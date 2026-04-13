@@ -1,6 +1,4 @@
-const placeholderPartners = [
-  "Partenaire 1", "Partenaire 2", "Partenaire 3", "Partenaire 4",
-];
+import logoPartners from "@/assets/logo-cat.png";
 
 export default function Confiance() {
   return (
@@ -14,17 +12,17 @@ export default function Confiance() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8">
-          {placeholderPartners.map((name, i) => (
-            <div
-              key={i}
-              className="card-premium w-44 h-24 rounded flex items-center justify-center"
-            >
-              <span className="text-cream/30 font-heading text-xs tracking-widest uppercase">
-                {name}
-              </span>
-            </div>
-          ))}
+        <div className="flex justify-center">
+          <div className="card-premium px-12 py-8 rounded flex items-center justify-center">
+            <img
+              src={logoPartners}
+              alt="CAT et Transakauto — Partenaires de confiance"
+              className="h-16 md:h-20 w-auto opacity-90"
+              loading="lazy"
+              width={512}
+              height={512}
+            />
+          </div>
         </div>
       </div>
     </section>
