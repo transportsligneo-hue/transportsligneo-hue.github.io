@@ -1,5 +1,5 @@
 import { Clock, Award, Globe, GraduationCap } from "lucide-react";
-import franceMapImg from "@/assets/france-map.png";
+import franceMapImg from "@/assets/france-map-flyer.png";
 
 const engagements = [
   { icon: Clock, text: "Récupération de vos véhicules en moins de 24h (selon distance)" },
@@ -37,10 +37,10 @@ export default function Engagements() {
             <img
               src={franceMapImg}
               alt="Carte de France – Tours"
-              className="w-64 md:w-80 opacity-70"
+              className="w-64 md:w-80 rounded"
               loading="lazy"
-              width={320}
-              height={400}
+              width={358}
+              height={301}
             />
             <p className="mt-4 font-heading text-primary tracking-[0.15em] text-lg">
               Basé à Tours (37)

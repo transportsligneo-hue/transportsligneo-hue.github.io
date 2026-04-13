@@ -1,4 +1,4 @@
-import logoPartners from "@/assets/logo-cat.png";
+import logoPartners from "@/assets/logo-partners.png";
 
 export default function Confiance() {
   return (
@@ -16,11 +16,11 @@ export default function Confiance() {
           <div className="card-premium px-12 py-8 rounded flex items-center justify-center">
             <img
               src={logoPartners}
-              alt="CAT et Transakauto — Partenaires de confiance"
-              className="h-16 md:h-20 w-auto opacity-90"
+              alt="CAT France et TransakAuto — Partenaires de confiance"
+              className="h-12 md:h-16 w-auto"
               loading="lazy"
-              width={512}
-              height={512}
+              width={636}
+              height={120}
             />
           </div>
         </div>
