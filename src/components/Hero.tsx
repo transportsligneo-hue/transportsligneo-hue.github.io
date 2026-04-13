@@ -1,4 +1,4 @@
-import heroCarImg from "@/assets/hero-car.png";
+import logoLigneo from "@/assets/logo-ligneo.png";
 
 export default function Hero() {
   return (
@@ -12,20 +12,16 @@ export default function Hero() {
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24 pb-16">
         <div>
           <img
-            src={heroCarImg}
-            alt="Voiture premium"
-            className="mx-auto w-72 md:w-96 mb-8 opacity-80"
-            width={384}
-            height={153}
+            src={logoLigneo}
+            alt="Transports Ligneo"
+            className="mx-auto w-80 md:w-[28rem] mb-8"
+            width={636}
+            height={241}
           />
         </div>
 
         <div>
           <div className="gold-divider-short mb-6" />
-          <h1 className="font-heading text-4xl md:text-6xl tracking-[0.25em] uppercase gold-gradient-text mb-4">
-            Transports Ligneo
-          </h1>
-          <div className="gold-divider-short mt-6 mb-8" />
         </div>
 
         <div className="space-y-4">
