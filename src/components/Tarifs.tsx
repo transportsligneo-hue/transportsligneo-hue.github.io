@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 
 const nosPlus = [
@@ -28,13 +27,7 @@ export default function Tarifs() {
         </div>
 
         {/* Main pricing highlight */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 card-premium p-10 rounded max-w-2xl mx-auto gold-border-strong"
-        >
+        <div className="text-center mb-16 card-premium p-10 rounded max-w-2xl mx-auto gold-border-strong">
           <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2">
             0,85 €<span className="text-2xl">/km</span>
           </p>
@@ -45,7 +38,7 @@ export default function Tarifs() {
           <p className="text-cream/50 text-xs mt-2">
             Options supplémentaires possibles selon vos besoins
           </p>
-        </motion.div>
+        </div>
 
         {/* Detailed pricing */}
         <div className="text-center mb-12">
@@ -56,14 +49,7 @@ export default function Tarifs() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {/* Tours */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="card-premium p-8 rounded"
-          >
+          <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
               Tours &amp; Département 37
             </h4>
@@ -77,16 +63,9 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">79 €</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Hors département */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="card-premium p-8 rounded"
-          >
+          <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
               Hors Département 37
             </h4>
@@ -100,16 +79,9 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">0,85 €/km</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Options */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="card-premium p-8 rounded"
-          >
+          <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
               Options
             </h4>
@@ -128,16 +100,9 @@ export default function Tarifs() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          {/* Infos complémentaires */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="card-premium p-8 rounded"
-          >
+          <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
               Informations complémentaires
             </h4>
@@ -147,17 +112,11 @@ export default function Tarifs() {
               <li>Stockage de vos véhicules : <span className="text-primary">5,90 €/jour</span></li>
               <li>À partir de 3 jours : <span className="text-primary">3 €/jour</span> supplémentaire (hors utilitaires et poids lourds)</li>
             </ul>
-          </motion.div>
+          </div>
         </div>
 
         {/* Nos Plus */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="card-premium p-10 rounded gold-border-strong max-w-4xl mx-auto"
-        >
+        <div className="card-premium p-10 rounded gold-border-strong max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-8">
             <Star className="text-primary" size={20} />
             <h4 className="font-heading text-primary tracking-[0.15em] uppercase">
@@ -173,7 +132,7 @@ export default function Tarifs() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

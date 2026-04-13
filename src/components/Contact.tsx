@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Phone, Mail, Globe } from "lucide-react";
 import { useState } from "react";
 
@@ -26,14 +25,7 @@ export default function Contact() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="space-y-8"
-          >
+          <div className="space-y-8">
             <div className="space-y-6">
               <a href="tel:0782456181" className="flex items-center gap-4 group">
                 <div className="w-12 h-12 rounded-full gold-border flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -66,7 +58,6 @@ export default function Contact() {
               </a>
             </div>
 
-            {/* Mobile CTA */}
             <a
               href="tel:0782456181"
               className="md:hidden inline-flex items-center gap-3 px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase"
@@ -74,15 +65,10 @@ export default function Contact() {
               <Phone size={16} />
               Appeler maintenant
             </a>
-          </motion.div>
+          </div>
 
-          {/* Form */}
-          <motion.form
+          <form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
             className="card-premium p-8 rounded space-y-5"
           >
             {[
@@ -123,7 +109,7 @@ export default function Contact() {
             >
               Envoyer ma demande
             </button>
-          </motion.form>
+          </form>
         </div>
       </div>
     </section>

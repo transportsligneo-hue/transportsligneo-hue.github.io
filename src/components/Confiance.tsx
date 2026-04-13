@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 const placeholderPartners = [
   "Partenaire 1", "Partenaire 2", "Partenaire 3", "Partenaire 4",
 ];
@@ -16,13 +14,7 @@ export default function Confiance() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-wrap justify-center gap-8"
-        >
+        <div className="flex flex-wrap justify-center gap-8">
           {placeholderPartners.map((name, i) => (
             <div
               key={i}
@@ -33,7 +25,7 @@ export default function Confiance() {
               </span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

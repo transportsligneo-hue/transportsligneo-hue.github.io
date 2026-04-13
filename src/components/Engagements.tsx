@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Clock, Award, Globe, GraduationCap } from "lucide-react";
 import franceMapImg from "@/assets/france-map.png";
 
@@ -8,15 +7,6 @@ const engagements = [
   { icon: Globe, text: "Intervention en France et partout en Europe" },
   { icon: GraduationCap, text: "Convoyeurs qualifiés avec formation continue" },
 ];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, delay: i * 0.15 },
-  }),
-};
 
 export default function Engagements() {
   return (
@@ -33,28 +23,17 @@ export default function Engagements() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             {engagements.map((e, i) => (
-              <motion.div
+              <div
                 key={i}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={fadeUp}
                 className="flex items-start gap-4 card-premium p-5 rounded"
               >
                 <e.icon className="text-primary shrink-0 mt-0.5" size={22} />
                 <p className="text-cream/85 leading-relaxed">{e.text}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="flex flex-col items-center"
-          >
+          <div className="flex flex-col items-center">
             <img
               src={franceMapImg}
               alt="Carte de France – Tours"
@@ -66,7 +45,7 @@ export default function Engagements() {
             <p className="mt-4 font-heading text-primary tracking-[0.15em] text-lg">
               Basé à Tours (37)
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

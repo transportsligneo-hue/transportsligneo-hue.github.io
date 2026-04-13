@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowLeftRight, Users, Handshake, ShieldCheck, AlertTriangle, HardHat } from "lucide-react";
 
 const prestations = [
@@ -24,19 +23,15 @@ export default function Prestations() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {prestations.map((p, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
               className="card-premium p-8 rounded text-center hover:border-primary/40 transition-colors duration-300 group"
             >
               <p.icon className="text-primary mx-auto mb-4 group-hover:text-gold-light transition-colors" size={28} />
               <p className="font-heading text-cream/90 tracking-wide text-sm uppercase">
                 {p.title}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
