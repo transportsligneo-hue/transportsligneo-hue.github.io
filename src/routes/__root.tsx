@@ -31,21 +31,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Transports Ligneo" },
-      { name: "description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile pour particuliers et professionnels.
-Basée à Tours (37)." },
+      { title: "Lovable App" },
+      { name: "description", content: "Lovable Generated Project" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Transports Ligneo" },
-      { property: "og:description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile pour particuliers et professionnels.
-Basée à Tours (37)." },
+      { property: "og:title", content: "Lovable App" },
+      { property: "og:description", content: "Lovable Generated Project" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Transports Ligneo" },
-      { name: "twitter:description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile pour particuliers et professionnels.
-Basée à Tours (37)." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/EyLKH77BBFVQ8ozsPzGIIZlXgQa2/social-images/social-1776095848780-ChatGPT_Image_6_mars_2026,_11_27_16.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/EyLKH77BBFVQ8ozsPzGIIZlXgQa2/social-images/social-1776095848780-ChatGPT_Image_6_mars_2026,_11_27_16.webp" },
     ],
     links: [
       {
