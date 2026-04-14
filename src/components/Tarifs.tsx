@@ -91,7 +91,7 @@ export default function Tarifs() {
                 ["72 (Sarthe)", "120 €", "200 €"],
                 ["86 (Vienne)", "120 €", "200 €"],
                 ["49 (Maine-et-Loire)", "130 €", "200 €"],
-                ["79 (Deux-Sèvres)", "130 €", "200 €"],
+                ["79 (Deux-Sèvres)", "140 €", "210 €"],
                 ["18 (Cher)", "140 €", "200 €"],
                 ["45 (Loiret)", "140 €", "210 €"],
               ].map(([dept, simple, retour], i) => (
