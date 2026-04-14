@@ -2,7 +2,7 @@ import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2 } from "luc
 import { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
 
-const EMAILJS_SERVICE_ID = "service_4rqk1ed";
+const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
 const EMAILJS_PUBLIC_KEY = "tTvDX_OgATR0pXFUr";
 
