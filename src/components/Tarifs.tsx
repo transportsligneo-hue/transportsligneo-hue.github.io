@@ -81,6 +81,7 @@ export default function Tarifs() {
               </div>
             </div>
             <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
+            <p className="font-heading gold-gradient-text text-sm mt-3 tracking-wide uppercase">Tarif aller-retour avantageux</p>
           </div>
 
           <div className="card-premium p-8 rounded md:col-span-2">
@@ -132,7 +133,7 @@ export default function Tarifs() {
               Informations complémentaires
             </h4>
             <ul className="space-y-3 text-sm text-cream/75">
-              <li className="font-heading gold-gradient-text text-sm tracking-wide uppercase">Tarif aller-retour avantageux</li>
+              
               <li>Péages et carburant inclus pour le transport</li>
               <li>Possibilité d'effectuer le plein (voir option)</li>
               <li>Lavage extérieur offert pour toute livraison de plus de 200 kilomètres</li>
