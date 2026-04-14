@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { MapPin, Calendar, Car, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck } from "lucide-react";
+import { useGpsTracking } from "@/hooks/useGpsTracking";
+import { InspectionGuidee } from "@/components/InspectionGuidee";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
@@ -11,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
 interface Mission {
   id: string;
   statut: string;
+  trajet_id: string;
   trajet: {
     depart: string;
     arrivee: string;
@@ -20,12 +23,19 @@ interface Mission {
     modele: string | null;
     immatriculation: string | null;
   } | null;
+  inspectionDepart?: boolean;
+  inspectionArrivee?: boolean;
 }
 
 function ConvoyeurMissions() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
+
+  // GPS tracking: active only during an en_cours mission
+  useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
   const fetchMissions = async () => {
     if (!user) return;
@@ -51,7 +61,26 @@ function ConvoyeurMissions() {
           .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
           .eq("id", attr.trajet_id)
           .single();
-        enriched.push({ id: attr.id, statut: attr.statut, trajet });
+
+        // Check existing inspections
+        const { data: inspections } = await supabase
+          .from("inspections")
+          .select("type, statut")
+          .eq("attribution_id", attr.id);
+
+        const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
+        const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
+
+        enriched.push({
+          id: attr.id,
+          statut: attr.statut,
+          trajet_id: attr.trajet_id,
+          trajet,
+          inspectionDepart: !!inspDepart,
+          inspectionArrivee: !!inspArrivee,
+        });
+
+        if (attr.statut === "en_cours") setActiveMissionId(attr.id);
       }
       setMissions(enriched);
     }
@@ -62,7 +91,38 @@ function ConvoyeurMissions() {
 
   const updateStatus = async (id: string, statut: string) => {
     await supabase.from("attributions").update({ statut }).eq("id", id);
+    if (statut === "en_cours") setActiveMissionId(id);
+    if (statut === "termine") setActiveMissionId(null);
     fetchMissions();
+  };
+
+  const startMission = (missionId: string) => {
+    // Must do inspection depart first
+    const mission = missions.find(m => m.id === missionId);
+    if (mission && !mission.inspectionDepart) {
+      setInspection({ attributionId: missionId, type: "depart" });
+    } else {
+      updateStatus(missionId, "en_cours");
+    }
+  };
+
+  const finishMission = (missionId: string) => {
+    const mission = missions.find(m => m.id === missionId);
+    if (mission && !mission.inspectionArrivee) {
+      setInspection({ attributionId: missionId, type: "arrivee" });
+    } else {
+      updateStatus(missionId, "termine");
+    }
+  };
+
+  const handleInspectionComplete = () => {
+    if (!inspection) return;
+    if (inspection.type === "depart") {
+      updateStatus(inspection.attributionId, "en_cours");
+    } else {
+      updateStatus(inspection.attributionId, "termine");
+    }
+    setInspection(null);
   };
 
   const statusLabel: Record<string, string> = {
@@ -79,9 +139,28 @@ function ConvoyeurMissions() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>;
 
+  if (inspection && user) {
+    return (
+      <InspectionGuidee
+        attributionId={inspection.attributionId}
+        type={inspection.type}
+        userId={user.id}
+        onComplete={handleInspectionComplete}
+        onCancel={() => setInspection(null)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes missions</h1>
+
+      {activeMissionId && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded text-green-300 text-xs">
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          GPS actif — Position transmise en temps réel
+        </div>
+      )}
 
       {missions.length === 0 ? (
         <p className="text-cream/50 text-sm">Aucune mission en cours.</p>
@@ -115,7 +194,17 @@ function ConvoyeurMissions() {
                 </div>
               )}
 
-              <div className="flex gap-2 pt-2">
+              {/* Inspection status */}
+              <div className="flex gap-3 text-xs">
+                <span className={`flex items-center gap-1 ${m.inspectionDepart ? "text-green-400" : "text-cream/30"}`}>
+                  <ClipboardCheck size={12} /> Départ {m.inspectionDepart ? "✓" : "—"}
+                </span>
+                <span className={`flex items-center gap-1 ${m.inspectionArrivee ? "text-green-400" : "text-cream/30"}`}>
+                  <ClipboardCheck size={12} /> Arrivée {m.inspectionArrivee ? "✓" : "—"}
+                </span>
+              </div>
+
+              <div className="flex gap-2 pt-2 flex-wrap">
                 {m.statut === "propose" && (
                   <>
                     <button onClick={() => updateStatus(m.id, "accepte")} className="px-4 py-1.5 bg-primary/20 text-primary text-xs rounded hover:bg-primary/30 transition-colors">
@@ -127,13 +216,13 @@ function ConvoyeurMissions() {
                   </>
                 )}
                 {m.statut === "accepte" && (
-                  <button onClick={() => updateStatus(m.id, "en_cours")} className="px-4 py-1.5 bg-blue-500/20 text-blue-300 text-xs rounded hover:bg-blue-500/30 transition-colors">
-                    Démarrer la mission
+                  <button onClick={() => startMission(m.id)} className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-500/20 text-blue-300 text-xs rounded hover:bg-blue-500/30 transition-colors">
+                    <Play size={12} /> Démarrer la mission
                   </button>
                 )}
                 {m.statut === "en_cours" && (
-                  <button onClick={() => updateStatus(m.id, "termine")} className="px-4 py-1.5 bg-green-500/20 text-green-300 text-xs rounded hover:bg-green-500/30 transition-colors">
-                    Mission terminée
+                  <button onClick={() => finishMission(m.id)} className="flex items-center gap-1.5 px-4 py-1.5 bg-green-500/20 text-green-300 text-xs rounded hover:bg-green-500/30 transition-colors">
+                    <Square size={12} /> Terminer la mission
                   </button>
                 )}
               </div>
