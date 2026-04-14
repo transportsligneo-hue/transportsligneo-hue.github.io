@@ -144,7 +144,6 @@ export default function DevisGenerator() {
   const [depOpen, setDepOpen] = useState(false);
   const [arrOpen, setArrOpen] = useState(false);
 
-  const isLocal37 = departure === "Tours" && arrival === "Tours";
   const distance = useMemo(() => {
     if (!departure || !arrival) return null;
     return getDistance(departure, arrival);
@@ -152,23 +151,8 @@ export default function DevisGenerator() {
 
   const pricing = useMemo(() => {
     if (distance === null || distance === 0) return null;
-    const base = calculatePrice(distance, isLocal37);
-    let finalPrice = base.price;
-    let multiplierLabel = "";
-    if (option === "aller-retour") {
-      finalPrice = Math.round(base.price + base.price * 0.5);
-      multiplierLabel = "Retour à -50%";
-    } else if (option === "express") {
-      finalPrice = Math.round(base.price * 1.20);
-      multiplierLabel = "+20% express";
-    }
-    return {
-      ...base,
-      finalPrice,
-      multiplierLabel,
-      hasExtra: option !== "aller-simple",
-    };
-  }, [distance, isLocal37, option]);
+    return calculatePrice(distance, arrival, option);
+  }, [distance, arrival, option]);
 
   const filteredDepCities = CITIES.filter(c => c.toLowerCase().includes(depFilter.toLowerCase()));
   const filteredArrCities = CITIES.filter(c => c.toLowerCase().includes(arrFilter.toLowerCase()));
