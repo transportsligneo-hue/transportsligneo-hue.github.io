@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck } from "lucide-react";
+import { MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { InspectionGuidee } from "@/components/InspectionGuidee";
+import { MissionDocuments } from "@/components/MissionDocuments";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
