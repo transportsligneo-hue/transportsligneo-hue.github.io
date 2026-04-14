@@ -47,6 +47,7 @@ export default function Footer() {
               <li><Link to="/cgv" className="text-cream/50 hover:text-primary transition-colors">Conditions Générales de Vente</Link></li>
               <li><Link to="/mentions-legales" className="text-cream/50 hover:text-primary transition-colors">Mentions Légales</Link></li>
               <li><Link to="/confidentialite" className="text-cream/50 hover:text-primary transition-colors">Politique de Confidentialité</Link></li>
+              <li><Link to="/login" className="text-cream/30 hover:text-primary transition-colors text-xs mt-2 inline-block">Espace pro</Link></li>
             </ul>
           </div>
         </div>
