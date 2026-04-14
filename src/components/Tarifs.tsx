@@ -60,7 +60,7 @@ export default function Tarifs() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-cream/80 text-sm">Aller-retour</span>
-                <span className="font-heading text-primary text-lg">179 €</span>
+                <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
           </div>
