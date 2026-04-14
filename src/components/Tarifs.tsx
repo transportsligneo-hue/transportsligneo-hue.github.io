@@ -51,7 +51,7 @@ export default function Tarifs() {
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Tours &amp; Département 37
+              Tours &amp; Département 37 – mise en main incluse
             </h4>
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">
@@ -92,7 +92,7 @@ export default function Tarifs() {
                 ["Lavage intérieur", "29,90 €"],
                 ["Lavage intérieur + extérieur", "79,90 €"],
                 ["Plein de carburant (client final)", "2,20 €/L"],
-                ["Plein électrique", "1,30 €/kWh"],
+                ["Plein électrique (client final)", "1,30 €/kWh"],
               ].map(([label, price], i) => (
                 <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
                   <span className="text-cream/75">{label}</span>
@@ -108,7 +108,7 @@ export default function Tarifs() {
             </h4>
             <ul className="space-y-3 text-sm text-cream/75">
               <li>Péages et carburant inclus pour le transport</li>
-              <li>Possibilité d'effectuer le plein pour le client final</li>
+              <li>Possibilité d'effectuer le plein (voir option)</li>
               <li>Stockage de vos véhicules : <span className="text-primary">5,90 €/jour</span></li>
               <li>À partir de 3 jours : <span className="text-primary">3 €/jour</span> supplémentaire (hors utilitaires et poids lourds)</li>
             </ul>
