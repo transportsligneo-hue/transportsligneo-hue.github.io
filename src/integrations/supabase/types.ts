@@ -350,6 +350,44 @@ export type Database = {
           },
         ]
       }
+      mission_documents: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          id: string
+          nom_fichier: string
+          type_document: string
+          uploaded_by: string
+          url_fichier: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          id?: string
+          nom_fichier: string
+          type_document?: string
+          uploaded_by: string
+          url_fichier: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          id?: string
+          nom_fichier?: string
+          type_document?: string
+          uploaded_by?: string
+          url_fichier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_documents_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_locations: {
         Row: {
           accuracy: number | null
