@@ -25,8 +25,6 @@ function LoginPage() {
   if (!authLoading && isAuthenticated && role) {
     if (role === "admin") {
       navigate({ to: "/admin" });
-    } else if (role === "convoyeur") {
-      navigate({ to: "/convoyeur" });
     }
   }
 

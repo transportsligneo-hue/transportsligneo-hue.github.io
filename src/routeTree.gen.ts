@@ -10,13 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CgvRouteImport } from './routes/cgv'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
+import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
+import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
   path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
@@ -29,43 +43,150 @@ const CgvRoute = CgvRouteImport.update({
   path: '/cgv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminTrajetsRoute =
+  AuthenticatedAdminTrajetsRouteImport.update({
+    id: '/trajets',
+    path: '/trajets',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDocumentsRoute =
+  AuthenticatedAdminDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDemandesRoute =
+  AuthenticatedAdminDemandesRouteImport.update({
+    id: '/demandes',
+    path: '/demandes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminConvoyeursRoute =
+  AuthenticatedAdminConvoyeursRouteImport.update({
+    id: '/convoyeurs',
+    path: '/convoyeurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAttributionsRoute =
+  AuthenticatedAdminAttributionsRouteImport.update({
+    id: '/attributions',
+    path: '/attributions',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
+  '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
+  '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
+  '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cgv' | '/confidentialite' | '/mentions-legales'
+  fullPaths:
+    | '/'
+    | '/cgv'
+    | '/confidentialite'
+    | '/login'
+    | '/mentions-legales'
+    | '/admin'
+    | '/admin/attributions'
+    | '/admin/convoyeurs'
+    | '/admin/demandes'
+    | '/admin/documents'
+    | '/admin/trajets'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cgv' | '/confidentialite' | '/mentions-legales'
-  id: '__root__' | '/' | '/cgv' | '/confidentialite' | '/mentions-legales'
+  to:
+    | '/'
+    | '/cgv'
+    | '/confidentialite'
+    | '/login'
+    | '/mentions-legales'
+    | '/admin/attributions'
+    | '/admin/convoyeurs'
+    | '/admin/demandes'
+    | '/admin/documents'
+    | '/admin/trajets'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/cgv'
+    | '/confidentialite'
+    | '/login'
+    | '/mentions-legales'
+    | '/_authenticated/admin'
+    | '/_authenticated/admin/attributions'
+    | '/_authenticated/admin/convoyeurs'
+    | '/_authenticated/admin/demandes'
+    | '/_authenticated/admin/documents'
+    | '/_authenticated/admin/trajets'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CgvRoute: typeof CgvRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
+  LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
 }
 
@@ -76,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/mentions-legales'
       fullPath: '/mentions-legales'
       preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confidentialite': {
@@ -92,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CgvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -99,13 +234,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/trajets': {
+      id: '/_authenticated/admin/trajets'
+      path: '/trajets'
+      fullPath: '/admin/trajets'
+      preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/documents': {
+      id: '/_authenticated/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/demandes': {
+      id: '/_authenticated/admin/demandes'
+      path: '/demandes'
+      fullPath: '/admin/demandes'
+      preLoaderRoute: typeof AuthenticatedAdminDemandesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/convoyeurs': {
+      id: '/_authenticated/admin/convoyeurs'
+      path: '/convoyeurs'
+      fullPath: '/admin/convoyeurs'
+      preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/attributions': {
+      id: '/_authenticated/admin/attributions'
+      path: '/attributions'
+      fullPath: '/admin/attributions'
+      preLoaderRoute: typeof AuthenticatedAdminAttributionsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
+  AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRoute
+  AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
+  AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
+  AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
+  AuthenticatedAdminConvoyeursRoute: AuthenticatedAdminConvoyeursRoute,
+  AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
+  AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
+  AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CgvRoute: CgvRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
+  LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
 }
 export const routeTree = rootRouteImport
