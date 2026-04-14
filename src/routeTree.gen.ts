@@ -13,6 +13,7 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -55,6 +56,11 @@ const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
+  id: '/inscription-convoyeur',
+  path: '/inscription-convoyeur',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/cgv': typeof CgvRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cgv'
     | '/confidentialite'
+    | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
     | '/setup'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cgv'
     | '/confidentialite'
+    | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
     | '/setup'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/cgv'
     | '/confidentialite'
+    | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
     | '/setup'
@@ -359,6 +371,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CgvRoute: typeof CgvRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
+  InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   SetupRoute: typeof SetupRoute
@@ -400,6 +413,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription-convoyeur': {
+      id: '/inscription-convoyeur'
+      path: '/inscription-convoyeur'
+      fullPath: '/inscription-convoyeur'
+      preLoaderRoute: typeof InscriptionConvoyeurRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confidentialite': {
@@ -627,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CgvRoute: CgvRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
+  InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   SetupRoute: SetupRoute,
