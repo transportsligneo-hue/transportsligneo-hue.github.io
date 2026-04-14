@@ -21,37 +21,39 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const fetchSuggestions = useCallback(async (query: string) => {
-    if (query.length < 3) {
+    if (query.length < 2) {
       setSuggestions([]);
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(
-        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=6&type=housenumber&autocomplete=1`
-      );
-      const data = await res.json();
-      const results: Suggestion[] = data.features?.map((f: any) => ({
-        label: f.properties.label,
-        context: f.properties.context,
-      })) ?? [];
+      // Search all types (addresses, streets, cities, localities, hamlets)
+      const [resAll, resMunicipality, resStreet] = await Promise.all([
+        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`),
+        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=municipality&autocomplete=1`),
+        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=street&autocomplete=1`),
+      ]);
+      const [dataAll, dataMunicipality, dataStreet] = await Promise.all([
+        resAll.json(), resMunicipality.json(), resStreet.json(),
+      ]);
 
-      if (results.length < 4) {
-        const res2 = await fetch(
-          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5&type=municipality&autocomplete=1`
-        );
-        const data2 = await res2.json();
-        const cities: Suggestion[] = data2.features?.map((f: any) => ({
-          label: f.properties.label,
-          context: f.properties.context,
-        })) ?? [];
-        const existingLabels = new Set(results.map(r => r.label));
-        cities.forEach(c => {
-          if (!existingLabels.has(c.label)) results.push(c);
-        });
-      }
+      const seen = new Set<string>();
+      const results: Suggestion[] = [];
+      const addResults = (features: any[]) => {
+        for (const f of features) {
+          const label = f.properties.label;
+          if (!seen.has(label)) {
+            seen.add(label);
+            results.push({ label, context: f.properties.context });
+          }
+        }
+      };
 
-      setSuggestions(results.slice(0, 6));
+      addResults(dataAll.features ?? []);
+      addResults(dataMunicipality.features ?? []);
+      addResults(dataStreet.features ?? []);
+
+      setSuggestions(results.slice(0, 8));
     } catch {
       setSuggestions([]);
     } finally {
