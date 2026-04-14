@@ -66,10 +66,7 @@ function SetupPage() {
             Configuration initiale
           </h1>
           <p className="text-cream/50 mt-2 text-sm">
-            Créez le mot de passe pour le compte admin
-          </p>
-          <p className="text-cream/30 text-xs mt-1">
-            Email : contact@transportsligneo.fr
+            Créez le compte administrateur
           </p>
         </div>
 
