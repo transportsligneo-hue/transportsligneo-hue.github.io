@@ -141,7 +141,7 @@ function ConvoyeurMissions() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [activeMissionId]);
+  }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
     await supabase.from("attributions").update({ statut }).eq("id", id);
