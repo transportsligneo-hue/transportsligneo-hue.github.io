@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SetupRouteImport } from './routes/setup'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
@@ -23,6 +24,11 @@ import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
   path: '/mentions-legales',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/setup': typeof SetupRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/setup': typeof SetupRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/setup': typeof SetupRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/login'
     | '/mentions-legales'
+    | '/setup'
     | '/admin'
     | '/admin/attributions'
     | '/admin/convoyeurs'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/login'
     | '/mentions-legales'
+    | '/setup'
     | '/admin/attributions'
     | '/admin/convoyeurs'
     | '/admin/demandes'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/confidentialite'
     | '/login'
     | '/mentions-legales'
+    | '/setup'
     | '/_authenticated/admin'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/convoyeurs'
@@ -188,10 +200,18 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  SetupRoute: typeof SetupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentions-legales': {
       id: '/mentions-legales'
       path: '/mentions-legales'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  SetupRoute: SetupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
