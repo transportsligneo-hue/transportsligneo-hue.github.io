@@ -1,0 +1,73 @@
+import { FileText, CheckCircle, Truck } from "lucide-react";
+
+const steps = [
+  {
+    icon: FileText,
+    step: "01",
+    title: "Demandez un devis",
+    desc: "Remplissez notre formulaire en ligne ou appelez-nous. Recevez une estimation instantanée.",
+  },
+  {
+    icon: CheckCircle,
+    step: "02",
+    title: "Confirmation",
+    desc: "Nous validons les détails de la mission et vous attribuons un convoyeur dédié.",
+  },
+  {
+    icon: Truck,
+    step: "03",
+    title: "Livraison",
+    desc: "Votre véhicule est pris en charge et livré à destination. Vous êtes informé à chaque étape.",
+  },
+];
+
+export default function CommentCaMarche() {
+  return (
+    <section className="py-24 section-bg-alt">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <div className="gold-divider-short mb-4" />
+          <h2 className="font-heading text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary">
+            Comment ça marche
+          </h2>
+          <p className="text-cream/60 mt-4 max-w-lg mx-auto text-sm">
+            Un processus simple, rapide et transparent.
+          </p>
+          <div className="gold-divider-short mt-4" />
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          {/* Connecting line */}
+          <div className="hidden md:block absolute top-20 left-[16.5%] right-[16.5%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
+          {steps.map((s, i) => (
+            <div key={i} className="text-center relative">
+              <div className="w-20 h-20 rounded-full gold-border-strong flex items-center justify-center mx-auto mb-6 card-premium relative z-10">
+                <s.icon className="text-primary" size={28} />
+              </div>
+              <span className="font-heading text-primary/40 text-4xl absolute top-0 right-1/4 md:right-auto md:left-[calc(50%+30px)] select-none">
+                {s.step}
+              </span>
+              <h3 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-3">
+                {s.title}
+              </h3>
+              <p className="text-cream/65 text-sm leading-relaxed max-w-xs mx-auto">
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-14">
+          <a
+            href="#devis"
+            className="px-10 py-4 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300 inline-block"
+          >
+            Estimer mon trajet
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
