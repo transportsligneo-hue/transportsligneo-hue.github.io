@@ -87,7 +87,7 @@ export default function Tarifs() {
             </h4>
             <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {[
-                ["41 (Loir-et-Cher)", "99 €", "200 €"],
+                ["41 (Loir-et-Cher)", "99 €", "139 €"],
                 ["72 (Sarthe)", "120 €", "200 €"],
                 ["86 (Vienne)", "120 €", "200 €"],
                 ["49 (Maine-et-Loire)", "130 €", "200 €"],
