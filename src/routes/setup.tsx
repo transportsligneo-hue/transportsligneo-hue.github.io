@@ -15,6 +15,7 @@ export const Route = createFileRoute("/setup")({
 
 function SetupPage() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,6 +26,10 @@ function SetupPage() {
     e.preventDefault();
     setError("");
 
+    if (!email || !email.includes("@")) {
+      setError("Veuillez entrer un email valide.");
+      return;
+    }
     if (password.length < 8) {
       setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
@@ -37,7 +42,7 @@ function SetupPage() {
     setLoading(true);
     try {
       const result = await seedAdminUser({
-        data: { email: "contact@transportsligneo.fr", password },
+        data: { email, password },
       });
       if (result.success) {
         setSuccess(true);
@@ -61,10 +66,7 @@ function SetupPage() {
             Configuration initiale
           </h1>
           <p className="text-cream/50 mt-2 text-sm">
-            Créez le mot de passe pour le compte admin
-          </p>
-          <p className="text-cream/30 text-xs mt-1">
-            Email : contact@transportsligneo.fr
+            Créez le compte administrateur
           </p>
         </div>
 
@@ -80,6 +82,18 @@ function SetupPage() {
                 {error}
               </div>
             )}
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Email admin</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
+                placeholder="votre@email.com"
+              />
+            </div>
 
             <div>
               <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Mot de passe</label>
