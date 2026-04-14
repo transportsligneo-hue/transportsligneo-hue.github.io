@@ -108,7 +108,7 @@ function calculatePrice(distance: number, arrival: string, option: string): { pr
   const rateLabel = distance >= 200 ? "0,85 €/km (+ de 200 km)" : "1 €/km";
   const basePrice = Math.round(distance * rate);
   if (option === "aller-retour") {
-    return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Retour à -50%", hasExtra: true };
+    return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour avantageux", hasExtra: true };
   }
   if (option === "express") {
     return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
@@ -251,7 +251,7 @@ export default function DevisGenerator() {
           <div className="flex flex-wrap gap-3 mb-8 justify-center">
             {[
               { value: "aller-simple", label: "Aller simple" },
-              { value: "aller-retour", label: "Aller-retour (retour -50%)" },
+              { value: "aller-retour", label: "Aller-retour" },
               { value: "express", label: "Express (+20%)" },
             ].map(o => (
               <button
