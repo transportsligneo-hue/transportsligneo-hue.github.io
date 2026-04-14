@@ -1,5 +1,5 @@
 import { Clock, Award, Globe, GraduationCap, Shield, Eye } from "lucide-react";
-import franceMapImg from "@/assets/france-map-gold.png";
+import franceMapImg from "@/assets/france-europe-map-gold.png";
 
 const engagements = [
   { icon: Shield, title: "Sécurité", text: "Assurance circulation incluse sur chaque mission, véhicule protégé de A à Z." },
@@ -47,11 +47,11 @@ export default function Engagements() {
             <div className="relative">
               <img
                 src={franceMapImg}
-                alt="Carte de France — Basé à Tours"
-                className="w-64 md:w-80 rounded object-contain"
+                alt="Carte de France et Europe — Basé à Tours"
+                className="w-80 md:w-[420px] rounded object-contain"
                 loading="lazy"
-                width={358}
-                height={301}
+                width={800}
+                height={800}
               />
             </div>
             <div className="mt-6 text-center">
