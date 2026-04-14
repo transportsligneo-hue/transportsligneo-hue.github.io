@@ -2,6 +2,7 @@ import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2 } from "luc
 import { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import AddressAutocomplete from "./AddressAutocomplete";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
