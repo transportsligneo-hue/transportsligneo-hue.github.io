@@ -88,14 +88,32 @@ function getDistance(from: string, to: string): number | null {
   return null;
 }
 
-function calculatePrice(distance: number, isLocal37: boolean): { price: number; rate: number; label: string } {
-  if (isLocal37) {
-    return { price: 79, rate: 0, label: "Forfait local Tours / Dept. 37" };
+function calculatePrice(distance: number, arrival: string, option: string): { price: number; label: string; finalPrice: number; multiplierLabel: string; hasExtra: boolean } {
+  // Check if arrival city has a fixed department tariff
+  const dept = CITY_DEPARTMENTS[arrival];
+  if (dept && FIXED_TARIFFS[dept]) {
+    const [simple, retour] = FIXED_TARIFFS[dept];
+    const label = DEPARTMENT_LABELS[dept] || dept;
+    if (option === "aller-retour") {
+      return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
+    }
+    if (option === "express") {
+      const expressPrice = Math.round(simple * 1.20);
+      return { price: simple, label, finalPrice: expressPrice, multiplierLabel: "+20% express", hasExtra: true };
+    }
+    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  if (distance >= 200) {
-    return { price: Math.round(distance * 0.85), rate: 0.85, label: "0,85 €/km (+ de 200 km)" };
+  // Hors département 37 et limitrophes: km-based pricing
+  const rate = distance >= 200 ? 0.85 : 1;
+  const rateLabel = distance >= 200 ? "0,85 €/km (+ de 200 km)" : "1 €/km";
+  const basePrice = Math.round(distance * rate);
+  if (option === "aller-retour") {
+    return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Retour à -50%", hasExtra: true };
   }
-  return { price: Math.round(distance * 1), rate: 1, label: "1 €/km" };
+  if (option === "express") {
+    return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
+  }
+  return { price: basePrice, label: rateLabel, finalPrice: basePrice, multiplierLabel: "", hasExtra: false };
 }
 
 function estimateDuration(distance: number): string {
