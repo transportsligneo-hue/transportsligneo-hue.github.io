@@ -330,6 +330,10 @@ function AdminAttributions() {
           </div>
         </div>
       )}
+      {/* Mission Report Modal */}
+      {reportId && (
+        <MissionReport attributionId={reportId} onClose={() => setReportId(null)} />
+      )}
     </div>
   );
 }
