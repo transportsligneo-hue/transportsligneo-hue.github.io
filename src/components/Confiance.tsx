@@ -1,10 +1,16 @@
-import logoPartners from "@/assets/logo-partners.png";
+import logoCat from "@/assets/logo-cat.png";
+import logoTransak from "@/assets/logo-transakauto.png";
 import { Shield, Clock, Award } from "lucide-react";
 
 const reassurance = [
   { icon: Shield, label: "Assurance incluse" },
   { icon: Clock, label: "Disponible 7j/7" },
   { icon: Award, label: "Service premium" },
+];
+
+const logos = [
+  { src: logoCat, alt: "CAT France", width: 294, height: 285 },
+  { src: logoTransak, alt: "TransakAuto", width: 1026, height: 285 },
 ];
 
 export default function Confiance() {
@@ -22,18 +28,23 @@ export default function Confiance() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        {/* Logos partenaires — grille propre */}
-        <div className="max-w-2xl mx-auto mb-16">
-          <div className="card-premium p-10 rounded gold-border flex items-center justify-center">
-            <img
-              src={logoPartners}
-              alt="CAT France et TransakAuto — Partenaires de confiance"
-              className="h-16 md:h-24 w-auto opacity-90 hover:opacity-100 transition-opacity duration-300"
-              loading="lazy"
-              width={636}
-              height={120}
-            />
-          </div>
+        {/* Logos partenaires — un par carte */}
+        <div className="flex flex-wrap justify-center gap-6 mb-16 max-w-3xl mx-auto">
+          {logos.map((logo, i) => (
+            <div
+              key={i}
+              className="card-premium gold-border rounded p-8 flex items-center justify-center min-w-[180px]"
+            >
+              <img
+                src={logo.src}
+                alt={logo.alt}
+                className="h-14 md:h-20 w-auto opacity-90 hover:opacity-100 transition-opacity duration-300"
+                loading="lazy"
+                width={logo.width}
+                height={logo.height}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Badges de réassurance */}
