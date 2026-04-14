@@ -1,5 +1,5 @@
 import { Clock, Award, Globe, GraduationCap, Shield, Eye } from "lucide-react";
-import franceMapImg from "@/assets/france-map-flyer.png";
+import franceMapImg from "@/assets/france-map-gold.png";
 
 const engagements = [
   { icon: Shield, title: "Sécurité", text: "Assurance circulation incluse sur chaque mission, véhicule protégé de A à Z." },
