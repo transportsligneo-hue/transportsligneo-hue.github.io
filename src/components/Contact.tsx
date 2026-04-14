@@ -1,6 +1,7 @@
 import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
@@ -62,12 +63,19 @@ export default function Contact() {
     { name: "email", label: "Email *", type: "email", required: true },
   ];
 
+  const handleFieldChange = (name: string, value: string) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const trajetFields = [
-    { name: "depart", label: "Adresse de départ *", type: "text", required: true, full: true },
-    { name: "arrivee", label: "Adresse d'arrivée *", type: "text", required: true, full: true },
     { name: "date", label: "Date souhaitée", type: "date", required: false },
-    { name: "heure", label: "Heure souhaitée", type: "time", required: false },
   ];
+
+  const heureOptions = Array.from({ length: 29 }, (_, i) => {
+    const h = Math.floor(i / 2) + 7;
+    const m = i % 2 === 0 ? "00" : "30";
+    return `${String(h).padStart(2, "0")}:${m}`;
+  });
 
   const vehicleFields = [
     { name: "marque", label: "Marque", type: "text", required: false },
@@ -169,12 +177,35 @@ export default function Contact() {
             {/* Trajet */}
             <p className="text-xs uppercase tracking-wider text-primary/80 font-heading pt-2">Trajet demandé</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <AddressAutocomplete
+                name="depart"
+                label="Adresse de départ *"
+                value={form.depart}
+                onChange={handleFieldChange}
+                required
+              />
+              <AddressAutocomplete
+                name="arrivee"
+                label="Adresse d'arrivée *"
+                value={form.arrivee}
+                onChange={handleFieldChange}
+                required
+              />
               {trajetFields.map((f) => (
-                <div key={f.name} className={f.full ? "sm:col-span-2" : ""}>
+                <div key={f.name}>
                   <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">{f.label}</label>
                   <input type={f.type} name={f.name} value={form[f.name as keyof typeof form]} onChange={handleChange} required={f.required} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors" />
                 </div>
               ))}
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Heure souhaitée</label>
+                <select name="heure" value={form.heure} onChange={handleChange} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors appearance-none">
+                  <option value="" className="bg-navy">Sélectionner un horaire...</option>
+                  {heureOptions.map((h) => (
+                    <option key={h} value={h} className="bg-navy">{h}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Véhicule */}
