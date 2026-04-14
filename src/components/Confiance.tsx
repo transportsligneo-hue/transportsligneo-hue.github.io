@@ -12,12 +12,12 @@ export default function Confiance() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        <div className="flex justify-center">
-          <div className="card-premium px-12 py-8 rounded flex items-center justify-center">
+        <div className="flex flex-wrap justify-center gap-8">
+          <div className="card-premium px-10 py-8 rounded gold-border flex items-center justify-center hover:border-primary/50 transition-colors duration-300">
             <img
               src={logoPartners}
               alt="CAT France et TransakAuto — Partenaires de confiance"
-              className="h-12 md:h-16 w-auto"
+              className="h-14 md:h-20 w-auto opacity-90 hover:opacity-100 transition-opacity"
               loading="lazy"
               width={636}
               height={120}
