@@ -32,17 +32,20 @@ export default function AvisClients() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {avis.map((a, i) => (
             <div key={i} className="card-premium p-8 rounded relative group hover:border-primary/40 transition-colors duration-300">
               <Quote className="text-primary/15 absolute top-4 right-4" size={40} />
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: a.stars }).map((_, j) => (
-                  <Star key={j} className="text-primary fill-primary" size={14} />
-                ))}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} className={j < a.stars ? "text-primary fill-primary" : "text-cream/20"} size={14} />
+                  ))}
+                </div>
+                <span className="text-cream/35 text-xs">{a.date}</span>
               </div>
-              <p className="text-cream/75 text-sm leading-relaxed mb-5 italic">
-                « {a.text} »
+              <p className="text-cream/75 text-sm leading-relaxed mb-5">
+                "{a.text}"
               </p>
               <div>
                 <p className="font-heading text-primary text-sm tracking-wide">{a.nom}</p>
