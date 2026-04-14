@@ -132,6 +132,7 @@ export default function Tarifs() {
               Informations complémentaires
             </h4>
             <ul className="space-y-3 text-sm text-cream/75">
+              <li className="font-heading gold-gradient-text text-sm tracking-wide uppercase">Tarif aller-retour avantageux</li>
               <li>Péages et carburant inclus pour le transport</li>
               <li>Possibilité d'effectuer le plein (voir option)</li>
               <li>Lavage extérieur offert pour toute livraison de plus de 200 kilomètres</li>
