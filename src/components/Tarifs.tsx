@@ -60,7 +60,7 @@ export default function Tarifs() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-cream/80 text-sm">Aller-retour</span>
-                <span className="font-heading text-primary text-lg">179 €</span>
+                <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function Tarifs() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-cream/80 text-sm">Aller-retour</span>
-                <span className="font-heading text-primary text-lg">179 €</span>
+                <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
           </div>
@@ -87,13 +87,13 @@ export default function Tarifs() {
             </h4>
             <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {[
-                ["41 (Loir-et-Cher)", "99 €", "250 €"],
-                ["72 (Sarthe)", "120 €", "250 €"],
-                ["86 (Vienne)", "120 €", "250 €"],
-                ["49 (Maine-et-Loire)", "130 €", "250 €"],
-                ["79 (Deux-Sèvres)", "130 €", "250 €"],
-                ["18 (Cher)", "140 €", "250 €"],
-                ["45 (Loiret)", "140 €", "260 €"],
+                ["41 (Loir-et-Cher)", "99 €", "200 €"],
+                ["72 (Sarthe)", "120 €", "200 €"],
+                ["86 (Vienne)", "120 €", "200 €"],
+                ["49 (Maine-et-Loire)", "130 €", "200 €"],
+                ["79 (Deux-Sèvres)", "130 €", "200 €"],
+                ["18 (Cher)", "140 €", "200 €"],
+                ["45 (Loiret)", "140 €", "210 €"],
               ].map(([dept, simple, retour], i) => (
                 <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
                   <span className="text-cream/80 text-sm">{dept}</span>
