@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CheckCircle, User, Mail, Phone } from "lucide-react";
+import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   component: InscriptionConvoyeur,
@@ -14,25 +14,34 @@ export const Route = createFileRoute("/inscription-convoyeur")({
 });
 
 function InscriptionConvoyeur() {
-  const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", message: "" });
+  const [form, setForm] = useState({
+    nom: "", prenom: "", email: "", telephone: "",
+    password: "", ville: "", disponibilite: "", permis: "", message: "",
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm({ ...form, [field]: e.target.value });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!form.nom || !form.prenom || !form.email || !form.telephone) {
+    if (!form.nom || !form.prenom || !form.email || !form.telephone || !form.password) {
       setError("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
 
     setLoading(true);
     try {
-      // Create auth account (email confirmation required)
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
-        password: crypto.randomUUID().slice(0, 16) + "Aa1!",
+        password: form.password,
         options: { data: { role: "convoyeur", nom: form.nom, prenom: form.prenom } },
       });
 
@@ -47,17 +56,19 @@ function InscriptionConvoyeur() {
       }
 
       if (authData.user) {
-        // Create convoyeur record (status: en_attente = pending admin validation)
         await supabase.from("convoyeurs").insert({
           user_id: authData.user.id,
           nom: form.nom,
           prenom: form.prenom,
           email: form.email,
           telephone: form.telephone,
+          ville: form.ville,
+          disponibilite: form.disponibilite,
+          permis: form.permis,
+          message: form.message,
           statut: "en_attente",
         });
 
-        // Assign convoyeur role
         await supabase.from("user_roles").insert({
           user_id: authData.user.id,
           role: "convoyeur" as const,
@@ -84,6 +95,9 @@ function InscriptionConvoyeur() {
             Merci pour votre candidature. Un email de confirmation vous a été envoyé.
             Notre équipe validera votre profil dans les meilleurs délais.
           </p>
+          <p className="text-cream/50 text-xs">
+            Vous pourrez vous connecter une fois votre compte validé par notre équipe.
+          </p>
           <Link to="/" className="inline-block text-primary text-sm hover:text-gold-light transition-colors">
             ← Retour au site
           </Link>
@@ -91,6 +105,8 @@ function InscriptionConvoyeur() {
       </div>
     );
   }
+
+  const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
   return (
     <div className="min-h-screen section-bg flex items-center justify-center px-4 py-12">
@@ -106,77 +122,88 @@ function InscriptionConvoyeur() {
         </div>
 
         <form onSubmit={handleSubmit} className="card-premium p-6 md:p-8 rounded space-y-5">
+          {/* Identité */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
                 <User size={12} className="inline mr-1" /> Prénom *
               </label>
-              <input
-                type="text"
-                value={form.prenom}
-                onChange={(e) => setForm({ ...form, prenom: e.target.value })}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none"
-                required
-              />
+              <input type="text" value={form.prenom} onChange={update("prenom")} className={inputClass} required />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
                 <User size={12} className="inline mr-1" /> Nom *
               </label>
-              <input
-                type="text"
-                value={form.nom}
-                onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none"
-                required
-              />
+              <input type="text" value={form.nom} onChange={update("nom")} className={inputClass} required />
             </div>
           </div>
 
+          {/* Contact */}
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
               <Mail size={12} className="inline mr-1" /> Email *
             </label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none"
-              required
-            />
+            <input type="email" value={form.email} onChange={update("email")} className={inputClass} required />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Phone size={12} className="inline mr-1" /> Téléphone *
+              </label>
+              <input type="tel" value={form.telephone} onChange={update("telephone")} className={inputClass} required />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <MapPin size={12} className="inline mr-1" /> Ville
+              </label>
+              <input type="text" value={form.ville} onChange={update("ville")} className={inputClass} placeholder="Ex: Tours" />
+            </div>
           </div>
 
+          {/* Mot de passe */}
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Phone size={12} className="inline mr-1" /> Téléphone *
+              <Lock size={12} className="inline mr-1" /> Mot de passe *
             </label>
-            <input
-              type="tel"
-              value={form.telephone}
-              onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none"
-              required
-            />
+            <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
           </div>
 
+          {/* Infos pro */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <FileText size={12} className="inline mr-1" /> Permis / infos
+              </label>
+              <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B, 10 ans" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Calendar size={12} className="inline mr-1" /> Disponibilité
+              </label>
+              <select value={form.disponibilite} onChange={update("disponibilite")} className={inputClass}>
+                <option value="">Non précisé</option>
+                <option value="temps_plein">Temps plein</option>
+                <option value="temps_partiel">Temps partiel</option>
+                <option value="weekend">Weekends</option>
+                <option value="ponctuel">Ponctuel</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Message */}
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
             <textarea
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              rows={3}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none resize-none"
+              value={form.message} onChange={update("message")}
+              rows={3} className={`${inputClass} resize-none`}
               placeholder="Présentez-vous brièvement..."
             />
           </div>
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="animate-spin" size={16} /> : null}
             {loading ? "Envoi en cours..." : "S'inscrire comme convoyeur"}
           </button>
@@ -186,8 +213,11 @@ function InscriptionConvoyeur() {
           </p>
         </form>
 
-        <div className="text-center mt-6">
-          <Link to="/" className="text-cream/40 text-xs hover:text-primary transition-colors">
+        <div className="text-center mt-6 space-y-2">
+          <Link to="/login" className="block text-primary text-xs hover:text-gold-light transition-colors">
+            Déjà inscrit ? Se connecter
+          </Link>
+          <Link to="/" className="block text-cream/40 text-xs hover:text-primary transition-colors">
             ← Retour au site
           </Link>
         </div>
