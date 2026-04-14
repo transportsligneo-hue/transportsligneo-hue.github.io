@@ -63,6 +63,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
+            <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
           </div>
 
           <div className="card-premium p-8 rounded">
@@ -79,6 +80,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
+            <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
           </div>
 
           <div className="card-premium p-8 rounded md:col-span-2">
@@ -102,6 +104,7 @@ export default function Tarifs() {
               ))}
             </div>
             <p className="text-cream/50 text-xs mt-4">Aller simple / Aller-retour</p>
+            <p className="text-cream/50 text-xs mt-1">Péage, essence et mise en main incluses</p>
           </div>
 
           <div className="card-premium p-8 rounded">
@@ -110,7 +113,6 @@ export default function Tarifs() {
             </h4>
             <div className="space-y-3 text-sm">
               {[
-                ["Mise en main du véhicule", "19,90 €"],
                 ["Livraison hors horaires / week-end / express (24h)", "+20 %"],
                 ["Lavage intérieur", "29,90 €"],
                 ["Lavage intérieur + extérieur", "79,90 €"],
@@ -132,6 +134,7 @@ export default function Tarifs() {
             <ul className="space-y-3 text-sm text-cream/75">
               <li>Péages et carburant inclus pour le transport</li>
               <li>Possibilité d'effectuer le plein (voir option)</li>
+              <li>Lavage extérieur offert pour toute livraison de plus de 200 kilomètres</li>
               <li>Stockage de vos véhicules : <span className="text-primary">5,90 €/jour</span></li>
               <li>À partir de 3 jours : <span className="text-primary">3 €/jour</span> supplémentaire (hors utilitaires et poids lourds)</li>
             </ul>
