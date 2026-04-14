@@ -84,6 +84,18 @@ function SetupPage() {
             )}
 
             <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Email admin</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
+                placeholder="votre@email.com"
+              />
+            </div>
+
+            <div>
               <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Mot de passe</label>
               <input
                 type="password"
