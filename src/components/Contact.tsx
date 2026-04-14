@@ -2,6 +2,7 @@ import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2 } from "luc
 import { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import AddressAutocomplete from "./AddressAutocomplete";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
@@ -28,6 +29,25 @@ export default function Contact() {
     setStatus("sending");
 
     try {
+      // Save to database
+      await supabase.from("demandes_convoyage").insert({
+        nom: form.nom,
+        prenom: form.prenom,
+        telephone: form.telephone,
+        email: form.email,
+        depart: form.depart,
+        arrivee: form.arrivee,
+        date_souhaitee: form.date || null,
+        heure_souhaitee: form.heure,
+        marque: form.marque,
+        modele: form.modele,
+        immatriculation: form.immatriculation,
+        carburant: form.carburant,
+        options: form.options,
+        message: form.message,
+      });
+
+      // Also send email notification
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
