@@ -98,11 +98,20 @@ export default function DevisGenerator() {
   const pricing = useMemo(() => {
     if (distance === null || distance === 0) return null;
     const base = calculatePrice(distance, isLocal37);
-    const multiplier = option === "aller-retour" ? 2 : option === "express" || option === "urgent" ? 1.25 : 1;
+    let finalPrice = base.price;
+    let multiplierLabel = "";
+    if (option === "aller-retour") {
+      finalPrice = Math.round(base.price + base.price * 0.5);
+      multiplierLabel = "Retour à -50%";
+    } else if (option === "express") {
+      finalPrice = Math.round(base.price * 1.20);
+      multiplierLabel = "+20% express";
+    }
     return {
       ...base,
-      finalPrice: Math.round(base.price * multiplier),
-      multiplier,
+      finalPrice,
+      multiplierLabel,
+      hasExtra: option !== "aller-simple",
     };
   }, [distance, isLocal37, option]);
 
@@ -203,9 +212,8 @@ export default function DevisGenerator() {
           <div className="flex flex-wrap gap-3 mb-8 justify-center">
             {[
               { value: "aller-simple", label: "Aller simple" },
-              { value: "aller-retour", label: "Aller-retour" },
-              { value: "express", label: "Express (+25%)" },
-              { value: "urgent", label: "Urgent (+25%)" },
+              { value: "aller-retour", label: "Aller-retour (retour -50%)" },
+              { value: "express", label: "Express (+20%)" },
             ].map(o => (
               <button
                 key={o.value}
@@ -239,9 +247,9 @@ export default function DevisGenerator() {
                 <Euro size={20} className="text-primary mx-auto mb-2" />
                 <p className="text-2xl font-heading gold-gradient-text">{pricing.finalPrice} €</p>
                 <p className="text-cream/50 text-xs mt-1">{pricing.label}</p>
-                {pricing.multiplier > 1 && (
+                {pricing.hasExtra && (
                   <p className="text-primary/70 text-xs mt-1">
-                    {option === "aller-retour" ? "×2 aller-retour" : "+25% express/urgent"}
+                    {pricing.multiplierLabel}
                   </p>
                 )}
               </div>
