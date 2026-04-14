@@ -6,22 +6,15 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import path from "path";
-import { loadEnv } from "vite";
 
 export default defineConfig({
-  vite: ({ mode }) => {
-    // Load all env vars (not just VITE_) into process.env for server routes
-    const serverEnv = loadEnv(mode, process.cwd(), "");
-    Object.assign(process.env, serverEnv);
-
-    return {
-      resolve: {
-        alias: {
-          "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
-          "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
-          "entities": path.resolve(__dirname, "node_modules/entities"),
-        },
+  vite: {
+    resolve: {
+      alias: {
+        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
+        "entities": path.resolve(__dirname, "node_modules/entities"),
       },
-    };
+    },
   },
 });
