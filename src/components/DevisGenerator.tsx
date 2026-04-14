@@ -7,6 +7,43 @@ const CITY_DISTANCES: Record<string, Record<string, number>> = {
   "Paris": { "Lyon": 465, "Marseille": 775, "Bordeaux": 585, "Nantes": 385, "Lille": 225, "Strasbourg": 490, "Toulouse": 680, "Nice": 930, "Montpellier": 750, "Rennes": 350, "Orléans": 130, "Poitiers": 340, "Limoges": 395, "Clermont-Ferrand": 420, "Angers": 300, "Le Mans": 210, "Blois": 185, "Chartres": 90, "Rouen": 135, "Caen": 240, "Dijon": 310, "Reims": 145, "Metz": 330, "Nancy": 380, "Brest": 590, "La Rochelle": 470, "Perpignan": 850, "Grenoble": 570, "Saint-Étienne": 530, "Amiens": 150, "Bourges": 240, "Châteauroux": 260, "Paris": 0 },
 };
 
+// Mapping cities to departments for fixed pricing
+const CITY_DEPARTMENTS: Record<string, string> = {
+  "Tours": "37-intra",
+  "Blois": "41",
+  "Le Mans": "72",
+  "Poitiers": "86",
+  "Angers": "49",
+  "Bourges": "18",
+  "Orléans": "45",
+  "Châteauroux": "37-hors",
+};
+
+// Fixed tariffs by department: [aller simple, aller-retour]
+const FIXED_TARIFFS: Record<string, [number, number]> = {
+  "37-intra": [79, 129],
+  "37-hors": [99, 129],
+  "41": [99, 200],
+  "72": [120, 200],
+  "86": [120, 200],
+  "49": [130, 200],
+  "79": [130, 200],
+  "18": [140, 210],
+  "45": [140, 210],
+};
+
+const DEPARTMENT_LABELS: Record<string, string> = {
+  "37-intra": "Forfait Tours intra",
+  "37-hors": "Forfait hors agglomération (37)",
+  "41": "Forfait 41 (Loir-et-Cher)",
+  "72": "Forfait 72 (Sarthe)",
+  "86": "Forfait 86 (Vienne)",
+  "49": "Forfait 49 (Maine-et-Loire)",
+  "79": "Forfait 79 (Deux-Sèvres)",
+  "18": "Forfait 18 (Cher)",
+  "45": "Forfait 45 (Loiret)",
+};
+
 const CITIES = [
   "Tours", "Paris", "Lyon", "Marseille", "Bordeaux", "Nantes", "Lille",
   "Strasbourg", "Toulouse", "Nice", "Montpellier", "Rennes", "Orléans",
