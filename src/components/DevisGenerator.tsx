@@ -23,7 +23,7 @@ const CITY_DEPARTMENTS: Record<string, string> = {
 const FIXED_TARIFFS: Record<string, [number, number]> = {
   "37-intra": [79, 129],
   "37-hors": [99, 129],
-  "41": [99, 200],
+  "41": [99, 139],
   "72": [120, 200],
   "86": [120, 200],
   "49": [130, 200],
