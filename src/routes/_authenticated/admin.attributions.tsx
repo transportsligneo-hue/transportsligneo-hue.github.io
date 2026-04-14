@@ -202,7 +202,25 @@ function AdminAttributions() {
                   <button onClick={() => viewPhotos(a.id, "arrivee")} className="p-1.5 text-cream/40 hover:text-green-400 transition-colors" title="Photos arrivée">
                     <Image size={14} />
                   </button>
+                  <button onClick={() => setReportId(a.id)} className="p-1.5 text-cream/40 hover:text-primary transition-colors" title="Rapport">
+                    <FileText size={14} />
+                  </button>
                 </div>
+              </div>
+              {/* Documents section */}
+              <div className="mt-2 pt-2 border-t border-primary/5">
+                <button
+                  onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
+                  className="flex items-center gap-1.5 text-xs text-cream/50 hover:text-primary transition-colors"
+                >
+                  <FileText size={11} /> Documents
+                  <span className="text-[10px] ml-1">{expandedDocs === a.id ? "▲" : "▼"}</span>
+                </button>
+                {expandedDocs === a.id && (
+                  <div className="mt-2">
+                    <MissionDocuments attributionId={a.id} userId="" isAdmin />
+                  </div>
+                )}
               </div>
             </div>
           ))}
