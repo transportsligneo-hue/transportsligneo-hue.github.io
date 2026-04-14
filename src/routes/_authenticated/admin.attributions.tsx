@@ -243,18 +243,29 @@ function AdminAttributions() {
       {/* GPS View Modal */}
       {gpsView && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setGpsView(null)}>
-          <div className="card-premium rounded-lg p-6 max-w-lg w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="card-premium rounded-lg p-6 max-w-2xl w-full max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-heading text-lg text-primary">Suivi GPS</h3>
-              <button onClick={() => setGpsView(null)} className="text-cream/50 hover:text-cream">✕</button>
+              <h3 className="font-heading text-lg text-primary">Suivi GPS en temps réel</h3>
+              <button onClick={() => setGpsView(null)} className="text-cream/50 hover:text-cream"><X size={18} /></button>
             </div>
             {gpsView.points.length === 0 ? (
               <p className="text-cream/50 text-sm">Aucune position enregistrée.</p>
             ) : (
-              <div className="space-y-2">
-                <p className="text-cream/50 text-xs">{gpsView.points.length} position(s) enregistrée(s)</p>
-                <div className="max-h-60 overflow-auto space-y-1">
-                  {gpsView.points.map((p, i) => (
+              <div className="space-y-3">
+                <GpsMapView points={gpsView.points} className="h-[400px]" />
+                <div className="flex items-center justify-between text-xs text-cream/50">
+                  <span>{gpsView.points.length} position(s) enregistrée(s)</span>
+                  <a
+                    href={`https://www.google.com/maps/dir/${gpsView.points.map(p => `${p.latitude},${p.longitude}`).join("/")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:text-gold-light transition-colors"
+                  >
+                    <MapPin size={12} /> Google Maps
+                  </a>
+                </div>
+                <div className="max-h-32 overflow-auto space-y-1">
+                  {gpsView.points.slice(-10).reverse().map((p, i) => (
                     <div key={i} className="flex items-center gap-3 text-xs text-cream/60 py-1 border-b border-primary/5">
                       <Clock size={10} className="text-primary shrink-0" />
                       <span>{new Date(p.recorded_at).toLocaleTimeString("fr-FR")}</span>
@@ -264,15 +275,6 @@ function AdminAttributions() {
                     </div>
                   ))}
                 </div>
-                {/* Simple map link */}
-                <a
-                  href={`https://www.google.com/maps/dir/${gpsView.points.map(p => `${p.latitude},${p.longitude}`).join("/")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:text-gold-light transition-colors"
-                >
-                  <MapPin size={12} /> Voir sur Google Maps
-                </a>
               </div>
             )}
           </div>
