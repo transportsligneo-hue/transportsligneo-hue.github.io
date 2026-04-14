@@ -232,28 +232,33 @@ export default function DevisGenerator() {
 
           {/* Result */}
           {distance !== null && distance > 0 && pricing && (
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="card-premium p-5 rounded">
-                <Navigation size={20} className="text-primary mx-auto mb-2" />
-                <p className="text-2xl font-heading gold-gradient-text">{distance} km</p>
-                <p className="text-cream/50 text-xs mt-1">Distance estimée</p>
+            <>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="card-premium p-5 rounded">
+                  <Navigation size={20} className="text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-heading gold-gradient-text">{distance} km</p>
+                  <p className="text-cream/50 text-xs mt-1">Distance estimée</p>
+                </div>
+                <div className="card-premium p-5 rounded">
+                  <Clock size={20} className="text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-heading gold-gradient-text">{estimateDuration(distance)}</p>
+                  <p className="text-cream/50 text-xs mt-1">Durée estimée</p>
+                </div>
+                <div className="card-premium p-5 rounded">
+                  <Euro size={20} className="text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-heading gold-gradient-text">{pricing.finalPrice} €</p>
+                  <p className="text-cream/50 text-xs mt-1">{pricing.label}</p>
+                  {pricing.hasExtra && (
+                    <p className="text-primary/70 text-xs mt-1">
+                      {pricing.multiplierLabel}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="card-premium p-5 rounded">
-                <Clock size={20} className="text-primary mx-auto mb-2" />
-                <p className="text-2xl font-heading gold-gradient-text">{estimateDuration(distance)}</p>
-                <p className="text-cream/50 text-xs mt-1">Durée estimée</p>
-              </div>
-              <div className="card-premium p-5 rounded">
-                <Euro size={20} className="text-primary mx-auto mb-2" />
-                <p className="text-2xl font-heading gold-gradient-text">{pricing.finalPrice} €</p>
-                <p className="text-cream/50 text-xs mt-1">{pricing.label}</p>
-                {pricing.hasExtra && (
-                  <p className="text-primary/70 text-xs mt-1">
-                    {pricing.multiplierLabel}
-                  </p>
-                )}
-              </div>
-            </div>
+              <p className="text-center text-primary/70 text-xs mt-4 font-heading tracking-wider uppercase">
+                Péage et carburant inclus
+              </p>
+            </>
           )}
 
           {distance === 0 && departure && arrival && (
