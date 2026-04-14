@@ -51,34 +51,57 @@ export default function Tarifs() {
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Tours &amp; Département 37 – mise en main incluse
+              Tours intra
             </h4>
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">
-                <span className="text-cream/80 text-sm">Livraison + restitution</span>
-                <span className="font-heading text-primary text-lg">129 €</span>
+                <span className="text-cream/80 text-sm">Aller simple</span>
+                <span className="font-heading text-primary text-lg">79 €</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-cream/80 text-sm">Livraison simple</span>
-                <span className="font-heading text-primary text-lg">79 €</span>
+                <span className="text-cream/80 text-sm">Aller-retour</span>
+                <span className="font-heading text-primary text-lg">179 €</span>
               </div>
             </div>
           </div>
 
           <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Hors Département 37
+              Hors agglomération (37)
             </h4>
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">
-                <span className="text-cream/80 text-sm">Frais kilométriques</span>
-                <span className="font-heading text-primary text-lg">1 €/km</span>
+                <span className="text-cream/80 text-sm">Aller simple</span>
+                <span className="font-heading text-primary text-lg">99 €</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-cream/80 text-sm">À partir de 200 km</span>
-                <span className="font-heading text-primary text-lg">0,85 €/km</span>
+                <span className="text-cream/80 text-sm">Aller-retour</span>
+                <span className="font-heading text-primary text-lg">179 €</span>
               </div>
             </div>
+          </div>
+
+          <div className="card-premium p-8 rounded md:col-span-2">
+            <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
+              Départements limitrophes du 37
+            </h4>
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+              {[
+                ["41 (Loir-et-Cher)", "99 €", "250 €"],
+                ["72 (Sarthe)", "120 €", "250 €"],
+                ["86 (Vienne)", "120 €", "250 €"],
+                ["49 (Maine-et-Loire)", "130 €", "250 €"],
+                ["79 (Deux-Sèvres)", "130 €", "250 €"],
+                ["18 (Cher)", "140 €", "250 €"],
+                ["45 (Loiret)", "140 €", "260 €"],
+              ].map(([dept, simple, retour], i) => (
+                <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
+                  <span className="text-cream/80 text-sm">{dept}</span>
+                  <span className="text-primary font-medium text-sm shrink-0 ml-4">{simple} / {retour}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-cream/50 text-xs mt-4">Aller simple / Aller-retour</p>
           </div>
 
           <div className="card-premium p-8 rounded">
