@@ -81,7 +81,6 @@ export default function Tarifs() {
               </div>
             </div>
             <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
-            <p className="font-heading gold-gradient-text text-sm mt-3 tracking-wide uppercase">Tarif aller-retour avantageux</p>
           </div>
 
           <div className="card-premium p-8 rounded md:col-span-2">
@@ -106,6 +105,20 @@ export default function Tarifs() {
             </div>
             <p className="text-cream/50 text-xs mt-4">Aller simple / Aller-retour</p>
             <p className="text-cream/50 text-xs mt-1">Péage, essence et mise en main incluses</p>
+          </div>
+
+          <div className="card-premium p-8 rounded md:col-span-2">
+            <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
+              Hors département 37 et limitrophes
+            </h4>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-cream/80 text-sm">À partir de 200 km</span>
+                <span className="font-heading text-primary text-lg">0,85 €/km</span>
+              </div>
+            </div>
+            <p className="text-cream/50 text-xs mt-4">Péage et carburant inclus</p>
+            <p className="font-heading gold-gradient-text text-sm mt-3 tracking-wide uppercase">Tarif aller-retour avantageux</p>
           </div>
 
           <div className="card-premium p-8 rounded">
