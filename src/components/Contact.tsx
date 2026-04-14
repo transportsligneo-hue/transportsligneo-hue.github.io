@@ -12,7 +12,9 @@ export default function Contact() {
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState({
     nom: "", prenom: "", telephone: "", email: "",
-    depart: "", arrivee: "", date: "", type_vehicule: "", message: "",
+    depart: "", arrivee: "", date: "", heure: "",
+    marque: "", modele: "", immatriculation: "", carburant: "", options: "",
+    message: "",
   });
   const [status, setStatus] = useState<FormStatus>("idle");
 
@@ -29,35 +31,51 @@ export default function Contact() {
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         {
-          from_name: `${form.prenom} ${form.nom}`,
-          from_email: form.email,
-          phone: form.telephone,
+          nom: form.nom,
+          prenom: form.prenom,
+          telephone: form.telephone,
+          email: form.email,
           depart: form.depart,
           arrivee: form.arrivee,
           date: form.date,
-          type_vehicule: form.type_vehicule,
+          heure: form.heure,
+          marque: form.marque,
+          modele: form.modele,
+          immatriculation: form.immatriculation,
+          carburant: form.carburant,
+          options: form.options,
           message: form.message,
         },
         EMAILJS_PUBLIC_KEY
       );
       setStatus("success");
-      setForm({ nom: "", prenom: "", telephone: "", email: "", depart: "", arrivee: "", date: "", type_vehicule: "", message: "" });
+      setForm({ nom: "", prenom: "", telephone: "", email: "", depart: "", arrivee: "", date: "", heure: "", marque: "", modele: "", immatriculation: "", carburant: "", options: "", message: "" });
     } catch {
       setStatus("error");
     }
   };
 
-  const fields = [
+  const personalFields = [
     { name: "nom", label: "Nom *", type: "text", required: true },
     { name: "prenom", label: "Prénom *", type: "text", required: true },
     { name: "telephone", label: "Téléphone", type: "tel", required: false },
     { name: "email", label: "Email *", type: "email", required: true },
-    { name: "depart", label: "Adresse de départ *", type: "text", required: true },
-    { name: "arrivee", label: "Adresse d'arrivée *", type: "text", required: true },
-    { name: "date", label: "Date du convoyage", type: "date", required: false },
   ];
 
-  const vehicleTypes = ["Citadine", "Berline", "SUV", "Utilitaire", "Autre"];
+  const trajetFields = [
+    { name: "depart", label: "Adresse de départ *", type: "text", required: true, full: true },
+    { name: "arrivee", label: "Adresse d'arrivée *", type: "text", required: true, full: true },
+    { name: "date", label: "Date souhaitée", type: "date", required: false },
+    { name: "heure", label: "Heure souhaitée", type: "time", required: false },
+  ];
+
+  const vehicleFields = [
+    { name: "marque", label: "Marque", type: "text", required: false },
+    { name: "modele", label: "Modèle", type: "text", required: false },
+    { name: "immatriculation", label: "Immatriculation", type: "text", required: false },
+  ];
+
+  const carburantTypes = ["Essence", "Diesel", "Hybride", "Électrique", "Autre"];
 
   return (
     <section id="contact" className="py-24 section-bg-alt">
@@ -137,52 +155,55 @@ export default function Contact() {
               </div>
             )}
 
+            {/* Informations personnelles */}
+            <p className="text-xs uppercase tracking-wider text-primary/80 font-heading">Informations personnelles</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {fields.map((f) => (
-                <div key={f.name} className={f.name === "depart" || f.name === "arrivee" ? "sm:col-span-2" : ""}>
-                  <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                    {f.label}
-                  </label>
-                  <input
-                    type={f.type}
-                    name={f.name}
-                    value={form[f.name as keyof typeof form]}
-                    onChange={handleChange}
-                    required={f.required}
-                    className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
-                  />
+              {personalFields.map((f) => (
+                <div key={f.name}>
+                  <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">{f.label}</label>
+                  <input type={f.type} name={f.name} value={form[f.name as keyof typeof form]} onChange={handleChange} required={f.required} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors" />
                 </div>
               ))}
             </div>
 
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                Type de véhicule
-              </label>
-              <select
-                name="type_vehicule"
-                value={form.type_vehicule}
-                onChange={handleChange}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors appearance-none"
-              >
-                <option value="" className="bg-navy">Sélectionner...</option>
-                {vehicleTypes.map((t) => (
-                  <option key={t} value={t} className="bg-navy">{t}</option>
-                ))}
-              </select>
+            {/* Trajet */}
+            <p className="text-xs uppercase tracking-wider text-primary/80 font-heading pt-2">Trajet demandé</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {trajetFields.map((f) => (
+                <div key={f.name} className={f.full ? "sm:col-span-2" : ""}>
+                  <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">{f.label}</label>
+                  <input type={f.type} name={f.name} value={form[f.name as keyof typeof form]} onChange={handleChange} required={f.required} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors" />
+                </div>
+              ))}
             </div>
 
+            {/* Véhicule */}
+            <p className="text-xs uppercase tracking-wider text-primary/80 font-heading pt-2">Informations véhicule</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {vehicleFields.map((f) => (
+                <div key={f.name}>
+                  <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">{f.label}</label>
+                  <input type={f.type} name={f.name} value={form[f.name as keyof typeof form]} onChange={handleChange} required={f.required} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors" />
+                </div>
+              ))}
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Carburant</label>
+                <select name="carburant" value={form.carburant} onChange={handleChange} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors appearance-none">
+                  <option value="" className="bg-navy">Sélectionner...</option>
+                  {carburantTypes.map((t) => (<option key={t} value={t} className="bg-navy">{t}</option>))}
+                </select>
+              </div>
+            </div>
+
+            {/* Options & Message */}
+            <p className="text-xs uppercase tracking-wider text-primary/80 font-heading pt-2">Informations complémentaires</p>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                Message
-              </label>
-              <textarea
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                rows={4}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors resize-none"
-              />
+              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Options / précisions véhicule</label>
+              <textarea name="options" value={form.options} onChange={handleChange} rows={2} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors resize-none" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Message</label>
+              <textarea name="message" value={form.message} onChange={handleChange} rows={3} className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors resize-none" />
             </div>
 
             <button
