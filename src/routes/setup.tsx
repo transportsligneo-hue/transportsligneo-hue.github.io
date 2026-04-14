@@ -15,6 +15,7 @@ export const Route = createFileRoute("/setup")({
 
 function SetupPage() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,6 +26,10 @@ function SetupPage() {
     e.preventDefault();
     setError("");
 
+    if (!email || !email.includes("@")) {
+      setError("Veuillez entrer un email valide.");
+      return;
+    }
     if (password.length < 8) {
       setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
@@ -37,7 +42,7 @@ function SetupPage() {
     setLoading(true);
     try {
       const result = await seedAdminUser({
-        data: { email: "contact@transportsligneo.fr", password },
+        data: { email, password },
       });
       if (result.success) {
         setSuccess(true);
