@@ -228,9 +228,26 @@ function ConvoyeurMissions() {
                   </button>
                 )}
               </div>
+
+              {/* Documents section */}
+              {(m.statut === "accepte" || m.statut === "en_cours") && user && (
+                <div className="pt-2 border-t border-primary/10">
+                  <button
+                    onClick={() => setExpandedDocs(expandedDocs === m.id ? null : m.id)}
+                    className="flex items-center gap-1.5 text-xs text-cream/60 hover:text-primary transition-colors w-full"
+                  >
+                    <FileText size={12} />
+                    Documents
+                    <span className="ml-auto text-[10px]">{expandedDocs === m.id ? "▲" : "▼"}</span>
+                  </button>
+                  {expandedDocs === m.id && (
+                    <div className="mt-3">
+                      <MissionDocuments attributionId={m.id} userId={user.id} />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
       )}
     </div>
   );
