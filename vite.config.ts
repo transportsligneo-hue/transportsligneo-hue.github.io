@@ -5,7 +5,11 @@ import { loadEnv } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(({ mode }) => ({
+// Load server env vars so process.env has SUPABASE_SERVICE_ROLE_KEY etc.
+const serverEnv = loadEnv("production", process.cwd(), "");
+Object.assign(process.env, serverEnv);
+
+export default defineConfig({
   vite: {
     resolve: {
       alias: {
@@ -14,14 +18,5 @@ export default defineConfig(({ mode }) => ({
         "entities": path.resolve(__dirname, "node_modules/entities"),
       },
     },
-    plugins: [
-      {
-        name: 'load-server-env',
-        configResolved() {
-          const serverEnv = loadEnv(mode, process.cwd(), "");
-          Object.assign(process.env, serverEnv);
-        },
-      },
-    ],
   },
-}));
+});
