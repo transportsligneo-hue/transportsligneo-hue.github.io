@@ -3,27 +3,17 @@ import { Star, Quote } from "lucide-react";
 const avis = [
   {
     nom: "Laurent M.",
-    role: "Concessionnaire automobile",
-    text: "Service impeccable, le véhicule a été livré dans les délais avec un suivi irréprochable. Je recommande vivement Transports Ligneo.",
+    role: "Professionnel auto — Tours",
+    text: "Honnêtement au début j'étais pas sûr, j'avais déjà eu des mauvaises expériences avec d'autres convoyeurs. Mais là rien à dire, le véhicule est arrivé nickel, dans les temps, et le chauffeur m'a tenu au courant tout du long. Depuis j'ai refait appel à eux 3 fois.",
     stars: 5,
+    date: "Mars 2025",
   },
   {
     nom: "Sophie D.",
     role: "Particulière",
-    text: "J'avais besoin de faire livrer ma voiture de Paris à Tours. Tout s'est passé parfaitement, le convoyeur était très professionnel.",
-    stars: 5,
-  },
-  {
-    nom: "Marc T.",
-    role: "Responsable flotte — Loueur",
-    text: "Nous travaillons avec Ligneo depuis 3 ans pour nos transferts inter-agences. Fiabilité et ponctualité au rendez-vous, zéro annulation.",
-    stars: 5,
-  },
-  {
-    nom: "Caroline B.",
-    role: "Compagnie d'assurance",
-    text: "Rapatriement de véhicules sinistrés effectué avec soin et rapidité. Un partenaire de confiance pour nos opérations.",
-    stars: 5,
+    text: "J'ai fait transporter ma voiture de Marseille à Tours après mon déménagement. Prix correct, le convoyeur était ponctuel et sympa. Petit bémol sur le délai de réponse au premier mail (2 jours) mais après c'était carré. Je recommande.",
+    stars: 4,
+    date: "Janvier 2025",
   },
 ];
 
