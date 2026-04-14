@@ -288,7 +288,7 @@ export default function DevisGenerator() {
                   <p className="text-2xl font-heading gold-gradient-text">{pricing.finalPrice} €</p>
                   <p className="text-cream/50 text-xs mt-1">{pricing.label}</p>
                   {pricing.hasExtra && (
-                    <p className="text-primary/70 text-xs mt-1">
+                    <p className="font-heading gold-gradient-text text-sm mt-2 tracking-wide uppercase">
                       {pricing.multiplierLabel}
                     </p>
                   )}
