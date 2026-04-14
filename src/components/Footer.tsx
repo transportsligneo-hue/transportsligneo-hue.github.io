@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export default function Footer() {
   return (
     <footer className="py-12 bg-navy border-t border-primary/15">
@@ -17,7 +19,7 @@ export default function Footer() {
               Navigation
             </p>
             <ul className="space-y-2 text-sm">
-              {["Accueil", "Engagements", "Prestations", "Tarifs", "Contact"].map((l) => (
+              {["Accueil", "Engagements", "Prestations", "Tarifs", "Devis", "Contact"].map((l) => (
                 <li key={l}>
                   <a
                     href={`#${l.toLowerCase()}`}
@@ -33,11 +35,19 @@ export default function Footer() {
             <p className="font-heading text-cream/70 text-xs tracking-[0.15em] uppercase mb-3">
               Coordonnées
             </p>
-            <div className="text-sm text-cream/50 space-y-1">
+            <div className="text-sm text-cream/50 space-y-1 mb-6">
               <p>07 82 45 61 81</p>
               <p>contact@transportsligneo.fr</p>
               <p>www.transportsligneo.fr</p>
             </div>
+            <p className="font-heading text-cream/70 text-xs tracking-[0.15em] uppercase mb-3">
+              Informations légales
+            </p>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/cgv" className="text-cream/50 hover:text-primary transition-colors">Conditions Générales de Vente</Link></li>
+              <li><Link to="/mentions-legales" className="text-cream/50 hover:text-primary transition-colors">Mentions Légales</Link></li>
+              <li><Link to="/confidentialite" className="text-cream/50 hover:text-primary transition-colors">Politique de Confidentialité</Link></li>
+            </ul>
           </div>
         </div>
         <div className="gold-divider mb-6" />

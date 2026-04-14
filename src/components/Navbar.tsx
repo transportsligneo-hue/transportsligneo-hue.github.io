@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import logoLigneo from "@/assets/logo-ligneo.png";
 
 const navLinks = [
   { href: "#accueil", label: "Accueil" },
   { href: "#engagements", label: "Engagements" },
   { href: "#prestations", label: "Prestations" },
   { href: "#tarifs", label: "Tarifs" },
+  { href: "#devis", label: "Devis" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -27,9 +29,13 @@ export default function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#accueil" className="font-heading text-xl tracking-[0.2em] text-primary uppercase">
-          Ligneo
+      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+        <a href="#accueil">
+          <img
+            src={logoLigneo}
+            alt="Transports Ligneo"
+            className="h-10 md:h-12 w-auto"
+          />
         </a>
 
         {/* Desktop */}
