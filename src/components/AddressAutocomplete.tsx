@@ -18,7 +18,7 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (query.length < 3) {
