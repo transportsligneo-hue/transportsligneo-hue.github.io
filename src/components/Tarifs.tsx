@@ -88,7 +88,7 @@ export default function Tarifs() {
             <div className="space-y-3 text-sm">
               {[
                 ["Mise en main du véhicule", "19,90 €"],
-                ["Livraison hors horaires / week-end / express (24h)", "+25 %"],
+                ["Livraison hors horaires / week-end / express (24h)", "+20 %"],
                 ["Lavage intérieur", "29,90 €"],
                 ["Lavage intérieur + extérieur", "79,90 €"],
                 ["Plein de carburant (client final)", "2,20 €/L"],
