@@ -176,6 +176,8 @@ export default function DevisGenerator() {
           <p className="text-cream/60 mt-4 max-w-lg mx-auto text-sm">
             Sélectionnez vos villes de départ et d'arrivée pour obtenir une estimation instantanée.
           </p>
+          <p className="text-primary text-sm mt-3 font-medium tracking-wide">Péage et essence inclus</p>
+          <p className="font-heading gold-gradient-text text-sm mt-2 tracking-wide uppercase">Tarif aller-retour avantageux</p>
           <div className="gold-divider-short mt-4" />
         </div>
 
