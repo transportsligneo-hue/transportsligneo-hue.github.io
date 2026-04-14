@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, X } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, X, FileText } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
+import { MissionReport } from "@/components/MissionReport";
+import { MissionDocuments } from "@/components/MissionDocuments";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
