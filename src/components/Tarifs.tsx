@@ -63,7 +63,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
+            <p className="text-cream/50 text-xs mt-4">Péage, carburant et mise en main inclus</p>
           </div>
 
           <div className="card-premium p-8 rounded">
@@ -80,7 +80,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Péage, essence et mise en main incluses</p>
+            <p className="text-cream/50 text-xs mt-4">Péage, carburant et mise en main inclus</p>
           </div>
 
           <div className="card-premium p-8 rounded md:col-span-2">
@@ -104,7 +104,7 @@ export default function Tarifs() {
               ))}
             </div>
             <p className="text-cream/50 text-xs mt-4">Aller simple / Aller-retour</p>
-            <p className="text-cream/50 text-xs mt-1">Péage, essence et mise en main incluses</p>
+            <p className="text-cream/50 text-xs mt-1">Péage, carburant et mise en main inclus</p>
           </div>
 
           <div className="card-premium p-8 rounded md:col-span-2">
