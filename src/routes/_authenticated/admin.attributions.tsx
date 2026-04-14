@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Plus, X, Send } from "lucide-react";
+import { notifyAttribution } from "@/server/notifications";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
