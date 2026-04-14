@@ -27,8 +27,8 @@ export default function Tarifs() {
         </div>
 
         {/* Main pricing highlight */}
-        <div className="text-center mb-16 card-premium p-10 rounded max-w-2xl mx-auto gold-border-strong">
-          <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2">
+        <div className="text-center mb-16 card-premium p-10 pb-12 rounded max-w-2xl mx-auto gold-border-strong overflow-visible">
+          <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2 leading-tight">
             0,85 €<span className="text-2xl">/km</span>
           </p>
           <p className="text-cream/70 text-sm mt-2">Pour les trajets de plus de 200 km</p>
