@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Route as RouteIcon, Users, Clock } from "lucide-react";
+import { FileText, Route as RouteIcon, Users, Clock, Truck, MapPin, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -13,6 +13,9 @@ function AdminDashboard() {
     demandesNouvelles: 0,
     trajetsEnCours: 0,
     convoyeursActifs: 0,
+    convoyeursEnAttente: 0,
+    missionsEnCours: 0,
+    missionsTerminees: 0,
   });
   const [recentDemandes, setRecentDemandes] = useState<Array<{
     id: string;
@@ -23,20 +26,32 @@ function AdminDashboard() {
     statut: string;
     created_at: string;
   }>>([]);
+  const [activeMissions, setActiveMissions] = useState<Array<{
+    id: string;
+    convoyeur: string;
+    depart: string;
+    arrivee: string;
+  }>>([]);
 
   useEffect(() => {
-    async function fetchStats() {
-      const [demandes, nouvelles, trajets, convoyeurs] = await Promise.all([
+    async function fetchAll() {
+      const [demandes, nouvelles, trajets, convoyeurs, convAttente, enCours, terminees] = await Promise.all([
         supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
         supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
         supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
         supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
+        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
+        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
+        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
       ]);
       setStats({
         demandes: demandes.count ?? 0,
         demandesNouvelles: nouvelles.count ?? 0,
         trajetsEnCours: trajets.count ?? 0,
         convoyeursActifs: convoyeurs.count ?? 0,
+        convoyeursEnAttente: convAttente.count ?? 0,
+        missionsEnCours: enCours.count ?? 0,
+        missionsTerminees: terminees.count ?? 0,
       });
     }
 
@@ -49,24 +64,40 @@ function AdminDashboard() {
       if (data) setRecentDemandes(data);
     }
 
-    fetchStats();
+    async function fetchActiveMissions() {
+      const { data } = await supabase
+        .from("attributions")
+        .select("id, convoyeur:convoyeurs(prenom, nom), trajet:trajets(depart, arrivee)")
+        .eq("statut", "en_cours")
+        .limit(5);
+      if (data) {
+        setActiveMissions(data.map((a: any) => ({
+          id: a.id,
+          convoyeur: a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "—",
+          depart: a.trajet?.depart ?? "—",
+          arrivee: a.trajet?.arrivee ?? "—",
+        })));
+      }
+    }
+
+    fetchAll();
     fetchRecent();
+    fetchActiveMissions();
   }, []);
 
   const statCards = [
-    { label: "Total demandes", value: stats.demandes, icon: FileText, color: "text-primary" },
-    { label: "Nouvelles", value: stats.demandesNouvelles, icon: Clock, color: "text-accent" },
-    { label: "Trajets en cours", value: stats.trajetsEnCours, icon: RouteIcon, color: "text-green-400" },
+    { label: "Nouvelles demandes", value: stats.demandesNouvelles, icon: Clock, color: "text-accent" },
+    { label: "Missions en cours", value: stats.missionsEnCours, icon: Truck, color: "text-green-400" },
     { label: "Convoyeurs actifs", value: stats.convoyeursActifs, icon: Users, color: "text-blue-400" },
+    { label: "En attente validation", value: stats.convoyeursEnAttente, icon: AlertTriangle, color: "text-amber-400" },
+    { label: "Total demandes", value: stats.demandes, icon: FileText, color: "text-primary" },
+    { label: "Trajets actifs", value: stats.trajetsEnCours, icon: RouteIcon, color: "text-purple-400" },
+    { label: "Missions terminées", value: stats.missionsTerminees, icon: MapPin, color: "text-emerald-400" },
   ];
 
   const statutLabel: Record<string, string> = {
-    nouvelle: "Nouvelle",
-    a_traiter: "À traiter",
-    convertie: "Convertie",
-    attribuee: "Attribuée",
-    terminee: "Terminée",
-    annulee: "Annulée",
+    nouvelle: "Nouvelle", a_traiter: "À traiter", convertie: "Convertie",
+    attribuee: "Attribuée", terminee: "Terminée", annulee: "Annulée",
   };
 
   return (
@@ -76,19 +107,47 @@ function AdminDashboard() {
         <p className="text-cream/50 text-sm mt-1">Vue globale de votre activité</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
-          <div key={s.label} className="card-premium p-5 rounded">
+          <div key={s.label} className="card-premium p-4 rounded">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-cream/50 text-xs uppercase tracking-wider">{s.label}</p>
-                <p className={`text-3xl font-heading mt-1 ${s.color}`}>{s.value}</p>
+                <p className={`text-2xl font-heading mt-1 ${s.color}`}>{s.value}</p>
               </div>
-              <s.icon className={`${s.color} opacity-30`} size={32} />
+              <s.icon className={`${s.color} opacity-30`} size={24} />
             </div>
           </div>
         ))}
       </div>
+
+      {/* Active missions */}
+      {activeMissions.length > 0 && (
+        <div className="card-premium rounded p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading text-lg text-primary tracking-wider uppercase flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" /> Missions en cours
+            </h2>
+            <Link to="/admin/attributions" className="text-xs text-primary hover:text-gold-light transition-colors">
+              Voir tout →
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {activeMissions.map((m) => (
+              <div key={m.id} className="flex items-center justify-between py-2 border-b border-primary/5 last:border-0">
+                <div className="text-sm">
+                  <span className="text-cream">{m.convoyeur}</span>
+                  <span className="text-cream/30 mx-2">·</span>
+                  <span className="text-cream/60">{m.depart} → {m.arrivee}</span>
+                </div>
+                <Link to="/admin/attributions" className="text-xs text-primary hover:text-gold-light">
+                  <MapPin size={14} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card-premium rounded p-6">
         <h2 className="font-heading text-lg text-primary tracking-wider uppercase mb-4">Dernières demandes</h2>
