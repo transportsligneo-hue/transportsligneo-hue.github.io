@@ -77,6 +77,8 @@ function AdminAttributions() {
   const [selectedConvoyeur, setSelectedConvoyeur] = useState("");
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
   const [photosView, setPhotosView] = useState<{ id: string; type: string; photos: InspectionPhoto[] } | null>(null);
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
 
   const fetchAttributions = useCallback(async () => {
     const { data } = await supabase
