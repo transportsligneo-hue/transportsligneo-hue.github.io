@@ -277,6 +277,117 @@ export type Database = {
         }
         Relationships: []
       }
+      inspection_photos: {
+        Row: {
+          created_at: string
+          id: string
+          inspection_id: string
+          notes: string | null
+          url_photo: string
+          vue_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inspection_id: string
+          notes?: string | null
+          url_photo: string
+          vue_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inspection_id?: string
+          notes?: string | null
+          url_photo?: string
+          vue_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_photos_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          statut: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          statut?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          statut?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_locations: {
+        Row: {
+          accuracy: number | null
+          attribution_id: string
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          recorded_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          attribution_id: string
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          recorded_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          attribution_id?: string
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_locations_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
