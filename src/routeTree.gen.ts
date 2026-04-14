@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
@@ -36,6 +37,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/setup': typeof SetupRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/setup'
+    | '/unsubscribe'
     | '/admin'
     | '/convoyeur'
     | '/email/unsubscribe'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/setup'
+    | '/unsubscribe'
     | '/email/unsubscribe'
     | '/admin/attributions'
     | '/admin/convoyeurs'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/setup'
+    | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/email/unsubscribe'
@@ -350,6 +362,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   SetupRoute: typeof SetupRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -361,6 +374,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/setup': {
       id: '/setup'
       path: '/setup'
@@ -610,6 +630,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   SetupRoute: SetupRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
