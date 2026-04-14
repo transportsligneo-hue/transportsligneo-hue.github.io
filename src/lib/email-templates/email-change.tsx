@@ -24,15 +24,17 @@ export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }:
         <Heading style={h1}>Confirmez le changement d'email</Heading>
         <Text style={text}>
           Vous avez demandé à changer votre adresse email pour {siteName} de{' '}
-          <Link href={`mailto:${email}`} style={link}>{email}</Link>{' '}
-          à{' '}
+          <Link href={`mailto:${email}`} style={link}>{email}</Link> vers{' '}
           <Link href={`mailto:${newEmail}`} style={link}>{newEmail}</Link>.
+        </Text>
+        <Text style={text}>
+          Cliquez sur le bouton ci-dessous pour confirmer ce changement :
         </Text>
         <Button style={button} href={confirmationUrl}>
           Confirmer le changement
         </Button>
         <Text style={footer}>
-          Si vous n'avez pas demandé ce changement, sécurisez votre compte immédiatement.
+          Si vous n'avez pas demandé ce changement, veuillez sécuriser votre compte immédiatement.
         </Text>
       </Container>
     </Body>

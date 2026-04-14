@@ -24,7 +24,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
         <Text style={text}>
           Vous avez été invité à rejoindre{' '}
           <Link href={siteUrl} style={link}><strong>{siteName}</strong></Link>.
-          Cliquez sur le bouton ci-dessous pour accepter l'invitation.
+          Cliquez sur le bouton ci-dessous pour accepter l'invitation et créer votre compte.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Accepter l'invitation

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { render } from '@react-email/render'
+import { render } from '@react-email/components'
 import { createFileRoute } from '@tanstack/react-router'
 import { SignupEmail } from '@/lib/email-templates/signup'
 import { InviteEmail } from '@/lib/email-templates/invite'
@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Transports Ligneo"
+const SITE_NAME = "transportsligneo"
 const _ROOT_DOMAIN = "transportsligneo.fr"
 
 // Sample data for preview mode ONLY (not used in actual email sending).

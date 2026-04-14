@@ -11,7 +11,7 @@ interface RecoveryEmailProps {
 export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Réinitialisation de votre mot de passe — {siteName}</Preview>
+    <Preview>Réinitialisez votre mot de passe — {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -19,16 +19,17 @@ export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps)
           <Text style={subtitle}>Convoyage automobile premium</Text>
         </Section>
         <Hr style={divider} />
-        <Heading style={h1}>Réinitialiser votre mot de passe</Heading>
+        <Heading style={h1}>Réinitialisez votre mot de passe</Heading>
         <Text style={text}>
-          Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte {siteName}.
+          Nous avons reçu une demande de réinitialisation de votre mot de passe pour {siteName}.
           Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Réinitialiser le mot de passe
         </Button>
         <Text style={footer}>
-          Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. Votre mot de passe ne sera pas modifié.
+          Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.
+          Votre mot de passe ne sera pas modifié.
         </Text>
       </Container>
     </Body>

@@ -18,11 +18,11 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
           <Text style={subtitle}>Convoyage automobile premium</Text>
         </Section>
         <Hr style={divider} />
-        <Heading style={h1}>Code de vérification</Heading>
+        <Heading style={h1}>Confirmez votre identité</Heading>
         <Text style={text}>Utilisez le code ci-dessous pour confirmer votre identité :</Text>
         <Text style={codeStyle}>{token}</Text>
         <Text style={footer}>
-          Ce code expirera sous peu. Si vous ne l'avez pas demandé, ignorez cet email.
+          Ce code expirera sous peu. Si vous n'avez pas fait cette demande, vous pouvez ignorer cet email.
         </Text>
       </Container>
     </Body>
@@ -39,5 +39,5 @@ const subtitle = { fontSize: '11px', color: '#0b1026', letterSpacing: '2px', mar
 const divider = { borderColor: '#d4af37', margin: '20px 0' }
 const h1 = { fontSize: '20px', fontWeight: 'bold' as const, color: '#0b1026', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#333', lineHeight: '1.6', margin: '0 0 20px' }
-const codeStyle = { fontFamily: 'Courier, monospace', fontSize: '28px', fontWeight: 'bold' as const, color: '#d4af37', margin: '0 0 30px', textAlign: 'center' as const, letterSpacing: '5px' }
+const codeStyle = { fontFamily: 'Courier, monospace', fontSize: '28px', fontWeight: 'bold' as const, color: '#d4af37', margin: '0 0 30px', letterSpacing: '4px' }
 const footer = { fontSize: '12px', color: '#999', margin: '30px 0 0' }
