@@ -14,16 +14,319 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attributions: {
+        Row: {
+          convoyeur_id: string
+          created_at: string
+          id: string
+          statut: string
+          trajet_id: string
+          updated_at: string
+        }
+        Insert: {
+          convoyeur_id: string
+          created_at?: string
+          id?: string
+          statut?: string
+          trajet_id: string
+          updated_at?: string
+        }
+        Update: {
+          convoyeur_id?: string
+          created_at?: string
+          id?: string
+          statut?: string
+          trajet_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attributions_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attributions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convoyeurs: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nom: string
+          prenom: string
+          statut: string
+          telephone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          nom: string
+          prenom: string
+          statut?: string
+          telephone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nom?: string
+          prenom?: string
+          statut?: string
+          telephone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      demandes_convoyage: {
+        Row: {
+          arrivee: string
+          carburant: string | null
+          created_at: string
+          date_souhaitee: string | null
+          depart: string
+          email: string
+          heure_souhaitee: string | null
+          id: string
+          immatriculation: string | null
+          marque: string | null
+          message: string | null
+          modele: string | null
+          nom: string
+          options: string | null
+          prenom: string
+          statut: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          arrivee: string
+          carburant?: string | null
+          created_at?: string
+          date_souhaitee?: string | null
+          depart: string
+          email: string
+          heure_souhaitee?: string | null
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          message?: string | null
+          modele?: string | null
+          nom: string
+          options?: string | null
+          prenom: string
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arrivee?: string
+          carburant?: string | null
+          created_at?: string
+          date_souhaitee?: string | null
+          depart?: string
+          email?: string
+          heure_souhaitee?: string | null
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          message?: string | null
+          modele?: string | null
+          nom?: string
+          options?: string | null
+          prenom?: string
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents_convoyeurs: {
+        Row: {
+          convoyeur_id: string
+          created_at: string
+          id: string
+          nom_fichier: string
+          type_document: string
+          url_fichier: string
+        }
+        Insert: {
+          convoyeur_id: string
+          created_at?: string
+          id?: string
+          nom_fichier: string
+          type_document: string
+          url_fichier: string
+        }
+        Update: {
+          convoyeur_id?: string
+          created_at?: string
+          id?: string
+          nom_fichier?: string
+          type_document?: string
+          url_fichier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_convoyeurs_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nom: string
+          prenom: string
+          telephone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom?: string
+          prenom?: string
+          telephone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom?: string
+          prenom?: string
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trajets: {
+        Row: {
+          arrivee: string
+          client_email: string | null
+          client_nom: string | null
+          client_telephone: string | null
+          created_at: string
+          date_trajet: string | null
+          demande_id: string | null
+          depart: string
+          heure_trajet: string | null
+          id: string
+          immatriculation: string | null
+          marque: string | null
+          modele: string | null
+          notes_internes: string | null
+          prix: number | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          arrivee: string
+          client_email?: string | null
+          client_nom?: string | null
+          client_telephone?: string | null
+          created_at?: string
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart: string
+          heure_trajet?: string | null
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          notes_internes?: string | null
+          prix?: number | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          arrivee?: string
+          client_email?: string | null
+          client_nom?: string | null
+          client_telephone?: string | null
+          created_at?: string
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart?: string
+          heure_trajet?: string | null
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          notes_internes?: string | null
+          prix?: number | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trajets_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "convoyeur"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +453,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "convoyeur"],
+    },
   },
 } as const
