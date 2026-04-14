@@ -34,6 +34,7 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
+  const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
 
   // GPS tracking: active only during an en_cours mission
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
