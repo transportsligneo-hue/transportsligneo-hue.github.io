@@ -79,11 +79,15 @@ function AdminAttributions() {
 
   const createAttribution = async () => {
     if (!selectedTrajet || !selectedConvoyeur) return;
-    await supabase.from("attributions").insert({
+    const { data: newAttr } = await supabase.from("attributions").insert({
       trajet_id: selectedTrajet,
       convoyeur_id: selectedConvoyeur,
       statut: "propose",
-    });
+    }).select("id").single();
+    // Notify convoyeur
+    if (newAttr) {
+      notifyAttribution({ data: { attributionId: newAttr.id } }).catch(console.error);
+    }
     // Update trajet status
     await supabase.from("trajets").update({ statut: "attribue" }).eq("id", selectedTrajet);
     setShowCreate(false);
