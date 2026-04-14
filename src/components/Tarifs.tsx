@@ -92,7 +92,7 @@ export default function Tarifs() {
                 ["86 (Vienne)", "120 €", "200 €"],
                 ["49 (Maine-et-Loire)", "130 €", "200 €"],
                 ["79 (Deux-Sèvres)", "140 €", "210 €"],
-                ["18 (Cher)", "140 €", "200 €"],
+                ["18 (Cher)", "140 €", "210 €"],
                 ["45 (Loiret)", "140 €", "210 €"],
               ].map(([dept, simple, retour], i) => (
                 <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
