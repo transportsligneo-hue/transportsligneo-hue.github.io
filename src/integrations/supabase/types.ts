@@ -59,36 +59,48 @@ export type Database = {
       convoyeurs: {
         Row: {
           created_at: string
+          disponibilite: string | null
           email: string
           id: string
+          message: string | null
           nom: string
+          permis: string | null
           prenom: string
           statut: string
           telephone: string
           updated_at: string
           user_id: string
+          ville: string | null
         }
         Insert: {
           created_at?: string
+          disponibilite?: string | null
           email: string
           id?: string
+          message?: string | null
           nom: string
+          permis?: string | null
           prenom: string
           statut?: string
           telephone: string
           updated_at?: string
           user_id: string
+          ville?: string | null
         }
         Update: {
           created_at?: string
+          disponibilite?: string | null
           email?: string
           id?: string
+          message?: string | null
           nom?: string
+          permis?: string | null
           prenom?: string
           statut?: string
           telephone?: string
           updated_at?: string
           user_id?: string
+          ville?: string | null
         }
         Relationships: []
       }
