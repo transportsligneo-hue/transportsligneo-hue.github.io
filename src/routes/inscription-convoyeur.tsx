@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import emailjs from "@emailjs/browser";
 import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock } from "lucide-react";
+
+const EMAILJS_SERVICE_ID = "service_ctxuphf";
+const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
+const EMAILJS_PUBLIC_KEY = "tTvDX_OgATR0pXFUr";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   component: InscriptionConvoyeur,
@@ -39,6 +44,7 @@ function InscriptionConvoyeur() {
 
     setLoading(true);
     try {
+      // 1. Create auth account
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -56,7 +62,8 @@ function InscriptionConvoyeur() {
       }
 
       if (authData.user) {
-        await supabase.from("convoyeurs").insert({
+        // 2. Insert convoyeur record
+        const { error: convError } = await supabase.from("convoyeurs").insert({
           user_id: authData.user.id,
           nom: form.nom,
           prenom: form.prenom,
@@ -69,10 +76,43 @@ function InscriptionConvoyeur() {
           statut: "en_attente",
         });
 
-        await supabase.from("user_roles").insert({
+        if (convError) {
+          console.error("Erreur insertion convoyeur:", convError);
+          setError("Erreur lors de l'enregistrement. Veuillez réessayer.");
+          setLoading(false);
+          return;
+        }
+
+        // 3. Insert role
+        const { error: roleError } = await supabase.from("user_roles").insert({
           user_id: authData.user.id,
           role: "convoyeur" as const,
         });
+
+        if (roleError) {
+          console.error("Erreur insertion rôle:", roleError);
+        }
+
+        // 4. Send email notification to admin
+        try {
+          await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+              nom: form.nom,
+              prenom: form.prenom,
+              email: form.email,
+              telephone: form.telephone,
+              message: `Nouvelle inscription convoyeur !\n\nNom: ${form.nom} ${form.prenom}\nEmail: ${form.email}\nTéléphone: ${form.telephone}\nVille: ${form.ville || "Non précisée"}\nDisponibilité: ${form.disponibilite || "Non précisée"}\nPermis: ${form.permis || "Non précisé"}\nMessage: ${form.message || "Aucun"}`,
+            },
+            EMAILJS_PUBLIC_KEY
+          );
+        } catch (emailErr) {
+          console.error("Erreur envoi email notification:", emailErr);
+        }
+
+        // 5. Sign out so they don't auto-access before admin validation
+        await supabase.auth.signOut();
       }
 
       setSuccess(true);

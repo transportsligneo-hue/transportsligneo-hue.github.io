@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, LogIn } from "lucide-react";
 
@@ -22,13 +22,15 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   // Redirect if already authenticated
-  if (!authLoading && isAuthenticated && role) {
-    if (role === "admin") {
-      navigate({ to: "/admin" });
-    } else if (role === "convoyeur") {
-      navigate({ to: "/convoyeur" });
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && role) {
+      if (role === "admin") {
+        navigate({ to: "/admin" });
+      } else if (role === "convoyeur") {
+        navigate({ to: "/convoyeur" });
+      }
     }
-  }
+  }, [authLoading, isAuthenticated, role, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
