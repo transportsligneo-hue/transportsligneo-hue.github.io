@@ -25,11 +25,27 @@ const navItems = [
 ];
 
 function ConvoyeurLayout() {
-  const { isAuthenticated, role, isLoading, logout } = useAuth();
+  const { isAuthenticated, user, role, isLoading, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [convoyeurStatut, setConvoyeurStatut] = useState<string | null>(null);
+  const [checkingStatut, setCheckingStatut] = useState(true);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!user) { setCheckingStatut(false); return; }
+    supabase
+      .from("convoyeurs")
+      .select("statut")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        setConvoyeurStatut(data?.statut ?? null);
+        setCheckingStatut(false);
+      });
+  }, [user]);
+
+  if (isLoading || checkingStatut) {
     return (
       <div className="min-h-screen flex items-center justify-center section-bg">
         <Loader2 className="animate-spin text-primary" size={32} />
@@ -44,13 +60,24 @@ function ConvoyeurLayout() {
     return null;
   }
 
-  if (role !== "convoyeur") {
+  if (role !== "convoyeur" || convoyeurStatut !== "valide") {
     return (
       <div className="min-h-screen flex items-center justify-center section-bg px-4">
         <div className="text-center space-y-4">
-          <h1 className="font-heading text-xl text-primary tracking-[0.1em] uppercase">Accès non autorisé</h1>
-          <p className="text-cream/50 text-sm">Votre compte est en attente de validation par notre équipe.</p>
-          <a href="/" className="inline-block text-primary text-sm hover:text-gold-light transition-colors">← Retour au site</a>
+          <h1 className="font-heading text-xl text-primary tracking-[0.1em] uppercase">
+            {convoyeurStatut === "en_attente" ? "Compte en attente" : convoyeurStatut === "refuse" ? "Compte refusé" : "Accès non autorisé"}
+          </h1>
+          <p className="text-cream/50 text-sm">
+            {convoyeurStatut === "en_attente"
+              ? "Votre inscription est en cours de validation par notre équipe. Vous recevrez un accès dès qu'elle sera approuvée."
+              : convoyeurStatut === "refuse"
+              ? "Votre candidature n'a pas été retenue. Contactez-nous pour plus d'informations."
+              : "Vous n'avez pas les droits pour accéder à cet espace."}
+          </p>
+          <div className="flex flex-col gap-2 items-center">
+            <button onClick={() => logout()} className="text-cream/50 text-sm hover:text-primary transition-colors">Se déconnecter</button>
+            <a href="/" className="text-cream/40 text-xs hover:text-primary transition-colors">← Retour au site</a>
+          </div>
         </div>
       </div>
     );
