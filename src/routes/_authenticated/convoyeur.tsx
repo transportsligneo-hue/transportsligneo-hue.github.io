@@ -36,11 +36,23 @@ function ConvoyeurLayout() {
     );
   }
 
-  if (!isAuthenticated || role !== "convoyeur") {
+  if (!isAuthenticated) {
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
     return null;
+  }
+
+  if (role !== "convoyeur") {
+    return (
+      <div className="min-h-screen flex items-center justify-center section-bg px-4">
+        <div className="text-center space-y-4">
+          <h1 className="font-heading text-xl text-primary tracking-[0.1em] uppercase">Accès non autorisé</h1>
+          <p className="text-cream/50 text-sm">Votre compte est en attente de validation par notre équipe.</p>
+          <a href="/" className="inline-block text-primary text-sm hover:text-gold-light transition-colors">← Retour au site</a>
+        </div>
+      </div>
+    );
   }
 
   return (
