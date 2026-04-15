@@ -4,20 +4,20 @@ const steps = [
   {
     icon: FileText,
     step: "01",
-    title: "Demandez un devis",
-    desc: "Remplissez notre formulaire en ligne ou appelez-nous. Recevez une estimation instantanée.",
+    title: "Estimez votre trajet",
+    desc: "Utilisez notre estimateur de trajet pour obtenir une estimation instantanée du prix, de la distance et de la durée.",
   },
   {
     icon: CheckCircle,
     step: "02",
-    title: "Confirmation",
-    desc: "Nous validons les détails de la mission et vous attribuons un convoyeur dédié.",
+    title: "Demandez un devis",
+    desc: "Une fois votre trajet estimé, demandez un devis directement depuis l'estimateur. Toutes les informations sont automatiquement transmises pour un traitement rapide.",
   },
   {
     icon: Truck,
     step: "03",
     title: "Livraison",
-    desc: "Votre véhicule est pris en charge et livré à destination. Vous êtes informé à chaque étape.",
+    desc: "Nous validons les détails, vous attribuons un convoyeur dédié et votre véhicule est livré à destination.",
   },
 ];
 
@@ -58,8 +58,15 @@ export default function CommentCaMarche() {
           ))}
         </div>
 
+        {/* Info */}
+        <div className="text-center mt-10">
+          <p className="text-cream/50 text-sm max-w-2xl mx-auto italic">
+            Une fois votre trajet estimé, vous pouvez faire une demande de devis directement depuis l'estimateur. Toutes les informations sont automatiquement transmises pour un traitement rapide.
+          </p>
+        </div>
+
         {/* CTA */}
-        <div className="text-center mt-14">
+        <div className="text-center mt-8">
           <a
             href="#devis"
             className="px-10 py-4 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300 inline-block"
