@@ -38,7 +38,7 @@ function ConvoyeurLayout() {
       .select("statut")
       .eq("user_id", user.id)
       .limit(1)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         setConvoyeurStatut(data?.statut ?? null);
         setCheckingStatut(false);

@@ -58,7 +58,7 @@ function ConvoyeurMissions() {
       .from("convoyeurs")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!conv) { setLoading(false); return; }
 
