@@ -4,16 +4,15 @@ import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
-  { id: "avant_droit", label: "Avant droit 3/4", description: "Vue 3/4 avant droite" },
-  { id: "cote_droit", label: "Côté droit", description: "Profil droit complet" },
-  { id: "arriere_droit", label: "Arrière droit 3/4", description: "Vue 3/4 arrière droite" },
+  { id: "avant_gauche", label: "3/4 avant gauche", description: "Vue 3/4 avant gauche" },
+  { id: "avant_droit", label: "3/4 avant droite", description: "Vue 3/4 avant droite" },
   { id: "arriere", label: "Arrière", description: "Face arrière du véhicule" },
-  { id: "arriere_gauche", label: "Arrière gauche 3/4", description: "Vue 3/4 arrière gauche" },
-  { id: "cote_gauche", label: "Côté gauche", description: "Profil gauche complet" },
-  { id: "avant_gauche", label: "Avant gauche 3/4", description: "Vue 3/4 avant gauche" },
-  { id: "interieur_avant", label: "Intérieur avant", description: "Sièges avant et planche de bord" },
-  { id: "interieur_arriere", label: "Intérieur arrière", description: "Sièges arrière et coffre" },
-  { id: "tableau_bord", label: "Tableau de bord", description: "Compteur kilométrique" },
+  { id: "arriere_gauche", label: "3/4 arrière gauche", description: "Vue 3/4 arrière gauche" },
+  { id: "arriere_droit", label: "3/4 arrière droite", description: "Vue 3/4 arrière droite" },
+  { id: "compteur", label: "Compteur", description: "Compteur kilométrique" },
+  { id: "siege_avant", label: "Siège avant", description: "Sièges avant" },
+  { id: "siege_arriere", label: "Siège arrière", description: "Sièges arrière" },
+  { id: "coffre", label: "Coffre", description: "Intérieur du coffre" },
 ] as const;
 
 interface InspectionGuideeProps {
