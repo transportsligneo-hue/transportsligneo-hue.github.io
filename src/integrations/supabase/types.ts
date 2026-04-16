@@ -68,6 +68,7 @@ export type Database = {
           prenom: string
           statut: string
           telephone: string
+          type_convoyeur: string
           updated_at: string
           user_id: string
           ville: string | null
@@ -83,6 +84,7 @@ export type Database = {
           prenom: string
           statut?: string
           telephone: string
+          type_convoyeur?: string
           updated_at?: string
           user_id: string
           ville?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           prenom?: string
           statut?: string
           telephone?: string
+          type_convoyeur?: string
           updated_at?: string
           user_id?: string
           ville?: string | null
@@ -513,6 +516,7 @@ export type Database = {
           notes_internes: string | null
           prix: number | null
           statut: string
+          tarif_convoyeur: number | null
           updated_at: string
         }
         Insert: {
@@ -532,6 +536,7 @@ export type Database = {
           notes_internes?: string | null
           prix?: number | null
           statut?: string
+          tarif_convoyeur?: number | null
           updated_at?: string
         }
         Update: {
@@ -551,6 +556,7 @@ export type Database = {
           notes_internes?: string | null
           prix?: number | null
           statut?: string
+          tarif_convoyeur?: number | null
           updated_at?: string
         }
         Relationships: [

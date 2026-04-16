@@ -1,12 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import emailjs from "@emailjs/browser";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock } from "lucide-react";
-
-const EMAILJS_SERVICE_ID = "service_ctxuphf";
-const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
-const EMAILJS_PUBLIC_KEY = "tTvDX_OgATR0pXFUr";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   component: InscriptionConvoyeur,
@@ -93,20 +89,20 @@ function InscriptionConvoyeur() {
           console.error("Erreur insertion rôle:", roleError);
         }
 
-        // 4. Send email notification to admin
+        // 4. Send email notification to admin via transactional email
         try {
-          await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            {
-              nom: form.nom,
+          await sendTransactionalEmail({
+            templateName: "inscription-convoyeur",
+            recipientEmail: "contact@transportsligneo.fr",
+            idempotencyKey: `inscription-${authData.user.id}`,
+            templateData: {
               prenom: form.prenom,
+              nom: form.nom,
               email: form.email,
               telephone: form.telephone,
-              message: `Nouvelle inscription convoyeur !\n\nNom: ${form.nom} ${form.prenom}\nEmail: ${form.email}\nTéléphone: ${form.telephone}\nVille: ${form.ville || "Non précisée"}\nDisponibilité: ${form.disponibilite || "Non précisée"}\nPermis: ${form.permis || "Non précisé"}\nMessage: ${form.message || "Aucun"}`,
+              ville: form.ville,
             },
-            EMAILJS_PUBLIC_KEY
-          );
+          });
         } catch (emailErr) {
           console.error("Erreur envoi email notification:", emailErr);
         }

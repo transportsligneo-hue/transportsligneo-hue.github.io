@@ -19,7 +19,7 @@ const reasons = [
   {
     icon: Users,
     title: "Convoyeurs professionnels",
-    desc: "Équipe salariée, formée en continu, avec tenue professionnelle obligatoire.",
+    desc: "Équipe salariée, formée en continu, avec convoyeur indépendant formé en renfort. Tenue professionnelle obligatoire.",
   },
   {
     icon: Award,

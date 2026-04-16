@@ -108,17 +108,29 @@ function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {statCards.map((s) => (
-          <div key={s.label} className="card-premium p-4 rounded">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-cream/50 text-xs uppercase tracking-wider">{s.label}</p>
-                <p className={`text-2xl font-heading mt-1 ${s.color}`}>{s.value}</p>
+        {statCards.map((s) => {
+          const linkMap: Record<string, string> = {
+            "Nouvelles demandes": "/admin/demandes",
+            "Missions en cours": "/admin/attributions",
+            "Convoyeurs actifs": "/admin/convoyeurs",
+            "En attente validation": "/admin/convoyeurs",
+            "Total demandes": "/admin/demandes",
+            "Trajets actifs": "/admin/trajets",
+            "Missions terminées": "/admin/attributions",
+          };
+          const to = linkMap[s.label] || "/admin";
+          return (
+            <Link key={s.label} to={to} className="card-premium p-4 rounded hover:border-primary/40 transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-cream/50 text-xs uppercase tracking-wider">{s.label}</p>
+                  <p className={`text-2xl font-heading mt-1 ${s.color}`}>{s.value}</p>
+                </div>
+                <s.icon className={`${s.color} opacity-30`} size={24} />
               </div>
-              <s.icon className={`${s.color} opacity-30`} size={24} />
-            </div>
-          </div>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Active missions */}

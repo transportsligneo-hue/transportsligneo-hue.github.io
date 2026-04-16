@@ -19,6 +19,7 @@ interface Convoyeur {
   permis: string | null;
   message: string | null;
   statut: string;
+  type_convoyeur: string;
   created_at: string;
 }
 
@@ -140,6 +141,7 @@ function AdminConvoyeurs() {
               <tr className="text-cream/50 text-xs uppercase tracking-wider border-b border-primary/10">
                 <th className="text-left py-3 px-4">Convoyeur</th>
                 <th className="text-left py-3 px-4 hidden sm:table-cell">Contact</th>
+                <th className="text-left py-3 px-4 hidden md:table-cell">Type</th>
                 <th className="text-left py-3 px-4 hidden md:table-cell">Ville</th>
                 <th className="text-left py-3 px-4">Statut</th>
                 <th className="text-left py-3 px-4">Actions</th>
@@ -155,6 +157,11 @@ function AdminConvoyeurs() {
                   <td className="py-3 px-4 text-cream/60 hidden sm:table-cell">
                     <div>{c.email}</div>
                     {c.telephone && <div className="text-xs text-cream/40">{c.telephone}</div>}
+                  </td>
+                  <td className="py-3 px-4 text-cream/60 hidden md:table-cell">
+                    <span className={`text-xs px-2 py-0.5 rounded border ${c.type_convoyeur === "independant" ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-blue-500/20 text-blue-300 border-blue-500/30"}`}>
+                      {c.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}
+                    </span>
                   </td>
                   <td className="py-3 px-4 text-cream/60 hidden md:table-cell">{c.ville || "—"}</td>
                   <td className="py-3 px-4">
@@ -192,10 +199,28 @@ function AdminConvoyeurs() {
               <DetailRow label="Email" value={selected.email} />
               <DetailRow label="Téléphone" value={selected.telephone} />
               <DetailRow label="Ville" value={selected.ville} />
+              <DetailRow label="Type" value={selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} />
               <DetailRow label="Permis / Infos" value={selected.permis} />
               <DetailRow label="Disponibilité" value={selected.disponibilite ? (dispoLabels[selected.disponibilite] ?? selected.disponibilite) : null} />
               <DetailRow label="Message" value={selected.message} />
               <DetailRow label="Inscrit le" value={new Date(selected.created_at).toLocaleDateString("fr-FR")} />
+            </div>
+            {/* Type convoyeur selector */}
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-cream/40 text-xs uppercase tracking-wider">Type</span>
+              <select
+                value={selected.type_convoyeur}
+                onChange={async (e) => {
+                  const newType = e.target.value;
+                  await supabase.from("convoyeurs").update({ type_convoyeur: newType } as any).eq("id", selected.id);
+                  setSelected((prev) => prev ? { ...prev, type_convoyeur: newType } : null);
+                  fetchConvoyeurs();
+                }}
+                className="bg-navy/60 border border-primary/20 rounded px-2 py-1 text-xs text-primary focus:outline-none appearance-none ml-auto"
+              >
+                <option value="salarie">Salarié</option>
+                <option value="independant">Indépendant</option>
+              </select>
             </div>
             <div className="mt-4 border-t border-primary/10 pt-4">
               <div className="flex items-center gap-2 mb-3">
