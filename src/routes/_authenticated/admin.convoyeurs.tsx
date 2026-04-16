@@ -199,10 +199,28 @@ function AdminConvoyeurs() {
               <DetailRow label="Email" value={selected.email} />
               <DetailRow label="Téléphone" value={selected.telephone} />
               <DetailRow label="Ville" value={selected.ville} />
+              <DetailRow label="Type" value={selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} />
               <DetailRow label="Permis / Infos" value={selected.permis} />
               <DetailRow label="Disponibilité" value={selected.disponibilite ? (dispoLabels[selected.disponibilite] ?? selected.disponibilite) : null} />
               <DetailRow label="Message" value={selected.message} />
               <DetailRow label="Inscrit le" value={new Date(selected.created_at).toLocaleDateString("fr-FR")} />
+            </div>
+            {/* Type convoyeur selector */}
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-cream/40 text-xs uppercase tracking-wider">Type</span>
+              <select
+                value={selected.type_convoyeur}
+                onChange={async (e) => {
+                  const newType = e.target.value;
+                  await supabase.from("convoyeurs").update({ type_convoyeur: newType } as any).eq("id", selected.id);
+                  setSelected((prev) => prev ? { ...prev, type_convoyeur: newType } : null);
+                  fetchConvoyeurs();
+                }}
+                className="bg-navy/60 border border-primary/20 rounded px-2 py-1 text-xs text-primary focus:outline-none appearance-none ml-auto"
+              >
+                <option value="salarie">Salarié</option>
+                <option value="independant">Indépendant</option>
+              </select>
             </div>
             <div className="mt-4 border-t border-primary/10 pt-4">
               <div className="flex items-center gap-2 mb-3">
