@@ -88,16 +88,14 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("inspection-photos")
-        .getPublicUrl(path);
-
+      // Save DB record with storage path (not public URL since bucket is private)
       await supabase.from("inspection_photos").upsert({
         inspection_id: insId,
         vue_type: currentVue.id,
-        url_photo: urlData.publicUrl,
+        url_photo: path,
       }, { onConflict: "inspection_id,vue_type" });
 
+      // Show local preview immediately
       setPhotos((prev) => ({ ...prev, [currentVue.id]: URL.createObjectURL(file) }));
     } catch (err) {
       console.error("Upload error:", err);
