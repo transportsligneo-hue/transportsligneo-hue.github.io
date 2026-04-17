@@ -70,6 +70,24 @@ function AdminConvoyeurs() {
 
   useEffect(() => { fetchConvoyeurs(); }, [fetchConvoyeurs]);
 
+  useEffect(() => {
+    if (!selected) { setHistorique([]); return; }
+    let cancelled = false;
+    const loadHisto = async () => {
+      setLoadingHisto(true);
+      const { data } = await supabase
+        .from("attributions")
+        .select("id, statut, created_at, trajet:trajets(depart, arrivee, date_trajet, tarif_convoyeur)")
+        .eq("convoyeur_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (!cancelled && data) setHistorique(data as unknown as MissionHistorique[]);
+      if (!cancelled) setLoadingHisto(false);
+    };
+    loadHisto();
+    return () => { cancelled = true; };
+  }, [selected]);
+
   const updateStatut = async (id: string, statut: string) => {
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
     fetchConvoyeurs();
