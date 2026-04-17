@@ -75,22 +75,22 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !currentVue) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile || !currentVue) return;
 
     setUploading(true);
     try {
+      // Compress for fast upload (~150-300KB instead of 3-5MB)
+      const file = await compressImage(rawFile);
       const insId = await ensureInspection();
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${userId}/${insId}/${currentVue.id}.${ext}`;
+      const path = `${userId}/${insId}/${currentVue.id}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from("inspection-photos")
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { upsert: true, contentType: "image/jpeg" });
 
       if (uploadError) throw uploadError;
 
-      // Save DB record with storage path (not public URL since bucket is private)
       await supabase.from("inspection_photos").upsert({
         inspection_id: insId,
         vue_type: currentVue.id,
@@ -98,7 +98,16 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
       }, { onConflict: "inspection_id,vue_type" });
 
       // Show local preview immediately
-      setPhotos((prev) => ({ ...prev, [currentVue.id]: URL.createObjectURL(file) }));
+      const previewUrl = URL.createObjectURL(file);
+      const capturedStep = currentStep;
+      setPhotos((prev) => ({ ...prev, [currentVue.id]: previewUrl }));
+
+      // Auto-advance after a brief preview moment for fluidity
+      setTimeout(() => {
+        if (capturedStep < VUE_TYPES.length - 1) {
+          animateStep(capturedStep + 1);
+        }
+      }, 600);
     } catch (err) {
       console.error("Upload error:", err);
     }
