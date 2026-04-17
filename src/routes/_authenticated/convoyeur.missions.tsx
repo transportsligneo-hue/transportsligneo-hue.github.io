@@ -27,6 +27,7 @@ interface Mission {
     marque: string | null;
     modele: string | null;
     immatriculation: string | null;
+    tarif_convoyeur: number | null;
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
@@ -49,6 +50,7 @@ function ConvoyeurMissions() {
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
+  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
 
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
