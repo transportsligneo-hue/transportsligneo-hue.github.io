@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
