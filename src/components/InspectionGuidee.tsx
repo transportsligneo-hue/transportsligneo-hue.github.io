@@ -278,13 +278,17 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
             {hasCurrentPhoto ? (
               <img src={photos[currentVue.id]} alt={currentVue.label} className="w-full h-full object-cover animate-scale-in" />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
-                <div className="w-28 h-28 border-2 border-dashed border-primary/30 rounded-lg flex items-center justify-center mb-3">
-                  <Camera size={28} className="text-primary/40" />
+              <>
+                {/* Silhouette guide overlay */}
+                <CarSilhouetteOverlay variant={currentVue.id as Parameters<typeof CarSilhouetteOverlay>[0]["variant"]} />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/90 to-transparent px-4 py-3 text-center">
+                  <p className="font-heading text-primary text-base">{currentVue.label}</p>
+                  <p className="text-cream/50 text-xs mt-0.5">{currentVue.description}</p>
                 </div>
-                <p className="font-heading text-primary text-lg">{currentVue.label}</p>
-                <p className="text-cream/40 text-xs mt-1">{currentVue.description}</p>
-              </div>
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-navy/70 border border-primary/30">
+                  <p className="text-primary text-[10px] uppercase tracking-wider">Cadrer selon la silhouette</p>
+                </div>
+              </>
             )}
             {uploading && (
               <div className="absolute inset-0 bg-navy/80 flex items-center justify-center">
