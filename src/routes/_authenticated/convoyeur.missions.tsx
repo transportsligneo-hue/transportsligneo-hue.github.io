@@ -58,11 +58,12 @@ function ConvoyeurMissions() {
     if (!user) return;
     const { data: conv } = await supabase
       .from("convoyeurs")
-      .select("id")
+      .select("id, type_convoyeur")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (!conv) { setLoading(false); return; }
+    setTypeConvoyeur(conv.type_convoyeur || "salarie");
 
     const { data } = await supabase
       .from("attributions")
@@ -75,9 +76,9 @@ function ConvoyeurMissions() {
       for (const attr of data) {
         const { data: trajet } = await supabase
           .from("trajets")
-          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
+          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur")
           .eq("id", attr.trajet_id)
-          .single();
+          .maybeSingle();
 
         const { data: inspections } = await supabase
           .from("inspections")
