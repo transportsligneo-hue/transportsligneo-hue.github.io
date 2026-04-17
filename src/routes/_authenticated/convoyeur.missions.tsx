@@ -273,6 +273,13 @@ function ConvoyeurMissions() {
                 {[activeMission.trajet.marque, activeMission.trajet.modele, activeMission.trajet.immatriculation].filter(Boolean).join(" · ")}
               </div>
             )}
+
+            {typeConvoyeur === "independant" && activeMission.trajet?.tarif_convoyeur != null && (
+              <div className="mt-2 pt-2 border-t border-primary/10 flex items-center justify-between">
+                <span className="text-cream/50 text-xs uppercase tracking-wider">Tarif mission</span>
+                <span className="text-primary font-heading text-base">{activeMission.trajet.tarif_convoyeur} €</span>
+              </div>
+            )}
           </div>
 
           {/* Live map toggle */}
@@ -371,6 +378,13 @@ function ConvoyeurMissions() {
                 <div className="flex items-center gap-2 text-xs text-cream/50">
                   <Car size={12} />
                   {[m.trajet.marque, m.trajet.modele, m.trajet.immatriculation].filter(Boolean).join(" · ")}
+                </div>
+              )}
+
+              {typeConvoyeur === "independant" && m.trajet?.tarif_convoyeur != null && (
+                <div className="flex items-center justify-between text-sm bg-primary/5 px-3 py-2 rounded border border-primary/15">
+                  <span className="text-cream/60 text-xs uppercase tracking-wider">Tarif proposé</span>
+                  <span className="text-primary font-heading">{m.trajet.tarif_convoyeur} €</span>
                 </div>
               )}
 
