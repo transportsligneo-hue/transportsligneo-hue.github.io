@@ -1,6 +1,8 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from "lucide-react";
+import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
+import { compressImage } from "@/lib/image-compression";
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
