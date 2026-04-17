@@ -270,6 +270,37 @@ function AdminConvoyeurs() {
                 </div>
               )}
             </div>
+
+            {/* Historique missions */}
+            <div className="mt-4 border-t border-primary/10 pt-4">
+              <h4 className="text-cream/40 text-xs uppercase tracking-wider mb-2">
+                Historique missions {historique.length > 0 && <span className="text-cream/30">({historique.length})</span>}
+              </h4>
+              {loadingHisto ? (
+                <p className="text-cream/40 text-xs">Chargement…</p>
+              ) : historique.length === 0 ? (
+                <p className="text-cream/40 text-xs">Aucune mission attribuée.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {historique.map((h) => (
+                    <div key={h.id} className="flex items-center justify-between gap-2 text-xs px-2 py-1.5 rounded bg-card/40 border border-primary/10">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-cream truncate">
+                          {h.trajet ? `${h.trajet.depart} → ${h.trajet.arrivee}` : "Trajet supprimé"}
+                        </div>
+                        <div className="text-cream/40 text-[10px]">
+                          {h.trajet?.date_trajet ? new Date(h.trajet.date_trajet).toLocaleDateString("fr-FR") : new Date(h.created_at).toLocaleDateString("fr-FR")}
+                          {selected.type_convoyeur === "independant" && h.trajet?.tarif_convoyeur != null && ` · ${h.trajet.tarif_convoyeur} €`}
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+                        {h.statut}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
