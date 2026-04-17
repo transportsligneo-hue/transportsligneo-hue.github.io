@@ -43,10 +43,19 @@ const dispoLabels: Record<string, string> = {
   ponctuel: "Ponctuel",
 };
 
+interface MissionHistorique {
+  id: string;
+  statut: string;
+  created_at: string;
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; tarif_convoyeur: number | null } | null;
+}
+
 function AdminConvoyeurs() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
   const [selected, setSelected] = useState<Convoyeur | null>(null);
+  const [historique, setHistorique] = useState<MissionHistorique[]>([]);
+  const [loadingHisto, setLoadingHisto] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
