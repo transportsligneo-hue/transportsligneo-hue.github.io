@@ -27,6 +27,7 @@ interface Mission {
     marque: string | null;
     modele: string | null;
     immatriculation: string | null;
+    tarif_convoyeur: number | null;
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
@@ -49,6 +50,7 @@ function ConvoyeurMissions() {
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
+  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
 
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
@@ -56,11 +58,12 @@ function ConvoyeurMissions() {
     if (!user) return;
     const { data: conv } = await supabase
       .from("convoyeurs")
-      .select("id")
+      .select("id, type_convoyeur")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (!conv) { setLoading(false); return; }
+    setTypeConvoyeur(conv.type_convoyeur || "salarie");
 
     const { data } = await supabase
       .from("attributions")
@@ -73,9 +76,9 @@ function ConvoyeurMissions() {
       for (const attr of data) {
         const { data: trajet } = await supabase
           .from("trajets")
-          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
+          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur")
           .eq("id", attr.trajet_id)
-          .single();
+          .maybeSingle();
 
         const { data: inspections } = await supabase
           .from("inspections")
@@ -270,6 +273,13 @@ function ConvoyeurMissions() {
                 {[activeMission.trajet.marque, activeMission.trajet.modele, activeMission.trajet.immatriculation].filter(Boolean).join(" · ")}
               </div>
             )}
+
+            {typeConvoyeur === "independant" && activeMission.trajet?.tarif_convoyeur != null && (
+              <div className="mt-2 pt-2 border-t border-primary/10 flex items-center justify-between">
+                <span className="text-cream/50 text-xs uppercase tracking-wider">Tarif mission</span>
+                <span className="text-primary font-heading text-base">{activeMission.trajet.tarif_convoyeur} €</span>
+              </div>
+            )}
           </div>
 
           {/* Live map toggle */}
@@ -368,6 +378,13 @@ function ConvoyeurMissions() {
                 <div className="flex items-center gap-2 text-xs text-cream/50">
                   <Car size={12} />
                   {[m.trajet.marque, m.trajet.modele, m.trajet.immatriculation].filter(Boolean).join(" · ")}
+                </div>
+              )}
+
+              {typeConvoyeur === "independant" && m.trajet?.tarif_convoyeur != null && (
+                <div className="flex items-center justify-between text-sm bg-primary/5 px-3 py-2 rounded border border-primary/15">
+                  <span className="text-cream/60 text-xs uppercase tracking-wider">Tarif proposé</span>
+                  <span className="text-primary font-heading">{m.trajet.tarif_convoyeur} €</span>
                 </div>
               )}
 

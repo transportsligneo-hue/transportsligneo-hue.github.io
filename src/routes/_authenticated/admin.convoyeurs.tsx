@@ -43,10 +43,19 @@ const dispoLabels: Record<string, string> = {
   ponctuel: "Ponctuel",
 };
 
+interface MissionHistorique {
+  id: string;
+  statut: string;
+  created_at: string;
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; tarif_convoyeur: number | null } | null;
+}
+
 function AdminConvoyeurs() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
   const [selected, setSelected] = useState<Convoyeur | null>(null);
+  const [historique, setHistorique] = useState<MissionHistorique[]>([]);
+  const [loadingHisto, setLoadingHisto] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
@@ -60,6 +69,24 @@ function AdminConvoyeurs() {
   }, [filterStatut]);
 
   useEffect(() => { fetchConvoyeurs(); }, [fetchConvoyeurs]);
+
+  useEffect(() => {
+    if (!selected) { setHistorique([]); return; }
+    let cancelled = false;
+    const loadHisto = async () => {
+      setLoadingHisto(true);
+      const { data } = await supabase
+        .from("attributions")
+        .select("id, statut, created_at, trajet:trajets(depart, arrivee, date_trajet, tarif_convoyeur)")
+        .eq("convoyeur_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (!cancelled && data) setHistorique(data as unknown as MissionHistorique[]);
+      if (!cancelled) setLoadingHisto(false);
+    };
+    loadHisto();
+    return () => { cancelled = true; };
+  }, [selected]);
 
   const updateStatut = async (id: string, statut: string) => {
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
@@ -240,6 +267,37 @@ function AdminConvoyeurs() {
                     className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600/20 text-red-300 border border-red-500/30 rounded text-xs uppercase tracking-wider hover:bg-red-600/30 transition-colors">
                     <XCircle size={14} /> Refuser
                   </button>
+                </div>
+              )}
+            </div>
+
+            {/* Historique missions */}
+            <div className="mt-4 border-t border-primary/10 pt-4">
+              <h4 className="text-cream/40 text-xs uppercase tracking-wider mb-2">
+                Historique missions {historique.length > 0 && <span className="text-cream/30">({historique.length})</span>}
+              </h4>
+              {loadingHisto ? (
+                <p className="text-cream/40 text-xs">Chargement…</p>
+              ) : historique.length === 0 ? (
+                <p className="text-cream/40 text-xs">Aucune mission attribuée.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {historique.map((h) => (
+                    <div key={h.id} className="flex items-center justify-between gap-2 text-xs px-2 py-1.5 rounded bg-card/40 border border-primary/10">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-cream truncate">
+                          {h.trajet ? `${h.trajet.depart} → ${h.trajet.arrivee}` : "Trajet supprimé"}
+                        </div>
+                        <div className="text-cream/40 text-[10px]">
+                          {h.trajet?.date_trajet ? new Date(h.trajet.date_trajet).toLocaleDateString("fr-FR") : new Date(h.created_at).toLocaleDateString("fr-FR")}
+                          {selected.type_convoyeur === "independant" && h.trajet?.tarif_convoyeur != null && ` · ${h.trajet.tarif_convoyeur} €`}
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+                        {h.statut}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

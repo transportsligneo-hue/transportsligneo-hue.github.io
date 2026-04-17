@@ -20,6 +20,7 @@ interface Trajet {
   client_email: string | null;
   client_telephone: string | null;
   prix: number | null;
+  tarif_convoyeur: number | null;
   statut: string;
   notes_internes: string | null;
   demande_id: string | null;
@@ -48,7 +49,7 @@ const emptyTrajet = {
   depart: "", arrivee: "", date_trajet: "", heure_trajet: "",
   marque: "", modele: "", immatriculation: "",
   client_nom: "", client_email: "", client_telephone: "",
-  prix: "", notes_internes: "",
+  prix: "", tarif_convoyeur: "", notes_internes: "",
 };
 
 function AdminTrajets() {
@@ -82,6 +83,7 @@ function AdminTrajets() {
       client_email: form.client_email || "",
       client_telephone: form.client_telephone || "",
       prix: form.prix ? parseFloat(form.prix) : null,
+      tarif_convoyeur: form.tarif_convoyeur ? parseFloat(form.tarif_convoyeur) : null,
       notes_internes: form.notes_internes || "",
     });
     setForm(emptyTrajet);
@@ -103,6 +105,7 @@ function AdminTrajets() {
       client_email: form.client_email || "",
       client_telephone: form.client_telephone || "",
       prix: form.prix ? parseFloat(form.prix) : null,
+      tarif_convoyeur: form.tarif_convoyeur ? parseFloat(form.tarif_convoyeur) : null,
       notes_internes: form.notes_internes || "",
     }).eq("id", selected.id);
     setEditing(false);
@@ -123,7 +126,8 @@ function AdminTrajets() {
       immatriculation: t.immatriculation ?? "",
       client_nom: t.client_nom ?? "", client_email: t.client_email ?? "",
       client_telephone: t.client_telephone ?? "",
-      prix: t.prix?.toString() ?? "", notes_internes: t.notes_internes ?? "",
+      prix: t.prix?.toString() ?? "", tarif_convoyeur: t.tarif_convoyeur?.toString() ?? "",
+      notes_internes: t.notes_internes ?? "",
     });
     setEditing(true);
     setSelected(t);
@@ -220,9 +224,10 @@ function AdminTrajets() {
                 <FormInput label="Tél." value={form.client_telephone} onChange={(v) => setForm({ ...form, client_telephone: v })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <FormInput label="Prix (€)" value={form.prix} onChange={(v) => setForm({ ...form, prix: v })} type="number" />
-                <FormInput label="Notes internes" value={form.notes_internes} onChange={(v) => setForm({ ...form, notes_internes: v })} />
+                <FormInput label="Prix client (€)" value={form.prix} onChange={(v) => setForm({ ...form, prix: v })} type="number" />
+                <FormInput label="Tarif convoyeur (€)" value={form.tarif_convoyeur} onChange={(v) => setForm({ ...form, tarif_convoyeur: v })} type="number" />
               </div>
+              <FormInput label="Notes internes" value={form.notes_internes} onChange={(v) => setForm({ ...form, notes_internes: v })} />
               <button onClick={editing ? updateTrajet : createTrajet}
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors">
                 <Save size={16} /> {editing ? "Enregistrer" : "Créer"}
@@ -250,7 +255,8 @@ function AdminTrajets() {
               <DetailRow label="Client" value={selected.client_nom} />
               <DetailRow label="Email" value={selected.client_email} />
               <DetailRow label="Téléphone" value={selected.client_telephone} />
-              <DetailRow label="Prix" value={selected.prix ? `${selected.prix} €` : null} />
+              <DetailRow label="Prix client" value={selected.prix ? `${selected.prix} €` : null} />
+              <DetailRow label="Tarif convoyeur (interne)" value={selected.tarif_convoyeur ? `${selected.tarif_convoyeur} €` : null} />
               <DetailRow label="Notes" value={selected.notes_internes} />
             </div>
             <div className="mt-4 border-t border-primary/10 pt-4 flex items-center gap-2">
