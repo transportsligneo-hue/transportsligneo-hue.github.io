@@ -526,17 +526,31 @@ export default function DevisGenerator() {
               <CheckCircle className="text-primary" size={32} />
             </div>
             <h3 className="font-heading text-xl text-primary tracking-[0.15em] uppercase mb-3">
-              Demande envoyée
+              Devis envoyé
             </h3>
+            {savedDevis && (
+              <p className="text-primary/80 text-xs tracking-wider uppercase mb-2">N° {savedDevis.numero}</p>
+            )}
             <p className="text-cream/70 text-sm leading-relaxed max-w-md mx-auto">
-              Merci pour votre demande de devis. Notre équipe vous recontactera dans les plus brefs délais.
+              Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email
+              et notre équipe vous recontactera dans les plus brefs délais.
             </p>
-            <button
-              onClick={() => { setSubmitted(false); setShowForm(false); setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment(""); }}
-              className="mt-6 px-6 py-2 gold-border text-primary font-heading text-xs tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors"
-            >
-              Nouvelle estimation
-            </button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {savedDevis && (
+                <button
+                  onClick={handleDownloadPdf}
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
+                >
+                  <Download size={14} /> Télécharger le PDF
+                </button>
+              )}
+              <button
+                onClick={() => { setSubmitted(false); setShowForm(false); setSavedDevis(null); setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment(""); }}
+                className="px-6 py-2 gold-border text-primary font-heading text-xs tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors"
+              >
+                Nouvelle estimation
+              </button>
+            </div>
           </div>
         )}
       </div>
