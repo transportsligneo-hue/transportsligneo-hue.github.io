@@ -23,6 +23,8 @@ interface Document {
   nom_fichier: string;
   url_fichier: string;
   created_at: string;
+  statut_validation?: string;
+  motif_refus?: string | null;
 }
 
 const DOC_LABELS: Record<string, string> = {
