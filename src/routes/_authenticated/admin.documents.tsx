@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, RefreshCw, ChevronDown, ChevronUp, Eye, AlertCircle } from "lucide-react";
+import { FileText, Download, RefreshCw, ChevronDown, ChevronUp, Eye, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
   component: AdminDocuments,
