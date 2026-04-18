@@ -7,6 +7,7 @@ import {
   Users,
   Send,
   FolderOpen,
+  Receipt,
   LogOut,
   Loader2,
   Menu,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 const navItems = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { to: "/admin/demandes", label: "Demandes", icon: FileText },
+  { to: "/admin/devis", label: "Devis", icon: Receipt },
   { to: "/admin/trajets", label: "Trajets", icon: RouteIcon },
   { to: "/admin/convoyeurs", label: "Convoyeurs", icon: Users },
   { to: "/admin/attributions", label: "Attributions", icon: Send },

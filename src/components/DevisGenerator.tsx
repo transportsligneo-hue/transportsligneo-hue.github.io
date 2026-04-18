@@ -1,11 +1,8 @@
 import { useState, useMemo } from "react";
-import { MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, Send, Loader2, CheckCircle, User, Phone, Mail } from "lucide-react";
-import emailjs from "@emailjs/browser";
+import { MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, Send, Loader2, CheckCircle, User, Phone, Mail, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-const EMAILJS_SERVICE_ID = "service_ctxuphf";
-const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
-const EMAILJS_PUBLIC_KEY = "tTvDX_OgATR0pXFUr";
+import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 // Pre-defined distances (km) from Tours to major French cities
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
@@ -108,6 +105,7 @@ export default function DevisGenerator() {
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [savedDevis, setSavedDevis] = useState<DevisData | null>(null);
 
   // Contact info for devis
   const [nom, setNom] = useState("");
@@ -135,70 +133,107 @@ export default function DevisGenerator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!pricing || distance == null) return;
     setSending(true);
 
     try {
-      // 1. Save to database (admin panel)
+      // 1. Save devis to dedicated table (with auto numero)
+      const { data: devisRow } = await supabase
+        .from("devis")
+        .insert({
+          nom, prenom, telephone, email,
+          depart: departure, arrivee: arrival,
+          distance_km: distance,
+          duree_estimee: estimateDuration(distance),
+          type_vehicule: vehicleType || null,
+          marque: marque || null,
+          modele: modele || null,
+          carburant: energy || null,
+          prestation: prestation || null,
+          option_trajet: option,
+          date_souhaitee: date || null,
+          heure_souhaitee: heure || null,
+          prix_estime: pricing.finalPrice,
+          prix_base: pricing.price,
+          tarif_label: pricing.label,
+          multiplier_label: pricing.multiplierLabel || null,
+          message: comment || null,
+        })
+        .select()
+        .single();
+
+      // 2. Mirror into demandes_convoyage so it shows up in the existing admin
       await supabase.from("demandes_convoyage").insert({
-        nom,
-        prenom,
-        telephone,
-        email,
-        depart: departure,
-        arrivee: arrival,
+        nom, prenom, telephone, email,
+        depart: departure, arrivee: arrival,
         date_souhaitee: date || null,
         heure_souhaitee: heure,
-        marque,
-        modele,
-        immatriculation: "",
+        marque, modele, immatriculation: "",
         carburant: energy,
         options: [
+          devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           prestation && `Prestation: ${prestation}`,
           option && `Option: ${option}`,
-          pricing && `Estimation: ${pricing.finalPrice}€`,
-          distance && `Distance: ${distance}km`,
+          `Estimation: ${pricing.finalPrice}€`,
+          `Distance: ${distance}km`,
           comment,
         ].filter(Boolean).join(" | "),
         message: comment,
       });
 
-      // 2. Send email notification
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          nom,
-          prenom,
-          telephone,
-          email,
-          depart: departure,
-          arrivee: arrival,
-          date,
-          heure,
-          marque,
-          modele,
-          immatriculation: "",
-          carburant: energy,
-          options: [
-            vehicleType && `Type véhicule: ${vehicleType}`,
-            prestation && `Prestation: ${prestation}`,
-            option && `Option: ${option}`,
-            pricing && `Estimation: ${pricing.finalPrice}€`,
-            distance && `Distance: ${distance}km`,
-          ].filter(Boolean).join(", "),
-          message: comment,
-        },
-        EMAILJS_PUBLIC_KEY
-      );
+      const devisData: DevisData = {
+        numero: devisRow?.numero || `DEV-${Date.now()}`,
+        nom, prenom, email, telephone,
+        depart: departure, arrivee: arrival,
+        distance_km: distance,
+        duree_estimee: estimateDuration(distance),
+        type_vehicule: vehicleType,
+        marque, modele, carburant: energy,
+        prestation, option_trajet: option,
+        date_souhaitee: date || null,
+        heure_souhaitee: heure || null,
+        prix_estime: pricing.finalPrice,
+        tarif_label: pricing.label,
+        multiplier_label: pricing.multiplierLabel,
+        message: comment,
+        created_at: devisRow?.created_at,
+      };
+      setSavedDevis(devisData);
+
+      // 3. Send transactional email to client (best-effort)
+      try {
+        await sendTransactionalEmail({
+          templateName: "devis-client",
+          recipientEmail: email,
+          idempotencyKey: `devis-${devisRow?.id || devisData.numero}`,
+          templateData: {
+            prenom, nom, numero: devisData.numero,
+            depart: departure, arrivee: arrival,
+            distance, prix: pricing.finalPrice,
+            optionTrajet: option,
+          },
+        });
+        if (devisRow?.id) {
+          await supabase.from("devis").update({ email_envoye: true }).eq("id", devisRow.id);
+        }
+      } catch (mailErr) {
+        console.warn("Email devis non envoyé", mailErr);
+      }
 
       setSubmitted(true);
-    } catch {
-      // silent fail - data is saved in DB
+    } catch (err) {
+      console.error(err);
       setSubmitted(true);
     } finally {
       setSending(false);
     }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!savedDevis) return;
+    const blob = await generateDevisPdf(savedDevis);
+    downloadDevisPdf(blob, savedDevis.numero);
   };
 
   const selectClasses = "w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors appearance-none";
@@ -491,17 +526,31 @@ export default function DevisGenerator() {
               <CheckCircle className="text-primary" size={32} />
             </div>
             <h3 className="font-heading text-xl text-primary tracking-[0.15em] uppercase mb-3">
-              Demande envoyée
+              Devis envoyé
             </h3>
+            {savedDevis && (
+              <p className="text-primary/80 text-xs tracking-wider uppercase mb-2">N° {savedDevis.numero}</p>
+            )}
             <p className="text-cream/70 text-sm leading-relaxed max-w-md mx-auto">
-              Merci pour votre demande de devis. Notre équipe vous recontactera dans les plus brefs délais.
+              Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email
+              et notre équipe vous recontactera dans les plus brefs délais.
             </p>
-            <button
-              onClick={() => { setSubmitted(false); setShowForm(false); setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment(""); }}
-              className="mt-6 px-6 py-2 gold-border text-primary font-heading text-xs tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors"
-            >
-              Nouvelle estimation
-            </button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {savedDevis && (
+                <button
+                  onClick={handleDownloadPdf}
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
+                >
+                  <Download size={14} /> Télécharger le PDF
+                </button>
+              )}
+              <button
+                onClick={() => { setSubmitted(false); setShowForm(false); setSavedDevis(null); setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment(""); }}
+                className="px-6 py-2 gold-border text-primary font-heading text-xs tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors"
+              >
+                Nouvelle estimation
+              </button>
+            </div>
           </div>
         )}
       </div>

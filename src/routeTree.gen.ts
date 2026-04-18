@@ -29,6 +29,7 @@ import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_
 import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_authenticated/convoyeur.documents'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
+import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
@@ -143,6 +144,11 @@ const AuthenticatedAdminDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDevisRoute = AuthenticatedAdminDevisRouteImport.update({
+  id: '/devis',
+  path: '/devis',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminDemandesRoute =
   AuthenticatedAdminDemandesRouteImport.update({
     id: '/demandes',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -263,6 +271,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/convoyeurs'
     | '/admin/demandes'
+    | '/admin/devis'
     | '/admin/documents'
     | '/admin/trajets'
     | '/convoyeur/documents'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/convoyeurs'
     | '/admin/demandes'
+    | '/admin/devis'
     | '/admin/documents'
     | '/admin/trajets'
     | '/convoyeur/documents'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
+    | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/convoyeur/documents'
@@ -527,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/devis': {
+      id: '/_authenticated/admin/devis'
+      path: '/devis'
+      fullPath: '/admin/devis'
+      preLoaderRoute: typeof AuthenticatedAdminDevisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/demandes': {
       id: '/_authenticated/admin/demandes'
       path: '/demandes'
@@ -590,6 +609,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRoute
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
+  AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -599,6 +619,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminConvoyeursRoute: AuthenticatedAdminConvoyeursRoute,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
+  AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
