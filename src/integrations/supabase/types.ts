@@ -170,6 +170,99 @@ export type Database = {
         }
         Relationships: []
       }
+      devis: {
+        Row: {
+          arrivee: string
+          carburant: string | null
+          created_at: string
+          date_souhaitee: string | null
+          depart: string
+          distance_km: number | null
+          duree_estimee: string | null
+          email: string
+          email_envoye: boolean
+          heure_souhaitee: string | null
+          id: string
+          marque: string | null
+          message: string | null
+          modele: string | null
+          multiplier_label: string | null
+          nom: string
+          numero: string
+          option_trajet: string | null
+          pdf_url: string | null
+          prenom: string
+          prestation: string | null
+          prix_base: number | null
+          prix_estime: number
+          statut: string
+          tarif_label: string | null
+          telephone: string | null
+          type_vehicule: string | null
+          updated_at: string
+        }
+        Insert: {
+          arrivee: string
+          carburant?: string | null
+          created_at?: string
+          date_souhaitee?: string | null
+          depart: string
+          distance_km?: number | null
+          duree_estimee?: string | null
+          email: string
+          email_envoye?: boolean
+          heure_souhaitee?: string | null
+          id?: string
+          marque?: string | null
+          message?: string | null
+          modele?: string | null
+          multiplier_label?: string | null
+          nom: string
+          numero?: string
+          option_trajet?: string | null
+          pdf_url?: string | null
+          prenom: string
+          prestation?: string | null
+          prix_base?: number | null
+          prix_estime: number
+          statut?: string
+          tarif_label?: string | null
+          telephone?: string | null
+          type_vehicule?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arrivee?: string
+          carburant?: string | null
+          created_at?: string
+          date_souhaitee?: string | null
+          depart?: string
+          distance_km?: number | null
+          duree_estimee?: string | null
+          email?: string
+          email_envoye?: boolean
+          heure_souhaitee?: string | null
+          id?: string
+          marque?: string | null
+          message?: string | null
+          modele?: string | null
+          multiplier_label?: string | null
+          nom?: string
+          numero?: string
+          option_trajet?: string | null
+          pdf_url?: string | null
+          prenom?: string
+          prestation?: string | null
+          prix_base?: number | null
+          prix_estime?: number
+          statut?: string
+          tarif_label?: string | null
+          telephone?: string | null
+          type_vehicule?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       documents_convoyeurs: {
         Row: {
           convoyeur_id: string
