@@ -76,12 +76,41 @@ function AdminDocuments() {
     return required.filter(r => !owned.has(r));
   };
 
+  // Vérifie si tous les documents requis sont approuvés (bloque activation indépendant)
+  const getBlockingIssues = (c: Convoyeur): string[] => {
+    const docs = docsByConvoyeur[c.id] || [];
+    const required = c.type_convoyeur === "independant"
+      ? [...REQUIRED_BASE, ...REQUIRED_INDEP]
+      : REQUIRED_BASE;
+    const issues: string[] = [];
+    for (const r of required) {
+      const doc = docs.find(d => d.type_document === r);
+      if (!doc) issues.push(`${DOC_LABELS[r]} manquant`);
+      else if (doc.statut_validation === "refuse") issues.push(`${DOC_LABELS[r]} refusé`);
+      else if (doc.statut_validation !== "approuve") issues.push(`${DOC_LABELS[r]} non validé`);
+    }
+    return issues;
+  };
+
   const filtered = convoyeurs.filter(c => {
     const missing = getMissingDocs(c);
-    if (filter === "incomplets") return missing.length > 0;
-    if (filter === "valides") return missing.length === 0;
+    const blocking = getBlockingIssues(c);
+    if (filter === "incomplets") return blocking.length > 0;
+    if (filter === "valides") return blocking.length === 0;
     return true;
+    void missing;
   });
+
+  const validateDoc = async (docId: string, statut: "approuve" | "refuse", motif?: string) => {
+    const { data: u } = await supabase.auth.getUser();
+    await supabase.from("documents_convoyeurs").update({
+      statut_validation: statut,
+      motif_refus: statut === "refuse" ? (motif || null) : null,
+      valide_par: u.user?.id,
+      valide_le: new Date().toISOString(),
+    } as never).eq("id", docId);
+    await fetchAll();
+  };
 
   const openDoc = async (path: string) => {
     const { data } = await supabase.storage.from("convoyeur-documents").createSignedUrl(path, 120);
