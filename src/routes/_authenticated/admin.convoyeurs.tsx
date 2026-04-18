@@ -89,6 +89,28 @@ function AdminConvoyeurs() {
   }, [selected]);
 
   const updateStatut = async (id: string, statut: string) => {
+    // Blocage : un indépendant ne peut être validé sans tous les docs approuvés
+    if (statut === "valide") {
+      const target = convoyeurs.find(c => c.id === id) || (selected?.id === id ? selected : null);
+      if (target?.type_convoyeur === "independant") {
+        const { data: docs } = await supabase
+          .from("documents_convoyeurs")
+          .select("type_document, statut_validation" as never)
+          .eq("convoyeur_id", id);
+        const required = ["permis", "identite", "domicile", "rib", "kbis", "assurance"];
+        const labels: Record<string, string> = { permis: "Permis", identite: "CNI", domicile: "Domicile", rib: "RIB", kbis: "KBIS", assurance: "Assurance" };
+        const issues: string[] = [];
+        for (const r of required) {
+          const d = (docs as Array<{ type_document: string; statut_validation?: string }> | null)?.find(x => x.type_document === r);
+          if (!d) issues.push(`${labels[r]} manquant`);
+          else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
+        }
+        if (issues.length > 0) {
+          window.alert(`Activation impossible — ce convoyeur indépendant doit avoir tous ses documents approuvés.\n\n• ${issues.join("\n• ")}`);
+          return;
+        }
+      }
+    }
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
     fetchConvoyeurs();
     if (selected?.id === id) setSelected((prev) => prev ? { ...prev, statut } : null);

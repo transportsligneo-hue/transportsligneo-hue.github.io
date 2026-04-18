@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, RefreshCw, ChevronDown, ChevronUp, Eye, AlertCircle } from "lucide-react";
+import { FileText, Download, RefreshCw, ChevronDown, ChevronUp, Eye, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
   component: AdminDocuments,
@@ -23,6 +23,8 @@ interface Document {
   nom_fichier: string;
   url_fichier: string;
   created_at: string;
+  statut_validation?: string;
+  motif_refus?: string | null;
 }
 
 const DOC_LABELS: Record<string, string> = {
@@ -74,12 +76,41 @@ function AdminDocuments() {
     return required.filter(r => !owned.has(r));
   };
 
+  // Vérifie si tous les documents requis sont approuvés (bloque activation indépendant)
+  const getBlockingIssues = (c: Convoyeur): string[] => {
+    const docs = docsByConvoyeur[c.id] || [];
+    const required = c.type_convoyeur === "independant"
+      ? [...REQUIRED_BASE, ...REQUIRED_INDEP]
+      : REQUIRED_BASE;
+    const issues: string[] = [];
+    for (const r of required) {
+      const doc = docs.find(d => d.type_document === r);
+      if (!doc) issues.push(`${DOC_LABELS[r]} manquant`);
+      else if (doc.statut_validation === "refuse") issues.push(`${DOC_LABELS[r]} refusé`);
+      else if (doc.statut_validation !== "approuve") issues.push(`${DOC_LABELS[r]} non validé`);
+    }
+    return issues;
+  };
+
   const filtered = convoyeurs.filter(c => {
     const missing = getMissingDocs(c);
-    if (filter === "incomplets") return missing.length > 0;
-    if (filter === "valides") return missing.length === 0;
+    const blocking = getBlockingIssues(c);
+    if (filter === "incomplets") return blocking.length > 0;
+    if (filter === "valides") return blocking.length === 0;
     return true;
+    void missing;
   });
+
+  const validateDoc = async (docId: string, statut: "approuve" | "refuse", motif?: string) => {
+    const { data: u } = await supabase.auth.getUser();
+    await supabase.from("documents_convoyeurs").update({
+      statut_validation: statut,
+      motif_refus: statut === "refuse" ? (motif || null) : null,
+      valide_par: u.user?.id,
+      valide_le: new Date().toISOString(),
+    } as never).eq("id", docId);
+    await fetchAll();
+  };
 
   const openDoc = async (path: string) => {
     const { data } = await supabase.storage.from("convoyeur-documents").createSignedUrl(path, 120);
@@ -120,7 +151,9 @@ function AdminDocuments() {
           {filtered.map((c) => {
             const docs = docsByConvoyeur[c.id] || [];
             const missing = getMissingDocs(c);
+            const blocking = getBlockingIssues(c);
             const isOpen = expanded === c.id;
+            const isIndependant = c.type_convoyeur === "independant";
             return (
               <div key={c.id} className="card-premium rounded">
                 <button
@@ -130,16 +163,16 @@ function AdminDocuments() {
                   <div className="text-left flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-cream font-medium">{c.prenom} {c.nom}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${c.type_convoyeur === "independant" ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-blue-500/20 text-blue-300 border-blue-500/30"}`}>
-                        {c.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${isIndependant ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-blue-500/20 text-blue-300 border-blue-500/30"}`}>
+                        {isIndependant ? "Indépendant" : "Salarié"}
                       </span>
-                      {missing.length > 0 ? (
+                      {blocking.length > 0 ? (
                         <span className="text-[10px] px-1.5 py-0.5 rounded border bg-amber-500/20 text-amber-300 border-amber-500/30 inline-flex items-center gap-1">
-                          <AlertCircle size={10} /> {missing.length} manquant{missing.length > 1 ? "s" : ""}
+                          <AlertCircle size={10} /> {isIndependant ? "Activation bloquée" : `${blocking.length} à valider`}
                         </span>
                       ) : (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded border bg-green-500/20 text-green-300 border-green-500/30">
-                          Dossier complet
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border bg-green-500/20 text-green-300 border-green-500/30 inline-flex items-center gap-1">
+                          <CheckCircle2 size={10} /> Tous validés
                         </span>
                       )}
                     </div>
@@ -150,7 +183,17 @@ function AdminDocuments() {
 
                 {isOpen && (
                   <div className="border-t border-primary/10 p-4 space-y-3">
-                    {missing.length > 0 && (
+                    {isIndependant && blocking.length > 0 && (
+                      <div className="p-3 rounded bg-red-500/10 border border-red-500/30 text-xs text-red-200">
+                        <div className="font-semibold mb-1 inline-flex items-center gap-1">
+                          <XCircle size={12} /> Activation indépendant bloquée
+                        </div>
+                        <ul className="list-disc list-inside space-y-0.5 opacity-80">
+                          {blocking.map((b, i) => <li key={i}>{b}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {!isIndependant && missing.length > 0 && (
                       <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
                         Manquants : {missing.map(m => DOC_LABELS[m] || m).join(", ")}
                       </div>
@@ -159,27 +202,65 @@ function AdminDocuments() {
                       <p className="text-cream/40 text-xs">Aucun document envoyé.</p>
                     ) : (
                       <div className="space-y-2">
-                        {docs.map((d) => (
-                          <div key={d.id} className="flex items-center justify-between gap-2 p-2.5 rounded bg-card/50 border border-primary/10">
-                            <div className="flex-1 min-w-0">
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary mr-2">
-                                {DOC_LABELS[d.type_document] || d.type_document}
-                              </span>
-                              <span className="text-xs text-cream truncate">{d.nom_fichier}</span>
-                              <div className="text-[10px] text-cream/30 mt-0.5">{new Date(d.created_at).toLocaleDateString("fr-FR")}</div>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              {isImage(d.nom_fichier) && (
-                                <button onClick={() => openDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Aperçu">
-                                  <Eye size={14} />
+                        {docs.map((d) => {
+                          const statut = d.statut_validation || "en_attente";
+                          const statutColor =
+                            statut === "approuve" ? "bg-green-500/15 text-green-300 border-green-500/30" :
+                            statut === "refuse" ? "bg-red-500/15 text-red-300 border-red-500/30" :
+                            "bg-amber-500/15 text-amber-300 border-amber-500/30";
+                          const statutIcon = statut === "approuve" ? <CheckCircle2 size={10} /> : statut === "refuse" ? <XCircle size={10} /> : <Clock size={10} />;
+                          const statutLabel = statut === "approuve" ? "Approuvé" : statut === "refuse" ? "Refusé" : "En attente";
+                          return (
+                            <div key={d.id} className="p-2.5 rounded bg-card/50 border border-primary/10 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                                      {DOC_LABELS[d.type_document] || d.type_document}
+                                    </span>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${statutColor}`}>
+                                      {statutIcon} {statutLabel}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-cream truncate mt-1">{d.nom_fichier}</div>
+                                  <div className="text-[10px] text-cream/30 mt-0.5">{new Date(d.created_at).toLocaleDateString("fr-FR")}</div>
+                                  {statut === "refuse" && d.motif_refus && (
+                                    <div className="text-[10px] text-red-300/80 mt-1 italic">Motif : {d.motif_refus}</div>
+                                  )}
+                                </div>
+                                <div className="flex gap-1 shrink-0">
+                                  {isImage(d.nom_fichier) && (
+                                    <button onClick={() => openDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Aperçu">
+                                      <Eye size={14} />
+                                    </button>
+                                  )}
+                                  <button onClick={() => downloadDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Télécharger">
+                                    <Download size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-1 border-t border-primary/5">
+                                <button
+                                  onClick={() => validateDoc(d.id, "approuve")}
+                                  disabled={statut === "approuve"}
+                                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[11px] bg-green-500/10 hover:bg-green-500/20 text-green-300 border border-green-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  <CheckCircle2 size={11} /> Approuver
                                 </button>
-                              )}
-                              <button onClick={() => downloadDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Télécharger">
-                                <Download size={14} />
-                              </button>
+                                <button
+                                  onClick={() => {
+                                    const motif = window.prompt("Motif du refus (facultatif) :") ?? "";
+                                    validateDoc(d.id, "refuse", motif);
+                                  }}
+                                  disabled={statut === "refuse"}
+                                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  <XCircle size={11} /> Refuser
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

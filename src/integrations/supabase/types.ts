@@ -268,25 +268,37 @@ export type Database = {
           convoyeur_id: string
           created_at: string
           id: string
+          motif_refus: string | null
           nom_fichier: string
+          statut_validation: string
           type_document: string
           url_fichier: string
+          valide_le: string | null
+          valide_par: string | null
         }
         Insert: {
           convoyeur_id: string
           created_at?: string
           id?: string
+          motif_refus?: string | null
           nom_fichier: string
+          statut_validation?: string
           type_document: string
           url_fichier: string
+          valide_le?: string | null
+          valide_par?: string | null
         }
         Update: {
           convoyeur_id?: string
           created_at?: string
           id?: string
+          motif_refus?: string | null
           nom_fichier?: string
+          statut_validation?: string
           type_document?: string
           url_fichier?: string
+          valide_le?: string | null
+          valide_par?: string | null
         }
         Relationships: [
           {
