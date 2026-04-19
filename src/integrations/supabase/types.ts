@@ -546,6 +546,78 @@ export type Database = {
           },
         ]
       }
+      missions: {
+        Row: {
+          carburant: string | null
+          created_at: string
+          date_prise_en_charge: string
+          email: string
+          id: string
+          immatriculation: string | null
+          marque: string | null
+          modele: string | null
+          nom: string
+          numero: string
+          options: Json
+          prenom: string
+          prix_total: number
+          remarques: string | null
+          statut: string
+          telephone: string | null
+          type_trajet: string
+          updated_at: string
+          user_id: string
+          ville_arrivee: string
+          ville_depart: string
+        }
+        Insert: {
+          carburant?: string | null
+          created_at?: string
+          date_prise_en_charge: string
+          email: string
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          nom: string
+          numero?: string
+          options?: Json
+          prenom: string
+          prix_total?: number
+          remarques?: string | null
+          statut?: string
+          telephone?: string | null
+          type_trajet?: string
+          updated_at?: string
+          user_id: string
+          ville_arrivee: string
+          ville_depart: string
+        }
+        Update: {
+          carburant?: string | null
+          created_at?: string
+          date_prise_en_charge?: string
+          email?: string
+          id?: string
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          nom?: string
+          numero?: string
+          options?: Json
+          prenom?: string
+          prix_total?: number
+          remarques?: string | null
+          statut?: string
+          telephone?: string | null
+          type_trajet?: string
+          updated_at?: string
+          user_id?: string
+          ville_arrivee?: string
+          ville_depart?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
