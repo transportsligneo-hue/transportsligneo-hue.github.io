@@ -211,13 +211,47 @@ function InscriptionConvoyeur() {
             <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
           </div>
 
-          {/* Infos pro */}
+          {/* Permis officiel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <FileText size={12} className="inline mr-1" /> Permis / infos
+                <BadgeCheck size={12} className="inline mr-1" /> N° permis *
               </label>
-              <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B, 10 ans" />
+              <input type="text" value={form.permis_numero} onChange={update("permis_numero")} className={inputClass} required placeholder="Ex: 1234567890123" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Calendar size={12} className="inline mr-1" /> Années d'expérience *
+              </label>
+              <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
+            </div>
+          </div>
+
+          {/* Upload photo permis */}
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+              <Upload size={12} className="inline mr-1" /> Photo du permis de conduire *
+            </label>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={handleFileChange}
+              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
+              required
+            />
+            {permisFile && (
+              <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>
+            )}
+            <p className="text-cream/30 text-xs mt-1">Format JPG, PNG ou PDF. Max 5 Mo.</p>
+          </div>
+
+          {/* Infos complémentaires */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <FileText size={12} className="inline mr-1" /> Infos complémentaires
+              </label>
+              <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B + EB" />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
