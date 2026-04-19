@@ -15,22 +15,44 @@ export const Route = createFileRoute("/inscription-convoyeur")({
 });
 
 function InscriptionConvoyeur() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
+    permis_numero: "", annees_experience: "",
   });
+  const [permisFile, setPermisFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("La photo du permis ne doit pas dépasser 5 Mo.");
+        return;
+      }
+      setPermisFile(file);
+      setError("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!form.nom || !form.prenom || !form.email || !form.telephone || !form.password) {
       setError("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    if (!form.permis_numero || !form.annees_experience) {
+      setError("Le numéro de permis et les années d'expérience sont obligatoires.");
+      return;
+    }
+    if (!permisFile) {
+      setError("Veuillez ajouter une photo de votre permis de conduire.");
       return;
     }
     if (form.password.length < 8) {
@@ -40,27 +62,43 @@ function InscriptionConvoyeur() {
 
     setLoading(true);
     try {
-      // 1. Create auth account
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { role: "convoyeur", nom: form.nom, prenom: form.prenom } },
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          data: { role: "convoyeur", nom: form.nom, prenom: form.prenom },
+        },
       });
 
       if (signUpError) {
-        if (signUpError.message.includes("already registered")) {
-          setError("Cette adresse email est déjà utilisée.");
-        } else {
-          setError(signUpError.message);
-        }
+        setError(signUpError.message.includes("already registered")
+          ? "Cette adresse email est déjà utilisée."
+          : signUpError.message);
         setLoading(false);
         return;
       }
 
       if (authData.user) {
-        // 2. Insert convoyeur record
+        const userId = authData.user.id;
+        let permisPhotoUrl: string | null = null;
+
+        // Upload permis photo (requires session — works if email auto-confirm enabled)
+        if (authData.session) {
+          const ext = permisFile.name.split(".").pop() || "jpg";
+          const filePath = `${userId}/permis-${Date.now()}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from("convoyeur-permis")
+            .upload(filePath, permisFile, { upsert: true });
+          if (!uploadError) {
+            permisPhotoUrl = filePath;
+          } else {
+            console.error("Upload permis:", uploadError);
+          }
+        }
+
         const { error: convError } = await supabase.from("convoyeurs").insert({
-          user_id: authData.user.id,
+          user_id: userId,
           nom: form.nom,
           prenom: form.prenom,
           email: form.email,
@@ -69,6 +107,9 @@ function InscriptionConvoyeur() {
           disponibilite: form.disponibilite,
           permis: form.permis,
           message: form.message,
+          permis_numero: form.permis_numero,
+          annees_experience: parseInt(form.annees_experience, 10) || 0,
+          permis_photo_url: permisPhotoUrl,
           statut: "en_attente",
         });
 
@@ -79,68 +120,34 @@ function InscriptionConvoyeur() {
           return;
         }
 
-        // 3. Insert role
-        const { error: roleError } = await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
+        await supabase.from("user_roles").insert({
+          user_id: userId,
           role: "convoyeur" as const,
         });
 
-        if (roleError) {
-          console.error("Erreur insertion rôle:", roleError);
-        }
-
-        // 4. Send email notification to admin via transactional email
         try {
           await sendTransactionalEmail({
             templateName: "inscription-convoyeur",
             recipientEmail: "contact@transportsligneo.fr",
-            idempotencyKey: `inscription-${authData.user.id}`,
+            idempotencyKey: `inscription-${userId}`,
             templateData: {
-              prenom: form.prenom,
-              nom: form.nom,
-              email: form.email,
-              telephone: form.telephone,
-              ville: form.ville,
+              prenom: form.prenom, nom: form.nom, email: form.email,
+              telephone: form.telephone, ville: form.ville,
             },
           });
         } catch (emailErr) {
           console.error("Erreur envoi email notification:", emailErr);
         }
 
-        // 5. Sign out so they don't auto-access before admin validation
         await supabase.auth.signOut();
       }
 
-      setSuccess(true);
+      navigate({ to: "/attente-validation" });
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
     }
     setLoading(false);
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen section-bg flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="gold-divider-short" />
-          <CheckCircle className="mx-auto text-green-400" size={48} />
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">
-            Inscription envoyée !
-          </h1>
-          <p className="text-cream/70 text-sm">
-            Merci pour votre candidature. Un email de confirmation vous a été envoyé.
-            Notre équipe validera votre profil dans les meilleurs délais.
-          </p>
-          <p className="text-cream/50 text-xs">
-            Vous pourrez vous connecter une fois votre compte validé par notre équipe.
-          </p>
-          <Link to="/" className="inline-block text-primary text-sm hover:text-gold-light transition-colors">
-            ← Retour au site
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
