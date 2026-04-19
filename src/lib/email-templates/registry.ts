@@ -12,9 +12,11 @@ export interface TemplateEntry {
 import { template as demandeConfirmation } from './demande-confirmation'
 import { template as inscriptionConvoyeur } from './inscription-convoyeur'
 import { template as devisClient } from './devis-client'
+import { template as missionConfirmation } from './mission-confirmation'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'demande-confirmation': demandeConfirmation,
   'inscription-convoyeur': inscriptionConvoyeur,
   'devis-client': devisClient,
+  'mission-confirmation': missionConfirmation,
 }
