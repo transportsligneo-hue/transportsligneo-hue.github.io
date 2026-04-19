@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
@@ -47,6 +48,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReserverRoute = ReserverRouteImport.update({
+  id: '/reserver',
+  path: '/reserver',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/reserver': typeof ReserverRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/reserver': typeof ReserverRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -263,6 +271,7 @@ export interface FileRoutesById {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/reserver': typeof ReserverRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -295,6 +304,7 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/reserver'
     | '/setup'
     | '/unsubscribe'
     | '/admin'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/reserver'
     | '/setup'
     | '/unsubscribe'
     | '/email/unsubscribe'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/reserver'
     | '/setup'
     | '/unsubscribe'
     | '/_authenticated/admin'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  ReserverRoute: typeof ReserverRoute
   SetupRoute: typeof SetupRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reserver': {
+      id: '/reserver'
+      path: '/reserver'
+      fullPath: '/reserver'
+      preLoaderRoute: typeof ReserverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentions-legales': {
@@ -671,6 +691,7 @@ const rootRouteChildren: RootRouteChildren = {
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  ReserverRoute: ReserverRoute,
   SetupRoute: SetupRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
