@@ -124,10 +124,13 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <a href="/" className="text-cream/40 text-xs hover:text-primary transition-colors">
+        <div className="text-center mt-6 space-y-2">
+          <Link to="/choisir-compte" className="block text-primary text-xs hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
+            Pas encore de compte ? Créer un compte
+          </Link>
+          <Link to="/" className="block text-cream/40 text-xs hover:text-primary transition-colors">
             ← Retour au site
-          </a>
+          </Link>
         </div>
       </div>
     </div>
