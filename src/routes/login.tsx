@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, LogIn } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -14,23 +15,39 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login, isAuthenticated, role, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, role, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (!authLoading && isAuthenticated && role) {
+    if (authLoading || !isAuthenticated || !user) return;
+    let cancelled = false;
+    (async () => {
       if (role === "admin") {
         navigate({ to: "/admin" });
       } else if (role === "convoyeur") {
-        navigate({ to: "/convoyeur" });
+        const { data: conv } = await supabase
+          .from("convoyeurs")
+          .select("statut")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (conv?.statut === "valide" || conv?.statut === "actif") {
+          navigate({ to: "/convoyeur" });
+        } else {
+          await supabase.auth.signOut();
+          navigate({ to: "/attente-validation" });
+        }
+      } else {
+        // Client or no role → home
+        navigate({ to: "/" });
       }
-    }
-  }, [authLoading, isAuthenticated, role, navigate]);
+    })();
+    return () => { cancelled = true; };
+  }, [authLoading, isAuthenticated, role, user, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -107,10 +124,13 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <a href="/" className="text-cream/40 text-xs hover:text-primary transition-colors">
+        <div className="text-center mt-6 space-y-2">
+          <Link to="/choisir-compte" className="block text-primary text-xs hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
+            Pas encore de compte ? Créer un compte
+          </Link>
+          <Link to="/" className="block text-cream/40 text-xs hover:text-primary transition-colors">
             ← Retour au site
-          </a>
+          </Link>
         </div>
       </div>
     </div>

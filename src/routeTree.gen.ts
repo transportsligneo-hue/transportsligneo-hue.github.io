@@ -15,8 +15,11 @@ import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
+import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as ChoisirCompteRouteImport } from './routes/choisir-compte'
 import { Route as CgvRouteImport } from './routes/cgv'
+import { Route as AttenteValidationRouteImport } from './routes/attente-validation'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -70,14 +73,29 @@ const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
   path: '/inscription-convoyeur',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InscriptionClientRoute = InscriptionClientRouteImport.update({
+  id: '/inscription-client',
+  path: '/inscription-client',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
   id: '/confidentialite',
   path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChoisirCompteRoute = ChoisirCompteRouteImport.update({
+  id: '/choisir-compte',
+  path: '/choisir-compte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CgvRoute = CgvRouteImport.update({
   id: '/cgv',
   path: '/cgv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttenteValidationRoute = AttenteValidationRouteImport.update({
+  id: '/attente-validation',
+  path: '/attente-validation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -204,8 +222,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
+  '/choisir-compte': typeof ChoisirCompteRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -235,8 +256,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
+  '/choisir-compte': typeof ChoisirCompteRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -266,8 +290,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
+  '/choisir-compte': typeof ChoisirCompteRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -299,8 +326,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/attente-validation'
     | '/cgv'
+    | '/choisir-compte'
     | '/confidentialite'
+    | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
@@ -330,8 +360,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/attente-validation'
     | '/cgv'
+    | '/choisir-compte'
     | '/confidentialite'
+    | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
@@ -360,8 +393,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/attente-validation'
     | '/cgv'
+    | '/choisir-compte'
     | '/confidentialite'
+    | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
@@ -393,8 +429,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AttenteValidationRoute: typeof AttenteValidationRoute
   CgvRoute: typeof CgvRoute
+  ChoisirCompteRoute: typeof ChoisirCompteRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
+  InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
@@ -454,6 +493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscriptionConvoyeurRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inscription-client': {
+      id: '/inscription-client'
+      path: '/inscription-client'
+      fullPath: '/inscription-client'
+      preLoaderRoute: typeof InscriptionClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/confidentialite': {
       id: '/confidentialite'
       path: '/confidentialite'
@@ -461,11 +507,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/choisir-compte': {
+      id: '/choisir-compte'
+      path: '/choisir-compte'
+      fullPath: '/choisir-compte'
+      preLoaderRoute: typeof ChoisirCompteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cgv': {
       id: '/cgv'
       path: '/cgv'
       fullPath: '/cgv'
       preLoaderRoute: typeof CgvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attente-validation': {
+      id: '/attente-validation'
+      path: '/attente-validation'
+      fullPath: '/attente-validation'
+      preLoaderRoute: typeof AttenteValidationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -686,8 +746,11 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AttenteValidationRoute: AttenteValidationRoute,
   CgvRoute: CgvRoute,
+  ChoisirCompteRoute: ChoisirCompteRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
+  InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
