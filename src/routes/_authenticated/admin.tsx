@@ -11,30 +11,24 @@ import {
   Receipt,
   Loader2,
 } from "lucide-react";
-import { DashboardSidebar, type SidebarItem } from "@/components/dashboard/DashboardSidebar";
+import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const navItems: SidebarItem[] = [
+const navItems: AdminSidebarItem[] = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
 
-  // Groupe Demandes commerciales
-  { to: "/admin/demandes", label: "Demandes", icon: FileText },
-  { to: "/admin/devis", label: "Devis", icon: Receipt },
+  { to: "/admin/demandes", label: "Demandes", icon: FileText, group: "Commercial" },
+  { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Commercial" },
 
-  // Groupe Clients
-  { to: "/admin/clients", label: "Clients", icon: UserRound },
+  { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
+  { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Comptes" },
+  { to: "/admin/documents", label: "Documents convoyeurs", icon: FolderOpen, group: "Comptes" },
 
-  // Groupe Convoyeurs
-  { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard },
-  { to: "/admin/documents", label: "Documents convoyeurs", icon: FolderOpen },
-
-  // Groupe Missions / Trajets
-  { to: "/admin/trajets", label: "Trajets", icon: RouteIcon },
-  { to: "/admin/attributions", label: "Attributions", icon: Send },
-  // Note : /admin/missions n'existe pas encore, on garde Attributions comme vue missions
+  { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
+  { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
 ];
 
 function AdminLayout() {
@@ -42,8 +36,8 @@ function AdminLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg">
-        <Loader2 className="animate-spin text-primary" size={32} />
+      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
+        <Loader2 className="animate-spin text-pro-accent" size={32} />
       </div>
     );
   }
@@ -56,12 +50,8 @@ function AdminLayout() {
   }
 
   return (
-    <DashboardSidebar
-      title="Admin Ligneo"
-      subtitle="Espace administrateur"
-      items={navItems}
-    >
+    <AdminSidebar items={navItems}>
       <Outlet />
-    </DashboardSidebar>
+    </AdminSidebar>
   );
 }
