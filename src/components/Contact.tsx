@@ -1,6 +1,7 @@
 import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2, User, Building2 } from "lucide-react";
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
