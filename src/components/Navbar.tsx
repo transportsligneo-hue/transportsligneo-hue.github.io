@@ -18,6 +18,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
+  const { isAuthenticated, role } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -28,6 +30,13 @@ export default function Navbar() {
   const openReserve = () => {
     setMobileOpen(false);
     setReserveOpen(true);
+  };
+
+  const goToEspace = () => {
+    setMobileOpen(false);
+    if (role === "admin") navigate({ to: "/admin" });
+    else if (role === "convoyeur") navigate({ to: "/convoyeur" });
+    else navigate({ to: "/" });
   };
 
   return (
