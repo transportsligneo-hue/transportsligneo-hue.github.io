@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, MoreHorizontal, type LucideIcon } from "lucide-react";
+import { LogOut, X, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
