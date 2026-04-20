@@ -42,7 +42,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "bg-navy/95 backdrop-blur-md shadow-lg shadow-black/30"
             : "bg-transparent"
