@@ -128,7 +128,7 @@ export default function DevisGenerator() {
 
   const pricing = useMemo(() => {
     if (distance === null || distance === 0) return null;
-    return calculatePrice(distance, arrival, option);
+    return calculatePrice(distance, departure, arrival, option);
   }, [distance, arrival, option]);
 
   const filteredDepCities = CITIES.filter(c => c.toLowerCase().includes(depFilter.toLowerCase()));
