@@ -6,14 +6,13 @@ const CITY_DISTANCES: Record<string, Record<string, number>> = {
 };
 
 const CITY_DEPARTMENTS: Record<string, string> = {
-  Tours: "37-intra", Blois: "41", "Le Mans": "72", Poitiers: "86",
-  Angers: "49", Bourges: "18", "Orléans": "45", "Châteauroux": "37-hors",
+  Tours: "37-intra",
+  "Châteauroux": "37-hors",
 };
 
 const FIXED_TARIFFS: Record<string, [number, number]> = {
-  "37-intra": [79, 129], "37-hors": [99, 129], "41": [99, 139],
-  "72": [120, 200], "86": [120, 200], "49": [130, 200], "79": [130, 200],
-  "18": [140, 210], "45": [140, 210],
+  "37-intra": [79, 129],
+  "37-hors": [99, 129],
 };
 
 /** Extrait la première ville reconnue d'une adresse libre */
@@ -58,11 +57,11 @@ export function calculateBasePrice(depart: string, arrivee: string, type: TripTy
 
   const dist = getDistance(depart, arrivee);
   if (dist == null || dist === 0) return { base: 0, label: "Distance inconnue" };
-  const rate = dist >= 200 ? 0.85 : 1;
+  const rate = 0.85;
   const baseKm = Math.round(dist * rate);
-  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rate} €/km (aller-retour)`; }
-  else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × ${rate} €/km (+20% express)`; }
-  else { base = baseKm; label = `${dist} km × ${rate} €/km`; }
+  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × 0,85 €/km (aller-retour)`; }
+  else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × 0,85 €/km (+20% express)`; }
+  else { base = baseKm; label = `${dist} km × 0,85 €/km`; }
   return { base, label };
 }
 
