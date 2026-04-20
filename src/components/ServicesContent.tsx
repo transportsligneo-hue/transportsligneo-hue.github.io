@@ -167,7 +167,7 @@ export default function ServicesContent() {
               Construisons ensemble une offre dédiée.
             </p>
             <Link
-              to="/contact"
+              to="/pro"
               className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
             >
               Demander une offre B2B <ArrowRight size={14} />
