@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { seedAdminUser } from "@/server/admin-setup";
 import { Loader2, Shield } from "lucide-react";
 
-export const Route = createFileRoute("/setup")({
+export const Route = createFileRoute("/setup-admin")({
   component: SetupPage,
   head: () => ({
     meta: [
