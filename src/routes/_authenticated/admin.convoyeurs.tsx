@@ -214,12 +214,9 @@ function AdminConvoyeurs() {
     <div>
       <PageHeader
         title="Convoyeurs"
-        subtitle={
-          <>
-            {convoyeurs.length} convoyeur{convoyeurs.length > 1 ? "s" : ""}
-            {pendingCount > 0 && filterStatut === "all" && ` · ${pendingCount} en attente`}
-          </> as unknown as string
-        }
+        subtitle={`${convoyeurs.length} convoyeur${convoyeurs.length > 1 ? "s" : ""}${
+          pendingCount > 0 && filterStatut === "all" ? ` · ${pendingCount} en attente` : ""
+        }`}
         actions={
           <>
             <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
