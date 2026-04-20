@@ -41,6 +41,21 @@ ${form.message}`
 ${form.message}`;
 
     try {
+      // 1. Sauvegarde en base de données
+      const { error: dbError } = await supabase.from("contact_messages").insert({
+        nom: form.nom,
+        prenom: form.prenom,
+        email: form.email,
+        telephone: form.telephone,
+        profil,
+        societe: profil === "pro" ? form.societe : "",
+        segment: profil === "pro" ? form.segment : "",
+        volume: profil === "pro" ? form.volume : "",
+        message: form.message,
+      });
+      if (dbError) throw dbError;
+
+      // 2. Envoi email
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
