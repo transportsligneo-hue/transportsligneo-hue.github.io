@@ -64,8 +64,11 @@ function getDistance(from: string, to: string): number | null {
   return null;
 }
 
-function calculatePrice(distance: number, arrival: string, option: string) {
-  const dept = CITY_DEPARTMENTS[arrival];
+function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
+  // Forfait 37 uniquement si départ ET arrivée sont dans le 37
+  const deptDep = CITY_DEPARTMENTS[departure];
+  const deptArr = CITY_DEPARTMENTS[arrival];
+  const dept = deptDep && deptArr ? deptArr : null;
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
     const label = DEPARTMENT_LABELS[dept] || dept;
