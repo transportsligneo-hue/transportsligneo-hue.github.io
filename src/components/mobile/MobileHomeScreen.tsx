@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-ligneo.png";
 import ReservationModal from "@/components/ReservationModal";
+import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -133,28 +134,8 @@ export default function MobileHomeScreen() {
         </div>
       </section>
 
-      {/* Avis clients — carrousel horizontal */}
-      <section className="pb-6">
-        <div className="px-5">
-          <SectionTitle title="Ils nous font confiance" />
-        </div>
-        <div className="overflow-x-auto px-5 pb-1 -mx-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-3 snap-x snap-mandatory">
-            <Review
-              name="Laurent M."
-              role="Pro auto · Tours"
-              text="Honnêtement nickel, le véhicule est arrivé dans les temps et le chauffeur m'a tenu au courant tout du long."
-              stars={5}
-            />
-            <Review
-              name="Sophie D."
-              role="Particulière"
-              text="Marseille → Tours après mon déménagement. Convoyeur ponctuel et sympa. Je recommande."
-              stars={4}
-            />
-          </div>
-        </div>
-      </section>
+      {/* Partenaires + réassurance (remplace les avis sur mobile) */}
+      <MobilePartnersStrip />
 
       {/* Footer app — minimal */}
       <footer className="px-5 pt-2 pb-4">
