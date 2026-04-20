@@ -34,9 +34,10 @@ export default function Navbar() {
 
   const goToEspace = () => {
     setMobileOpen(false);
+    if (!isAuthenticated) return navigate({ to: "/login" });
     if (role === "admin") navigate({ to: "/admin" });
     else if (role === "convoyeur") navigate({ to: "/convoyeur" });
-    else navigate({ to: "/" });
+    else navigate({ to: "/dashboard-client" });
   };
 
   return (
@@ -58,7 +59,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop */}
-          <ul className="hidden md:flex gap-8 items-center">
+          <ul className="flex gap-8 items-center">
             {navLinks.map((l) => (
               <li key={l.to}>
                 <Link
@@ -79,17 +80,15 @@ export default function Navbar() {
                 Réserver
               </button>
             </li>
-            {isAuthenticated && (
-              <li>
-                <button
-                  onClick={goToEspace}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium hover:bg-primary hover:text-navy transition-colors"
-                >
-                  <User size={14} />
-                  Mon espace
-                </button>
-              </li>
-            )}
+            <li>
+              <button
+                onClick={goToEspace}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium hover:bg-primary hover:text-navy transition-colors"
+              >
+                <User size={14} />
+                {isAuthenticated ? "Mon espace" : "Connexion"}
+              </button>
+            </li>
           </ul>
 
           {/* Mobile toggle */}
@@ -127,17 +126,15 @@ export default function Navbar() {
                   Réserver
                 </button>
               </li>
-              {isAuthenticated && (
-                <li>
-                  <button
-                    onClick={goToEspace}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium"
-                  >
-                    <User size={14} />
-                    Mon espace
-                  </button>
-                </li>
-              )}
+              <li>
+                <button
+                  onClick={goToEspace}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium"
+                >
+                  <User size={14} />
+                  {isAuthenticated ? "Mon espace" : "Connexion"}
+                </button>
+              </li>
             </ul>
           </div>
         )}
