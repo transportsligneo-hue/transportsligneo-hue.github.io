@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
+import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 
 import appCss from "../styles.css?url";
 
@@ -75,6 +76,7 @@ function RootComponent() {
   return (
     <AuthProvider>
       <Outlet />
+      <MobileBottomNav />
     </AuthProvider>
   );
 }
