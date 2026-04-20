@@ -64,7 +64,7 @@ function LoginPage() {
           }
           return;
         }
-        navigate({ to: "/dashboard-client" });
+        navigate({ to: "/" });
       }
     })();
     return () => { cancelled = true; };
