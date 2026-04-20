@@ -9,10 +9,10 @@ const valeurs = [
 ];
 
 const stats = [
-  { value: "1 200+", label: "Missions réalisées" },
-  { value: "850 000", label: "Kilomètres parcourus" },
+  { value: "2 300+", label: "Missions réalisées" },
+  { value: "500 000+", label: "Kilomètres parcourus" },
   { value: "98 %", label: "Clients satisfaits" },
-  { value: "6 ans", label: "D'expérience terrain" },
+  { value: "5 ans", label: "D'expérience terrain" },
 ];
 
 export default function AProposContent() {
@@ -76,7 +76,7 @@ export default function AProposContent() {
                 </div>
                 <div>
                   <p className="font-heading text-primary text-lg tracking-wide">
-                    Aurélien Ligneo
+                    Olivier G.
                   </p>
                   <p className="text-cream/55 text-xs tracking-wider uppercase">
                     Fondateur & dirigeant
@@ -91,7 +91,7 @@ export default function AProposContent() {
               <div className="gold-divider-short mt-6" />
               <div className="grid grid-cols-2 gap-4 mt-6 text-center">
                 <div>
-                  <p className="font-heading text-primary text-2xl">2019</p>
+                  <p className="font-heading text-primary text-2xl">2021</p>
                   <p className="text-cream/50 text-[10px] uppercase tracking-wider mt-1">Création</p>
                 </div>
                 <div>
