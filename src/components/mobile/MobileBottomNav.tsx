@@ -14,6 +14,13 @@ export default function MobileBottomNav() {
   const { isAuthenticated, role } = useAuth();
   const [reserveOpen, setReserveOpen] = useState(false);
 
+  // Ne pas afficher la nav publique sur les espaces authentifiés (ils ont leur propre nav)
+  const inDashboard =
+    location.pathname.startsWith("/dashboard-client") ||
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/convoyeur");
+  if (inDashboard) return null;
+
   const goEspace = () => {
     if (!isAuthenticated) return navigate({ to: "/login" });
     if (role === "admin") return navigate({ to: "/admin" });
