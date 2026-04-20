@@ -19,6 +19,7 @@ import { Route as ProRouteImport } from './routes/pro'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -117,6 +118,11 @@ const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscriptionProRoute = InscriptionProRouteImport.update({
+  id: '/inscription-pro',
+  path: '/inscription-pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -464,6 +471,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -522,6 +530,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -584,6 +593,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -644,6 +654,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -701,6 +712,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -763,6 +775,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
+  InscriptionProRoute: typeof InscriptionProRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
@@ -852,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription-pro': {
+      id: '/inscription-pro'
+      path: '/inscription-pro'
+      fullPath: '/inscription-pro'
+      preLoaderRoute: typeof InscriptionProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscription-convoyeur': {
@@ -1361,6 +1381,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
+  InscriptionProRoute: InscriptionProRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
