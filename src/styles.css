@@ -76,6 +76,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  /* Réserve la place de la bottom nav mobile (hauteur 64px + safe-area) */
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    }
+  }
   html {
     scroll-behavior: smooth;
   }
