@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
-import CommentCaMarche from "@/components/CommentCaMarche";
+import CommentCaMarcheTimeline from "@/components/CommentCaMarcheTimeline";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/comment-ca-marche")({
@@ -8,9 +8,9 @@ export const Route = createFileRoute("/comment-ca-marche")({
   head: () => ({
     meta: [
       { title: "Comment ça marche — Transports Ligneo" },
-      { name: "description", content: "Découvrez les étapes simples pour confier votre véhicule à Transports Ligneo : devis, prise en charge, livraison." },
+      { name: "description", content: "Réservation, prise en charge, livraison : découvrez les 3 étapes simples du convoyage Transports Ligneo." },
       { property: "og:title", content: "Comment ça marche — Transports Ligneo" },
-      { property: "og:description", content: "Le processus de convoyage Transports Ligneo en quelques étapes." },
+      { property: "og:description", content: "Le processus de convoyage Transports Ligneo en 3 étapes claires." },
     ],
   }),
 });
@@ -20,7 +20,7 @@ function CommentCaMarchePage() {
     <>
       <Navbar />
       <main className="pt-24">
-        <CommentCaMarche />
+        <CommentCaMarcheTimeline />
       </main>
       <Footer />
     </>

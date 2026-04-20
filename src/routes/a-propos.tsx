@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
-import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
-import Engagements from "@/components/Engagements";
-import AvisClients from "@/components/AvisClients";
-import Confiance from "@/components/Confiance";
+import AProposContent from "@/components/AProposContent";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/a-propos")({
@@ -11,9 +8,9 @@ export const Route = createFileRoute("/a-propos")({
   head: () => ({
     meta: [
       { title: "À propos — Transports Ligneo" },
-      { name: "description", content: "Transports Ligneo, spécialiste du convoyage automobile premium depuis Tours. Nos engagements, nos clients, notre savoir-faire." },
+      { name: "description", content: "Découvrez l'histoire, la mission et les valeurs de Transports Ligneo, spécialiste du convoyage automobile premium depuis Tours." },
       { property: "og:title", content: "À propos — Transports Ligneo" },
-      { property: "og:description", content: "Notre histoire, nos engagements et la confiance de nos clients." },
+      { property: "og:description", content: "Notre histoire, nos valeurs, notre fondateur et nos chiffres clés." },
     ],
   }),
 });
@@ -22,11 +19,8 @@ function AProposPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24">
-        <PourquoiNousChoisir />
-        <Engagements />
-        <AvisClients />
-        <Confiance />
+      <main className="pt-24 md:pt-24">
+        <AProposContent />
       </main>
       <Footer />
     </>
