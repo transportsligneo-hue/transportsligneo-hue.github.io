@@ -10,22 +10,21 @@ const CITY_DISTANCES: Record<string, Record<string, number>> = {
   "Paris": { "Lyon": 465, "Marseille": 775, "Bordeaux": 585, "Nantes": 385, "Lille": 225, "Strasbourg": 490, "Toulouse": 680, "Nice": 930, "Montpellier": 750, "Rennes": 350, "Orléans": 130, "Poitiers": 340, "Limoges": 395, "Clermont-Ferrand": 420, "Angers": 300, "Le Mans": 210, "Blois": 185, "Chartres": 90, "Rouen": 135, "Caen": 240, "Dijon": 310, "Reims": 145, "Metz": 330, "Nancy": 380, "Brest": 590, "La Rochelle": 470, "Perpignan": 850, "Grenoble": 570, "Saint-Étienne": 530, "Amiens": 150, "Bourges": 240, "Châteauroux": 260, "Paris": 0 },
 };
 
+// Seuls les forfaits du département 37 sont appliqués.
+// Tout le reste passe en tarif au km : 0,85 €/km.
 const CITY_DEPARTMENTS: Record<string, string> = {
-  "Tours": "37-intra", "Blois": "41", "Le Mans": "72", "Poitiers": "86",
-  "Angers": "49", "Bourges": "18", "Orléans": "45", "Châteauroux": "37-hors",
+  "Tours": "37-intra",
+  "Châteauroux": "37-hors", // exemple historique d'arrivée hors agglo 37
 };
 
 const FIXED_TARIFFS: Record<string, [number, number]> = {
-  "37-intra": [79, 129], "37-hors": [99, 129], "41": [99, 139],
-  "72": [120, 200], "86": [120, 200], "49": [130, 200], "79": [130, 200],
-  "18": [140, 210], "45": [140, 210],
+  "37-intra": [79, 129],
+  "37-hors": [99, 129],
 };
 
 const DEPARTMENT_LABELS: Record<string, string> = {
-  "37-intra": "Forfait Tours intra", "37-hors": "Forfait hors agglomération (37)",
-  "41": "Forfait 41 (Loir-et-Cher)", "72": "Forfait 72 (Sarthe)",
-  "86": "Forfait 86 (Vienne)", "49": "Forfait 49 (Maine-et-Loire)",
-  "79": "Forfait 79 (Deux-Sèvres)", "18": "Forfait 18 (Cher)", "45": "Forfait 45 (Loiret)",
+  "37-intra": "Forfait Tours intra",
+  "37-hors": "Forfait hors agglomération (37)",
 };
 
 const CITIES = [
@@ -74,8 +73,9 @@ function calculatePrice(distance: number, arrival: string, option: string) {
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  const rate = distance >= 200 ? 0.85 : 1;
-  const rateLabel = distance >= 200 ? "0,85 €/km (+ de 200 km)" : "1 €/km";
+  // Tarif unique au km hors 37 : 0,85 €/km, quelle que soit la distance.
+  const rate = 0.85;
+  const rateLabel = "0,85 €/km";
   const basePrice = Math.round(distance * rate);
   if (option === "aller-retour") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour avantageux", hasExtra: true };
   if (option === "express") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
