@@ -123,6 +123,17 @@ export default function Navbar() {
                   Réserver
                 </button>
               </li>
+              {isAuthenticated && (
+                <li>
+                  <button
+                    onClick={goToEspace}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium"
+                  >
+                    <User size={14} />
+                    Mon espace
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         )}
