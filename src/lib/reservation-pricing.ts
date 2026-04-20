@@ -57,11 +57,12 @@ export function calculateBasePrice(depart: string, arrivee: string, type: TripTy
 
   const dist = getDistance(depart, arrivee);
   if (dist == null || dist === 0) return { base: 0, label: "Distance inconnue" };
-  const rate = 0.85;
+  const rate = dist < 200 ? 1.20 : 0.85;
+  const rateLabel = dist < 200 ? "1,20 €/km" : "0,85 €/km";
   const baseKm = Math.round(dist * rate);
-  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × 0,85 €/km (aller-retour)`; }
-  else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × 0,85 €/km (+20% express)`; }
-  else { base = baseKm; label = `${dist} km × 0,85 €/km`; }
+  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (aller-retour)`; }
+  else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × ${rateLabel} (+20% express)`; }
+  else { base = baseKm; label = `${dist} km × ${rateLabel}`; }
   return { base, label };
 }
 
