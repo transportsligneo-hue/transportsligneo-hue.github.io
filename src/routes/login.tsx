@@ -48,7 +48,8 @@ function LoginPage() {
           .maybeSingle();
         if (cancelled) return;
         if (conv?.statut === "valide" || conv?.statut === "actif") {
-          navigate({ to: "/dashboard-convoyeur" });
+          // /convoyeur existe déjà ; le futur /dashboard-convoyeur réutilisera ces routes
+          navigate({ to: "/convoyeur" });
         } else {
           await supabase.auth.signOut();
           navigate({ to: "/attente-validation" });

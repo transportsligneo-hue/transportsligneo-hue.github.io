@@ -74,7 +74,7 @@ function ClientLayout() {
     return null;
   }
   if (role === "convoyeur") {
-    if (typeof window !== "undefined") window.location.href = "/dashboard-convoyeur";
+    if (typeof window !== "undefined") window.location.href = "/convoyeur";
     return null;
   }
 
