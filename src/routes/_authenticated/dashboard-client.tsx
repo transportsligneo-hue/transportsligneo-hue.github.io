@@ -87,6 +87,11 @@ function ClientLayout() {
     if (typeof window !== "undefined") window.location.href = "/convoyeur";
     return null;
   }
+  // Si client B2B → rediriger vers son espace dédié
+  if (typeClient === "b2b") {
+    if (typeof window !== "undefined") window.location.href = "/dashboard-pro";
+    return null;
+  }
 
   return (
     <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems}>
