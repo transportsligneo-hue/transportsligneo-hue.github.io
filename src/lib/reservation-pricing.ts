@@ -42,8 +42,12 @@ export function getDistance(from: string, to: string): number | null {
 export type TripType = "aller_simple" | "aller_retour" | "express";
 
 export function calculateBasePrice(depart: string, arrivee: string, type: TripType): { base: number; label: string } {
+  const cDep = extractCity(depart);
   const cArr = extractCity(arrivee);
-  const dept = CITY_DEPARTMENTS[cArr];
+  // Forfait 37 uniquement si départ ET arrivée sont dans le 37
+  const deptDep = CITY_DEPARTMENTS[cDep];
+  const deptArr = CITY_DEPARTMENTS[cArr];
+  const dept = deptDep && deptArr ? deptArr : null;
   let base = 0;
   let label = "Tarif au km";
 
