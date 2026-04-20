@@ -83,43 +83,7 @@ export default function Tarifs() {
             <p className="text-cream/50 text-xs mt-4">Péage, carburant et mise en main inclus — Tarifs TTC</p>
           </div>
 
-          <div className="card-premium p-8 rounded md:col-span-2">
-            <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Départements limitrophes du 37
-            </h4>
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
-              {[
-                ["41 (Loir-et-Cher)", "99 €", "139 €"],
-                ["72 (Sarthe)", "120 €", "200 €"],
-                ["86 (Vienne)", "120 €", "200 €"],
-                ["49 (Maine-et-Loire)", "130 €", "200 €"],
-                ["79 (Deux-Sèvres)", "140 €", "210 €"],
-                ["18 (Cher)", "140 €", "210 €"],
-                ["45 (Loiret)", "140 €", "210 €"],
-              ].map(([dept, simple, retour], i) => (
-                <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
-                  <span className="text-cream/80 text-sm">{dept}</span>
-                  <span className="text-primary font-medium text-sm shrink-0 ml-4">{simple} / {retour}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-cream/50 text-xs mt-4">Aller simple / Aller-retour</p>
-            <p className="text-cream/50 text-xs mt-1">Péage, carburant et mise en main inclus — Tarifs TTC</p>
-          </div>
-
-          <div className="card-premium p-8 rounded md:col-span-2">
-            <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Hors département 37 et limitrophes
-            </h4>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cream/80 text-sm">À partir de 200 km</span>
-                <span className="font-heading text-primary text-lg">0,85 €/km</span>
-              </div>
-            </div>
-            <p className="text-cream/50 text-xs mt-4">Péage et carburant inclus — Tarifs TTC</p>
-            <p className="font-heading gold-gradient-text text-sm mt-3 tracking-wide uppercase">Tarif aller-retour avantageux</p>
-          </div>
+          {/* Tarifs hors département 37 masqués sur le site (toujours utilisés en interne par l'estimateur) */}
 
           <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
