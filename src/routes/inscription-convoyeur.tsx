@@ -51,10 +51,6 @@ function InscriptionConvoyeur() {
       setError("Le numéro de permis et les années d'expérience sont obligatoires.");
       return;
     }
-    if (!permisFile) {
-      setError("Veuillez ajouter une photo de votre permis de conduire.");
-      return;
-    }
     if (form.password.length < 8) {
       setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
@@ -62,6 +58,7 @@ function InscriptionConvoyeur() {
 
     setLoading(true);
     try {
+      console.log("[inscription-convoyeur] signUp →", form.email);
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -77,78 +74,92 @@ function InscriptionConvoyeur() {
       });
 
       if (signUpError) {
-        setError(signUpError.message.includes("already registered")
-          ? "Cette adresse email est déjà utilisée."
-          : signUpError.message);
+        console.error("[inscription-convoyeur] signUp error:", signUpError);
+        const msg = signUpError.message || "";
+        if (msg.includes("already registered") || msg.includes("already been registered")) {
+          setError("Cette adresse email est déjà utilisée.");
+        } else if (msg.toLowerCase().includes("rate limit") || /after \d+ second/i.test(msg)) {
+          setError("Trop de tentatives récentes. Patientez 1 minute et réessayez.");
+        } else {
+          setError(`Erreur d'inscription : ${msg}`);
+        }
         setLoading(false);
         return;
       }
 
-      if (authData.user) {
-        const userId = authData.user.id;
-        let permisPhotoUrl: string | null = null;
+      if (!authData.user) {
+        setError("Erreur inattendue : aucun utilisateur créé.");
+        setLoading(false);
+        return;
+      }
 
-        // Upload permis photo (requires session — works if email auto-confirm enabled)
-        if (authData.session) {
+      const userId = authData.user.id;
+      let permisPhotoUrl: string | null = null;
+
+      // Upload permis (optionnel — n'empêche pas l'inscription si échoue)
+      if (permisFile && authData.session) {
+        try {
           const ext = permisFile.name.split(".").pop() || "jpg";
           const filePath = `${userId}/permis-${Date.now()}.${ext}`;
           const { error: uploadError } = await supabase.storage
             .from("convoyeur-permis")
             .upload(filePath, permisFile, { upsert: true });
-          if (!uploadError) {
-            permisPhotoUrl = filePath;
+          if (uploadError) {
+            console.warn("[inscription-convoyeur] upload permis failed:", uploadError);
           } else {
-            console.error("Upload permis:", uploadError);
+            permisPhotoUrl = filePath;
           }
+        } catch (uploadErr) {
+          console.warn("[inscription-convoyeur] upload exception:", uploadErr);
         }
-
-        // Le trigger handle_new_user a déjà créé profile + user_roles (role=convoyeur).
-        // On insère le record convoyeur métier.
-        const { error: convError } = await supabase.from("convoyeurs").insert({
-          user_id: userId,
-          nom: form.nom,
-          prenom: form.prenom,
-          email: form.email,
-          telephone: form.telephone,
-          ville: form.ville,
-          disponibilite: form.disponibilite,
-          permis: form.permis,
-          message: form.message,
-          permis_numero: form.permis_numero,
-          annees_experience: parseInt(form.annees_experience, 10) || 0,
-          permis_photo_url: permisPhotoUrl,
-          statut: "en_attente",
-        });
-
-        if (convError) {
-          console.error("Erreur insertion convoyeur:", convError);
-          setError("Erreur lors de l'enregistrement. Veuillez réessayer.");
-          setLoading(false);
-          return;
-        }
-
-        try {
-          await sendTransactionalEmail({
-            templateName: "inscription-convoyeur",
-            recipientEmail: "contact@transportsligneo.fr",
-            idempotencyKey: `inscription-${userId}`,
-            templateData: {
-              prenom: form.prenom, nom: form.nom, email: form.email,
-              telephone: form.telephone, ville: form.ville,
-            },
-          });
-        } catch (emailErr) {
-          console.error("Erreur envoi email notification:", emailErr);
-        }
-
-        await supabase.auth.signOut();
       }
 
+      // Insert convoyeur record (le trigger handle_new_user a déjà créé profile + user_roles)
+      const { error: convError } = await supabase.from("convoyeurs").insert({
+        user_id: userId,
+        nom: form.nom,
+        prenom: form.prenom,
+        email: form.email,
+        telephone: form.telephone,
+        ville: form.ville,
+        disponibilite: form.disponibilite,
+        permis: form.permis,
+        message: form.message,
+        permis_numero: form.permis_numero,
+        annees_experience: parseInt(form.annees_experience, 10) || 0,
+        permis_photo_url: permisPhotoUrl,
+        statut: "en_attente",
+      });
+
+      if (convError) {
+        console.error("[inscription-convoyeur] insert convoyeur error:", convError);
+        setError(`Erreur d'enregistrement : ${convError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      // Notification email (best-effort)
+      try {
+        await sendTransactionalEmail({
+          templateName: "inscription-convoyeur",
+          recipientEmail: "contact@transportsligneo.fr",
+          idempotencyKey: `inscription-${userId}`,
+          templateData: {
+            prenom: form.prenom, nom: form.nom, email: form.email,
+            telephone: form.telephone, ville: form.ville,
+          },
+        });
+      } catch (emailErr) {
+        console.warn("[inscription-convoyeur] email notification failed:", emailErr);
+      }
+
+      await supabase.auth.signOut();
       navigate({ to: "/attente-validation" });
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+    } catch (err) {
+      console.error("[inscription-convoyeur] unexpected error:", err);
+      setError(err instanceof Error ? `Erreur : ${err.message}` : "Une erreur inattendue est survenue.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
