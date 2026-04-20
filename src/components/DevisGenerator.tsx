@@ -73,9 +73,9 @@ function calculatePrice(distance: number, arrival: string, option: string) {
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  // Tarif unique au km hors 37 : 0,85 €/km, quelle que soit la distance.
-  const rate = 0.85;
-  const rateLabel = "0,85 €/km";
+  // Hors 37 : 1,20 €/km en dessous de 200 km, 0,85 €/km au-dessus.
+  const rate = distance < 200 ? 1.20 : 0.85;
+  const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
   const basePrice = Math.round(distance * rate);
   if (option === "aller-retour") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour avantageux", hasExtra: true };
   if (option === "express") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
