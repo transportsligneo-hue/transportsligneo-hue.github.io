@@ -1,6 +1,7 @@
 import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2, User, Building2 } from "lucide-react";
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMAILJS_SERVICE_ID = "service_ctxuphf";
 const EMAILJS_TEMPLATE_ID = "template_g0a5cad";
@@ -40,6 +41,21 @@ ${form.message}`
 ${form.message}`;
 
     try {
+      // 1. Sauvegarde en base de données
+      const { error: dbError } = await supabase.from("contact_messages").insert({
+        nom: form.nom,
+        prenom: form.prenom,
+        email: form.email,
+        telephone: form.telephone,
+        profil,
+        societe: profil === "pro" ? form.societe : "",
+        segment: profil === "pro" ? form.segment : "",
+        volume: profil === "pro" ? form.volume : "",
+        message: form.message,
+      });
+      if (dbError) throw dbError;
+
+      // 2. Envoi email
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,

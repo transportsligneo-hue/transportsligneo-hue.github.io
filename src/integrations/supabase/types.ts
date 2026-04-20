@@ -56,6 +56,54 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          nom: string
+          prenom: string
+          profil: string
+          segment: string | null
+          societe: string | null
+          statut: string
+          telephone: string | null
+          updated_at: string
+          volume: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          nom: string
+          prenom?: string
+          profil?: string
+          segment?: string | null
+          societe?: string | null
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+          volume?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          nom?: string
+          prenom?: string
+          profil?: string
+          segment?: string | null
+          societe?: string | null
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+          volume?: string | null
+        }
+        Relationships: []
+      }
       convoyeurs: {
         Row: {
           annees_experience: number | null
