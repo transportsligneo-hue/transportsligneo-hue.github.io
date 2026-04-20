@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Truck, Clock, CheckCircle, Calendar, Euro, ArrowUpRight, PlusCircle,
-  TrendingUp, Loader2, MapPin,
+  Loader2, MapPin,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({

@@ -166,4 +166,26 @@
   .font-heading {
     font-family: var(--font-serif);
   }
+
+  /* === Pro / B2B SaaS theme (mode clair, ne touche pas au site vitrine) === */
+  .bg-pro-bg { background-color: #f8fafc; }
+  .bg-pro-bg-soft { background-color: #f1f5f9; }
+  .bg-pro-accent { background-color: #0b1026; }
+  .bg-pro-accent\/5 { background-color: rgba(11, 16, 38, 0.05); }
+  .bg-pro-accent\/10 { background-color: rgba(11, 16, 38, 0.10); }
+  .text-pro-text { color: #0f172a; }
+  .text-pro-text-soft { color: #475569; }
+  .text-pro-muted { color: #94a3b8; }
+  .text-pro-accent { color: #0b1026; }
+  .border-pro-border { border-color: #e2e8f0; }
+  .border-pro-accent { border-color: #0b1026; }
+  .border-pro-accent\/20 { border-color: rgba(11, 16, 38, 0.20); }
+  .hover\:bg-pro-accent-hover:hover { background-color: #1a2040; }
+  .hover\:bg-pro-bg-soft:hover { background-color: #f1f5f9; }
+  .hover\:bg-pro-bg-soft\/60:hover { background-color: rgba(241, 245, 249, 0.6); }
+  .hover\:border-pro-accent:hover { border-color: #0b1026; }
+  .hover\:text-pro-text:hover { color: #0f172a; }
+  .focus\:border-pro-accent:focus { border-color: #0b1026; }
+  .focus\:ring-pro-accent\/20:focus { --tw-ring-color: rgba(11, 16, 38, 0.20); }
+  .placeholder\:text-pro-muted::placeholder { color: #94a3b8; }
 }
