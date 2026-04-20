@@ -672,6 +672,7 @@ export type Database = {
           id: string
           nom: string
           prenom: string
+          statut: string
           telephone: string | null
           updated_at: string
           user_id: string
@@ -682,6 +683,7 @@ export type Database = {
           id?: string
           nom?: string
           prenom?: string
+          statut?: string
           telephone?: string | null
           updated_at?: string
           user_id: string
@@ -692,11 +694,50 @@ export type Database = {
           id?: string
           nom?: string
           prenom?: string
+          statut?: string
           telephone?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          client_id: string
+          commentaire: string | null
+          created_at: string
+          id: string
+          mission_id: string
+          note: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          mission_id: string
+          note: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          mission_id?: string
+          note?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {

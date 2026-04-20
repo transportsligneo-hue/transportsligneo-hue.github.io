@@ -67,7 +67,12 @@ function InscriptionConvoyeur() {
         password: form.password,
         options: {
           emailRedirectTo: `${window.location.origin}/login`,
-          data: { role: "convoyeur", nom: form.nom, prenom: form.prenom },
+          data: {
+            role: "convoyeur",
+            nom: form.nom,
+            prenom: form.prenom,
+            telephone: form.telephone,
+          },
         },
       });
 
@@ -97,6 +102,8 @@ function InscriptionConvoyeur() {
           }
         }
 
+        // Le trigger handle_new_user a déjà créé profile + user_roles (role=convoyeur).
+        // On insère le record convoyeur métier.
         const { error: convError } = await supabase.from("convoyeurs").insert({
           user_id: userId,
           nom: form.nom,
@@ -119,11 +126,6 @@ function InscriptionConvoyeur() {
           setLoading(false);
           return;
         }
-
-        await supabase.from("user_roles").insert({
-          user_id: userId,
-          role: "convoyeur" as const,
-        });
 
         try {
           await sendTransactionalEmail({
