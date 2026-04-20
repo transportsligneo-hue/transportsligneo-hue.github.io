@@ -34,9 +34,10 @@ export default function Navbar() {
 
   const goToEspace = () => {
     setMobileOpen(false);
+    if (!isAuthenticated) return navigate({ to: "/login" });
     if (role === "admin") navigate({ to: "/admin" });
     else if (role === "convoyeur") navigate({ to: "/convoyeur" });
-    else navigate({ to: "/" });
+    else navigate({ to: "/dashboard-client" });
   };
 
   return (
