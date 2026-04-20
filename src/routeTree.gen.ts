@@ -19,6 +19,7 @@ import { Route as ProRouteImport } from './routes/pro'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -33,13 +34,19 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDashboardProIndexRouteImport } from './routes/_authenticated/dashboard-pro.index'
 import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/_authenticated/dashboard-client.index'
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
+import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
+import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
+import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
 import { Route as AuthenticatedDashboardClientMissionsRouteImport } from './routes/_authenticated/dashboard-client.missions'
@@ -113,6 +120,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InscriptionProRoute = InscriptionProRouteImport.update({
+  id: '/inscription-pro',
+  path: '/inscription-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
   id: '/inscription-convoyeur',
   path: '/inscription-convoyeur',
@@ -182,6 +194,12 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AuthenticatedDashboardProRoute =
+  AuthenticatedDashboardProRouteImport.update({
+    id: '/dashboard-pro',
+    path: '/dashboard-pro',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardClientRoute =
   AuthenticatedDashboardClientRouteImport.update({
     id: '/dashboard-client',
@@ -198,6 +216,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDashboardProIndexRoute =
+  AuthenticatedDashboardProIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardClientIndexRoute =
   AuthenticatedDashboardClientIndexRouteImport.update({
     id: '/',
@@ -220,6 +244,30 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDashboardProSocieteRoute =
+  AuthenticatedDashboardProSocieteRouteImport.update({
+    id: '/societe',
+    path: '/societe',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProNouvelleDemandeRoute =
+  AuthenticatedDashboardProNouvelleDemandeRouteImport.update({
+    id: '/nouvelle-demande',
+    path: '/nouvelle-demande',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProMissionsRoute =
+  AuthenticatedDashboardProMissionsRouteImport.update({
+    id: '/missions',
+    path: '/missions',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProDocumentsRoute =
+  AuthenticatedDashboardProDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardClientProfilRoute =
   AuthenticatedDashboardClientProfilRouteImport.update({
     id: '/profil',
@@ -362,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -375,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
+  '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -393,10 +443,15 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
+  '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
+  '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -416,6 +471,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -444,10 +500,15 @@ export interface FileRoutesByTo {
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
+  '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
+  '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -469,6 +530,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -482,6 +544,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
+  '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -500,10 +563,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
+  '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
+  '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -525,6 +593,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -538,6 +607,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
+    | '/dashboard-pro'
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
@@ -556,10 +626,15 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
+    | '/dashboard-pro/documents'
+    | '/dashboard-pro/missions'
+    | '/dashboard-pro/nouvelle-demande'
+    | '/dashboard-pro/societe'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/convoyeur/'
     | '/dashboard-client/'
+    | '/dashboard-pro/'
     | '/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -579,6 +654,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -607,10 +683,15 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
+    | '/dashboard-pro/documents'
+    | '/dashboard-pro/missions'
+    | '/dashboard-pro/nouvelle-demande'
+    | '/dashboard-pro/societe'
     | '/lovable/email/suppression'
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
+    | '/dashboard-pro'
     | '/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -631,6 +712,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
@@ -644,6 +726,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
+    | '/_authenticated/dashboard-pro'
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
@@ -662,10 +745,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/missions'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
+    | '/_authenticated/dashboard-pro/documents'
+    | '/_authenticated/dashboard-pro/missions'
+    | '/_authenticated/dashboard-pro/nouvelle-demande'
+    | '/_authenticated/dashboard-pro/societe'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/convoyeur/'
     | '/_authenticated/dashboard-client/'
+    | '/_authenticated/dashboard-pro/'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -687,6 +775,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
+  InscriptionProRoute: typeof InscriptionProRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
@@ -776,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription-pro': {
+      id: '/inscription-pro'
+      path: '/inscription-pro'
+      fullPath: '/inscription-pro'
+      preLoaderRoute: typeof InscriptionProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscription-convoyeur': {
@@ -876,6 +972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/_authenticated/dashboard-pro': {
+      id: '/_authenticated/dashboard-pro'
+      path: '/dashboard-pro'
+      fullPath: '/dashboard-pro'
+      preLoaderRoute: typeof AuthenticatedDashboardProRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard-client': {
       id: '/_authenticated/dashboard-client'
       path: '/dashboard-client'
@@ -896,6 +999,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard-pro/': {
+      id: '/_authenticated/dashboard-pro/'
+      path: '/'
+      fullPath: '/dashboard-pro/'
+      preLoaderRoute: typeof AuthenticatedDashboardProIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-client/': {
       id: '/_authenticated/dashboard-client/'
@@ -924,6 +1034,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard-pro/societe': {
+      id: '/_authenticated/dashboard-pro/societe'
+      path: '/societe'
+      fullPath: '/dashboard-pro/societe'
+      preLoaderRoute: typeof AuthenticatedDashboardProSocieteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/nouvelle-demande': {
+      id: '/_authenticated/dashboard-pro/nouvelle-demande'
+      path: '/nouvelle-demande'
+      fullPath: '/dashboard-pro/nouvelle-demande'
+      preLoaderRoute: typeof AuthenticatedDashboardProNouvelleDemandeRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/missions': {
+      id: '/_authenticated/dashboard-pro/missions'
+      path: '/missions'
+      fullPath: '/dashboard-pro/missions'
+      preLoaderRoute: typeof AuthenticatedDashboardProMissionsRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/documents': {
+      id: '/_authenticated/dashboard-pro/documents'
+      path: '/documents'
+      fullPath: '/dashboard-pro/documents'
+      preLoaderRoute: typeof AuthenticatedDashboardProDocumentsRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-client/profil': {
       id: '/_authenticated/dashboard-client/profil'
@@ -1175,10 +1313,37 @@ const AuthenticatedDashboardClientRouteWithChildren =
     AuthenticatedDashboardClientRouteChildren,
   )
 
+interface AuthenticatedDashboardProRouteChildren {
+  AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
+  AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRoute
+  AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
+  AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
+}
+
+const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChildren =
+  {
+    AuthenticatedDashboardProDocumentsRoute:
+      AuthenticatedDashboardProDocumentsRoute,
+    AuthenticatedDashboardProMissionsRoute:
+      AuthenticatedDashboardProMissionsRoute,
+    AuthenticatedDashboardProNouvelleDemandeRoute:
+      AuthenticatedDashboardProNouvelleDemandeRoute,
+    AuthenticatedDashboardProSocieteRoute:
+      AuthenticatedDashboardProSocieteRoute,
+    AuthenticatedDashboardProIndexRoute: AuthenticatedDashboardProIndexRoute,
+  }
+
+const AuthenticatedDashboardProRouteWithChildren =
+  AuthenticatedDashboardProRoute._addFileChildren(
+    AuthenticatedDashboardProRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedConvoyeurRoute: typeof AuthenticatedConvoyeurRouteWithChildren
   AuthenticatedDashboardClientRoute: typeof AuthenticatedDashboardClientRouteWithChildren
+  AuthenticatedDashboardProRoute: typeof AuthenticatedDashboardProRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1186,6 +1351,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedConvoyeurRoute: AuthenticatedConvoyeurRouteWithChildren,
   AuthenticatedDashboardClientRoute:
     AuthenticatedDashboardClientRouteWithChildren,
+  AuthenticatedDashboardProRoute: AuthenticatedDashboardProRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -1215,6 +1381,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
+  InscriptionProRoute: InscriptionProRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
