@@ -7,8 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 /**
  * Bottom navigation publique (mobile uniquement).
  * 4 onglets : Accueil · Tarifs · Réserver (CTA centré) · Mon espace.
- * Le bouton Réserver ouvre la modal de réservation existante.
- * Mon espace redirige vers le dashboard correspondant au rôle, ou /login.
  */
 export default function MobileBottomNav() {
   const location = useLocation();
@@ -23,8 +21,18 @@ export default function MobileBottomNav() {
     return navigate({ to: "/dashboard-client" });
   };
 
-  const isActive = (path: string, exact = false) =>
-    exact ? location.pathname === path : location.pathname.startsWith(path);
+  const isHome = location.pathname === "/";
+  const isTarifs = location.pathname.startsWith("/tarifs");
+  const isEspace =
+    isAuthenticated ||
+    location.pathname.startsWith("/dashboard-client") ||
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/convoyeur") ||
+    location.pathname.startsWith("/login");
+
+  const tabBase = "flex flex-col items-center justify-center gap-1 h-full tap-scale";
+  const colorOn = "text-primary";
+  const colorOff = "text-cream/55";
 
   return (
     <>
@@ -33,22 +41,19 @@ export default function MobileBottomNav() {
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-bar border-t border-primary/15 safe-bottom"
       >
         <div className="grid grid-cols-4 h-16 items-stretch">
-          <NavTab
-            label="Accueil"
-            icon={<Home size={20} />}
-            active={isActive("/", true)}
-            as={
-              <Link to="/" className="flex flex-col items-center justify-center gap-1 h-full tap-scale" />
-            }
-          />
-          <NavTab
-            label="Tarifs"
-            icon={<Tag size={20} />}
-            active={isActive("/tarifs")}
-            as={
-              <Link to="/tarifs" className="flex flex-col items-center justify-center gap-1 h-full tap-scale" />
-            }
-          />
+          <Link to="/" className={tabBase}>
+            <Home size={20} className={isHome ? colorOn : colorOff} />
+            <span className={`text-[10px] tracking-[0.1em] uppercase ${isHome ? colorOn : colorOff}`}>
+              Accueil
+            </span>
+          </Link>
+
+          <Link to="/tarifs" className={tabBase}>
+            <Tag size={20} className={isTarifs ? colorOn : colorOff} />
+            <span className={`text-[10px] tracking-[0.1em] uppercase ${isTarifs ? colorOn : colorOff}`}>
+              Tarifs
+            </span>
+          </Link>
 
           {/* CTA Réserver — centré, surélevé */}
           <button
@@ -64,20 +69,9 @@ export default function MobileBottomNav() {
             </span>
           </button>
 
-          <button
-            onClick={goEspace}
-            className="flex flex-col items-center justify-center gap-1 h-full tap-scale"
-            aria-label="Mon espace"
-          >
-            <User
-              size={20}
-              className={isAuthenticated || location.pathname.includes("dashboard") || location.pathname.includes("/admin") || location.pathname.includes("/convoyeur") ? "text-primary" : "text-cream/55"}
-            />
-            <span
-              className={`text-[10px] tracking-[0.1em] uppercase ${
-                isAuthenticated ? "text-primary" : "text-cream/55"
-              }`}
-            >
+          <button onClick={goEspace} className={tabBase} aria-label="Mon espace">
+            <User size={20} className={isEspace ? colorOn : colorOff} />
+            <span className={`text-[10px] tracking-[0.1em] uppercase ${isEspace ? colorOn : colorOff}`}>
               {isAuthenticated ? "Espace" : "Connexion"}
             </span>
           </button>
@@ -86,26 +80,5 @@ export default function MobileBottomNav() {
 
       <ReservationModal open={reserveOpen} onClose={() => setReserveOpen(false)} />
     </>
-  );
-}
-
-function NavTab({
-  label,
-  icon,
-  active,
-  as,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  active: boolean;
-  as: React.ReactElement;
-}) {
-  const className = `${active ? "text-primary" : "text-cream/55"}`;
-  // Clone the link with content
-  return (
-    <as.type {...as.props}>
-      <span className={className}>{icon}</span>
-      <span className={`text-[10px] tracking-[0.1em] uppercase ${className}`}>{label}</span>
-    </as.type>
   );
 }
