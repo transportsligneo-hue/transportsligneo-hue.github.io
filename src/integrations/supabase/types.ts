@@ -272,6 +272,44 @@ export type Database = {
         }
         Relationships: []
       }
+      disponibilites_convoyeurs: {
+        Row: {
+          convoyeur_id: string
+          created_at: string
+          date_dispo: string
+          id: string
+          notes: string | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          convoyeur_id: string
+          created_at?: string
+          date_dispo: string
+          id?: string
+          notes?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          convoyeur_id?: string
+          created_at?: string
+          date_dispo?: string
+          id?: string
+          notes?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disponibilites_convoyeurs_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents_convoyeurs: {
         Row: {
           convoyeur_id: string
@@ -757,18 +795,21 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          actif: boolean
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          actif?: boolean
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          actif?: boolean
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
