@@ -1,7 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, RefreshCw, ChevronDown, ChevronUp, Eye, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
+import {
+  FileText,
+  Download,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  FolderOpen,
+} from "lucide-react";
+import {
+  PageHeader,
+  Card,
+  Badge,
+  EmptyState,
+  Button,
+  IconButton,
+  Select,
+} from "@/components/admin/AdminUI";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
   component: AdminDocuments,
@@ -51,7 +72,10 @@ function AdminDocuments() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const [convRes, docsRes] = await Promise.all([
-      supabase.from("convoyeurs").select("id, nom, prenom, email, type_convoyeur, statut").order("created_at", { ascending: false }),
+      supabase
+        .from("convoyeurs")
+        .select("id, nom, prenom, email, type_convoyeur, statut")
+        .order("created_at", { ascending: false }),
       supabase.from("documents_convoyeurs").select("*").order("created_at", { ascending: false }),
     ]);
     if (convRes.data) setConvoyeurs(convRes.data as Convoyeur[]);
@@ -66,25 +90,24 @@ function AdminDocuments() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const getMissingDocs = (c: Convoyeur): string[] => {
-    const owned = new Set((docsByConvoyeur[c.id] || []).map(d => d.type_document));
-    const required = c.type_convoyeur === "independant"
-      ? [...REQUIRED_BASE, ...REQUIRED_INDEP]
-      : REQUIRED_BASE;
-    return required.filter(r => !owned.has(r));
+    const owned = new Set((docsByConvoyeur[c.id] || []).map((d) => d.type_document));
+    const required =
+      c.type_convoyeur === "independant" ? [...REQUIRED_BASE, ...REQUIRED_INDEP] : REQUIRED_BASE;
+    return required.filter((r) => !owned.has(r));
   };
 
-  // Vérifie si tous les documents requis sont approuvés (bloque activation indépendant)
   const getBlockingIssues = (c: Convoyeur): string[] => {
     const docs = docsByConvoyeur[c.id] || [];
-    const required = c.type_convoyeur === "independant"
-      ? [...REQUIRED_BASE, ...REQUIRED_INDEP]
-      : REQUIRED_BASE;
+    const required =
+      c.type_convoyeur === "independant" ? [...REQUIRED_BASE, ...REQUIRED_INDEP] : REQUIRED_BASE;
     const issues: string[] = [];
     for (const r of required) {
-      const doc = docs.find(d => d.type_document === r);
+      const doc = docs.find((d) => d.type_document === r);
       if (!doc) issues.push(`${DOC_LABELS[r]} manquant`);
       else if (doc.statut_validation === "refuse") issues.push(`${DOC_LABELS[r]} refusé`);
       else if (doc.statut_validation !== "approuve") issues.push(`${DOC_LABELS[r]} non validé`);
@@ -92,23 +115,24 @@ function AdminDocuments() {
     return issues;
   };
 
-  const filtered = convoyeurs.filter(c => {
-    const missing = getMissingDocs(c);
+  const filtered = convoyeurs.filter((c) => {
     const blocking = getBlockingIssues(c);
     if (filter === "incomplets") return blocking.length > 0;
     if (filter === "valides") return blocking.length === 0;
     return true;
-    void missing;
   });
 
   const validateDoc = async (docId: string, statut: "approuve" | "refuse", motif?: string) => {
     const { data: u } = await supabase.auth.getUser();
-    await supabase.from("documents_convoyeurs").update({
-      statut_validation: statut,
-      motif_refus: statut === "refuse" ? (motif || null) : null,
-      valide_par: u.user?.id,
-      valide_le: new Date().toISOString(),
-    } as never).eq("id", docId);
+    await supabase
+      .from("documents_convoyeurs")
+      .update({
+        statut_validation: statut,
+        motif_refus: statut === "refuse" ? motif || null : null,
+        valide_par: u.user?.id,
+        valide_le: new Date().toISOString(),
+      } as never)
+      .eq("id", docId);
     await fetchAll();
   };
 
@@ -125,27 +149,28 @@ function AdminDocuments() {
   const isImage = (name: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Documents convoyeurs</h1>
-          <p className="text-cream/50 text-sm mt-1">{filtered.length} convoyeur{filtered.length > 1 ? "s" : ""}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-sm focus:border-primary/60 focus:outline-none appearance-none">
-            <option value="all">Tous</option>
-            <option value="incomplets">Documents manquants</option>
-            <option value="valides">Dossiers complets</option>
-          </select>
-          <button onClick={fetchAll} className="p-2 text-cream/50 hover:text-primary transition-colors"><RefreshCw size={16} /></button>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        title="Documents convoyeurs"
+        subtitle={`${filtered.length} convoyeur${filtered.length > 1 ? "s" : ""}`}
+        actions={
+          <>
+            <Select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
+              <option value="all">Tous</option>
+              <option value="incomplets">Documents manquants</option>
+              <option value="valides">Dossiers complets</option>
+            </Select>
+            <IconButton onClick={fetchAll} title="Actualiser">
+              <RefreshCw size={15} />
+            </IconButton>
+          </>
+        }
+      />
 
       {loading ? (
-        <div className="card-premium p-8 rounded text-center text-cream/40">Chargement…</div>
+        <Card className="text-center text-pro-muted py-12">Chargement…</Card>
       ) : filtered.length === 0 ? (
-        <div className="card-premium p-8 rounded text-center text-cream/40">Aucun convoyeur correspondant.</div>
+        <EmptyState icon={FolderOpen} title="Aucun convoyeur" description="Aucun convoyeur ne correspond à ce filtre." />
       ) : (
         <div className="space-y-3">
           {filtered.map((c) => {
@@ -155,108 +180,148 @@ function AdminDocuments() {
             const isOpen = expanded === c.id;
             const isIndependant = c.type_convoyeur === "independant";
             return (
-              <div key={c.id} className="card-premium rounded">
+              <Card key={c.id} padded={false}>
                 <button
                   onClick={() => setExpanded(isOpen ? null : c.id)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-primary/5 transition-colors"
+                  className="w-full flex items-center justify-between p-4 hover:bg-pro-bg-soft/50 transition-colors text-left"
                 >
-                  <div className="text-left flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-cream font-medium">{c.prenom} {c.nom}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${isIndependant ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-blue-500/20 text-blue-300 border-blue-500/30"}`}>
-                        {isIndependant ? "Indépendant" : "Salarié"}
+                      <span className="font-medium text-pro-text">
+                        {c.prenom} {c.nom}
                       </span>
+                      <Badge tone={isIndependant ? "purple" : "info"}>
+                        {isIndependant ? "Indépendant" : "Salarié"}
+                      </Badge>
                       {blocking.length > 0 ? (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded border bg-amber-500/20 text-amber-300 border-amber-500/30 inline-flex items-center gap-1">
-                          <AlertCircle size={10} /> {isIndependant ? "Activation bloquée" : `${blocking.length} à valider`}
-                        </span>
+                        <Badge tone="warning" icon={<AlertCircle size={10} />}>
+                          {isIndependant ? "Activation bloquée" : `${blocking.length} à valider`}
+                        </Badge>
                       ) : (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded border bg-green-500/20 text-green-300 border-green-500/30 inline-flex items-center gap-1">
-                          <CheckCircle2 size={10} /> Tous validés
-                        </span>
+                        <Badge tone="success" icon={<CheckCircle2 size={10} />}>
+                          Tous validés
+                        </Badge>
                       )}
                     </div>
-                    <div className="text-cream/40 text-xs mt-0.5">{c.email} · {docs.length} document{docs.length > 1 ? "s" : ""}</div>
+                    <p className="text-pro-muted text-xs mt-1">
+                      {c.email} · {docs.length} document{docs.length > 1 ? "s" : ""}
+                    </p>
                   </div>
-                  {isOpen ? <ChevronUp size={16} className="text-cream/50" /> : <ChevronDown size={16} className="text-cream/50" />}
+                  {isOpen ? (
+                    <ChevronUp size={16} className="text-pro-muted shrink-0" />
+                  ) : (
+                    <ChevronDown size={16} className="text-pro-muted shrink-0" />
+                  )}
                 </button>
 
                 {isOpen && (
-                  <div className="border-t border-primary/10 p-4 space-y-3">
+                  <div className="border-t border-pro-border p-4 space-y-3">
                     {isIndependant && blocking.length > 0 && (
-                      <div className="p-3 rounded bg-red-500/10 border border-red-500/30 text-xs text-red-200">
+                      <div className="p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-700">
                         <div className="font-semibold mb-1 inline-flex items-center gap-1">
                           <XCircle size={12} /> Activation indépendant bloquée
                         </div>
-                        <ul className="list-disc list-inside space-y-0.5 opacity-80">
-                          {blocking.map((b, i) => <li key={i}>{b}</li>)}
+                        <ul className="list-disc list-inside space-y-0.5 opacity-90">
+                          {blocking.map((b, i) => (
+                            <li key={i}>{b}</li>
+                          ))}
                         </ul>
                       </div>
                     )}
                     {!isIndependant && missing.length > 0 && (
-                      <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
-                        Manquants : {missing.map(m => DOC_LABELS[m] || m).join(", ")}
+                      <div className="p-2.5 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-700">
+                        Manquants : {missing.map((m) => DOC_LABELS[m] || m).join(", ")}
                       </div>
                     )}
                     {docs.length === 0 ? (
-                      <p className="text-cream/40 text-xs">Aucun document envoyé.</p>
+                      <p className="text-pro-muted text-sm">Aucun document envoyé.</p>
                     ) : (
                       <div className="space-y-2">
                         {docs.map((d) => {
                           const statut = d.statut_validation || "en_attente";
-                          const statutColor =
-                            statut === "approuve" ? "bg-green-500/15 text-green-300 border-green-500/30" :
-                            statut === "refuse" ? "bg-red-500/15 text-red-300 border-red-500/30" :
-                            "bg-amber-500/15 text-amber-300 border-amber-500/30";
-                          const statutIcon = statut === "approuve" ? <CheckCircle2 size={10} /> : statut === "refuse" ? <XCircle size={10} /> : <Clock size={10} />;
-                          const statutLabel = statut === "approuve" ? "Approuvé" : statut === "refuse" ? "Refusé" : "En attente";
+                          const tone =
+                            statut === "approuve"
+                              ? "success"
+                              : statut === "refuse"
+                                ? "danger"
+                                : "warning";
+                          const icon =
+                            statut === "approuve" ? (
+                              <CheckCircle2 size={10} />
+                            ) : statut === "refuse" ? (
+                              <XCircle size={10} />
+                            ) : (
+                              <Clock size={10} />
+                            );
+                          const statutLabel =
+                            statut === "approuve"
+                              ? "Approuvé"
+                              : statut === "refuse"
+                                ? "Refusé"
+                                : "En attente";
                           return (
-                            <div key={d.id} className="p-2.5 rounded bg-card/50 border border-primary/10 space-y-2">
+                            <div key={d.id} className="p-3 rounded-md bg-pro-bg-soft/50 border border-pro-border space-y-2">
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary">
-                                      {DOC_LABELS[d.type_document] || d.type_document}
-                                    </span>
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${statutColor}`}>
-                                      {statutIcon} {statutLabel}
-                                    </span>
+                                    <Badge tone="primary">{DOC_LABELS[d.type_document] || d.type_document}</Badge>
+                                    <Badge tone={tone} icon={icon}>
+                                      {statutLabel}
+                                    </Badge>
                                   </div>
-                                  <div className="text-xs text-cream truncate mt-1">{d.nom_fichier}</div>
-                                  <div className="text-[10px] text-cream/30 mt-0.5">{new Date(d.created_at).toLocaleDateString("fr-FR")}</div>
+                                  <p className="text-sm text-pro-text truncate mt-1">{d.nom_fichier}</p>
+                                  <p className="text-xs text-pro-muted mt-0.5">
+                                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                                  </p>
                                   {statut === "refuse" && d.motif_refus && (
-                                    <div className="text-[10px] text-red-300/80 mt-1 italic">Motif : {d.motif_refus}</div>
+                                    <p className="text-xs text-red-600 mt-1 italic">
+                                      Motif : {d.motif_refus}
+                                    </p>
                                   )}
                                 </div>
                                 <div className="flex gap-1 shrink-0">
                                   {isImage(d.nom_fichier) && (
-                                    <button onClick={() => openDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Aperçu">
+                                    <IconButton
+                                      onClick={() => openDoc(d.url_fichier)}
+                                      title="Aperçu"
+                                      tone="primary"
+                                    >
                                       <Eye size={14} />
-                                    </button>
+                                    </IconButton>
                                   )}
-                                  <button onClick={() => downloadDoc(d.url_fichier)} className="p-1.5 rounded hover:bg-primary/10 text-cream/50 hover:text-primary transition-colors" title="Télécharger">
+                                  <IconButton
+                                    onClick={() => downloadDoc(d.url_fichier)}
+                                    title="Télécharger"
+                                    tone="primary"
+                                  >
                                     <Download size={14} />
-                                  </button>
+                                  </IconButton>
                                 </div>
                               </div>
-                              <div className="flex gap-2 pt-1 border-t border-primary/5">
-                                <button
-                                  onClick={() => validateDoc(d.id, "approuve")}
+                              <div className="flex gap-2 pt-2 border-t border-pro-border">
+                                <Button
+                                  size="sm"
+                                  variant="success"
+                                  className="flex-1"
                                   disabled={statut === "approuve"}
-                                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[11px] bg-green-500/10 hover:bg-green-500/20 text-green-300 border border-green-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  onClick={() => validateDoc(d.id, "approuve")}
+                                  icon={<CheckCircle2 size={12} />}
                                 >
-                                  <CheckCircle2 size={11} /> Approuver
-                                </button>
-                                <button
+                                  Approuver
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  className="flex-1"
+                                  disabled={statut === "refuse"}
                                   onClick={() => {
                                     const motif = window.prompt("Motif du refus (facultatif) :") ?? "";
                                     validateDoc(d.id, "refuse", motif);
                                   }}
-                                  disabled={statut === "refuse"}
-                                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  icon={<XCircle size={12} />}
                                 >
-                                  <XCircle size={11} /> Refuser
-                                </button>
+                                  Refuser
+                                </Button>
                               </div>
                             </div>
                           );
@@ -265,19 +330,25 @@ function AdminDocuments() {
                     )}
                   </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
 
       {previewUrl && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
-          <div className="max-w-2xl max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-            <img src={previewUrl} alt="Aperçu document" className="rounded max-w-full" />
-            <button onClick={() => setPreviewUrl(null)} className="mt-2 w-full py-2 bg-primary/20 text-primary text-xs rounded inline-flex items-center justify-center gap-2">
-              <FileText size={14} /> Fermer
-            </button>
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <div
+            className="bg-white rounded-xl p-3 max-w-2xl max-h-[85vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img src={previewUrl} alt="Aperçu document" className="rounded-md max-w-full" />
+            <Button className="w-full mt-2" variant="secondary" onClick={() => setPreviewUrl(null)} icon={<FileText size={14} />}>
+              Fermer
+            </Button>
           </div>
         </div>
       )}
