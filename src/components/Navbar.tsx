@@ -6,13 +6,13 @@ import ReservationModal from "./ReservationModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
-  { href: "#accueil", label: "Accueil" },
-  { href: "#engagements", label: "Engagements" },
-  { href: "#prestations", label: "Prestations" },
-  { href: "#tarifs", label: "Tarifs" },
-  { href: "#devis", label: "Devis" },
-  { href: "#contact", label: "Contact" },
-];
+  { to: "/", label: "Accueil" },
+  { to: "/services", label: "Services" },
+  { to: "/tarifs", label: "Tarifs" },
+  { to: "/comment-ca-marche", label: "Comment ça marche" },
+  { to: "/a-propos", label: "À propos" },
+  { to: "/contact", label: "Contact" },
+] as const;
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -60,13 +60,15 @@ export default function Navbar() {
           {/* Desktop */}
           <ul className="hidden md:flex gap-8 items-center">
             {navLinks.map((l) => (
-              <li key={l.href}>
-                <a
-                  href={l.href}
+              <li key={l.to}>
+                <Link
+                  to={l.to}
+                  activeOptions={{ exact: true }}
+                  activeProps={{ className: "text-primary" }}
                   className="text-sm tracking-[0.15em] uppercase text-cream/80 hover:text-primary transition-colors duration-300"
                 >
                   {l.label}
-                </a>
+                </Link>
               </li>
             ))}
             <li>
@@ -105,14 +107,16 @@ export default function Navbar() {
           <div className="md:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
             <ul className="flex flex-col items-center gap-6 pt-6">
               {navLinks.map((l) => (
-                <li key={l.href}>
-                  <a
-                    href={l.href}
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
                     onClick={() => setMobileOpen(false)}
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: "text-primary" }}
                     className="text-sm tracking-[0.15em] uppercase text-cream/80 hover:text-primary transition-colors"
                   >
                     {l.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               <li>
