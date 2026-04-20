@@ -5,17 +5,17 @@ import {
   FileText,
   Route as RouteIcon,
   Users,
-  Clock,
   Truck,
-  AlertTriangle,
   ArrowRight,
-  CheckCircle2,
   Receipt,
   TrendingUp,
+  Briefcase,
+  ClipboardList,
+  ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import {
   PageHeader,
-  KpiCard,
   Card,
   Badge,
   Table,
@@ -40,15 +40,27 @@ const statutLabel: Record<string, string> = {
   annulee: "Annulée",
 };
 
+type HubCard = {
+  to: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  count: number;
+  badge?: { label: string; tone: "warning" | "info" | "success" | "danger" };
+  accent: string; // tailwind classes for icon background
+};
+
 function AdminDashboard() {
   const [stats, setStats] = useState({
     demandes: 0,
     demandesNouvelles: 0,
-    trajetsEnCours: 0,
-    convoyeursActifs: 0,
+    trajets: 0,
+    trajetsActifs: 0,
+    convoyeurs: 0,
     convoyeursEnAttente: 0,
+    clients: 0,
+    clientsB2B: 0,
     missionsEnCours: 0,
-    missionsTerminees: 0,
     devisTotal: 0,
   });
   const [recentDemandes, setRecentDemandes] = useState<Array<{
@@ -60,34 +72,42 @@ function AdminDashboard() {
     statut: string;
     created_at: string;
   }>>([]);
-  const [activeMissions, setActiveMissions] = useState<Array<{
-    id: string;
-    convoyeur: string;
-    depart: string;
-    arrivee: string;
-  }>>([]);
 
   useEffect(() => {
     async function fetchAll() {
-      const [demandes, nouvelles, trajets, convoyeurs, convAttente, enCours, terminees, devis] =
-        await Promise.all([
-          supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
-          supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
-          supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
-          supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
-          supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
-          supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
-          supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
-          supabase.from("devis").select("id", { count: "exact", head: true }),
-        ]);
+      const [
+        demandes,
+        nouvelles,
+        trajets,
+        trajetsActifs,
+        convoyeurs,
+        convAttente,
+        clients,
+        clientsB2B,
+        enCours,
+        devis,
+      ] = await Promise.all([
+        supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
+        supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
+        supabase.from("trajets").select("id", { count: "exact", head: true }),
+        supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
+        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
+        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("type_client", "b2b"),
+        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
+        supabase.from("devis").select("id", { count: "exact", head: true }),
+      ]);
       setStats({
         demandes: demandes.count ?? 0,
         demandesNouvelles: nouvelles.count ?? 0,
-        trajetsEnCours: trajets.count ?? 0,
-        convoyeursActifs: convoyeurs.count ?? 0,
+        trajets: trajets.count ?? 0,
+        trajetsActifs: trajetsActifs.count ?? 0,
+        convoyeurs: convoyeurs.count ?? 0,
         convoyeursEnAttente: convAttente.count ?? 0,
+        clients: clients.count ?? 0,
+        clientsB2B: clientsB2B.count ?? 0,
         missionsEnCours: enCours.count ?? 0,
-        missionsTerminees: terminees.count ?? 0,
         devisTotal: devis.count ?? 0,
       });
     }
@@ -97,116 +117,147 @@ function AdminDashboard() {
         .from("demandes_convoyage")
         .select("id, nom, prenom, depart, arrivee, statut, created_at")
         .order("created_at", { ascending: false })
-        .limit(6);
-      if (data) setRecentDemandes(data);
-    }
-
-    async function fetchActiveMissions() {
-      const { data } = await supabase
-        .from("attributions")
-        .select("id, convoyeur:convoyeurs(prenom, nom), trajet:trajets(depart, arrivee)")
-        .eq("statut", "en_cours")
         .limit(5);
-      if (data) {
-        setActiveMissions(
-          data.map((a: any) => ({
-            id: a.id,
-            convoyeur: a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "—",
-            depart: a.trajet?.depart ?? "—",
-            arrivee: a.trajet?.arrivee ?? "—",
-          })),
-        );
-      }
+      if (data) setRecentDemandes(data);
     }
 
     fetchAll();
     fetchRecent();
-    fetchActiveMissions();
   }, []);
 
+  const hubCards: HubCard[] = [
+    {
+      to: "/admin/demandes",
+      title: "Demandes",
+      description: "Nouvelles demandes de convoyage à traiter",
+      icon: ClipboardList,
+      count: stats.demandes,
+      badge:
+        stats.demandesNouvelles > 0
+          ? { label: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""}`, tone: "warning" }
+          : undefined,
+      accent: "bg-amber-50 text-amber-600",
+    },
+    {
+      to: "/admin/trajets",
+      title: "Trajets",
+      description: "Planification et gestion des trajets",
+      icon: RouteIcon,
+      count: stats.trajets,
+      badge:
+        stats.trajetsActifs > 0
+          ? { label: `${stats.trajetsActifs} actif${stats.trajetsActifs > 1 ? "s" : ""}`, tone: "info" }
+          : undefined,
+      accent: "bg-blue-50 text-blue-600",
+    },
+    {
+      to: "/admin/attributions",
+      title: "Missions",
+      description: "Attributions et suivi des missions en cours",
+      icon: Truck,
+      count: stats.missionsEnCours,
+      badge:
+        stats.missionsEnCours > 0
+          ? { label: "En cours", tone: "success" }
+          : undefined,
+      accent: "bg-emerald-50 text-emerald-600",
+    },
+    {
+      to: "/admin/convoyeurs",
+      title: "Convoyeurs",
+      description: "Validation et gestion des convoyeurs",
+      icon: Users,
+      count: stats.convoyeurs,
+      badge:
+        stats.convoyeursEnAttente > 0
+          ? { label: `${stats.convoyeursEnAttente} à valider`, tone: "warning" }
+          : undefined,
+      accent: "bg-violet-50 text-violet-600",
+    },
+    {
+      to: "/admin/clients",
+      title: "Clients",
+      description: "Comptes particuliers et professionnels",
+      icon: Briefcase,
+      count: stats.clients,
+      badge:
+        stats.clientsB2B > 0
+          ? { label: `${stats.clientsB2B} B2B`, tone: "info" }
+          : undefined,
+      accent: "bg-sky-50 text-sky-600",
+    },
+    {
+      to: "/admin/devis",
+      title: "Devis & Facturation",
+      description: "Devis générés et historique de facturation",
+      icon: Receipt,
+      count: stats.devisTotal,
+      accent: "bg-rose-50 text-rose-600",
+    },
+    {
+      to: "/admin/documents",
+      title: "Documents",
+      description: "Pièces justificatives convoyeurs à valider",
+      icon: FileText,
+      count: 0,
+      accent: "bg-slate-100 text-slate-600",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Tableau de bord"
-        subtitle="Vue d'ensemble de l'activité Ligneo"
+        subtitle="Accédez rapidement à toutes les sections de gestion"
       />
 
-      {/* KPIs prioritaires */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          label="Nouvelles demandes"
-          value={stats.demandesNouvelles}
-          icon={Clock}
-          tone="warning"
-          hint={stats.demandesNouvelles > 0 ? "À traiter" : "Tout est à jour"}
-        />
-        <KpiCard
-          label="Missions en cours"
-          value={stats.missionsEnCours}
-          icon={Truck}
-          tone="info"
-        />
-        <KpiCard
-          label="Convoyeurs actifs"
-          value={stats.convoyeursActifs}
-          icon={Users}
-          tone="success"
-        />
-        <KpiCard
-          label="À valider"
-          value={stats.convoyeursEnAttente}
-          icon={AlertTriangle}
-          tone={stats.convoyeursEnAttente > 0 ? "warning" : "default"}
-          hint="Convoyeurs en attente"
-        />
-      </div>
-
-      {/* KPIs secondaires */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Total demandes" value={stats.demandes} icon={FileText} />
-        <KpiCard label="Trajets actifs" value={stats.trajetsEnCours} icon={RouteIcon} />
-        <KpiCard label="Missions terminées" value={stats.missionsTerminees} icon={CheckCircle2} tone="success" />
-        <KpiCard label="Devis générés" value={stats.devisTotal} icon={Receipt} />
-      </div>
-
-      {/* Missions en cours */}
-      {activeMissions.length > 0 && (
-        <Card padded={false}>
-          <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <h2 className="text-pro-text font-semibold">Missions en cours</h2>
-            </div>
+      {/* === HUB DE NAVIGATION === */}
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {hubCards.map((card) => (
             <Link
-              to="/admin/attributions"
-              className="text-xs text-pro-accent hover:underline inline-flex items-center gap-1"
+              key={card.to}
+              to={card.to}
+              className="group relative bg-white border border-pro-border rounded-lg p-5 hover:border-pro-accent hover:shadow-md transition-all duration-200 flex flex-col gap-4 min-h-[150px]"
             >
-              Voir tout <ArrowRight size={12} />
-            </Link>
-          </div>
-          <div className="divide-y divide-pro-border">
-            {activeMissions.map((m) => (
-              <div key={m.id} className="px-5 py-3 flex items-center justify-between hover:bg-pro-bg-soft/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
-                    {m.convoyeur.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-pro-text text-sm font-medium truncate">{m.convoyeur}</p>
-                    <p className="text-pro-muted text-xs truncate">
-                      {m.depart} → {m.arrivee}
-                    </p>
-                  </div>
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3">
+                <div
+                  className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${card.accent} group-hover:scale-110 transition-transform`}
+                >
+                  <card.icon size={20} />
                 </div>
-                <Badge tone="purple">En cours</Badge>
+                {card.badge && (
+                  <Badge tone={card.badge.tone}>{card.badge.label}</Badge>
+                )}
               </div>
-            ))}
-          </div>
-        </Card>
-      )}
 
-      {/* Dernières demandes */}
-      <div>
+              {/* Body */}
+              <div className="flex-1">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <h3 className="text-pro-text font-semibold text-base">{card.title}</h3>
+                  <span className="text-pro-muted text-sm">· {card.count}</span>
+                </div>
+                <p className="text-pro-muted text-xs leading-relaxed">{card.description}</p>
+              </div>
+
+              {/* Footer arrow */}
+              <div className="flex items-center justify-between pt-2 border-t border-pro-border/60">
+                <span className="text-xs text-pro-muted group-hover:text-pro-accent transition-colors">
+                  Accéder
+                </span>
+                <ChevronRight
+                  size={16}
+                  className="text-pro-muted group-hover:text-pro-accent group-hover:translate-x-1 transition-all"
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* === DERNIÈRES DEMANDES === */}
+      <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-pro-text font-semibold flex items-center gap-2">
             <TrendingUp size={16} className="text-pro-accent" />
@@ -226,41 +277,43 @@ function AdminDashboard() {
             description="Les nouvelles demandes apparaîtront ici."
           />
         ) : (
-          <Table>
-            <THead>
-              <TH>Client</TH>
-              <TH className="hidden sm:table-cell">Trajet</TH>
-              <TH>Statut</TH>
-              <TH className="hidden md:table-cell">Date</TH>
-            </THead>
-            <tbody>
-              {recentDemandes.map((d) => (
-                <TR key={d.id}>
-                  <TD>
-                    <p className="font-medium text-pro-text">
-                      {d.prenom} {d.nom}
-                    </p>
-                    <p className="text-pro-muted text-xs sm:hidden">
+          <Card padded={false}>
+            <Table>
+              <THead>
+                <TH>Client</TH>
+                <TH className="hidden sm:table-cell">Trajet</TH>
+                <TH>Statut</TH>
+                <TH className="hidden md:table-cell">Date</TH>
+              </THead>
+              <tbody>
+                {recentDemandes.map((d) => (
+                  <TR key={d.id}>
+                    <TD>
+                      <p className="font-medium text-pro-text">
+                        {d.prenom} {d.nom}
+                      </p>
+                      <p className="text-pro-muted text-xs sm:hidden">
+                        {d.depart} → {d.arrivee}
+                      </p>
+                    </TD>
+                    <TD className="hidden sm:table-cell text-pro-text-soft">
                       {d.depart} → {d.arrivee}
-                    </p>
-                  </TD>
-                  <TD className="hidden sm:table-cell text-pro-text-soft">
-                    {d.depart} → {d.arrivee}
-                  </TD>
-                  <TD>
-                    <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
-                      {statutLabel[d.statut] ?? d.statut}
-                    </Badge>
-                  </TD>
-                  <TD className="hidden md:table-cell text-pro-muted text-xs">
-                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                  </TD>
-                </TR>
-              ))}
-            </tbody>
-          </Table>
+                    </TD>
+                    <TD>
+                      <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
+                        {statutLabel[d.statut] ?? d.statut}
+                      </Badge>
+                    </TD>
+                    <TD className="hidden md:table-cell text-pro-muted text-xs">
+                      {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                    </TD>
+                  </TR>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
         )}
-      </div>
+      </section>
     </div>
   );
 }
