@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-ligneo.png";
 
 export default function Hero() {
@@ -40,18 +41,18 @@ export default function Hero() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-          <a
-            href="#contact"
+          <Link
+            to="/contact"
             className="px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300"
           >
             Demander un devis
-          </a>
-          <a
-            href="#tarifs"
+          </Link>
+          <Link
+            to="/tarifs"
             className="px-8 py-3 gold-border text-primary font-heading text-sm tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors duration-300"
           >
             Voir les tarifs
-          </a>
+          </Link>
         </div>
       </div>
     </section>

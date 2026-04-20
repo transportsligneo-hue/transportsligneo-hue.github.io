@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TarifsRouteImport } from './routes/tarifs'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
@@ -18,10 +20,13 @@ import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
 import { Route as ChoisirCompteRouteImport } from './routes/choisir-compte'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as AttenteValidationRouteImport } from './routes/attente-validation'
+import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -60,9 +65,19 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
   path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TarifsRoute = TarifsRouteImport.update({
+  id: '/tarifs',
+  path: '/tarifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -100,9 +115,19 @@ const InscriptionClientRoute = InscriptionClientRouteImport.update({
   path: '/inscription-client',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
   id: '/confidentialite',
   path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommentCaMarcheRoute = CommentCaMarcheRouteImport.update({
+  id: '/comment-ca-marche',
+  path: '/comment-ca-marche',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChoisirCompteRoute = ChoisirCompteRouteImport.update({
@@ -118,6 +143,11 @@ const CgvRoute = CgvRouteImport.update({
 const AttenteValidationRoute = AttenteValidationRouteImport.update({
   id: '/attente-validation',
   path: '/attente-validation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AProposRoute = AProposRouteImport.update({
+  id: '/a-propos',
+  path: '/a-propos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -304,10 +334,13 @@ const AuthenticatedDashboardClientMissionsMissionIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
+  '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
@@ -315,7 +348,9 @@ export interface FileRoutesByFullPath {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/services': typeof ServicesRoute
   '/setup': typeof SetupRoute
+  '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -350,10 +385,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
+  '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
@@ -361,7 +399,9 @@ export interface FileRoutesByTo {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/services': typeof ServicesRoute
   '/setup': typeof SetupRoute
+  '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -395,10 +435,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
+  '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
@@ -406,7 +449,9 @@ export interface FileRoutesById {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/services': typeof ServicesRoute
   '/setup': typeof SetupRoute
+  '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -443,10 +488,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/a-propos'
     | '/attente-validation'
     | '/cgv'
     | '/choisir-compte'
+    | '/comment-ca-marche'
     | '/confidentialite'
+    | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
@@ -454,7 +502,9 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/reserver'
     | '/reset-password'
+    | '/services'
     | '/setup'
+    | '/tarifs'
     | '/unsubscribe'
     | '/admin'
     | '/convoyeur'
@@ -489,10 +539,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/a-propos'
     | '/attente-validation'
     | '/cgv'
     | '/choisir-compte'
+    | '/comment-ca-marche'
     | '/confidentialite'
+    | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
@@ -500,7 +553,9 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/reserver'
     | '/reset-password'
+    | '/services'
     | '/setup'
+    | '/tarifs'
     | '/unsubscribe'
     | '/email/unsubscribe'
     | '/admin/attributions'
@@ -533,10 +588,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/a-propos'
     | '/attente-validation'
     | '/cgv'
     | '/choisir-compte'
+    | '/comment-ca-marche'
     | '/confidentialite'
+    | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/login'
@@ -544,7 +602,9 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/reserver'
     | '/reset-password'
+    | '/services'
     | '/setup'
+    | '/tarifs'
     | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
@@ -581,10 +641,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AProposRoute: typeof AProposRoute
   AttenteValidationRoute: typeof AttenteValidationRoute
   CgvRoute: typeof CgvRoute
   ChoisirCompteRoute: typeof ChoisirCompteRoute
+  CommentCaMarcheRoute: typeof CommentCaMarcheRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
+  ContactRoute: typeof ContactRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   LoginRoute: typeof LoginRoute
@@ -592,7 +655,9 @@ export interface RootRouteChildren {
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ReserverRoute: typeof ReserverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ServicesRoute: typeof ServicesRoute
   SetupRoute: typeof SetupRoute
+  TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -612,11 +677,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tarifs': {
+      id: '/tarifs'
+      path: '/tarifs'
+      fullPath: '/tarifs'
+      preLoaderRoute: typeof TarifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/setup': {
       id: '/setup'
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -668,11 +747,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscriptionClientRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/confidentialite': {
       id: '/confidentialite'
       path: '/confidentialite'
       fullPath: '/confidentialite'
       preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comment-ca-marche': {
+      id: '/comment-ca-marche'
+      path: '/comment-ca-marche'
+      fullPath: '/comment-ca-marche'
+      preLoaderRoute: typeof CommentCaMarcheRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/choisir-compte': {
@@ -694,6 +787,13 @@ declare module '@tanstack/react-router' {
       path: '/attente-validation'
       fullPath: '/attente-validation'
       preLoaderRoute: typeof AttenteValidationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a-propos': {
+      id: '/a-propos'
+      path: '/a-propos'
+      fullPath: '/a-propos'
+      preLoaderRoute: typeof AProposRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1036,10 +1136,13 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AProposRoute: AProposRoute,
   AttenteValidationRoute: AttenteValidationRoute,
   CgvRoute: CgvRoute,
   ChoisirCompteRoute: ChoisirCompteRoute,
+  CommentCaMarcheRoute: CommentCaMarcheRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
+  ContactRoute: ContactRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   LoginRoute: LoginRoute,
@@ -1047,7 +1150,9 @@ const rootRouteChildren: RootRouteChildren = {
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   ReserverRoute: ReserverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ServicesRoute: ServicesRoute,
   SetupRoute: SetupRoute,
+  TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

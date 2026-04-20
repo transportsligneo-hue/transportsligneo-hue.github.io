@@ -3,14 +3,8 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
 import CommentCaMarche from "@/components/CommentCaMarche";
-import Engagements from "@/components/Engagements";
-import Prestations from "@/components/Prestations";
-import Tarifs from "@/components/Tarifs";
-import DevisGenerator from "@/components/DevisGenerator";
 import AvisClients from "@/components/AvisClients";
-import FAQ from "@/components/FAQ";
 import Confiance from "@/components/Confiance";
-import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/")({
@@ -32,14 +26,8 @@ function Index() {
       <Hero />
       <PourquoiNousChoisir />
       <CommentCaMarche />
-      <Engagements />
-      <Prestations />
-      <Tarifs />
-      <DevisGenerator />
       <AvisClients />
       <Confiance />
-      <FAQ />
-      <Contact />
       <Footer />
     </>
   );

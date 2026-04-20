@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { FileText, CheckCircle, Truck } from "lucide-react";
 
 const steps = [
@@ -67,12 +68,12 @@ export default function CommentCaMarche() {
 
         {/* CTA */}
         <div className="text-center mt-8">
-          <a
-            href="#devis"
+          <Link
+            to="/tarifs"
             className="px-10 py-4 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300 inline-block"
           >
             Estimer mon trajet
-          </a>
+          </Link>
         </div>
       </div>
     </section>
