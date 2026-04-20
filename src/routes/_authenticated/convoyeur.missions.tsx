@@ -109,13 +109,9 @@ function ConvoyeurMissions() {
 
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
 
-  // Fetch and subscribe to GPS points for active mission
+  // GPS points for active mission
   useEffect(() => {
-    if (!activeMissionId) {
-      setGpsPoints([]);
-      return;
-    }
-
+    if (!activeMissionId) { setGpsPoints([]); return; }
     const fetchPoints = async () => {
       const { data } = await supabase
         .from("mission_locations")
@@ -148,14 +144,8 @@ function ConvoyeurMissions() {
 
   const updateStatus = async (id: string, statut: string) => {
     await supabase.from("attributions").update({ statut }).eq("id", id);
-    if (statut === "en_cours") {
-      setActiveMissionId(id);
-      setShowMap(true);
-    }
-    if (statut === "termine") {
-      setActiveMissionId(null);
-      setShowMap(false);
-    }
+    if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
+    if (statut === "termine") { setActiveMissionId(null); setShowMap(false); }
     fetchMissions();
   };
 
@@ -187,18 +177,16 @@ function ConvoyeurMissions() {
     setInspection(null);
   };
 
-  const statusLabel: Record<string, string> = {
-    propose: "Proposée",
-    accepte: "Acceptée",
-    en_cours: "En cours",
-  };
-  const statusColor: Record<string, string> = {
-    propose: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
-    accepte: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-    en_cours: "bg-green-500/20 text-green-300 border-green-500/30",
+  const getDuration = () => {
+    if (!missionStartTime) return null;
+    const start = new Date(missionStartTime).getTime();
+    const diff = Math.floor((Date.now() - start) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    return h > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${m} min`;
   };
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>;
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
   if (inspection && user) {
     return (
@@ -216,124 +204,117 @@ function ConvoyeurMissions() {
   const otherMissions = missions.filter(m => m.statut !== "en_cours");
   const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
-  // Duration calculation
-  const getDuration = () => {
-    if (!missionStartTime) return null;
-    const start = new Date(missionStartTime).getTime();
-    const now = Date.now();
-    const diff = Math.floor((now - start) / 1000);
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    return h > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${m} min`;
+  const statusLabel: Record<string, string> = { propose: "Proposée", accepte: "Acceptée", en_cours: "En cours" };
+  const statusStyle: Record<string, string> = {
+    propose: "bg-amber-50 text-amber-700 border-amber-200",
+    accepte: "bg-blue-50 text-blue-700 border-blue-200",
+    en_cours: "bg-emerald-50 text-emerald-700 border-emerald-200",
   };
 
   return (
     <div className="space-y-4">
-      <h1 className="font-heading text-xl md:text-2xl text-primary tracking-[0.1em] uppercase">Mes missions</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
 
-      {/* === ACTIVE MISSION: Uber-like view === */}
+      {/* === ACTIVE MISSION === */}
       {activeMission && (
         <div className="space-y-3">
-          {/* Status bar */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse shrink-0" />
+          {/* Live status bar */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <div className="flex-1">
-              <p className="text-green-300 text-sm font-medium">Mission en cours</p>
-              <p className="text-green-300/60 text-xs">
+              <p className="text-emerald-800 text-sm font-medium">Mission en cours</p>
+              <p className="text-emerald-600 text-xs">
                 GPS actif · {gpsPoints.length} position{gpsPoints.length > 1 ? "s" : ""}
                 {getDuration() && ` · ${getDuration()}`}
               </p>
             </div>
-            <Navigation size={18} className="text-green-400" />
+            <Navigation size={18} className="text-emerald-600" />
           </div>
 
-          {/* Route info */}
-          <div className="card-premium p-4 rounded-lg">
+          {/* Route info card */}
+          <div className="bg-white rounded-xl border border-pro-border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="flex flex-col items-center gap-1 pt-1">
-                <div className="w-3 h-3 rounded-full border-2 border-green-400 bg-green-400/30" />
-                <div className="w-0.5 h-8 bg-primary/30" />
-                <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary/30" />
+                <div className="w-3 h-3 rounded-full border-2 border-emerald-500 bg-emerald-100" />
+                <div className="w-0.5 h-8 bg-pro-border" />
+                <div className="w-3 h-3 rounded-full border-2 border-blue-500 bg-blue-100" />
               </div>
               <div className="flex-1 space-y-3">
                 <div>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">Départ</p>
-                  <p className="text-cream text-sm">{activeMission.trajet?.depart}</p>
+                  <p className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">Départ</p>
+                  <p className="text-pro-text text-sm">{activeMission.trajet?.depart}</p>
                 </div>
                 <div>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">Arrivée</p>
-                  <p className="text-cream text-sm">{activeMission.trajet?.arrivee}</p>
+                  <p className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">Arrivée</p>
+                  <p className="text-pro-text text-sm">{activeMission.trajet?.arrivee}</p>
                 </div>
               </div>
             </div>
 
             {(activeMission.trajet?.marque || activeMission.trajet?.immatriculation) && (
-              <div className="mt-3 pt-3 border-t border-primary/10 flex items-center gap-2 text-xs text-cream/50">
+              <div className="mt-3 pt-3 border-t border-pro-border flex items-center gap-2 text-xs text-pro-text-soft">
                 <Car size={12} />
                 {[activeMission.trajet.marque, activeMission.trajet.modele, activeMission.trajet.immatriculation].filter(Boolean).join(" · ")}
               </div>
             )}
 
             {typeConvoyeur === "independant" && activeMission.trajet?.tarif_convoyeur != null && (
-              <div className="mt-2 pt-2 border-t border-primary/10 flex items-center justify-between">
-                <span className="text-cream/50 text-xs uppercase tracking-wider">Tarif mission</span>
-                <span className="text-primary font-heading text-base">{activeMission.trajet.tarif_convoyeur} €</span>
+              <div className="mt-2 pt-2 border-t border-pro-border flex items-center justify-between">
+                <span className="text-pro-muted text-xs uppercase tracking-wider">Tarif mission</span>
+                <span className="text-emerald-700 font-bold text-base">{activeMission.trajet.tarif_convoyeur} €</span>
               </div>
             )}
           </div>
 
-          {/* Live map toggle */}
+          {/* Map toggle */}
           <button
             onClick={() => setShowMap(!showMap)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-sm hover:bg-primary/20 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-pro-text border border-pro-border rounded-xl text-sm hover:bg-pro-bg-soft transition-colors"
           >
             <MapPin size={14} />
             {showMap ? "Masquer la carte" : "Voir la carte en direct"}
             {showMap ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
-          {/* GPS Map */}
           {showMap && (
             <div className="space-y-2">
-              <GpsMapView points={gpsPoints} className="h-[280px] md:h-[400px]" />
+              <GpsMapView points={gpsPoints} className="h-[280px] md:h-[400px] rounded-xl overflow-hidden" />
               {lastPoint && (
-                <div className="flex items-center justify-between text-[10px] text-cream/40 px-1">
+                <div className="flex items-center justify-between text-[10px] text-pro-muted px-1">
                   <span className="flex items-center gap-1">
                     <Clock size={10} />
                     Dernière position: {new Date(lastPoint.recorded_at).toLocaleTimeString("fr-FR")}
                   </span>
-                  {lastPoint.accuracy && (
-                    <span>Précision: ±{Math.round(lastPoint.accuracy)}m</span>
-                  )}
+                  {lastPoint.accuracy && <span>Précision: ±{Math.round(lastPoint.accuracy)}m</span>}
                 </div>
               )}
             </div>
           )}
 
-          {/* Inspection status */}
+          {/* Inspections status */}
           <div className="flex gap-3 text-xs px-1">
-            <span className={`flex items-center gap-1 ${activeMission.inspectionDepart ? "text-green-400" : "text-cream/30"}`}>
+            <span className={`flex items-center gap-1 ${activeMission.inspectionDepart ? "text-emerald-600" : "text-pro-muted"}`}>
               <ClipboardCheck size={12} /> Départ {activeMission.inspectionDepart ? "✓" : "—"}
             </span>
-            <span className={`flex items-center gap-1 ${activeMission.inspectionArrivee ? "text-green-400" : "text-cream/30"}`}>
+            <span className={`flex items-center gap-1 ${activeMission.inspectionArrivee ? "text-emerald-600" : "text-pro-muted"}`}>
               <ClipboardCheck size={12} /> Arrivée {activeMission.inspectionArrivee ? "✓" : "—"}
             </span>
           </div>
 
-          {/* Action button - BIG for mobile */}
+          {/* Action button */}
           <button
             onClick={() => finishMission(activeMission.id)}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-600/20 text-green-300 border-2 border-green-500/40 rounded-xl text-base font-heading tracking-[0.08em] uppercase hover:bg-green-600/30 transition-all active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 transition-colors active:scale-[0.98]"
           >
             <Square size={20} /> Terminer la mission
           </button>
 
           {/* Documents */}
           {user && (
-            <div className="card-premium p-4 rounded-lg">
+            <div className="bg-white rounded-xl border border-pro-border p-4">
               <button
                 onClick={() => setExpandedDocs(expandedDocs === activeMission.id ? null : activeMission.id)}
-                className="flex items-center gap-2 text-sm text-cream/60 hover:text-primary transition-colors w-full"
+                className="flex items-center gap-2 text-sm text-pro-text-soft hover:text-pro-text transition-colors w-full"
               >
                 <FileText size={14} />
                 Documents de mission
@@ -352,15 +333,15 @@ function ConvoyeurMissions() {
       {/* === OTHER MISSIONS === */}
       {otherMissions.length > 0 && (
         <div className="space-y-3">
-          {activeMission && <h2 className="text-cream/40 text-xs uppercase tracking-wider mt-4">Autres missions</h2>}
+          {activeMission && <h2 className="text-pro-muted text-xs uppercase tracking-wider font-medium mt-4">Autres missions</h2>}
           {otherMissions.map((m) => (
-            <div key={m.id} className="card-premium p-4 rounded-lg space-y-3">
+            <div key={m.id} className="bg-white rounded-xl border border-pro-border p-4 space-y-3 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className={`text-xs px-2.5 py-1 rounded border ${statusColor[m.statut] || "bg-primary/10 text-primary border-primary/20"}`}>
+                <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${statusStyle[m.statut] || "bg-pro-bg-soft text-pro-text border-pro-border"}`}>
                   {statusLabel[m.statut] || m.statut}
                 </span>
                 {m.trajet?.date_trajet && (
-                  <span className="text-cream/50 text-xs flex items-center gap-1">
+                  <span className="text-pro-text-soft text-xs flex items-center gap-1">
                     <Calendar size={12} /> {m.trajet.date_trajet}
                     {m.trajet.heure_trajet && ` à ${m.trajet.heure_trajet}`}
                   </span>
@@ -368,49 +349,48 @@ function ConvoyeurMissions() {
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <MapPin size={14} className="text-primary shrink-0" />
-                <span className="text-cream">{m.trajet?.depart}</span>
-                <span className="text-cream/30">→</span>
-                <span className="text-cream">{m.trajet?.arrivee}</span>
+                <MapPin size={14} className="text-emerald-600 shrink-0" />
+                <span className="text-pro-text">{m.trajet?.depart}</span>
+                <span className="text-pro-muted">→</span>
+                <span className="text-pro-text">{m.trajet?.arrivee}</span>
               </div>
 
               {(m.trajet?.marque || m.trajet?.immatriculation) && (
-                <div className="flex items-center gap-2 text-xs text-cream/50">
+                <div className="flex items-center gap-2 text-xs text-pro-text-soft">
                   <Car size={12} />
                   {[m.trajet.marque, m.trajet.modele, m.trajet.immatriculation].filter(Boolean).join(" · ")}
                 </div>
               )}
 
               {typeConvoyeur === "independant" && m.trajet?.tarif_convoyeur != null && (
-                <div className="flex items-center justify-between text-sm bg-primary/5 px-3 py-2 rounded border border-primary/15">
-                  <span className="text-cream/60 text-xs uppercase tracking-wider">Tarif proposé</span>
-                  <span className="text-primary font-heading">{m.trajet.tarif_convoyeur} €</span>
+                <div className="flex items-center justify-between text-sm bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
+                  <span className="text-pro-text-soft text-xs font-medium uppercase tracking-wider">Tarif proposé</span>
+                  <span className="text-emerald-700 font-bold">{m.trajet.tarif_convoyeur} €</span>
                 </div>
               )}
 
-              {/* Inspection status */}
               <div className="flex gap-3 text-xs">
-                <span className={`flex items-center gap-1 ${m.inspectionDepart ? "text-green-400" : "text-cream/30"}`}>
+                <span className={`flex items-center gap-1 ${m.inspectionDepart ? "text-emerald-600" : "text-pro-muted"}`}>
                   <ClipboardCheck size={12} /> Départ {m.inspectionDepart ? "✓" : "—"}
                 </span>
-                <span className={`flex items-center gap-1 ${m.inspectionArrivee ? "text-green-400" : "text-cream/30"}`}>
+                <span className={`flex items-center gap-1 ${m.inspectionArrivee ? "text-emerald-600" : "text-pro-muted"}`}>
                   <ClipboardCheck size={12} /> Arrivée {m.inspectionArrivee ? "✓" : "—"}
                 </span>
               </div>
 
-              {/* Action buttons - BIG for mobile */}
+              {/* Action buttons */}
               <div className="flex gap-2 pt-1">
                 {m.statut === "propose" && (
                   <>
                     <button
                       onClick={() => updateStatus(m.id, "accepte")}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary/20 text-primary border border-primary/30 rounded-lg text-sm font-heading tracking-wider uppercase hover:bg-primary/30 transition-all active:scale-[0.98]"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors active:scale-[0.98]"
                     >
                       Accepter
                     </button>
                     <button
                       onClick={() => updateStatus(m.id, "refuse")}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-destructive/20 text-destructive border border-destructive/30 rounded-lg text-sm font-heading tracking-wider uppercase hover:bg-destructive/30 transition-all active:scale-[0.98]"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-red-600 border border-red-200 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors active:scale-[0.98]"
                     >
                       Refuser
                     </button>
@@ -419,7 +399,7 @@ function ConvoyeurMissions() {
                 {m.statut === "accepte" && (
                   <button
                     onClick={() => startMission(m.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg text-sm font-heading tracking-wider uppercase hover:bg-blue-500/30 transition-all active:scale-[0.98]"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors active:scale-[0.98]"
                   >
                     <Play size={16} /> Démarrer la mission
                   </button>
@@ -428,10 +408,10 @@ function ConvoyeurMissions() {
 
               {/* Documents */}
               {(m.statut === "accepte" || m.statut === "en_cours") && user && (
-                <div className="pt-2 border-t border-primary/10">
+                <div className="pt-2 border-t border-pro-border">
                   <button
                     onClick={() => setExpandedDocs(expandedDocs === m.id ? null : m.id)}
-                    className="flex items-center gap-1.5 text-xs text-cream/60 hover:text-primary transition-colors w-full"
+                    className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-text transition-colors w-full"
                   >
                     <FileText size={12} />
                     Documents
@@ -450,10 +430,10 @@ function ConvoyeurMissions() {
       )}
 
       {missions.length === 0 && (
-        <div className="card-premium p-8 rounded-lg text-center">
-          <Loader2 size={32} className="mx-auto text-cream/20 mb-3" />
-          <p className="text-cream/50 text-sm">Aucune mission en cours.</p>
-          <p className="text-cream/30 text-xs mt-1">Vos nouvelles missions apparaîtront ici.</p>
+        <div className="bg-white rounded-xl border border-pro-border p-8 text-center shadow-sm">
+          <Truck size={32} className="mx-auto text-pro-muted mb-3" />
+          <p className="text-pro-text-soft text-sm">Aucune mission en cours.</p>
+          <p className="text-pro-muted text-xs mt-1">Vos nouvelles missions apparaîtront ici.</p>
         </div>
       )}
     </div>

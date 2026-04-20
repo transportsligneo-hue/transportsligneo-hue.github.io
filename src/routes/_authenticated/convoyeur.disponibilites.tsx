@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Trash2, CalendarCheck } from "lucide-react";
-import { StatusBadge } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/disponibilites")({
   component: ConvoyeurDisponibilites,
@@ -13,7 +12,7 @@ type Statut = "disponible" | "indisponible";
 
 interface DispoRow {
   id: string;
-  date_dispo: string; // YYYY-MM-DD
+  date_dispo: string;
   statut: Statut;
   notes: string | null;
 }
@@ -25,10 +24,7 @@ const MONTH_NAMES = [
 ];
 
 function fmtDate(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function ConvoyeurDisponibilites() {
@@ -45,7 +41,6 @@ function ConvoyeurDisponibilites() {
   const [editStatut, setEditStatut] = useState<Statut>("disponible");
   const [editNotes, setEditNotes] = useState("");
 
-  // Load convoyeur id + dispos
   const loadAll = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -57,7 +52,6 @@ function ConvoyeurDisponibilites() {
     if (!conv) { setLoading(false); return; }
     setConvoyeurId(conv.id);
 
-    // fenêtre : 6 mois autour
     const from = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
     const to = new Date(cursor.getFullYear(), cursor.getMonth() + 3, 0);
     const { data } = await supabase
@@ -73,7 +67,6 @@ function ConvoyeurDisponibilites() {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  // Pré-remplir le formulaire quand on sélectionne un jour
   useEffect(() => {
     if (!selectedDate) return;
     const existing = dispos.find((d) => d.date_dispo === selectedDate);
@@ -87,11 +80,9 @@ function ConvoyeurDisponibilites() {
     return map;
   }, [dispos]);
 
-  // Construit la grille du mois courant (lundi-dim)
   const monthGrid = useMemo(() => {
     const firstDay = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
     const lastDay = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
-    // jour de la semaine du 1er (0=dim, 1=lun…). On veut commencer lundi.
     const offset = (firstDay.getDay() + 6) % 7;
     const cells: { date: Date; current: boolean }[] = [];
     for (let i = 0; i < offset; i++) {
@@ -124,12 +115,7 @@ function ConvoyeurDisponibilites() {
     } else {
       await supabase
         .from("disponibilites_convoyeurs")
-        .insert({
-          convoyeur_id: convoyeurId,
-          date_dispo: selectedDate,
-          statut: editStatut,
-          notes: editNotes || null,
-        });
+        .insert({ convoyeur_id: convoyeurId, date_dispo: selectedDate, statut: editStatut, notes: editNotes || null });
     }
     await loadAll();
     setSaving(false);
@@ -155,48 +141,46 @@ function ConvoyeurDisponibilites() {
     };
   }, [dispos, cursor]);
 
+  const inputClass = "w-full bg-white border border-pro-border rounded-lg px-3 py-2.5 text-pro-text text-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/30 focus:outline-none transition-colors";
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes disponibilités</h1>
-          <p className="text-cream/50 text-sm mt-1">
-            Cliquez sur un jour pour indiquer votre disponibilité.
-          </p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes disponibilités</h1>
+          <p className="text-pro-text-soft text-sm mt-1">Cliquez sur un jour pour indiquer votre disponibilité.</p>
         </div>
-        <div className="flex gap-3 text-xs">
-          <StatusBadge kind="success" size="md">{stats.dispo} dispo</StatusBadge>
-          <StatusBadge kind="danger" size="md">{stats.indispo} indispo</StatusBadge>
+        <div className="flex gap-2 text-xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">{stats.dispo} dispo</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium">{stats.indispo} indispo</span>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>
       ) : (
-        <div className="grid lg:grid-cols-[1fr_320px] gap-5">
-          {/* Calendrier */}
-          <div className="card-premium rounded-lg p-4 md:p-5">
+        <div className="grid lg:grid-cols-[1fr_300px] gap-4">
+          {/* Calendar */}
+          <div className="bg-white rounded-xl border border-pro-border p-4 md:p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
-                className="p-2 rounded hover:bg-primary/10 text-cream/70 hover:text-primary transition-colors"
-                aria-label="Mois précédent"
+                className="p-2 rounded-lg hover:bg-pro-bg-soft text-pro-text-soft hover:text-pro-text transition-colors"
               >
                 <ChevronLeft size={18} />
               </button>
-              <h2 className="font-heading text-lg text-primary tracking-wider">
+              <h2 className="font-semibold text-pro-text text-base">
                 {MONTH_NAMES[cursor.getMonth()]} {cursor.getFullYear()}
               </h2>
               <button
                 onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
-                className="p-2 rounded hover:bg-primary/10 text-cream/70 hover:text-primary transition-colors"
-                aria-label="Mois suivant"
+                className="p-2 rounded-lg hover:bg-pro-bg-soft text-pro-text-soft hover:text-pro-text transition-colors"
               >
                 <ChevronRight size={18} />
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-cream/40 mb-2">
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-pro-muted mb-2 font-medium">
               {FRENCH_DAYS.map((d) => <div key={d}>{d}</div>)}
             </div>
 
@@ -208,13 +192,13 @@ function ConvoyeurDisponibilites() {
                 const isToday = ds === todayStr;
                 const isPast = ds < todayStr;
 
-                let bg = "bg-card/40 border-primary/10 text-cream/40";
+                let bg = "bg-white border-pro-border text-pro-muted";
                 if (cell.current) {
-                  if (dispo?.statut === "disponible") bg = "bg-green-500/15 border-green-500/40 text-green-200";
-                  else if (dispo?.statut === "indisponible") bg = "bg-red-500/15 border-red-500/40 text-red-200";
-                  else bg = "bg-navy/40 border-primary/15 text-cream/80";
+                  if (dispo?.statut === "disponible") bg = "bg-emerald-50 border-emerald-200 text-emerald-800";
+                  else if (dispo?.statut === "indisponible") bg = "bg-red-50 border-red-200 text-red-700";
+                  else bg = "bg-pro-bg-soft border-pro-border text-pro-text";
                 }
-                if (isSelected) bg += " ring-2 ring-primary";
+                if (isSelected) bg += " ring-2 ring-emerald-500";
                 if (isToday) bg += " font-bold";
 
                 return (
@@ -222,7 +206,7 @@ function ConvoyeurDisponibilites() {
                     key={i}
                     disabled={!cell.current || isPast}
                     onClick={() => setSelectedDate(ds)}
-                    className={`aspect-square rounded border text-sm transition-all ${bg} ${cell.current && !isPast ? "hover:border-primary/60 cursor-pointer" : "opacity-50 cursor-not-allowed"}`}
+                    className={`aspect-square rounded-lg border text-sm transition-all ${bg} ${cell.current && !isPast ? "hover:border-emerald-400 cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
                   >
                     {cell.date.getDate()}
                   </button>
@@ -230,48 +214,47 @@ function ConvoyeurDisponibilites() {
               })}
             </div>
 
-            <div className="flex flex-wrap gap-3 mt-4 text-[11px] text-cream/50">
+            <div className="flex flex-wrap gap-3 mt-4 text-[11px] text-pro-muted">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-green-500/40 border border-green-500/60" /> Disponible
+                <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300" /> Disponible
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-red-500/40 border border-red-500/60" /> Indisponible
+                <span className="w-3 h-3 rounded bg-red-100 border border-red-300" /> Indisponible
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-navy/40 border border-primary/15" /> Non renseigné
+                <span className="w-3 h-3 rounded bg-pro-bg-soft border border-pro-border" /> Non renseigné
               </span>
             </div>
           </div>
 
-          {/* Editeur */}
-          <div className="card-premium rounded-lg p-5 space-y-4 h-fit lg:sticky lg:top-4">
-            <h3 className="font-heading text-base text-primary tracking-wider flex items-center gap-2">
-              <CalendarCheck size={16} /> {selectedDate ? new Date(selectedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "Sélectionnez un jour"}
+          {/* Editor */}
+          <div className="bg-white rounded-xl border border-pro-border p-5 space-y-4 h-fit lg:sticky lg:top-4 shadow-sm">
+            <h3 className="font-semibold text-sm text-pro-text flex items-center gap-2">
+              <CalendarCheck size={16} className="text-emerald-600" />
+              {selectedDate ? new Date(selectedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "Sélectionnez un jour"}
             </h3>
 
             {!selectedDate ? (
-              <p className="text-cream/40 text-sm">
-                Cliquez sur une case du calendrier pour modifier votre disponibilité de ce jour-là.
-              </p>
+              <p className="text-pro-muted text-sm">Cliquez sur une case du calendrier.</p>
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setEditStatut("disponible")}
-                    className={`px-3 py-2.5 rounded border text-xs uppercase tracking-wider transition-all ${
+                    className={`px-3 py-2.5 rounded-lg border text-xs uppercase tracking-wider font-medium transition-all ${
                       editStatut === "disponible"
-                        ? "bg-green-500/20 text-green-300 border-green-500/50"
-                        : "bg-navy/60 text-cream/50 border-primary/15 hover:border-green-500/30"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                        : "bg-white text-pro-text-soft border-pro-border hover:border-emerald-300"
                     }`}
                   >
                     Disponible
                   </button>
                   <button
                     onClick={() => setEditStatut("indisponible")}
-                    className={`px-3 py-2.5 rounded border text-xs uppercase tracking-wider transition-all ${
+                    className={`px-3 py-2.5 rounded-lg border text-xs uppercase tracking-wider font-medium transition-all ${
                       editStatut === "indisponible"
-                        ? "bg-red-500/20 text-red-300 border-red-500/50"
-                        : "bg-navy/60 text-cream/50 border-primary/15 hover:border-red-500/30"
+                        ? "bg-red-50 text-red-700 border-red-300"
+                        : "bg-white text-pro-text-soft border-pro-border hover:border-red-300"
                     }`}
                   >
                     Indisponible
@@ -279,13 +262,13 @@ function ConvoyeurDisponibilites() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-cream/40 mb-1">Notes (optionnel)</label>
+                  <label className="block text-xs font-medium text-pro-text-soft mb-1">Notes (optionnel)</label>
                   <textarea
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
                     placeholder="Ex : Disponible matin uniquement"
                     rows={3}
-                    className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-sm focus:border-primary/60 focus:outline-none resize-none"
+                    className={inputClass + " resize-none"}
                   />
                 </div>
 
@@ -293,7 +276,7 @@ function ConvoyeurDisponibilites() {
                   <button
                     onClick={saveDispo}
                     disabled={saving}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60 rounded"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-60"
                   >
                     {saving && <Loader2 size={12} className="animate-spin" />} Enregistrer
                   </button>
@@ -301,7 +284,7 @@ function ConvoyeurDisponibilites() {
                     <button
                       onClick={removeDispo}
                       disabled={saving}
-                      className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-destructive/15 text-destructive border border-destructive/30 rounded text-xs hover:bg-destructive/25 transition-colors"
+                      className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-white text-red-600 border border-red-200 rounded-lg text-sm hover:bg-red-50 transition-colors"
                       title="Supprimer"
                     >
                       <Trash2 size={14} />
