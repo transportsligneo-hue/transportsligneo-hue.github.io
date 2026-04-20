@@ -13,12 +13,89 @@ interface Suggestion {
   context: string;
 }
 
+const GOOGLE_KEY = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY as string | undefined;
+
+/** Google Places loader (singleton) */
+let googleLoadPromise: Promise<any> | null = null;
+function loadGooglePlaces(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("ssr"));
+  if ((window as any).google?.maps?.places) return Promise.resolve((window as any).google);
+  if (googleLoadPromise) return googleLoadPromise;
+  if (!GOOGLE_KEY) return Promise.reject(new Error("no-key"));
+
+  googleLoadPromise = new Promise((resolve, reject) => {
+    const cbName = `__gplaces_cb_${Date.now()}`;
+    (window as any)[cbName] = () => resolve((window as any).google);
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}&libraries=places&callback=${cbName}&language=fr&region=FR`;
+    s.async = true;
+    s.defer = true;
+    s.onerror = () => reject(new Error("script-error"));
+    document.head.appendChild(s);
+  });
+  return googleLoadPromise;
+}
+
 export default function AddressAutocomplete({ name, label, value, onChange, required }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const sessionTokenRef = useRef<any>(null);
+
+  const fetchFromFrenchApi = useCallback(async (query: string): Promise<Suggestion[]> => {
+    const [resAll, resMunicipality, resStreet] = await Promise.all([
+      fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`),
+      fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=municipality&autocomplete=1`),
+      fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=street&autocomplete=1`),
+    ]);
+    const [dataAll, dataMunicipality, dataStreet] = await Promise.all([
+      resAll.json(), resMunicipality.json(), resStreet.json(),
+    ]);
+    const seen = new Set<string>();
+    const results: Suggestion[] = [];
+    const addResults = (features: any[]) => {
+      for (const f of features) {
+        const lbl = f.properties.label;
+        if (!seen.has(lbl)) {
+          seen.add(lbl);
+          results.push({ label: lbl, context: f.properties.context });
+        }
+      }
+    };
+    addResults(dataAll.features ?? []);
+    addResults(dataMunicipality.features ?? []);
+    addResults(dataStreet.features ?? []);
+    return results.slice(0, 8);
+  }, []);
+
+  const fetchFromGoogle = useCallback(async (query: string): Promise<Suggestion[]> => {
+    const google = await loadGooglePlaces();
+    if (!sessionTokenRef.current) {
+      sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+    }
+    const service = new google.maps.places.AutocompleteService();
+    return await new Promise((resolve) => {
+      service.getPlacePredictions(
+        {
+          input: query,
+          sessionToken: sessionTokenRef.current,
+          componentRestrictions: { country: ["fr", "be", "lu", "ch", "es", "it", "de", "nl", "pt", "gb"] },
+          language: "fr",
+        },
+        (predictions: any[] | null) => {
+          if (!predictions) return resolve([]);
+          resolve(
+            predictions.slice(0, 8).map((p) => ({
+              label: p.description,
+              context: p.structured_formatting?.secondary_text ?? "",
+            })),
+          );
+        },
+      );
+    });
+  }, []);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (query.length < 2) {
@@ -27,39 +104,23 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
     }
     setLoading(true);
     try {
-      // Search all types (addresses, streets, cities, localities, hamlets)
-      const [resAll, resMunicipality, resStreet] = await Promise.all([
-        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5&autocomplete=1`),
-        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=municipality&autocomplete=1`),
-        fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=3&type=street&autocomplete=1`),
-      ]);
-      const [dataAll, dataMunicipality, dataStreet] = await Promise.all([
-        resAll.json(), resMunicipality.json(), resStreet.json(),
-      ]);
-
-      const seen = new Set<string>();
-      const results: Suggestion[] = [];
-      const addResults = (features: any[]) => {
-        for (const f of features) {
-          const label = f.properties.label;
-          if (!seen.has(label)) {
-            seen.add(label);
-            results.push({ label, context: f.properties.context });
-          }
+      let results: Suggestion[] = [];
+      if (GOOGLE_KEY) {
+        try {
+          results = await fetchFromGoogle(query);
+        } catch {
+          results = await fetchFromFrenchApi(query);
         }
-      };
-
-      addResults(dataAll.features ?? []);
-      addResults(dataMunicipality.features ?? []);
-      addResults(dataStreet.features ?? []);
-
-      setSuggestions(results.slice(0, 8));
+      } else {
+        results = await fetchFromFrenchApi(query);
+      }
+      setSuggestions(results);
     } catch {
       setSuggestions([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchFromGoogle, fetchFromFrenchApi]);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -73,6 +134,7 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
     onChange(name, suggestion.label);
     setSuggestions([]);
     setShowSuggestions(false);
+    sessionTokenRef.current = null; // new session after selection
   };
 
   useEffect(() => {
@@ -113,7 +175,7 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
               className="px-4 py-3 cursor-pointer hover:bg-primary/10 transition-colors border-b border-primary/10 last:border-0"
             >
               <p className="text-cream text-sm">{s.label}</p>
-              <p className="text-cream/40 text-xs mt-0.5">{s.context}</p>
+              {s.context && <p className="text-cream/40 text-xs mt-0.5">{s.context}</p>}
             </li>
           ))}
         </ul>
