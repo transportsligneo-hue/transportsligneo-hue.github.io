@@ -720,8 +720,11 @@ export type Database = {
           id: string
           nom: string
           prenom: string
+          siret: string | null
+          societe: string | null
           statut: string
           telephone: string | null
+          type_client: string
           updated_at: string
           user_id: string
         }
@@ -731,8 +734,11 @@ export type Database = {
           id?: string
           nom?: string
           prenom?: string
+          siret?: string | null
+          societe?: string | null
           statut?: string
           telephone?: string | null
+          type_client?: string
           updated_at?: string
           user_id: string
         }
@@ -742,8 +748,11 @@ export type Database = {
           id?: string
           nom?: string
           prenom?: string
+          siret?: string | null
+          societe?: string | null
           statut?: string
           telephone?: string | null
+          type_client?: string
           updated_at?: string
           user_id?: string
         }
