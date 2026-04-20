@@ -240,22 +240,21 @@ function InscriptionConvoyeur() {
             </div>
           </div>
 
-          {/* Upload photo permis */}
+          {/* Upload photo permis (optionnel) */}
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Upload size={12} className="inline mr-1" /> Photo du permis de conduire *
+              <Upload size={12} className="inline mr-1" /> Photo du permis (optionnel)
             </label>
             <input
               type="file"
               accept="image/*,application/pdf"
               onChange={handleFileChange}
               className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
-              required
             />
             {permisFile && (
               <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>
             )}
-            <p className="text-cream/30 text-xs mt-1">Format JPG, PNG ou PDF. Max 5 Mo.</p>
+            <p className="text-cream/30 text-xs mt-1">Format JPG, PNG ou PDF. Max 5 Mo. Ajoutable plus tard depuis votre espace.</p>
           </div>
 
           {/* Infos complémentaires */}
