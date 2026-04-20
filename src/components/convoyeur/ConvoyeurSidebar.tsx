@@ -26,7 +26,7 @@ interface Props {
 export function ConvoyeurSidebar({ items, children }: Props) {
   const location = useLocation();
   const { logout, user } = useAuth();
-  const isMobile = useIsMobile();
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
