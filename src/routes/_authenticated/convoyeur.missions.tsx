@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useCallback } from "react";
 import {
   MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck,
-  FileText, Navigation, Clock, ChevronDown, ChevronUp,
+  FileText, Navigation, Clock, ChevronDown, ChevronUp, Truck,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { InspectionGuidee } from "@/components/InspectionGuidee";

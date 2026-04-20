@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, Truck, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 
 export interface ConvoyeurSidebarItem {
   to: string;
