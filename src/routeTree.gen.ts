@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReserverRouteImport } from './routes/reserver'
+import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
@@ -53,9 +55,19 @@ const SetupRoute = SetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReserverRoute = ReserverRouteImport.update({
   id: '/reserver',
   path: '/reserver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
+  id: '/mot-de-passe-oublie',
+  path: '/mot-de-passe-oublie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -230,7 +242,9 @@ export interface FileRoutesByFullPath {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -264,7 +278,9 @@ export interface FileRoutesByTo {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -298,7 +314,9 @@ export interface FileRoutesById {
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/reserver': typeof ReserverRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -334,7 +352,9 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/mot-de-passe-oublie'
     | '/reserver'
+    | '/reset-password'
     | '/setup'
     | '/unsubscribe'
     | '/admin'
@@ -368,7 +388,9 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/mot-de-passe-oublie'
     | '/reserver'
+    | '/reset-password'
     | '/setup'
     | '/unsubscribe'
     | '/email/unsubscribe'
@@ -401,7 +423,9 @@ export interface FileRouteTypes {
     | '/inscription-convoyeur'
     | '/login'
     | '/mentions-legales'
+    | '/mot-de-passe-oublie'
     | '/reserver'
+    | '/reset-password'
     | '/setup'
     | '/unsubscribe'
     | '/_authenticated/admin'
@@ -437,7 +461,9 @@ export interface RootRouteChildren {
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ReserverRoute: typeof ReserverRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SetupRoute: typeof SetupRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -465,11 +491,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reserver': {
       id: '/reserver'
       path: '/reserver'
       fullPath: '/reserver'
       preLoaderRoute: typeof ReserverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mot-de-passe-oublie': {
+      id: '/mot-de-passe-oublie'
+      path: '/mot-de-passe-oublie'
+      fullPath: '/mot-de-passe-oublie'
+      preLoaderRoute: typeof MotDePasseOublieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentions-legales': {
@@ -754,7 +794,9 @@ const rootRouteChildren: RootRouteChildren = {
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  MotDePasseOublieRoute: MotDePasseOublieRoute,
   ReserverRoute: ReserverRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SetupRoute: SetupRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
