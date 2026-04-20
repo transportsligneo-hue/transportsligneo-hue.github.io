@@ -9,7 +9,6 @@ import {
   Send,
   FolderOpen,
   Receipt,
-  Truck,
   Loader2,
 } from "lucide-react";
 import { DashboardSidebar, type SidebarItem } from "@/components/dashboard/DashboardSidebar";

@@ -36,14 +36,17 @@ import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
 import { Route as AuthenticatedDashboardClientMissionsRouteImport } from './routes/_authenticated/dashboard-client.missions'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
+import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_authenticated/convoyeur.profil'
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
 import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_authenticated/convoyeur.historique'
 import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_authenticated/convoyeur.documents'
+import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './routes/_authenticated/convoyeur.disponibilites'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -193,6 +196,12 @@ const AuthenticatedDashboardClientDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedConvoyeurProfilRoute =
+  AuthenticatedConvoyeurProfilRouteImport.update({
+    id: '/profil',
+    path: '/profil',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
 const AuthenticatedConvoyeurMissionsRoute =
   AuthenticatedConvoyeurMissionsRouteImport.update({
     id: '/missions',
@@ -209,6 +218,12 @@ const AuthenticatedConvoyeurDocumentsRoute =
   AuthenticatedConvoyeurDocumentsRouteImport.update({
     id: '/documents',
     path: '/documents',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
+const AuthenticatedConvoyeurDisponibilitesRoute =
+  AuthenticatedConvoyeurDisponibilitesRouteImport.update({
+    id: '/disponibilites',
+    path: '/disponibilites',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
 const AuthenticatedAdminTrajetsRoute =
@@ -238,6 +253,12 @@ const AuthenticatedAdminConvoyeursRoute =
   AuthenticatedAdminConvoyeursRouteImport.update({
     id: '/convoyeurs',
     path: '/convoyeurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminClientsRoute =
+  AuthenticatedAdminClientsRouteImport.update({
+    id: '/clients',
+    path: '/clients',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAttributionsRoute =
@@ -301,14 +322,17 @@ export interface FileRoutesByFullPath {
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -341,14 +365,17 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -386,14 +413,17 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/_authenticated/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -431,14 +461,17 @@ export interface FileRouteTypes {
     | '/dashboard-client'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/trajets'
+    | '/convoyeur/disponibilites'
     | '/convoyeur/documents'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
+    | '/convoyeur/profil'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
@@ -471,14 +504,17 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/trajets'
+    | '/convoyeur/disponibilites'
     | '/convoyeur/documents'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
+    | '/convoyeur/profil'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
@@ -515,14 +551,17 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
+    | '/_authenticated/admin/clients'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/trajets'
+    | '/_authenticated/convoyeur/disponibilites'
     | '/_authenticated/convoyeur/documents'
     | '/_authenticated/convoyeur/historique'
     | '/_authenticated/convoyeur/missions'
+    | '/_authenticated/convoyeur/profil'
     | '/_authenticated/dashboard-client/documents'
     | '/_authenticated/dashboard-client/missions'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
@@ -755,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientDocumentsRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/convoyeur/profil': {
+      id: '/_authenticated/convoyeur/profil'
+      path: '/profil'
+      fullPath: '/convoyeur/profil'
+      preLoaderRoute: typeof AuthenticatedConvoyeurProfilRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
     '/_authenticated/convoyeur/missions': {
       id: '/_authenticated/convoyeur/missions'
       path: '/missions'
@@ -774,6 +820,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/convoyeur/documents'
       preLoaderRoute: typeof AuthenticatedConvoyeurDocumentsRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
+    '/_authenticated/convoyeur/disponibilites': {
+      id: '/_authenticated/convoyeur/disponibilites'
+      path: '/disponibilites'
+      fullPath: '/convoyeur/disponibilites'
+      preLoaderRoute: typeof AuthenticatedConvoyeurDisponibilitesRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
     '/_authenticated/admin/trajets': {
@@ -809,6 +862,13 @@ declare module '@tanstack/react-router' {
       path: '/convoyeurs'
       fullPath: '/admin/convoyeurs'
       preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/clients': {
+      id: '/_authenticated/admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AuthenticatedAdminClientsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/attributions': {
@@ -865,6 +925,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
+  AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRoute
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
@@ -875,6 +936,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
+  AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRoute,
   AuthenticatedAdminConvoyeursRoute: AuthenticatedAdminConvoyeursRoute,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
@@ -887,18 +949,23 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedConvoyeurRouteChildren {
+  AuthenticatedConvoyeurDisponibilitesRoute: typeof AuthenticatedConvoyeurDisponibilitesRoute
   AuthenticatedConvoyeurDocumentsRoute: typeof AuthenticatedConvoyeurDocumentsRoute
   AuthenticatedConvoyeurHistoriqueRoute: typeof AuthenticatedConvoyeurHistoriqueRoute
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
+  AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
   AuthenticatedConvoyeurIndexRoute: typeof AuthenticatedConvoyeurIndexRoute
 }
 
 const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
   {
+    AuthenticatedConvoyeurDisponibilitesRoute:
+      AuthenticatedConvoyeurDisponibilitesRoute,
     AuthenticatedConvoyeurDocumentsRoute: AuthenticatedConvoyeurDocumentsRoute,
     AuthenticatedConvoyeurHistoriqueRoute:
       AuthenticatedConvoyeurHistoriqueRoute,
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
+    AuthenticatedConvoyeurProfilRoute: AuthenticatedConvoyeurProfilRoute,
     AuthenticatedConvoyeurIndexRoute: AuthenticatedConvoyeurIndexRoute,
   }
 

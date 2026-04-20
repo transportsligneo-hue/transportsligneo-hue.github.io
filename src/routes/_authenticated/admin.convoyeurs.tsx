@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Eye, X, CheckCircle, XCircle, Plus, UserPlus } from "lucide-react";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,
@@ -111,7 +112,26 @@ function AdminConvoyeurs() {
         }
       }
     }
+    // Détecter le passage à "valide" pour notifier
+    const previous = convoyeurs.find((c) => c.id === id) || (selected?.id === id ? selected : null);
+    const wasNotValid = previous?.statut !== "valide";
+
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
+
+    // Email auto si validation
+    if (statut === "valide" && wasNotValid && previous) {
+      try {
+        await sendTransactionalEmail({
+          templateName: "convoyeur-validation",
+          recipientEmail: previous.email,
+          idempotencyKey: `convoyeur-validation-${previous.id}`,
+          templateData: { prenom: previous.prenom, nom: previous.nom },
+        });
+      } catch (err) {
+        console.error("[admin.convoyeurs] envoi email validation échoué", err);
+      }
+    }
+
     fetchConvoyeurs();
     if (selected?.id === id) setSelected((prev) => prev ? { ...prev, statut } : null);
   };
