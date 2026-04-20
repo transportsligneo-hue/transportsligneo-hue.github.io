@@ -9,10 +9,10 @@ const valeurs = [
 ];
 
 const stats = [
-  { value: "1 200+", label: "Missions réalisées" },
-  { value: "850 000", label: "Kilomètres parcourus" },
+  { value: "2 300+", label: "Missions réalisées" },
+  { value: "500 000+", label: "Kilomètres parcourus" },
   { value: "98 %", label: "Clients satisfaits" },
-  { value: "6 ans", label: "D'expérience terrain" },
+  { value: "5 ans", label: "D'expérience terrain" },
 ];
 
 export default function AProposContent() {
@@ -29,7 +29,7 @@ export default function AProposContent() {
             Le convoyage,<br />une affaire de confiance
           </h1>
           <p className="text-cream/75 text-base md:text-lg mt-6 leading-relaxed max-w-2xl mx-auto">
-            Depuis 2019, <span className="text-primary">Transports Ligneo</span> accompagne particuliers,
+            Depuis 2021, <span className="text-primary">Transports Ligneo</span> accompagne particuliers,
             concessionnaires et loueurs dans le convoyage de leurs véhicules à travers la France.
             Une promesse simple : votre véhicule, livré comme s'il était le nôtre.
           </p>
@@ -50,7 +50,7 @@ export default function AProposContent() {
               </h2>
               <div className="space-y-4 text-cream/75 text-sm md:text-base leading-relaxed">
                 <p>
-                  L'aventure démarre à Tours, en 2019. Après plusieurs années passées
+                  L'aventure démarre à Tours, en 2021. Après plusieurs années passées
                   à constater les écarts de qualité du convoyage automobile, le constat
                   est clair : il manque un acteur réellement <span className="text-primary">premium</span>,
                   capable d'allier rigueur, transparence tarifaire et relation humaine.
@@ -61,7 +61,7 @@ export default function AProposContent() {
                   incluse, et une exigence absolue sur la prise en main du véhicule.
                 </p>
                 <p>
-                  Six ans plus tard, l'entreprise est devenue le partenaire de référence
+                  Cinq ans plus tard, l'entreprise est devenue le partenaire de référence
                   de plusieurs concessionnaires, loueurs et particuliers exigeants
                   partout en France.
                 </p>
@@ -76,7 +76,7 @@ export default function AProposContent() {
                 </div>
                 <div>
                   <p className="font-heading text-primary text-lg tracking-wide">
-                    Aurélien Ligneo
+                    Olivier G.
                   </p>
                   <p className="text-cream/55 text-xs tracking-wider uppercase">
                     Fondateur & dirigeant
@@ -91,7 +91,7 @@ export default function AProposContent() {
               <div className="gold-divider-short mt-6" />
               <div className="grid grid-cols-2 gap-4 mt-6 text-center">
                 <div>
-                  <p className="font-heading text-primary text-2xl">2019</p>
+                  <p className="font-heading text-primary text-2xl">2021</p>
                   <p className="text-cream/50 text-[10px] uppercase tracking-wider mt-1">Création</p>
                 </div>
                 <div>
