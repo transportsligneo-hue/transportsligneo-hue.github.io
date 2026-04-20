@@ -64,7 +64,8 @@ function LoginPage() {
           }
           return;
         }
-        navigate({ to: "/" });
+        // role === "client" ou null → espace client
+        navigate({ to: "/dashboard-client" });
       }
     })();
     return () => { cancelled = true; };

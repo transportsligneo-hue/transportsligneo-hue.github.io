@@ -45,7 +45,12 @@ function InscriptionClient() {
         password: form.password,
         options: {
           emailRedirectTo: `${window.location.origin}/login`,
-          data: { role: "client", nom: form.nom, prenom: form.prenom },
+          data: {
+            role: "client",
+            nom: form.nom,
+            prenom: form.prenom,
+            telephone: form.telephone,
+          },
         },
       });
 
@@ -58,25 +63,19 @@ function InscriptionClient() {
       }
 
       if (authData.user) {
-        // Update profile with full info
-        await supabase.from("profiles").upsert({
-          user_id: authData.user.id,
-          nom: form.nom,
-          prenom: form.prenom,
-          email: form.email,
-          telephone: form.telephone,
-        }, { onConflict: "user_id" });
-
-        // Insert client role
-        await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "client" as const,
-        });
+        // Le trigger handle_new_user crée automatiquement profile + user_roles.
+        // On met juste à jour le téléphone si l'utilisateur a une session active.
+        if (authData.session) {
+          await supabase.from("profiles").update({
+            telephone: form.telephone,
+            nom: form.nom,
+            prenom: form.prenom,
+          }).eq("user_id", authData.user.id);
+        }
 
         setSuccess(true);
-        // If session active (auto-confirm), redirect; otherwise show success message
         if (authData.session) {
-          setTimeout(() => navigate({ to: "/" }), 1500);
+          setTimeout(() => navigate({ to: "/dashboard-client" }), 1500);
         }
       }
     } catch {
