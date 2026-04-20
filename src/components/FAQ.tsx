@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 
 const faqs = [
@@ -80,12 +81,12 @@ export default function FAQ() {
         {/* CTA */}
         <div className="text-center mt-12">
           <p className="text-cream/50 text-sm mb-4">Vous avez une autre question ?</p>
-          <a
-            href="#contact"
+          <Link
+            to="/contact"
             className="px-8 py-3 gold-border text-primary font-heading text-sm tracking-[0.15em] uppercase hover:bg-primary/10 transition-colors duration-300 inline-block"
           >
             Contactez-nous
-          </a>
+          </Link>
         </div>
       </div>
     </section>
