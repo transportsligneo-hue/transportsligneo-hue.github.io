@@ -64,8 +64,19 @@ function LoginPage() {
           }
           return;
         }
-        // role === "client" ou null → espace client
-        navigate({ to: "/dashboard-client" });
+        // role === "client" ou null → on regarde si B2B ou particulier
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("type_client" as never)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        const typeClient = (prof as { type_client?: string } | null)?.type_client;
+        if (typeClient === "b2b") {
+          navigate({ to: "/dashboard-pro" });
+        } else {
+          navigate({ to: "/dashboard-client" });
+        }
       }
     })();
     return () => { cancelled = true; };
