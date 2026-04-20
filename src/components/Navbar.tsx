@@ -10,7 +10,9 @@ const navLinks = [
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
+  { to: "/pro", label: "Pros" },
   { to: "/a-propos", label: "À propos" },
+  { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },
 ] as const;
 

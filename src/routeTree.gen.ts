@@ -15,6 +15,7 @@ import { Route as SetupAdminRouteImport } from './routes/setup-admin'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReserverRouteImport } from './routes/reserver'
+import { Route as ProRouteImport } from './routes/pro'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
@@ -25,11 +26,13 @@ import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
 import { Route as ChoisirCompteRouteImport } from './routes/choisir-compte'
 import { Route as CgvRouteImport } from './routes/cgv'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AttenteValidationRouteImport } from './routes/attente-validation'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -90,6 +93,11 @@ const ReserverRoute = ReserverRouteImport.update({
   path: '/reserver',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
   id: '/mot-de-passe-oublie',
   path: '/mot-de-passe-oublie',
@@ -140,6 +148,11 @@ const CgvRoute = CgvRouteImport.update({
   path: '/cgv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AttenteValidationRoute = AttenteValidationRouteImport.update({
   id: '/attente-validation',
   path: '/attente-validation',
@@ -163,6 +176,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
 } as any)
 const AuthenticatedDashboardClientRoute =
   AuthenticatedDashboardClientRouteImport.update({
@@ -336,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
@@ -346,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/pro': typeof ProRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
@@ -355,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
@@ -387,6 +408,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
@@ -397,12 +419,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/pro': typeof ProRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
@@ -437,6 +461,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
@@ -447,6 +472,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/pro': typeof ProRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
@@ -456,6 +482,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRoute
@@ -490,6 +517,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/attente-validation'
+    | '/blog'
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
@@ -500,6 +528,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
+    | '/pro'
     | '/reserver'
     | '/reset-password'
     | '/services'
@@ -509,6 +538,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
     | '/admin/clients'
@@ -541,6 +571,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/attente-validation'
+    | '/blog'
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
@@ -551,12 +582,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
+    | '/pro'
     | '/reserver'
     | '/reset-password'
     | '/services'
     | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
     | '/admin/clients'
@@ -590,6 +623,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/a-propos'
     | '/attente-validation'
+    | '/blog'
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
@@ -600,6 +634,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
+    | '/pro'
     | '/reserver'
     | '/reset-password'
     | '/services'
@@ -609,6 +644,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/clients'
@@ -643,6 +679,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AProposRoute: typeof AProposRoute
   AttenteValidationRoute: typeof AttenteValidationRoute
+  BlogRoute: typeof BlogRouteWithChildren
   CgvRoute: typeof CgvRoute
   ChoisirCompteRoute: typeof ChoisirCompteRoute
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
@@ -653,6 +690,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
+  ProRoute: typeof ProRoute
   ReserverRoute: typeof ReserverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
@@ -710,6 +748,13 @@ declare module '@tanstack/react-router' {
       path: '/reserver'
       fullPath: '/reserver'
       preLoaderRoute: typeof ReserverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mot-de-passe-oublie': {
@@ -782,6 +827,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CgvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/attente-validation': {
       id: '/attente-validation'
       path: '/attente-validation'
@@ -816,6 +868,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/_authenticated/dashboard-client': {
       id: '/_authenticated/dashboard-client'
@@ -1133,11 +1192,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AProposRoute: AProposRoute,
   AttenteValidationRoute: AttenteValidationRoute,
+  BlogRoute: BlogRouteWithChildren,
   CgvRoute: CgvRoute,
   ChoisirCompteRoute: ChoisirCompteRoute,
   CommentCaMarcheRoute: CommentCaMarcheRoute,
@@ -1148,6 +1218,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
+  ProRoute: ProRoute,
   ReserverRoute: ReserverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
