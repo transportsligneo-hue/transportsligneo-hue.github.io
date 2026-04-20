@@ -24,6 +24,7 @@ const navItems: SidebarItem[] = [
 function ClientLayout() {
   const { isAuthenticated, user, role, isLoading } = useAuth();
   const [active, setActive] = useState<boolean | null>(null);
+  const [typeClient, setTypeClient] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) { setActive(null); return; }
@@ -36,6 +37,15 @@ function ClientLayout() {
       .then(({ data }) => {
         const row = data as { actif?: boolean } | null;
         setActive(row?.actif === false ? false : true);
+      });
+    supabase
+      .from("profiles")
+      .select("type_client" as never)
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const row = data as { type_client?: string } | null;
+        setTypeClient(row?.type_client ?? "particulier");
       });
   }, [user]);
 
