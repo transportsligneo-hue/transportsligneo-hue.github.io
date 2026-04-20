@@ -3,8 +3,9 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
 import CommentCaMarche from "@/components/CommentCaMarche";
-import AvisClients from "@/components/AvisClients";
+import AvisClientsDynamiques from "@/components/AvisClientsDynamiques";
 import Confiance from "@/components/Confiance";
+import MissionsCounter from "@/components/MissionsCounter";
 import Footer from "@/components/Footer";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
 
@@ -30,9 +31,10 @@ function Index() {
       <div className="hidden md:block">
         <Navbar />
         <Hero />
+        <MissionsCounter />
         <PourquoiNousChoisir />
         <CommentCaMarche />
-        <AvisClients />
+        <AvisClientsDynamiques />
         <Confiance />
         <Footer />
       </div>

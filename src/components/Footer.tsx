@@ -44,6 +44,8 @@ export default function Footer() {
               Informations légales
             </p>
             <ul className="space-y-2 text-sm">
+              <li><Link to="/pro" className="text-cream/50 hover:text-primary transition-colors">Espace professionnels</Link></li>
+              <li><Link to="/blog" className="text-cream/50 hover:text-primary transition-colors">Blog</Link></li>
               <li><Link to="/cgv" className="text-cream/50 hover:text-primary transition-colors">Conditions Générales de Vente</Link></li>
               <li><Link to="/mentions-legales" className="text-cream/50 hover:text-primary transition-colors">Mentions Légales</Link></li>
               <li><Link to="/confidentialite" className="text-cream/50 hover:text-primary transition-colors">Politique de Confidentialité</Link></li>
