@@ -6,6 +6,7 @@ import CommentCaMarche from "@/components/CommentCaMarche";
 import AvisClients from "@/components/AvisClients";
 import Confiance from "@/components/Confiance";
 import Footer from "@/components/Footer";
+import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -22,13 +23,19 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <>
-      <Navbar />
-      <Hero />
-      <PourquoiNousChoisir />
-      <CommentCaMarche />
-      <AvisClients />
-      <Confiance />
-      <Footer />
+      {/* Mobile : écran d'app dédié */}
+      <MobileHomeScreen />
+
+      {/* Desktop : layout existant intact */}
+      <div className="hidden md:block">
+        <Navbar />
+        <Hero />
+        <PourquoiNousChoisir />
+        <CommentCaMarche />
+        <AvisClients />
+        <Confiance />
+        <Footer />
+      </div>
     </>
   );
 }
