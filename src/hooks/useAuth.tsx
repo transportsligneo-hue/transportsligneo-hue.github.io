@@ -2,11 +2,13 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
+type AppRole = "admin" | "convoyeur" | "client";
+
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   session: Session | null;
-  role: "admin" | "convoyeur" | null;
+  role: AppRole | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -19,17 +21,23 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<"admin" | "convoyeur" | null>(null);
+  const [role, setRole] = useState<AppRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRole = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
+      .eq("actif", true)
       .limit(1)
-      .single();
-    setRole(data?.role as "admin" | "convoyeur" | null);
+      .maybeSingle();
+    if (error) {
+      console.warn("[useAuth] fetchRole error:", error.message);
+      setRole(null);
+      return;
+    }
+    setRole((data?.role as AppRole | undefined) ?? null);
   }, []);
 
   useEffect(() => {
