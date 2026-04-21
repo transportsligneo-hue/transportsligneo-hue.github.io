@@ -481,6 +481,153 @@ function AdminTrajets() {
                 ))}
               </Select>
             </FormField>
+
+            {/* === SECTION ENCHÈRES === */}
+            <div className="mt-5 pt-5 border-t border-pro-border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-pro-text flex items-center gap-2">
+                  <Gavel size={16} className="text-pro-accent" />
+                  Publication & offres convoyeurs
+                </h3>
+                <Badge
+                  tone={
+                    selected.statut_publication === "publie"
+                      ? "success"
+                      : selected.statut_publication === "attribue"
+                      ? "info"
+                      : "neutral"
+                  }
+                >
+                  {selected.statut_publication === "publie"
+                    ? "Publié"
+                    : selected.statut_publication === "attribue"
+                    ? "Attribué"
+                    : "Brouillon"}
+                </Badge>
+              </div>
+
+              {selected.statut_publication !== "attribue" && (
+                <Card padded={false} className="mb-3">
+                  <div className="p-3 space-y-3">
+                    <FormField label="Prix suggéré aux convoyeurs (€)">
+                      <TextInput
+                        type="number"
+                        value={prixSuggereInput}
+                        onChange={(e) => setPrixSuggereInput(e.target.value)}
+                        placeholder="ex: 250"
+                      />
+                    </FormField>
+                    <div className="flex gap-2">
+                      {selected.statut_publication !== "publie" ? (
+                        <Button
+                          variant="success"
+                          onClick={() => togglePublication(true)}
+                          disabled={savingPub || !prixSuggereInput}
+                          icon={<Send size={14} />}
+                          className="flex-1"
+                        >
+                          Publier aux convoyeurs
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="danger"
+                          onClick={() => togglePublication(false)}
+                          disabled={savingPub}
+                          className="flex-1"
+                        >
+                          Dépublier
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              <p className="text-xs text-pro-muted mb-2">
+                {offres.length} offre{offres.length > 1 ? "s" : ""} reçue{offres.length > 1 ? "s" : ""}
+              </p>
+
+              {offres.length === 0 ? (
+                <div className="text-center py-6 text-pro-muted text-sm bg-pro-bg-soft/30 rounded-lg border border-dashed border-pro-border">
+                  Aucune offre pour le moment.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {offres.map((o) => (
+                    <div
+                      key={o.id}
+                      className={`border rounded-lg p-3 ${
+                        o.statut === "acceptee"
+                          ? "border-emerald-200 bg-emerald-50/50"
+                          : o.statut === "refusee" || o.statut === "retiree"
+                          ? "border-pro-border bg-slate-50 opacity-60"
+                          : "border-pro-border bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-pro-text text-sm">
+                            {o.convoyeur?.prenom} {o.convoyeur?.nom}
+                          </p>
+                          <p className="text-pro-muted text-xs">
+                            {o.convoyeur?.telephone} · {o.convoyeur?.email}
+                          </p>
+                          <p className="text-xs mt-1">
+                            <span className="text-pro-muted">Type :</span>{" "}
+                            {o.type_offre === "acceptation_directe" ? "Accepte le prix suggéré" : "Contre-proposition"}
+                            {o.prix_suggere_snapshot != null && o.type_offre === "contre_proposition" && (
+                              <span className="text-pro-muted"> (suggéré : {o.prix_suggere_snapshot} €)</span>
+                            )}
+                          </p>
+                          {o.message && (
+                            <p className="text-xs text-pro-text-soft mt-1 italic">"{o.message}"</p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-emerald-700 font-bold text-lg leading-none">{o.prix_propose} €</p>
+                          <Badge
+                            tone={
+                              o.statut === "acceptee"
+                                ? "success"
+                                : o.statut === "refusee" || o.statut === "retiree"
+                                ? "neutral"
+                                : "warning"
+                            }
+                          >
+                            {o.statut === "en_attente"
+                              ? "En attente"
+                              : o.statut === "acceptee"
+                              ? "Acceptée"
+                              : o.statut === "refusee"
+                              ? "Refusée"
+                              : "Retirée"}
+                          </Badge>
+                        </div>
+                      </div>
+                      {o.statut === "en_attente" && selected.statut_publication !== "attribue" && (
+                        <div className="flex gap-2 mt-3 pt-3 border-t border-pro-border">
+                          <Button
+                            variant="success"
+                            onClick={() => validerOffre(o)}
+                            icon={<CheckCircle2 size={13} />}
+                            className="flex-1"
+                          >
+                            Valider ce convoyeur
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => refuserOffre(o.id)}
+                            icon={<XCircle size={13} />}
+                          >
+                            Refuser
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </Modal>
