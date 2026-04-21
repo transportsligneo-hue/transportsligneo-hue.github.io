@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck,
   FileText, Navigation, Clock, ChevronDown, ChevronUp, Truck,
+  PackageCheck, UserClock, AlertTriangle, Route as RouteIcon,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { InspectionGuidee } from "@/components/InspectionGuidee";
