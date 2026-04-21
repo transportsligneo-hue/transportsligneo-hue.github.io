@@ -55,6 +55,7 @@ import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_auth
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
 import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_authenticated/convoyeur.historique'
 import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_authenticated/convoyeur.documents'
+import { Route as AuthenticatedConvoyeurDisponiblesRouteImport } from './routes/_authenticated/convoyeur.disponibles'
 import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './routes/_authenticated/convoyeur.disponibilites'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
@@ -316,6 +317,12 @@ const AuthenticatedConvoyeurDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
+const AuthenticatedConvoyeurDisponiblesRoute =
+  AuthenticatedConvoyeurDisponiblesRouteImport.update({
+    id: '/disponibles',
+    path: '/disponibles',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
 const AuthenticatedConvoyeurDisponibilitesRoute =
   AuthenticatedConvoyeurDisponibilitesRouteImport.update({
     id: '/disponibilites',
@@ -435,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
+  '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
@@ -492,6 +500,7 @@ export interface FileRoutesByTo {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
+  '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
@@ -555,6 +564,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
+  '/_authenticated/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
@@ -618,6 +628,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/trajets'
     | '/convoyeur/disponibilites'
+    | '/convoyeur/disponibles'
     | '/convoyeur/documents'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
@@ -675,6 +686,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/trajets'
     | '/convoyeur/disponibilites'
+    | '/convoyeur/disponibles'
     | '/convoyeur/documents'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
@@ -737,6 +749,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/convoyeur/disponibilites'
+    | '/_authenticated/convoyeur/disponibles'
     | '/_authenticated/convoyeur/documents'
     | '/_authenticated/convoyeur/historique'
     | '/_authenticated/convoyeur/missions'
@@ -1119,6 +1132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConvoyeurDocumentsRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
+    '/_authenticated/convoyeur/disponibles': {
+      id: '/_authenticated/convoyeur/disponibles'
+      path: '/disponibles'
+      fullPath: '/convoyeur/disponibles'
+      preLoaderRoute: typeof AuthenticatedConvoyeurDisponiblesRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
     '/_authenticated/convoyeur/disponibilites': {
       id: '/_authenticated/convoyeur/disponibilites'
       path: '/disponibilites'
@@ -1247,6 +1267,7 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurDisponibilitesRoute: typeof AuthenticatedConvoyeurDisponibilitesRoute
+  AuthenticatedConvoyeurDisponiblesRoute: typeof AuthenticatedConvoyeurDisponiblesRoute
   AuthenticatedConvoyeurDocumentsRoute: typeof AuthenticatedConvoyeurDocumentsRoute
   AuthenticatedConvoyeurHistoriqueRoute: typeof AuthenticatedConvoyeurHistoriqueRoute
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
@@ -1258,6 +1279,8 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
   {
     AuthenticatedConvoyeurDisponibilitesRoute:
       AuthenticatedConvoyeurDisponibilitesRoute,
+    AuthenticatedConvoyeurDisponiblesRoute:
+      AuthenticatedConvoyeurDisponiblesRoute,
     AuthenticatedConvoyeurDocumentsRoute: AuthenticatedConvoyeurDocumentsRoute,
     AuthenticatedConvoyeurHistoriqueRoute:
       AuthenticatedConvoyeurHistoriqueRoute,

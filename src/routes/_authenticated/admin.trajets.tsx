@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon } from "lucide-react";
+import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -44,6 +44,21 @@ interface Trajet {
   notes_internes: string | null;
   demande_id: string | null;
   created_at: string;
+  prix_suggere?: number | null;
+  statut_publication?: string;
+}
+
+interface Offre {
+  id: string;
+  trajet_id: string;
+  convoyeur_id: string;
+  prix_propose: number;
+  prix_suggere_snapshot: number | null;
+  type_offre: string;
+  statut: string;
+  message: string | null;
+  created_at: string;
+  convoyeur?: { prenom: string; nom: string; telephone: string; email: string } | null;
 }
 
 const statuts = ["en_attente", "attribue", "accepte", "en_cours", "termine", "annule"];
@@ -79,6 +94,97 @@ function AdminTrajets() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState(emptyTrajet);
   const [editing, setEditing] = useState(false);
+  const [offres, setOffres] = useState<Offre[]>([]);
+  const [prixSuggereInput, setPrixSuggereInput] = useState<string>("");
+  const [savingPub, setSavingPub] = useState(false);
+
+  const fetchOffres = useCallback(async (trajetId: string) => {
+    const { data: offresData } = await supabase
+      .from("mission_offres" as never)
+      .select("*")
+      .eq("trajet_id" as never, trajetId as never)
+      .order("prix_propose" as never, { ascending: true } as never);
+    if (!offresData) {
+      setOffres([]);
+      return;
+    }
+    const list = offresData as unknown as Offre[];
+    // Hydrater convoyeurs
+    const ids = Array.from(new Set(list.map((o) => o.convoyeur_id)));
+    if (ids.length > 0) {
+      const { data: convs } = await supabase
+        .from("convoyeurs")
+        .select("id, prenom, nom, telephone, email")
+        .in("id", ids);
+      const map: Record<string, { prenom: string; nom: string; telephone: string; email: string }> = {};
+      (convs ?? []).forEach((c) => {
+        map[c.id] = { prenom: c.prenom, nom: c.nom, telephone: c.telephone, email: c.email };
+      });
+      setOffres(list.map((o) => ({ ...o, convoyeur: map[o.convoyeur_id] ?? null })));
+    } else {
+      setOffres(list);
+    }
+  }, []);
+
+  // Charger les offres dès qu'un trajet est ouvert en lecture
+  useEffect(() => {
+    if (selected && !editing && !showCreate) {
+      fetchOffres(selected.id);
+      setPrixSuggereInput(selected.prix_suggere?.toString() ?? "");
+    } else {
+      setOffres([]);
+    }
+  }, [selected, editing, showCreate, fetchOffres]);
+
+  const togglePublication = async (publier: boolean) => {
+    if (!selected) return;
+    setSavingPub(true);
+    const updates: Record<string, unknown> = {
+      statut_publication: publier ? "publie" : "brouillon",
+    };
+    if (publier && prixSuggereInput) {
+      updates.prix_suggere = parseFloat(prixSuggereInput);
+    }
+    await supabase.from("trajets").update(updates as never).eq("id", selected.id);
+    setSavingPub(false);
+    setSelected({ ...selected, statut_publication: publier ? "publie" : "brouillon", prix_suggere: publier ? parseFloat(prixSuggereInput || "0") : selected.prix_suggere });
+    fetchTrajets();
+  };
+
+  const validerOffre = async (offre: Offre) => {
+    if (!selected) return;
+    if (!confirm(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`)) return;
+    // 1) Marquer cette offre acceptée, refuser les autres
+    await supabase.from("mission_offres" as never).update({ statut: "acceptee" } as never).eq("id" as never, offre.id as never);
+    await supabase
+      .from("mission_offres" as never)
+      .update({ statut: "refusee" } as never)
+      .eq("trajet_id" as never, selected.id as never)
+      .neq("id" as never, offre.id as never);
+    // 2) Créer une attribution officielle
+    await supabase.from("attributions").insert({
+      trajet_id: selected.id,
+      convoyeur_id: offre.convoyeur_id,
+      statut: "propose",
+    });
+    // 3) Mettre le trajet en attribué + figer publication
+    await supabase
+      .from("trajets")
+      .update({
+        statut: "attribue",
+        tarif_convoyeur: offre.prix_propose,
+        statut_publication: "attribue",
+      } as never)
+      .eq("id", selected.id);
+    fetchOffres(selected.id);
+    fetchTrajets();
+    setSelected({ ...selected, statut: "attribue", tarif_convoyeur: offre.prix_propose, statut_publication: "attribue" });
+  };
+
+  const refuserOffre = async (offreId: string) => {
+    await supabase.from("mission_offres" as never).update({ statut: "refusee" } as never).eq("id" as never, offreId as never);
+    if (selected) fetchOffres(selected.id);
+  };
 
   const fetchTrajets = useCallback(async () => {
     let query = supabase.from("trajets").select("*").order("created_at", { ascending: false });
@@ -375,6 +481,153 @@ function AdminTrajets() {
                 ))}
               </Select>
             </FormField>
+
+            {/* === SECTION ENCHÈRES === */}
+            <div className="mt-5 pt-5 border-t border-pro-border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-pro-text flex items-center gap-2">
+                  <Gavel size={16} className="text-pro-accent" />
+                  Publication & offres convoyeurs
+                </h3>
+                <Badge
+                  tone={
+                    selected.statut_publication === "publie"
+                      ? "success"
+                      : selected.statut_publication === "attribue"
+                      ? "info"
+                      : "neutral"
+                  }
+                >
+                  {selected.statut_publication === "publie"
+                    ? "Publié"
+                    : selected.statut_publication === "attribue"
+                    ? "Attribué"
+                    : "Brouillon"}
+                </Badge>
+              </div>
+
+              {selected.statut_publication !== "attribue" && (
+                <Card padded={false} className="mb-3">
+                  <div className="p-3 space-y-3">
+                    <FormField label="Prix suggéré aux convoyeurs (€)">
+                      <TextInput
+                        type="number"
+                        value={prixSuggereInput}
+                        onChange={(e) => setPrixSuggereInput(e.target.value)}
+                        placeholder="ex: 250"
+                      />
+                    </FormField>
+                    <div className="flex gap-2">
+                      {selected.statut_publication !== "publie" ? (
+                        <Button
+                          variant="success"
+                          onClick={() => togglePublication(true)}
+                          disabled={savingPub || !prixSuggereInput}
+                          icon={<Send size={14} />}
+                          className="flex-1"
+                        >
+                          Publier aux convoyeurs
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="danger"
+                          onClick={() => togglePublication(false)}
+                          disabled={savingPub}
+                          className="flex-1"
+                        >
+                          Dépublier
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              <p className="text-xs text-pro-muted mb-2">
+                {offres.length} offre{offres.length > 1 ? "s" : ""} reçue{offres.length > 1 ? "s" : ""}
+              </p>
+
+              {offres.length === 0 ? (
+                <div className="text-center py-6 text-pro-muted text-sm bg-pro-bg-soft/30 rounded-lg border border-dashed border-pro-border">
+                  Aucune offre pour le moment.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {offres.map((o) => (
+                    <div
+                      key={o.id}
+                      className={`border rounded-lg p-3 ${
+                        o.statut === "acceptee"
+                          ? "border-emerald-200 bg-emerald-50/50"
+                          : o.statut === "refusee" || o.statut === "retiree"
+                          ? "border-pro-border bg-slate-50 opacity-60"
+                          : "border-pro-border bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-pro-text text-sm">
+                            {o.convoyeur?.prenom} {o.convoyeur?.nom}
+                          </p>
+                          <p className="text-pro-muted text-xs">
+                            {o.convoyeur?.telephone} · {o.convoyeur?.email}
+                          </p>
+                          <p className="text-xs mt-1">
+                            <span className="text-pro-muted">Type :</span>{" "}
+                            {o.type_offre === "acceptation_directe" ? "Accepte le prix suggéré" : "Contre-proposition"}
+                            {o.prix_suggere_snapshot != null && o.type_offre === "contre_proposition" && (
+                              <span className="text-pro-muted"> (suggéré : {o.prix_suggere_snapshot} €)</span>
+                            )}
+                          </p>
+                          {o.message && (
+                            <p className="text-xs text-pro-text-soft mt-1 italic">"{o.message}"</p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-emerald-700 font-bold text-lg leading-none">{o.prix_propose} €</p>
+                          <Badge
+                            tone={
+                              o.statut === "acceptee"
+                                ? "success"
+                                : o.statut === "refusee" || o.statut === "retiree"
+                                ? "neutral"
+                                : "warning"
+                            }
+                          >
+                            {o.statut === "en_attente"
+                              ? "En attente"
+                              : o.statut === "acceptee"
+                              ? "Acceptée"
+                              : o.statut === "refusee"
+                              ? "Refusée"
+                              : "Retirée"}
+                          </Badge>
+                        </div>
+                      </div>
+                      {o.statut === "en_attente" && selected.statut_publication !== "attribue" && (
+                        <div className="flex gap-2 mt-3 pt-3 border-t border-pro-border">
+                          <Button
+                            variant="success"
+                            onClick={() => validerOffre(o)}
+                            icon={<CheckCircle2 size={13} />}
+                            className="flex-1"
+                          >
+                            Valider ce convoyeur
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => refuserOffre(o.id)}
+                            icon={<XCircle size={13} />}
+                          >
+                            Refuser
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </Modal>
