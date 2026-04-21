@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon } from "lucide-react";
+import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -44,6 +44,21 @@ interface Trajet {
   notes_internes: string | null;
   demande_id: string | null;
   created_at: string;
+  prix_suggere?: number | null;
+  statut_publication?: string;
+}
+
+interface Offre {
+  id: string;
+  trajet_id: string;
+  convoyeur_id: string;
+  prix_propose: number;
+  prix_suggere_snapshot: number | null;
+  type_offre: string;
+  statut: string;
+  message: string | null;
+  created_at: string;
+  convoyeur?: { prenom: string; nom: string; telephone: string; email: string } | null;
 }
 
 const statuts = ["en_attente", "attribue", "accepte", "en_cours", "termine", "annule"];
