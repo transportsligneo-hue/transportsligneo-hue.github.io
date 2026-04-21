@@ -69,6 +69,7 @@ export type Database = {
           societe: string | null
           statut: string
           telephone: string | null
+          type_demande: string
           updated_at: string
           volume: string | null
         }
@@ -84,6 +85,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          type_demande?: string
           updated_at?: string
           volume?: string | null
         }
@@ -99,6 +101,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          type_demande?: string
           updated_at?: string
           volume?: string | null
         }
