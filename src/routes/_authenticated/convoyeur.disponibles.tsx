@@ -79,8 +79,7 @@ function ConvoyeurDisponibles() {
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
         .from("trajets")
-        // @ts-expect-error nouveau champ
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at")
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at" as never)
         .eq("statut_publication" as never, "publie" as never)
         .order("created_at", { ascending: false }),
       supabase
