@@ -641,6 +641,60 @@ export type Database = {
           },
         ]
       }
+      mission_offres: {
+        Row: {
+          convoyeur_id: string
+          created_at: string
+          id: string
+          message: string | null
+          prix_propose: number
+          prix_suggere_snapshot: number | null
+          statut: string
+          trajet_id: string
+          type_offre: string
+          updated_at: string
+        }
+        Insert: {
+          convoyeur_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          prix_propose: number
+          prix_suggere_snapshot?: number | null
+          statut?: string
+          trajet_id: string
+          type_offre?: string
+          updated_at?: string
+        }
+        Update: {
+          convoyeur_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          prix_propose?: number
+          prix_suggere_snapshot?: number | null
+          statut?: string
+          trajet_id?: string
+          type_offre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_offres_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_offres_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       missions: {
         Row: {
           carburant: string | null
@@ -837,7 +891,9 @@ export type Database = {
           modele: string | null
           notes_internes: string | null
           prix: number | null
+          prix_suggere: number | null
           statut: string
+          statut_publication: string
           tarif_convoyeur: number | null
           updated_at: string
         }
@@ -857,7 +913,9 @@ export type Database = {
           modele?: string | null
           notes_internes?: string | null
           prix?: number | null
+          prix_suggere?: number | null
           statut?: string
+          statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
         }
@@ -877,7 +935,9 @@ export type Database = {
           modele?: string | null
           notes_internes?: string | null
           prix?: number | null
+          prix_suggere?: number | null
           statut?: string
+          statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
         }
