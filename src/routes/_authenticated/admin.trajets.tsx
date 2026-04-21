@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel } from "lucide-react";
 import {
   PageHeader,
@@ -154,20 +155,29 @@ function AdminTrajets() {
   const validerOffre = async (offre: Offre) => {
     if (!selected) return;
     if (!confirm(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`)) return;
-    // 1) Marquer cette offre acceptée, refuser les autres
+
+    // 1) Récupérer toutes les autres offres en attente pour les notifier
+    const { data: autresOffres } = await supabase
+      .from("mission_offres" as never)
+      .select("id, convoyeur_id, prix_propose")
+      .eq("trajet_id" as never, selected.id as never)
+      .neq("id" as never, offre.id as never)
+      .eq("statut" as never, "en_attente" as never);
+
+    // 2) Marquer cette offre acceptée, refuser les autres
     await supabase.from("mission_offres" as never).update({ statut: "acceptee" } as never).eq("id" as never, offre.id as never);
     await supabase
       .from("mission_offres" as never)
       .update({ statut: "refusee" } as never)
       .eq("trajet_id" as never, selected.id as never)
       .neq("id" as never, offre.id as never);
-    // 2) Créer une attribution officielle
+    // 3) Créer une attribution officielle
     await supabase.from("attributions").insert({
       trajet_id: selected.id,
       convoyeur_id: offre.convoyeur_id,
       statut: "propose",
     });
-    // 3) Mettre le trajet en attribué + figer publication
+    // 4) Mettre le trajet en attribué + figer publication
     await supabase
       .from("trajets")
       .update({
@@ -176,13 +186,74 @@ function AdminTrajets() {
         statut_publication: "attribue",
       } as never)
       .eq("id", selected.id);
+
+    // 5) Notifications email (best-effort)
+    const dateFmt = selected.date_trajet
+      ? new Date(selected.date_trajet).toLocaleDateString("fr-FR")
+      : "—";
+    if (offre.convoyeur?.email) {
+      sendTransactionalEmail({
+        templateName: "offre-acceptee",
+        recipientEmail: offre.convoyeur.email,
+        idempotencyKey: `offre-acceptee-${offre.id}`,
+        templateData: {
+          prenom: offre.convoyeur.prenom,
+          depart: selected.depart,
+          arrivee: selected.arrivee,
+          date: dateFmt,
+          prixPropose: offre.prix_propose,
+        },
+      }).catch(() => {});
+    }
+    if (autresOffres && autresOffres.length > 0) {
+      const ids = autresOffres as unknown as { convoyeur_id: string; prix_propose: number; id: string }[];
+      const { data: convs } = await supabase
+        .from("convoyeurs")
+        .select("id, prenom, email")
+        .in("id", ids.map((o) => o.convoyeur_id));
+      ids.forEach((o) => {
+        const c = convs?.find((cc) => cc.id === o.convoyeur_id);
+        if (c?.email) {
+          sendTransactionalEmail({
+            templateName: "offre-refusee",
+            recipientEmail: c.email,
+            idempotencyKey: `offre-refusee-${o.id}`,
+            templateData: {
+              prenom: c.prenom,
+              depart: selected.depart,
+              arrivee: selected.arrivee,
+              date: dateFmt,
+              prixPropose: o.prix_propose,
+            },
+          }).catch(() => {});
+        }
+      });
+    }
+
     fetchOffres(selected.id);
     fetchTrajets();
     setSelected({ ...selected, statut: "attribue", tarif_convoyeur: offre.prix_propose, statut_publication: "attribue" });
   };
 
-  const refuserOffre = async (offreId: string) => {
-    await supabase.from("mission_offres" as never).update({ statut: "refusee" } as never).eq("id" as never, offreId as never);
+  const refuserOffre = async (offre: Offre) => {
+    await supabase.from("mission_offres" as never).update({ statut: "refusee" } as never).eq("id" as never, offre.id as never);
+    if (offre.convoyeur?.email && selected) {
+      const dateFmt = selected.date_trajet
+        ? new Date(selected.date_trajet).toLocaleDateString("fr-FR")
+        : "—";
+      sendTransactionalEmail({
+        templateName: "offre-refusee",
+        recipientEmail: offre.convoyeur.email,
+        idempotencyKey: `offre-refusee-${offre.id}`,
+        templateData: {
+          prenom: offre.convoyeur.prenom,
+          depart: selected.depart,
+          arrivee: selected.arrivee,
+          date: dateFmt,
+          prixPropose: offre.prix_propose,
+        },
+      }).catch(() => {});
+    }
     if (selected) fetchOffres(selected.id);
   };
 
