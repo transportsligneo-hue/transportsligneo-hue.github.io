@@ -687,7 +687,7 @@ function AdminTrajets() {
                           </Button>
                           <Button
                             variant="ghost"
-                            onClick={() => refuserOffre(o.id)}
+                            onClick={() => refuserOffre(o)}
                             icon={<XCircle size={13} />}
                           >
                             Refuser
