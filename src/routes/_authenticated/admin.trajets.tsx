@@ -94,6 +94,97 @@ function AdminTrajets() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState(emptyTrajet);
   const [editing, setEditing] = useState(false);
+  const [offres, setOffres] = useState<Offre[]>([]);
+  const [prixSuggereInput, setPrixSuggereInput] = useState<string>("");
+  const [savingPub, setSavingPub] = useState(false);
+
+  const fetchOffres = useCallback(async (trajetId: string) => {
+    const { data: offresData } = await supabase
+      .from("mission_offres" as never)
+      .select("*")
+      .eq("trajet_id" as never, trajetId as never)
+      .order("prix_propose" as never, { ascending: true } as never);
+    if (!offresData) {
+      setOffres([]);
+      return;
+    }
+    const list = offresData as unknown as Offre[];
+    // Hydrater convoyeurs
+    const ids = Array.from(new Set(list.map((o) => o.convoyeur_id)));
+    if (ids.length > 0) {
+      const { data: convs } = await supabase
+        .from("convoyeurs")
+        .select("id, prenom, nom, telephone, email")
+        .in("id", ids);
+      const map: Record<string, { prenom: string; nom: string; telephone: string; email: string }> = {};
+      (convs ?? []).forEach((c) => {
+        map[c.id] = { prenom: c.prenom, nom: c.nom, telephone: c.telephone, email: c.email };
+      });
+      setOffres(list.map((o) => ({ ...o, convoyeur: map[o.convoyeur_id] ?? null })));
+    } else {
+      setOffres(list);
+    }
+  }, []);
+
+  // Charger les offres dès qu'un trajet est ouvert en lecture
+  useEffect(() => {
+    if (selected && !editing && !showCreate) {
+      fetchOffres(selected.id);
+      setPrixSuggereInput(selected.prix_suggere?.toString() ?? "");
+    } else {
+      setOffres([]);
+    }
+  }, [selected, editing, showCreate, fetchOffres]);
+
+  const togglePublication = async (publier: boolean) => {
+    if (!selected) return;
+    setSavingPub(true);
+    const updates: Record<string, unknown> = {
+      statut_publication: publier ? "publie" : "brouillon",
+    };
+    if (publier && prixSuggereInput) {
+      updates.prix_suggere = parseFloat(prixSuggereInput);
+    }
+    await supabase.from("trajets").update(updates as never).eq("id", selected.id);
+    setSavingPub(false);
+    setSelected({ ...selected, statut_publication: publier ? "publie" : "brouillon", prix_suggere: publier ? parseFloat(prixSuggereInput || "0") : selected.prix_suggere });
+    fetchTrajets();
+  };
+
+  const validerOffre = async (offre: Offre) => {
+    if (!selected) return;
+    if (!confirm(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`)) return;
+    // 1) Marquer cette offre acceptée, refuser les autres
+    await supabase.from("mission_offres" as never).update({ statut: "acceptee" } as never).eq("id" as never, offre.id as never);
+    await supabase
+      .from("mission_offres" as never)
+      .update({ statut: "refusee" } as never)
+      .eq("trajet_id" as never, selected.id as never)
+      .neq("id" as never, offre.id as never);
+    // 2) Créer une attribution officielle
+    await supabase.from("attributions").insert({
+      trajet_id: selected.id,
+      convoyeur_id: offre.convoyeur_id,
+      statut: "propose",
+    });
+    // 3) Mettre le trajet en attribué + figer publication
+    await supabase
+      .from("trajets")
+      .update({
+        statut: "attribue",
+        tarif_convoyeur: offre.prix_propose,
+        statut_publication: "attribue",
+      } as never)
+      .eq("id", selected.id);
+    fetchOffres(selected.id);
+    fetchTrajets();
+    setSelected({ ...selected, statut: "attribue", tarif_convoyeur: offre.prix_propose, statut_publication: "attribue" });
+  };
+
+  const refuserOffre = async (offreId: string) => {
+    await supabase.from("mission_offres" as never).update({ statut: "refusee" } as never).eq("id" as never, offreId as never);
+    if (selected) fetchOffres(selected.id);
+  };
 
   const fetchTrajets = useCallback(async () => {
     let query = supabase.from("trajets").select("*").order("created_at", { ascending: false });
