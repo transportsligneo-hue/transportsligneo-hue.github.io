@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   MapPin, Calendar, Car, Loader2, Play, Square, ClipboardCheck,
   FileText, Navigation, Clock, ChevronDown, ChevronUp, Truck,
+  PackageCheck, UserCheck, AlertTriangle,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { InspectionGuidee } from "@/components/InspectionGuidee";
@@ -51,6 +52,7 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
+  const [etape, setEtape] = useState<string | null>(null);
 
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
@@ -290,6 +292,36 @@ function ConvoyeurMissions() {
               )}
             </div>
           )}
+
+          {/* Étapes rapides (sous-statut local) */}
+          <div className="bg-white border border-pro-border rounded-xl p-3">
+            <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2">Étape en cours</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { key: "arrive_chargement", label: "Arrivé chargement", icon: PackageCheck, color: "blue" },
+                { key: "en_route", label: "En route", icon: Navigation, color: "emerald" },
+                { key: "attente_client", label: "Attente client", icon: UserCheck, color: "amber" },
+                { key: "incident", label: "Incident", icon: AlertTriangle, color: "red" },
+              ].map((s) => {
+                const active = etape === s.key;
+                const colorMap: Record<string, string> = {
+                  blue: active ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-700 hover:bg-blue-100",
+                  emerald: active ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                  amber: active ? "bg-amber-600 text-white" : "bg-amber-50 text-amber-700 hover:bg-amber-100",
+                  red: active ? "bg-red-600 text-white" : "bg-red-50 text-red-700 hover:bg-red-100",
+                };
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => setEtape(active ? null : s.key)}
+                    className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium transition ${colorMap[s.color]}`}
+                  >
+                    <s.icon size={13} /> {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Inspections status */}
           <div className="flex gap-3 text-xs px-1">

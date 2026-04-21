@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import {
   MapPin,
   Calendar,
@@ -102,6 +103,37 @@ function ConvoyeurDisponibles() {
     if (convoyeurId) fetchData();
   }, [convoyeurId, fetchData]);
 
+  const notifyAdmin = async (
+    trajet: TrajetDispo,
+    prix: number,
+    typeOffre: string,
+    message?: string,
+  ) => {
+    if (!convoyeurId) return;
+    const { data: conv } = await supabase
+      .from("convoyeurs")
+      .select("prenom, nom")
+      .eq("id", convoyeurId)
+      .maybeSingle();
+    sendTransactionalEmail({
+      templateName: "nouvelle-offre-admin",
+      recipientEmail: "contact@transportsligneo.fr",
+      idempotencyKey: `nouvelle-offre-${trajet.id}-${convoyeurId}-${Date.now()}`,
+      templateData: {
+        convoyeurNom: conv ? `${conv.prenom} ${conv.nom}` : "Convoyeur",
+        depart: trajet.depart,
+        arrivee: trajet.arrivee,
+        date: trajet.date_trajet
+          ? new Date(trajet.date_trajet).toLocaleDateString("fr-FR")
+          : "—",
+        prixSuggere: trajet.prix_suggere,
+        prixPropose: prix,
+        typeOffre,
+        message: message ?? null,
+      },
+    }).catch(() => {});
+  };
+
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
     if (!convoyeurId || !trajet.prix_suggere) return;
     setSubmitting(true);
@@ -113,6 +145,7 @@ function ConvoyeurDisponibles() {
       type_offre: "acceptation_directe",
       statut: "en_attente",
     } as never);
+    notifyAdmin(trajet, trajet.prix_suggere, "acceptation_directe");
     setSubmitting(false);
     setOpenTrajetId(null);
     fetchData();
@@ -132,6 +165,7 @@ function ConvoyeurDisponibles() {
       statut: "en_attente",
       message: contreMessage || null,
     } as never);
+    notifyAdmin(trajet, prix, "contre_proposition", contreMessage || undefined);
     setSubmitting(false);
     setContrePrix("");
     setContreMessage("");

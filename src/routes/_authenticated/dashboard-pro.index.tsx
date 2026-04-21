@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Truck, Clock, CheckCircle, Calendar, Euro, ArrowUpRight, PlusCircle,
-  Loader2, MapPin,
+  Loader2, MapPin, Building2, FolderOpen, ChevronRight, Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -76,8 +77,8 @@ function ProDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-pro-text">Vue d'ensemble</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Suivi de vos missions de convoyage</p>
+          <h1 className="text-2xl font-semibold text-pro-text">Espace Pro</h1>
+          <p className="text-pro-muted text-sm mt-0.5">Accès rapide à vos outils de convoyage</p>
         </div>
         <Link
           to="/dashboard-pro/nouvelle-demande"
@@ -93,6 +94,45 @@ function ProDashboard() {
         <KpiCard icon={Calendar} label="À venir" value={aVenir} tone="blue" />
         <KpiCard icon={CheckCircle} label="Livrées" value={terminees} tone="emerald" />
         <KpiCard icon={Euro} label="CA réalisé" value={`${ca.toFixed(0)} €`} tone="violet" />
+      </div>
+
+      {/* Hub navigation cards */}
+      <div>
+        <h2 className="text-pro-text font-semibold text-sm mb-3 flex items-center gap-1.5">
+          <Sparkles size={14} className="text-pro-accent" /> Accès rapide
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <HubCard
+            to="/dashboard-pro/nouvelle-demande"
+            icon={PlusCircle}
+            title="Nouvelle demande"
+            description="Créer une mission de convoyage en quelques clics"
+            tone="emerald"
+            featured
+          />
+          <HubCard
+            to="/dashboard-pro/missions"
+            icon={Truck}
+            title="Mes missions"
+            description="Suivre l'état de vos demandes en cours"
+            badge={enCours > 0 ? `${enCours} active${enCours > 1 ? "s" : ""}` : undefined}
+            tone="blue"
+          />
+          <HubCard
+            to="/dashboard-pro/societe"
+            icon={Building2}
+            title="Ma société"
+            description="Coordonnées, SIRET et facturation"
+            tone="violet"
+          />
+          <HubCard
+            to="/dashboard-pro/documents"
+            icon={FolderOpen}
+            title="Documents"
+            description="Factures, bons de commande et CGV"
+            tone="amber"
+          />
+        </div>
       </div>
 
       {/* Missions table */}
@@ -159,6 +199,52 @@ function ProDashboard() {
         )}
       </div>
     </div>
+  );
+}
+
+function HubCard({
+  to, icon: Icon, title, description, badge, tone, featured,
+}: {
+  to: string;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  badge?: string;
+  tone: "amber" | "blue" | "emerald" | "violet";
+  featured?: boolean;
+}) {
+  const tones = {
+    amber: { bg: "bg-amber-50", text: "text-amber-600", border: "hover:border-amber-200" },
+    blue: { bg: "bg-blue-50", text: "text-blue-600", border: "hover:border-blue-200" },
+    emerald: { bg: "bg-emerald-50", text: "text-emerald-600", border: "hover:border-emerald-200" },
+    violet: { bg: "bg-violet-50", text: "text-violet-600", border: "hover:border-violet-200" },
+  };
+  const t = tones[tone];
+  return (
+    <Link
+      to={to}
+      className={`group bg-white rounded-xl border border-pro-border ${t.border} p-4 transition-all hover:shadow-md hover:-translate-y-0.5 ${
+        featured ? "ring-1 ring-pro-accent/20" : ""
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${t.bg} ${t.text}`}>
+          <Icon size={18} />
+        </div>
+        <ChevronRight size={16} className="text-pro-muted group-hover:text-pro-accent transition-colors mt-1" />
+      </div>
+      <div className="mt-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="font-semibold text-pro-text text-sm">{title}</p>
+          {badge && (
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${t.bg} ${t.text}`}>
+              {badge}
+            </span>
+          )}
+        </div>
+        <p className="text-pro-muted text-xs mt-1 leading-snug">{description}</p>
+      </div>
+    </Link>
   );
 }
 
