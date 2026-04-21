@@ -9,6 +9,7 @@ import {
   Send,
   FolderOpen,
   Receipt,
+  MessageSquare,
   Loader2,
 } from "lucide-react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -20,7 +21,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
 const navItems: AdminSidebarItem[] = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
 
-  { to: "/admin/demandes", label: "Demandes", icon: FileText, group: "Commercial" },
+  { to: "/admin/demandes", label: "Demandes convoyage", icon: FileText, group: "Commercial" },
+  { to: "/admin/messages", label: "Messages & contacts", icon: MessageSquare, group: "Commercial" },
   { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Commercial" },
 
   { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },

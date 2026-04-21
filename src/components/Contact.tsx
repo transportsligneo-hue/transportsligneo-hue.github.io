@@ -41,6 +41,17 @@ ${form.message}`
 ${form.message}`;
 
     try {
+      // Détection automatique du type de demande
+      const messageL = form.message.toLowerCase();
+      let type_demande: "convoyage" | "devis" | "b2b" | "partenariat" = "convoyage";
+      if (profil === "pro") {
+        type_demande = "b2b";
+      } else if (messageL.includes("partenariat") || messageL.includes("partenaire")) {
+        type_demande = "partenariat";
+      } else if (messageL.includes("devis") || messageL.includes("tarif") || messageL.includes("prix")) {
+        type_demande = "devis";
+      }
+
       // 1. Sauvegarde en base de données
       const { error: dbError } = await supabase.from("contact_messages").insert({
         nom: form.nom,
@@ -52,6 +63,7 @@ ${form.message}`;
         segment: profil === "pro" ? form.segment : "",
         volume: profil === "pro" ? form.volume : "",
         message: form.message,
+        type_demande,
       });
       if (dbError) throw dbError;
 
