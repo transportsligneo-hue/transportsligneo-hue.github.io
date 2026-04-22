@@ -8,10 +8,15 @@ import {
   Truck,
   ArrowRight,
   Receipt,
-  TrendingUp,
   Briefcase,
   ClipboardList,
   ChevronRight,
+  AlertCircle,
+  UserCheck,
+  FolderOpen,
+  Activity,
+  Euro,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -47,7 +52,15 @@ type HubCard = {
   icon: LucideIcon;
   count: number;
   badge?: { label: string; tone: "warning" | "info" | "success" | "danger" };
-  accent: string; // tailwind classes for icon background
+  accent: string;
+};
+
+type Alerte = {
+  to: string;
+  icon: LucideIcon;
+  title: string;
+  count: number;
+  tone: "warning" | "danger" | "info";
 };
 
 function AdminDashboard() {
@@ -61,12 +74,17 @@ function AdminDashboard() {
     clients: 0,
     clientsB2B: 0,
     missionsEnCours: 0,
+    missionsTerminees: 0,
     devisTotal: 0,
+    devisEnvoyes: 0,
+    docsEnAttente: 0,
+    caTotal: 0,
   });
   const [recentDemandes, setRecentDemandes] = useState<Array<{
     id: string;
     nom: string;
     prenom: string;
+    telephone: string | null;
     depart: string;
     arrivee: string;
     statut: string;
@@ -85,7 +103,11 @@ function AdminDashboard() {
         clients,
         clientsB2B,
         enCours,
+        terminees,
         devis,
+        devisEnvoyes,
+        docsAttente,
+        missionsTerm,
       ] = await Promise.all([
         supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
         supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
@@ -96,8 +118,18 @@ function AdminDashboard() {
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("type_client", "b2b"),
         supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
+        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
         supabase.from("devis").select("id", { count: "exact", head: true }),
+        supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye"),
+        supabase.from("documents_convoyeurs").select("id", { count: "exact", head: true }).eq("statut_validation", "en_attente"),
+        supabase.from("missions").select("prix_total").in("statut", ["livree", "terminee"]),
       ]);
+
+      const ca = (missionsTerm.data ?? []).reduce(
+        (sum: number, m: { prix_total: number | null }) => sum + Number(m.prix_total ?? 0),
+        0
+      );
+
       setStats({
         demandes: demandes.count ?? 0,
         demandesNouvelles: nouvelles.count ?? 0,
@@ -108,16 +140,20 @@ function AdminDashboard() {
         clients: clients.count ?? 0,
         clientsB2B: clientsB2B.count ?? 0,
         missionsEnCours: enCours.count ?? 0,
+        missionsTerminees: terminees.count ?? 0,
         devisTotal: devis.count ?? 0,
+        devisEnvoyes: devisEnvoyes.count ?? 0,
+        docsEnAttente: docsAttente.count ?? 0,
+        caTotal: ca,
       });
     }
 
     async function fetchRecent() {
       const { data } = await supabase
         .from("demandes_convoyage")
-        .select("id, nom, prenom, depart, arrivee, statut, created_at")
+        .select("id, nom, prenom, telephone, depart, arrivee, statut, created_at")
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(6);
       if (data) setRecentDemandes(data);
     }
 
@@ -125,11 +161,42 @@ function AdminDashboard() {
     fetchRecent();
   }, []);
 
+  const alertes: Alerte[] = [
+    stats.demandesNouvelles > 0 && {
+      to: "/admin/demandes",
+      icon: FileText,
+      title: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""} demande${stats.demandesNouvelles > 1 ? "s" : ""}`,
+      count: stats.demandesNouvelles,
+      tone: "warning" as const,
+    },
+    stats.convoyeursEnAttente > 0 && {
+      to: "/admin/convoyeurs",
+      icon: UserCheck,
+      title: `${stats.convoyeursEnAttente} convoyeur${stats.convoyeursEnAttente > 1 ? "s" : ""} à valider`,
+      count: stats.convoyeursEnAttente,
+      tone: "danger" as const,
+    },
+    stats.docsEnAttente > 0 && {
+      to: "/admin/documents",
+      icon: FolderOpen,
+      title: `${stats.docsEnAttente} document${stats.docsEnAttente > 1 ? "s" : ""} en attente`,
+      count: stats.docsEnAttente,
+      tone: "info" as const,
+    },
+    stats.devisEnvoyes > 0 && {
+      to: "/admin/devis",
+      icon: Receipt,
+      title: `${stats.devisEnvoyes} devis envoyé${stats.devisEnvoyes > 1 ? "s" : ""} en attente`,
+      count: stats.devisEnvoyes,
+      tone: "info" as const,
+    },
+  ].filter(Boolean) as Alerte[];
+
   const hubCards: HubCard[] = [
     {
       to: "/admin/demandes",
       title: "Demandes",
-      description: "Nouvelles demandes de convoyage à traiter",
+      description: "Demandes de convoyage entrantes",
       icon: ClipboardList,
       count: stats.demandes,
       badge:
@@ -141,7 +208,7 @@ function AdminDashboard() {
     {
       to: "/admin/trajets",
       title: "Trajets",
-      description: "Planification et gestion des trajets",
+      description: "Planification et publication",
       icon: RouteIcon,
       count: stats.trajets,
       badge:
@@ -153,7 +220,7 @@ function AdminDashboard() {
     {
       to: "/admin/attributions",
       title: "Missions",
-      description: "Attributions et suivi des missions en cours",
+      description: "Suivi des missions en cours",
       icon: Truck,
       count: stats.missionsEnCours,
       badge:
@@ -165,7 +232,7 @@ function AdminDashboard() {
     {
       to: "/admin/convoyeurs",
       title: "Convoyeurs",
-      description: "Validation et gestion des convoyeurs",
+      description: "Validation et gestion du staff",
       icon: Users,
       count: stats.convoyeurs,
       badge:
@@ -177,7 +244,7 @@ function AdminDashboard() {
     {
       to: "/admin/clients",
       title: "Clients",
-      description: "Comptes particuliers et professionnels",
+      description: "Particuliers et professionnels",
       icon: Briefcase,
       count: stats.clients,
       badge:
@@ -189,7 +256,7 @@ function AdminDashboard() {
     {
       to: "/admin/devis",
       title: "Devis & Facturation",
-      description: "Devis générés et historique de facturation",
+      description: "Devis et historique facturation",
       icon: Receipt,
       count: stats.devisTotal,
       accent: "bg-rose-50 text-rose-600",
@@ -197,59 +264,133 @@ function AdminDashboard() {
     {
       to: "/admin/documents",
       title: "Documents",
-      description: "Pièces justificatives convoyeurs à valider",
-      icon: FileText,
-      count: 0,
+      description: "Pièces convoyeurs à valider",
+      icon: FolderOpen,
+      count: stats.docsEnAttente,
+      badge:
+        stats.docsEnAttente > 0
+          ? { label: "À valider", tone: "warning" }
+          : undefined,
       accent: "bg-slate-100 text-slate-600",
     },
   ];
 
+  const toneAlerte: Record<Alerte["tone"], string> = {
+    warning: "border-l-amber-500 bg-amber-50/50 hover:bg-amber-50",
+    danger: "border-l-red-500 bg-red-50/50 hover:bg-red-50",
+    info: "border-l-blue-500 bg-blue-50/50 hover:bg-blue-50",
+  };
+  const toneAlerteIcon: Record<Alerte["tone"], string> = {
+    warning: "text-amber-600 bg-amber-100",
+    danger: "text-red-600 bg-red-100",
+    info: "text-blue-600 bg-blue-100",
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         title="Tableau de bord"
-        subtitle="Accédez rapidement à toutes les sections de gestion"
+        subtitle="Vue d'ensemble de l'activité Transports Ligneo"
       />
+
+      {/* === KPI STRIP === */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiTile
+          icon={Activity}
+          label="Missions actives"
+          value={stats.missionsEnCours}
+          tone="emerald"
+        />
+        <KpiTile
+          icon={Clock}
+          label="Demandes nouvelles"
+          value={stats.demandesNouvelles}
+          tone="amber"
+        />
+        <KpiTile
+          icon={Users}
+          label="Convoyeurs validés"
+          value={stats.convoyeurs}
+          hint={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
+          tone="violet"
+        />
+        <KpiTile
+          icon={Euro}
+          label="CA réalisé"
+          value={`${stats.caTotal.toFixed(0)} €`}
+          hint={`${stats.missionsTerminees} mission${stats.missionsTerminees > 1 ? "s" : ""}`}
+          tone="blue"
+        />
+      </section>
+
+      {/* === ALERTES À TRAITER === */}
+      {alertes.length > 0 && (
+        <section>
+          <h2 className="text-pro-text font-semibold text-sm mb-3 flex items-center gap-2">
+            <AlertCircle size={15} className="text-amber-600" />
+            À traiter en priorité
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {alertes.map((a) => (
+              <Link
+                key={a.to}
+                to={a.to}
+                className={`group flex items-center gap-3 px-4 py-3 bg-white border border-pro-border border-l-4 rounded-md transition-all ${toneAlerte[a.tone]}`}
+              >
+                <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${toneAlerteIcon[a.tone]}`}>
+                  <a.icon size={17} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-pro-text font-medium text-sm">{a.title}</p>
+                  <p className="text-pro-muted text-xs">Action requise</p>
+                </div>
+                <ChevronRight
+                  size={16}
+                  className="text-pro-muted group-hover:translate-x-1 group-hover:text-pro-text transition-all shrink-0"
+                />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* === HUB DE NAVIGATION === */}
       <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-pro-text font-semibold text-sm mb-3">Sections de gestion</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {hubCards.map((card) => (
             <Link
               key={card.to}
               to={card.to}
-              className="group relative bg-white border border-pro-border rounded-lg p-5 hover:border-pro-accent hover:shadow-md transition-all duration-200 flex flex-col gap-4 min-h-[150px]"
+              className="group relative bg-white border border-pro-border rounded-lg p-4 hover:border-pro-accent/40 hover:shadow-sm transition-all flex flex-col gap-3"
             >
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <div
-                  className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${card.accent} group-hover:scale-110 transition-transform`}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${card.accent}`}
                 >
-                  <card.icon size={20} />
+                  <card.icon size={18} />
                 </div>
                 {card.badge && (
                   <Badge tone={card.badge.tone}>{card.badge.label}</Badge>
                 )}
               </div>
 
-              {/* Body */}
               <div className="flex-1">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <h3 className="text-pro-text font-semibold text-base">{card.title}</h3>
-                  <span className="text-pro-muted text-sm">· {card.count}</span>
+                <div className="flex items-baseline gap-2 mb-0.5">
+                  <h3 className="text-pro-text font-semibold text-[15px]">{card.title}</h3>
+                  <span className="text-pro-muted text-xs font-medium">· {card.count}</span>
                 </div>
                 <p className="text-pro-muted text-xs leading-relaxed">{card.description}</p>
               </div>
 
-              {/* Footer arrow */}
-              <div className="flex items-center justify-between pt-2 border-t border-pro-border/60">
-                <span className="text-xs text-pro-muted group-hover:text-pro-accent transition-colors">
-                  Accéder
+              <div className="flex items-center justify-end pt-2 border-t border-pro-border/60">
+                <span className="text-xs text-pro-text-soft group-hover:text-pro-accent inline-flex items-center gap-1 transition-colors">
+                  Ouvrir
+                  <ChevronRight
+                    size={13}
+                    className="group-hover:translate-x-0.5 transition-transform"
+                  />
                 </span>
-                <ChevronRight
-                  size={16}
-                  className="text-pro-muted group-hover:text-pro-accent group-hover:translate-x-1 transition-all"
-                />
               </div>
             </Link>
           ))}
@@ -259,15 +400,12 @@ function AdminDashboard() {
       {/* === DERNIÈRES DEMANDES === */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-pro-text font-semibold flex items-center gap-2">
-            <TrendingUp size={16} className="text-pro-accent" />
-            Dernières demandes
-          </h2>
+          <h2 className="text-pro-text font-semibold text-sm">Dernières demandes</h2>
           <Link
             to="/admin/demandes"
             className="text-xs text-pro-accent hover:underline inline-flex items-center gap-1"
           >
-            Toutes les demandes <ArrowRight size={12} />
+            Tout voir <ArrowRight size={12} />
           </Link>
         </div>
         {recentDemandes.length === 0 ? (
@@ -282,8 +420,9 @@ function AdminDashboard() {
               <THead>
                 <TH>Client</TH>
                 <TH className="hidden sm:table-cell">Trajet</TH>
+                <TH className="hidden lg:table-cell">Téléphone</TH>
                 <TH>Statut</TH>
-                <TH className="hidden md:table-cell">Date</TH>
+                <TH className="hidden md:table-cell">Reçue le</TH>
               </THead>
               <tbody>
                 {recentDemandes.map((d) => (
@@ -297,7 +436,14 @@ function AdminDashboard() {
                       </p>
                     </TD>
                     <TD className="hidden sm:table-cell text-pro-text-soft">
-                      {d.depart} → {d.arrivee}
+                      <span className="inline-flex items-center gap-1.5">
+                        {d.depart}
+                        <ArrowRight size={11} className="text-pro-muted" />
+                        {d.arrivee}
+                      </span>
+                    </TD>
+                    <TD className="hidden lg:table-cell text-pro-text-soft text-xs font-mono">
+                      {d.telephone ?? "—"}
                     </TD>
                     <TD>
                       <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
@@ -305,7 +451,10 @@ function AdminDashboard() {
                       </Badge>
                     </TD>
                     <TD className="hidden md:table-cell text-pro-muted text-xs">
-                      {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      {new Date(d.created_at).toLocaleDateString("fr-FR", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
                     </TD>
                   </TR>
                 ))}
@@ -314,6 +463,44 @@ function AdminDashboard() {
           </Card>
         )}
       </section>
+    </div>
+  );
+}
+
+/* ============= KpiTile (compact, sans icône floue) ============= */
+function KpiTile({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number | string;
+  hint?: string;
+  tone: "amber" | "blue" | "emerald" | "violet";
+}) {
+  const tones: Record<string, string> = {
+    amber: "bg-amber-50 text-amber-600",
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    violet: "bg-violet-50 text-violet-600",
+  };
+  return (
+    <div className="bg-white border border-pro-border rounded-lg p-4">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${tones[tone]}`}>
+          <Icon size={18} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-pro-muted text-[11px] uppercase tracking-wider font-medium truncate">
+            {label}
+          </p>
+          <p className="text-pro-text text-xl font-semibold leading-tight mt-0.5">{value}</p>
+          {hint && <p className="text-pro-muted text-[11px] mt-0.5 truncate">{hint}</p>}
+        </div>
+      </div>
     </div>
   );
 }
