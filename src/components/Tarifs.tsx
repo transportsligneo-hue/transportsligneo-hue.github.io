@@ -29,7 +29,7 @@ export default function Tarifs() {
         {/* Main pricing highlight */}
         <div className="text-center mb-16 card-premium p-10 pb-12 rounded max-w-2xl mx-auto gold-border-strong overflow-visible">
           <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2 leading-tight">
-            0,85 €<span className="text-2xl">/km</span>
+            <span className="text-2xl align-middle mr-2">à partir de</span>0,85 €<span className="text-2xl">/km</span>
           </p>
           <p className="text-cream/70 text-sm mt-2">Hors département 37 et limitrophes — pour les trajets de plus de 200 km</p>
           <p className="text-primary text-sm mt-3 font-medium tracking-wide">
