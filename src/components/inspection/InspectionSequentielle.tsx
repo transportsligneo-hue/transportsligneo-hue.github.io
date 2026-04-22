@@ -314,21 +314,20 @@ export function InspectionSequentielle({
     })();
   }, [inspectionId]);
 
-  const photoSteps = useMemo(() => STEPS.filter((s) => s.kind !== "documents"), [STEPS]);
+  const photoSteps = useMemo(() => STEPS, [STEPS]);
   const completedPhotoSteps = useMemo(() => {
     return photoSteps.filter((s) => (photos[s.id]?.some((p) => p.status === "success") ?? false));
   }, [photos, photoSteps]);
-  const completedSteps = useMemo(() => {
-    return STEPS.filter((s) => {
-      if (s.kind === "documents") return true;
-      return (photos[s.id]?.some((p) => p.status === "success") ?? false);
-    });
-  }, [photos, STEPS]);
+  const completedSteps = completedPhotoSteps;
   const progressPct = Math.round((completedSteps.length / STEPS.length) * 100);
 
-  const isJantes = currentStep.id === "jantes";
-  const jantePhotosCount = isJantes ? (photos.jantes?.filter((p) => p.status !== "error").length ?? 0) : 0;
-  const jantesRemaining = isJantes ? Math.max(0, 4 - jantePhotosCount) : 0;
+  // Compteur global des 4 jantes (pour rappel UX sur chaque étape jante_*)
+  const JANTE_IDS = ["jante_avant_gauche", "jante_avant_droite", "jante_arriere_gauche", "jante_arriere_droite"];
+  const isJante = JANTE_IDS.includes(currentStep.id);
+  const jantePhotosCount = isJante
+    ? JANTE_IDS.filter((id) => photos[id]?.some((p) => p.status === "success")).length
+    : 0;
+  const jantesRemaining = isJante ? Math.max(0, 4 - jantePhotosCount) : 0;
 
   const triggerCamera = () => fileRef.current?.click();
 
