@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-ligneo.png";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export default function Hero() {
   return (
