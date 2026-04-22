@@ -375,7 +375,7 @@ function AdminDashboard() {
             <Link
               key={card.to}
               to={card.to}
-              className="group relative bg-white border border-pro-border rounded-lg p-4 hover:border-pro-accent/40 hover:shadow-sm transition-all flex flex-col gap-3"
+              className="group relative bg-white border border-pro-border rounded-xl p-4 shadow-pro-card hover:shadow-pro-card-hover hover:border-pro-accent/40 transition-all flex flex-col gap-3"
             >
               <div className="flex items-start justify-between gap-2">
                 <div
