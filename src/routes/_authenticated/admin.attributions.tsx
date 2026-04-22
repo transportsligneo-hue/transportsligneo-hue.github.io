@@ -180,13 +180,29 @@ function AdminAttributions() {
       .select("id")
       .eq("attribution_id", attributionId)
       .eq("type", type)
-      .single();
-    if (!inspection) return;
+      .maybeSingle();
+    if (!inspection) {
+      setPhotosView({ id: attributionId, type, photos: [] });
+      return;
+    }
     const { data: photos } = await supabase
       .from("inspection_photos")
       .select("vue_type, url_photo, created_at")
-      .eq("inspection_id", inspection.id);
-    setPhotosView({ id: attributionId, type, photos: photos || [] });
+      .eq("inspection_id", inspection.id)
+      .order("created_at", { ascending: true });
+
+    // Génère des signed URLs pour le bucket privé inspection-photos
+    const enriched = await Promise.all(
+      (photos ?? []).map(async (p) => {
+        // url_photo peut déjà être une URL complète (ancien format) ou un path stockage
+        if (/^https?:\/\//i.test(p.url_photo)) return p;
+        const { data: signed } = await supabase.storage
+          .from("inspection-photos")
+          .createSignedUrl(p.url_photo, 3600);
+        return { ...p, url_photo: signed?.signedUrl ?? p.url_photo };
+      })
+    );
+    setPhotosView({ id: attributionId, type, photos: enriched });
   };
 
   return (

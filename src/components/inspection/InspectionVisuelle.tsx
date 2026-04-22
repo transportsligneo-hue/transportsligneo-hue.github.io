@@ -17,7 +17,9 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Camera, Check, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compression";
 import {
   VehicleInspectionMap,
   ZoneEvalModal,
@@ -166,32 +168,60 @@ export function InspectionVisuelle({
   };
 
   const handleExtraPhoto = async (raw: File) => {
-    if (!inspectionId) return;
-    const path = `${userId}/${inspectionId}/extra_${Date.now()}.jpg`;
-    const { error } = await supabase.storage
-      .from("inspection-photos")
-      .upload(path, raw, { upsert: true, contentType: raw.type || "image/jpeg" });
-    if (error) { console.error(error); return; }
-    await supabase.from("inspection_photos").upsert({
-      inspection_id: inspectionId,
-      vue_type: `extra_${Date.now()}`,
-      url_photo: path,
-    });
-    setExtraPhotos(prev => [...prev, path]);
+    if (!inspectionId) {
+      toast.error("Inspection non initialisée, réessayez dans un instant");
+      return;
+    }
+    try {
+      const file = await compressImage(raw);
+      const stamp = Date.now();
+      const path = `${userId}/${inspectionId}/extra_${stamp}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("inspection-photos")
+        .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const { error: dbErr } = await supabase.from("inspection_photos").insert({
+        inspection_id: inspectionId,
+        vue_type: `extra_${stamp}`,
+        url_photo: path,
+        file_size_bytes: file.size,
+      });
+      if (dbErr) throw dbErr;
+      setExtraPhotos(prev => [...prev, path]);
+      toast.success("Photo complémentaire ajoutée");
+    } catch (e) {
+      console.error("[InspectionVisuelle] extra upload error:", e);
+      toast.error("Impossible d'envoyer la photo", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    }
   };
 
   const goNext = () => setStepIndex(i => Math.min(i + 1, STEPS.length - 1));
   const goPrev = () => setStepIndex(i => Math.max(i - 1, 0));
 
   const handleComplete = async () => {
-    if (!inspectionId) return;
+    if (!inspectionId) {
+      toast.error("Inspection non initialisée");
+      return;
+    }
     setCompleting(true);
-    const note = JSON.stringify({ zones, extras: extraPhotos.length });
-    await supabase.from("inspections")
-      .update({ statut: "complete", notes: note })
-      .eq("id", inspectionId);
-    setCompleting(false);
-    onComplete();
+    try {
+      const note = JSON.stringify({ zones, extras: extraPhotos.length });
+      const { error } = await supabase.from("inspections")
+        .update({ statut: "complete", notes: note })
+        .eq("id", inspectionId);
+      if (error) throw error;
+      toast.success("État des lieux validé");
+      onComplete();
+    } catch (e) {
+      console.error("[InspectionVisuelle] complete error:", e);
+      toast.error("Impossible de clôturer l'état des lieux", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setCompleting(false);
+    }
   };
 
   // ============== RENDER ==============
