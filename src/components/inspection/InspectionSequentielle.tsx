@@ -621,7 +621,7 @@ export function InspectionSequentielle({
               <p className="text-pro-text-soft text-xs mt-0.5">
                 {currentStep.hint}
               </p>
-              {isJantes && (
+              {isJante && (
                 <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
                   {jantePhotosCount}/4 jantes
                   {jantesRemaining > 0 && <span className="opacity-60">· {jantesRemaining} restantes</span>}
@@ -630,18 +630,41 @@ export function InspectionSequentielle({
             </div>
           </div>
 
-          {currentStep.kind === "documents" ? (
+          {currentStep.kind === "signature" ? (
             <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
               <div className="flex items-start gap-2 mb-3 pb-3 border-b border-pro-border">
-                <FileText size={18} className="text-primary shrink-0 mt-0.5" />
+                <PenLine size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-pro-text text-sm font-semibold">Paquets & documents de la mission</p>
+                  <p className="text-pro-text text-sm font-semibold">Signature du client</p>
                   <p className="text-pro-text-soft text-xs mt-0.5">
-                    Ajoutez la carte grise, le bon de prise en charge, le contrat, ou tout document fourni avec le véhicule.
+                    Le client signe directement à l'écran avec le doigt. Vous validez ensuite.
                   </p>
                 </div>
               </div>
-              <MissionDocuments attributionId={attributionId} userId={userId} />
+              {photos[currentStep.id]?.some((p) => p.status === "success") ? (
+                <div className="space-y-2">
+                  <img
+                    src={photos[currentStep.id]!.find((p) => p.status === "success")!.previewUrl}
+                    alt="Signature"
+                    className="w-full bg-white rounded-xl border border-pro-border"
+                  />
+                  <p className="text-emerald-600 text-xs flex items-center gap-1 font-medium">
+                    <Check size={14} /> Signature enregistrée
+                  </p>
+                </div>
+              ) : (
+                <SignatureCanvas
+                  onValidate={(file) => {
+                    const localId = crypto.randomUUID();
+                    const previewUrl = URL.createObjectURL(file);
+                    setPhotos((prev) => ({
+                      ...prev,
+                      [currentStep.id]: [{ localId, previewUrl, status: "uploading" }],
+                    }));
+                    void uploadOne(currentStep.id, localId, file);
+                  }}
+                />
+              )}
             </div>
           ) : (
             <>
