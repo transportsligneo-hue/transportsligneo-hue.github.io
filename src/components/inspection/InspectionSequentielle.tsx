@@ -118,11 +118,11 @@ const ALL_STEPS: StepDef[] = [
   { num: 18, id: "signature",                  label: "Signature client",       hint: "Le client signe directement à l'écran",    variant: "signature", singlePhoto: true, kind: "signature" },
 ];
 
-const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
-  devant: {
-    src: frontGuide,
-    alt: "Repère visuel véhicule vu de face",
-  },
+/**
+ * Repères visuels (vraies photos de voiture) par variante.
+ * Mappés indirectement via les nouveaux IDs d'étape ci-dessous (voir GUIDE_BY_STEP_ID).
+ */
+const STEP_GUIDE_IMAGES: Partial<Record<string, GuideAsset>> = {
   trois_quart_avant_gauche: {
     src: frontThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts avant gauche",
@@ -131,7 +131,7 @@ const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
     src: rearThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts arrière gauche",
   },
-  coffre_ferme: {
+  arriere: {
     src: rearGuide,
     alt: "Repère visuel véhicule vu de l'arrière",
   },
@@ -148,6 +148,11 @@ const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
     src: frontThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts avant droite",
     mirror: true,
+  },
+  // Vue avant — conservée pour anciennes inspections en base
+  devant: {
+    src: frontGuide,
+    alt: "Repère visuel véhicule vu de face",
   },
 };
 
