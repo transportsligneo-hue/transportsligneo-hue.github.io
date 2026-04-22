@@ -293,8 +293,8 @@ function AdminDashboard() {
         subtitle="Vue d'ensemble de l'activité Transports Ligneo"
       />
 
-      {/* === KPI STRIP === */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* === KPI STRIP (style Stripe / Qonto) === */}
+      <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         <KpiTile
           icon={Activity}
           label="Missions actives"
@@ -302,10 +302,10 @@ function AdminDashboard() {
           tone="emerald"
         />
         <KpiTile
-          icon={Clock}
-          label="Demandes nouvelles"
-          value={stats.demandesNouvelles}
-          tone="amber"
+          icon={Truck}
+          label="Missions terminées"
+          value={stats.missionsTerminees}
+          tone="blue"
         />
         <KpiTile
           icon={Users}
@@ -315,11 +315,24 @@ function AdminDashboard() {
           tone="violet"
         />
         <KpiTile
+          icon={Briefcase}
+          label="Clients actifs"
+          value={stats.clients}
+          hint={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
+          tone="sky"
+        />
+        <KpiTile
           icon={Euro}
           label="CA réalisé"
-          value={`${stats.caTotal.toFixed(0)} €`}
-          hint={`${stats.missionsTerminees} mission${stats.missionsTerminees > 1 ? "s" : ""}`}
-          tone="blue"
+          value={`${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
+          tone="gold"
+          premium
+        />
+        <KpiTile
+          icon={Clock}
+          label="Demandes nouvelles"
+          value={stats.demandesNouvelles}
+          tone="amber"
         />
       </section>
 
