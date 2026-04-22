@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, Shield, type LucideIcon } from "lucide-react";
+import { LogOut, Menu, X, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { LigneoBrand } from "@/components/brand/LigneoBrand";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
