@@ -12,7 +12,7 @@ import {
   Clock,
   Euro,
 } from "lucide-react";
-import logoLigneo from "@/assets/logo-ligneo.png";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import ReservationModal from "@/components/ReservationModal";
 import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,9 +37,9 @@ export default function MobileHomeScreen() {
     <div className="md:hidden section-bg min-h-screen pb-bottom-nav">
       {/* Header app — compact */}
       <header className="safe-top px-5 pt-4 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src={logoLigneo} alt="Ligneo" className="h-8 w-auto" />
-        </div>
+        <Link to="/" className="flex items-center gap-2" aria-label="Accueil">
+          <img src={logoLigneo} alt="Transports Ligneo" className="h-10 w-auto object-contain" loading="eager" />
+        </Link>
         <button
           onClick={goEspace}
           className="w-10 h-10 rounded-full gold-border flex items-center justify-center tap-scale"

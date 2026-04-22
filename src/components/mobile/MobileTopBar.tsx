@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-ligneo.png";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { ReactNode } from "react";
 
 interface Props {
@@ -26,7 +26,7 @@ export default function MobileTopBar({ title, right, showLogo = true, transparen
       <div className="h-14 px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 tap-scale">
           {showLogo ? (
-            <img src={logoLigneo} alt="Ligneo" className="h-7 w-auto" />
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" loading="lazy" />
           ) : (
             <span className="font-heading text-primary text-sm tracking-[0.15em] uppercase">
               {title}
