@@ -10,6 +10,7 @@ import {
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { InspectionGuidee } from "@/components/InspectionGuidee";
 import { InspectionVisuelle } from "@/components/inspection/InspectionVisuelle";
+import { InspectionSequentielle } from "@/components/inspection/InspectionSequentielle";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
@@ -38,7 +39,7 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee"; mode: "visuel" | "photos" } | null>(null);
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee"; mode: "sequentiel" | "visuel" | "photos" } | null>(null);
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
