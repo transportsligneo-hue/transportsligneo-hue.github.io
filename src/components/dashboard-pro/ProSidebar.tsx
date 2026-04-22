@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, Building2, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export interface ProSidebarItem {
   to: string;
@@ -161,8 +162,9 @@ export function ProSidebar({ societe, items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen">
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+        <DashboardHeader variant="light" profileTo="/dashboard-pro/societe" />
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-1">{children}</div>
       </main>
     </div>
   );

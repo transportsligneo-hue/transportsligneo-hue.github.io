@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, Shield, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export interface AdminSidebarItem {
   to: string;
@@ -162,8 +163,9 @@ export function AdminSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen">
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+        <DashboardHeader variant="light" enableGlobalSearch />
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-1">{children}</div>
       </main>
     </div>
   );
