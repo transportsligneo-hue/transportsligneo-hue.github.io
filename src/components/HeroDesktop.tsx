@@ -19,6 +19,18 @@ export default function HeroDesktop() {
       <div className="absolute bottom-8 left-8 w-20 h-20 border-b border-l border-primary/30 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-20 h-20 border-b border-r border-primary/30 pointer-events-none" />
 
+      {/* Logo signature en filigrane (centré, opacité faible) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center z-0"
+      >
+        <img
+          src={logoLigneo}
+          alt=""
+          className="w-[80%] max-w-3xl opacity-[0.07] mix-blend-screen select-none"
+        />
+      </div>
+
       {/* Image voiture — colonne droite, fondue dans le navy */}
       <div className="absolute inset-y-0 right-0 w-[58%] xl:w-[60%]">
         <img
@@ -54,16 +66,11 @@ export default function HeroDesktop() {
         <div className="max-w-xl xl:max-w-2xl">
           <div className="h-px w-16 bg-primary mb-6" />
 
-          {/* Logo officiel "Transports Ligneo" — grand format, intégré au hero */}
-          <h1 className="m-0">
-            <span className="sr-only">Transports Ligneo</span>
-            <img
-              src={logoLigneo}
-              alt="Transports Ligneo"
-              className="h-44 xl:h-56 2xl:h-64 w-auto object-contain"
-              loading="eager"
-              fetchPriority="high"
-            />
+          {/* Wordmark texte — le logo graphique est en filigrane derrière */}
+          <h1 className="m-0 font-heading text-cream text-5xl xl:text-6xl 2xl:text-7xl tracking-[0.1em] leading-[1.05]">
+            TRANSPORTS
+            <br />
+            <span className="text-primary">LIGNEO</span>
           </h1>
 
           <p className="font-heading text-2xl xl:text-3xl text-primary italic mt-6">
