@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export default function Footer() {
   return (
@@ -6,7 +7,15 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-8 mb-10">
           <div>
-            <p className="font-heading text-primary tracking-[0.2em] uppercase text-lg mb-3">
+            <Link to="/" className="inline-flex items-center gap-3 mb-3" aria-label="Accueil — Transports Ligneo">
+              <img
+                src={logoLigneo}
+                alt="Transports Ligneo"
+                className="h-14 w-auto object-contain opacity-90"
+                loading="lazy"
+              />
+            </Link>
+            <p className="font-heading text-primary tracking-[0.2em] uppercase text-base mb-2">
               Transports Ligneo
             </p>
             <p className="text-cream/50 text-sm leading-relaxed">
