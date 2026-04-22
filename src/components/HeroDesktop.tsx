@@ -51,25 +51,18 @@ export default function HeroDesktop() {
 
       {/* Contenu */}
       <div className="relative z-10 max-w-7xl mx-auto px-10 xl:px-16 pt-40 pb-24 min-h-screen flex items-center">
-        <div className="max-w-xl xl:max-w-2xl relative">
-          {/* Logo en watermark, centré au-dessus du wordmark */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-24 xl:-top-28 w-[260px] xl:w-[320px] h-[260px] xl:h-[320px] opacity-[0.13]"
-            style={{
-              backgroundImage: `url(${logoLigneo})`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "contain",
-              filter: "blur(0.3px) saturate(1.05)",
-            }}
-          />
-          <div className="h-px w-16 bg-primary mb-8 relative" />
+        <div className="max-w-xl xl:max-w-2xl">
+          <div className="h-px w-16 bg-primary mb-8" />
 
-          <h1 className="font-heading text-5xl xl:text-6xl 2xl:text-7xl tracking-wide leading-[1.05] gold-gradient-text relative">
-            TRANSPORTS
-            <br />
-            LIGNEO
+          {/* Logo "Transports Ligneo" — fondu dans la page, remplace le wordmark */}
+          <h1 className="m-0">
+            <span className="sr-only">Transports Ligneo</span>
+            <img
+              src={logoLigneo}
+              alt="Transports Ligneo"
+              className="h-40 xl:h-52 2xl:h-60 w-auto object-contain opacity-90 mix-blend-screen drop-shadow-[0_10px_40px_rgba(212,175,55,0.35)]"
+              loading="eager"
+            />
           </h1>
 
           <p className="font-heading text-2xl xl:text-3xl text-primary italic mt-6">
