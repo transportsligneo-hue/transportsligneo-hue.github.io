@@ -501,27 +501,33 @@ export type Database = {
       inspection_photos: {
         Row: {
           created_at: string
+          file_size_bytes: number | null
           id: string
           inspection_id: string
           notes: string | null
           url_photo: string
           vue_type: string
+          zone_id: string | null
         }
         Insert: {
           created_at?: string
+          file_size_bytes?: number | null
           id?: string
           inspection_id: string
           notes?: string | null
           url_photo: string
           vue_type: string
+          zone_id?: string | null
         }
         Update: {
           created_at?: string
+          file_size_bytes?: number | null
           id?: string
           inspection_id?: string
           notes?: string | null
           url_photo?: string
           vue_type?: string
+          zone_id?: string | null
         }
         Relationships: [
           {
