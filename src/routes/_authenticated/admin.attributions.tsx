@@ -82,21 +82,25 @@ const vueLabels: Record<string, string> = {
   interieur_avant: "Intérieur avant",
   interieur_arriere: "Intérieur arrière",
   tableau_bord: "Tableau de bord",
-  // Parcours séquentiel (15 étapes)
-  devant: "1. Devant",
+  // Parcours séquentiel (ordre métier)
+  devant: "1. Avant",
   trois_quart_avant_gauche: "2. 3/4 avant gauche",
   trois_quart_arriere_gauche: "3. 3/4 arrière gauche",
-  trois_quart_arriere_droite: "8. 3/4 arrière droite",
+  coffre_ferme: "4. Coffre",
+  coffre_ouvert: "5. Ouverture du coffre",
+  trois_quart_arriere_droite: "6. 3/4 arrière droite",
+  siege_arriere: "7. Sièges arrière",
+  siege_avant: "8. Sièges avant",
   trois_quart_avant_droite: "9. 3/4 avant droite",
-  coffre_ouvert: "5. Coffre ouvert",
-  siege_arriere: "6. Siège arrière",
-  siege_avant: "7. Siège avant",
-  compteur: "10. Compteur",
-  cable: "11. Câble de recharge",
-  roue_secours: "12. Roue de secours",
-  kit_securite: "13. Kit sécurité",
-  pv_livraison: "14. PV livraison",
+  jantes: "10. Jantes",
+  compteur: "11. Compteur",
+  kit_securite: "12. Kit sécurité",
+  cable: "13. Câble de recharge",
+  documents: "14. Documents",
   signature: "15. Signature",
+  // Legacy
+  roue_secours: "Roue de secours",
+  pv_livraison: "PV livraison",
 };
 
 /** Normalise un vue_type (peut être "devant" ou "devant_<timestamp>" pour multi-photos) */
