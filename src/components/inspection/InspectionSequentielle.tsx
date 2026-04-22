@@ -494,20 +494,28 @@ export function InspectionSequentielle({
 
           <div className="grid grid-cols-3 gap-2 max-w-2xl mx-auto">
             {STEPS.map((s) => {
-              if (s.kind === "documents") {
+              if (s.kind === "signature") {
+                const signed = photos[s.id]?.some((p) => p.status === "success");
                 return (
                   <button
                     key={s.id}
                     onClick={() => { setStepIndex(STEPS.indexOf(s)); setShowRecap(false); }}
-                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary/25 bg-primary/10 hover:border-primary/40 transition flex flex-col items-center justify-center p-2"
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition flex flex-col items-center justify-center p-2 ${
+                      signed ? "border-emerald-500 bg-emerald-50" : "border-pro-border bg-white"
+                    }`}
                   >
-                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-primary">
+                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-pro-text">
                       {s.num}
                     </span>
-                    <FileText size={22} className="text-primary mb-1" />
+                    <PenLine size={22} className={signed ? "text-emerald-600 mb-1" : "text-pro-muted mb-1"} />
                     <span className="text-[9px] text-center leading-tight font-medium text-pro-text">
-                      Documents
+                      Signature
                     </span>
+                    {signed && (
+                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow">
+                        <Check size={12} className="text-white" strokeWidth={3} />
+                      </div>
+                    )}
                   </button>
                 );
               }
