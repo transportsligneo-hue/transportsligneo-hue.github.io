@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -10,8 +10,7 @@ import {
   Loader2,
   Gavel,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
 
 export const Route = createFileRoute("/_authenticated/convoyeur")({
@@ -29,25 +28,22 @@ const navItems: ConvoyeurSidebarItem[] = [
 ];
 
 function ConvoyeurLayout() {
-  const { isAuthenticated, user, role, isLoading, logout } = useAuth();
-  const [convoyeurStatut, setConvoyeurStatut] = useState<string | null>(null);
-  const [checkingStatut, setCheckingStatut] = useState(true);
+  const { isAuthenticated, role, convoyeurStatut, isLoading, logout, homeRoute } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setCheckingStatut(false); return; }
-    supabase
-      .from("convoyeurs")
-      .select("statut")
-      .eq("user_id", user.id)
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        setConvoyeurStatut(data?.statut ?? null);
-        setCheckingStatut(false);
-      });
-  }, [user]);
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      navigate({ to: "/login" });
+      return;
+    }
+    // Mauvais rôle → on redirige vers la home appropriée
+    if (role && role !== "convoyeur") {
+      navigate({ to: homeRoute });
+    }
+  }, [isLoading, isAuthenticated, role, homeRoute, navigate]);
 
-  if (isLoading || checkingStatut) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-emerald-600" size={32} />
@@ -55,26 +51,36 @@ function ConvoyeurLayout() {
     );
   }
 
-  if (!isAuthenticated) {
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-    return null;
+  if (!isAuthenticated || (role && role !== "convoyeur")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
+        <Loader2 className="animate-spin text-emerald-600" size={32} />
+      </div>
+    );
   }
 
-  if (role !== "convoyeur" || convoyeurStatut !== "valide") {
+  // Convoyeur pas encore validé : affiche l'écran d'attente
+  if (role === "convoyeur" && convoyeurStatut !== "valide" && convoyeurStatut !== "actif") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg px-4">
         <div className="text-center space-y-4 max-w-md bg-white rounded-xl border border-pro-border p-8 shadow-sm">
           <h1 className="font-semibold text-lg text-pro-text">
-            {convoyeurStatut === "en_attente" ? "Compte en attente de validation" : convoyeurStatut === "refuse" ? "Compte refusé" : "Accès non autorisé"}
+            {convoyeurStatut === "en_attente"
+              ? "Compte en attente de validation"
+              : convoyeurStatut === "refuse"
+              ? "Compte refusé"
+              : convoyeurStatut === "suspendu"
+              ? "Compte suspendu"
+              : "Validation requise"}
           </h1>
           <p className="text-pro-text-soft text-sm">
             {convoyeurStatut === "en_attente"
               ? "Votre inscription est en cours de validation par notre équipe. Vous recevrez un email dès qu'elle sera approuvée."
               : convoyeurStatut === "refuse"
               ? "Votre candidature n'a pas été retenue. Contactez-nous pour plus d'informations."
-              : "Vous n'avez pas les droits pour accéder à cet espace."}
+              : convoyeurStatut === "suspendu"
+              ? "Votre compte est temporairement suspendu. Contactez notre équipe."
+              : "Veuillez patienter pendant la finalisation de votre dossier."}
           </p>
           <div className="flex flex-col gap-2 items-center pt-2">
             <button onClick={() => logout()} className="text-sm text-red-600 hover:underline">Se déconnecter</button>

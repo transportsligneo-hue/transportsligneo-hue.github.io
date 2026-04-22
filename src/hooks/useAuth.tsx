@@ -1,94 +1,191 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
 type AppRole = "admin" | "convoyeur" | "client";
+type TypeClient = "particulier" | "b2b";
+type ConvoyeurStatut = "en_attente" | "valide" | "actif" | "refuse" | "suspendu";
 
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   session: Session | null;
   role: AppRole | null;
+  /** true tant que role/profil/statut ne sont pas tous chargés */
   isLoading: boolean;
+  /** true uniquement pendant la toute première initialisation */
+  isInitializing: boolean;
+  roleActif: boolean;
+  typeClient: TypeClient | null;
+  convoyeurStatut: ConvoyeurStatut | null;
+  /** route de destination calculée selon role + typeClient + statut */
+  homeRoute: string;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refresh: () => Promise<void>;
   hasRole: (role: string) => boolean;
   hasAnyRole: (roles: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
 
+interface ResolvedProfile {
+  role: AppRole | null;
+  roleActif: boolean;
+  typeClient: TypeClient | null;
+  convoyeurStatut: ConvoyeurStatut | null;
+}
+
+function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string {
+  if (!isAuthenticated) return "/login";
+  if (!p.roleActif) return "/login";
+  if (p.role === "admin") return "/admin";
+  if (p.role === "convoyeur") {
+    if (p.convoyeurStatut === "valide" || p.convoyeurStatut === "actif") return "/convoyeur";
+    return "/attente-validation";
+  }
+  // client (par défaut)
+  if (p.typeClient === "b2b") return "/dashboard-pro";
+  return "/dashboard-client";
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [profile, setProfile] = useState<ResolvedProfile>({
+    role: null,
+    roleActif: true,
+    typeClient: null,
+    convoyeurStatut: null,
+  });
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const currentUserIdRef = useRef<string | null>(null);
 
-  const fetchRole = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("actif", true)
-      .limit(1)
-      .maybeSingle();
-    if (error) {
-      console.warn("[useAuth] fetchRole error:", error.message);
-      setRole(null);
-      return;
+  /** Charge en une seule passe rôle + profile + statut convoyeur (si applicable). */
+  const loadProfile = useCallback(async (userId: string): Promise<ResolvedProfile> => {
+    try {
+      const [rolesRes, profileRes] = await Promise.all([
+        supabase
+          .from("user_roles")
+          .select("role, actif")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("type_client")
+          .eq("user_id", userId)
+          .maybeSingle(),
+      ]);
+
+      const role = (rolesRes.data?.role as AppRole | undefined) ?? null;
+      const roleActif = rolesRes.data?.actif !== false;
+      const typeClient = ((profileRes.data as { type_client?: string } | null)?.type_client as TypeClient | undefined) ?? "particulier";
+
+      let convoyeurStatut: ConvoyeurStatut | null = null;
+      if (role === "convoyeur") {
+        const { data: convData } = await supabase
+          .from("convoyeurs")
+          .select("statut")
+          .eq("user_id", userId)
+          .limit(1)
+          .maybeSingle();
+        convoyeurStatut = (convData?.statut as ConvoyeurStatut | undefined) ?? "en_attente";
+      }
+
+      return { role, roleActif, typeClient, convoyeurStatut };
+    } catch (err) {
+      console.warn("[useAuth] loadProfile error:", err);
+      return { role: null, roleActif: true, typeClient: null, convoyeurStatut: null };
     }
-    setRole((data?.role as AppRole | undefined) ?? null);
   }, []);
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setTimeout(() => fetchRole(session.user.id), 0);
-        } else {
-          setRole(null);
-        }
-        setIsLoading(false);
-      }
-    );
+  /** Hydrate l'état pour un user donné. Annule si un autre user est arrivé entre-temps. */
+  const hydrateForUser = useCallback(
+    async (u: User | null) => {
+      const userId = u?.id ?? null;
+      currentUserIdRef.current = userId;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRole(session.user.id);
+      if (!userId) {
+        setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null });
+        setIsLoading(false);
+        return;
       }
+
+      setIsLoading(true);
+      const resolved = await loadProfile(userId);
+
+      // Race-guard : un autre auth state change a pu arriver entretemps
+      if (currentUserIdRef.current !== userId) return;
+
+      setProfile(resolved);
+      setIsLoading(false);
+    },
+    [loadProfile],
+  );
+
+  useEffect(() => {
+    // 1) S'abonner AVANT de charger la session pour ne rater aucun event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      // hydrate de manière non bloquante
+      void hydrateForUser(newSession?.user ?? null);
+    });
+
+    // 2) Charger la session existante
+    supabase.auth.getSession().then(async ({ data: { session: existing } }) => {
+      setSession(existing);
+      setUser(existing?.user ?? null);
+      await hydrateForUser(existing?.user ?? null);
+      setIsInitializing(false);
+    }).catch(() => {
+      setIsInitializing(false);
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchRole]);
+  }, [hydrateForUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    // onAuthStateChange déclenchera l'hydratation
   }, []);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
-    setRole(null);
+    // onAuthStateChange remettra les états à zéro
   }, []);
 
-  const hasRole = useCallback((r: string) => role === r, [role]);
-  const hasAnyRole = useCallback((roles: string[]) => roles.includes(role ?? ""), [role]);
+  const refresh = useCallback(async () => {
+    if (user) await hydrateForUser(user);
+  }, [user, hydrateForUser]);
+
+  const hasRole = useCallback((r: string) => profile.role === r, [profile.role]);
+  const hasAnyRole = useCallback((roles: string[]) => roles.includes(profile.role ?? ""), [profile.role]);
+
+  const isAuthenticated = !!session;
+  const homeRoute = computeHomeRoute(profile, isAuthenticated);
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated: !!session,
+        isAuthenticated,
         user,
         session,
-        role,
-        isLoading,
+        role: profile.role,
+        roleActif: profile.roleActif,
+        typeClient: profile.typeClient,
+        convoyeurStatut: profile.convoyeurStatut,
+        isLoading: isInitializing || isLoading,
+        isInitializing,
+        homeRoute,
         login,
         logout,
+        refresh,
         hasRole,
         hasAnyRole,
       }}

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Loader2,
 } from "lucide-react";
+import { useEffect } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -34,21 +35,26 @@ const navItems: AdminSidebarItem[] = [
 ];
 
 function AdminLayout() {
-  const { isAuthenticated, role, isLoading } = useAuth();
+  const { isAuthenticated, role, isLoading, homeRoute } = useAuth();
+  const navigate = useNavigate();
 
-  if (isLoading) {
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (role !== "admin") {
+      navigate({ to: homeRoute });
+    }
+  }, [isLoading, isAuthenticated, role, homeRoute, navigate]);
+
+  if (isLoading || !isAuthenticated || role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />
       </div>
     );
-  }
-
-  if (!isAuthenticated || role !== "admin") {
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-    return null;
   }
 
   return (

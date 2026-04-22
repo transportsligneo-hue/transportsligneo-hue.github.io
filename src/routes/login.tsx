@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, LogIn, User, Truck } from "lucide-react";
 import logoLigneo from "@/assets/logo-ligneo.png";
 
@@ -18,86 +17,108 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login, isAuthenticated, role, user, isLoading: authLoading, logout } = useAuth();
+  const {
+    login,
+    logout,
+    isAuthenticated,
+    isLoading,
+    isInitializing,
+    role,
+    convoyeurStatut,
+    typeClient,
+    homeRoute,
+  } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("client");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  /** True quand on vient de soumettre — déclenche la logique de routage post-login */
+  const justLoggedInRef = useRef(false);
+  /** Onglet utilisé au moment du submit (figé pour éviter qu'un changement de tab casse la redirection) */
+  const submittedTabRef = useRef<Tab>("client");
 
-  // Redirection auto après connexion (en respectant l'onglet sélectionné)
   useEffect(() => {
-    if (authLoading || !isAuthenticated || !user) return;
-    let cancelled = false;
-    (async () => {
-      // Routage strict par onglet : un client qui se connecte via "Pro" est rejeté
-      if (tab === "pro") {
-        if (role === "admin") { navigate({ to: "/admin" }); return; }
-        if (role !== "convoyeur") {
-          await supabase.auth.signOut();
-          if (!cancelled) {
-            setError("Cet email correspond à un compte client. Utilisez l'onglet « Espace Client ».");
-          }
-          return;
-        }
-        const { data: conv } = await supabase
-          .from("convoyeurs")
-          .select("statut")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (cancelled) return;
-        if (conv?.statut === "valide" || conv?.statut === "actif") {
-          // /convoyeur existe déjà ; le futur /dashboard-convoyeur réutilisera ces routes
-          navigate({ to: "/convoyeur" });
-        } else {
-          await supabase.auth.signOut();
-          navigate({ to: "/attente-validation" });
-        }
-      } else {
-        // Onglet client
-        if (role === "admin") { navigate({ to: "/admin" }); return; }
-        if (role === "convoyeur") {
-          await supabase.auth.signOut();
-          if (!cancelled) {
-            setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Pro ».");
-          }
-          return;
-        }
-        // role === "client" ou null → on regarde si B2B ou particulier
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("type_client" as never)
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (cancelled) return;
-        const typeClient = (prof as { type_client?: string } | null)?.type_client;
-        if (typeClient === "b2b") {
-          navigate({ to: "/dashboard-pro" });
-        } else {
-          navigate({ to: "/dashboard-client" });
-        }
+    // On attend que l'auth soit complètement hydratée (role + profile + statut)
+    if (isInitializing || isLoading || !isAuthenticated) return;
+
+    // Si l'utilisateur est déjà authentifié à l'arrivée sur la page (pas de submit en cours),
+    // on le renvoie directement vers son espace.
+    if (!justLoggedInRef.current) {
+      navigate({ to: homeRoute });
+      return;
+    }
+
+    // Routage strict par onglet après un login volontaire
+    const usedTab = submittedTabRef.current;
+    justLoggedInRef.current = false;
+
+    if (role === "admin") {
+      navigate({ to: "/admin" });
+      return;
+    }
+
+    if (usedTab === "pro") {
+      if (role !== "convoyeur") {
+        setError("Cet email correspond à un compte client. Utilisez l'onglet « Espace Client ».");
+        void logout();
+        return;
       }
-    })();
-    return () => { cancelled = true; };
-  }, [authLoading, isAuthenticated, role, user, navigate, tab, logout]);
+      if (convoyeurStatut === "valide" || convoyeurStatut === "actif") {
+        navigate({ to: "/convoyeur" });
+      } else {
+        navigate({ to: "/attente-validation" });
+      }
+      return;
+    }
+
+    // Onglet client
+    if (role === "convoyeur") {
+      setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Pro ».");
+      void logout();
+      return;
+    }
+    if (typeClient === "b2b") {
+      navigate({ to: "/dashboard-pro" });
+    } else {
+      navigate({ to: "/dashboard-client" });
+    }
+  }, [
+    isAuthenticated,
+    isLoading,
+    isInitializing,
+    role,
+    convoyeurStatut,
+    typeClient,
+    homeRoute,
+    navigate,
+    logout,
+  ]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    setSubmitting(true);
+    submittedTabRef.current = tab;
+    justLoggedInRef.current = true;
     try {
-      await login(email, password);
+      await login(email.trim(), password);
+      // Le useEffect prendra le relais une fois l'auth hydratée
     } catch (err: unknown) {
+      justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
       setError(msg.includes("Invalid") ? "Email ou mot de passe incorrect." : msg);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   const inscriptionLink = tab === "pro" ? "/inscription-convoyeur" : "/inscription-client";
   const inscriptionLabel = tab === "pro" ? "Devenir convoyeur" : "Créer un compte client";
+  /** True tant qu'on attend l'hydratation post-login */
+  const awaitingRouting = justLoggedInRef.current && isAuthenticated && !isLoading;
+  const loading = submitting || awaitingRouting;
 
   return (
     <div className="min-h-screen flex items-center justify-center section-bg px-4 py-10">
@@ -154,7 +175,8 @@ function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
+              disabled={loading}
+              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors disabled:opacity-60"
               placeholder={tab === "pro" ? "convoyeur@email.com" : "votre@email.com"}
             />
           </div>
@@ -175,7 +197,8 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
+              disabled={loading}
+              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors disabled:opacity-60"
               placeholder="••••••••"
             />
           </div>
