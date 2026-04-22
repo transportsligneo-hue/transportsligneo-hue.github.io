@@ -186,6 +186,17 @@ function ConvoyeurMissions() {
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
   if (inspection && user) {
+    if (inspection.mode === "sequentiel") {
+      return (
+        <InspectionSequentielle
+          attributionId={inspection.attributionId}
+          type={inspection.type}
+          userId={user.id}
+          onComplete={handleInspectionComplete}
+          onCancel={() => setInspection(null)}
+        />
+      );
+    }
     if (inspection.mode === "visuel") {
       return (
         <InspectionVisuelle
