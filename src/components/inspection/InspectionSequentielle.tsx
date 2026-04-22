@@ -103,7 +103,7 @@ const ALL_STEPS: StepDef[] = [
   { num: 2,  id: "jante_avant_gauche",         label: "Jante avant gauche",     hint: "Gros plan jante AV-G",                     variant: "jantes" },
   { num: 3,  id: "jante_arriere_gauche",       label: "Jante arrière gauche",   hint: "Gros plan jante AR-G",                     variant: "jantes" },
   { num: 4,  id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche",     hint: "Vue 3/4 arrière côté gauche",              variant: "trois_quart_arriere_gauche" },
-  { num: 5,  id: "devant",                     label: "Arrière",                hint: "Vue arrière complète",                     variant: "coffre_ferme" },
+  { num: 5,  id: "arriere",                    label: "Arrière",                hint: "Vue arrière complète",                     variant: "coffre_ferme" },
   { num: 6,  id: "coffre_ouvert",              label: "Coffre ouvert",          hint: "Coffre grand ouvert + intérieur",          variant: "coffre_ouvert" },
   { num: 7,  id: "roue_secours",               label: "Roue de secours / kit",  hint: "Roue de secours OU kit anti-crevaison",    variant: "kit_securite" },
   { num: 8,  id: "trois_quart_arriere_droite", label: "3/4 arrière droite",     hint: "Vue 3/4 arrière côté droit",               variant: "trois_quart_arriere_droite" },
