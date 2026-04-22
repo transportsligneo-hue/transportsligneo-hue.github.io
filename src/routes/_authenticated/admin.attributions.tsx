@@ -418,12 +418,12 @@ function AdminAttributions() {
                 <a href={p.url_photo} target="_blank" rel="noopener noreferrer">
                   <img
                     src={p.url_photo}
-                    alt={vueLabels[p.vue_type] || p.vue_type}
+                    alt={vueLabelFor(p.vue_type)}
                     className="w-full aspect-[3/4] object-cover rounded-md border border-pro-border"
                   />
                 </a>
                 <p className="text-pro-text-soft text-xs text-center">
-                  {vueLabels[p.vue_type] || p.vue_type}
+                  {vueLabelFor(p.vue_type)}
                 </p>
               </div>
             ))}
