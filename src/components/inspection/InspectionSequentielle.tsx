@@ -1,46 +1,49 @@
 /**
- * InspectionSequentielle — Parcours d'état des lieux 15 étapes (style "grand groupe").
+ * InspectionSequentielle — Parcours d'état des lieux séquentiel "grand groupe".
  *
- * Suit STRICTEMENT l'ordre métier demandé :
- *  1. Devant
- *  2. 3/4 gauche avant
- *  3. 3/4 gauche arrière
- *  4. Arrière
- *  5. Coffre ouvert
- *  6. Sièges arrière
- *  7. Sièges avant
- *  8. 3/4 droite arrière
- *  9. 3/4 droite avant
- *  10. Compteur (km + carburant)
- *  11. Câble de recharge (optionnel — électrique/hybride)
- *  12. Roue de secours / kit crevaison
- *  13. Kit sécurité (gilet + triangle)
- *  14. PV livraison / restitution
- *  15. Signature
+ * ORDRE MÉTIER OBLIGATOIRE (UI uniquement — les `id` BDD restent stables) :
+ *   1.  Avant
+ *   2.  3/4 gauche avant
+ *   3.  3/4 gauche arrière
+ *   4.  Coffre (fermé, vue arrière)
+ *   5.  Ouverture du coffre
+ *   6.  3/4 droite arrière
+ *   7.  Sièges arrière
+ *   8.  Sièges avant
+ *   9.  3/4 droite avant
+ *   10. Les 4 jantes
+ *   11. Compteur (km + carburant)
+ *   12. Kit de sécurité (gilet + triangle) — toujours demandé
+ *   13. Câble de recharge — UNIQUEMENT si EV / hybride rechargeable
+ *   14. Documents de mission (carte grise, bon, contrat…) — étape obligatoire
+ *   15. Signature client
  *
  * Compatible 100% avec le backend existant :
  *   - Crée `inspections` (statut en_cours puis complete)
  *   - Stocke chaque photo dans `inspection_photos` (vue_type stable, multi-photos via timestamp)
- *   - Aucune migration DB nécessaire (la contrainte CHECK a déjà été supprimée).
+ *   - Aucune migration DB nécessaire.
  *   - Commentaires stockés dans `inspection_photos.notes`.
+ *   - L'étape "documents" délègue au composant <MissionDocuments> existant.
  *
  * UX :
  *   - Aperçu local immédiat (Blob URL)
  *   - Upload non bloquant en arrière-plan, retry x3
  *   - Statut visuel (uploading / success / error) par photo
- *   - Reprendre / Valider / Commentaire optionnel
  *   - Multi-photos par étape (sauf signature)
  *   - Récap final cliquable
+ *   - CTA principal en footer sticky avec safe-area
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
   Image as ImageIcon, AlertCircle, MessageSquare, ChevronRight,
+  FileText, Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { CarRealisticSilhouette } from "./CarRealisticSilhouette";
+import { MissionDocuments } from "@/components/MissionDocuments";
 
 interface Props {
   attributionId: string;
@@ -53,7 +56,7 @@ interface Props {
 type Variant = Parameters<typeof CarRealisticSilhouette>[0]["variant"];
 
 interface StepDef {
-  /** Numéro affiché (1..15) */
+  /** Numéro affiché (1..N) */
   num: number;
   /** ID stable utilisé pour `vue_type` en BDD — ne JAMAIS changer */
   id: string;
@@ -63,48 +66,60 @@ interface StepDef {
   hint: string;
   /** Variante de silhouette à afficher */
   variant: Variant;
-  /** Étape optionnelle (peut être skippée) */
-  optional?: boolean;
+  /** Étape conditionnelle (ex: câble = EV/PHEV uniquement) */
+  conditional?: "ev_only";
   /** Si true, n'autorise qu'une seule photo (signature) */
   singlePhoto?: boolean;
+  /** Étape spéciale : pas de photo mais composant custom (documents) */
+  kind?: "photos" | "documents";
 }
 
-const STEPS: StepDef[] = [
-  { num: 1,  id: "devant",                      label: "Devant",                  hint: "Vue de face complète",          variant: "devant" },
+/**
+ * Liste maître. L'ORDRE est l'ORDRE MÉTIER affiché.
+ * Les IDs (vue_type) restent compatibles avec ce qui est en base.
+ */
+const ALL_STEPS: StepDef[] = [
+  { num: 1,  id: "devant",                      label: "Avant",                   hint: "Vue de face complète",          variant: "devant" },
   { num: 2,  id: "trois_quart_avant_gauche",    label: "3/4 avant gauche",        hint: "Vue 3/4 avant côté gauche",     variant: "trois_quart_avant_gauche" },
   { num: 3,  id: "trois_quart_arriere_gauche",  label: "3/4 arrière gauche",      hint: "Vue 3/4 arrière côté gauche",   variant: "trois_quart_arriere_gauche" },
-  { num: 4,  id: "arriere",                     label: "Arrière",                 hint: "Vue arrière complète",          variant: "arriere" },
-  { num: 5,  id: "coffre_ouvert",               label: "Coffre ouvert",           hint: "Coffre grand ouvert",           variant: "coffre_ouvert" },
-  { num: 6,  id: "siege_arriere",               label: "Siège arrière",           hint: "Banquette arrière",             variant: "siege_arriere" },
-  { num: 7,  id: "siege_avant",                 label: "Siège avant",             hint: "Sièges avant",                  variant: "siege_avant" },
-  { num: 8,  id: "trois_quart_arriere_droite",  label: "3/4 arrière droite",      hint: "Vue 3/4 arrière côté droit",    variant: "trois_quart_arriere_droite" },
+  { num: 4,  id: "coffre_ferme",                label: "Coffre",                  hint: "Vue arrière, coffre fermé",     variant: "coffre_ferme" },
+  { num: 5,  id: "coffre_ouvert",               label: "Ouverture du coffre",     hint: "Coffre grand ouvert + intérieur", variant: "coffre_ouvert" },
+  { num: 6,  id: "trois_quart_arriere_droite",  label: "3/4 arrière droite",      hint: "Vue 3/4 arrière côté droit",    variant: "trois_quart_arriere_droite" },
+  { num: 7,  id: "siege_arriere",               label: "Sièges arrière",          hint: "Banquette + appuie-têtes",      variant: "siege_arriere" },
+  { num: 8,  id: "siege_avant",                 label: "Sièges avant",            hint: "Sièges conducteur + passager",  variant: "siege_avant" },
   { num: 9,  id: "trois_quart_avant_droite",    label: "3/4 avant droite",        hint: "Vue 3/4 avant côté droit",      variant: "trois_quart_avant_droite" },
-  { num: 10, id: "compteur",                    label: "Compteur",                hint: "Kilométrage + niveau carburant", variant: "compteur" },
-  { num: 11, id: "cable",                       label: "Câble de recharge",      hint: "Si électrique / hybride rechargeable", variant: "cable", optional: true },
-  { num: 12, id: "roue_secours",                label: "Roue de secours",         hint: "Roue de secours ou kit crevaison", variant: "roue_secours" },
-  { num: 13, id: "kit_securite",                label: "Kit sécurité",            hint: "Gilet + triangle",              variant: "kit_securite" },
-  { num: 14, id: "pv_livraison",                label: "PV livraison",            hint: "PV livraison ou restitution",   variant: "pv_livraison" },
-  { num: 15, id: "signature",                   label: "Signature",               hint: "Signature client",              variant: "signature", singlePhoto: true },
+  { num: 10, id: "jantes",                      label: "Les 4 jantes",            hint: "1 photo par jante (AV-G, AV-D, AR-G, AR-D)", variant: "jantes" },
+  { num: 11, id: "compteur",                    label: "Compteur",                hint: "Kilométrage + niveau carburant", variant: "compteur" },
+  { num: 12, id: "kit_securite",                label: "Kit de sécurité",         hint: "Gilet jaune + triangle",         variant: "kit_securite" },
+  { num: 13, id: "cable",                       label: "Câble de recharge",      hint: "Véhicule électrique ou hybride rechargeable", variant: "cable", conditional: "ev_only" },
+  { num: 14, id: "documents",                   label: "Documents de mission",    hint: "Carte grise, bon, contrat, paquets…", variant: "documents", kind: "documents" },
+  { num: 15, id: "signature",                   label: "Signature client",        hint: "Faire signer le client",        variant: "signature", singlePhoto: true },
 ];
 
 interface PhotoEntry {
-  /** UUID local pour réconcilier (même avant insertion DB) */
   localId: string;
-  /** ID DB (inspection_photos.id) une fois inséré */
   dbId?: string;
-  /** Aperçu (URL.createObjectURL) ou chemin Storage si déjà uploadé */
   previewUrl: string;
-  /** Chemin Storage final */
   storagePath?: string;
-  /** Statut upload */
   status: "uploading" | "success" | "error";
-  /** Message d'erreur éventuel */
   error?: string;
-  /** Commentaire optionnel */
   comment?: string;
 }
 
 type PhotosByStep = Record<string, PhotoEntry[]>;
+
+/* ─────────────────── Helpers ─────────────────── */
+
+const EV_FUEL_VALUES = new Set([
+  "electrique", "electric", "ev", "bev",
+  "hybride_rechargeable", "phev", "plug-in", "plug_in_hybrid", "hybride-rechargeable",
+]);
+
+function isEvOrPhev(carburant?: string | null): boolean {
+  if (!carburant) return false;
+  const norm = carburant.toLowerCase().trim().replace(/\s+/g, "_");
+  return EV_FUEL_VALUES.has(norm) || norm.includes("electr") || norm.includes("rechargeable");
+}
 
 async function uploadWithRetry(path: string, file: File, attempts = 3): Promise<void> {
   let lastErr: unknown = null;
@@ -125,6 +140,8 @@ async function uploadWithRetry(path: string, file: File, attempts = 3): Promise<
   throw lastErr ?? new Error("Upload échoué");
 }
 
+/* ─────────────────── Composant ─────────────────── */
+
 export function InspectionSequentielle({
   attributionId, type, userId, onComplete, onCancel,
 }: Props) {
@@ -133,14 +150,22 @@ export function InspectionSequentielle({
   const [photos, setPhotos] = useState<PhotosByStep>({});
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
-  const [vehicleInfo, setVehicleInfo] = useState<{ marque?: string; modele?: string; immat?: string }>({});
+  const [vehicleInfo, setVehicleInfo] = useState<{ marque?: string; modele?: string; immat?: string; carburant?: string }>({});
   const [editingComment, setEditingComment] = useState<{ stepId: string; localId: string; value: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const currentStep = STEPS[stepIndex];
+  // Étapes effectives (filtre câble si non-EV)
+  const STEPS = useMemo(() => {
+    const ev = isEvOrPhev(vehicleInfo.carburant);
+    return ALL_STEPS
+      .filter((s) => s.conditional !== "ev_only" || ev)
+      .map((s, i) => ({ ...s, num: i + 1 }));
+  }, [vehicleInfo.carburant]);
+
+  const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
   const currentPhotos = photos[currentStep.id] ?? [];
 
-  // ─── bootstrap inspection ───
+  /* ─── bootstrap inspection ─── */
   const ensureInspection = useCallback(async () => {
     if (inspectionId) return inspectionId;
     const { data: existing } = await supabase
@@ -170,23 +195,37 @@ export function InspectionSequentielle({
     });
   }, [ensureInspection]);
 
-  // ─── infos véhicule ───
+  /* ─── infos véhicule (marque + carburant pour conditionnels) ─── */
   useEffect(() => {
     (async () => {
       const { data: attr } = await supabase
         .from("attributions").select("trajet_id").eq("id", attributionId).maybeSingle();
       if (!attr?.trajet_id) return;
       const { data: t } = await supabase
-        .from("trajets").select("marque, modele, immatriculation").eq("id", attr.trajet_id).maybeSingle();
-      if (t) setVehicleInfo({
+        .from("trajets")
+        .select("marque, modele, immatriculation, demande_id")
+        .eq("id", attr.trajet_id)
+        .maybeSingle();
+      if (!t) return;
+      let carburant: string | null = null;
+      if (t.demande_id) {
+        const { data: d } = await supabase
+          .from("demandes_convoyage")
+          .select("carburant")
+          .eq("id", t.demande_id)
+          .maybeSingle();
+        carburant = d?.carburant ?? null;
+      }
+      setVehicleInfo({
         marque: t.marque ?? undefined,
         modele: t.modele ?? undefined,
         immat: t.immatriculation ?? undefined,
+        carburant: carburant ?? undefined,
       });
     })();
   }, [attributionId]);
 
-  // ─── hydrate from existing photos ───
+  /* ─── hydrate from existing photos ─── */
   useEffect(() => {
     if (!inspectionId) return;
     (async () => {
@@ -199,8 +238,7 @@ export function InspectionSequentielle({
 
       const next: PhotosByStep = {};
       for (const p of data) {
-        // Gérer les anciens vue_type (legacy "zone_xxx" ou exact step.id) et les nouveaux (step.id ou step.id_<ts>)
-        const stepDef = STEPS.find((s) => p.vue_type === s.id || p.vue_type.startsWith(`${s.id}_`));
+        const stepDef = ALL_STEPS.find((s) => p.vue_type === s.id || p.vue_type.startsWith(`${s.id}_`));
         if (!stepDef) continue;
         const { data: signed } = await supabase.storage
           .from("inspection-photos")
@@ -219,16 +257,28 @@ export function InspectionSequentielle({
     })();
   }, [inspectionId]);
 
-  // ─── progression ───
+  /* ─── progression ─── */
+  const photoSteps = useMemo(() => STEPS.filter((s) => s.kind !== "documents"), [STEPS]);
+  const completedPhotoSteps = useMemo(() => {
+    return photoSteps.filter((s) => (photos[s.id]?.some((p) => p.status === "success") ?? false));
+  }, [photos, photoSteps]);
   const completedSteps = useMemo(() => {
-    return STEPS.filter((s) => (photos[s.id]?.some((p) => p.status === "success") ?? false));
-  }, [photos]);
+    return STEPS.filter((s) => {
+      if (s.kind === "documents") return true; // toujours considéré OK (l'utilisateur a juste à passer dessus)
+      return (photos[s.id]?.some((p) => p.status === "success") ?? false);
+    });
+  }, [photos, STEPS]);
   const progressPct = Math.round((completedSteps.length / STEPS.length) * 100);
 
-  // ─── prise de photo ───
+  // Étape "jantes" : on demande implicitement 4 photos (1/jante)
+  const isJantes = currentStep.id === "jantes";
+  const jantePhotosCount = isJantes ? (photos.jantes?.filter((p) => p.status !== "error").length ?? 0) : 0;
+  const jantesRemaining = isJantes ? Math.max(0, 4 - jantePhotosCount) : 0;
+
+  /* ─── prise de photo ─── */
   const triggerCamera = () => fileRef.current?.click();
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     if (fileRef.current) fileRef.current.value = "";
     if (!raw) return;
@@ -236,9 +286,8 @@ export function InspectionSequentielle({
     const localId = crypto.randomUUID();
     const previewUrl = URL.createObjectURL(raw);
     const stepId = currentStep.id;
-
-    // Si étape signature → remplace la photo existante
     const isSingle = currentStep.singlePhoto === true;
+
     setPhotos((prev) => ({
       ...prev,
       [stepId]: isSingle
@@ -246,7 +295,6 @@ export function InspectionSequentielle({
         : [...(prev[stepId] ?? []), { localId, previewUrl, status: "uploading" }],
     }));
 
-    // Upload non bloquant
     void uploadOne(stepId, localId, raw);
   };
 
@@ -296,8 +344,6 @@ export function InspectionSequentielle({
     }
   };
 
-
-
   const removePhoto = async (stepId: string, localId: string) => {
     const entry = photos[stepId]?.find((p) => p.localId === localId);
     setPhotos((prev) => ({
@@ -328,7 +374,7 @@ export function InspectionSequentielle({
     setEditingComment(null);
   };
 
-  // ─── navigation ───
+  /* ─── navigation ─── */
   const goNext = () => {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex(stepIndex + 1);
@@ -346,6 +392,7 @@ export function InspectionSequentielle({
         steps_completed: completedSteps.length,
         steps_total: STEPS.length,
         photos_total: Object.values(photos).flat().filter((p) => p.status === "success").length,
+        ev: isEvOrPhev(vehicleInfo.carburant),
       };
       const { error } = await supabase
         .from("inspections")
@@ -362,26 +409,57 @@ export function InspectionSequentielle({
     }
   };
 
-  // ============== RENDER : RÉCAP ==============
+  /* ============== RENDER : RÉCAP ============== */
   if (showRecap) {
+    const missingCritical = photoSteps.filter(
+      (s) => !photos[s.id]?.some((p) => p.status === "success"),
+    );
+
     return (
       <div className="fixed inset-0 z-50 bg-pro-bg flex flex-col">
         <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-pro-border shrink-0">
-          <button onClick={() => setShowRecap(false)} className="p-2 -ml-2 hover:bg-pro-bg-soft rounded-lg">
+          <button onClick={() => setShowRecap(false)} className="p-2 -ml-2 hover:bg-pro-bg-soft rounded-lg" aria-label="Retour">
             <ArrowLeft size={20} className="text-pro-text-soft" />
           </button>
           <div className="text-center">
-            <p className="text-[10px] uppercase tracking-wider text-pro-muted">Résumé des photos</p>
+            <p className="text-[10px] uppercase tracking-wider text-pro-muted">Résumé de l'état des lieux</p>
             <p className="text-sm font-semibold text-pro-text">
-              {completedSteps.length}/{STEPS.length} étapes complétées
+              {completedPhotoSteps.length}/{photoSteps.length} étapes photo
             </p>
           </div>
           <span className="w-9" />
         </header>
 
-        <div className="flex-1 overflow-auto px-4 py-4">
+        <div className="flex-1 overflow-auto px-4 py-4 pb-40">
+          {missingCritical.length > 0 && (
+            <div className="max-w-2xl mx-auto mb-4 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+              <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-amber-800 text-xs">
+                <p className="font-semibold">{missingCritical.length} étape(s) photo manquante(s)</p>
+                <p className="opacity-80">Vous pouvez tout de même envoyer mais nous recommandons de les compléter.</p>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-2 max-w-2xl mx-auto">
             {STEPS.map((s) => {
+              if (s.kind === "documents") {
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => { setStepIndex(STEPS.indexOf(s)); setShowRecap(false); }}
+                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-blue-300 bg-blue-50 hover:border-blue-500 transition flex flex-col items-center justify-center p-2"
+                  >
+                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-blue-700">
+                      {s.num}
+                    </span>
+                    <FileText size={22} className="text-blue-600 mb-1" />
+                    <span className="text-[9px] text-center leading-tight font-medium text-blue-800">
+                      Documents
+                    </span>
+                  </button>
+                );
+              }
               const ph = photos[s.id]?.find((p) => p.status === "success");
               const done = !!ph;
               return (
@@ -419,21 +497,21 @@ export function InspectionSequentielle({
           </div>
         </div>
 
-        <footer className="px-4 py-4 bg-white border-t border-pro-border shrink-0 safe-bottom">
+        <footer className="px-4 py-4 bg-white border-t border-pro-border shrink-0 safe-bottom sticky bottom-0">
           <button
             onClick={handleComplete}
-            disabled={completing || completedSteps.length === 0}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 transition"
+            disabled={completing || completedPhotoSteps.length === 0}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 transition shadow-lg shadow-emerald-600/20"
           >
-            {completing ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
-            {completing ? "Validation…" : "Valider l'état des lieux"}
+            {completing ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+            {completing ? "Envoi…" : "Envoyer l'état des lieux"}
           </button>
         </footer>
       </div>
     );
   }
 
-  // ============== RENDER : ÉTAPE ==============
+  /* ============== RENDER : ÉTAPE ============== */
   return (
     <div className="fixed inset-0 z-50 bg-pro-bg flex flex-col">
       {/* Header */}
@@ -474,7 +552,7 @@ export function InspectionSequentielle({
 
       {/* Body */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-md mx-auto px-4 py-4 space-y-4">
+        <div className="max-w-md mx-auto px-4 py-4 space-y-4 pb-32">
           {/* Titre étape */}
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow">
@@ -486,95 +564,116 @@ export function InspectionSequentielle({
               </h2>
               <p className="text-pro-text-soft text-xs mt-0.5">
                 {currentStep.hint}
-                {currentStep.optional && <span className="ml-1 text-amber-600">· optionnel</span>}
               </p>
-            </div>
-          </div>
-
-          {/* Carte silhouette / aperçu */}
-          {currentPhotos.length === 0 ? (
-            <div className="bg-white border border-pro-border rounded-2xl p-6 shadow-sm">
-              <div className="aspect-[4/3] flex items-center justify-center">
-                <CarRealisticSilhouette variant={currentStep.variant} />
-              </div>
-              {vehicleInfo.marque && (
-                <div className="mt-3 pt-3 border-t border-pro-border text-center">
-                  <p className="text-pro-muted text-[10px] uppercase tracking-wider">Véhicule</p>
-                  <p className="text-pro-text text-sm font-semibold mt-0.5">
-                    {[vehicleInfo.marque, vehicleInfo.modele].filter(Boolean).join(" ")}
-                    {vehicleInfo.immat && <span className="text-pro-text-soft font-mono ml-2">· {vehicleInfo.immat}</span>}
-                  </p>
+              {isJantes && (
+                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+                  {jantePhotosCount}/4 jantes
+                  {jantesRemaining > 0 && <span className="opacity-60">· {jantesRemaining} restantes</span>}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* === Étape DOCUMENTS (composant dédié) === */}
+          {currentStep.kind === "documents" ? (
+            <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
+              <div className="flex items-start gap-2 mb-3 pb-3 border-b border-pro-border">
+                <FileText size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-pro-text text-sm font-semibold">Paquets & documents de la mission</p>
+                  <p className="text-pro-text-soft text-xs mt-0.5">
+                    Ajoutez la carte grise, le bon de prise en charge, le contrat, ou tout document fourni avec le véhicule.
+                  </p>
+                </div>
+              </div>
+              <MissionDocuments attributionId={attributionId} userId={userId} />
+            </div>
           ) : (
-            <div className="space-y-2">
-              {currentPhotos.map((p) => (
-                <div key={p.localId} className="bg-white border border-pro-border rounded-2xl overflow-hidden shadow-sm">
-                  <div className="relative aspect-[4/3] bg-black">
-                    <img src={p.previewUrl} alt={currentStep.label} className="w-full h-full object-cover" />
-                    {/* Statut */}
-                    {p.status === "uploading" && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/70 text-white rounded-full text-[11px] backdrop-blur">
-                        <Loader2 className="animate-spin" size={12} /> Envoi…
-                      </div>
-                    )}
-                    {p.status === "success" && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600 text-white rounded-full text-[11px] shadow">
-                        <Check size={12} strokeWidth={3} /> Photo prise
-                      </div>
-                    )}
-                    {p.status === "error" && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white rounded-full text-[11px] max-w-[80%] shadow">
-                        <AlertCircle size={12} /> {p.error ?? "Échec"}
-                      </div>
-                    )}
-                    <button
-                      onClick={() => removePhoto(currentStep.id, p.localId)}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur"
-                      aria-label="Supprimer la photo"
-                    >
-                      <X size={16} />
-                    </button>
+            <>
+              {/* Carte silhouette / aperçu */}
+              {currentPhotos.length === 0 ? (
+                <div className="bg-white border border-pro-border rounded-2xl p-6 shadow-sm">
+                  <div className="aspect-[4/3] flex items-center justify-center">
+                    <CarRealisticSilhouette variant={currentStep.variant} />
                   </div>
-                  {/* Commentaire */}
-                  <div className="px-3 py-2 border-t border-pro-border">
-                    {editingComment?.localId === p.localId ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={editingComment.value}
-                          onChange={(e) => setEditingComment({ ...editingComment, value: e.target.value })}
-                          placeholder="Écrire un commentaire…"
-                          className="flex-1 px-2 py-1.5 text-sm border border-pro-border rounded-lg focus:outline-none focus:border-emerald-500"
-                          autoFocus
-                        />
+                  {vehicleInfo.marque && (
+                    <div className="mt-3 pt-3 border-t border-pro-border text-center">
+                      <p className="text-pro-muted text-[10px] uppercase tracking-wider">Véhicule</p>
+                      <p className="text-pro-text text-sm font-semibold mt-0.5">
+                        {[vehicleInfo.marque, vehicleInfo.modele].filter(Boolean).join(" ")}
+                        {vehicleInfo.immat && <span className="text-pro-text-soft font-mono ml-2">· {vehicleInfo.immat}</span>}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {currentPhotos.map((p) => (
+                    <div key={p.localId} className="bg-white border border-pro-border rounded-2xl overflow-hidden shadow-sm">
+                      <div className="relative aspect-[4/3] bg-black">
+                        <img src={p.previewUrl} alt={currentStep.label} className="w-full h-full object-cover" />
+                        {p.status === "uploading" && (
+                          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/70 text-white rounded-full text-[11px] backdrop-blur">
+                            <Loader2 className="animate-spin" size={12} /> Envoi…
+                          </div>
+                        )}
+                        {p.status === "success" && (
+                          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600 text-white rounded-full text-[11px] shadow">
+                            <Check size={12} strokeWidth={3} /> Envoyée
+                          </div>
+                        )}
+                        {p.status === "error" && (
+                          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white rounded-full text-[11px] max-w-[80%] shadow">
+                            <AlertCircle size={12} /> {p.error ?? "Échec"}
+                          </div>
+                        )}
                         <button
-                          onClick={saveComment}
-                          className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
+                          onClick={() => removePhoto(currentStep.id, p.localId)}
+                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur"
+                          aria-label="Supprimer la photo"
                         >
-                          OK
+                          <X size={16} />
                         </button>
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => setEditingComment({ stepId: currentStep.id, localId: p.localId, value: p.comment ?? "" })}
-                        className="flex items-center gap-2 text-pro-text-soft hover:text-pro-text text-xs w-full py-1"
-                      >
-                        <MessageSquare size={12} />
-                        {p.comment ? <span className="text-left truncate">{p.comment}</span> : <span>Ajouter un commentaire (optionnel)</span>}
-                      </button>
-                    )}
-                  </div>
+                      <div className="px-3 py-2 border-t border-pro-border">
+                        {editingComment?.localId === p.localId ? (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={editingComment.value}
+                              onChange={(e) => setEditingComment({ ...editingComment, value: e.target.value })}
+                              placeholder="Écrire un commentaire…"
+                              className="flex-1 px-2 py-1.5 text-sm border border-pro-border rounded-lg focus:outline-none focus:border-emerald-500"
+                              autoFocus
+                            />
+                            <button
+                              onClick={saveComment}
+                              className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
+                            >
+                              OK
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setEditingComment({ stepId: currentStep.id, localId: p.localId, value: p.comment ?? "" })}
+                            className="flex items-center gap-2 text-pro-text-soft hover:text-pro-text text-xs w-full py-1"
+                          >
+                            <MessageSquare size={12} />
+                            {p.comment ? <span className="text-left truncate">{p.comment}</span> : <span>Ajouter un commentaire (optionnel)</span>}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* Action photo */}
-      <div className="px-4 py-3 bg-white border-t border-pro-border shrink-0 space-y-2 safe-bottom">
+      {/* Action footer (sticky, safe-area, hors bottom-nav) */}
+      <div className="px-4 py-3 bg-white border-t border-pro-border shrink-0 space-y-2 safe-bottom shadow-[0_-4px_16px_-8px_rgba(15,23,42,0.08)]">
         <input
           ref={fileRef}
           type="file"
@@ -584,7 +683,14 @@ export function InspectionSequentielle({
           className="hidden"
         />
 
-        {currentPhotos.length === 0 ? (
+        {currentStep.kind === "documents" ? (
+          <button
+            onClick={goNext}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
+          >
+            Étape suivante <ChevronRight size={18} />
+          </button>
+        ) : currentPhotos.length === 0 ? (
           <button
             onClick={triggerCamera}
             className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
@@ -620,16 +726,7 @@ export function InspectionSequentielle({
             <ArrowLeft size={12} /> Précédent
           </button>
 
-          {currentPhotos.length === 0 && currentStep.optional && (
-            <button
-              onClick={goNext}
-              className="flex items-center gap-1 text-xs text-pro-text-soft hover:text-pro-text transition px-2 py-1"
-            >
-              Passer (non concerné) <ArrowRight size={12} />
-            </button>
-          )}
-
-          {currentPhotos.length === 0 && !currentStep.optional && stepIndex < STEPS.length - 1 && (
+          {currentPhotos.length === 0 && currentStep.kind !== "documents" && stepIndex < STEPS.length - 1 && (
             <button
               onClick={goNext}
               className="flex items-center gap-1 text-xs text-pro-muted hover:text-pro-text-soft transition px-2 py-1"
