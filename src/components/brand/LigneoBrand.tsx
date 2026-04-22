@@ -1,4 +1,4 @@
-import logoLigneo from "@/assets/logo-transports-ligneo.jpg";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export type LigneoRole = "admin" | "driver" | "client" | "partner";
 
@@ -48,11 +48,12 @@ export function LigneoBrand({ role, compact = false, variant = "light" }: Props)
 
   return (
     <div className="flex items-center gap-2.5 min-w-0">
-      <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026]">
+      <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
         <img
           src={logoLigneo}
           alt="Transports Ligneo"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
+          loading="lazy"
         />
       </div>
       <div className="min-w-0 flex flex-col">

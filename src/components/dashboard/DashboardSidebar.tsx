@@ -3,6 +3,7 @@ import { LogOut, X, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export interface SidebarItem {
   to: string;
@@ -51,12 +52,15 @@ export function DashboardSidebar({ title, subtitle, items, children }: Props) {
       {/* === MOBILE HEADER (compact, sticky) === */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-primary/15 safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="font-heading text-primary text-sm tracking-[0.15em] uppercase truncate">
-              {title}
-            </p>
-            {subtitle && <p className="text-cream/40 text-[10px] truncate">{subtitle}</p>}
-          </div>
+          <Link to="/" className="flex items-center gap-2 min-w-0" aria-label="Accueil">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain shrink-0" />
+            <div className="min-w-0">
+              <p className="font-heading text-primary text-sm tracking-[0.15em] uppercase truncate">
+                {title}
+              </p>
+              {subtitle && <p className="text-cream/40 text-[10px] truncate">{subtitle}</p>}
+            </div>
+          </Link>
           <button
             onClick={() => logout()}
             className="w-9 h-9 rounded-full border border-primary/30 flex items-center justify-center tap-scale text-cream/60 hover:text-destructive transition-colors"
@@ -73,9 +77,12 @@ export function DashboardSidebar({ title, subtitle, items, children }: Props) {
           desktopMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="p-6 border-b border-primary/15 hidden md:block">
-          <h2 className="font-heading text-primary text-lg tracking-[0.1em] uppercase">{title}</h2>
-          {subtitle && <p className="text-cream/40 text-xs mt-1">{subtitle}</p>}
+        <div className="p-6 border-b border-primary/15 hidden md:flex items-center gap-3">
+          <img src={logoLigneo} alt="Transports Ligneo" className="h-12 w-auto object-contain shrink-0" />
+          <div className="min-w-0">
+            <h2 className="font-heading text-primary text-base tracking-[0.1em] uppercase truncate">{title}</h2>
+            {subtitle && <p className="text-cream/40 text-xs mt-1 truncate">{subtitle}</p>}
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-ligneo.png";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import ReservationModal from "./ReservationModal";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -52,11 +52,12 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link to="/">
+          <Link to="/" className="flex items-center gap-3" aria-label="Accueil — Transports Ligneo">
             <img
               src={logoLigneo}
               alt="Transports Ligneo"
-              className="h-10 md:h-12 w-auto"
+              className="h-12 md:h-14 w-auto object-contain"
+              loading="eager"
             />
           </Link>
 

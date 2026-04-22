@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Tag } from "lucide-react";
 import heroCar from "@/assets/hero-car-premium.jpg";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 /**
  * Hero desktop premium — version 2 colonnes (texte gauche / voiture droite).
@@ -51,6 +52,12 @@ export default function HeroDesktop() {
       {/* Contenu */}
       <div className="relative z-10 max-w-7xl mx-auto px-10 xl:px-16 pt-40 pb-24 min-h-screen flex items-center">
         <div className="max-w-xl xl:max-w-2xl">
+          <img
+            src={logoLigneo}
+            alt="Transports Ligneo"
+            className="h-24 xl:h-28 w-auto object-contain mb-6 drop-shadow-[0_8px_30px_rgba(212,175,55,0.25)]"
+            loading="eager"
+          />
           <div className="h-px w-16 bg-primary mb-8" />
 
           <h1 className="font-heading text-5xl xl:text-6xl 2xl:text-7xl tracking-wide leading-[1.05] gold-gradient-text">
