@@ -296,11 +296,7 @@ export function InspectionSequentielle({
     }
   };
 
-  const retryPhoto = async (stepId: string, localId: string) => {
-    // Pour un retry, on relance simplement la prise de photo (le fichier brut a été perdu).
-    // L'utilisateur reprend la photo via "Reprendre".
-    toast.info("Tapez « Reprendre » pour refaire la photo");
-  };
+
 
   const removePhoto = async (stepId: string, localId: string) => {
     const entry = photos[stepId]?.find((p) => p.localId === localId);
