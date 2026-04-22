@@ -80,8 +80,8 @@ interface StepDef {
   conditional?: "ev_only";
   /** Si true, n'autorise qu'une seule photo (signature) */
   singlePhoto?: boolean;
-  /** Étape spéciale : pas de photo mais composant custom (documents) */
-  kind?: "photos" | "documents";
+  /** Étape spéciale */
+  kind?: "photos" | "documents" | "signature";
 }
 
 interface GuideAsset {
@@ -93,23 +93,30 @@ interface GuideAsset {
 /**
  * Liste maître. L'ORDRE est l'ORDRE MÉTIER affiché.
  * Les IDs (vue_type) restent compatibles avec ce qui est en base.
+ *
+ * IMPORTANT : ne pas renommer les `id` (clé `vue_type` dans la DB).
+ * On peut ajouter de nouveaux IDs (jante_*, roue_secours, pv_livraison, carte_grise) :
+ * ils seront enregistrés normalement et libellés côté admin.
  */
 const ALL_STEPS: StepDef[] = [
-  { num: 1, id: "devant", label: "Avant", hint: "Vue de face complète", variant: "devant" },
-  { num: 2, id: "trois_quart_avant_gauche", label: "3/4 avant gauche", hint: "Vue 3/4 avant côté gauche", variant: "trois_quart_avant_gauche" },
-  { num: 3, id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche", hint: "Vue 3/4 arrière côté gauche", variant: "trois_quart_arriere_gauche" },
-  { num: 4, id: "coffre_ferme", label: "Coffre", hint: "Vue arrière, coffre fermé", variant: "coffre_ferme" },
-  { num: 5, id: "coffre_ouvert", label: "Ouverture du coffre", hint: "Coffre grand ouvert + intérieur", variant: "coffre_ouvert" },
-  { num: 6, id: "trois_quart_arriere_droite", label: "3/4 arrière droite", hint: "Vue 3/4 arrière côté droit", variant: "trois_quart_arriere_droite" },
-  { num: 7, id: "siege_arriere", label: "Sièges arrière", hint: "Banquette + appuie-têtes", variant: "siege_arriere" },
-  { num: 8, id: "siege_avant", label: "Sièges avant", hint: "Sièges conducteur + passager", variant: "siege_avant" },
-  { num: 9, id: "trois_quart_avant_droite", label: "3/4 avant droite", hint: "Vue 3/4 avant côté droit", variant: "trois_quart_avant_droite" },
-  { num: 10, id: "jantes", label: "Les 4 jantes", hint: "1 photo par jante (AV-G, AV-D, AR-G, AR-D)", variant: "jantes" },
-  { num: 11, id: "compteur", label: "Compteur", hint: "Kilométrage + niveau carburant", variant: "compteur" },
-  { num: 12, id: "kit_securite", label: "Kit de sécurité", hint: "Gilet jaune + triangle", variant: "kit_securite" },
-  { num: 13, id: "cable", label: "Câble de recharge", hint: "Véhicule électrique ou hybride rechargeable", variant: "cable", conditional: "ev_only" },
-  { num: 14, id: "documents", label: "Documents de mission", hint: "Carte grise, bon, contrat, paquets…", variant: "documents", kind: "documents" },
-  { num: 15, id: "signature", label: "Signature client", hint: "Faire signer le client", variant: "signature", singlePhoto: true },
+  { num: 1,  id: "trois_quart_avant_gauche",   label: "3/4 avant gauche",       hint: "Vue 3/4 avant côté gauche",                variant: "trois_quart_avant_gauche" },
+  { num: 2,  id: "jante_avant_gauche",         label: "Jante avant gauche",     hint: "Gros plan jante AV-G",                     variant: "jantes" },
+  { num: 3,  id: "jante_arriere_gauche",       label: "Jante arrière gauche",   hint: "Gros plan jante AR-G",                     variant: "jantes" },
+  { num: 4,  id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche",     hint: "Vue 3/4 arrière côté gauche",              variant: "trois_quart_arriere_gauche" },
+  { num: 5,  id: "devant",                     label: "Arrière",                hint: "Vue arrière complète",                     variant: "coffre_ferme" },
+  { num: 6,  id: "coffre_ouvert",              label: "Coffre ouvert",          hint: "Coffre grand ouvert + intérieur",          variant: "coffre_ouvert" },
+  { num: 7,  id: "roue_secours",               label: "Roue de secours / kit",  hint: "Roue de secours OU kit anti-crevaison",    variant: "kit_securite" },
+  { num: 8,  id: "trois_quart_arriere_droite", label: "3/4 arrière droite",     hint: "Vue 3/4 arrière côté droit",               variant: "trois_quart_arriere_droite" },
+  { num: 9,  id: "jante_arriere_droite",       label: "Jante arrière droite",   hint: "Gros plan jante AR-D",                     variant: "jantes" },
+  { num: 10, id: "siege_arriere",              label: "Sièges arrière",         hint: "Banquette + appuie-têtes",                 variant: "siege_arriere" },
+  { num: 11, id: "jante_avant_droite",         label: "Jante avant droite",     hint: "Gros plan jante AV-D",                     variant: "jantes" },
+  { num: 12, id: "trois_quart_avant_droite",   label: "3/4 avant droite",       hint: "Vue 3/4 avant côté droit",                 variant: "trois_quart_avant_droite" },
+  { num: 13, id: "siege_avant",                label: "Sièges avant",           hint: "Sièges conducteur + passager",             variant: "siege_avant" },
+  { num: 14, id: "compteur",                   label: "Compteur",               hint: "Kilométrage + niveau carburant",           variant: "compteur" },
+  { num: 15, id: "kit_securite",               label: "Kit de sécurité",        hint: "Gilet jaune + triangle",                   variant: "kit_securite" },
+  { num: 16, id: "pv_livraison",               label: "PV livraison / restitution", hint: "Photo du PV signé / bon de mission",   variant: "documents" },
+  { num: 17, id: "carte_grise",                label: "Carte grise",            hint: "Photo de la carte grise du véhicule",      variant: "documents" },
+  { num: 18, id: "signature",                  label: "Signature client",       hint: "Le client signe directement à l'écran",    variant: "signature", singlePhoto: true, kind: "signature" },
 ];
 
 const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
