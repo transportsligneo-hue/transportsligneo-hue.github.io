@@ -468,9 +468,9 @@ export function InspectionSequentielle({
 
         <div className="flex-1 overflow-auto px-4 py-4 pb-48">
           {missingCritical.length > 0 && (
-            <div className="max-w-2xl mx-auto mb-4 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
-              <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-amber-800 text-xs">
+            <div className="max-w-2xl mx-auto mb-4 px-3 py-2.5 bg-primary/10 border border-primary/20 rounded-xl flex items-start gap-2">
+              <AlertCircle size={16} className="text-primary shrink-0 mt-0.5" />
+              <div className="text-pro-text text-xs">
                 <p className="font-semibold">{missingCritical.length} étape(s) photo manquante(s)</p>
                 <p className="opacity-80">Vous pouvez tout de même envoyer mais nous recommandons de les compléter.</p>
               </div>
