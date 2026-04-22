@@ -70,6 +70,7 @@ const statutLabels: Record<string, string> = {
 };
 
 const vueLabels: Record<string, string> = {
+  // Legacy
   avant: "Avant",
   avant_droit: "Avant droit 3/4",
   cote_droit: "Côté droit",
@@ -81,7 +82,31 @@ const vueLabels: Record<string, string> = {
   interieur_avant: "Intérieur avant",
   interieur_arriere: "Intérieur arrière",
   tableau_bord: "Tableau de bord",
+  // Parcours séquentiel (15 étapes)
+  devant: "1. Devant",
+  trois_quart_avant_gauche: "2. 3/4 avant gauche",
+  trois_quart_arriere_gauche: "3. 3/4 arrière gauche",
+  trois_quart_arriere_droite: "8. 3/4 arrière droite",
+  trois_quart_avant_droite: "9. 3/4 avant droite",
+  coffre_ouvert: "5. Coffre ouvert",
+  siege_arriere: "6. Siège arrière",
+  siege_avant: "7. Siège avant",
+  compteur: "10. Compteur",
+  cable: "11. Câble de recharge",
+  roue_secours: "12. Roue de secours",
+  kit_securite: "13. Kit sécurité",
+  pv_livraison: "14. PV livraison",
+  signature: "15. Signature",
 };
+
+/** Normalise un vue_type (peut être "devant" ou "devant_<timestamp>" pour multi-photos) */
+function vueLabelFor(vueType: string): string {
+  if (vueLabels[vueType]) return vueLabels[vueType];
+  // Strip timestamp suffix : "devant_1729600000000" → "devant"
+  const m = vueType.match(/^([a-z_]+?)(?:_\d{10,})?$/);
+  if (m && vueLabels[m[1]]) return vueLabels[m[1]];
+  return vueType;
+}
 
 function AdminAttributions() {
   const [attributions, setAttributions] = useState<Attribution[]>([]);
