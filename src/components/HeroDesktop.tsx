@@ -19,15 +19,28 @@ export default function HeroDesktop() {
       <div className="absolute bottom-8 left-8 w-20 h-20 border-b border-l border-primary/30 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-20 h-20 border-b border-r border-primary/30 pointer-events-none" />
 
-      {/* Logo signature en filigrane (centré, opacité faible) */}
+      {/* Logo signature en filigrane — élément graphique natif du fond */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-center z-0"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       >
+        {/* Halo doré radial qui ancre le logo dans le fond */}
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(closest-side, rgba(212,175,55,0.10), rgba(212,175,55,0) 70%)",
+          }}
+        />
         <img
           src={logoLigneo}
           alt=""
-          className="w-[80%] max-w-3xl opacity-[0.07] mix-blend-screen select-none"
+          aria-hidden="true"
+          className="absolute left-[18%] top-1/2 -translate-y-1/2 w-[640px] xl:w-[760px] 2xl:w-[860px] opacity-[0.10] select-none"
+          style={{
+            filter:
+              "grayscale(0.2) brightness(1.4) drop-shadow(0 0 60px rgba(212,175,55,0.25))",
+          }}
         />
       </div>
 
