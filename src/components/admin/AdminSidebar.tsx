@@ -77,10 +77,11 @@ export function AdminSidebar({ items, children }: Props) {
   return (
     <div className="min-h-screen flex bg-pro-bg text-pro-text">
       {/* === Sidebar Desktop === */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col">
-        <div className="px-5 py-5 border-b border-pro-border">
-          <LigneoBrand role="admin" variant="light" />
-          <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col shadow-pro-card">
+        {/* Bandeau brand bleu nuit (style Stripe / Qonto) */}
+        <div className="bg-pro-brand-strip px-5 py-5 border-b border-pro-border">
+          <LigneoBrand role="admin" variant="dark" />
+          <p className="text-cream/50 text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
         </div>
 
         {renderNav()}
@@ -117,12 +118,12 @@ export function AdminSidebar({ items, children }: Props) {
             className="lg:hidden fixed inset-0 z-50 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="lg:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
-            <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
-              <LigneoBrand role="admin" variant="light" />
+          <aside className="lg:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom shadow-pro-elevated">
+            <div className="bg-pro-brand-strip px-5 py-4 border-b border-pro-border flex items-center justify-between">
+              <LigneoBrand role="admin" variant="dark" />
               <button
                 onClick={() => setMobileOpen(false)}
-                className="w-8 h-8 rounded-md hover:bg-pro-bg-soft flex items-center justify-center text-pro-text-soft"
+                className="w-8 h-8 rounded-md hover:bg-white/10 flex items-center justify-center text-cream/70 hover:text-white"
               >
                 <X size={18} />
               </button>
