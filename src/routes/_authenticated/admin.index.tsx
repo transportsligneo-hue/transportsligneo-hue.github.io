@@ -480,40 +480,51 @@ function AdminDashboard() {
   );
 }
 
-/* ============= KpiTile (compact, sans icône floue) ============= */
+/* ============= KpiTile (premium SaaS look) ============= */
 function KpiTile({
   icon: Icon,
   label,
   value,
   hint,
   tone,
+  premium = false,
 }: {
   icon: LucideIcon;
   label: string;
   value: number | string;
   hint?: string;
-  tone: "amber" | "blue" | "emerald" | "violet";
+  tone: "amber" | "blue" | "emerald" | "violet" | "sky" | "gold";
+  premium?: boolean;
 }) {
   const tones: Record<string, string> = {
     amber: "bg-amber-50 text-amber-600",
     blue: "bg-blue-50 text-blue-600",
     emerald: "bg-emerald-50 text-emerald-600",
     violet: "bg-violet-50 text-violet-600",
+    sky: "bg-sky-50 text-sky-600",
+    gold: "bg-pro-gold-soft text-pro-gold",
   };
   return (
-    <div className="bg-white border border-pro-border rounded-lg p-4">
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${tones[tone]}`}>
-          <Icon size={18} />
+    <div
+      className={`bg-white rounded-xl p-4 shadow-pro-card hover:shadow-pro-card-hover transition-shadow ${
+        premium ? "border border-pro-gold ring-1 ring-pro-gold/20" : "border border-pro-border"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${tones[tone]}`}>
+          <Icon size={17} />
         </div>
-        <div className="min-w-0">
-          <p className="text-pro-muted text-[11px] uppercase tracking-wider font-medium truncate">
-            {label}
-          </p>
-          <p className="text-pro-text text-xl font-semibold leading-tight mt-0.5">{value}</p>
-          {hint && <p className="text-pro-muted text-[11px] mt-0.5 truncate">{hint}</p>}
-        </div>
+        {premium && (
+          <span className="text-[9px] font-bold uppercase tracking-wider text-pro-gold bg-pro-gold-soft px-1.5 py-0.5 rounded">
+            Premium
+          </span>
+        )}
       </div>
+      <p className="text-pro-muted text-[11px] uppercase tracking-wider font-medium truncate">
+        {label}
+      </p>
+      <p className="text-pro-text text-2xl font-semibold leading-tight mt-1">{value}</p>
+      {hint && <p className="text-pro-muted text-[11px] mt-1 truncate">{hint}</p>}
     </div>
   );
 }
