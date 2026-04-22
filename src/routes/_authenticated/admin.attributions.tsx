@@ -70,37 +70,41 @@ const statutLabels: Record<string, string> = {
 };
 
 const vueLabels: Record<string, string> = {
-  // Legacy
+  // Parcours séquentiel — ordre métier 18 étapes
+  trois_quart_avant_gauche:   "01. 3/4 avant gauche",
+  jante_avant_gauche:         "02. Jante avant gauche",
+  jante_arriere_gauche:       "03. Jante arrière gauche",
+  trois_quart_arriere_gauche: "04. 3/4 arrière gauche",
+  arriere:                    "05. Arrière",
+  coffre_ouvert:              "06. Coffre ouvert",
+  roue_secours:               "07. Roue de secours / kit",
+  trois_quart_arriere_droite: "08. 3/4 arrière droite",
+  jante_arriere_droite:       "09. Jante arrière droite",
+  siege_arriere:              "10. Sièges arrière",
+  jante_avant_droite:         "11. Jante avant droite",
+  trois_quart_avant_droite:   "12. 3/4 avant droite",
+  siege_avant:                "13. Sièges avant",
+  compteur:                   "14. Compteur (km + carburant)",
+  kit_securite:               "15. Kit de sécurité",
+  pv_livraison:               "16. PV livraison / restitution",
+  carte_grise:                "17. Carte grise",
+  signature:                  "18. Signature client",
+  // Legacy (anciennes inspections — conservés pour rétrocompatibilité)
+  devant: "Avant",
   avant: "Avant",
   avant_droit: "Avant droit 3/4",
   cote_droit: "Côté droit",
   arriere_droit: "Arrière droit 3/4",
-  arriere: "Arrière",
   arriere_gauche: "Arrière gauche 3/4",
   cote_gauche: "Côté gauche",
   avant_gauche: "Avant gauche 3/4",
   interieur_avant: "Intérieur avant",
   interieur_arriere: "Intérieur arrière",
   tableau_bord: "Tableau de bord",
-  // Parcours séquentiel (ordre métier)
-  devant: "1. Avant",
-  trois_quart_avant_gauche: "2. 3/4 avant gauche",
-  trois_quart_arriere_gauche: "3. 3/4 arrière gauche",
-  coffre_ferme: "4. Coffre",
-  coffre_ouvert: "5. Ouverture du coffre",
-  trois_quart_arriere_droite: "6. 3/4 arrière droite",
-  siege_arriere: "7. Sièges arrière",
-  siege_avant: "8. Sièges avant",
-  trois_quart_avant_droite: "9. 3/4 avant droite",
-  jantes: "10. Jantes",
-  compteur: "11. Compteur",
-  kit_securite: "12. Kit sécurité",
-  cable: "13. Câble de recharge",
-  documents: "14. Documents",
-  signature: "15. Signature",
-  // Legacy
-  roue_secours: "Roue de secours",
-  pv_livraison: "PV livraison",
+  coffre_ferme: "Coffre fermé",
+  jantes: "Jantes",
+  cable: "Câble de recharge",
+  documents: "Documents",
 };
 
 /** Normalise un vue_type (peut être "devant" ou "devant_<timestamp>" pour multi-photos) */
