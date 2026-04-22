@@ -679,7 +679,7 @@ function AdminMissionDetail() {
               <div className="flex items-center gap-2 mb-3">
                 <RoleBadge role={isB2B ? "partner" : "client"} />
                 <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
-                  {isB2B ? "Partenaire" : "Client"}
+                  {isB2B ? "Partner" : "Client"}
                 </h3>
               </div>
               <p className="text-pro-text font-medium">{trajet.client_nom}</p>
