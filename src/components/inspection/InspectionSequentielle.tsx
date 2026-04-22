@@ -2,21 +2,24 @@
  * InspectionSequentielle — Parcours d'état des lieux séquentiel "grand groupe".
  *
  * ORDRE MÉTIER OBLIGATOIRE (UI uniquement — les `id` BDD restent stables) :
- *   1.  Avant
- *   2.  3/4 gauche avant
- *   3.  3/4 gauche arrière
- *   4.  Coffre (fermé, vue arrière)
- *   5.  Ouverture du coffre
- *   6.  3/4 droite arrière
- *   7.  Sièges arrière
- *   8.  Sièges avant
- *   9.  3/4 droite avant
- *   10. Les 4 jantes
- *   11. Compteur (km + carburant)
- *   12. Kit de sécurité (gilet + triangle) — toujours demandé
- *   13. Câble de recharge — UNIQUEMENT si EV / hybride rechargeable
- *   14. Documents de mission (carte grise, bon, contrat…) — étape obligatoire
- *   15. Signature client
+ *   1.  3/4 avant gauche
+ *   2.  Jante avant gauche
+ *   3.  Jante arrière gauche
+ *   4.  3/4 arrière gauche
+ *   5.  Arrière
+ *   6.  Coffre (ouvert)
+ *   7.  Roue de secours / kit crevaison
+ *   8.  3/4 arrière droite
+ *   9.  Jante arrière droite
+ *   10. Sièges arrière
+ *   11. Jante avant droite
+ *   12. 3/4 avant droite
+ *   13. Sièges avant
+ *   14. Compteur (kilométrage + carburant)
+ *   15. Kit sécurité
+ *   16. PV livraison ou restitution
+ *   17. Carte grise
+ *   18. Signature sur téléphone (canvas tactile)
  *
  * Compatible 100% avec le backend existant :
  *   - Crée `inspections` (statut en_cours puis complete)
@@ -30,6 +33,7 @@
  *   - Upload non bloquant en arrière-plan, retry x3
  *   - Statut visuel (uploading / success / error) par photo
  *   - Multi-photos par étape (sauf signature)
+ *   - Signature : canvas tactile (pas de capture appareil photo)
  *   - Récap final cliquable
  *   - CTA principal fixé au-dessus de la bottom bar mobile
  */
@@ -37,13 +41,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
   Image as ImageIcon, AlertCircle, MessageSquare, ChevronRight,
-  FileText, Send,
+  Send, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { CarRealisticSilhouette } from "./CarRealisticSilhouette";
-import { MissionDocuments } from "@/components/MissionDocuments";
+import { SignatureCanvas } from "./SignatureCanvas";
 import frontGuide from "@/assets/inspection-guides/front.jpg";
 import frontThreeQuarterGuide from "@/assets/inspection-guides/front-three-quarter.jpg";
 import rearThreeQuarterGuide from "@/assets/inspection-guides/rear-three-quarter.jpg";
@@ -75,8 +79,8 @@ interface StepDef {
   conditional?: "ev_only";
   /** Si true, n'autorise qu'une seule photo (signature) */
   singlePhoto?: boolean;
-  /** Étape spéciale : pas de photo mais composant custom (documents) */
-  kind?: "photos" | "documents";
+  /** Étape spéciale */
+  kind?: "photos" | "documents" | "signature";
 }
 
 interface GuideAsset {
@@ -88,30 +92,37 @@ interface GuideAsset {
 /**
  * Liste maître. L'ORDRE est l'ORDRE MÉTIER affiché.
  * Les IDs (vue_type) restent compatibles avec ce qui est en base.
+ *
+ * IMPORTANT : ne pas renommer les `id` (clé `vue_type` dans la DB).
+ * On peut ajouter de nouveaux IDs (jante_*, roue_secours, pv_livraison, carte_grise) :
+ * ils seront enregistrés normalement et libellés côté admin.
  */
 const ALL_STEPS: StepDef[] = [
-  { num: 1, id: "devant", label: "Avant", hint: "Vue de face complète", variant: "devant" },
-  { num: 2, id: "trois_quart_avant_gauche", label: "3/4 avant gauche", hint: "Vue 3/4 avant côté gauche", variant: "trois_quart_avant_gauche" },
-  { num: 3, id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche", hint: "Vue 3/4 arrière côté gauche", variant: "trois_quart_arriere_gauche" },
-  { num: 4, id: "coffre_ferme", label: "Coffre", hint: "Vue arrière, coffre fermé", variant: "coffre_ferme" },
-  { num: 5, id: "coffre_ouvert", label: "Ouverture du coffre", hint: "Coffre grand ouvert + intérieur", variant: "coffre_ouvert" },
-  { num: 6, id: "trois_quart_arriere_droite", label: "3/4 arrière droite", hint: "Vue 3/4 arrière côté droit", variant: "trois_quart_arriere_droite" },
-  { num: 7, id: "siege_arriere", label: "Sièges arrière", hint: "Banquette + appuie-têtes", variant: "siege_arriere" },
-  { num: 8, id: "siege_avant", label: "Sièges avant", hint: "Sièges conducteur + passager", variant: "siege_avant" },
-  { num: 9, id: "trois_quart_avant_droite", label: "3/4 avant droite", hint: "Vue 3/4 avant côté droit", variant: "trois_quart_avant_droite" },
-  { num: 10, id: "jantes", label: "Les 4 jantes", hint: "1 photo par jante (AV-G, AV-D, AR-G, AR-D)", variant: "jantes" },
-  { num: 11, id: "compteur", label: "Compteur", hint: "Kilométrage + niveau carburant", variant: "compteur" },
-  { num: 12, id: "kit_securite", label: "Kit de sécurité", hint: "Gilet jaune + triangle", variant: "kit_securite" },
-  { num: 13, id: "cable", label: "Câble de recharge", hint: "Véhicule électrique ou hybride rechargeable", variant: "cable", conditional: "ev_only" },
-  { num: 14, id: "documents", label: "Documents de mission", hint: "Carte grise, bon, contrat, paquets…", variant: "documents", kind: "documents" },
-  { num: 15, id: "signature", label: "Signature client", hint: "Faire signer le client", variant: "signature", singlePhoto: true },
+  { num: 1,  id: "trois_quart_avant_gauche",   label: "3/4 avant gauche",       hint: "Vue 3/4 avant côté gauche",                variant: "trois_quart_avant_gauche" },
+  { num: 2,  id: "jante_avant_gauche",         label: "Jante avant gauche",     hint: "Gros plan jante AV-G",                     variant: "jantes" },
+  { num: 3,  id: "jante_arriere_gauche",       label: "Jante arrière gauche",   hint: "Gros plan jante AR-G",                     variant: "jantes" },
+  { num: 4,  id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche",     hint: "Vue 3/4 arrière côté gauche",              variant: "trois_quart_arriere_gauche" },
+  { num: 5,  id: "arriere",                    label: "Arrière",                hint: "Vue arrière complète",                     variant: "coffre_ferme" },
+  { num: 6,  id: "coffre_ouvert",              label: "Coffre ouvert",          hint: "Coffre grand ouvert + intérieur",          variant: "coffre_ouvert" },
+  { num: 7,  id: "roue_secours",               label: "Roue de secours / kit",  hint: "Roue de secours OU kit anti-crevaison",    variant: "kit_securite" },
+  { num: 8,  id: "trois_quart_arriere_droite", label: "3/4 arrière droite",     hint: "Vue 3/4 arrière côté droit",               variant: "trois_quart_arriere_droite" },
+  { num: 9,  id: "jante_arriere_droite",       label: "Jante arrière droite",   hint: "Gros plan jante AR-D",                     variant: "jantes" },
+  { num: 10, id: "siege_arriere",              label: "Sièges arrière",         hint: "Banquette + appuie-têtes",                 variant: "siege_arriere" },
+  { num: 11, id: "jante_avant_droite",         label: "Jante avant droite",     hint: "Gros plan jante AV-D",                     variant: "jantes" },
+  { num: 12, id: "trois_quart_avant_droite",   label: "3/4 avant droite",       hint: "Vue 3/4 avant côté droit",                 variant: "trois_quart_avant_droite" },
+  { num: 13, id: "siege_avant",                label: "Sièges avant",           hint: "Sièges conducteur + passager",             variant: "siege_avant" },
+  { num: 14, id: "compteur",                   label: "Compteur",               hint: "Kilométrage + niveau carburant",           variant: "compteur" },
+  { num: 15, id: "kit_securite",               label: "Kit de sécurité",        hint: "Gilet jaune + triangle",                   variant: "kit_securite" },
+  { num: 16, id: "pv_livraison",               label: "PV livraison / restitution", hint: "Photo du PV signé / bon de mission",   variant: "documents" },
+  { num: 17, id: "carte_grise",                label: "Carte grise",            hint: "Photo de la carte grise du véhicule",      variant: "documents" },
+  { num: 18, id: "signature",                  label: "Signature client",       hint: "Le client signe directement à l'écran",    variant: "signature", singlePhoto: true, kind: "signature" },
 ];
 
-const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
-  devant: {
-    src: frontGuide,
-    alt: "Repère visuel véhicule vu de face",
-  },
+/**
+ * Repères visuels (vraies photos de voiture) par variante.
+ * Mappés indirectement via les nouveaux IDs d'étape ci-dessous (voir GUIDE_BY_STEP_ID).
+ */
+const STEP_GUIDE_IMAGES: Partial<Record<string, GuideAsset>> = {
   trois_quart_avant_gauche: {
     src: frontThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts avant gauche",
@@ -120,7 +131,7 @@ const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
     src: rearThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts arrière gauche",
   },
-  coffre_ferme: {
+  arriere: {
     src: rearGuide,
     alt: "Repère visuel véhicule vu de l'arrière",
   },
@@ -137,6 +148,11 @@ const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
     src: frontThreeQuarterGuide,
     alt: "Repère visuel véhicule en trois quarts avant droite",
     mirror: true,
+  },
+  // Vue avant — conservée pour anciennes inspections en base
+  devant: {
+    src: frontGuide,
+    alt: "Repère visuel véhicule vu de face",
   },
 };
 
@@ -298,21 +314,20 @@ export function InspectionSequentielle({
     })();
   }, [inspectionId]);
 
-  const photoSteps = useMemo(() => STEPS.filter((s) => s.kind !== "documents"), [STEPS]);
+  const photoSteps = useMemo(() => STEPS, [STEPS]);
   const completedPhotoSteps = useMemo(() => {
     return photoSteps.filter((s) => (photos[s.id]?.some((p) => p.status === "success") ?? false));
   }, [photos, photoSteps]);
-  const completedSteps = useMemo(() => {
-    return STEPS.filter((s) => {
-      if (s.kind === "documents") return true;
-      return (photos[s.id]?.some((p) => p.status === "success") ?? false);
-    });
-  }, [photos, STEPS]);
+  const completedSteps = completedPhotoSteps;
   const progressPct = Math.round((completedSteps.length / STEPS.length) * 100);
 
-  const isJantes = currentStep.id === "jantes";
-  const jantePhotosCount = isJantes ? (photos.jantes?.filter((p) => p.status !== "error").length ?? 0) : 0;
-  const jantesRemaining = isJantes ? Math.max(0, 4 - jantePhotosCount) : 0;
+  // Compteur global des 4 jantes (pour rappel UX sur chaque étape jante_*)
+  const JANTE_IDS = ["jante_avant_gauche", "jante_avant_droite", "jante_arriere_gauche", "jante_arriere_droite"];
+  const isJante = JANTE_IDS.includes(currentStep.id);
+  const jantePhotosCount = isJante
+    ? JANTE_IDS.filter((id) => photos[id]?.some((p) => p.status === "success")).length
+    : 0;
+  const jantesRemaining = isJante ? Math.max(0, 4 - jantePhotosCount) : 0;
 
   const triggerCamera = () => fileRef.current?.click();
 
@@ -479,20 +494,28 @@ export function InspectionSequentielle({
 
           <div className="grid grid-cols-3 gap-2 max-w-2xl mx-auto">
             {STEPS.map((s) => {
-              if (s.kind === "documents") {
+              if (s.kind === "signature") {
+                const signed = photos[s.id]?.some((p) => p.status === "success");
                 return (
                   <button
                     key={s.id}
                     onClick={() => { setStepIndex(STEPS.indexOf(s)); setShowRecap(false); }}
-                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary/25 bg-primary/10 hover:border-primary/40 transition flex flex-col items-center justify-center p-2"
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition flex flex-col items-center justify-center p-2 ${
+                      signed ? "border-emerald-500 bg-emerald-50" : "border-pro-border bg-white"
+                    }`}
                   >
-                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-primary">
+                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-pro-text">
                       {s.num}
                     </span>
-                    <FileText size={22} className="text-primary mb-1" />
+                    <PenLine size={22} className={signed ? "text-emerald-600 mb-1" : "text-pro-muted mb-1"} />
                     <span className="text-[9px] text-center leading-tight font-medium text-pro-text">
-                      Documents
+                      Signature
                     </span>
+                    {signed && (
+                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow">
+                        <Check size={12} className="text-white" strokeWidth={3} />
+                      </div>
+                    )}
                   </button>
                 );
               }
@@ -598,7 +621,7 @@ export function InspectionSequentielle({
               <p className="text-pro-text-soft text-xs mt-0.5">
                 {currentStep.hint}
               </p>
-              {isJantes && (
+              {isJante && (
                 <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
                   {jantePhotosCount}/4 jantes
                   {jantesRemaining > 0 && <span className="opacity-60">· {jantesRemaining} restantes</span>}
@@ -607,18 +630,41 @@ export function InspectionSequentielle({
             </div>
           </div>
 
-          {currentStep.kind === "documents" ? (
+          {currentStep.kind === "signature" ? (
             <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
               <div className="flex items-start gap-2 mb-3 pb-3 border-b border-pro-border">
-                <FileText size={18} className="text-primary shrink-0 mt-0.5" />
+                <PenLine size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-pro-text text-sm font-semibold">Paquets & documents de la mission</p>
+                  <p className="text-pro-text text-sm font-semibold">Signature du client</p>
                   <p className="text-pro-text-soft text-xs mt-0.5">
-                    Ajoutez la carte grise, le bon de prise en charge, le contrat, ou tout document fourni avec le véhicule.
+                    Le client signe directement à l'écran avec le doigt. Vous validez ensuite.
                   </p>
                 </div>
               </div>
-              <MissionDocuments attributionId={attributionId} userId={userId} />
+              {photos[currentStep.id]?.some((p) => p.status === "success") ? (
+                <div className="space-y-2">
+                  <img
+                    src={photos[currentStep.id]!.find((p) => p.status === "success")!.previewUrl}
+                    alt="Signature"
+                    className="w-full bg-white rounded-xl border border-pro-border"
+                  />
+                  <p className="text-emerald-600 text-xs flex items-center gap-1 font-medium">
+                    <Check size={14} /> Signature enregistrée
+                  </p>
+                </div>
+              ) : (
+                <SignatureCanvas
+                  onValidate={(file) => {
+                    const localId = crypto.randomUUID();
+                    const previewUrl = URL.createObjectURL(file);
+                    setPhotos((prev) => ({
+                      ...prev,
+                      [currentStep.id]: [{ localId, previewUrl, status: "uploading" }],
+                    }));
+                    void uploadOne(currentStep.id, localId, file);
+                  }}
+                />
+              )}
             </div>
           ) : (
             <>
@@ -746,13 +792,19 @@ export function InspectionSequentielle({
             className="hidden"
           />
 
-          {currentStep.kind === "documents" ? (
-            <button
-              onClick={goNext}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
-            >
-              Étape suivante <ChevronRight size={18} />
-            </button>
+          {currentStep.kind === "signature" ? (
+            photos[currentStep.id]?.some((p) => p.status === "success") ? (
+              <button
+                onClick={goNext}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
+              >
+                {stepIndex === STEPS.length - 1 ? "Terminer" : "Valider"} <ChevronRight size={18} />
+              </button>
+            ) : (
+              <p className="text-center text-pro-text-soft text-xs py-2">
+                Validez la signature dans la zone ci-dessus pour continuer.
+              </p>
+            )
           ) : currentPhotos.length === 0 ? (
             <button
               onClick={triggerCamera}
