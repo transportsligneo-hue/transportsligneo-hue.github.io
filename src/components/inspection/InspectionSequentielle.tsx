@@ -41,14 +41,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
   Image as ImageIcon, AlertCircle, MessageSquare, ChevronRight,
-  FileText, Send, PenLine,
+  Send, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { CarRealisticSilhouette } from "./CarRealisticSilhouette";
 import { SignatureCanvas } from "./SignatureCanvas";
-import { MissionDocuments } from "@/components/MissionDocuments";
 import frontGuide from "@/assets/inspection-guides/front.jpg";
 import frontThreeQuarterGuide from "@/assets/inspection-guides/front-three-quarter.jpg";
 import rearThreeQuarterGuide from "@/assets/inspection-guides/rear-three-quarter.jpg";
