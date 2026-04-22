@@ -1,8 +1,9 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, Truck, type LucideIcon, MoreHorizontal } from "lucide-react";
+import { LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { LigneoBrand } from "@/components/brand/LigneoBrand";
 
 
 export interface ConvoyeurSidebarItem {
@@ -47,15 +48,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {/* === Sidebar Desktop === */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-pro-border flex-col">
         <div className="px-5 py-5 border-b border-pro-border">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-              <Truck size={18} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-pro-text font-semibold text-sm truncate">Espace Convoyeur</p>
-              <p className="text-pro-muted text-xs truncate">{user?.email}</p>
-            </div>
-          </div>
+          <LigneoBrand role="driver" variant="light" />
+          <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -93,12 +87,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {/* === Mobile Header === */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
-              <Truck size={15} />
-            </div>
-            <p className="text-pro-text font-semibold text-sm truncate">Convoyeur</p>
-          </div>
+          <LigneoBrand role="driver" variant="light" compact />
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
@@ -115,15 +104,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           <div className="md:hidden fixed inset-0 z-50 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
           <aside className="md:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
             <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                  <Truck size={18} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-pro-text font-semibold text-sm truncate">Espace Convoyeur</p>
-                  <p className="text-pro-muted text-xs truncate">{user?.email}</p>
-                </div>
-              </div>
+              <LigneoBrand role="driver" variant="light" />
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-8 h-8 rounded-md hover:bg-pro-bg-soft flex items-center justify-center text-pro-text-soft"

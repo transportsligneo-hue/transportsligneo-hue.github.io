@@ -1,8 +1,9 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, Building2, type LucideIcon } from "lucide-react";
+import { LogOut, Menu, X, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { LigneoBrand } from "@/components/brand/LigneoBrand";
 
 export interface ProSidebarItem {
   to: string;
@@ -36,18 +37,11 @@ export function ProSidebar({ societe, items, children }: Props) {
     <div className="min-h-screen flex bg-pro-bg text-pro-text">
       {/* === Sidebar Desktop === */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col">
-        <div className="px-6 py-5 border-b border-pro-border">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-pro-accent text-white flex items-center justify-center">
-              <Building2 size={18} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-pro-text font-semibold text-sm truncate">
-                {societe || "Espace Pro"}
-              </p>
-              <p className="text-pro-muted text-xs truncate">{user?.email}</p>
-            </div>
-          </div>
+        <div className="px-5 py-5 border-b border-pro-border">
+          <LigneoBrand role="partner" variant="light" />
+          <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">
+            {societe || user?.email}
+          </p>
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -85,12 +79,7 @@ export function ProSidebar({ societe, items, children }: Props) {
       {/* === Mobile header === */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-pro-accent text-white flex items-center justify-center shrink-0">
-              <Building2 size={15} />
-            </div>
-            <p className="text-pro-text font-semibold text-sm truncate">{societe || "Espace Pro"}</p>
-          </div>
+          <LigneoBrand role="partner" variant="light" compact />
           <button
             onClick={() => setMobileOpen(true)}
             className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
@@ -110,15 +99,7 @@ export function ProSidebar({ societe, items, children }: Props) {
           />
           <aside className="lg:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
             <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-pro-accent text-white flex items-center justify-center shrink-0">
-                  <Building2 size={18} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-pro-text font-semibold text-sm truncate">{societe || "Espace Pro"}</p>
-                  <p className="text-pro-muted text-xs truncate">{user?.email}</p>
-                </div>
-              </div>
+              <LigneoBrand role="partner" variant="light" />
               <button
                 onClick={() => setMobileOpen(false)}
                 className="w-8 h-8 rounded-md hover:bg-pro-bg-soft flex items-center justify-center text-pro-text-soft"
