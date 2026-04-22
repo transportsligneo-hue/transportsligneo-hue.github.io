@@ -55,22 +55,12 @@ export default function HeroDesktop() {
           <div className="h-px w-16 bg-primary mb-6" />
 
           {/* Logo officiel "Transports Ligneo" — grand format, intégré au hero */}
-          <h1 className="m-0 relative inline-block">
+          <h1 className="m-0">
             <span className="sr-only">Transports Ligneo</span>
-            {/* Aura dorée derrière le logo */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -m-10 rounded-full"
-              style={{
-                background:
-                  "radial-gradient(closest-side, rgba(212,175,55,0.28), rgba(212,175,55,0.08) 55%, transparent 75%)",
-                filter: "blur(20px)",
-              }}
-            />
             <img
               src={logoLigneo}
               alt="Transports Ligneo"
-              className="relative h-44 xl:h-56 2xl:h-64 w-auto object-contain drop-shadow-[0_12px_40px_rgba(212,175,55,0.35)]"
+              className="h-44 xl:h-56 2xl:h-64 w-auto object-contain"
               loading="eager"
               fetchPriority="high"
             />
