@@ -401,6 +401,45 @@ function ConvoyeurMissions() {
             )}
           </div>
         )}
+
+        {/* Sticky bottom action bar — toujours accessible au pouce sur mobile */}
+        {openMission.statut !== "propose" && openMission.statut !== "termine" && (
+          <div
+            className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-pro-border shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
+          >
+            <div className="flex items-stretch gap-2 px-3 pt-3">
+              <a
+                href={t?.depart ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.depart)}` : "#"}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold active:scale-95 transition"
+              >
+                <Navigation size={18} />
+                <span className="text-[11px] uppercase tracking-wide">GPS</span>
+              </a>
+              <a
+                href={t?.client_telephone ? `tel:${t.client_telephone}` : "#"}
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-xl font-semibold transition ${
+                  t?.client_telephone
+                    ? "bg-emerald-600 text-white active:scale-95"
+                    : "bg-pro-bg-soft text-pro-muted pointer-events-none"
+                }`}
+              >
+                <Phone size={18} />
+                <span className="text-[11px] uppercase tracking-wide">Appeler</span>
+              </a>
+              {isActive && (
+                <button
+                  onClick={() => setShowMap(v => !v)}
+                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 bg-white border border-pro-border text-pro-text rounded-xl font-semibold active:scale-95 transition"
+                >
+                  <MapPin size={18} />
+                  <span className="text-[11px] uppercase tracking-wide">{showMap ? "Masquer" : "Carte"}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
