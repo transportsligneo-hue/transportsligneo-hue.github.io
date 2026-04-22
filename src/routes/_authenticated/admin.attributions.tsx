@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, ExternalLink } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
@@ -297,6 +297,14 @@ function AdminAttributions() {
                       </option>
                     ))}
                   </Select>
+                  <Link
+                    to="/admin/missions/$missionId"
+                    params={{ missionId: a.id }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium role-admin-bg text-white hover:opacity-90 transition-opacity"
+                    title="Ouvrir la fiche mission"
+                  >
+                    <ExternalLink size={12} /> Ouvrir
+                  </Link>
                   <IconButton onClick={() => viewGps(a.id)} title="Suivi GPS" tone="primary">
                     <MapPin size={15} />
                   </IconButton>
