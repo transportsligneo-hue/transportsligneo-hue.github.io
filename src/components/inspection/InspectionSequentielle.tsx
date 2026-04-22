@@ -792,13 +792,19 @@ export function InspectionSequentielle({
             className="hidden"
           />
 
-          {currentStep.kind === "documents" ? (
-            <button
-              onClick={goNext}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
-            >
-              Étape suivante <ChevronRight size={18} />
-            </button>
+          {currentStep.kind === "signature" ? (
+            photos[currentStep.id]?.some((p) => p.status === "success") ? (
+              <button
+                onClick={goNext}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
+              >
+                {stepIndex === STEPS.length - 1 ? "Terminer" : "Valider"} <ChevronRight size={18} />
+              </button>
+            ) : (
+              <p className="text-center text-pro-text-soft text-xs py-2">
+                Validez la signature dans la zone ci-dessus pour continuer.
+              </p>
+            )
           ) : currentPhotos.length === 0 ? (
             <button
               onClick={triggerCamera}
