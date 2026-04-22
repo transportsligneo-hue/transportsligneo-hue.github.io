@@ -2,21 +2,24 @@
  * InspectionSequentielle — Parcours d'état des lieux séquentiel "grand groupe".
  *
  * ORDRE MÉTIER OBLIGATOIRE (UI uniquement — les `id` BDD restent stables) :
- *   1.  Avant
- *   2.  3/4 gauche avant
- *   3.  3/4 gauche arrière
- *   4.  Coffre (fermé, vue arrière)
- *   5.  Ouverture du coffre
- *   6.  3/4 droite arrière
- *   7.  Sièges arrière
- *   8.  Sièges avant
- *   9.  3/4 droite avant
- *   10. Les 4 jantes
- *   11. Compteur (km + carburant)
- *   12. Kit de sécurité (gilet + triangle) — toujours demandé
- *   13. Câble de recharge — UNIQUEMENT si EV / hybride rechargeable
- *   14. Documents de mission (carte grise, bon, contrat…) — étape obligatoire
- *   15. Signature client
+ *   1.  3/4 avant gauche
+ *   2.  Jante avant gauche
+ *   3.  Jante arrière gauche
+ *   4.  3/4 arrière gauche
+ *   5.  Arrière
+ *   6.  Coffre (ouvert)
+ *   7.  Roue de secours / kit crevaison
+ *   8.  3/4 arrière droite
+ *   9.  Jante arrière droite
+ *   10. Sièges arrière
+ *   11. Jante avant droite
+ *   12. 3/4 avant droite
+ *   13. Sièges avant
+ *   14. Compteur (kilométrage + carburant)
+ *   15. Kit sécurité
+ *   16. PV livraison ou restitution
+ *   17. Carte grise
+ *   18. Signature sur téléphone (canvas tactile)
  *
  * Compatible 100% avec le backend existant :
  *   - Crée `inspections` (statut en_cours puis complete)
@@ -30,6 +33,7 @@
  *   - Upload non bloquant en arrière-plan, retry x3
  *   - Statut visuel (uploading / success / error) par photo
  *   - Multi-photos par étape (sauf signature)
+ *   - Signature : canvas tactile (pas de capture appareil photo)
  *   - Récap final cliquable
  *   - CTA principal fixé au-dessus de la bottom bar mobile
  */
