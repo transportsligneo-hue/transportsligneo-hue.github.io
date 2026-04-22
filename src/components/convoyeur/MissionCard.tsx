@@ -54,7 +54,7 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
   return (
     <article
       className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
-        isActive ? "border-emerald-300 ring-2 ring-emerald-500/20" : "border-pro-border hover:border-pro-border-strong"
+        isActive ? "border-emerald-300 ring-2 ring-emerald-500/20" : "border-pro-border hover:border-emerald-200"
       }`}
     >
       {/* Header */}
