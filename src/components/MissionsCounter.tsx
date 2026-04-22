@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Truck, Route, Users, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Stat {
   icon: typeof Truck;
@@ -9,32 +7,10 @@ interface Stat {
 }
 
 export default function MissionsCounter() {
-  const [missions, setMissions] = useState<number | null>(null);
-  const [clients, setClients] = useState<number | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const [{ count: m }, { count: c }] = await Promise.all([
-        supabase.from("missions").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-      ]);
-      if (!mounted) return;
-      setMissions(m ?? 0);
-      setClients(c ?? 0);
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  // Base "fondatrice" + dynamique pour rendre crédible dès le départ
-  const totalMissions = (missions ?? 0) + 1200;
-  const kmEstimes = totalMissions * 720; // moyenne ~720 km/mission
-  const totalClients = (clients ?? 0) + 320;
-
   const stats: Stat[] = [
-    { icon: Truck, value: totalMissions.toLocaleString("fr-FR") + "+", label: "Missions réalisées" },
-    { icon: Route, value: kmEstimes.toLocaleString("fr-FR"), label: "Kilomètres parcourus" },
-    { icon: Users, value: totalClients.toLocaleString("fr-FR") + "+", label: "Clients accompagnés" },
+    { icon: Truck, value: "2 300+", label: "Missions réalisées" },
+    { icon: Route, value: "400 000+ km", label: "Kilomètres parcourus" },
+    { icon: Users, value: "600+", label: "Clients accompagnés" },
     { icon: Calendar, value: "6 ans", label: "D'expérience terrain" },
   ];
 
