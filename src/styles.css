@@ -168,8 +168,9 @@
   }
 
   /* === Pro / B2B SaaS theme (mode clair, ne touche pas au site vitrine) === */
-  .bg-pro-bg { background-color: #f8fafc; }
-  .bg-pro-bg-soft { background-color: #f1f5f9; }
+  /* Fond plus doux (gris-blanc tirant vers le bleuté, type Qonto/Stripe) */
+  .bg-pro-bg { background-color: #f7f8fb; }
+  .bg-pro-bg-soft { background-color: #f1f3f8; }
   .bg-pro-accent { background-color: #0b1026; }
   .bg-pro-accent\/5 { background-color: rgba(11, 16, 38, 0.05); }
   .bg-pro-accent\/10 { background-color: rgba(11, 16, 38, 0.10); }
@@ -177,17 +178,39 @@
   .text-pro-text-soft { color: #475569; }
   .text-pro-muted { color: #94a3b8; }
   .text-pro-accent { color: #0b1026; }
-  .border-pro-border { border-color: #e2e8f0; }
+  .border-pro-border { border-color: #e6e8ee; }
+  .border-pro-border\/60 { border-color: rgba(230, 232, 238, 0.6); }
   .border-pro-accent { border-color: #0b1026; }
   .border-pro-accent\/20 { border-color: rgba(11, 16, 38, 0.20); }
+  .border-pro-accent\/40 { border-color: rgba(11, 16, 38, 0.40); }
   .hover\:bg-pro-accent-hover:hover { background-color: #1a2040; }
-  .hover\:bg-pro-bg-soft:hover { background-color: #f1f5f9; }
-  .hover\:bg-pro-bg-soft\/60:hover { background-color: rgba(241, 245, 249, 0.6); }
+  .hover\:bg-pro-bg-soft:hover { background-color: #f1f3f8; }
+  .hover\:bg-pro-bg-soft\/60:hover { background-color: rgba(241, 243, 248, 0.6); }
   .hover\:border-pro-accent:hover { border-color: #0b1026; }
+  .hover\:border-pro-accent\/40:hover { border-color: rgba(11, 16, 38, 0.40); }
   .hover\:text-pro-text:hover { color: #0f172a; }
   .focus\:border-pro-accent:focus { border-color: #0b1026; }
   .focus\:ring-pro-accent\/20:focus { --tw-ring-color: rgba(11, 16, 38, 0.20); }
   .placeholder\:text-pro-muted::placeholder { color: #94a3b8; }
+
+  /* === Premium SaaS shadows & gold highlight === */
+  .shadow-pro-card { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03); }
+  .shadow-pro-card-hover { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04); }
+  .shadow-pro-elevated { box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04); }
+  .ring-pro-soft { box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.04); }
+
+  /* Accent doré branding (highlights premium uniquement) */
+  .text-pro-gold { color: #b8902e; }
+  .bg-pro-gold { background-color: #d4af37; }
+  .bg-pro-gold-soft { background-color: rgba(212, 175, 55, 0.10); }
+  .border-pro-gold { border-color: rgba(212, 175, 55, 0.35); }
+  .hover\:bg-pro-gold-hover:hover { background-color: #b8902e; }
+  .bg-pro-gold-gradient { background-image: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%); }
+
+  /* Bandeau brand bleu nuit en haut de sidebar (style Stripe / Qonto) */
+  .bg-pro-brand-strip {
+    background-image: linear-gradient(135deg, #0b1026 0%, #131a38 60%, #0b1026 100%);
+  }
 
   /* === Couleurs rôles Transports Ligneo (séparées des statuts mission) === */
   /* Admin : bleu vif | Driver : vert | Client : orange | Partenaire : violet */
