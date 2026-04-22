@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
+import HeroDesktop from "@/components/HeroDesktop";
 import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
 import CommentCaMarche from "@/components/CommentCaMarche";
 import AvisClientsDynamiques from "@/components/AvisClientsDynamiques";
@@ -30,7 +30,7 @@ function Index() {
       {/* Desktop : layout existant intact */}
       <div className="hidden md:block">
         <Navbar />
-        <Hero />
+        <HeroDesktop />
         <MissionsCounter />
         <PourquoiNousChoisir />
         <CommentCaMarche />
