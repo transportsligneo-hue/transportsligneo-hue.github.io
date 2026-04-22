@@ -10,27 +10,34 @@ interface Props {
   variant?: "light" | "dark";
 }
 
-const roleConfig: Record<LigneoRole, { label: string; bg: string; ring: string; text: string }> = {
+const roleConfig: Record<
+  LigneoRole,
+  { label: string; dashboardLabel: string; bg: string; ring: string; text: string }
+> = {
   admin: {
     label: "Admin",
+    dashboardLabel: "Admin Dashboard",
     bg: "role-admin-bg",
     ring: "role-admin-border",
     text: "text-white",
   },
   driver: {
     label: "Driver",
+    dashboardLabel: "Driver Dashboard",
     bg: "role-driver-bg",
     ring: "role-driver-border",
     text: "text-white",
   },
   client: {
     label: "Client",
+    dashboardLabel: "Client Dashboard",
     bg: "role-client-bg",
     ring: "role-client-border",
     text: "text-white",
   },
   partner: {
-    label: "Partenaire",
+    label: "Partner",
+    dashboardLabel: "Partner Dashboard",
     bg: "role-partner-bg",
     ring: "role-partner-border",
     text: "text-white",
@@ -69,7 +76,7 @@ export function LigneoBrand({ role, compact = false, variant = "light" }: Props)
             {cfg.label}
           </span>
           {!compact && (
-            <span className={`text-[10px] ${tagColor}`}>· Espace pro</span>
+            <span className={`text-[10px] ${tagColor}`}>· {cfg.dashboardLabel}</span>
           )}
         </div>
       </div>
