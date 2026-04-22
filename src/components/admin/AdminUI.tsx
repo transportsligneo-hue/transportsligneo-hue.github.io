@@ -34,7 +34,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`bg-white border border-pro-border rounded-lg ${padded ? "p-5" : ""} ${className}`}
+      className={`bg-white border border-pro-border rounded-xl shadow-pro-card ${padded ? "p-5" : ""} ${className}`}
     >
       {children}
     </div>
@@ -279,7 +279,7 @@ export function IconButton({
 /* ============= Table ============= */
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-white border border-pro-border rounded-lg overflow-hidden">
+    <div className="bg-white border border-pro-border rounded-xl shadow-pro-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">{children}</table>
       </div>
