@@ -53,7 +53,6 @@ export function InspectionVisuelle({
   const [activeZone, setActiveZone] = useState<{ id: string; label: string } | null>(null);
   const [cameraZone, setCameraZone] = useState<{ id: string; label: string } | null>(null);
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
-  const [extrasOpen, setExtrasOpen] = useState(false);
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [vehicleInfo, setVehicleInfo] = useState<{ marque?: string; modele?: string; immat?: string }>({});
