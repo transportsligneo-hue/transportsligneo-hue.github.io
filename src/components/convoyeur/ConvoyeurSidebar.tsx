@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, Truck, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 
 export interface ConvoyeurSidebarItem {
@@ -165,8 +166,11 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 md:ml-60 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen">
-        <div className="p-4 sm:p-5 md:p-8 max-w-5xl mx-auto">{children}</div>
+      <main className="flex-1 md:ml-60 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen flex flex-col">
+        <div className="hidden md:block">
+          <DashboardHeader variant="light" profileTo="/convoyeur/profil" />
+        </div>
+        <div className="p-4 sm:p-5 md:p-8 max-w-5xl mx-auto w-full flex-1">{children}</div>
       </main>
 
       {/* === Mobile Bottom Tab Bar === */}

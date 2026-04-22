@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, X, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export interface SidebarItem {
   to: string;
@@ -111,8 +112,11 @@ export function DashboardSidebar({ title, subtitle, items, children }: Props) {
       </aside>
 
       {/* === MAIN === */}
-      <main className="flex-1 overflow-auto pt-14 md:pt-0 pb-bottom-nav md:pb-0">
-        <div className="p-4 md:p-8 max-w-6xl mx-auto">{children}</div>
+      <main className="flex-1 overflow-auto pt-14 md:pt-0 pb-bottom-nav md:pb-0 flex flex-col">
+        <div className="hidden md:block">
+          <DashboardHeader variant="dark" profileTo="/dashboard-client/profil" />
+        </div>
+        <div className="p-4 md:p-8 max-w-6xl mx-auto w-full flex-1">{children}</div>
       </main>
 
       {/* === MOBILE BOTTOM NAV (dashboard) === */}
