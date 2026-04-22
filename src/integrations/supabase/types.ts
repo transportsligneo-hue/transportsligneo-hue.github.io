@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           convoyeur_id: string
           created_at: string
+          etape_courante: string | null
           id: string
           statut: string
           trajet_id: string
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           convoyeur_id: string
           created_at?: string
+          etape_courante?: string | null
           id?: string
           statut?: string
           trajet_id: string
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           convoyeur_id?: string
           created_at?: string
+          etape_courante?: string | null
           id?: string
           statut?: string
           trajet_id?: string
@@ -599,6 +602,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mission_documents_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_etape_history: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          created_by: string | null
+          etape: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          created_by?: string | null
+          etape: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          created_by?: string | null
+          etape?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_etape_history_attribution_id_fkey"
             columns: ["attribution_id"]
             isOneToOne: false
             referencedRelation: "attributions"
