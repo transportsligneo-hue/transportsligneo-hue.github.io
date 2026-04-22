@@ -71,6 +71,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
+import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -411,6 +412,12 @@ const AuthenticatedDashboardClientMissionsMissionIdRoute =
     path: '/$missionId',
     getParentRoute: () => AuthenticatedDashboardClientMissionsRoute,
   } as any)
+const AuthenticatedAdminMissionsMissionIdRoute =
+  AuthenticatedAdminMissionsMissionIdRouteImport.update({
+    id: '/missions/$missionId',
+    path: '/missions/$missionId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -468,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
+  '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -527,6 +535,7 @@ export interface FileRoutesByTo {
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
+  '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -592,6 +601,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
+  '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -657,6 +667,7 @@ export interface FileRouteTypes {
     | '/convoyeur/'
     | '/dashboard-client/'
     | '/dashboard-pro/'
+    | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -716,6 +727,7 @@ export interface FileRouteTypes {
     | '/convoyeur'
     | '/dashboard-client'
     | '/dashboard-pro'
+    | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -780,6 +792,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/'
     | '/_authenticated/dashboard-client/'
     | '/_authenticated/dashboard-pro/'
+    | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1257,6 +1270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedDashboardClientMissionsRoute
     }
+    '/_authenticated/admin/missions/$missionId': {
+      id: '/_authenticated/admin/missions/$missionId'
+      path: '/missions/$missionId'
+      fullPath: '/admin/missions/$missionId'
+      preLoaderRoute: typeof AuthenticatedAdminMissionsMissionIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
@@ -1270,6 +1290,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminMissionsMissionIdRoute: typeof AuthenticatedAdminMissionsMissionIdRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -1282,6 +1303,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminMissionsMissionIdRoute:
+    AuthenticatedAdminMissionsMissionIdRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
