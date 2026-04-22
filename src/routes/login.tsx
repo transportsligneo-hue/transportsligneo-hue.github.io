@@ -3,7 +3,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, LogIn, User, Truck } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import logoLigneo from "@/assets/logo-ligneo.png";
 
 type Tab = "client" | "pro";
 

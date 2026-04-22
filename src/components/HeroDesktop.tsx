@@ -19,31 +19,6 @@ export default function HeroDesktop() {
       <div className="absolute bottom-8 left-8 w-20 h-20 border-b border-l border-primary/30 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-20 h-20 border-b border-r border-primary/30 pointer-events-none" />
 
-      {/* Logo signature en filigrane — élément graphique natif du fond */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-      >
-        {/* Halo doré radial qui ancre le logo dans le fond */}
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(closest-side, rgba(212,175,55,0.10), rgba(212,175,55,0) 70%)",
-          }}
-        />
-        <img
-          src={logoLigneo}
-          alt=""
-          aria-hidden="true"
-          className="absolute left-[18%] top-1/2 -translate-y-1/2 w-[640px] xl:w-[760px] 2xl:w-[860px] opacity-[0.10] select-none"
-          style={{
-            filter:
-              "grayscale(0.2) brightness(1.4) drop-shadow(0 0 60px rgba(212,175,55,0.25))",
-          }}
-        />
-      </div>
-
       {/* Image voiture — colonne droite, fondue dans le navy */}
       <div className="absolute inset-y-0 right-0 w-[58%] xl:w-[60%]">
         <img
@@ -76,14 +51,25 @@ export default function HeroDesktop() {
 
       {/* Contenu */}
       <div className="relative z-10 max-w-7xl mx-auto px-10 xl:px-16 pt-40 pb-24 min-h-screen flex items-center">
-        <div className="max-w-xl xl:max-w-2xl">
-          <div className="h-px w-16 bg-primary mb-6" />
+        <div className="max-w-xl xl:max-w-2xl relative">
+          {/* Logo en watermark, centré au-dessus du wordmark */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-24 xl:-top-28 w-[260px] xl:w-[320px] h-[260px] xl:h-[320px] opacity-[0.13]"
+            style={{
+              backgroundImage: `url(${logoLigneo})`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              backgroundSize: "contain",
+              filter: "blur(0.3px) saturate(1.05)",
+            }}
+          />
+          <div className="h-px w-16 bg-primary mb-8 relative" />
 
-          {/* Wordmark texte — le logo graphique est en filigrane derrière */}
-          <h1 className="m-0 font-heading text-cream text-5xl xl:text-6xl 2xl:text-7xl tracking-[0.1em] leading-[1.05]">
+          <h1 className="font-heading text-5xl xl:text-6xl 2xl:text-7xl tracking-wide leading-[1.05] gold-gradient-text relative">
             TRANSPORTS
             <br />
-            <span className="text-primary">LIGNEO</span>
+            LIGNEO
           </h1>
 
           <p className="font-heading text-2xl xl:text-3xl text-primary italic mt-6">

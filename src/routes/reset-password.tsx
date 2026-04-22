@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Lock, CheckCircle, AlertCircle } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import logoLigneo from "@/assets/logo-ligneo.png";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPassword,

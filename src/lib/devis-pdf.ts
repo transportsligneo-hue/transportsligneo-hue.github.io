@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import logoLigneo from "@/assets/logo-ligneo.png";
 
 export interface DevisData {
   numero: string;
