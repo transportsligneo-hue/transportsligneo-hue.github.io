@@ -2,7 +2,6 @@
  * MissionCard — carte mission compacte pour la liste convoyeur.
  * Mobile-first, gros zones tappables, infos essentielles immédiates.
  */
-import { Link } from "@tanstack/react-router";
 import {
   MapPin, Calendar, Car, ClipboardCheck, ChevronRight,
   Phone, Navigation, AlertCircle, Clock, Truck, Flag,
