@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  MapPin, Loader2, ClipboardCheck, FileText, Navigation, Clock,
+  MapPin, Loader2, FileText, Navigation, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter, Phone,
   Car, Calendar, Check, X,
 } from "lucide-react";
