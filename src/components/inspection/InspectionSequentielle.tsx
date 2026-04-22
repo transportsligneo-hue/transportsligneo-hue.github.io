@@ -31,7 +31,7 @@
  *   - Statut visuel (uploading / success / error) par photo
  *   - Multi-photos par étape (sauf signature)
  *   - Récap final cliquable
- *   - CTA principal en footer sticky avec safe-area
+ *   - CTA principal fixé au-dessus de la bottom bar mobile
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -44,6 +44,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { CarRealisticSilhouette } from "./CarRealisticSilhouette";
 import { MissionDocuments } from "@/components/MissionDocuments";
+import frontGuide from "@/assets/inspection-guides/front.jpg";
+import frontThreeQuarterGuide from "@/assets/inspection-guides/front-three-quarter.jpg";
+import rearThreeQuarterGuide from "@/assets/inspection-guides/rear-three-quarter.jpg";
+import rearGuide from "@/assets/inspection-guides/rear.jpg";
+import openTrunkGuide from "@/assets/inspection-guides/open-trunk.jpg";
 
 interface Props {
   attributionId: string;
@@ -74,27 +79,66 @@ interface StepDef {
   kind?: "photos" | "documents";
 }
 
+interface GuideAsset {
+  src: string;
+  alt: string;
+  mirror?: boolean;
+}
+
 /**
  * Liste maître. L'ORDRE est l'ORDRE MÉTIER affiché.
  * Les IDs (vue_type) restent compatibles avec ce qui est en base.
  */
 const ALL_STEPS: StepDef[] = [
-  { num: 1,  id: "devant",                      label: "Avant",                   hint: "Vue de face complète",          variant: "devant" },
-  { num: 2,  id: "trois_quart_avant_gauche",    label: "3/4 avant gauche",        hint: "Vue 3/4 avant côté gauche",     variant: "trois_quart_avant_gauche" },
-  { num: 3,  id: "trois_quart_arriere_gauche",  label: "3/4 arrière gauche",      hint: "Vue 3/4 arrière côté gauche",   variant: "trois_quart_arriere_gauche" },
-  { num: 4,  id: "coffre_ferme",                label: "Coffre",                  hint: "Vue arrière, coffre fermé",     variant: "coffre_ferme" },
-  { num: 5,  id: "coffre_ouvert",               label: "Ouverture du coffre",     hint: "Coffre grand ouvert + intérieur", variant: "coffre_ouvert" },
-  { num: 6,  id: "trois_quart_arriere_droite",  label: "3/4 arrière droite",      hint: "Vue 3/4 arrière côté droit",    variant: "trois_quart_arriere_droite" },
-  { num: 7,  id: "siege_arriere",               label: "Sièges arrière",          hint: "Banquette + appuie-têtes",      variant: "siege_arriere" },
-  { num: 8,  id: "siege_avant",                 label: "Sièges avant",            hint: "Sièges conducteur + passager",  variant: "siege_avant" },
-  { num: 9,  id: "trois_quart_avant_droite",    label: "3/4 avant droite",        hint: "Vue 3/4 avant côté droit",      variant: "trois_quart_avant_droite" },
-  { num: 10, id: "jantes",                      label: "Les 4 jantes",            hint: "1 photo par jante (AV-G, AV-D, AR-G, AR-D)", variant: "jantes" },
-  { num: 11, id: "compteur",                    label: "Compteur",                hint: "Kilométrage + niveau carburant", variant: "compteur" },
-  { num: 12, id: "kit_securite",                label: "Kit de sécurité",         hint: "Gilet jaune + triangle",         variant: "kit_securite" },
-  { num: 13, id: "cable",                       label: "Câble de recharge",      hint: "Véhicule électrique ou hybride rechargeable", variant: "cable", conditional: "ev_only" },
-  { num: 14, id: "documents",                   label: "Documents de mission",    hint: "Carte grise, bon, contrat, paquets…", variant: "documents", kind: "documents" },
-  { num: 15, id: "signature",                   label: "Signature client",        hint: "Faire signer le client",        variant: "signature", singlePhoto: true },
+  { num: 1, id: "devant", label: "Avant", hint: "Vue de face complète", variant: "devant" },
+  { num: 2, id: "trois_quart_avant_gauche", label: "3/4 avant gauche", hint: "Vue 3/4 avant côté gauche", variant: "trois_quart_avant_gauche" },
+  { num: 3, id: "trois_quart_arriere_gauche", label: "3/4 arrière gauche", hint: "Vue 3/4 arrière côté gauche", variant: "trois_quart_arriere_gauche" },
+  { num: 4, id: "coffre_ferme", label: "Coffre", hint: "Vue arrière, coffre fermé", variant: "coffre_ferme" },
+  { num: 5, id: "coffre_ouvert", label: "Ouverture du coffre", hint: "Coffre grand ouvert + intérieur", variant: "coffre_ouvert" },
+  { num: 6, id: "trois_quart_arriere_droite", label: "3/4 arrière droite", hint: "Vue 3/4 arrière côté droit", variant: "trois_quart_arriere_droite" },
+  { num: 7, id: "siege_arriere", label: "Sièges arrière", hint: "Banquette + appuie-têtes", variant: "siege_arriere" },
+  { num: 8, id: "siege_avant", label: "Sièges avant", hint: "Sièges conducteur + passager", variant: "siege_avant" },
+  { num: 9, id: "trois_quart_avant_droite", label: "3/4 avant droite", hint: "Vue 3/4 avant côté droit", variant: "trois_quart_avant_droite" },
+  { num: 10, id: "jantes", label: "Les 4 jantes", hint: "1 photo par jante (AV-G, AV-D, AR-G, AR-D)", variant: "jantes" },
+  { num: 11, id: "compteur", label: "Compteur", hint: "Kilométrage + niveau carburant", variant: "compteur" },
+  { num: 12, id: "kit_securite", label: "Kit de sécurité", hint: "Gilet jaune + triangle", variant: "kit_securite" },
+  { num: 13, id: "cable", label: "Câble de recharge", hint: "Véhicule électrique ou hybride rechargeable", variant: "cable", conditional: "ev_only" },
+  { num: 14, id: "documents", label: "Documents de mission", hint: "Carte grise, bon, contrat, paquets…", variant: "documents", kind: "documents" },
+  { num: 15, id: "signature", label: "Signature client", hint: "Faire signer le client", variant: "signature", singlePhoto: true },
 ];
+
+const STEP_GUIDE_IMAGES: Partial<Record<Variant, GuideAsset>> = {
+  devant: {
+    src: frontGuide,
+    alt: "Repère visuel véhicule vu de face",
+  },
+  trois_quart_avant_gauche: {
+    src: frontThreeQuarterGuide,
+    alt: "Repère visuel véhicule en trois quarts avant gauche",
+  },
+  trois_quart_arriere_gauche: {
+    src: rearThreeQuarterGuide,
+    alt: "Repère visuel véhicule en trois quarts arrière gauche",
+  },
+  coffre_ferme: {
+    src: rearGuide,
+    alt: "Repère visuel véhicule vu de l'arrière",
+  },
+  coffre_ouvert: {
+    src: openTrunkGuide,
+    alt: "Repère visuel coffre ouvert",
+  },
+  trois_quart_arriere_droite: {
+    src: rearThreeQuarterGuide,
+    alt: "Repère visuel véhicule en trois quarts arrière droite",
+    mirror: true,
+  },
+  trois_quart_avant_droite: {
+    src: frontThreeQuarterGuide,
+    alt: "Repère visuel véhicule en trois quarts avant droite",
+    mirror: true,
+  },
+};
 
 interface PhotoEntry {
   localId: string;
@@ -154,7 +198,6 @@ export function InspectionSequentielle({
   const [editingComment, setEditingComment] = useState<{ stepId: string; localId: string; value: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Étapes effectives (filtre câble si non-EV)
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(vehicleInfo.carburant);
     return ALL_STEPS
@@ -164,8 +207,8 @@ export function InspectionSequentielle({
 
   const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
   const currentPhotos = photos[currentStep.id] ?? [];
+  const currentGuide = STEP_GUIDE_IMAGES[currentStep.variant];
 
-  /* ─── bootstrap inspection ─── */
   const ensureInspection = useCallback(async () => {
     if (inspectionId) return inspectionId;
     const { data: existing } = await supabase
@@ -195,7 +238,6 @@ export function InspectionSequentielle({
     });
   }, [ensureInspection]);
 
-  /* ─── infos véhicule (marque + carburant pour conditionnels) ─── */
   useEffect(() => {
     (async () => {
       const { data: attr } = await supabase
@@ -225,7 +267,6 @@ export function InspectionSequentielle({
     })();
   }, [attributionId]);
 
-  /* ─── hydrate from existing photos ─── */
   useEffect(() => {
     if (!inspectionId) return;
     (async () => {
@@ -257,25 +298,22 @@ export function InspectionSequentielle({
     })();
   }, [inspectionId]);
 
-  /* ─── progression ─── */
   const photoSteps = useMemo(() => STEPS.filter((s) => s.kind !== "documents"), [STEPS]);
   const completedPhotoSteps = useMemo(() => {
     return photoSteps.filter((s) => (photos[s.id]?.some((p) => p.status === "success") ?? false));
   }, [photos, photoSteps]);
   const completedSteps = useMemo(() => {
     return STEPS.filter((s) => {
-      if (s.kind === "documents") return true; // toujours considéré OK (l'utilisateur a juste à passer dessus)
+      if (s.kind === "documents") return true;
       return (photos[s.id]?.some((p) => p.status === "success") ?? false);
     });
   }, [photos, STEPS]);
   const progressPct = Math.round((completedSteps.length / STEPS.length) * 100);
 
-  // Étape "jantes" : on demande implicitement 4 photos (1/jante)
   const isJantes = currentStep.id === "jantes";
   const jantePhotosCount = isJantes ? (photos.jantes?.filter((p) => p.status !== "error").length ?? 0) : 0;
   const jantesRemaining = isJantes ? Math.max(0, 4 - jantePhotosCount) : 0;
 
-  /* ─── prise de photo ─── */
   const triggerCamera = () => fileRef.current?.click();
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -374,7 +412,6 @@ export function InspectionSequentielle({
     setEditingComment(null);
   };
 
-  /* ─── navigation ─── */
   const goNext = () => {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex(stepIndex + 1);
@@ -409,14 +446,13 @@ export function InspectionSequentielle({
     }
   };
 
-  /* ============== RENDER : RÉCAP ============== */
   if (showRecap) {
     const missingCritical = photoSteps.filter(
       (s) => !photos[s.id]?.some((p) => p.status === "success"),
     );
 
     return (
-      <div className="fixed inset-0 z-50 bg-pro-bg flex flex-col">
+      <div className="fixed inset-0 z-[70] bg-pro-bg flex flex-col">
         <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-pro-border shrink-0">
           <button onClick={() => setShowRecap(false)} className="p-2 -ml-2 hover:bg-pro-bg-soft rounded-lg" aria-label="Retour">
             <ArrowLeft size={20} className="text-pro-text-soft" />
@@ -430,11 +466,11 @@ export function InspectionSequentielle({
           <span className="w-9" />
         </header>
 
-        <div className="flex-1 overflow-auto px-4 py-4 pb-40">
+        <div className="flex-1 overflow-auto px-4 py-4 pb-48">
           {missingCritical.length > 0 && (
-            <div className="max-w-2xl mx-auto mb-4 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
-              <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-amber-800 text-xs">
+            <div className="max-w-2xl mx-auto mb-4 px-3 py-2.5 bg-primary/10 border border-primary/20 rounded-xl flex items-start gap-2">
+              <AlertCircle size={16} className="text-primary shrink-0 mt-0.5" />
+              <div className="text-pro-text text-xs">
                 <p className="font-semibold">{missingCritical.length} étape(s) photo manquante(s)</p>
                 <p className="opacity-80">Vous pouvez tout de même envoyer mais nous recommandons de les compléter.</p>
               </div>
@@ -448,13 +484,13 @@ export function InspectionSequentielle({
                   <button
                     key={s.id}
                     onClick={() => { setStepIndex(STEPS.indexOf(s)); setShowRecap(false); }}
-                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-blue-300 bg-blue-50 hover:border-blue-500 transition flex flex-col items-center justify-center p-2"
+                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary/25 bg-primary/10 hover:border-primary/40 transition flex flex-col items-center justify-center p-2"
                   >
-                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-blue-700">
+                    <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-primary">
                       {s.num}
                     </span>
-                    <FileText size={22} className="text-blue-600 mb-1" />
-                    <span className="text-[9px] text-center leading-tight font-medium text-blue-800">
+                    <FileText size={22} className="text-primary mb-1" />
+                    <span className="text-[9px] text-center leading-tight font-medium text-pro-text">
                       Documents
                     </span>
                   </button>
@@ -472,7 +508,7 @@ export function InspectionSequentielle({
                 >
                   {done ? (
                     <>
-                      <img src={ph!.previewUrl} alt={s.label} className="w-full h-full object-cover" />
+                      <img src={ph.previewUrl} alt={s.label} className="w-full h-full object-cover" />
                       <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow">
                         <Check size={12} className="text-white" strokeWidth={3} />
                       </div>
@@ -497,24 +533,24 @@ export function InspectionSequentielle({
           </div>
         </div>
 
-        <footer className="px-4 py-4 bg-white border-t border-pro-border shrink-0 safe-bottom sticky bottom-0">
-          <button
-            onClick={handleComplete}
-            disabled={completing || completedPhotoSteps.length === 0}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 transition shadow-lg shadow-emerald-600/20"
-          >
-            {completing ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-            {completing ? "Envoi…" : "Envoyer l'état des lieux"}
-          </button>
+        <footer className="fixed inset-x-0 bottom-0 z-[80] border-t border-pro-border bg-white/95 backdrop-blur-sm shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.22)]">
+          <div className="mx-auto w-full max-w-md px-4 pt-3 pb-4 safe-bottom">
+            <button
+              onClick={handleComplete}
+              disabled={completing || completedPhotoSteps.length === 0}
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 transition shadow-lg shadow-emerald-600/20"
+            >
+              {completing ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+              {completing ? "Envoi…" : "Envoyer l'état des lieux"}
+            </button>
+          </div>
         </footer>
       </div>
     );
   }
 
-  /* ============== RENDER : ÉTAPE ============== */
   return (
-    <div className="fixed inset-0 z-50 bg-pro-bg flex flex-col">
-      {/* Header */}
+    <div className="fixed inset-0 z-[70] bg-pro-bg flex flex-col">
       <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-pro-border shrink-0">
         <button onClick={onCancel} className="p-2 -ml-2 hover:bg-pro-bg-soft rounded-lg" aria-label="Fermer">
           <X size={20} className="text-pro-text-soft" />
@@ -536,7 +572,6 @@ export function InspectionSequentielle({
         </button>
       </header>
 
-      {/* Progression */}
       <div className="px-4 py-2.5 bg-white border-b border-pro-border shrink-0">
         <div className="h-1.5 bg-pro-bg-soft rounded-full overflow-hidden">
           <div
@@ -550,10 +585,8 @@ export function InspectionSequentielle({
         </div>
       </div>
 
-      {/* Body */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-md mx-auto px-4 py-4 space-y-4 pb-32">
-          {/* Titre étape */}
+        <div className="max-w-md mx-auto px-4 py-4 space-y-4 pb-52">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow">
               {currentStep.num}
@@ -574,11 +607,10 @@ export function InspectionSequentielle({
             </div>
           </div>
 
-          {/* === Étape DOCUMENTS (composant dédié) === */}
           {currentStep.kind === "documents" ? (
             <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
               <div className="flex items-start gap-2 mb-3 pb-3 border-b border-pro-border">
-                <FileText size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                <FileText size={18} className="text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-pro-text text-sm font-semibold">Paquets & documents de la mission</p>
                   <p className="text-pro-text-soft text-xs mt-0.5">
@@ -590,20 +622,51 @@ export function InspectionSequentielle({
             </div>
           ) : (
             <>
-              {/* Carte silhouette / aperçu */}
               {currentPhotos.length === 0 ? (
-                <div className="bg-white border border-pro-border rounded-2xl p-6 shadow-sm">
-                  <div className="aspect-[4/3] flex items-center justify-center">
-                    <CarRealisticSilhouette variant={currentStep.variant} />
-                  </div>
-                  {vehicleInfo.marque && (
-                    <div className="mt-3 pt-3 border-t border-pro-border text-center">
-                      <p className="text-pro-muted text-[10px] uppercase tracking-wider">Véhicule</p>
-                      <p className="text-pro-text text-sm font-semibold mt-0.5">
-                        {[vehicleInfo.marque, vehicleInfo.modele].filter(Boolean).join(" ")}
-                        {vehicleInfo.immat && <span className="text-pro-text-soft font-mono ml-2">· {vehicleInfo.immat}</span>}
-                      </p>
-                    </div>
+                <div className="bg-white border border-pro-border rounded-2xl p-4 shadow-sm overflow-hidden">
+                  {currentGuide ? (
+                    <>
+                      <div className="aspect-[4/3] overflow-hidden rounded-[18px] bg-pro-bg-soft border border-pro-border/70">
+                        <img
+                          src={currentGuide.src}
+                          alt={currentGuide.alt}
+                          loading="lazy"
+                          width={1024}
+                          height={768}
+                          className="w-full h-full object-cover"
+                          style={currentGuide.mirror ? { transform: "scaleX(-1)" } : undefined}
+                        />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3 border-t border-pro-border pt-3">
+                        <div>
+                          <p className="text-pro-muted text-[10px] uppercase tracking-wider">Repère visuel</p>
+                          <p className="text-pro-text text-sm font-semibold mt-0.5">Vraie vue véhicule</p>
+                        </div>
+                        {vehicleInfo.marque && (
+                          <div className="text-right min-w-0">
+                            <p className="text-pro-muted text-[10px] uppercase tracking-wider">Véhicule</p>
+                            <p className="text-pro-text text-sm font-semibold truncate">
+                              {[vehicleInfo.marque, vehicleInfo.modele].filter(Boolean).join(" ")}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="aspect-[4/3] flex items-center justify-center rounded-[18px] bg-pro-bg-soft border border-pro-border/70">
+                        <CarRealisticSilhouette variant={currentStep.variant} className="max-w-[92%]" />
+                      </div>
+                      {vehicleInfo.marque && (
+                        <div className="mt-3 pt-3 border-t border-pro-border text-center">
+                          <p className="text-pro-muted text-[10px] uppercase tracking-wider">Véhicule</p>
+                          <p className="text-pro-text text-sm font-semibold mt-0.5">
+                            {[vehicleInfo.marque, vehicleInfo.modele].filter(Boolean).join(" ")}
+                            {vehicleInfo.immat && <span className="text-pro-text-soft font-mono ml-2">· {vehicleInfo.immat}</span>}
+                          </p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ) : (
@@ -672,68 +735,68 @@ export function InspectionSequentielle({
         </div>
       </div>
 
-      {/* Action footer (sticky, safe-area, hors bottom-nav) */}
-      <div className="px-4 py-3 bg-white border-t border-pro-border shrink-0 space-y-2 safe-bottom shadow-[0_-4px_16px_-8px_rgba(15,23,42,0.08)]">
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFile}
-          className="hidden"
-        />
+      <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-pro-border bg-white/95 backdrop-blur-sm shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.22)]">
+        <div className="mx-auto w-full max-w-md px-4 pt-3 pb-4 safe-bottom space-y-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFile}
+            className="hidden"
+          />
 
-        {currentStep.kind === "documents" ? (
-          <button
-            onClick={goNext}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
-          >
-            Étape suivante <ChevronRight size={18} />
-          </button>
-        ) : currentPhotos.length === 0 ? (
-          <button
-            onClick={triggerCamera}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
-          >
-            <Camera size={18} /> Prendre la photo
-          </button>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
+          {currentStep.kind === "documents" ? (
+            <button
+              onClick={goNext}
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
+            >
+              Étape suivante <ChevronRight size={18} />
+            </button>
+          ) : currentPhotos.length === 0 ? (
             <button
               onClick={triggerCamera}
-              className="flex items-center justify-center gap-1.5 py-3 bg-white border border-pro-border text-pro-text rounded-xl text-sm font-medium hover:bg-pro-bg-soft transition"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition shadow-sm"
             >
-              <Camera size={16} />
-              {currentStep.singlePhoto ? "Reprendre" : "+ Photo"}
+              <Camera size={18} /> Prendre la photo
             </button>
-            <button
-              onClick={goNext}
-              className="flex items-center justify-center gap-1.5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition"
-            >
-              {stepIndex === STEPS.length - 1 ? "Terminer" : "Valider"}
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
-
-        {/* Navigation secondaire */}
-        <div className="flex items-center justify-between pt-1">
-          <button
-            onClick={goPrev}
-            disabled={stepIndex === 0}
-            className="flex items-center gap-1 text-xs text-pro-text-soft hover:text-pro-text disabled:opacity-30 transition px-2 py-1"
-          >
-            <ArrowLeft size={12} /> Précédent
-          </button>
-
-          {currentPhotos.length === 0 && currentStep.kind !== "documents" && stepIndex < STEPS.length - 1 && (
-            <button
-              onClick={goNext}
-              className="flex items-center gap-1 text-xs text-pro-muted hover:text-pro-text-soft transition px-2 py-1"
-            >
-              Passer <ArrowRight size={12} />
-            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={triggerCamera}
+                className="flex items-center justify-center gap-1.5 py-3 bg-white border border-pro-border text-pro-text rounded-xl text-sm font-medium hover:bg-pro-bg-soft transition"
+              >
+                <Camera size={16} />
+                {currentStep.singlePhoto ? "Reprendre" : "+ Photo"}
+              </button>
+              <button
+                onClick={goNext}
+                className="flex items-center justify-center gap-1.5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition"
+              >
+                {stepIndex === STEPS.length - 1 ? "Terminer" : "Valider"}
+                <ChevronRight size={16} />
+              </button>
+            </div>
           )}
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              onClick={goPrev}
+              disabled={stepIndex === 0}
+              className="flex items-center gap-1 text-xs text-pro-text-soft hover:text-pro-text disabled:opacity-30 transition px-2 py-1"
+            >
+              <ArrowLeft size={12} /> Précédent
+            </button>
+
+            {currentPhotos.length === 0 && currentStep.kind !== "documents" && stepIndex < STEPS.length - 1 && (
+              <button
+                onClick={goNext}
+                className="flex items-center gap-1 text-xs text-pro-muted hover:text-pro-text-soft transition px-2 py-1"
+              >
+                Passer <ArrowRight size={12} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
