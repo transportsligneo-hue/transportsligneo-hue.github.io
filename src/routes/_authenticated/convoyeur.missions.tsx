@@ -226,14 +226,25 @@ function ConvoyeurMissions() {
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
     return (
-      <div className="space-y-4 pb-20">
-        {/* Back bar */}
-        <button
-          onClick={() => setOpenMissionId(null)}
-          className="flex items-center gap-1.5 text-pro-text-soft hover:text-pro-text text-sm py-1"
-        >
-          <ArrowLeft size={16} /> Retour aux missions
-        </button>
+      <div className="space-y-4 pb-32">
+        {/* Sticky back bar — toujours accessible au pouce en haut */}
+        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-pro-bg/95 backdrop-blur-sm border-b border-pro-border/60">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => setOpenMissionId(null)}
+              className="flex items-center gap-1.5 text-pro-text hover:text-pro-accent text-sm font-medium py-1.5 px-2 -ml-2 rounded-md hover:bg-white/60 active:scale-95 transition"
+            >
+              <ArrowLeft size={18} /> Missions
+            </button>
+            {isActive && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                EN COURS
+                {getDuration() && <span className="text-emerald-600 font-medium">· {getDuration()}</span>}
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Trajet card */}
         <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
