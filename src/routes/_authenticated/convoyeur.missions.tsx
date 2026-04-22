@@ -38,7 +38,8 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee"; mode: "visuel" | "photos" } | null>(null);
+  const [inspectionPicker, setInspectionPicker] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
