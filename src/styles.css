@@ -188,4 +188,26 @@
   .focus\:border-pro-accent:focus { border-color: #0b1026; }
   .focus\:ring-pro-accent\/20:focus { --tw-ring-color: rgba(11, 16, 38, 0.20); }
   .placeholder\:text-pro-muted::placeholder { color: #94a3b8; }
+
+  /* === Couleurs rôles Transports Ligneo (séparées des statuts mission) === */
+  /* Admin : bleu vif | Driver : vert | Client : orange | Partenaire : violet */
+  .role-admin-bg     { background-color: #2563eb; }
+  .role-admin-text   { color: #2563eb; }
+  .role-admin-soft   { background-color: rgba(37, 99, 235, 0.10); }
+  .role-admin-border { border-color: rgba(37, 99, 235, 0.25); }
+
+  .role-driver-bg     { background-color: #059669; }
+  .role-driver-text   { color: #059669; }
+  .role-driver-soft   { background-color: rgba(5, 150, 105, 0.10); }
+  .role-driver-border { border-color: rgba(5, 150, 105, 0.25); }
+
+  .role-client-bg     { background-color: #ea7c1c; }
+  .role-client-text   { color: #ea7c1c; }
+  .role-client-soft   { background-color: rgba(234, 124, 28, 0.10); }
+  .role-client-border { border-color: rgba(234, 124, 28, 0.25); }
+
+  .role-partner-bg     { background-color: #7c3aed; }
+  .role-partner-text   { color: #7c3aed; }
+  .role-partner-soft   { background-color: rgba(124, 58, 237, 0.10); }
+  .role-partner-border { border-color: rgba(124, 58, 237, 0.25); }
 }
