@@ -51,21 +51,22 @@ export default function HeroDesktop() {
 
       {/* Contenu */}
       <div className="relative z-10 max-w-7xl mx-auto px-10 xl:px-16 pt-40 pb-24 min-h-screen flex items-center">
-        <div className="max-w-xl xl:max-w-2xl">
-          <div className="flex items-center gap-3 mb-5">
-            <img
-              src={logoLigneo}
-              alt="Transports Ligneo"
-              className="h-14 xl:h-16 w-auto object-contain drop-shadow-[0_4px_18px_rgba(212,175,55,0.2)]"
-              loading="eager"
-            />
-            <span className="font-heading text-cream/55 text-[11px] tracking-[0.25em] uppercase">
-              Convoyage premium
-            </span>
-          </div>
-          <div className="h-px w-16 bg-primary mb-8" />
+        <div className="max-w-xl xl:max-w-2xl relative">
+          {/* Logo en watermark, centré au-dessus du wordmark */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-24 xl:-top-28 w-[260px] xl:w-[320px] h-[260px] xl:h-[320px] opacity-[0.13]"
+            style={{
+              backgroundImage: `url(${logoLigneo})`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              backgroundSize: "contain",
+              filter: "blur(0.3px) saturate(1.05)",
+            }}
+          />
+          <div className="h-px w-16 bg-primary mb-8 relative" />
 
-          <h1 className="font-heading text-5xl xl:text-6xl 2xl:text-7xl tracking-wide leading-[1.05] gold-gradient-text">
+          <h1 className="font-heading text-5xl xl:text-6xl 2xl:text-7xl tracking-wide leading-[1.05] gold-gradient-text relative">
             TRANSPORTS
             <br />
             LIGNEO
