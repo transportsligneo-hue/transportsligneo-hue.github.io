@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardSidebar, type SidebarItem } from "@/components/dashboard/DashboardSidebar";
@@ -22,34 +22,25 @@ const navItems: SidebarItem[] = [
 ];
 
 function ClientLayout() {
-  const { isAuthenticated, user, role, isLoading } = useAuth();
-  const [active, setActive] = useState<boolean | null>(null);
-  const [typeClient, setTypeClient] = useState<string | null>(null);
+  const { isAuthenticated, role, roleActif, typeClient, isLoading, homeRoute } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setActive(null); return; }
-    supabase
-      .from("user_roles")
-      .select("actif" as never)
-      .eq("user_id", user.id)
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        const row = data as { actif?: boolean } | null;
-        setActive(row?.actif === false ? false : true);
-      });
-    supabase
-      .from("profiles")
-      .select("type_client" as never)
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        const row = data as { type_client?: string } | null;
-        setTypeClient(row?.type_client ?? "particulier");
-      });
-  }, [user]);
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (role === "admin" || role === "convoyeur") {
+      navigate({ to: homeRoute });
+      return;
+    }
+    if (typeClient === "b2b") {
+      navigate({ to: "/dashboard-pro" });
+    }
+  }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
 
-  if (isLoading || active === null) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center section-bg">
         <Loader2 className="animate-spin text-primary" size={32} />
@@ -57,12 +48,7 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated) {
-    if (typeof window !== "undefined") window.location.href = "/login";
-    return null;
-  }
-
-  if (active === false) {
+  if (!roleActif) {
     return (
       <div className="min-h-screen flex items-center justify-center section-bg px-4">
         <div className="text-center space-y-4 max-w-md">
@@ -78,19 +64,12 @@ function ClientLayout() {
     );
   }
 
-  // Si convoyeur ou admin, on redirige vers leur espace
-  if (role === "admin") {
-    if (typeof window !== "undefined") window.location.href = "/admin";
-    return null;
-  }
-  if (role === "convoyeur") {
-    if (typeof window !== "undefined") window.location.href = "/convoyeur";
-    return null;
-  }
-  // Si client B2B → rediriger vers son espace dédié
-  if (typeClient === "b2b") {
-    if (typeof window !== "undefined") window.location.href = "/dashboard-pro";
-    return null;
+  if (!isAuthenticated || role === "admin" || role === "convoyeur" || typeClient === "b2b") {
+    return (
+      <div className="min-h-screen flex items-center justify-center section-bg">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    );
   }
 
   return (

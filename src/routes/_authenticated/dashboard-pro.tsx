@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
@@ -22,27 +22,26 @@ const navItems: ProSidebarItem[] = [
 ];
 
 function ProLayout() {
-  const { isAuthenticated, user, role, isLoading } = useAuth();
-  const [societe, setSociete] = useState<string>("");
-  const [typeClient, setTypeClient] = useState<string | null>(null);
-  const [checking, setChecking] = useState(true);
+  const { isAuthenticated, role, typeClient, isLoading, homeRoute } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setChecking(false); return; }
-    supabase
-      .from("profiles")
-      .select("societe, type_client" as never)
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        const row = data as { societe?: string; type_client?: string } | null;
-        setSociete(row?.societe ?? "");
-        setTypeClient(row?.type_client ?? "particulier");
-        setChecking(false);
-      });
-  }, [user]);
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (role === "admin" || role === "convoyeur") {
+      navigate({ to: homeRoute });
+      return;
+    }
+    // Client mais pas B2B → renvoi vers espace particulier
+    if (typeClient !== "b2b") {
+      navigate({ to: "/dashboard-client" });
+    }
+  }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
 
-  if (isLoading || checking) {
+  if (isLoading || !isAuthenticated || role === "admin" || role === "convoyeur" || typeClient !== "b2b") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />
@@ -50,28 +49,8 @@ function ProLayout() {
     );
   }
 
-  if (!isAuthenticated) {
-    if (typeof window !== "undefined") window.location.href = "/login";
-    return null;
-  }
-
-  if (role === "admin") {
-    if (typeof window !== "undefined") window.location.href = "/admin";
-    return null;
-  }
-  if (role === "convoyeur") {
-    if (typeof window !== "undefined") window.location.href = "/convoyeur";
-    return null;
-  }
-
-  // Si pas B2B → rediriger vers l'espace particulier
-  if (typeClient !== "b2b") {
-    if (typeof window !== "undefined") window.location.href = "/dashboard-client";
-    return null;
-  }
-
   return (
-    <ProSidebar societe={societe} items={navItems}>
+    <ProSidebar items={navItems}>
       <Outlet />
     </ProSidebar>
   );
