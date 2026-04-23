@@ -37,7 +37,15 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
+  // Persisted in sessionStorage so the camera-suspend/restart on mobile
+  // cannot drop us back to the mission page mid-inspection.
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("edl:inspection");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
@@ -45,6 +53,18 @@ function ConvoyeurMissions() {
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
+
+  // Sync inspection state to sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (inspection) {
+      sessionStorage.setItem("edl:inspection", JSON.stringify(inspection));
+      // Also restore the open mission so the back navigation works
+      if (!openMissionId) setOpenMissionId(inspection.attributionId);
+    } else {
+      sessionStorage.removeItem("edl:inspection");
+    }
+  }, [inspection, openMissionId]);
 
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
@@ -183,17 +203,17 @@ function ConvoyeurMissions() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
-  if (inspection && user) {
-    return (
-      <EtatDesLieuxFlow
-        attributionId={inspection.attributionId}
-        type={inspection.type}
-        userId={user.id}
-        onComplete={handleInspectionComplete}
-        onClose={() => setInspection(null)}
-      />
-    );
-  }
+  // Overlay plein écran via Portal (dans EtatDesLieuxFlow) — rendu en parallèle du DOM normal,
+  // ne dépend plus du re-render du parent. Survit aux fetchMissions / GPS realtime.
+  const inspectionOverlay = inspection && user ? (
+    <EtatDesLieuxFlow
+      attributionId={inspection.attributionId}
+      type={inspection.type}
+      userId={user.id}
+      onComplete={handleInspectionComplete}
+      onClose={() => setInspection(null)}
+    />
+  ) : null;
 
   // === FICHE MISSION DÉTAILLÉE ===
   if (openMission) {
@@ -202,6 +222,8 @@ function ConvoyeurMissions() {
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
     return (
+      <>
+      {inspectionOverlay}
       <div className="space-y-4 pb-32">
         {/* Sticky back bar — toujours accessible au pouce en haut */}
         <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-pro-bg/95 backdrop-blur-sm border-b border-pro-border/60">
@@ -417,6 +439,7 @@ function ConvoyeurMissions() {
           </div>
         )}
       </div>
+      </>
     );
   }
 
@@ -437,6 +460,8 @@ function ConvoyeurMissions() {
   ];
 
   return (
+    <>
+    {inspectionOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
@@ -498,5 +523,6 @@ function ConvoyeurMissions() {
         </div>
       )}
     </div>
+    </>
   );
 }
