@@ -37,7 +37,15 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
+  // Persisted in sessionStorage so the camera-suspend/restart on mobile
+  // cannot drop us back to the mission page mid-inspection.
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("edl:inspection");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
@@ -45,6 +53,18 @@ function ConvoyeurMissions() {
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
+
+  // Sync inspection state to sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (inspection) {
+      sessionStorage.setItem("edl:inspection", JSON.stringify(inspection));
+      // Also restore the open mission so the back navigation works
+      if (!openMissionId) setOpenMissionId(inspection.attributionId);
+    } else {
+      sessionStorage.removeItem("edl:inspection");
+    }
+  }, [inspection, openMissionId]);
 
   useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
 
