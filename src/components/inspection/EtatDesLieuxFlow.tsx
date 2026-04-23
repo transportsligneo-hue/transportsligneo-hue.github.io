@@ -14,6 +14,7 @@
  * carte_grise, cables).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
   RefreshCw, AlertCircle, ChevronRight, Eye, ShieldCheck,
