@@ -203,17 +203,17 @@ function ConvoyeurMissions() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
-  if (inspection && user) {
-    return (
-      <EtatDesLieuxFlow
-        attributionId={inspection.attributionId}
-        type={inspection.type}
-        userId={user.id}
-        onComplete={handleInspectionComplete}
-        onClose={() => setInspection(null)}
-      />
-    );
-  }
+  // Overlay plein écran via Portal (dans EtatDesLieuxFlow) — rendu en parallèle du DOM normal,
+  // ne dépend plus du re-render du parent. Survit aux fetchMissions / GPS realtime.
+  const inspectionOverlay = inspection && user ? (
+    <EtatDesLieuxFlow
+      attributionId={inspection.attributionId}
+      type={inspection.type}
+      userId={user.id}
+      onComplete={handleInspectionComplete}
+      onClose={() => setInspection(null)}
+    />
+  ) : null;
 
   // === FICHE MISSION DÉTAILLÉE ===
   if (openMission) {
