@@ -32,6 +32,19 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
+  // Force fond clair sur <html> et <body> tant qu'on est dans l'espace driver
+  // pour éviter de voir le fond bleu nuit du site vitrine derrière la safe-area mobile.
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.background;
+    const prevBody = document.body.style.background;
+    document.documentElement.style.background = "#f7f8fb";
+    document.body.style.background = "#f7f8fb";
+    return () => {
+      document.documentElement.style.background = prevHtml;
+      document.body.style.background = prevBody;
+    };
+  }, []);
+
   const isActive = (item: ConvoyeurSidebarItem) =>
     item.exact
       ? location.pathname === item.to
