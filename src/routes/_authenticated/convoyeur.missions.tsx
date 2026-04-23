@@ -37,7 +37,7 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee"; mode: "sequentiel" | "visuel" | "photos" } | null>(null);
+  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(null);
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
@@ -184,35 +184,13 @@ function ConvoyeurMissions() {
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
   if (inspection && user) {
-    if (inspection.mode === "sequentiel") {
-      return (
-        <InspectionSequentielle
-          attributionId={inspection.attributionId}
-          type={inspection.type}
-          userId={user.id}
-          onComplete={handleInspectionComplete}
-          onCancel={() => setInspection(null)}
-        />
-      );
-    }
-    if (inspection.mode === "visuel") {
-      return (
-        <InspectionVisuelle
-          attributionId={inspection.attributionId}
-          type={inspection.type}
-          userId={user.id}
-          onComplete={handleInspectionComplete}
-          onCancel={() => setInspection(null)}
-        />
-      );
-    }
     return (
-      <InspectionGuidee
+      <EtatDesLieuxFlow
         attributionId={inspection.attributionId}
         type={inspection.type}
         userId={user.id}
         onComplete={handleInspectionComplete}
-        onCancel={() => setInspection(null)}
+        onClose={() => setInspection(null)}
       />
     );
   }
