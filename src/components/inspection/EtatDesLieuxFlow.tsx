@@ -648,10 +648,12 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
 /* ─────────────────── Sub-components ─────────────────── */
 
 function FullScreen({ children }: { children: React.ReactNode }) {
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-white flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       {children}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
