@@ -353,7 +353,7 @@ function ConvoyeurMissions() {
             statut={openMission.statut}
             inspectionDepartDone={!!openMission.inspectionDepart}
             inspectionArriveeDone={!!openMission.inspectionArrivee}
-            onStartInspection={(type) => setInspection({ attributionId: openMission.id, type, mode: "sequentiel" })}
+            onStartInspection={(type) => setInspection({ attributionId: openMission.id, type })}
             onMacroStatusChange={(s) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
           />
