@@ -460,6 +460,8 @@ function ConvoyeurMissions() {
   ];
 
   return (
+    <>
+    {inspectionOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
