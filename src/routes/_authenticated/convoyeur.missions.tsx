@@ -222,6 +222,8 @@ function ConvoyeurMissions() {
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
     return (
+      <>
+      {inspectionOverlay}
       <div className="space-y-4 pb-32">
         {/* Sticky back bar — toujours accessible au pouce en haut */}
         <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-pro-bg/95 backdrop-blur-sm border-b border-pro-border/60">
