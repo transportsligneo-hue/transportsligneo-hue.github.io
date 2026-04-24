@@ -55,11 +55,15 @@ interface ReportData {
 }
 
 const vueLabels: Record<string, string> = {
-  avant: "Avant", avant_droit: "Avant droit 3/4", cote_droit: "Côté droit",
-  arriere_droit: "Arrière droit 3/4", arriere: "Arrière", arriere_gauche: "Arrière gauche 3/4",
-  cote_gauche: "Côté gauche", avant_gauche: "Avant gauche 3/4",
-  interieur_avant: "Intérieur avant", interieur_arriere: "Intérieur arrière",
-  tableau_bord: "Tableau de bord",
+  face_avant: "Face avant", trois_quart_avant_droite: "3/4 avant droit", cote_droit: "Côté droit",
+  jante_avant_droite: "Jante avant droite", trois_quart_arriere_droite: "3/4 arrière droite",
+  jante_arriere_droite: "Jante arrière droite", face_arriere: "Face arrière", coffre_ouvert: "Coffre ouvert",
+  trois_quart_arriere_gauche: "3/4 arrière gauche", jante_arriere_gauche: "Jante arrière gauche",
+  trois_quart_avant_gauche: "3/4 avant gauche", jante_avant_gauche: "Jante avant gauche",
+  siege_avant: "Sièges avant", siege_arriere: "Sièges arrière", cables: "Câbles",
+  roue_secours: "Roue de secours / kit", compteur: "Compteur", kit_securite: "Kit sécurité",
+  pv_livraison: "PV livraison / restitution", carte_grise: "Carte grise",
+  avant: "Avant", avant_droit: "Avant droit 3/4", arriere: "Arrière",
 };
 
 const docTypeLabels: Record<string, string> = {
