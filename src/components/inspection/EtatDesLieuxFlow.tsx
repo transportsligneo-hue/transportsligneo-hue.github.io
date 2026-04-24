@@ -717,19 +717,21 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
               className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl font-bold uppercase tracking-wide text-sm hover:bg-emerald-700 active:scale-[0.98] transition"
             >
               {stepIndex === STEPS.length - 1 ? (
-                <>Voir le récap <ChevronRight size={18} /></>
+                <>Signer et clôturer la mission <ChevronRight size={18} /></>
               ) : (
                 <>Valider et continuer <ArrowRight size={18} /></>
               )}
             </button>
           ) : (
             <button
-              onClick={triggerCapture}
+              onClick={isSignatureStep ? undefined : triggerCapture}
               disabled={currentPhoto?.status === "uploading"}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 text-white rounded-xl font-bold uppercase tracking-wide text-sm hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-50"
             >
               {currentPhoto?.status === "uploading" ? (
                 <><Loader2 className="animate-spin" size={18} /> Envoi…</>
+              ) : isSignatureStep ? (
+                <><PenLine size={18} /> Signature obligatoire</>
               ) : (
                 <><Camera size={18} /> Prendre la photo</>
               )}
