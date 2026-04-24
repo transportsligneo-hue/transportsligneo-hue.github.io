@@ -108,6 +108,8 @@ interface PhotoState {
   error?: string;
 }
 
+const stepNumber = (steps: StepDef[], id: string) => Math.max(1, steps.findIndex(s => s.id === id) + 1);
+
 interface StoredFlowState {
   attributionId: string;
   type: "depart" | "arrivee";
@@ -196,11 +198,12 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   // Filtre les étapes EV
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(carburant);
-    return ALL_STEPS.filter(s => s.conditional !== "ev_only" || ev);
-  }, [carburant]);
+    return ALL_STEPS.filter(s => (s.conditional !== "ev_only" || ev) && (s.id !== "signature" || type === "arrivee"));
+  }, [carburant, type]);
 
   const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
   const currentPhoto = photos[currentStep.id];
+  const isSignatureStep = currentStep.id === "signature";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
@@ -365,6 +368,33 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     });
   };
 
+  const uploadSignature = async (file: File) => {
+    if (!inspectionId) return;
+    setPhotos(prev => ({ ...prev, signature: { status: "uploading" } }));
+    try {
+      const path = `${attributionId}/${Date.now()}_signature_pv.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("mission-documents")
+        .upload(path, file, { upsert: true, contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      const { error: insertError } = await supabase.from("mission_documents").insert({
+        attribution_id: attributionId,
+        type_document: "pv_signature",
+        nom_fichier: file.name,
+        url_fichier: path,
+        uploaded_by: userId,
+      });
+      if (insertError) throw insertError;
+      const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrl(path, 3600);
+      setPhotos(prev => ({ ...prev, signature: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
+      toast.success("Signature enregistrée");
+    } catch (err) {
+      console.error("[EDL] signature failed", err);
+      setPhotos(prev => ({ ...prev, signature: { status: "error", error: "Signature non enregistrée" } }));
+      toast.error("Impossible d'enregistrer la signature");
+    }
+  };
+
   const handleComplete = async () => {
     if (!allDone || !inspectionId) {
       toast.error("Toutes les photos doivent être prises");
@@ -375,6 +405,22 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       await supabase.from("inspections")
         .update({ statut: "complete" })
         .eq("id", inspectionId);
+      if (type === "arrivee") {
+        await supabase.from("attributions")
+          .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
+          .eq("id", attributionId);
+        sendTransactionalEmail({
+          templateName: "document-mission-admin",
+          recipientEmail: "contact@transportsligneo.fr",
+          idempotencyKey: `mission-validation-${attributionId}`,
+          templateData: {
+            attributionId,
+            documentName: "État des lieux complet + signature",
+            documentType: "Mission en attente de validation admin",
+            uploadedAt: new Date().toLocaleString("fr-FR"),
+          },
+        }).catch((e) => console.warn("Notification admin validation non bloquante:", e));
+      }
       toast.success("État des lieux validé ✓");
       onComplete();
     } catch (err) {
