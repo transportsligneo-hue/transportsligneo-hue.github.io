@@ -106,7 +106,18 @@ interface PhotoState {
   error?: string;
 }
 
+interface StoredFlowState {
+  attributionId: string;
+  type: "depart" | "arrivee";
+  stepIndex: number;
+  inspectionId: string | null;
+  photos: Record<string, PhotoState>;
+  updatedAt: number;
+}
+
 const EV_FUEL = new Set(["electrique", "ev", "bev", "hybride_rechargeable", "phev"]);
+const flowStorageKey = (attributionId: string, type: "depart" | "arrivee") => `edl:flow:${attributionId}:${type}`;
+
 function isEvOrPhev(carb?: string | null) {
   if (!carb) return false;
   const n = carb.toLowerCase().trim().replace(/\s+/g, "_");
@@ -129,15 +140,37 @@ async function uploadWithRetry(path: string, file: File, attempts = 3) {
 }
 
 export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onClose }: Props) {
-  const [stepIndex, setStepIndex] = useState(0);
+  const storageKey = useMemo(() => flowStorageKey(attributionId, type), [attributionId, type]);
+  const initialState = useMemo<StoredFlowState | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(storageKey) ?? sessionStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as StoredFlowState;
+      return parsed.attributionId === attributionId && parsed.type === type ? parsed : null;
+    } catch { return null; }
+  }, [attributionId, storageKey, type]);
+  const [stepIndex, setStepIndex] = useState(() => initialState?.stepIndex ?? 0);
   const [showRecap, setShowRecap] = useState(false);
-  const [photos, setPhotos] = useState<Record<string, PhotoState>>({});
-  const [inspectionId, setInspectionId] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<Record<string, PhotoState>>(() => initialState?.photos ?? {});
+  const [inspectionId, setInspectionId] = useState<string | null>(() => initialState?.inspectionId ?? null);
   const [carburant, setCarburant] = useState<string | null>(null);
   const [vehicleLabel, setVehicleLabel] = useState<string>("");
   const [completing, setCompleting] = useState(false);
   const [askExit, setAskExit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const safePhotos = Object.fromEntries(
+      Object.entries(photos)
+        .filter(([, value]) => value.status === "success")
+        .map(([key, value]) => [key, { ...value, previewUrl: value.previewUrl?.startsWith("blob:") ? undefined : value.previewUrl }]),
+    ) as Record<string, PhotoState>;
+    const raw = JSON.stringify({ attributionId, type, stepIndex, inspectionId, photos: safePhotos, updatedAt: Date.now() } satisfies StoredFlowState);
+    sessionStorage.setItem(storageKey, raw);
+    localStorage.setItem(storageKey, raw);
+  }, [attributionId, inspectionId, photos, stepIndex, storageKey, type]);
 
   // Empêche la fermeture accidentelle (back système, refresh)
   useEffect(() => {
