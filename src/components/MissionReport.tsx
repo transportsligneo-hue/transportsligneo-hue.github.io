@@ -97,7 +97,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         supabase.from("convoyeurs").select("nom, prenom, email, telephone").eq("id", attr.convoyeur_id).single(),
         supabase.from("inspections").select("id, type, statut, notes, created_at").eq("attribution_id", attributionId),
         supabase.from("mission_locations").select("recorded_at").eq("attribution_id", attributionId).order("recorded_at", { ascending: true }),
-        supabase.from("mission_documents").select("type_document, nom_fichier, created_at").eq("attribution_id", attributionId),
+        supabase.from("mission_documents").select("type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
       ]);
 
       // Fetch photos for each inspection
@@ -107,8 +107,17 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
           .from("inspection_photos")
           .select("vue_type, url_photo")
           .eq("inspection_id", insp.id);
-        inspections.push({ ...insp, photos: photos || [] });
+        const signedPhotos = await Promise.all((photos || []).map(async (photo) => ({
+          ...photo,
+          signed_url: await signedStorageUrl("inspection-photos", photo.url_photo),
+        })));
+        inspections.push({ ...insp, photos: signedPhotos });
       }
+
+      const signedDocs = await Promise.all((docsRes.data || []).map(async (doc) => ({
+        ...doc,
+        signed_url: await signedStorageUrl("mission-documents", doc.url_fichier),
+      })));
 
       // GPS summary
       const gpsData = gpsRes.data || [];
@@ -125,7 +134,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         convoyeur: convoyeurRes.data as ReportData["convoyeur"],
         inspections,
         gps: { points: gpsData.length, startTime, endTime, durationMinutes },
-        documents: (docsRes.data || []) as ReportData["documents"],
+        documents: signedDocs as ReportData["documents"],
       });
     } catch {
       setError("Erreur lors de la génération du rapport.");
