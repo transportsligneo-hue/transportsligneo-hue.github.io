@@ -332,6 +332,15 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     }
   };
 
+  // Reprise automatique après retour de l'appareil photo si le navigateur mobile
+  // a relancé la page avant d'envoyer l'événement change au composant React.
+  useEffect(() => {
+    if (!inspectionId) return;
+    const pending = STEPS.find(s => photos[s.id]?.status !== "success");
+    const nextIndex = pending ? STEPS.findIndex(s => s.id === pending.id) : Math.max(0, STEPS.length - 1);
+    if (stepIndex < nextIndex) setStepIndex(nextIndex);
+  }, [STEPS, inspectionId, photos, stepIndex]);
+
   const goNext = () => {
     if (currentPhoto?.status !== "success") {
       toast.error("Prenez d'abord la photo de cette étape");
