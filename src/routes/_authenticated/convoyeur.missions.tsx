@@ -305,7 +305,7 @@ function ConvoyeurMissions() {
         </div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="hidden lg:grid grid-cols-2 gap-2">
           <a
             href={t?.depart ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.depart)}` : "#"}
             target="_blank" rel="noopener noreferrer"
@@ -418,7 +418,7 @@ function ConvoyeurMissions() {
         )}
 
         {/* Sticky bottom action bar — toujours accessible au pouce sur mobile */}
-        {openMission.statut !== "propose" && openMission.statut !== "termine" && (
+        {openMission.statut !== "propose" && !["termine", "en_attente_validation", "validee", "refusee"].includes(openMission.statut) && (
           <div
             className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-pro-border shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
