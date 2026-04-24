@@ -757,6 +757,40 @@ function FullScreen({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ExampleFrame({ stepId, label }: { stepId: string; label: string }) {
+  const isWheel = stepId.includes("jante");
+  const isRear = stepId.includes("arriere") || stepId === "coffre_ouvert";
+  const isInterior = stepId.includes("siege") || stepId === "compteur";
+  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId === "signature";
+  return (
+    <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="relative flex aspect-[16/9] items-center justify-center bg-slate-100">
+        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={stepId === "signature"} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
+        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">Exemple</span>
+      </div>
+      <button type="button" className="w-full border-t border-slate-200 py-2 text-xs font-semibold text-blue-700 underline-offset-2 hover:underline">
+        Voir l'exemple — {label}
+      </button>
+    </div>
+  );
+}
+
+function CarExample({ rear, openTrunk }: { rear: boolean; openTrunk: boolean }) {
+  return <div className="relative h-28 w-56"><div className="absolute bottom-7 left-5 h-14 w-46 rounded-[48px_56px_18px_18px] bg-slate-300 shadow-inner" /><div className="absolute bottom-18 left-16 h-10 w-28 rounded-t-[42px] bg-slate-400" />{openTrunk && <div className="absolute bottom-20 left-19 h-4 w-24 -rotate-12 rounded bg-slate-500" />}<div className="absolute bottom-5 left-10 h-9 w-9 rounded-full border-[7px] border-slate-800 bg-slate-200" /><div className="absolute bottom-5 right-10 h-9 w-9 rounded-full border-[7px] border-slate-800 bg-slate-200" />{rear ? <div className="absolute bottom-12 right-5 h-3 w-10 rounded bg-red-500" /> : <div className="absolute bottom-12 left-5 h-3 w-10 rounded bg-blue-100" />}</div>;
+}
+
+function WheelExample() {
+  return <div className="relative h-32 w-32 rounded-full border-[18px] border-slate-800 bg-slate-200 shadow-xl"><div className="absolute inset-5 rounded-full border-4 border-slate-400" />{Array.from({ length: 8 }).map((_, i) => <span key={i} className="absolute left-1/2 top-1/2 h-2 w-14 origin-left rounded-full bg-slate-500" style={{ transform: `rotate(${i * 45}deg)` }} />)}</div>;
+}
+
+function InteriorExample({ compteur }: { compteur: boolean }) {
+  return compteur ? <div className="flex h-28 w-56 items-center justify-center rounded-2xl bg-slate-900"><div className="h-20 w-44 rounded-xl border border-slate-700 bg-slate-800 p-4"><div className="flex justify-between"><div className="h-12 w-12 rounded-full border-4 border-blue-400" /><div className="h-12 w-12 rounded-full border-4 border-emerald-400" /></div></div></div> : <div className="flex gap-5"><div className="h-28 w-20 rounded-[20px_20px_12px_12px] bg-slate-700 shadow-lg" /><div className="h-28 w-20 rounded-[20px_20px_12px_12px] bg-slate-700 shadow-lg" /></div>;
+}
+
+function DocumentExample({ signature }: { signature: boolean }) {
+  return <div className="h-32 w-24 rounded-lg bg-white p-3 shadow-xl"><div className="mb-3 h-3 w-16 rounded bg-slate-300" /><div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-1.5 rounded bg-slate-200" />)}</div>{signature && <div className="mt-5 h-5 w-16 rounded-full border-b-2 border-slate-800" />}</div>;
+}
+
 function Header({
   title, subtitle, right, onBack, backIcon,
 }: {
