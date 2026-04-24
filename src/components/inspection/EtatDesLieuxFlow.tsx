@@ -106,7 +106,18 @@ interface PhotoState {
   error?: string;
 }
 
+interface StoredFlowState {
+  attributionId: string;
+  type: "depart" | "arrivee";
+  stepIndex: number;
+  inspectionId: string | null;
+  photos: Record<string, PhotoState>;
+  updatedAt: number;
+}
+
 const EV_FUEL = new Set(["electrique", "ev", "bev", "hybride_rechargeable", "phev"]);
+const flowStorageKey = (attributionId: string, type: "depart" | "arrivee") => `edl:flow:${attributionId}:${type}`;
+
 function isEvOrPhev(carb?: string | null) {
   if (!carb) return false;
   const n = carb.toLowerCase().trim().replace(/\s+/g, "_");
