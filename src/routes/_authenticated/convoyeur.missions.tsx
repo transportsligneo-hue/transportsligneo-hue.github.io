@@ -51,6 +51,15 @@ function ConvoyeurMissions() {
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
   const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
+  const openInspection = useCallback((next: InspectionSession) => {
+    if (typeof window !== "undefined") {
+      const raw = JSON.stringify(next);
+      sessionStorage.setItem(EDL_SESSION_KEY, raw);
+      localStorage.setItem(EDL_SESSION_KEY, raw);
+    }
+    setOpenMissionId(next.attributionId);
+    setInspection(next);
+  }, []);
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
@@ -383,7 +392,7 @@ function ConvoyeurMissions() {
             statut={openMission.statut}
             inspectionDepartDone={!!openMission.inspectionDepart}
             inspectionArriveeDone={!!openMission.inspectionArrivee}
-            onStartInspection={(type) => setInspection({ attributionId: openMission.id, type })}
+            onStartInspection={(type) => openInspection({ attributionId: openMission.id, type })}
             onMacroStatusChange={(s) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
           />
