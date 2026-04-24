@@ -285,8 +285,8 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {insp.photos.map((p) => (
                         <div key={p.vue_type} className="space-y-0.5">
-                          <a href={p.url_photo} target="_blank" rel="noopener noreferrer">
-                            <img src={p.url_photo} alt={vueLabels[p.vue_type] || p.vue_type}
+                          <a href={p.signed_url || p.url_photo} target="_blank" rel="noopener noreferrer">
+                            <img src={p.signed_url || p.url_photo} alt={vueLabels[p.vue_type] || p.vue_type}
                               className="w-full aspect-[3/4] object-cover rounded border border-primary/20 hover:border-primary/50 transition-colors" />
                           </a>
                           <p className="text-cream/40 text-[9px] text-center truncate">{vueLabels[p.vue_type] || p.vue_type}</p>
@@ -304,9 +304,14 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
             <Section title="Documents joints" icon={<FileText size={16} />}>
               <div className="space-y-1">
                 {report.documents.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-primary/5 last:border-0">
-                    <span className="text-cream/80">{d.nom_fichier}</span>
-                    <span className="text-cream/40 text-xs">{docTypeLabels[d.type_document] || d.type_document}</span>
+                  <div key={i} className="space-y-2 py-2 border-b border-primary/5 last:border-0">
+                    <div className="flex items-center justify-between text-sm gap-3">
+                      <a href={d.signed_url || undefined} target="_blank" rel="noopener noreferrer" className="text-cream/80 underline-offset-2 hover:underline truncate">{d.nom_fichier}</a>
+                      <span className="text-cream/40 text-xs shrink-0">{docTypeLabels[d.type_document] || d.type_document}</span>
+                    </div>
+                    {d.signed_url && isImageFile(d.nom_fichier) && (
+                      <img src={d.signed_url} alt={d.nom_fichier} className="w-full max-w-xs aspect-[4/3] object-cover rounded border border-primary/20" />
+                    )}
                   </div>
                 ))}
               </div>
