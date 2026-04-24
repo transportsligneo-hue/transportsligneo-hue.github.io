@@ -502,7 +502,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
                             </div>
                           )}
                           <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-white/95 text-slate-700 text-[11px] font-bold flex items-center justify-center shadow">
-                            {s.num}
+                            {stepNumber(STEPS, s.id)}
                           </div>
                           {ok && (
                             <div className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
@@ -555,7 +555,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   return (
     <FullScreen>
       <Header
-        title={`${currentStep.num} / ${totalSteps}`}
+        title={`${stepIndex + 1} / ${totalSteps}`}
         subtitle={type === "depart" ? "État des lieux — Départ" : "État des lieux — Arrivée"}
         right={
           completedCount > 0 && (
@@ -594,12 +594,28 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       {/* Main content */}
       <div className="flex-1 overflow-auto bg-slate-50">
         <div className="max-w-2xl mx-auto px-4 py-4">
+          <ExampleFrame stepId={currentStep.id} label={currentStep.label} />
           <div className="text-center mb-3">
             <h2 className="text-xl font-bold text-slate-900">{currentStep.label}</h2>
             <p className="text-slate-600 text-sm mt-1">{currentStep.hint}</p>
           </div>
 
-          {/* Photo zone */}
+          {/* Photo / signature zone */}
+          {isSignatureStep ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <SignatureCanvas onValidate={uploadSignature} disabled={currentPhoto?.status === "uploading" || completing} />
+              {currentPhoto?.status === "success" && (
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                  <Check size={16} /> Signature validée
+                </div>
+              )}
+              {currentPhoto?.status === "uploading" && (
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
+                  <Loader2 className="animate-spin" size={16} /> Enregistrement…
+                </div>
+              )}
+            </div>
+          ) : (
           <div className="relative rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm aspect-[3/4] sm:aspect-[4/3]">
             {currentPhoto?.previewUrl ? (
               <>
@@ -638,10 +654,11 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
                   <Camera size={32} className="text-blue-600" />
                 </div>
                 <p className="text-slate-700 text-sm font-semibold">Touchez pour ouvrir l'appareil photo</p>
-                <p className="text-slate-400 text-xs">Étape {currentStep.num} sur {totalSteps}</p>
+                <p className="text-slate-400 text-xs">Étape {stepIndex + 1} sur {totalSteps}</p>
               </button>
             )}
           </div>
+          )}
 
           {/* Status & actions inline */}
           {currentPhoto?.status === "success" && (
@@ -661,7 +678,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
               <button
                 key={s.id}
                 onClick={() => goToStep(i)}
-                aria-label={`Étape ${s.num}: ${s.label}`}
+                aria-label={`Étape ${i + 1}: ${s.label}`}
                 className={`h-2 rounded-full transition-all ${
                   i === stepIndex ? "w-6 bg-blue-600" :
                   photos[s.id]?.status === "success" ? "w-2 bg-emerald-500" :
