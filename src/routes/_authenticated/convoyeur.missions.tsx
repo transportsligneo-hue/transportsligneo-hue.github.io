@@ -100,7 +100,7 @@ function ConvoyeurMissions() {
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante" as never)
       .eq("convoyeur_id", conv.id)
-      .in("statut", ["propose", "accepte", "en_cours", "termine"]);
+      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
 
     if (data) {
       const enriched: Mission[] = [];
@@ -203,7 +203,7 @@ function ConvoyeurMissions() {
     if (filter === "today") list = list.filter(m => m.trajet?.date_trajet === today);
     if (filter === "upcoming") list = list.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > today);
     if (filter === "in_progress") list = list.filter(m => m.statut === "en_cours");
-    if (filter === "done") list = list.filter(m => m.statut === "termine");
+    if (filter === "done") list = list.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(m =>
@@ -465,7 +465,7 @@ function ConvoyeurMissions() {
     today: missions.filter(m => m.trajet?.date_trajet === new Date().toISOString().split("T")[0]).length,
     in_progress: missions.filter(m => m.statut === "en_cours").length,
     upcoming: missions.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > new Date().toISOString().split("T")[0]).length,
-    done: missions.filter(m => m.statut === "termine").length,
+    done: missions.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut)).length,
   };
 
   const filters: { key: FilterKey; label: string; count?: number }[] = [
