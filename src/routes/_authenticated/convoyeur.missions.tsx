@@ -100,7 +100,7 @@ function ConvoyeurMissions() {
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante" as never)
       .eq("convoyeur_id", conv.id)
-      .in("statut", ["propose", "accepte", "en_cours", "termine"]);
+      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
 
     if (data) {
       const enriched: Mission[] = [];
@@ -203,7 +203,7 @@ function ConvoyeurMissions() {
     if (filter === "today") list = list.filter(m => m.trajet?.date_trajet === today);
     if (filter === "upcoming") list = list.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > today);
     if (filter === "in_progress") list = list.filter(m => m.statut === "en_cours");
-    if (filter === "done") list = list.filter(m => m.statut === "termine");
+    if (filter === "done") list = list.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(m =>
@@ -305,7 +305,7 @@ function ConvoyeurMissions() {
         </div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="hidden lg:grid grid-cols-2 gap-2">
           <a
             href={t?.depart ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.depart)}` : "#"}
             target="_blank" rel="noopener noreferrer"
@@ -418,7 +418,7 @@ function ConvoyeurMissions() {
         )}
 
         {/* Sticky bottom action bar — toujours accessible au pouce sur mobile */}
-        {openMission.statut !== "propose" && openMission.statut !== "termine" && (
+        {openMission.statut !== "propose" && !["termine", "en_attente_validation", "validee", "refusee"].includes(openMission.statut) && (
           <div
             className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-pro-border shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
@@ -465,7 +465,7 @@ function ConvoyeurMissions() {
     today: missions.filter(m => m.trajet?.date_trajet === new Date().toISOString().split("T")[0]).length,
     in_progress: missions.filter(m => m.statut === "en_cours").length,
     upcoming: missions.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > new Date().toISOString().split("T")[0]).length,
-    done: missions.filter(m => m.statut === "termine").length,
+    done: missions.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut)).length,
   };
 
   const filters: { key: FilterKey; label: string; count?: number }[] = [

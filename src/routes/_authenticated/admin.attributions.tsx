@@ -65,6 +65,9 @@ const statutLabels: Record<string, string> = {
   accepte: "Accepté",
   refuse: "Refusé",
   en_cours: "En cours",
+  en_attente_validation: "En attente validation",
+  validee: "Validée",
+  refusee: "Refusée",
   termine: "Terminé",
   annule: "Annulé",
 };

@@ -40,6 +40,9 @@ const STATUS_META: Record<string, { label: string; cls: string; Icon: ComponentT
   propose:     { label: "Proposée",  cls: "bg-amber-50 text-amber-700 border-amber-200",     Icon: Clock },
   accepte:     { label: "Acceptée",  cls: "bg-blue-50 text-blue-700 border-blue-200",        Icon: ClipboardCheck },
   en_cours:    { label: "En cours",  cls: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: Truck },
+  en_attente_validation: { label: "Validation admin", cls: "bg-amber-50 text-amber-700 border-amber-200", Icon: Clock },
+  validee:     { label: "Validée",   cls: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: Flag },
+  refusee:     { label: "Refusée",   cls: "bg-red-50 text-red-700 border-red-200",           Icon: AlertCircle },
   termine:     { label: "Terminée",  cls: "bg-slate-50 text-slate-600 border-slate-200",     Icon: Flag },
   incident:    { label: "Incident",  cls: "bg-red-50 text-red-700 border-red-200",           Icon: AlertCircle },
 };

@@ -17,11 +17,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
-  RefreshCw, AlertCircle, ChevronRight, Eye, ShieldCheck,
+  RefreshCw, AlertCircle, ChevronRight, Eye, ShieldCheck, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
+import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 interface Props {
   attributionId: string;
@@ -31,13 +33,11 @@ interface Props {
   onClose: () => void;
 }
 
-type StepKind = "exterieur" | "interieur" | "coffre" | "tableau" | "securite" | "documents";
+type StepKind = "exterieur" | "interieur" | "coffre" | "tableau" | "securite" | "documents" | "signature";
 
 interface StepDef {
   /** ID stable utilisé en BDD (vue_type) */
   id: string;
-  /** Numéro métier (1..20) — affiché dans l'UI */
-  num: number;
   /** Section logique */
   section: StepKind;
   /** Libellé court */
@@ -54,36 +54,37 @@ interface StepDef {
  */
 const ALL_STEPS: StepDef[] = [
   // ───── EXTÉRIEUR ─────
-  { num: 1,  id: "face_avant",                  section: "exterieur", label: "Face avant",              hint: "Photo de la face avant complète du véhicule" },
-  { num: 2,  id: "trois_quart_avant_droite",    section: "exterieur", label: "Trois quarts avant",      hint: "Vue 3/4 avant droit du véhicule" },
-  { num: 3,  id: "cote_droit",                  section: "exterieur", label: "Côté droit",              hint: "Vue de profil côté droit, véhicule entier" },
-  { num: 4,  id: "jante_avant_droite",          section: "exterieur", label: "Jante avant droite",      hint: "Gros plan sur la jante avant droite" },
-  { num: 5,  id: "trois_quart_arriere_droite",  section: "exterieur", label: "Trois quarts arrière droite", hint: "Vue 3/4 arrière droit" },
-  { num: 6,  id: "jante_arriere_droite",        section: "exterieur", label: "Jante arrière droite",    hint: "Gros plan sur la jante arrière droite" },
-  { num: 7,  id: "face_arriere",                section: "exterieur", label: "Face arrière",            hint: "Photo de la face arrière complète" },
-  { num: 8,  id: "trois_quart_arriere_gauche",  section: "exterieur", label: "Trois quarts arrière gauche", hint: "Vue 3/4 arrière gauche" },
-  { num: 9,  id: "jante_arriere_gauche",        section: "exterieur", label: "Jante arrière gauche",    hint: "Gros plan sur la jante arrière gauche" },
-  { num: 10, id: "trois_quart_avant_gauche",    section: "exterieur", label: "Trois quarts avant gauche", hint: "Vue 3/4 avant gauche" },
-  { num: 11, id: "jante_avant_gauche",          section: "exterieur", label: "Jante avant gauche",      hint: "Gros plan sur la jante avant gauche" },
+  { id: "face_avant",                  section: "exterieur", label: "Face avant",              hint: "Prenez une photo de la face avant du véhicule" },
+  { id: "trois_quart_avant_droite",    section: "exterieur", label: "3/4 avant droit",         hint: "Prenez une photo du trois quarts avant droit" },
+  { id: "cote_droit",                  section: "exterieur", label: "Côté droit",              hint: "Prenez une photo du côté droit du véhicule" },
+  { id: "jante_avant_droite",          section: "exterieur", label: "Jante avant droite",      hint: "Prenez une photo de la jante avant droite" },
+  { id: "trois_quart_arriere_droite",  section: "exterieur", label: "3/4 arrière droite",      hint: "Prenez une photo du trois quarts arrière droit" },
+  { id: "jante_arriere_droite",        section: "exterieur", label: "Jante arrière droite",    hint: "Prenez une photo de la jante arrière droite" },
+  { id: "face_arriere",                section: "exterieur", label: "Face arrière",            hint: "Prenez une photo de la face arrière du véhicule" },
+  { id: "coffre_ouvert",               section: "coffre",    label: "Coffre ouvert",           hint: "Prenez une photo du coffre ouvert" },
+  { id: "trois_quart_arriere_gauche",  section: "exterieur", label: "3/4 arrière gauche",      hint: "Prenez une photo du trois quarts arrière gauche" },
+  { id: "jante_arriere_gauche",        section: "exterieur", label: "Jante arrière gauche",    hint: "Prenez une photo de la jante arrière gauche" },
+  { id: "trois_quart_avant_gauche",    section: "exterieur", label: "3/4 avant gauche",        hint: "Prenez une photo du trois quarts avant gauche" },
+  { id: "jante_avant_gauche",          section: "exterieur", label: "Jante avant gauche",      hint: "Prenez une photo de la jante avant gauche" },
 
   // ───── INTÉRIEUR ─────
-  { num: 12, id: "siege_avant",                 section: "interieur", label: "Sièges avant",            hint: "Sièges conducteur + passager" },
-  { num: 13, id: "siege_arriere",               section: "interieur", label: "Sièges arrière",          hint: "Banquette arrière + appuie-têtes" },
+  { id: "siege_avant",                 section: "interieur", label: "Sièges avant",            hint: "Prenez une photo des sièges avant" },
+  { id: "siege_arriere",               section: "interieur", label: "Sièges arrière",          hint: "Prenez une photo des sièges arrière" },
 
   // ───── COFFRE & ÉQUIPEMENTS ─────
-  { num: 14, id: "coffre_ouvert",               section: "coffre",    label: "Coffre ouvert",           hint: "Coffre grand ouvert + intérieur" },
-  { num: 15, id: "cables",                      section: "coffre",    label: "Câbles de recharge",      hint: "Photo des câbles de recharge", conditional: "ev_only" },
-  { num: 16, id: "roue_secours",                section: "coffre",    label: "Roue de secours / kit",   hint: "Roue de secours OU kit anti-crevaison" },
+  { id: "cables",                      section: "coffre",    label: "Câbles",                  hint: "Prenez une photo des câbles de recharge", conditional: "ev_only" },
+  { id: "roue_secours",                section: "coffre",    label: "Roue de secours / kit crevaison", hint: "Prenez une photo de la roue de secours ou du kit crevaison" },
 
   // ───── TABLEAU DE BORD ─────
-  { num: 17, id: "compteur",                    section: "tableau",   label: "Compteur",                hint: "Carburant + kilométrage bien visibles" },
+  { id: "compteur",                    section: "tableau",   label: "Compteur (km + carburant)", hint: "Prenez une photo du compteur avec kilométrage et carburant" },
 
   // ───── SÉCURITÉ ─────
-  { num: 18, id: "kit_securite",                section: "securite",  label: "Kit de sécurité",         hint: "Gilet jaune + triangle de signalisation" },
+  { id: "kit_securite",                section: "securite",  label: "Kit sécurité",             hint: "Prenez une photo du kit sécurité (gilet, triangle, etc.)" },
 
   // ───── DOCUMENTS ─────
-  { num: 19, id: "pv_livraison",                section: "documents", label: "PV de livraison",         hint: "Photo du PV signé / bon de mission" },
-  { num: 20, id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Photo de la carte grise du véhicule" },
+  { id: "pv_livraison",                section: "documents", label: "PV livraison / restitution", hint: "Prenez une photo du PV de livraison" },
+  { id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Prenez une photo de la carte grise du véhicule" },
+  { id: "signature",                   section: "signature", label: "Signature obligatoire",    hint: "Signez pour clôturer et envoyer la mission à l'admin" },
 ];
 
 const SECTION_LABEL: Record<StepKind, string> = {
@@ -93,6 +94,7 @@ const SECTION_LABEL: Record<StepKind, string> = {
   tableau: "Tableau de bord",
   securite: "Sécurité",
   documents: "Documents",
+  signature: "Signature",
 };
 
 interface PhotoState {
@@ -105,6 +107,8 @@ interface PhotoState {
   /** Message d'erreur */
   error?: string;
 }
+
+const stepNumber = (steps: StepDef[], id: string) => Math.max(1, steps.findIndex(s => s.id === id) + 1);
 
 interface StoredFlowState {
   attributionId: string;
@@ -194,11 +198,12 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   // Filtre les étapes EV
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(carburant);
-    return ALL_STEPS.filter(s => s.conditional !== "ev_only" || ev);
-  }, [carburant]);
+    return ALL_STEPS.filter(s => (s.conditional !== "ev_only" || ev) && (s.id !== "signature" || type === "arrivee"));
+  }, [carburant, type]);
 
   const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
   const currentPhoto = photos[currentStep.id];
+  const isSignatureStep = currentStep.id === "signature";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
@@ -363,6 +368,33 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     });
   };
 
+  const uploadSignature = async (file: File) => {
+    if (!inspectionId) return;
+    setPhotos(prev => ({ ...prev, signature: { status: "uploading" } }));
+    try {
+      const path = `${attributionId}/${Date.now()}_signature_pv.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("mission-documents")
+        .upload(path, file, { upsert: true, contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      const { error: insertError } = await supabase.from("mission_documents").insert({
+        attribution_id: attributionId,
+        type_document: "pv_signature",
+        nom_fichier: file.name,
+        url_fichier: path,
+        uploaded_by: userId,
+      });
+      if (insertError) throw insertError;
+      const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrl(path, 3600);
+      setPhotos(prev => ({ ...prev, signature: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
+      toast.success("Signature enregistrée");
+    } catch (err) {
+      console.error("[EDL] signature failed", err);
+      setPhotos(prev => ({ ...prev, signature: { status: "error", error: "Signature non enregistrée" } }));
+      toast.error("Impossible d'enregistrer la signature");
+    }
+  };
+
   const handleComplete = async () => {
     if (!allDone || !inspectionId) {
       toast.error("Toutes les photos doivent être prises");
@@ -373,6 +405,22 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       await supabase.from("inspections")
         .update({ statut: "complete" })
         .eq("id", inspectionId);
+      if (type === "arrivee") {
+        await supabase.from("attributions")
+          .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
+          .eq("id", attributionId);
+        sendTransactionalEmail({
+          templateName: "document-mission-admin",
+          recipientEmail: "contact@transportsligneo.fr",
+          idempotencyKey: `mission-validation-${attributionId}`,
+          templateData: {
+            attributionId,
+            documentName: "État des lieux complet + signature",
+            documentType: "Mission en attente de validation admin",
+            uploadedAt: new Date().toLocaleString("fr-FR"),
+          },
+        }).catch((e) => console.warn("Notification admin validation non bloquante:", e));
+      }
       toast.success("État des lieux validé ✓");
       onComplete();
     } catch (err) {
@@ -454,7 +502,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
                             </div>
                           )}
                           <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-white/95 text-slate-700 text-[11px] font-bold flex items-center justify-center shadow">
-                            {s.num}
+                            {stepNumber(STEPS, s.id)}
                           </div>
                           {ok && (
                             <div className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
@@ -507,7 +555,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   return (
     <FullScreen>
       <Header
-        title={`${currentStep.num} / ${totalSteps}`}
+        title={`${stepIndex + 1} / ${totalSteps}`}
         subtitle={type === "depart" ? "État des lieux — Départ" : "État des lieux — Arrivée"}
         right={
           completedCount > 0 && (
@@ -546,12 +594,28 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       {/* Main content */}
       <div className="flex-1 overflow-auto bg-slate-50">
         <div className="max-w-2xl mx-auto px-4 py-4">
+          <ExampleFrame stepId={currentStep.id} label={currentStep.label} />
           <div className="text-center mb-3">
             <h2 className="text-xl font-bold text-slate-900">{currentStep.label}</h2>
             <p className="text-slate-600 text-sm mt-1">{currentStep.hint}</p>
           </div>
 
-          {/* Photo zone */}
+          {/* Photo / signature zone */}
+          {isSignatureStep ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <SignatureCanvas onValidate={uploadSignature} disabled={currentPhoto?.status === "uploading" || completing} />
+              {currentPhoto?.status === "success" && (
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                  <Check size={16} /> Signature validée
+                </div>
+              )}
+              {currentPhoto?.status === "uploading" && (
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
+                  <Loader2 className="animate-spin" size={16} /> Enregistrement…
+                </div>
+              )}
+            </div>
+          ) : (
           <div className="relative rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm aspect-[3/4] sm:aspect-[4/3]">
             {currentPhoto?.previewUrl ? (
               <>
@@ -590,10 +654,11 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
                   <Camera size={32} className="text-blue-600" />
                 </div>
                 <p className="text-slate-700 text-sm font-semibold">Touchez pour ouvrir l'appareil photo</p>
-                <p className="text-slate-400 text-xs">Étape {currentStep.num} sur {totalSteps}</p>
+                <p className="text-slate-400 text-xs">Étape {stepIndex + 1} sur {totalSteps}</p>
               </button>
             )}
           </div>
+          )}
 
           {/* Status & actions inline */}
           {currentPhoto?.status === "success" && (
@@ -613,7 +678,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
               <button
                 key={s.id}
                 onClick={() => goToStep(i)}
-                aria-label={`Étape ${s.num}: ${s.label}`}
+                aria-label={`Étape ${i + 1}: ${s.label}`}
                 className={`h-2 rounded-full transition-all ${
                   i === stepIndex ? "w-6 bg-blue-600" :
                   photos[s.id]?.status === "success" ? "w-2 bg-emerald-500" :
@@ -652,19 +717,21 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
               className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl font-bold uppercase tracking-wide text-sm hover:bg-emerald-700 active:scale-[0.98] transition"
             >
               {stepIndex === STEPS.length - 1 ? (
-                <>Voir le récap <ChevronRight size={18} /></>
+                <>Signer et clôturer la mission <ChevronRight size={18} /></>
               ) : (
                 <>Valider et continuer <ArrowRight size={18} /></>
               )}
             </button>
           ) : (
             <button
-              onClick={triggerCapture}
+              onClick={isSignatureStep ? undefined : triggerCapture}
               disabled={currentPhoto?.status === "uploading"}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 text-white rounded-xl font-bold uppercase tracking-wide text-sm hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-50"
             >
               {currentPhoto?.status === "uploading" ? (
                 <><Loader2 className="animate-spin" size={18} /> Envoi…</>
+              ) : isSignatureStep ? (
+                <><PenLine size={18} /> Signature obligatoire</>
               ) : (
                 <><Camera size={18} /> Prendre la photo</>
               )}
@@ -688,6 +755,40 @@ function FullScreen({ children }: { children: React.ReactNode }) {
     </div>,
     document.body,
   );
+}
+
+function ExampleFrame({ stepId, label }: { stepId: string; label: string }) {
+  const isWheel = stepId.includes("jante");
+  const isRear = stepId.includes("arriere") || stepId === "coffre_ouvert";
+  const isInterior = stepId.includes("siege") || stepId === "compteur";
+  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId === "signature";
+  return (
+    <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="relative flex aspect-[16/9] items-center justify-center bg-slate-100">
+        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={stepId === "signature"} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
+        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">Exemple</span>
+      </div>
+      <button type="button" className="w-full border-t border-slate-200 py-2 text-xs font-semibold text-blue-700 underline-offset-2 hover:underline">
+        Voir l'exemple — {label}
+      </button>
+    </div>
+  );
+}
+
+function CarExample({ rear, openTrunk }: { rear: boolean; openTrunk: boolean }) {
+  return <div className="relative h-28 w-56"><div className="absolute bottom-7 left-5 h-14 w-46 rounded-[48px_56px_18px_18px] bg-slate-300 shadow-inner" /><div className="absolute bottom-18 left-16 h-10 w-28 rounded-t-[42px] bg-slate-400" />{openTrunk && <div className="absolute bottom-20 left-19 h-4 w-24 -rotate-12 rounded bg-slate-500" />}<div className="absolute bottom-5 left-10 h-9 w-9 rounded-full border-[7px] border-slate-800 bg-slate-200" /><div className="absolute bottom-5 right-10 h-9 w-9 rounded-full border-[7px] border-slate-800 bg-slate-200" />{rear ? <div className="absolute bottom-12 right-5 h-3 w-10 rounded bg-red-500" /> : <div className="absolute bottom-12 left-5 h-3 w-10 rounded bg-blue-100" />}</div>;
+}
+
+function WheelExample() {
+  return <div className="relative h-32 w-32 rounded-full border-[18px] border-slate-800 bg-slate-200 shadow-xl"><div className="absolute inset-5 rounded-full border-4 border-slate-400" />{Array.from({ length: 8 }).map((_, i) => <span key={i} className="absolute left-1/2 top-1/2 h-2 w-14 origin-left rounded-full bg-slate-500" style={{ transform: `rotate(${i * 45}deg)` }} />)}</div>;
+}
+
+function InteriorExample({ compteur }: { compteur: boolean }) {
+  return compteur ? <div className="flex h-28 w-56 items-center justify-center rounded-2xl bg-slate-900"><div className="h-20 w-44 rounded-xl border border-slate-700 bg-slate-800 p-4"><div className="flex justify-between"><div className="h-12 w-12 rounded-full border-4 border-blue-400" /><div className="h-12 w-12 rounded-full border-4 border-emerald-400" /></div></div></div> : <div className="flex gap-5"><div className="h-28 w-20 rounded-[20px_20px_12px_12px] bg-slate-700 shadow-lg" /><div className="h-28 w-20 rounded-[20px_20px_12px_12px] bg-slate-700 shadow-lg" /></div>;
+}
+
+function DocumentExample({ signature }: { signature: boolean }) {
+  return <div className="h-32 w-24 rounded-lg bg-white p-3 shadow-xl"><div className="mb-3 h-3 w-16 rounded bg-slate-300" /><div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-1.5 rounded bg-slate-200" />)}</div>{signature && <div className="mt-5 h-5 w-16 rounded-full border-b-2 border-slate-800" />}</div>;
 }
 
 function Header({

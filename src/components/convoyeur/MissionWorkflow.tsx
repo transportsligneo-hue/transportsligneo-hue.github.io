@@ -19,7 +19,8 @@ import {
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"
   | "vehicule_recupere" | "edl_depart_fait" | "en_livraison"
-  | "arrive_destination" | "edl_arrivee_fait" | "terminee" | "incident";
+  | "arrive_destination" | "edl_arrivee_fait" | "en_attente_validation"
+  | "validee" | "refusee" | "terminee" | "incident";
 
 interface EtapeDef {
   key: EtapeKey;
@@ -40,6 +41,9 @@ export const ETAPES: EtapeDef[] = [
   { key: "en_livraison", label: "En livraison", short: "Livraison", icon: Truck, cta: "Je suis arrivé à destination" },
   { key: "arrive_destination", label: "Arrivé à destination", short: "Arrivé", icon: MapPin, cta: "Faire l'état des lieux arrivée" },
   { key: "edl_arrivee_fait", label: "État des lieux arrivée fait", short: "EDL arrivée", icon: ClipboardCheck, cta: "Clôturer la mission" },
+  { key: "en_attente_validation", label: "En attente validation admin", short: "Validation", icon: Clock, cta: "En attente de validation" },
+  { key: "validee", label: "Mission validée", short: "Validée", icon: Check, cta: "Mission validée" },
+  { key: "refusee", label: "Mission refusée", short: "Refusée", icon: AlertTriangle, cta: "Mission refusée" },
   { key: "terminee", label: "Mission terminée", short: "Terminée", icon: Flag, cta: "Mission clôturée" },
 ];
 
@@ -80,7 +84,10 @@ export function MissionWorkflow({
 
   // Étape effective : si rien en base, on déduit depuis le statut macro
   const effectiveEtape: EtapeKey = (currentEtape as EtapeKey) ||
-    (statut === "termine" ? "terminee" :
+    (statut === "en_attente_validation" ? "en_attente_validation" :
+     statut === "validee" ? "validee" :
+     statut === "refusee" ? "refusee" :
+     statut === "termine" ? "terminee" :
      statut === "en_cours" ? "en_route" :
      statut === "accepte" ? "acceptee" : "assignee");
 
@@ -157,7 +164,7 @@ export function MissionWorkflow({
   }, [inspectionDepartDone, inspectionArriveeDone]);
 
   const isIncident = effectiveEtape === "incident";
-  const isFinished = effectiveEtape === "terminee";
+  const isFinished = ["terminee", "en_attente_validation", "validee", "refusee"].includes(effectiveEtape);
 
   return (
     <div className="space-y-3">
@@ -210,7 +217,7 @@ export function MissionWorkflow({
 
         {isFinished && (
           <div className="mt-3 flex items-center gap-2 text-emerald-700 text-sm font-medium">
-            <Check size={16} /> Mission clôturée avec succès
+            <Check size={16} /> {effectiveEtape === "en_attente_validation" ? "Dossier envoyé à l'admin pour validation" : "Mission clôturée avec succès"}
           </div>
         )}
 
