@@ -37,7 +37,7 @@ interface ReportData {
     statut: string;
     notes: string | null;
     created_at: string;
-    photos: Array<{ vue_type: string; url_photo: string }>;
+    photos: Array<{ vue_type: string; url_photo: string; signed_url?: string | null }>;
   }>;
   gps: {
     points: number;
@@ -48,7 +48,9 @@ interface ReportData {
   documents: Array<{
     type_document: string;
     nom_fichier: string;
+    url_fichier: string;
     created_at: string;
+    signed_url?: string | null;
   }>;
 }
 
@@ -61,9 +63,16 @@ const vueLabels: Record<string, string> = {
 };
 
 const docTypeLabels: Record<string, string> = {
-  carte_grise: "Carte grise", assurance: "Assurance", bon_livraison: "Bon de livraison",
-  contrat: "Contrat", photo_supplementaire: "Photo supplémentaire", autre: "Autre",
+  pv_livraison: "PV de livraison / restitution", pv_signature: "Signature PV",
+  carte_grise: "Carte grise", contrat: "Contrat", autre: "Autre",
 };
+
+const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
+
+async function signedStorageUrl(bucket: string, path: string, expires = 3600) {
+  const { data } = await supabase.storage.from(bucket).createSignedUrl(path, expires);
+  return data?.signedUrl ?? null;
+}
 
 export function MissionReport({ attributionId, onClose }: MissionReportProps) {
   const [report, setReport] = useState<ReportData | null>(null);
