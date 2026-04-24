@@ -138,6 +138,9 @@ export const attributionStatutTone: Record<string, BadgeTone> = {
   accepte: "success",
   refuse: "danger",
   en_cours: "purple",
+  en_attente_validation: "warning",
+  validee: "success",
+  refusee: "danger",
   termine: "success",
   annule: "neutral",
 };
