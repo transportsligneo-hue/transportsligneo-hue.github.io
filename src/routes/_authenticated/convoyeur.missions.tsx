@@ -30,6 +30,17 @@ interface GpsPoint {
 }
 
 type FilterKey = "all" | "today" | "upcoming" | "in_progress" | "done";
+type InspectionSession = { attributionId: string; type: "depart" | "arrivee" };
+
+const EDL_SESSION_KEY = "edl:inspection";
+
+function readStoredInspection(): InspectionSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(EDL_SESSION_KEY) ?? localStorage.getItem(EDL_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
 function ConvoyeurMissions() {
   const { user } = useAuth();
@@ -39,13 +50,7 @@ function ConvoyeurMissions() {
   const [openMissionId, setOpenMissionId] = useState<string | null>(null);
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
-  const [inspection, setInspection] = useState<{ attributionId: string; type: "depart" | "arrivee" } | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = sessionStorage.getItem("edl:inspection");
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  });
+  const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
   const [expandedDocs, setExpandedDocs] = useState(false);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
@@ -58,11 +63,14 @@ function ConvoyeurMissions() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (inspection) {
-      sessionStorage.setItem("edl:inspection", JSON.stringify(inspection));
+      const raw = JSON.stringify(inspection);
+      sessionStorage.setItem(EDL_SESSION_KEY, raw);
+      localStorage.setItem(EDL_SESSION_KEY, raw);
       // Also restore the open mission so the back navigation works
       if (!openMissionId) setOpenMissionId(inspection.attributionId);
     } else {
-      sessionStorage.removeItem("edl:inspection");
+      sessionStorage.removeItem(EDL_SESSION_KEY);
+      localStorage.removeItem(EDL_SESSION_KEY);
     }
   }, [inspection, openMissionId]);
 
