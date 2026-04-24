@@ -17,11 +17,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X,
-  RefreshCw, AlertCircle, ChevronRight, Eye, ShieldCheck,
+  RefreshCw, AlertCircle, ChevronRight, Eye, ShieldCheck, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
+import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 interface Props {
   attributionId: string;
@@ -31,13 +33,11 @@ interface Props {
   onClose: () => void;
 }
 
-type StepKind = "exterieur" | "interieur" | "coffre" | "tableau" | "securite" | "documents";
+type StepKind = "exterieur" | "interieur" | "coffre" | "tableau" | "securite" | "documents" | "signature";
 
 interface StepDef {
   /** ID stable utilisé en BDD (vue_type) */
   id: string;
-  /** Numéro métier (1..20) — affiché dans l'UI */
-  num: number;
   /** Section logique */
   section: StepKind;
   /** Libellé court */
@@ -54,36 +54,37 @@ interface StepDef {
  */
 const ALL_STEPS: StepDef[] = [
   // ───── EXTÉRIEUR ─────
-  { num: 1,  id: "face_avant",                  section: "exterieur", label: "Face avant",              hint: "Photo de la face avant complète du véhicule" },
-  { num: 2,  id: "trois_quart_avant_droite",    section: "exterieur", label: "Trois quarts avant",      hint: "Vue 3/4 avant droit du véhicule" },
-  { num: 3,  id: "cote_droit",                  section: "exterieur", label: "Côté droit",              hint: "Vue de profil côté droit, véhicule entier" },
-  { num: 4,  id: "jante_avant_droite",          section: "exterieur", label: "Jante avant droite",      hint: "Gros plan sur la jante avant droite" },
-  { num: 5,  id: "trois_quart_arriere_droite",  section: "exterieur", label: "Trois quarts arrière droite", hint: "Vue 3/4 arrière droit" },
-  { num: 6,  id: "jante_arriere_droite",        section: "exterieur", label: "Jante arrière droite",    hint: "Gros plan sur la jante arrière droite" },
-  { num: 7,  id: "face_arriere",                section: "exterieur", label: "Face arrière",            hint: "Photo de la face arrière complète" },
-  { num: 8,  id: "trois_quart_arriere_gauche",  section: "exterieur", label: "Trois quarts arrière gauche", hint: "Vue 3/4 arrière gauche" },
-  { num: 9,  id: "jante_arriere_gauche",        section: "exterieur", label: "Jante arrière gauche",    hint: "Gros plan sur la jante arrière gauche" },
-  { num: 10, id: "trois_quart_avant_gauche",    section: "exterieur", label: "Trois quarts avant gauche", hint: "Vue 3/4 avant gauche" },
-  { num: 11, id: "jante_avant_gauche",          section: "exterieur", label: "Jante avant gauche",      hint: "Gros plan sur la jante avant gauche" },
+  { id: "face_avant",                  section: "exterieur", label: "Face avant",              hint: "Prenez une photo de la face avant du véhicule" },
+  { id: "trois_quart_avant_droite",    section: "exterieur", label: "3/4 avant droit",         hint: "Prenez une photo du trois quarts avant droit" },
+  { id: "cote_droit",                  section: "exterieur", label: "Côté droit",              hint: "Prenez une photo du côté droit du véhicule" },
+  { id: "jante_avant_droite",          section: "exterieur", label: "Jante avant droite",      hint: "Prenez une photo de la jante avant droite" },
+  { id: "trois_quart_arriere_droite",  section: "exterieur", label: "3/4 arrière droite",      hint: "Prenez une photo du trois quarts arrière droit" },
+  { id: "jante_arriere_droite",        section: "exterieur", label: "Jante arrière droite",    hint: "Prenez une photo de la jante arrière droite" },
+  { id: "face_arriere",                section: "exterieur", label: "Face arrière",            hint: "Prenez une photo de la face arrière du véhicule" },
+  { id: "coffre_ouvert",               section: "coffre",    label: "Coffre ouvert",           hint: "Prenez une photo du coffre ouvert" },
+  { id: "trois_quart_arriere_gauche",  section: "exterieur", label: "3/4 arrière gauche",      hint: "Prenez une photo du trois quarts arrière gauche" },
+  { id: "jante_arriere_gauche",        section: "exterieur", label: "Jante arrière gauche",    hint: "Prenez une photo de la jante arrière gauche" },
+  { id: "trois_quart_avant_gauche",    section: "exterieur", label: "3/4 avant gauche",        hint: "Prenez une photo du trois quarts avant gauche" },
+  { id: "jante_avant_gauche",          section: "exterieur", label: "Jante avant gauche",      hint: "Prenez une photo de la jante avant gauche" },
 
   // ───── INTÉRIEUR ─────
-  { num: 12, id: "siege_avant",                 section: "interieur", label: "Sièges avant",            hint: "Sièges conducteur + passager" },
-  { num: 13, id: "siege_arriere",               section: "interieur", label: "Sièges arrière",          hint: "Banquette arrière + appuie-têtes" },
+  { id: "siege_avant",                 section: "interieur", label: "Sièges avant",            hint: "Prenez une photo des sièges avant" },
+  { id: "siege_arriere",               section: "interieur", label: "Sièges arrière",          hint: "Prenez une photo des sièges arrière" },
 
   // ───── COFFRE & ÉQUIPEMENTS ─────
-  { num: 14, id: "coffre_ouvert",               section: "coffre",    label: "Coffre ouvert",           hint: "Coffre grand ouvert + intérieur" },
-  { num: 15, id: "cables",                      section: "coffre",    label: "Câbles de recharge",      hint: "Photo des câbles de recharge", conditional: "ev_only" },
-  { num: 16, id: "roue_secours",                section: "coffre",    label: "Roue de secours / kit",   hint: "Roue de secours OU kit anti-crevaison" },
+  { id: "cables",                      section: "coffre",    label: "Câbles",                  hint: "Prenez une photo des câbles de recharge", conditional: "ev_only" },
+  { id: "roue_secours",                section: "coffre",    label: "Roue de secours / kit crevaison", hint: "Prenez une photo de la roue de secours ou du kit crevaison" },
 
   // ───── TABLEAU DE BORD ─────
-  { num: 17, id: "compteur",                    section: "tableau",   label: "Compteur",                hint: "Carburant + kilométrage bien visibles" },
+  { id: "compteur",                    section: "tableau",   label: "Compteur (km + carburant)", hint: "Prenez une photo du compteur avec kilométrage et carburant" },
 
   // ───── SÉCURITÉ ─────
-  { num: 18, id: "kit_securite",                section: "securite",  label: "Kit de sécurité",         hint: "Gilet jaune + triangle de signalisation" },
+  { id: "kit_securite",                section: "securite",  label: "Kit sécurité",             hint: "Prenez une photo du kit sécurité (gilet, triangle, etc.)" },
 
   // ───── DOCUMENTS ─────
-  { num: 19, id: "pv_livraison",                section: "documents", label: "PV de livraison",         hint: "Photo du PV signé / bon de mission" },
-  { num: 20, id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Photo de la carte grise du véhicule" },
+  { id: "pv_livraison",                section: "documents", label: "PV livraison / restitution", hint: "Prenez une photo du PV de livraison" },
+  { id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Prenez une photo de la carte grise du véhicule" },
+  { id: "signature",                   section: "signature", label: "Signature obligatoire",    hint: "Signez pour clôturer et envoyer la mission à l'admin" },
 ];
 
 const SECTION_LABEL: Record<StepKind, string> = {
@@ -93,6 +94,7 @@ const SECTION_LABEL: Record<StepKind, string> = {
   tableau: "Tableau de bord",
   securite: "Sécurité",
   documents: "Documents",
+  signature: "Signature",
 };
 
 interface PhotoState {
