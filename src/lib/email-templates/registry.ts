@@ -17,6 +17,7 @@ import { template as convoyeurValidation } from './convoyeur-validation'
 import { template as offreAcceptee } from './offre-acceptee'
 import { template as offreRefusee } from './offre-refusee'
 import { template as nouvelleOffreAdmin } from './nouvelle-offre-admin'
+import { template as documentMissionAdmin } from './document-mission-admin'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'demande-confirmation': demandeConfirmation,
@@ -27,4 +28,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'offre-acceptee': offreAcceptee,
   'offre-refusee': offreRefusee,
   'nouvelle-offre-admin': nouvelleOffreAdmin,
+  'document-mission-admin': documentMissionAdmin,
 }
