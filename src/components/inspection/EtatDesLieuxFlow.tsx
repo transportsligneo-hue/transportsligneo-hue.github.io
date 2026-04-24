@@ -163,7 +163,9 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   useEffect(() => {
     if (typeof window === "undefined") return;
     const safePhotos = Object.fromEntries(
-      Object.entries(photos).map(([key, value]) => [key, { ...value, previewUrl: value.previewUrl?.startsWith("blob:") ? undefined : value.previewUrl }]),
+      Object.entries(photos)
+        .filter(([, value]) => value.status === "success")
+        .map(([key, value]) => [key, { ...value, previewUrl: value.previewUrl?.startsWith("blob:") ? undefined : value.previewUrl }]),
     ) as Record<string, PhotoState>;
     const raw = JSON.stringify({ attributionId, type, stepIndex, inspectionId, photos: safePhotos, updatedAt: Date.now() } satisfies StoredFlowState);
     sessionStorage.setItem(storageKey, raw);
@@ -331,15 +333,6 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       toast.error("Échec de l'envoi. Réessayez ou reprenez la photo.");
     }
   };
-
-  // Reprise automatique après retour de l'appareil photo si le navigateur mobile
-  // a relancé la page avant d'envoyer l'événement change au composant React.
-  useEffect(() => {
-    if (!inspectionId) return;
-    const pending = STEPS.find(s => photos[s.id]?.status !== "success");
-    const nextIndex = pending ? STEPS.findIndex(s => s.id === pending.id) : Math.max(0, STEPS.length - 1);
-    if (stepIndex < nextIndex) setStepIndex(nextIndex);
-  }, [STEPS, inspectionId, photos, stepIndex]);
 
   const goNext = () => {
     if (currentPhoto?.status !== "success") {
