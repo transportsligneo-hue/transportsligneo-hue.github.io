@@ -37,7 +37,7 @@ interface ReportData {
     statut: string;
     notes: string | null;
     created_at: string;
-    photos: Array<{ vue_type: string; url_photo: string }>;
+    photos: Array<{ vue_type: string; url_photo: string; signed_url?: string | null }>;
   }>;
   gps: {
     points: number;
@@ -48,7 +48,9 @@ interface ReportData {
   documents: Array<{
     type_document: string;
     nom_fichier: string;
+    url_fichier: string;
     created_at: string;
+    signed_url?: string | null;
   }>;
 }
 
@@ -61,9 +63,16 @@ const vueLabels: Record<string, string> = {
 };
 
 const docTypeLabels: Record<string, string> = {
-  carte_grise: "Carte grise", assurance: "Assurance", bon_livraison: "Bon de livraison",
-  contrat: "Contrat", photo_supplementaire: "Photo supplémentaire", autre: "Autre",
+  pv_livraison: "PV de livraison / restitution", pv_signature: "Signature PV",
+  carte_grise: "Carte grise", contrat: "Contrat", autre: "Autre",
 };
+
+const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
+
+async function signedStorageUrl(bucket: string, path: string, expires = 3600) {
+  const { data } = await supabase.storage.from(bucket).createSignedUrl(path, expires);
+  return data?.signedUrl ?? null;
+}
 
 export function MissionReport({ attributionId, onClose }: MissionReportProps) {
   const [report, setReport] = useState<ReportData | null>(null);
@@ -88,7 +97,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         supabase.from("convoyeurs").select("nom, prenom, email, telephone").eq("id", attr.convoyeur_id).single(),
         supabase.from("inspections").select("id, type, statut, notes, created_at").eq("attribution_id", attributionId),
         supabase.from("mission_locations").select("recorded_at").eq("attribution_id", attributionId).order("recorded_at", { ascending: true }),
-        supabase.from("mission_documents").select("type_document, nom_fichier, created_at").eq("attribution_id", attributionId),
+        supabase.from("mission_documents").select("type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
       ]);
 
       // Fetch photos for each inspection
@@ -98,8 +107,17 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
           .from("inspection_photos")
           .select("vue_type, url_photo")
           .eq("inspection_id", insp.id);
-        inspections.push({ ...insp, photos: photos || [] });
+        const signedPhotos = await Promise.all((photos || []).map(async (photo) => ({
+          ...photo,
+          signed_url: await signedStorageUrl("inspection-photos", photo.url_photo),
+        })));
+        inspections.push({ ...insp, photos: signedPhotos });
       }
+
+      const signedDocs = await Promise.all((docsRes.data || []).map(async (doc) => ({
+        ...doc,
+        signed_url: await signedStorageUrl("mission-documents", doc.url_fichier),
+      })));
 
       // GPS summary
       const gpsData = gpsRes.data || [];
@@ -116,7 +134,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         convoyeur: convoyeurRes.data as ReportData["convoyeur"],
         inspections,
         gps: { points: gpsData.length, startTime, endTime, durationMinutes },
-        documents: (docsRes.data || []) as ReportData["documents"],
+        documents: signedDocs as ReportData["documents"],
       });
     } catch {
       setError("Erreur lors de la génération du rapport.");
@@ -267,8 +285,8 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {insp.photos.map((p) => (
                         <div key={p.vue_type} className="space-y-0.5">
-                          <a href={p.url_photo} target="_blank" rel="noopener noreferrer">
-                            <img src={p.url_photo} alt={vueLabels[p.vue_type] || p.vue_type}
+                          <a href={p.signed_url || p.url_photo} target="_blank" rel="noopener noreferrer">
+                            <img src={p.signed_url || p.url_photo} alt={vueLabels[p.vue_type] || p.vue_type}
                               className="w-full aspect-[3/4] object-cover rounded border border-primary/20 hover:border-primary/50 transition-colors" />
                           </a>
                           <p className="text-cream/40 text-[9px] text-center truncate">{vueLabels[p.vue_type] || p.vue_type}</p>
@@ -286,9 +304,14 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
             <Section title="Documents joints" icon={<FileText size={16} />}>
               <div className="space-y-1">
                 {report.documents.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-primary/5 last:border-0">
-                    <span className="text-cream/80">{d.nom_fichier}</span>
-                    <span className="text-cream/40 text-xs">{docTypeLabels[d.type_document] || d.type_document}</span>
+                  <div key={i} className="space-y-2 py-2 border-b border-primary/5 last:border-0">
+                    <div className="flex items-center justify-between text-sm gap-3">
+                      <a href={d.signed_url || undefined} target="_blank" rel="noopener noreferrer" className="text-cream/80 underline-offset-2 hover:underline truncate">{d.nom_fichier}</a>
+                      <span className="text-cream/40 text-xs shrink-0">{docTypeLabels[d.type_document] || d.type_document}</span>
+                    </div>
+                    {d.signed_url && isImageFile(d.nom_fichier) && (
+                      <img src={d.signed_url} alt={d.nom_fichier} className="w-full max-w-xs aspect-[4/3] object-cover rounded border border-primary/20" />
+                    )}
                   </div>
                 ))}
               </div>
