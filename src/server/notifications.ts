@@ -1,10 +1,31 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function assertAdmin(context: { supabase: typeof supabaseAdmin; userId: string }) {
+  const { data } = await context.supabase
+    .from("user_roles")
+    .select("id")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .eq("actif", true)
+    .maybeSingle();
+
+  if (!data) throw new Response("Forbidden", { status: 403 });
+}
 
 // Notification: new demande received → notify admin
 export const notifyNewDemande = createServerFn({ method: "POST" })
-  .inputValidator((input: { demandeId: string }) => input)
-  .handler(async ({ data }) => {
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { demandeId: string }) => {
+    if (!UUID_RE.test(input.demandeId)) throw new Error("Invalid demande id");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+
     const { data: demande } = await supabaseAdmin
       .from("demandes_convoyage")
       .select("*")
@@ -40,8 +61,14 @@ export const notifyNewDemande = createServerFn({ method: "POST" })
 
 // Notification: trajet attributed to convoyeur
 export const notifyAttribution = createServerFn({ method: "POST" })
-  .inputValidator((input: { attributionId: string }) => input)
-  .handler(async ({ data }) => {
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { attributionId: string }) => {
+    if (!UUID_RE.test(input.attributionId)) throw new Error("Invalid attribution id");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+
     const { data: attribution } = await supabaseAdmin
       .from("attributions")
       .select("*, convoyeur_id, trajet_id")
