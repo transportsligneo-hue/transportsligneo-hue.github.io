@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can insert action" ON public.b2b_actions_history;
