@@ -52,12 +52,9 @@ const COMPANY_TYPES = [
 ];
 
 function TransportPonctuelPage() {
-  const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [paymentRequested, setPaymentRequested] = useState(false);
-
   const [form, setForm] = useState<FormData>({
     companyName: "",
     companyType: "garage",
