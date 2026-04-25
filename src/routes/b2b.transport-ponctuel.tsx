@@ -200,7 +200,6 @@ function TransportPonctuelPage() {
       console.error(err);
       toast.error(err.message || "Erreur lors de la soumission");
       setSubmitting(false);
-      setPaymentRequested(false);
     }
   }
 
