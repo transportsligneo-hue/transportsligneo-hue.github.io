@@ -131,7 +131,7 @@ function TransportPonctuelPage() {
       return;
     }
     setSubmitting(true);
-    setPaymentRequested(true);
+    
     try {
       // 1) Créer/récupérer company
       const { data: existingCompany } = await supabase
