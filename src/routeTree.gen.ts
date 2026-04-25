@@ -36,6 +36,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
+import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
@@ -207,6 +208,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const B2bTransportPonctuelRoute = B2bTransportPonctuelRouteImport.update({
   id: '/transport-ponctuel',
   path: '/transport-ponctuel',
+  getParentRoute: () => B2bRoute,
+} as any)
+const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
+  id: '/partenariat-flotte',
+  path: '/partenariat-flotte',
   getParentRoute: () => B2bRoute,
 } as any)
 const AuthenticatedDashboardProRoute =
@@ -459,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
+  '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -521,6 +528,7 @@ export interface FileRoutesByTo {
   '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -589,6 +597,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
+  '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -657,6 +666,7 @@ export interface FileRouteTypes {
     | '/convoyeur'
     | '/dashboard-client'
     | '/dashboard-pro'
+    | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
@@ -719,6 +729,7 @@ export interface FileRouteTypes {
     | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
+    | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
     | '/_authenticated/dashboard-pro'
+    | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
@@ -1048,6 +1060,13 @@ declare module '@tanstack/react-router' {
       path: '/transport-ponctuel'
       fullPath: '/b2b/transport-ponctuel'
       preLoaderRoute: typeof B2bTransportPonctuelRouteImport
+      parentRoute: typeof B2bRoute
+    }
+    '/b2b/partenariat-flotte': {
+      id: '/b2b/partenariat-flotte'
+      path: '/partenariat-flotte'
+      fullPath: '/b2b/partenariat-flotte'
+      preLoaderRoute: typeof B2bPartenariatFlotteRouteImport
       parentRoute: typeof B2bRoute
     }
     '/_authenticated/dashboard-pro': {
@@ -1466,10 +1485,12 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface B2bRouteChildren {
+  B2bPartenariatFlotteRoute: typeof B2bPartenariatFlotteRoute
   B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRoute
 }
 
 const B2bRouteChildren: B2bRouteChildren = {
+  B2bPartenariatFlotteRoute: B2bPartenariatFlotteRoute,
   B2bTransportPonctuelRoute: B2bTransportPonctuelRoute,
 }
 
