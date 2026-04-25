@@ -35,6 +35,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
@@ -202,6 +203,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => BlogRoute,
+} as any)
+const B2bTransportPonctuelRoute = B2bTransportPonctuelRouteImport.update({
+  id: '/transport-ponctuel',
+  path: '/transport-ponctuel',
+  getParentRoute: () => B2bRoute,
 } as any)
 const AuthenticatedDashboardProRoute =
   AuthenticatedDashboardProRouteImport.update({
@@ -429,7 +435,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
-  '/b2b': typeof B2bRoute
+  '/b2b': typeof B2bRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -453,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -494,7 +501,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
-  '/b2b': typeof B2bRoute
+  '/b2b': typeof B2bRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -514,6 +521,7 @@ export interface FileRoutesByTo {
   '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -557,7 +565,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
-  '/b2b': typeof B2bRoute
+  '/b2b': typeof B2bRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -581,6 +589,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -648,6 +657,7 @@ export interface FileRouteTypes {
     | '/convoyeur'
     | '/dashboard-client'
     | '/dashboard-pro'
+    | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
@@ -709,6 +719,7 @@ export interface FileRouteTypes {
     | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
+    | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
@@ -775,6 +786,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
     | '/_authenticated/dashboard-pro'
+    | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
@@ -818,7 +830,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AProposRoute: typeof AProposRoute
   AttenteValidationRoute: typeof AttenteValidationRoute
-  B2bRoute: typeof B2bRoute
+  B2bRoute: typeof B2bRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CgvRoute: typeof CgvRoute
   ChoisirCompteRoute: typeof ChoisirCompteRoute
@@ -1030,6 +1042,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
+    }
+    '/b2b/transport-ponctuel': {
+      id: '/b2b/transport-ponctuel'
+      path: '/transport-ponctuel'
+      fullPath: '/b2b/transport-ponctuel'
+      preLoaderRoute: typeof B2bTransportPonctuelRouteImport
+      parentRoute: typeof B2bRoute
     }
     '/_authenticated/dashboard-pro': {
       id: '/_authenticated/dashboard-pro'
@@ -1446,6 +1465,16 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface B2bRouteChildren {
+  B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRoute
+}
+
+const B2bRouteChildren: B2bRouteChildren = {
+  B2bTransportPonctuelRoute: B2bTransportPonctuelRoute,
+}
+
+const B2bRouteWithChildren = B2bRoute._addFileChildren(B2bRouteChildren)
+
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
 }
@@ -1461,7 +1490,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AProposRoute: AProposRoute,
   AttenteValidationRoute: AttenteValidationRoute,
-  B2bRoute: B2bRoute,
+  B2bRoute: B2bRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CgvRoute: CgvRoute,
   ChoisirCompteRoute: ChoisirCompteRoute,
