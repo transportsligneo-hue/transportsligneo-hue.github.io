@@ -28,6 +28,7 @@ import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
 import { Route as ChoisirCompteRouteImport } from './routes/choisir-compte'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as B2bRouteImport } from './routes/b2b'
 import { Route as AttenteValidationRouteImport } from './routes/attente-validation'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -166,6 +167,11 @@ const CgvRoute = CgvRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const B2bRoute = B2bRouteImport.update({
+  id: '/b2b',
+  path: '/b2b',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AttenteValidationRoute = AttenteValidationRouteImport.update({
@@ -423,6 +429,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/b2b': typeof B2bRoute
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -487,6 +494,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/b2b': typeof B2bRoute
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -549,6 +557,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/a-propos': typeof AProposRoute
   '/attente-validation': typeof AttenteValidationRoute
+  '/b2b': typeof B2bRoute
   '/blog': typeof BlogRouteWithChildren
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
@@ -615,6 +624,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/attente-validation'
+    | '/b2b'
     | '/blog'
     | '/cgv'
     | '/choisir-compte'
@@ -679,6 +689,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/attente-validation'
+    | '/b2b'
     | '/blog'
     | '/cgv'
     | '/choisir-compte'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/a-propos'
     | '/attente-validation'
+    | '/b2b'
     | '/blog'
     | '/cgv'
     | '/choisir-compte'
@@ -806,6 +818,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AProposRoute: typeof AProposRoute
   AttenteValidationRoute: typeof AttenteValidationRoute
+  B2bRoute: typeof B2bRoute
   BlogRoute: typeof BlogRouteWithChildren
   CgvRoute: typeof CgvRoute
   ChoisirCompteRoute: typeof ChoisirCompteRoute
@@ -967,6 +980,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/b2b': {
+      id: '/b2b'
+      path: '/b2b'
+      fullPath: '/b2b'
+      preLoaderRoute: typeof B2bRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attente-validation': {
@@ -1441,6 +1461,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AProposRoute: AProposRoute,
   AttenteValidationRoute: AttenteValidationRoute,
+  B2bRoute: B2bRoute,
   BlogRoute: BlogRouteWithChildren,
   CgvRoute: CgvRoute,
   ChoisirCompteRoute: ChoisirCompteRoute,
