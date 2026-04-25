@@ -59,6 +59,293 @@ export type Database = {
           },
         ]
       }
+      b2b_actions_history: {
+        Row: {
+          action_type: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          related_id: string
+          related_type: string
+        }
+        Insert: {
+          action_type: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          related_id: string
+          related_type: string
+        }
+        Update: {
+          action_type?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          related_id?: string
+          related_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_actions_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_fleet_leads: {
+        Row: {
+          assigned_to: string | null
+          budget: string | null
+          company_id: string | null
+          constraints: string | null
+          created_at: string
+          description: string | null
+          estimated_vehicle_count: number
+          frequency: string | null
+          geography: string | null
+          id: string
+          lead_score: number
+          need_type: string
+          numero: string
+          score_category: string
+          start_delay: string | null
+          status: string
+          structure_type: string
+          updated_at: string
+          vehicle_types: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          budget?: string | null
+          company_id?: string | null
+          constraints?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_vehicle_count?: number
+          frequency?: string | null
+          geography?: string | null
+          id?: string
+          lead_score?: number
+          need_type?: string
+          numero?: string
+          score_category?: string
+          start_delay?: string | null
+          status?: string
+          structure_type?: string
+          updated_at?: string
+          vehicle_types?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          budget?: string | null
+          company_id?: string | null
+          constraints?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_vehicle_count?: number
+          frequency?: string | null
+          geography?: string | null
+          id?: string
+          lead_score?: number
+          need_type?: string
+          numero?: string
+          score_category?: string
+          start_delay?: string | null
+          status?: string
+          structure_type?: string
+          updated_at?: string
+          vehicle_types?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_fleet_leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_notes: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string
+          related_id: string
+          related_type: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note: string
+          related_id: string
+          related_type: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string
+          related_id?: string
+          related_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_transport_requests: {
+        Row: {
+          assigned_convoyeur_id: string | null
+          company_id: string | null
+          created_at: string
+          distance_km: number | null
+          dropoff_address: string
+          estimated_price_ht: number | null
+          estimated_price_ttc: number | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          numero: string
+          operational_status: string
+          payment_status: string
+          pickup_address: string
+          scheduled_date: string
+          scheduled_time: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          urgency: string
+          vehicle_running: boolean
+          vehicle_type: string
+        }
+        Insert: {
+          assigned_convoyeur_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          distance_km?: number | null
+          dropoff_address: string
+          estimated_price_ht?: number | null
+          estimated_price_ttc?: number | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          numero?: string
+          operational_status?: string
+          payment_status?: string
+          pickup_address: string
+          scheduled_date: string
+          scheduled_time: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          urgency?: string
+          vehicle_running?: boolean
+          vehicle_type?: string
+        }
+        Update: {
+          assigned_convoyeur_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          distance_km?: number | null
+          dropoff_address?: string
+          estimated_price_ht?: number | null
+          estimated_price_ttc?: number | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          numero?: string
+          operational_status?: string
+          payment_status?: string
+          pickup_address?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          urgency?: string
+          vehicle_running?: boolean
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_transport_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          contact_email: string
+          contact_function: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          name: string
+          score: number
+          score_category: string
+          sector: string | null
+          siret: string | null
+          size: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email: string
+          contact_function?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          name: string
+          score?: number
+          score_category?: string
+          sector?: string | null
+          siret?: string | null
+          size?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string
+          contact_function?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          name?: string
+          score?: number
+          score_category?: string
+          sector?: string | null
+          siret?: string | null
+          size?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -1058,6 +1345,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recalculate_company_score: {
+        Args: { _company_id: string }
+        Returns: undefined
       }
     }
     Enums: {
