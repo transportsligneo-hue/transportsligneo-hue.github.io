@@ -142,33 +142,19 @@ function FleetPartnershipPage() {
       }
       const v = parsed.data;
 
-      // 1) Trouver ou créer la société
-      const { data: existing } = await supabase
-        .from("companies")
-        .select("id")
-        .eq("contact_email", v.contactEmail.toLowerCase())
-        .maybeSingle();
-
-      let companyId = existing?.id;
-      if (!companyId) {
-        const { data: company, error: cErr } = await supabase
-          .from("companies")
-          .insert({
-            name: v.companyName,
-            type: v.structureType,
-            siret: v.siret || null,
-            sector: v.sector || null,
-            size: v.size,
-            contact_name: v.contactName,
-            contact_function: v.contactFunction || null,
-            contact_email: v.contactEmail.toLowerCase(),
-            contact_phone: v.contactPhone,
-          })
-          .select("id")
-          .single();
-        if (cErr) throw cErr;
-        companyId = company.id;
-      }
+      // 1) Trouver ou créer la société via RPC sécurisée
+      const { data: companyId, error: cErr } = await supabase.rpc("find_or_create_company", {
+        _name: v.companyName,
+        _type: v.structureType,
+        _contact_name: v.contactName,
+        _contact_email: v.contactEmail.toLowerCase(),
+        _contact_phone: v.contactPhone,
+        _siret: v.siret || null,
+        _sector: v.sector || null,
+        _size: v.size,
+        _contact_function: v.contactFunction || null,
+      });
+      if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
       // 2) Créer le lead flotte
       const score = calculateLeadScore({
