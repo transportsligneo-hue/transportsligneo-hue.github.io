@@ -164,7 +164,7 @@ function FleetPartnershipPage() {
         budget: v.budget,
       });
 
-      const { error: lErr } = await supabase.from("b2b_fleet_leads").insert({
+      const { data: insertedLead, error: lErr } = await supabase.from("b2b_fleet_leads").insert({
         company_id: companyId,
         structure_type: v.structureType,
         need_type: v.needType,
@@ -178,8 +178,17 @@ function FleetPartnershipPage() {
         constraints: v.constraints || null,
         lead_score: score.score,
         score_category: score.category,
-      });
+      }).select("id").maybeSingle();
       if (lErr) throw lErr;
+
+      // Notify admin (server-side, fire-and-forget — UX should not depend on it)
+      if (insertedLead?.id) {
+        fetch("/api/public/b2b/lead-created", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leadId: insertedLead.id }),
+        }).catch((e) => console.warn("notify failed", e));
+      }
 
       setSubmitted(true);
       toast.success("Demande envoyée — nous vous recontactons sous 24h ouvrées");
