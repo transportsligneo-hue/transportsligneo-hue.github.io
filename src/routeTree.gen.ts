@@ -77,6 +77,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
+import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 
@@ -451,6 +452,11 @@ const ApiPublicB2bWebhookRoute = ApiPublicB2bWebhookRouteImport.update({
   path: '/api/public/b2b/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicB2bLeadCreatedRoute = ApiPublicB2bLeadCreatedRouteImport.update({
+  id: '/api/public/b2b/lead-created',
+  path: '/api/public/b2b/lead-created',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardClientMissionsMissionIdRoute =
   AuthenticatedDashboardClientMissionsMissionIdRouteImport.update({
     id: '/$missionId',
@@ -528,6 +534,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -595,6 +602,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -668,6 +676,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -741,6 +750,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/'
     | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -808,6 +818,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -880,6 +891,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -915,6 +927,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1401,6 +1414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicB2bWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/b2b/lead-created': {
+      id: '/api/public/b2b/lead-created'
+      path: '/api/public/b2b/lead-created'
+      fullPath: '/api/public/b2b/lead-created'
+      preLoaderRoute: typeof ApiPublicB2bLeadCreatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard-client/missions/$missionId': {
       id: '/_authenticated/dashboard-client/missions/$missionId'
       path: '/$missionId'
@@ -1628,6 +1648,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
