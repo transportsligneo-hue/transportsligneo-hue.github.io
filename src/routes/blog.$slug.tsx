@@ -60,7 +60,7 @@ function BlogArticlePage() {
             <div className="gold-divider-short mt-8" />
 
             <div className="mt-10 space-y-6">
-              {article.content.map((block, i) => {
+              {article.content.map((block: { type: string; text: string; items?: string[] }, i: number) => {
                 if (block.type === "h2") {
                   return (
                     <h2 key={i} className="font-heading text-primary text-xl md:text-2xl tracking-wide mt-10">
@@ -71,7 +71,7 @@ function BlogArticlePage() {
                 if (block.type === "ul") {
                   return (
                     <ul key={i} className="space-y-2 pl-5 list-disc marker:text-primary/60">
-                      {block.items?.map((it, j) => (
+                      {block.items?.map((it: string, j: number) => (
                         <li key={j} className="text-cream/75 text-base leading-relaxed">{it}</li>
                       ))}
                     </ul>
