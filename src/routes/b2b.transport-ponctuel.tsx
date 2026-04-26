@@ -128,15 +128,16 @@ function TransportPonctuelPage() {
   }
   function prev() { setStep((s) => Math.max(1, s - 1) as Step); }
 
-  async function handlePayAndConfirm() {
+  async function handleCreateRequest() {
     if (!estimate || !estimate.isEstimable) {
       toast.error("Devis non calculable automatiquement, contactez-nous au 02 47 XX XX XX");
       return;
     }
+    if (requestId) return; // déjà créée
     setSubmitting(true);
-    
+
     try {
-      // 1) Créer/récupérer la société via RPC sécurisée (pas de lecture directe de companies)
+      // 1) Créer/récupérer la société via RPC sécurisée
       const { data: companyId, error: cErr } = await supabase.rpc("find_or_create_company", {
         _name: form.companyName.trim(),
         _type: form.companyType,
@@ -146,7 +147,7 @@ function TransportPonctuelPage() {
       });
       if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
-      // 2) Créer demande
+      // 2) Créer la demande (statut paiement = pending)
       const { data: request, error: rErr } = await supabase
         .from("b2b_transport_requests")
         .insert({
@@ -167,27 +168,12 @@ function TransportPonctuelPage() {
         .single();
       if (rErr) throw rErr;
 
-      // 3) Lancer Stripe Checkout via server function
-      const res = await fetch("/api/b2b/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requestId: request.id,
-          amountTtc: estimate.priceTtc,
-          description: `Transport B2B ${form.pickupAddress} → ${form.dropoffAddress}`,
-          customerEmail: form.contactEmail.trim().toLowerCase(),
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Erreur création session de paiement");
-      }
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      setRequestId(request.id);
+      setRequestNumero(request.numero);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Erreur lors de la soumission");
+      toast.error(err.message || "Erreur lors de la création de la demande");
+    } finally {
       setSubmitting(false);
     }
   }
