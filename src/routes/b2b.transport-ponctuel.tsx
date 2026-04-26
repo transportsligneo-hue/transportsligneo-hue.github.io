@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight, Loader2, Building2, MapPin, CreditCard, CheckCir
 import { supabase } from "@/integrations/supabase/client";
 import { estimateB2BPrice, B2B_VEHICLE_LABELS, B2B_URGENCY_LABELS, type B2BVehicleType, type B2BUrgency } from "@/lib/b2b-pricing";
 import { toast } from "sonner";
+import { B2BEmbeddedCheckout } from "@/components/b2b/B2BEmbeddedCheckout";
 
 export const Route = createFileRoute("/b2b/transport-ponctuel")({
   component: TransportPonctuelPage,
@@ -55,6 +56,8 @@ function TransportPonctuelPage() {
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [requestNumero, setRequestNumero] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
     companyName: "",
     companyType: "garage",
@@ -125,15 +128,16 @@ function TransportPonctuelPage() {
   }
   function prev() { setStep((s) => Math.max(1, s - 1) as Step); }
 
-  async function handlePayAndConfirm() {
+  async function handleCreateRequest() {
     if (!estimate || !estimate.isEstimable) {
       toast.error("Devis non calculable automatiquement, contactez-nous au 02 47 XX XX XX");
       return;
     }
+    if (requestId) return; // déjà créée
     setSubmitting(true);
-    
+
     try {
-      // 1) Créer/récupérer la société via RPC sécurisée (pas de lecture directe de companies)
+      // 1) Créer/récupérer la société via RPC sécurisée
       const { data: companyId, error: cErr } = await supabase.rpc("find_or_create_company", {
         _name: form.companyName.trim(),
         _type: form.companyType,
@@ -143,7 +147,7 @@ function TransportPonctuelPage() {
       });
       if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
-      // 2) Créer demande
+      // 2) Créer la demande (statut paiement = pending)
       const { data: request, error: rErr } = await supabase
         .from("b2b_transport_requests")
         .insert({
@@ -164,27 +168,12 @@ function TransportPonctuelPage() {
         .single();
       if (rErr) throw rErr;
 
-      // 3) Lancer Stripe Checkout via server function
-      const res = await fetch("/api/b2b/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requestId: request.id,
-          amountTtc: estimate.priceTtc,
-          description: `Transport B2B ${form.pickupAddress} → ${form.dropoffAddress}`,
-          customerEmail: form.contactEmail.trim().toLowerCase(),
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Erreur création session de paiement");
-      }
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      setRequestId(request.id);
+      setRequestNumero(request.numero);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Erreur lors de la soumission");
+      toast.error(err.message || "Erreur lors de la création de la demande");
+    } finally {
       setSubmitting(false);
     }
   }
@@ -368,23 +357,33 @@ function TransportPonctuelPage() {
                   <div>{form.pickupAddress} → {form.dropoffAddress}</div>
                   <div>{form.scheduledDate} à {form.scheduledTime}</div>
                   <div>{B2B_VEHICLE_LABELS[form.vehicleType]} · {form.vehicleRunning === "oui" ? "Roulant" : "Non roulant"} · {B2B_URGENCY_LABELS[form.urgency]}</div>
+                  {requestNumero && <div className="pt-2 text-xs text-emerald-700">Demande {requestNumero} créée — finalisez le paiement ci-dessous.</div>}
                 </div>
               </div>
+
+              {requestId && (
+                <B2BEmbeddedCheckout
+                  requestId={requestId}
+                  returnUrl={`${window.location.origin}/b2b/transport-ponctuel/retour?session_id={CHECKOUT_SESSION_ID}`}
+                />
+              )}
             </div>
           )}
 
           <div className="mt-8 flex items-center justify-between">
-            <Button variant="ghost" onClick={prev} disabled={step === 1 || submitting}>
+            <Button variant="ghost" onClick={prev} disabled={step === 1 || submitting || !!requestId}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Précédent
             </Button>
             {step < 3 ? (
               <Button onClick={next} className="bg-emerald-600 hover:bg-emerald-700">
                 Suivant <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            ) : (
-              <Button onClick={handlePayAndConfirm} disabled={submitting || !estimate?.isEstimable} className="bg-emerald-600 hover:bg-emerald-700">
-                {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirection…</> : <><CreditCard className="mr-2 h-4 w-4" /> Payer et confirmer la demande</>}
+            ) : !requestId ? (
+              <Button onClick={handleCreateRequest} disabled={submitting || !estimate?.isEstimable} className="bg-emerald-600 hover:bg-emerald-700">
+                {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Création…</> : <><CreditCard className="mr-2 h-4 w-4" /> Procéder au paiement</>}
               </Button>
+            ) : (
+              <span className="text-xs text-slate-500">Saisissez vos informations de paiement ci-dessus</span>
             )}
           </div>
         </div>

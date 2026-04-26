@@ -45,6 +45,8 @@ import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
@@ -66,12 +68,15 @@ import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
+import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
+import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 
@@ -259,6 +264,17 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const B2bTransportPonctuelRetourRoute =
+  B2bTransportPonctuelRetourRouteImport.update({
+    id: '/retour',
+    path: '/retour',
+    getParentRoute: () => B2bTransportPonctuelRoute,
+  } as any)
+const ApiB2bCheckoutRoute = ApiB2bCheckoutRouteImport.update({
+  id: '/api/b2b/checkout',
+  path: '/api/b2b/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardProSocieteRoute =
   AuthenticatedDashboardProSocieteRouteImport.update({
     id: '/societe',
@@ -384,6 +400,18 @@ const AuthenticatedAdminClientsRoute =
     path: '/clients',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminB2bLeadsRoute =
+  AuthenticatedAdminB2bLeadsRouteImport.update({
+    id: '/b2b-leads',
+    path: '/b2b-leads',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminB2bDispatchRoute =
+  AuthenticatedAdminB2bDispatchRouteImport.update({
+    id: '/b2b-dispatch',
+    path: '/b2b-dispatch',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAttributionsRoute =
   AuthenticatedAdminAttributionsRouteImport.update({
     id: '/attributions',
@@ -416,6 +444,11 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicB2bWebhookRoute = ApiPublicB2bWebhookRouteImport.update({
+  id: '/api/public/b2b/webhook',
+  path: '/api/public/b2b/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardClientMissionsMissionIdRoute =
@@ -459,10 +492,12 @@ export interface FileRoutesByFullPath {
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -484,6 +519,8 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -491,6 +528,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -521,10 +559,12 @@ export interface FileRoutesByTo {
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -546,6 +586,8 @@ export interface FileRoutesByTo {
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
@@ -553,6 +595,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -589,10 +632,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -614,6 +659,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -621,6 +668,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -661,6 +709,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/b2b-dispatch'
+    | '/admin/b2b-leads'
     | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
@@ -682,6 +732,8 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
+    | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/convoyeur/'
@@ -689,6 +741,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/'
     | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -723,6 +776,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/b2b-dispatch'
+    | '/admin/b2b-leads'
     | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
@@ -744,6 +799,8 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
+    | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
     | '/convoyeur'
@@ -751,6 +808,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/admin/missions/$missionId'
     | '/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -790,6 +848,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
+    | '/_authenticated/admin/b2b-dispatch'
+    | '/_authenticated/admin/b2b-leads'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
@@ -811,6 +871,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/societe'
+    | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/convoyeur/'
@@ -818,6 +880,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/dashboard-client/missions/$missionId'
+    | '/api/public/b2b/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -850,7 +913,9 @@ export interface RootRouteChildren {
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1112,6 +1177,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/b2b/transport-ponctuel/retour': {
+      id: '/b2b/transport-ponctuel/retour'
+      path: '/retour'
+      fullPath: '/b2b/transport-ponctuel/retour'
+      preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
+      parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/b2b/checkout': {
+      id: '/api/b2b/checkout'
+      path: '/api/b2b/checkout'
+      fullPath: '/api/b2b/checkout'
+      preLoaderRoute: typeof ApiB2bCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard-pro/societe': {
       id: '/_authenticated/dashboard-pro/societe'
       path: '/societe'
@@ -1259,6 +1338,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/b2b-leads': {
+      id: '/_authenticated/admin/b2b-leads'
+      path: '/b2b-leads'
+      fullPath: '/admin/b2b-leads'
+      preLoaderRoute: typeof AuthenticatedAdminB2bLeadsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/b2b-dispatch': {
+      id: '/_authenticated/admin/b2b-dispatch'
+      path: '/b2b-dispatch'
+      fullPath: '/admin/b2b-dispatch'
+      preLoaderRoute: typeof AuthenticatedAdminB2bDispatchRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/attributions': {
       id: '/_authenticated/admin/attributions'
       path: '/attributions'
@@ -1301,6 +1394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/b2b/webhook': {
+      id: '/api/public/b2b/webhook'
+      path: '/api/public/b2b/webhook'
+      fullPath: '/api/public/b2b/webhook'
+      preLoaderRoute: typeof ApiPublicB2bWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard-client/missions/$missionId': {
       id: '/_authenticated/dashboard-client/missions/$missionId'
       path: '/$missionId'
@@ -1320,6 +1420,8 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
+  AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
+  AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRoute
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
@@ -1333,6 +1435,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
+  AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
+  AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRoute,
   AuthenticatedAdminConvoyeursRoute: AuthenticatedAdminConvoyeursRoute,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
@@ -1464,14 +1568,25 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface B2bTransportPonctuelRouteChildren {
+  B2bTransportPonctuelRetourRoute: typeof B2bTransportPonctuelRetourRoute
+}
+
+const B2bTransportPonctuelRouteChildren: B2bTransportPonctuelRouteChildren = {
+  B2bTransportPonctuelRetourRoute: B2bTransportPonctuelRetourRoute,
+}
+
+const B2bTransportPonctuelRouteWithChildren =
+  B2bTransportPonctuelRoute._addFileChildren(B2bTransportPonctuelRouteChildren)
+
 interface B2bRouteChildren {
   B2bPartenariatFlotteRoute: typeof B2bPartenariatFlotteRoute
-  B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRoute
+  B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRouteWithChildren
 }
 
 const B2bRouteChildren: B2bRouteChildren = {
   B2bPartenariatFlotteRoute: B2bPartenariatFlotteRoute,
-  B2bTransportPonctuelRoute: B2bTransportPonctuelRoute,
+  B2bTransportPonctuelRoute: B2bTransportPonctuelRouteWithChildren,
 }
 
 const B2bRouteWithChildren = B2bRoute._addFileChildren(B2bRouteChildren)
@@ -1511,7 +1626,9 @@ const rootRouteChildren: RootRouteChildren = {
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
