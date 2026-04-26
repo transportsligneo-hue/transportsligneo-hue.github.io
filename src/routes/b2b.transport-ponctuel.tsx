@@ -357,23 +357,33 @@ function TransportPonctuelPage() {
                   <div>{form.pickupAddress} → {form.dropoffAddress}</div>
                   <div>{form.scheduledDate} à {form.scheduledTime}</div>
                   <div>{B2B_VEHICLE_LABELS[form.vehicleType]} · {form.vehicleRunning === "oui" ? "Roulant" : "Non roulant"} · {B2B_URGENCY_LABELS[form.urgency]}</div>
+                  {requestNumero && <div className="pt-2 text-xs text-emerald-700">Demande {requestNumero} créée — finalisez le paiement ci-dessous.</div>}
                 </div>
               </div>
+
+              {requestId && (
+                <B2BEmbeddedCheckout
+                  requestId={requestId}
+                  returnUrl={`${window.location.origin}/b2b/transport-ponctuel/retour?session_id={CHECKOUT_SESSION_ID}`}
+                />
+              )}
             </div>
           )}
 
           <div className="mt-8 flex items-center justify-between">
-            <Button variant="ghost" onClick={prev} disabled={step === 1 || submitting}>
+            <Button variant="ghost" onClick={prev} disabled={step === 1 || submitting || !!requestId}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Précédent
             </Button>
             {step < 3 ? (
               <Button onClick={next} className="bg-emerald-600 hover:bg-emerald-700">
                 Suivant <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            ) : (
-              <Button onClick={handlePayAndConfirm} disabled={submitting || !estimate?.isEstimable} className="bg-emerald-600 hover:bg-emerald-700">
-                {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirection…</> : <><CreditCard className="mr-2 h-4 w-4" /> Payer et confirmer la demande</>}
+            ) : !requestId ? (
+              <Button onClick={handleCreateRequest} disabled={submitting || !estimate?.isEstimable} className="bg-emerald-600 hover:bg-emerald-700">
+                {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Création…</> : <><CreditCard className="mr-2 h-4 w-4" /> Procéder au paiement</>}
               </Button>
+            ) : (
+              <span className="text-xs text-slate-500">Saisissez vos informations de paiement ci-dessus</span>
             )}
           </div>
         </div>
