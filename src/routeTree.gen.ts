@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TarifsRouteImport } from './routes/tarifs'
-import { Route as SetupAdminRouteImport } from './routes/setup-admin'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReserverRouteImport } from './routes/reserver'
@@ -84,11 +83,6 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TarifsRoute = TarifsRouteImport.update({
   id: '/tarifs',
   path: '/tarifs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SetupAdminRoute = SetupAdminRouteImport.update({
-  id: '/setup-admin',
-  path: '/setup-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -458,7 +452,6 @@ export interface FileRoutesByFullPath {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -525,7 +518,6 @@ export interface FileRoutesByTo {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
@@ -590,7 +582,6 @@ export interface FileRoutesById {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/setup-admin': typeof SetupAdminRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -659,7 +650,6 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
-    | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
     | '/admin'
@@ -726,7 +716,6 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
-    | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
     | '/b2b/partenariat-flotte'
@@ -790,7 +779,6 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
-    | '/setup-admin'
     | '/tarifs'
     | '/unsubscribe'
     | '/_authenticated/admin'
@@ -859,7 +847,6 @@ export interface RootRouteChildren {
   ReserverRoute: typeof ReserverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
-  SetupAdminRoute: typeof SetupAdminRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -885,13 +872,6 @@ declare module '@tanstack/react-router' {
       path: '/tarifs'
       fullPath: '/tarifs'
       preLoaderRoute: typeof TarifsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/setup-admin': {
-      id: '/setup-admin'
-      path: '/setup-admin'
-      fullPath: '/setup-admin'
-      preLoaderRoute: typeof SetupAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -1528,7 +1508,6 @@ const rootRouteChildren: RootRouteChildren = {
   ReserverRoute: ReserverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
-  SetupAdminRoute: SetupAdminRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,

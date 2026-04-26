@@ -133,29 +133,15 @@ function TransportPonctuelPage() {
     setSubmitting(true);
     
     try {
-      // 1) Créer/récupérer company
-      const { data: existingCompany } = await supabase
-        .from("companies")
-        .select("id")
-        .eq("contact_email", form.contactEmail.trim().toLowerCase())
-        .maybeSingle();
-
-      let companyId = existingCompany?.id;
-      if (!companyId) {
-        const { data: newCompany, error: cErr } = await supabase
-          .from("companies")
-          .insert({
-            name: form.companyName.trim(),
-            type: form.companyType,
-            contact_name: form.contactName.trim(),
-            contact_email: form.contactEmail.trim().toLowerCase(),
-            contact_phone: form.contactPhone.trim(),
-          })
-          .select("id")
-          .single();
-        if (cErr) throw cErr;
-        companyId = newCompany.id;
-      }
+      // 1) Créer/récupérer la société via RPC sécurisée (pas de lecture directe de companies)
+      const { data: companyId, error: cErr } = await supabase.rpc("find_or_create_company", {
+        _name: form.companyName.trim(),
+        _type: form.companyType,
+        _contact_name: form.contactName.trim(),
+        _contact_email: form.contactEmail.trim().toLowerCase(),
+        _contact_phone: form.contactPhone.trim(),
+      });
+      if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
       // 2) Créer demande
       const { data: request, error: rErr } = await supabase
