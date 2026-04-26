@@ -1322,6 +1322,20 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      find_or_create_company: {
+        Args: {
+          _contact_email: string
+          _contact_function?: string
+          _contact_name: string
+          _contact_phone: string
+          _name: string
+          _sector?: string
+          _siret?: string
+          _size?: string
+          _type: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
