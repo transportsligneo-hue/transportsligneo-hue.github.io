@@ -149,10 +149,10 @@ function FleetPartnershipPage() {
         _contact_name: v.contactName,
         _contact_email: v.contactEmail.toLowerCase(),
         _contact_phone: v.contactPhone,
-        _siret: v.siret || null,
-        _sector: v.sector || null,
+        _siret: v.siret || undefined,
+        _sector: v.sector || undefined,
         _size: v.size,
-        _contact_function: v.contactFunction || null,
+        _contact_function: v.contactFunction || undefined,
       });
       if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
