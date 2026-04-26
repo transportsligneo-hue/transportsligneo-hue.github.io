@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight, Loader2, Building2, MapPin, CreditCard, CheckCir
 import { supabase } from "@/integrations/supabase/client";
 import { estimateB2BPrice, B2B_VEHICLE_LABELS, B2B_URGENCY_LABELS, type B2BVehicleType, type B2BUrgency } from "@/lib/b2b-pricing";
 import { toast } from "sonner";
+import { B2BEmbeddedCheckout } from "@/components/b2b/B2BEmbeddedCheckout";
 
 export const Route = createFileRoute("/b2b/transport-ponctuel")({
   component: TransportPonctuelPage,

@@ -45,6 +45,7 @@ import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
@@ -261,6 +262,12 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const B2bTransportPonctuelRetourRoute =
+  B2bTransportPonctuelRetourRouteImport.update({
+    id: '/retour',
+    path: '/retour',
+    getParentRoute: () => B2bTransportPonctuelRoute,
+  } as any)
 const ApiB2bCheckoutRoute = ApiB2bCheckoutRouteImport.update({
   id: '/api/b2b/checkout',
   path: '/api/b2b/checkout',
@@ -471,7 +478,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -497,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -535,7 +543,7 @@ export interface FileRoutesByTo {
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -561,6 +569,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
@@ -605,7 +614,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
-  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRoute
+  '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -631,6 +640,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -701,6 +711,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
     | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/convoyeur/'
@@ -765,6 +776,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
     | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
     | '/convoyeur'
@@ -834,6 +846,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/societe'
     | '/api/b2b/checkout'
+    | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/convoyeur/'
@@ -1137,6 +1150,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/b2b/transport-ponctuel/retour': {
+      id: '/b2b/transport-ponctuel/retour'
+      path: '/retour'
+      fullPath: '/b2b/transport-ponctuel/retour'
+      preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
+      parentRoute: typeof B2bTransportPonctuelRoute
     }
     '/api/b2b/checkout': {
       id: '/api/b2b/checkout'
@@ -1504,14 +1524,25 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface B2bTransportPonctuelRouteChildren {
+  B2bTransportPonctuelRetourRoute: typeof B2bTransportPonctuelRetourRoute
+}
+
+const B2bTransportPonctuelRouteChildren: B2bTransportPonctuelRouteChildren = {
+  B2bTransportPonctuelRetourRoute: B2bTransportPonctuelRetourRoute,
+}
+
+const B2bTransportPonctuelRouteWithChildren =
+  B2bTransportPonctuelRoute._addFileChildren(B2bTransportPonctuelRouteChildren)
+
 interface B2bRouteChildren {
   B2bPartenariatFlotteRoute: typeof B2bPartenariatFlotteRoute
-  B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRoute
+  B2bTransportPonctuelRoute: typeof B2bTransportPonctuelRouteWithChildren
 }
 
 const B2bRouteChildren: B2bRouteChildren = {
   B2bPartenariatFlotteRoute: B2bPartenariatFlotteRoute,
-  B2bTransportPonctuelRoute: B2bTransportPonctuelRoute,
+  B2bTransportPonctuelRoute: B2bTransportPonctuelRouteWithChildren,
 }
 
 const B2bRouteWithChildren = B2bRoute._addFileChildren(B2bRouteChildren)
