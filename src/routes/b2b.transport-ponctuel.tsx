@@ -56,6 +56,8 @@ function TransportPonctuelPage() {
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [requestNumero, setRequestNumero] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
     companyName: "",
     companyType: "garage",
