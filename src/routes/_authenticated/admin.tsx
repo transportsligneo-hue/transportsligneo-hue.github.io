@@ -11,6 +11,8 @@ import {
   Receipt,
   MessageSquare,
   Loader2,
+  Truck,
+  Briefcase,
 } from "lucide-react";
 import { useEffect } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -25,6 +27,9 @@ const navItems: AdminSidebarItem[] = [
   { to: "/admin/demandes", label: "Demandes convoyage", icon: FileText, group: "Commercial" },
   { to: "/admin/messages", label: "Messages & contacts", icon: MessageSquare, group: "Commercial" },
   { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Commercial" },
+
+  { to: "/admin/b2b-dispatch", label: "Dispatch B2B", icon: Truck, group: "B2B" },
+  { to: "/admin/b2b-leads", label: "CRM Flotte", icon: Briefcase, group: "B2B" },
 
   { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
   { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Comptes" },

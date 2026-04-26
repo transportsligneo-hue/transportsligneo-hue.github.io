@@ -68,6 +68,8 @@ import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
+import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
+import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -398,6 +400,18 @@ const AuthenticatedAdminClientsRoute =
     path: '/clients',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminB2bLeadsRoute =
+  AuthenticatedAdminB2bLeadsRouteImport.update({
+    id: '/b2b-leads',
+    path: '/b2b-leads',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminB2bDispatchRoute =
+  AuthenticatedAdminB2bDispatchRouteImport.update({
+    id: '/b2b-dispatch',
+    path: '/b2b-dispatch',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAttributionsRoute =
   AuthenticatedAdminAttributionsRouteImport.update({
     id: '/attributions',
@@ -482,6 +496,8 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -547,6 +563,8 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -618,6 +636,8 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
+  '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
+  '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRoute
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
@@ -689,6 +709,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/b2b-dispatch'
+    | '/admin/b2b-leads'
     | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
@@ -754,6 +776,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/attributions'
+    | '/admin/b2b-dispatch'
+    | '/admin/b2b-leads'
     | '/admin/clients'
     | '/admin/convoyeurs'
     | '/admin/demandes'
@@ -824,6 +848,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/_authenticated/admin/attributions'
+    | '/_authenticated/admin/b2b-dispatch'
+    | '/_authenticated/admin/b2b-leads'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
@@ -1312,6 +1338,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/b2b-leads': {
+      id: '/_authenticated/admin/b2b-leads'
+      path: '/b2b-leads'
+      fullPath: '/admin/b2b-leads'
+      preLoaderRoute: typeof AuthenticatedAdminB2bLeadsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/b2b-dispatch': {
+      id: '/_authenticated/admin/b2b-dispatch'
+      path: '/b2b-dispatch'
+      fullPath: '/admin/b2b-dispatch'
+      preLoaderRoute: typeof AuthenticatedAdminB2bDispatchRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/attributions': {
       id: '/_authenticated/admin/attributions'
       path: '/attributions'
@@ -1380,6 +1420,8 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
+  AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
+  AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRoute
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
@@ -1393,6 +1435,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
+  AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
+  AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRoute,
   AuthenticatedAdminConvoyeursRoute: AuthenticatedAdminConvoyeursRoute,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
