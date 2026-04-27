@@ -81,6 +81,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
+import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -477,6 +478,12 @@ const AuthenticatedDashboardClientMissionsMissionIdRoute =
     path: '/$missionId',
     getParentRoute: () => AuthenticatedDashboardClientMissionsRoute,
   } as any)
+const AuthenticatedAdminOrganisationsOrgIdRoute =
+  AuthenticatedAdminOrganisationsOrgIdRouteImport.update({
+    id: '/$orgId',
+    path: '/$orgId',
+    getParentRoute: () => AuthenticatedAdminOrganisationsRoute,
+  } as any)
 const AuthenticatedAdminMissionsMissionIdRoute =
   AuthenticatedAdminMissionsMissionIdRouteImport.update({
     id: '/missions/$missionId',
@@ -524,7 +531,7 @@ export interface FileRoutesByFullPath {
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
-  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -549,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -594,7 +602,7 @@ export interface FileRoutesByTo {
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
-  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -619,6 +627,7 @@ export interface FileRoutesByTo {
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -670,7 +679,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
-  '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
+  '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -695,6 +704,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -771,6 +781,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/'
     | '/dashboard-pro/'
     | '/admin/missions/$missionId'
+    | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -841,6 +852,7 @@ export interface FileRouteTypes {
     | '/dashboard-client'
     | '/dashboard-pro'
     | '/admin/missions/$missionId'
+    | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -916,6 +928,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/'
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/admin/missions/$missionId'
+    | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -1468,6 +1481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedDashboardClientMissionsRoute
     }
+    '/_authenticated/admin/organisations/$orgId': {
+      id: '/_authenticated/admin/organisations/$orgId'
+      path: '/$orgId'
+      fullPath: '/admin/organisations/$orgId'
+      preLoaderRoute: typeof AuthenticatedAdminOrganisationsOrgIdRouteImport
+      parentRoute: typeof AuthenticatedAdminOrganisationsRoute
+    }
     '/_authenticated/admin/missions/$missionId': {
       id: '/_authenticated/admin/missions/$missionId'
       path: '/missions/$missionId'
@@ -1477,6 +1497,21 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAdminOrganisationsRouteChildren {
+  AuthenticatedAdminOrganisationsOrgIdRoute: typeof AuthenticatedAdminOrganisationsOrgIdRoute
+}
+
+const AuthenticatedAdminOrganisationsRouteChildren: AuthenticatedAdminOrganisationsRouteChildren =
+  {
+    AuthenticatedAdminOrganisationsOrgIdRoute:
+      AuthenticatedAdminOrganisationsOrgIdRoute,
+  }
+
+const AuthenticatedAdminOrganisationsRouteWithChildren =
+  AuthenticatedAdminOrganisationsRoute._addFileChildren(
+    AuthenticatedAdminOrganisationsRouteChildren,
+  )
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
@@ -1488,7 +1523,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
-  AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRoute
+  AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1505,7 +1540,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
-  AuthenticatedAdminOrganisationsRoute: AuthenticatedAdminOrganisationsRoute,
+  AuthenticatedAdminOrganisationsRoute:
+    AuthenticatedAdminOrganisationsRouteWithChildren,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
