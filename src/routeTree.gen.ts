@@ -61,8 +61,13 @@ import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_
 import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_authenticated/convoyeur.documents'
 import { Route as AuthenticatedConvoyeurDisponiblesRouteImport } from './routes/_authenticated/convoyeur.disponibles'
 import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './routes/_authenticated/convoyeur.disponibilites'
+import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
+import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
+import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
+import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
@@ -79,6 +84,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
+import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -360,16 +366,46 @@ const AuthenticatedConvoyeurDisponibilitesRoute =
     path: '/disponibilites',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
+const AuthenticatedAdminUtilisateursRoute =
+  AuthenticatedAdminUtilisateursRouteImport.update({
+    id: '/utilisateurs',
+    path: '/utilisateurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminTrajetsRoute =
   AuthenticatedAdminTrajetsRouteImport.update({
     id: '/trajets',
     path: '/trajets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminParametresRoute =
+  AuthenticatedAdminParametresRouteImport.update({
+    id: '/parametres',
+    path: '/parametres',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPaiementsRoute =
+  AuthenticatedAdminPaiementsRouteImport.update({
+    id: '/paiements',
+    path: '/paiements',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminOrganisationsRoute =
+  AuthenticatedAdminOrganisationsRouteImport.update({
+    id: '/organisations',
+    path: '/organisations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMessagesRoute =
   AuthenticatedAdminMessagesRouteImport.update({
     id: '/messages',
     path: '/messages',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHistoriqueRoute =
+  AuthenticatedAdminHistoriqueRouteImport.update({
+    id: '/historique',
+    path: '/historique',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDocumentsRoute =
@@ -463,6 +499,12 @@ const AuthenticatedDashboardClientMissionsMissionIdRoute =
     path: '/$missionId',
     getParentRoute: () => AuthenticatedDashboardClientMissionsRoute,
   } as any)
+const AuthenticatedAdminOrganisationsOrgIdRoute =
+  AuthenticatedAdminOrganisationsOrgIdRouteImport.update({
+    id: '/$orgId',
+    path: '/$orgId',
+    getParentRoute: () => AuthenticatedAdminOrganisationsRoute,
+  } as any)
 const AuthenticatedAdminMissionsMissionIdRoute =
   AuthenticatedAdminMissionsMissionIdRouteImport.update({
     id: '/missions/$missionId',
@@ -509,8 +551,13 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
+  '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -533,6 +580,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -577,8 +625,13 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
+  '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -601,6 +654,7 @@ export interface FileRoutesByTo {
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -651,8 +705,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
+  '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
+  '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/_authenticated/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -675,6 +734,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
+  '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -725,8 +785,13 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/historique'
     | '/admin/messages'
+    | '/admin/organisations'
+    | '/admin/paiements'
+    | '/admin/parametres'
     | '/admin/trajets'
+    | '/admin/utilisateurs'
     | '/convoyeur/disponibilites'
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
@@ -749,6 +814,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/'
     | '/dashboard-pro/'
     | '/admin/missions/$missionId'
+    | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -793,8 +859,13 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/historique'
     | '/admin/messages'
+    | '/admin/organisations'
+    | '/admin/paiements'
+    | '/admin/parametres'
     | '/admin/trajets'
+    | '/admin/utilisateurs'
     | '/convoyeur/disponibilites'
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
@@ -817,6 +888,7 @@ export interface FileRouteTypes {
     | '/dashboard-client'
     | '/dashboard-pro'
     | '/admin/missions/$missionId'
+    | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -866,8 +938,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
+    | '/_authenticated/admin/historique'
     | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/organisations'
+    | '/_authenticated/admin/paiements'
+    | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/trajets'
+    | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/disponibilites'
     | '/_authenticated/convoyeur/disponibles'
     | '/_authenticated/convoyeur/documents'
@@ -890,6 +967,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/'
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/admin/missions/$missionId'
+    | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/webhook'
@@ -1302,6 +1380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConvoyeurDisponibilitesRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
+    '/_authenticated/admin/utilisateurs': {
+      id: '/_authenticated/admin/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/admin/utilisateurs'
+      preLoaderRoute: typeof AuthenticatedAdminUtilisateursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/trajets': {
       id: '/_authenticated/admin/trajets'
       path: '/trajets'
@@ -1309,11 +1394,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/parametres': {
+      id: '/_authenticated/admin/parametres'
+      path: '/parametres'
+      fullPath: '/admin/parametres'
+      preLoaderRoute: typeof AuthenticatedAdminParametresRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/paiements': {
+      id: '/_authenticated/admin/paiements'
+      path: '/paiements'
+      fullPath: '/admin/paiements'
+      preLoaderRoute: typeof AuthenticatedAdminPaiementsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/organisations': {
+      id: '/_authenticated/admin/organisations'
+      path: '/organisations'
+      fullPath: '/admin/organisations'
+      preLoaderRoute: typeof AuthenticatedAdminOrganisationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/messages': {
       id: '/_authenticated/admin/messages'
       path: '/messages'
       fullPath: '/admin/messages'
       preLoaderRoute: typeof AuthenticatedAdminMessagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/historique': {
+      id: '/_authenticated/admin/historique'
+      path: '/historique'
+      fullPath: '/admin/historique'
+      preLoaderRoute: typeof AuthenticatedAdminHistoriqueRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/documents': {
@@ -1428,6 +1541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedDashboardClientMissionsRoute
     }
+    '/_authenticated/admin/organisations/$orgId': {
+      id: '/_authenticated/admin/organisations/$orgId'
+      path: '/$orgId'
+      fullPath: '/admin/organisations/$orgId'
+      preLoaderRoute: typeof AuthenticatedAdminOrganisationsOrgIdRouteImport
+      parentRoute: typeof AuthenticatedAdminOrganisationsRoute
+    }
     '/_authenticated/admin/missions/$missionId': {
       id: '/_authenticated/admin/missions/$missionId'
       path: '/missions/$missionId'
@@ -1438,6 +1558,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminOrganisationsRouteChildren {
+  AuthenticatedAdminOrganisationsOrgIdRoute: typeof AuthenticatedAdminOrganisationsOrgIdRoute
+}
+
+const AuthenticatedAdminOrganisationsRouteChildren: AuthenticatedAdminOrganisationsRouteChildren =
+  {
+    AuthenticatedAdminOrganisationsOrgIdRoute:
+      AuthenticatedAdminOrganisationsOrgIdRoute,
+  }
+
+const AuthenticatedAdminOrganisationsRouteWithChildren =
+  AuthenticatedAdminOrganisationsRoute._addFileChildren(
+    AuthenticatedAdminOrganisationsRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
@@ -1447,8 +1582,13 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
+  AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
+  AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
+  AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
+  AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminMissionsMissionIdRoute: typeof AuthenticatedAdminMissionsMissionIdRoute
 }
@@ -1462,8 +1602,14 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
+  AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminOrganisationsRoute:
+    AuthenticatedAdminOrganisationsRouteWithChildren,
+  AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
+  AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
+  AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminMissionsMissionIdRoute:
     AuthenticatedAdminMissionsMissionIdRoute,
