@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Tag } from "lucide-react";
-import heroCar from "@/assets/hero-car-premium.jpg";
+import heroCar from "@/assets/hero-chauffeur-ligneo.jpg";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 /**
@@ -19,26 +19,27 @@ export default function HeroDesktop() {
       <div className="absolute bottom-8 left-8 w-20 h-20 border-b border-l border-primary/30 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-20 h-20 border-b border-r border-primary/30 pointer-events-none" />
 
-      {/* Image voiture — colonne droite, fondue dans le navy */}
+      {/* Image lifestyle — colonne droite, fondue dans le navy */}
       <div className="absolute inset-y-0 right-0 w-[58%] xl:w-[60%]">
         <img
           src={heroCar}
-          alt="Berline noire premium en route au coucher du soleil"
-          className="absolute inset-0 w-full h-full object-cover object-left"
+          alt="Chauffeur Transports LIGNEO photographiant une Mercedes noire devant une villa au coucher de soleil"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: "65% center" }}
           width={1920}
           height={1080}
           fetchPriority="high"
         />
-        {/* Dégradé navy → image pour fondre le bord gauche */}
+        {/* Dégradé navy → image renforcé pour lisibilité du texte */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, #0b1026 0%, rgba(11,16,38,0.85) 18%, rgba(11,16,38,0.35) 38%, rgba(11,16,38,0) 60%)",
+              "linear-gradient(90deg, #0b1026 0%, rgba(11,16,38,0.92) 22%, rgba(11,16,38,0.55) 42%, rgba(11,16,38,0.15) 65%, rgba(11,16,38,0) 80%)",
           }}
         />
         {/* Voile sombre global pour homogénéiser */}
-        <div className="absolute inset-0 bg-navy/20" />
+        <div className="absolute inset-0 bg-navy/25" />
         {/* Vignette bas */}
         <div
           className="absolute inset-x-0 bottom-0 h-40"
