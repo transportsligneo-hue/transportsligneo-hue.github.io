@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Tag } from "lucide-react";
-import heroCar from "@/assets/hero-car-premium.jpg";
+import heroCar from "@/assets/hero-chauffeur-ligneo.jpg";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 /**
