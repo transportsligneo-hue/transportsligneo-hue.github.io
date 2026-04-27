@@ -63,6 +63,7 @@ import { Route as AuthenticatedConvoyeurDisponiblesRouteImport } from './routes/
 import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './routes/_authenticated/convoyeur.disponibilites'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
@@ -373,6 +374,12 @@ const AuthenticatedAdminTrajetsRoute =
     path: '/trajets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminOrganisationsRoute =
+  AuthenticatedAdminOrganisationsRouteImport.update({
+    id: '/organisations',
+    path: '/organisations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMessagesRoute =
   AuthenticatedAdminMessagesRouteImport.update({
     id: '/messages',
@@ -517,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -586,6 +594,7 @@ export interface FileRoutesByTo {
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -661,6 +670,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
@@ -736,6 +746,7 @@ export interface FileRouteTypes {
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/messages'
+    | '/admin/organisations'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/disponibilites'
@@ -805,6 +816,7 @@ export interface FileRouteTypes {
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/messages'
+    | '/admin/organisations'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/disponibilites'
@@ -879,6 +891,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/organisations'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/disponibilites'
@@ -1329,6 +1342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/organisations': {
+      id: '/_authenticated/admin/organisations'
+      path: '/organisations'
+      fullPath: '/admin/organisations'
+      preLoaderRoute: typeof AuthenticatedAdminOrganisationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/messages': {
       id: '/_authenticated/admin/messages'
       path: '/messages'
@@ -1468,6 +1488,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1484,6 +1505,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminOrganisationsRoute: AuthenticatedAdminOrganisationsRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
