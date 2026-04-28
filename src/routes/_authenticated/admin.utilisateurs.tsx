@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
 });
@@ -160,7 +160,7 @@ function AdminUtilisateurs() {
 
   return (
     <div className="space-y-6">
-      <header>
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-pro-accent/10 flex items-center justify-center">
             <Users className="text-pro-accent" size={22} />
@@ -170,6 +170,7 @@ function AdminUtilisateurs() {
             <p className="text-sm text-pro-muted">Vue centralisée de tous les comptes de la plateforme.</p>
           </div>
         </div>
+        <CreateAccountDialog onCreated={() => void loadUsers()} />
       </header>
 
       {/* KPIs */}

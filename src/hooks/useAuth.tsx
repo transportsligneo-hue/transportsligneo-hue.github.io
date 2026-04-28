@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, ty
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-type AppRole = "admin" | "convoyeur" | "client";
+type AppRole = "admin" | "super_admin" | "manager" | "convoyeur" | "client" | "sous_traitant";
 type TypeClient = "particulier" | "b2b";
 type ConvoyeurStatut = "en_attente" | "valide" | "actif" | "refuse" | "suspendu";
 
@@ -34,17 +34,21 @@ interface ResolvedProfile {
   roleActif: boolean;
   typeClient: TypeClient | null;
   convoyeurStatut: ConvoyeurStatut | null;
+  orgRole: "client_b2b" | "flotte_partenaire" | "sous_traitant" | null;
 }
 
 function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string {
   if (!isAuthenticated) return "/login";
   if (!p.roleActif) return "/login";
-  if (p.role === "admin") return "/admin";
+  if (p.role === "admin" || p.role === "super_admin") return "/admin";
   if (p.role === "convoyeur") {
     if (p.convoyeurStatut === "valide" || p.convoyeurStatut === "actif") return "/convoyeur";
     return "/attente-validation";
   }
-  // client (par défaut)
+  // Org-based redirection (flotte / entreprise)
+  if (p.orgRole === "flotte_partenaire") return "/flotte";
+  if (p.orgRole === "client_b2b") return "/entreprise";
+  // Fallback B2B sans org rattachée
   if (p.typeClient === "b2b") return "/dashboard-pro";
   return "/dashboard-client";
 }
@@ -57,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     roleActif: true,
     typeClient: null,
     convoyeurStatut: null,
+    orgRole: null,
   });
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,10 +100,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         convoyeurStatut = (convData?.statut as ConvoyeurStatut | undefined) ?? "en_attente";
       }
 
-      return { role, roleActif, typeClient, convoyeurStatut };
+      // Détecter le rôle d'organisation prioritaire (flotte_partenaire > client_b2b > sous_traitant)
+      let orgRole: ResolvedProfile["orgRole"] = null;
+      if (role === "client" || role === "manager" || role === "sous_traitant") {
+        const { data: mems } = await supabase
+          .from("organization_members")
+          .select("organization_id")
+          .eq("user_id", userId)
+          .eq("status", "active");
+        const orgIds = (mems ?? []).map((m) => m.organization_id);
+        if (orgIds.length > 0) {
+          const { data: orgRoles } = await supabase
+            .from("organization_roles")
+            .select("role")
+            .in("organization_id", orgIds)
+            .eq("active", true);
+          const list = (orgRoles ?? []).map((r) => r.role);
+          if (list.includes("flotte_partenaire")) orgRole = "flotte_partenaire";
+          else if (list.includes("client_b2b")) orgRole = "client_b2b";
+          else if (list.includes("sous_traitant")) orgRole = "sous_traitant";
+        }
+      }
+
+      return { role, roleActif, typeClient, convoyeurStatut, orgRole };
     } catch (err) {
       console.warn("[useAuth] loadProfile error:", err);
-      return { role: null, roleActif: true, typeClient: null, convoyeurStatut: null };
+      return { role: null, roleActif: true, typeClient: null, convoyeurStatut: null, orgRole: null };
     }
   }, []);
 
@@ -109,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentUserIdRef.current = userId;
 
       if (!userId) {
-        setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null });
+        setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null, orgRole: null });
         setIsLoading(false);
         return;
       }
