@@ -36,11 +36,13 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
+import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedFlotteIndexRouteImport } from './routes/_authenticated/flotte.index'
 import { Route as AuthenticatedEntrepriseIndexRouteImport } from './routes/_authenticated/entreprise.index'
 import { Route as AuthenticatedDashboardProIndexRouteImport } from './routes/_authenticated/dashboard-pro.index'
 import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/_authenticated/dashboard-client.index'
@@ -49,6 +51,10 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
+import { Route as AuthenticatedFlotteSocieteRouteImport } from './routes/_authenticated/flotte.societe'
+import { Route as AuthenticatedFlotteMissionsRouteImport } from './routes/_authenticated/flotte.missions'
+import { Route as AuthenticatedFlotteDisponibilitesRouteImport } from './routes/_authenticated/flotte.disponibilites'
+import { Route as AuthenticatedFlotteConducteursRouteImport } from './routes/_authenticated/flotte.conducteurs'
 import { Route as AuthenticatedEntrepriseSocieteRouteImport } from './routes/_authenticated/entreprise.societe'
 import { Route as AuthenticatedEntrepriseMissionsRouteImport } from './routes/_authenticated/entreprise.missions'
 import { Route as AuthenticatedEntrepriseMembresRouteImport } from './routes/_authenticated/entreprise.membres'
@@ -227,6 +233,11 @@ const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
   path: '/partenariat-flotte',
   getParentRoute: () => B2bRoute,
 } as any)
+const AuthenticatedFlotteRoute = AuthenticatedFlotteRouteImport.update({
+  id: '/flotte',
+  path: '/flotte',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedEntrepriseRoute = AuthenticatedEntrepriseRouteImport.update({
   id: '/entreprise',
   path: '/entreprise',
@@ -254,6 +265,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFlotteIndexRoute =
+  AuthenticatedFlotteIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFlotteRoute,
+  } as any)
 const AuthenticatedEntrepriseIndexRoute =
   AuthenticatedEntrepriseIndexRouteImport.update({
     id: '/',
@@ -299,6 +316,30 @@ const ApiB2bCheckoutRoute = ApiB2bCheckoutRouteImport.update({
   path: '/api/b2b/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedFlotteSocieteRoute =
+  AuthenticatedFlotteSocieteRouteImport.update({
+    id: '/societe',
+    path: '/societe',
+    getParentRoute: () => AuthenticatedFlotteRoute,
+  } as any)
+const AuthenticatedFlotteMissionsRoute =
+  AuthenticatedFlotteMissionsRouteImport.update({
+    id: '/missions',
+    path: '/missions',
+    getParentRoute: () => AuthenticatedFlotteRoute,
+  } as any)
+const AuthenticatedFlotteDisponibilitesRoute =
+  AuthenticatedFlotteDisponibilitesRouteImport.update({
+    id: '/disponibilites',
+    path: '/disponibilites',
+    getParentRoute: () => AuthenticatedFlotteRoute,
+  } as any)
+const AuthenticatedFlotteConducteursRoute =
+  AuthenticatedFlotteConducteursRouteImport.update({
+    id: '/conducteurs',
+    path: '/conducteurs',
+    getParentRoute: () => AuthenticatedFlotteRoute,
+  } as any)
 const AuthenticatedEntrepriseSocieteRoute =
   AuthenticatedEntrepriseSocieteRouteImport.update({
     id: '/societe',
@@ -581,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
+  '/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -618,6 +660,10 @@ export interface FileRoutesByFullPath {
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
   '/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
+  '/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
+  '/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
+  '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -626,6 +672,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/entreprise/': typeof AuthenticatedEntrepriseIndexRoute
+  '/flotte/': typeof AuthenticatedFlotteIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -697,6 +744,10 @@ export interface FileRoutesByTo {
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
   '/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
+  '/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
+  '/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
+  '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -705,6 +756,7 @@ export interface FileRoutesByTo {
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/entreprise': typeof AuthenticatedEntrepriseIndexRoute
+  '/flotte': typeof AuthenticatedFlotteIndexRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -746,6 +798,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
+  '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -783,6 +836,10 @@ export interface FileRoutesById {
   '/_authenticated/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/_authenticated/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
   '/_authenticated/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
+  '/_authenticated/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
+  '/_authenticated/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
+  '/_authenticated/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/_authenticated/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -791,6 +848,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/entreprise/': typeof AuthenticatedEntrepriseIndexRoute
+  '/_authenticated/flotte/': typeof AuthenticatedFlotteIndexRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -832,6 +890,7 @@ export interface FileRouteTypes {
     | '/dashboard-client'
     | '/dashboard-pro'
     | '/entreprise'
+    | '/flotte'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
@@ -869,6 +928,10 @@ export interface FileRouteTypes {
     | '/entreprise/membres'
     | '/entreprise/missions'
     | '/entreprise/societe'
+    | '/flotte/conducteurs'
+    | '/flotte/disponibilites'
+    | '/flotte/missions'
+    | '/flotte/societe'
     | '/api/b2b/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -877,6 +940,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/'
     | '/dashboard-pro/'
     | '/entreprise/'
+    | '/flotte/'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
@@ -948,6 +1012,10 @@ export interface FileRouteTypes {
     | '/entreprise/membres'
     | '/entreprise/missions'
     | '/entreprise/societe'
+    | '/flotte/conducteurs'
+    | '/flotte/disponibilites'
+    | '/flotte/missions'
+    | '/flotte/societe'
     | '/api/b2b/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -956,6 +1024,7 @@ export interface FileRouteTypes {
     | '/dashboard-client'
     | '/dashboard-pro'
     | '/entreprise'
+    | '/flotte'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
@@ -996,6 +1065,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client'
     | '/_authenticated/dashboard-pro'
     | '/_authenticated/entreprise'
+    | '/_authenticated/flotte'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
@@ -1033,6 +1103,10 @@ export interface FileRouteTypes {
     | '/_authenticated/entreprise/membres'
     | '/_authenticated/entreprise/missions'
     | '/_authenticated/entreprise/societe'
+    | '/_authenticated/flotte/conducteurs'
+    | '/_authenticated/flotte/disponibilites'
+    | '/_authenticated/flotte/missions'
+    | '/_authenticated/flotte/societe'
     | '/api/b2b/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -1041,6 +1115,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/'
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/entreprise/'
+    | '/_authenticated/flotte/'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
@@ -1280,6 +1355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof B2bPartenariatFlotteRouteImport
       parentRoute: typeof B2bRoute
     }
+    '/_authenticated/flotte': {
+      id: '/_authenticated/flotte'
+      path: '/flotte'
+      fullPath: '/flotte'
+      preLoaderRoute: typeof AuthenticatedFlotteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/entreprise': {
       id: '/_authenticated/entreprise'
       path: '/entreprise'
@@ -1314,6 +1396,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/flotte/': {
+      id: '/_authenticated/flotte/'
+      path: '/'
+      fullPath: '/flotte/'
+      preLoaderRoute: typeof AuthenticatedFlotteIndexRouteImport
+      parentRoute: typeof AuthenticatedFlotteRoute
     }
     '/_authenticated/entreprise/': {
       id: '/_authenticated/entreprise/'
@@ -1370,6 +1459,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/b2b/checkout'
       preLoaderRoute: typeof ApiB2bCheckoutRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/flotte/societe': {
+      id: '/_authenticated/flotte/societe'
+      path: '/societe'
+      fullPath: '/flotte/societe'
+      preLoaderRoute: typeof AuthenticatedFlotteSocieteRouteImport
+      parentRoute: typeof AuthenticatedFlotteRoute
+    }
+    '/_authenticated/flotte/missions': {
+      id: '/_authenticated/flotte/missions'
+      path: '/missions'
+      fullPath: '/flotte/missions'
+      preLoaderRoute: typeof AuthenticatedFlotteMissionsRouteImport
+      parentRoute: typeof AuthenticatedFlotteRoute
+    }
+    '/_authenticated/flotte/disponibilites': {
+      id: '/_authenticated/flotte/disponibilites'
+      path: '/disponibilites'
+      fullPath: '/flotte/disponibilites'
+      preLoaderRoute: typeof AuthenticatedFlotteDisponibilitesRouteImport
+      parentRoute: typeof AuthenticatedFlotteRoute
+    }
+    '/_authenticated/flotte/conducteurs': {
+      id: '/_authenticated/flotte/conducteurs'
+      path: '/conducteurs'
+      fullPath: '/flotte/conducteurs'
+      preLoaderRoute: typeof AuthenticatedFlotteConducteursRouteImport
+      parentRoute: typeof AuthenticatedFlotteRoute
     }
     '/_authenticated/entreprise/societe': {
       id: '/_authenticated/entreprise/societe'
@@ -1854,12 +1971,33 @@ const AuthenticatedEntrepriseRouteWithChildren =
     AuthenticatedEntrepriseRouteChildren,
   )
 
+interface AuthenticatedFlotteRouteChildren {
+  AuthenticatedFlotteConducteursRoute: typeof AuthenticatedFlotteConducteursRoute
+  AuthenticatedFlotteDisponibilitesRoute: typeof AuthenticatedFlotteDisponibilitesRoute
+  AuthenticatedFlotteMissionsRoute: typeof AuthenticatedFlotteMissionsRoute
+  AuthenticatedFlotteSocieteRoute: typeof AuthenticatedFlotteSocieteRoute
+  AuthenticatedFlotteIndexRoute: typeof AuthenticatedFlotteIndexRoute
+}
+
+const AuthenticatedFlotteRouteChildren: AuthenticatedFlotteRouteChildren = {
+  AuthenticatedFlotteConducteursRoute: AuthenticatedFlotteConducteursRoute,
+  AuthenticatedFlotteDisponibilitesRoute:
+    AuthenticatedFlotteDisponibilitesRoute,
+  AuthenticatedFlotteMissionsRoute: AuthenticatedFlotteMissionsRoute,
+  AuthenticatedFlotteSocieteRoute: AuthenticatedFlotteSocieteRoute,
+  AuthenticatedFlotteIndexRoute: AuthenticatedFlotteIndexRoute,
+}
+
+const AuthenticatedFlotteRouteWithChildren =
+  AuthenticatedFlotteRoute._addFileChildren(AuthenticatedFlotteRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedConvoyeurRoute: typeof AuthenticatedConvoyeurRouteWithChildren
   AuthenticatedDashboardClientRoute: typeof AuthenticatedDashboardClientRouteWithChildren
   AuthenticatedDashboardProRoute: typeof AuthenticatedDashboardProRouteWithChildren
   AuthenticatedEntrepriseRoute: typeof AuthenticatedEntrepriseRouteWithChildren
+  AuthenticatedFlotteRoute: typeof AuthenticatedFlotteRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1869,6 +2007,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedDashboardClientRouteWithChildren,
   AuthenticatedDashboardProRoute: AuthenticatedDashboardProRouteWithChildren,
   AuthenticatedEntrepriseRoute: AuthenticatedEntrepriseRouteWithChildren,
+  AuthenticatedFlotteRoute: AuthenticatedFlotteRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
