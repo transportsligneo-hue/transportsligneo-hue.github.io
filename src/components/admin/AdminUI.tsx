@@ -34,7 +34,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`bg-white border border-pro-border rounded-xl shadow-pro-card ${padded ? "p-5" : ""} ${className}`}
+      className={`bg-white border border-pro-border rounded-2xl shadow-pro-card ${padded ? "p-6" : ""} ${className}`}
     >
       {children}
     </div>
@@ -48,12 +48,14 @@ export function KpiCard({
   icon: Icon,
   tone = "default",
   hint,
+  trend,
 }: {
   label: string;
   value: string | number;
   icon?: React.ComponentType<{ size?: number; className?: string }>;
-  tone?: "default" | "success" | "warning" | "danger" | "info";
+  tone?: "default" | "success" | "warning" | "danger" | "info" | "primary";
   hint?: string;
+  trend?: { value: string; positive?: boolean };
 }) {
   const toneClasses: Record<string, string> = {
     default: "bg-slate-100 text-slate-600",
@@ -61,18 +63,24 @@ export function KpiCard({
     warning: "bg-amber-50 text-amber-600",
     danger: "bg-red-50 text-red-600",
     info: "bg-blue-50 text-blue-600",
+    primary: "bg-pro-gold-soft text-pro-gold",
   };
   return (
-    <div className="bg-white border border-pro-border rounded-lg p-5">
+    <div className="bg-white border border-pro-border rounded-2xl p-6 shadow-pro-card hover:shadow-pro-card-hover transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-pro-muted text-xs uppercase tracking-wider font-medium">{label}</p>
-          <p className="text-2xl font-semibold text-pro-text mt-1">{value}</p>
-          {hint && <p className="text-pro-muted text-xs mt-1">{hint}</p>}
+          <p className="text-pro-muted text-[11px] uppercase tracking-wider font-semibold">{label}</p>
+          <p className="text-3xl font-semibold text-pro-text mt-2 tracking-tight">{value}</p>
+          {hint && <p className="text-pro-muted text-xs mt-1.5">{hint}</p>}
+          {trend && (
+            <p className={`text-xs mt-1.5 font-medium ${trend.positive ? "text-emerald-600" : "text-red-600"}`}>
+              {trend.positive ? "↑" : "↓"} {trend.value}
+            </p>
+          )}
         </div>
         {Icon && (
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${toneClasses[tone]}`}>
-            <Icon size={18} />
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${toneClasses[tone]}`}>
+            <Icon size={20} />
           </div>
         )}
       </div>
@@ -282,7 +290,7 @@ export function IconButton({
 /* ============= Table ============= */
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-white border border-pro-border rounded-xl shadow-pro-card overflow-hidden">
+    <div className="bg-white border border-pro-border rounded-2xl shadow-pro-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">{children}</table>
       </div>
@@ -315,7 +323,7 @@ export function TR({
   return (
     <tr
       onClick={onClick}
-      className={`border-b border-pro-border last:border-0 hover:bg-pro-bg-soft/50 transition-colors ${
+      className={`border-b border-pro-border last:border-0 hover:bg-pro-bg-soft/60 transition-colors ${
         onClick ? "cursor-pointer" : ""
       }`}
     >
@@ -324,7 +332,7 @@ export function TR({
   );
 }
 export function TD({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <td className={`py-3 px-4 text-pro-text ${className}`}>{children}</td>;
+  return <td className={`py-3.5 px-4 text-pro-text`+ " " + className}>{children}</td>;
 }
 
 /* ============= EmptyState ============= */
@@ -338,13 +346,13 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className="bg-white border border-pro-border rounded-lg p-12 text-center">
+    <div className="bg-white border border-pro-border rounded-2xl p-12 text-center shadow-pro-card">
       {Icon && (
-        <div className="w-12 h-12 rounded-full bg-pro-bg-soft mx-auto mb-3 flex items-center justify-center text-pro-muted">
-          <Icon size={22} />
+        <div className="w-14 h-14 rounded-2xl bg-pro-bg-soft mx-auto mb-4 flex items-center justify-center text-pro-muted">
+          <Icon size={24} />
         </div>
       )}
-      <p className="text-pro-text font-medium">{title}</p>
+      <p className="text-pro-text font-semibold">{title}</p>
       {description && <p className="text-pro-muted text-sm mt-1">{description}</p>}
     </div>
   );
