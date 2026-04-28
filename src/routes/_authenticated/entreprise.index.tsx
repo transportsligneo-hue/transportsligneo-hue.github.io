@@ -33,9 +33,9 @@ function EntrepriseIndex() {
         supabase.from("b2b_transport_requests").select("estimated_price_ttc", { count: "exact" }).eq("organization_id", orgId),
       ]);
 
-      const ca =
-        (missionsRes.data ?? []).reduce((s, m: { prix_total?: number }) => s + Number(m.prix_total ?? 0), 0) +
-        (demandesRes.data ?? []).reduce((s, d: { estimated_price_ttc?: number }) => s + Number(d.estimated_price_ttc ?? 0), 0);
+      const sum = (arr: unknown[], key: string) =>
+        arr.reduce((s: number, row) => s + Number((row as Record<string, unknown>)[key] ?? 0), 0);
+      const ca = sum(missionsRes.data ?? [], "prix_total") + sum(demandesRes.data ?? [], "estimated_price_ttc");
 
       setStats({
         missions: missionsRes.count ?? 0,
