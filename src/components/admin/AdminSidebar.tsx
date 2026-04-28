@@ -42,11 +42,11 @@ export function AdminSidebar({ items, children }: Props) {
   const groupOrder = Object.keys(groups);
 
   const renderNav = (onClick?: () => void) => (
-    <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+    <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
       {groupOrder.map((g) => (
         <div key={g} className="space-y-0.5">
           {g !== "_main" && (
-            <p className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-pro-muted">
+            <p className="px-3 pt-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-pro-muted">
               {g}
             </p>
           )}
@@ -57,13 +57,16 @@ export function AdminSidebar({ items, children }: Props) {
                 key={item.to}
                 to={item.to}
                 onClick={onClick}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                   active
-                    ? "bg-pro-accent/10 text-pro-accent font-medium"
+                    ? "bg-pro-gold-soft text-pro-text font-semibold"
                     : "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text"
                 }`}
               >
-                <item.icon size={17} className={active ? "text-pro-accent" : "text-pro-muted"} />
+                {active && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-pro-gold" />
+                )}
+                <item.icon size={17} className={active ? "text-pro-gold" : "text-pro-muted group-hover:text-pro-text"} />
                 <span className="flex-1">{item.label}</span>
                 {item.badge}
               </Link>
