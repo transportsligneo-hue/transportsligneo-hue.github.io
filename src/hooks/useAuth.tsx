@@ -34,6 +34,7 @@ interface ResolvedProfile {
   roleActif: boolean;
   typeClient: TypeClient | null;
   convoyeurStatut: ConvoyeurStatut | null;
+  orgRole: "client_b2b" | "flotte_partenaire" | "sous_traitant" | null;
 }
 
 function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string {
