@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     roleActif: true,
     typeClient: null,
     convoyeurStatut: null,
+    orgRole: null,
   });
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
