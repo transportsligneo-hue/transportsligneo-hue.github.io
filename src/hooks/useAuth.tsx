@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, ty
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-type AppRole = "admin" | "convoyeur" | "client";
+type AppRole = "admin" | "super_admin" | "manager" | "convoyeur" | "client" | "sous_traitant";
 type TypeClient = "particulier" | "b2b";
 type ConvoyeurStatut = "en_attente" | "valide" | "actif" | "refuse" | "suspendu";
 
