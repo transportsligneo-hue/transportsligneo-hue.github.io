@@ -39,12 +39,15 @@ interface ResolvedProfile {
 function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string {
   if (!isAuthenticated) return "/login";
   if (!p.roleActif) return "/login";
-  if (p.role === "admin") return "/admin";
+  if (p.role === "admin" || p.role === "super_admin") return "/admin";
   if (p.role === "convoyeur") {
     if (p.convoyeurStatut === "valide" || p.convoyeurStatut === "actif") return "/convoyeur";
     return "/attente-validation";
   }
-  // client (par défaut)
+  // Org-based redirection (flotte / entreprise)
+  if (p.orgRole === "flotte_partenaire") return "/flotte";
+  if (p.orgRole === "client_b2b") return "/entreprise";
+  // Fallback B2B sans org rattachée
   if (p.typeClient === "b2b") return "/dashboard-pro";
   return "/dashboard-client";
 }
