@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentUserIdRef.current = userId;
 
       if (!userId) {
-        setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null });
+        setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null, orgRole: null });
         setIsLoading(false);
         return;
       }
