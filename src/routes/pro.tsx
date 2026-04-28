@@ -172,8 +172,8 @@ function ProPage() {
                 </button>
 
                 <div className="flex items-center justify-center gap-6 pt-2 text-cream/45 text-xs">
-                  <span className="inline-flex items-center gap-1.5"><Phone size={12} /> 07 82 45 61 81</span>
-                  <span className="inline-flex items-center gap-1.5"><Mail size={12} /> contact@transportsligneo.fr</span>
+                  <span className="inline-flex items-center gap-1.5"><Phone size={12} /><span>07 82 45 61 81</span></span>
+                  <span className="inline-flex items-center gap-1.5"><Mail size={12} /><span>contact@transportsligneo.fr</span></span>
                 </div>
               </form>
             )}
