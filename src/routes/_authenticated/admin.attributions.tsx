@@ -41,12 +41,7 @@ interface Trajet {
   statut: string;
 }
 
-interface Convoyeur {
-  id: string;
-  nom: string;
-  prenom: string;
-  statut: string;
-}
+interface GpsPoint {
 
 interface GpsPoint {
   latitude: number;
