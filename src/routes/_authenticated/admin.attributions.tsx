@@ -14,7 +14,6 @@ import {
   Button,
   IconButton,
   Select,
-  FormField,
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
@@ -124,7 +123,6 @@ function vueLabelFor(vueType: string): string {
 function AdminAttributions() {
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
-  const [convoyeursValides, setConvoyeursValides] = useState<Convoyeur[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
@@ -141,15 +139,11 @@ function AdminAttributions() {
   }, []);
 
   const fetchOptions = useCallback(async () => {
-    const [trajets, convoyeurs] = await Promise.all([
-      supabase
-        .from("trajets")
-        .select("id, depart, arrivee, date_trajet, statut")
-        .in("statut", ["en_attente", "attribue"]),
-      supabase.from("convoyeurs").select("id, nom, prenom, statut").eq("statut", "valide"),
-    ]);
-    if (trajets.data) setTrajetsDisponibles(trajets.data as Trajet[]);
-    if (convoyeurs.data) setConvoyeursValides(convoyeurs.data as Convoyeur[]);
+    const { data: trajets } = await supabase
+      .from("trajets")
+      .select("id, depart, arrivee, date_trajet, statut")
+      .in("statut", ["en_attente", "attribue"]);
+    if (trajets) setTrajetsDisponibles(trajets as Trajet[]);
   }, []);
 
   useEffect(() => {
