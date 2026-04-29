@@ -19,6 +19,8 @@ import {
   Select,
   demandeStatutTone,
 } from "@/components/admin/AdminUI";
+import { PriceBlock } from "@/components/admin/PriceBlock";
+import { quoteFromDemande } from "@/lib/pricing-engine";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
