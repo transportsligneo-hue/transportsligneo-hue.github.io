@@ -19,6 +19,8 @@ import {
   Select,
   demandeStatutTone,
 } from "@/components/admin/AdminUI";
+import { PriceBlock } from "@/components/admin/PriceBlock";
+import { quoteFromDemande } from "@/lib/pricing-engine";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
@@ -144,83 +146,94 @@ function AdminDemandes() {
             <TH>Client</TH>
             <TH className="hidden sm:table-cell">Trajet</TH>
             <TH className="hidden md:table-cell">Date</TH>
+            <TH className="hidden lg:table-cell">Prix estimé</TH>
             <TH>Statut</TH>
             <TH className="text-right">Actions</TH>
           </THead>
           <tbody>
-            {demandes.map((d) => (
-              <TR key={d.id}>
-                <TD>
-                  <p className="font-medium text-pro-text">
-                    {d.prenom} {d.nom}
-                  </p>
-                  <p className="text-pro-muted text-xs sm:hidden">
+            {demandes.map((d) => {
+              const q = quoteFromDemande(d);
+              return (
+                <TR key={d.id}>
+                  <TD>
+                    <p className="font-medium text-pro-text">
+                      {d.prenom} {d.nom}
+                    </p>
+                    <p className="text-pro-muted text-xs sm:hidden">
+                      {d.depart} → {d.arrivee}
+                    </p>
+                  </TD>
+                  <TD className="hidden sm:table-cell text-pro-text-soft">
                     {d.depart} → {d.arrivee}
-                  </p>
-                </TD>
-                <TD className="hidden sm:table-cell text-pro-text-soft">
-                  {d.depart} → {d.arrivee}
-                </TD>
-                <TD className="hidden md:table-cell text-pro-muted text-xs">
-                  {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                </TD>
-                <TD>
-                  <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
-                    {statutLabels[d.statut] ?? d.statut}
-                  </Badge>
-                </TD>
-                <TD>
-                  <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(d)} title="Voir" tone="primary">
-                      <Eye size={15} />
-                    </IconButton>
-                    {d.statut !== "convertie" && d.statut !== "terminee" && (
-                      <IconButton
-                        onClick={() => convertToTrajet(d)}
-                        disabled={converting === d.id}
-                        title="Convertir en trajet"
-                        tone="success"
-                      >
-                        <ArrowRightCircle size={15} />
+                  </TD>
+                  <TD className="hidden md:table-cell text-pro-muted text-xs">
+                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                  </TD>
+                  <TD className="hidden lg:table-cell">
+                    <PriceBlock quote={q} variant="compact" />
+                  </TD>
+                  <TD>
+                    <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
+                      {statutLabels[d.statut] ?? d.statut}
+                    </Badge>
+                  </TD>
+                  <TD>
+                    <div className="flex items-center justify-end gap-1">
+                      <IconButton onClick={() => setSelected(d)} title="Voir" tone="primary">
+                        <Eye size={15} />
                       </IconButton>
-                    )}
-                  </div>
-                </TD>
-              </TR>
-            ))}
+                      {d.statut !== "convertie" && d.statut !== "terminee" && (
+                        <IconButton
+                          onClick={() => convertToTrajet(d)}
+                          disabled={converting === d.id}
+                          title="Convertir en trajet"
+                          tone="success"
+                        >
+                          <ArrowRightCircle size={15} />
+                        </IconButton>
+                      )}
+                    </div>
+                  </TD>
+                </TR>
+              );
+            })}
           </tbody>
         </Table>
       )}
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Détail demande" size="md">
+      <Modal open={!!selected} onClose={() => setSelected(null)} title="Détail demande" size="lg">
         {selected && (
           <>
-            <Card padded={false} className="mb-4">
-              <div className="px-4 py-3 bg-pro-bg-soft/40 border-b border-pro-border flex items-center justify-between">
-                <p className="text-pro-text font-medium">
-                  {selected.prenom} {selected.nom}
-                </p>
-                <Badge tone={demandeStatutTone[selected.statut] ?? "neutral"}>
-                  {statutLabels[selected.statut] ?? selected.statut}
-                </Badge>
-              </div>
-              <div className="px-4 divide-y divide-pro-border">
-                <DetailRow label="Email" value={selected.email} />
-                <DetailRow label="Téléphone" value={selected.telephone} />
-                <DetailRow label="Départ" value={selected.depart} />
-                <DetailRow label="Arrivée" value={selected.arrivee} />
-                <DetailRow label="Date souhaitée" value={selected.date_souhaitee} />
-                <DetailRow label="Heure" value={selected.heure_souhaitee} />
-                <DetailRow
-                  label="Véhicule"
-                  value={[selected.marque, selected.modele].filter(Boolean).join(" ") || null}
-                />
-                <DetailRow label="Immatriculation" value={selected.immatriculation} />
-                <DetailRow label="Carburant" value={selected.carburant} />
-                <DetailRow label="Options" value={selected.options} />
-                <DetailRow label="Message" value={selected.message} />
-              </div>
-            </Card>
+            <div className="grid md:grid-cols-[1fr_280px] gap-4 mb-4">
+              <Card padded={false}>
+                <div className="px-4 py-3 bg-pro-bg-soft/40 border-b border-pro-border flex items-center justify-between">
+                  <p className="text-pro-text font-medium">
+                    {selected.prenom} {selected.nom}
+                  </p>
+                  <Badge tone={demandeStatutTone[selected.statut] ?? "neutral"}>
+                    {statutLabels[selected.statut] ?? selected.statut}
+                  </Badge>
+                </div>
+                <div className="px-4 divide-y divide-pro-border">
+                  <DetailRow label="Email" value={selected.email} />
+                  <DetailRow label="Téléphone" value={selected.telephone} />
+                  <DetailRow label="Départ" value={selected.depart} />
+                  <DetailRow label="Arrivée" value={selected.arrivee} />
+                  <DetailRow label="Date souhaitée" value={selected.date_souhaitee} />
+                  <DetailRow label="Heure" value={selected.heure_souhaitee} />
+                  <DetailRow
+                    label="Véhicule"
+                    value={[selected.marque, selected.modele].filter(Boolean).join(" ") || null}
+                  />
+                  <DetailRow label="Immatriculation" value={selected.immatriculation} />
+                  <DetailRow label="Carburant" value={selected.carburant} />
+                  <DetailRow label="Options" value={selected.options} />
+                  <DetailRow label="Message" value={selected.message} />
+                </div>
+              </Card>
+
+              <PriceBlock quote={quoteFromDemande(selected)} title="Estimation" />
+            </div>
 
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-medium text-pro-text-soft">Statut</span>
