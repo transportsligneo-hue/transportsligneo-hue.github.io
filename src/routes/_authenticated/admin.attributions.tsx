@@ -258,7 +258,7 @@ function AdminAttributions() {
                 setShowCreate(true);
               }}
             >
-              Attribuer
+              Attribuer un trajet
             </Button>
             <IconButton onClick={fetchAttributions} title="Actualiser">
               <RefreshCw size={15} />
@@ -346,40 +346,55 @@ function AdminAttributions() {
         </div>
       )}
 
-      {/* Create modal */}
-      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Attribuer un trajet" size="md">
-        <div className="space-y-3">
-          <FormField label="Trajet" required>
-            <Select value={selectedTrajet} onChange={(e) => setSelectedTrajet(e.target.value)}>
-              <option value="">Sélectionner un trajet</option>
-              {trajetsDisponibles.map((t) => (
-                <option key={t.id} value={t.id}>
+      {/* Étape 1 : choix du trajet à assigner */}
+      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Choisir un trajet à attribuer" size="md">
+        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          {trajetsDisponibles.length === 0 ? (
+            <p className="text-sm text-pro-muted text-center py-6">Aucun trajet en attente.</p>
+          ) : (
+            trajetsDisponibles.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setAssignTrajet(t);
+                  setShowCreate(false);
+                }}
+                className="w-full text-left p-3 rounded-xl border border-pro-border hover:border-pro-gold/40 hover:bg-pro-bg-soft/50 transition-all"
+              >
+                <p className="font-medium text-pro-text">
                   {t.depart} → {t.arrivee}
-                  {t.date_trajet ? ` (${new Date(t.date_trajet).toLocaleDateString("fr-FR")})` : ""}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <FormField label="Convoyeur" required>
-            <Select value={selectedConvoyeur} onChange={(e) => setSelectedConvoyeur(e.target.value)}>
-              <option value="">Sélectionner un convoyeur</option>
-              {convoyeursValides.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.prenom} {c.nom}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <Button
-            className="w-full"
-            onClick={createAttribution}
-            disabled={!selectedTrajet || !selectedConvoyeur}
-            icon={<Send size={14} />}
-          >
-            Attribuer
-          </Button>
+                </p>
+                <p className="text-xs text-pro-text-soft mt-0.5">
+                  {t.date_trajet
+                    ? new Date(t.date_trajet).toLocaleDateString("fr-FR")
+                    : "Date à définir"}{" "}
+                  · {statutLabels[t.statut] ?? t.statut}
+                </p>
+              </button>
+            ))
+          )}
         </div>
       </Modal>
+
+      {/* Étape 2 : assignation premium */}
+      {assignTrajet && (
+        <AssignDriverDialog
+          open={!!assignTrajet}
+          onClose={() => setAssignTrajet(null)}
+          trip={{
+            id: assignTrajet.id,
+            depart: assignTrajet.depart,
+            arrivee: assignTrajet.arrivee,
+            date: assignTrajet.date_trajet,
+            source: "trajet",
+          }}
+          onAssigned={(t) => {
+            toast.success(`Trajet assigné à ${t.label}`);
+            fetchAttributions();
+            fetchOptions();
+          }}
+        />
+      )}
 
       {/* GPS modal */}
       <Modal open={!!gpsView} onClose={() => setGpsView(null)} title="Suivi GPS en temps réel" size="lg">
