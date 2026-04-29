@@ -1,10 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Calendar, Clock, Euro, Building2, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, MapPin, Calendar, Clock, Search, UserPlus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import {
+  PageHeader,
+  Card,
+  Badge,
+  Table,
+  THead,
+  TH,
+  TR,
+  TD,
+  EmptyState,
+  IconButton,
+  Button,
+  Select,
+  SearchInput,
+} from "@/components/admin/AdminUI";
+import { PriceBlock } from "@/components/admin/PriceBlock";
+import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/b2b-dispatch")({
   component: AdminB2BDispatch,
@@ -20,10 +35,12 @@ interface Request {
   vehicle_type: string;
   urgency: string;
   estimated_price_ttc: number | null;
+  estimated_price_ht: number | null;
   payment_status: string;
   operational_status: string;
   created_at: string;
   company_id: string | null;
+  assigned_convoyeur_id: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -35,11 +52,20 @@ const STATUS_LABELS: Record<string, string> = {
   annule: "Annulé",
 };
 
-const PAYMENT_BADGES: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  paid: "bg-emerald-100 text-emerald-800",
-  failed: "bg-red-100 text-red-800",
-  refunded: "bg-slate-100 text-slate-700",
+const STATUS_TONES: Record<string, "info" | "warning" | "purple" | "success" | "danger" | "neutral"> = {
+  nouveau: "info",
+  a_dispatcher: "warning",
+  attribue: "purple",
+  en_cours: "purple",
+  termine: "success",
+  annule: "danger",
+};
+
+const PAYMENT_TONES: Record<string, "warning" | "success" | "danger" | "neutral"> = {
+  pending: "warning",
+  paid: "success",
+  failed: "danger",
+  refunded: "neutral",
 };
 
 function AdminB2BDispatch() {
@@ -47,6 +73,7 @@ function AdminB2BDispatch() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [assignTarget, setAssignTarget] = useState<Request | null>(null);
 
   async function load() {
     setLoading(true);
@@ -59,7 +86,9 @@ function AdminB2BDispatch() {
     setLoading(false);
   }
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   async function updateStatus(id: string, status: string) {
     const { error } = await supabase
@@ -88,87 +117,128 @@ function AdminB2BDispatch() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-pro-text">Dispatch B2B — Transports ponctuels</h1>
-        <p className="mt-1 text-sm text-pro-muted">
-          Pilotage opérationnel des demandes payées, à attribuer et en cours.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Dispatch B2B"
+        subtitle="Pilotage opérationnel des transports ponctuels payés"
+        actions={
+          <>
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="all">Tous statuts</option>
+              {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </Select>
+            <IconButton onClick={load} title="Actualiser">
+              <RefreshCw size={15} />
+            </IconButton>
+          </>
+        }
+      />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pro-muted" />
-          <Input
-            placeholder="Rechercher (n°, adresse)…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="sm:w-56"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous statuts</SelectItem>
-            {Object.entries(STATUS_LABELS).map(([v, l]) => (
-              <SelectItem key={v} value={v}>{l}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="mb-4">
+        <SearchInput value={search} onChange={setSearch} placeholder="Rechercher (n°, adresse)…" />
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-pro-accent" /></div>
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-pro-accent" />
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-pro-border bg-white p-10 text-center text-sm text-pro-muted">
-          Aucune demande trouvée.
-        </div>
+        <EmptyState icon={Search} title="Aucune demande" description="Aucune demande B2B ne correspond aux filtres." />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-pro-border bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-pro-bg-soft text-xs uppercase tracking-wide text-pro-muted">
-              <tr>
-                <th className="px-4 py-3 text-left">N°</th>
-                <th className="px-4 py-3 text-left">Trajet</th>
-                <th className="px-4 py-3 text-left">Date</th>
-                <th className="px-4 py-3 text-left">Prix</th>
-                <th className="px-4 py-3 text-left">Paiement</th>
-                <th className="px-4 py-3 text-left">Statut opé</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-pro-border">
-              {filtered.map((r) => (
-                <tr key={r.id} className="hover:bg-pro-bg-soft/40">
-                  <td className="px-4 py-3 font-mono text-xs">{r.numero}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-pro-muted" />{r.pickup_address}</div>
-                    <div className="flex items-center gap-1.5 text-pro-muted"><MapPin className="h-3 w-3" />{r.dropoff_address}</div>
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    <div className="flex items-center gap-1"><Calendar className="h-3 w-3" />{r.scheduled_date}</div>
-                    <div className="flex items-center gap-1 text-pro-muted"><Clock className="h-3 w-3" />{r.scheduled_time}</div>
-                  </td>
-                  <td className="px-4 py-3 font-medium">{r.estimated_price_ttc ? `${Number(r.estimated_price_ttc).toFixed(0)} €` : "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${PAYMENT_BADGES[r.payment_status] ?? "bg-slate-100"}`}>
-                      {r.payment_status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Select value={r.operational_status} onValueChange={(v) => updateStatus(r.id, v)}>
-                      <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                          <SelectItem key={v} value={v}>{l}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <THead>
+            <TH>N°</TH>
+            <TH>Trajet</TH>
+            <TH className="hidden md:table-cell">Date</TH>
+            <TH>Prix</TH>
+            <TH className="hidden lg:table-cell">Paiement</TH>
+            <TH>Statut</TH>
+            <TH className="text-right">Actions</TH>
+          </THead>
+          <tbody>
+            {filtered.map((r) => (
+              <TR key={r.id}>
+                <TD className="font-mono text-xs text-pro-text-soft">{r.numero}</TD>
+                <TD>
+                  <div className="flex items-center gap-1.5 text-sm text-pro-text">
+                    <MapPin size={12} className="text-pro-muted" />
+                    {r.pickup_address}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-pro-muted mt-0.5">
+                    <MapPin size={11} /> {r.dropoff_address}
+                  </div>
+                </TD>
+                <TD className="hidden md:table-cell text-xs">
+                  <div className="flex items-center gap-1 text-pro-text-soft">
+                    <Calendar size={11} /> {r.scheduled_date}
+                  </div>
+                  <div className="flex items-center gap-1 text-pro-muted mt-0.5">
+                    <Clock size={11} /> {r.scheduled_time}
+                  </div>
+                </TD>
+                <TD>
+                  <PriceBlock
+                    variant="compact"
+                    priceTtc={r.estimated_price_ttc != null ? Number(r.estimated_price_ttc) : null}
+                    priceHt={r.estimated_price_ht != null ? Number(r.estimated_price_ht) : null}
+                  />
+                </TD>
+                <TD className="hidden lg:table-cell">
+                  <Badge tone={PAYMENT_TONES[r.payment_status] ?? "neutral"}>
+                    {r.payment_status}
+                  </Badge>
+                </TD>
+                <TD>
+                  <Select
+                    value={r.operational_status}
+                    onChange={(e) => updateStatus(r.id, e.target.value)}
+                    className="text-xs py-1.5"
+                  >
+                    {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                      <option key={v} value={v}>
+                        {l}
+                      </option>
+                    ))}
+                  </Select>
+                </TD>
+                <TD>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      size="sm"
+                      variant={r.assigned_convoyeur_id ? "secondary" : "primary"}
+                      icon={<UserPlus size={13} />}
+                      onClick={() => setAssignTarget(r)}
+                    >
+                      {r.assigned_convoyeur_id ? "Réassigner" : "Assigner"}
+                    </Button>
+                  </div>
+                </TD>
+              </TR>
+            ))}
+          </tbody>
+        </Table>
+      )}
+
+      {assignTarget && (
+        <AssignDriverDialog
+          open={!!assignTarget}
+          onClose={() => setAssignTarget(null)}
+          trip={{
+            id: assignTarget.id,
+            depart: assignTarget.pickup_address,
+            arrivee: assignTarget.dropoff_address,
+            date: assignTarget.scheduled_date,
+            source: "b2b_request",
+          }}
+          onAssigned={(t) => {
+            toast.success(`Demande assignée à ${t.label}`);
+            void load();
+          }}
+        />
       )}
     </div>
   );

@@ -14,9 +14,10 @@ import {
   Button,
   IconButton,
   Select,
-  FormField,
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
+import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
@@ -37,13 +38,6 @@ interface Trajet {
   depart: string;
   arrivee: string;
   date_trajet: string | null;
-  statut: string;
-}
-
-interface Convoyeur {
-  id: string;
-  nom: string;
-  prenom: string;
   statut: string;
 }
 
@@ -122,10 +116,8 @@ function vueLabelFor(vueType: string): string {
 function AdminAttributions() {
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
-  const [convoyeursValides, setConvoyeursValides] = useState<Convoyeur[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedTrajet, setSelectedTrajet] = useState("");
-  const [selectedConvoyeur, setSelectedConvoyeur] = useState("");
+  const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
   const [photosView, setPhotosView] = useState<{ id: string; type: string; photos: InspectionPhoto[] } | null>(null);
   const [reportId, setReportId] = useState<string | null>(null);
@@ -140,15 +132,11 @@ function AdminAttributions() {
   }, []);
 
   const fetchOptions = useCallback(async () => {
-    const [trajets, convoyeurs] = await Promise.all([
-      supabase
-        .from("trajets")
-        .select("id, depart, arrivee, date_trajet, statut")
-        .in("statut", ["en_attente", "attribue"]),
-      supabase.from("convoyeurs").select("id, nom, prenom, statut").eq("statut", "valide"),
-    ]);
-    if (trajets.data) setTrajetsDisponibles(trajets.data as Trajet[]);
-    if (convoyeurs.data) setConvoyeursValides(convoyeurs.data as Convoyeur[]);
+    const { data: trajets } = await supabase
+      .from("trajets")
+      .select("id, depart, arrivee, date_trajet, statut")
+      .in("statut", ["en_attente", "attribue"]);
+    if (trajets) setTrajetsDisponibles(trajets as Trajet[]);
   }, []);
 
   useEffect(() => {
@@ -181,20 +169,6 @@ function AdminAttributions() {
     };
   }, [gpsView?.id]);
 
-  const createAttribution = async () => {
-    if (!selectedTrajet || !selectedConvoyeur) return;
-    await supabase.from("attributions").insert({
-      trajet_id: selectedTrajet,
-      convoyeur_id: selectedConvoyeur,
-      statut: "propose",
-    });
-    await supabase.from("trajets").update({ statut: "attribue" }).eq("id", selectedTrajet);
-    setShowCreate(false);
-    setSelectedTrajet("");
-    setSelectedConvoyeur("");
-    fetchAttributions();
-    fetchOptions();
-  };
 
   const updateStatut = async (id: string, statut: string) => {
     await supabase.from("attributions").update({ statut }).eq("id", id);
@@ -255,7 +229,7 @@ function AdminAttributions() {
                 setShowCreate(true);
               }}
             >
-              Attribuer
+              Attribuer un trajet
             </Button>
             <IconButton onClick={fetchAttributions} title="Actualiser">
               <RefreshCw size={15} />
@@ -343,40 +317,55 @@ function AdminAttributions() {
         </div>
       )}
 
-      {/* Create modal */}
-      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Attribuer un trajet" size="md">
-        <div className="space-y-3">
-          <FormField label="Trajet" required>
-            <Select value={selectedTrajet} onChange={(e) => setSelectedTrajet(e.target.value)}>
-              <option value="">Sélectionner un trajet</option>
-              {trajetsDisponibles.map((t) => (
-                <option key={t.id} value={t.id}>
+      {/* Étape 1 : choix du trajet à assigner */}
+      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Choisir un trajet à attribuer" size="md">
+        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          {trajetsDisponibles.length === 0 ? (
+            <p className="text-sm text-pro-muted text-center py-6">Aucun trajet en attente.</p>
+          ) : (
+            trajetsDisponibles.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setAssignTrajet(t);
+                  setShowCreate(false);
+                }}
+                className="w-full text-left p-3 rounded-xl border border-pro-border hover:border-pro-gold/40 hover:bg-pro-bg-soft/50 transition-all"
+              >
+                <p className="font-medium text-pro-text">
                   {t.depart} → {t.arrivee}
-                  {t.date_trajet ? ` (${new Date(t.date_trajet).toLocaleDateString("fr-FR")})` : ""}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <FormField label="Convoyeur" required>
-            <Select value={selectedConvoyeur} onChange={(e) => setSelectedConvoyeur(e.target.value)}>
-              <option value="">Sélectionner un convoyeur</option>
-              {convoyeursValides.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.prenom} {c.nom}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <Button
-            className="w-full"
-            onClick={createAttribution}
-            disabled={!selectedTrajet || !selectedConvoyeur}
-            icon={<Send size={14} />}
-          >
-            Attribuer
-          </Button>
+                </p>
+                <p className="text-xs text-pro-text-soft mt-0.5">
+                  {t.date_trajet
+                    ? new Date(t.date_trajet).toLocaleDateString("fr-FR")
+                    : "Date à définir"}{" "}
+                  · {statutLabels[t.statut] ?? t.statut}
+                </p>
+              </button>
+            ))
+          )}
         </div>
       </Modal>
+
+      {/* Étape 2 : assignation premium */}
+      {assignTrajet && (
+        <AssignDriverDialog
+          open={!!assignTrajet}
+          onClose={() => setAssignTrajet(null)}
+          trip={{
+            id: assignTrajet.id,
+            depart: assignTrajet.depart,
+            arrivee: assignTrajet.arrivee,
+            date: assignTrajet.date_trajet,
+            source: "trajet",
+          }}
+          onAssigned={(t) => {
+            toast.success(`Trajet assigné à ${t.label}`);
+            fetchAttributions();
+            fetchOptions();
+          }}
+        />
+      )}
 
       {/* GPS modal */}
       <Modal open={!!gpsView} onClose={() => setGpsView(null)} title="Suivi GPS en temps réel" size="lg">
