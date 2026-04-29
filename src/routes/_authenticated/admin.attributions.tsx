@@ -127,8 +127,6 @@ function AdminAttributions() {
   const [convoyeursValides, setConvoyeursValides] = useState<Convoyeur[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
-  const [selectedTrajet, setSelectedTrajet] = useState("");
-  const [selectedConvoyeur, setSelectedConvoyeur] = useState("");
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
   const [photosView, setPhotosView] = useState<{ id: string; type: string; photos: InspectionPhoto[] } | null>(null);
   const [reportId, setReportId] = useState<string | null>(null);
@@ -184,20 +182,6 @@ function AdminAttributions() {
     };
   }, [gpsView?.id]);
 
-  const createAttribution = async () => {
-    if (!selectedTrajet || !selectedConvoyeur) return;
-    await supabase.from("attributions").insert({
-      trajet_id: selectedTrajet,
-      convoyeur_id: selectedConvoyeur,
-      statut: "propose",
-    });
-    await supabase.from("trajets").update({ statut: "attribue" }).eq("id", selectedTrajet);
-    setShowCreate(false);
-    setSelectedTrajet("");
-    setSelectedConvoyeur("");
-    fetchAttributions();
-    fetchOptions();
-  };
 
   const updateStatut = async (id: string, statut: string) => {
     await supabase.from("attributions").update({ statut }).eq("id", id);
