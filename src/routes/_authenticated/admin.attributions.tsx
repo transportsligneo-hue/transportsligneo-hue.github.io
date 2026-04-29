@@ -42,8 +42,6 @@ interface Trajet {
 }
 
 interface GpsPoint {
-
-interface GpsPoint {
   latitude: number;
   longitude: number;
   recorded_at: string;
