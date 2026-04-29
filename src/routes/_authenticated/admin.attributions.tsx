@@ -17,6 +17,8 @@ import {
   FormField,
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
+import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
@@ -124,6 +126,7 @@ function AdminAttributions() {
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [convoyeursValides, setConvoyeursValides] = useState<Convoyeur[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
   const [selectedTrajet, setSelectedTrajet] = useState("");
   const [selectedConvoyeur, setSelectedConvoyeur] = useState("");
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
