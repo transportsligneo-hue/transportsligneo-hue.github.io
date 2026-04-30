@@ -221,7 +221,13 @@ export function InspectionSequentielle({
       .map((s, i) => ({ ...s, num: i + 1 }));
   }, [vehicleInfo.carburant]);
 
-  const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
+  // Clamp stepIndex pour éviter "X/Y" incohérent quand STEPS change (filtre EV)
+  const safeStepIndex = Math.min(Math.max(0, stepIndex), Math.max(0, STEPS.length - 1));
+  useEffect(() => {
+    if (stepIndex !== safeStepIndex) setStepIndex(safeStepIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [STEPS.length]);
+  const currentStep = STEPS[safeStepIndex];
   const currentPhotos = photos[currentStep.id] ?? [];
   const currentGuide = STEP_GUIDE_IMAGES[currentStep.variant];
 
