@@ -84,7 +84,9 @@ const ALL_STEPS: StepDef[] = [
   // ───── DOCUMENTS ─────
   { id: "pv_livraison",                section: "documents", label: "PV livraison / restitution", hint: "Prenez une photo du PV de livraison" },
   { id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Prenez une photo de la carte grise du véhicule" },
-  { id: "signature",                   section: "signature", label: "Signature obligatoire",    hint: "Signez pour clôturer et envoyer la mission à l'admin" },
+  // ───── DOUBLE SIGNATURE OBLIGATOIRE (départ ET arrivée) ─────
+  { id: "signature_convoyeur",         section: "signature", label: "Signature convoyeur",      hint: "Signez pour attester de l'état du véhicule à cette étape" },
+  { id: "signature_client",            section: "signature", label: "Signature client",         hint: "Faites signer le client (donneur d'ordre ou réceptionnaire) sur l'écran" },
 ];
 
 const SECTION_LABEL: Record<StepKind, string> = {
@@ -195,10 +197,10 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Filtre les étapes EV
+  // Filtre les étapes EV — la double signature (convoyeur + client) est OBLIGATOIRE au départ ET à l'arrivée
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(carburant);
-    return ALL_STEPS.filter(s => (s.conditional !== "ev_only" || ev) && (s.id !== "signature" || type === "arrivee"));
+    return ALL_STEPS.filter(s => s.conditional !== "ev_only" || ev);
   }, [carburant, type]);
 
   // Clamp stepIndex au cas où la liste filtrée raccourcit après coup (ex: type change, EV→non-EV)
@@ -210,7 +212,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   }, [STEPS.length]);
   const currentStep = STEPS[safeStepIndex];
   const currentPhoto = photos[currentStep.id];
-  const isSignatureStep = currentStep.id === "signature";
+  const isSignatureStep = currentStep.section === "signature";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
@@ -385,27 +387,38 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
 
   const uploadSignature = async (file: File) => {
     if (!inspectionId) return;
-    setPhotos(prev => ({ ...prev, signature: { status: "uploading" } }));
+    const stepId = currentStep.id; // "signature_convoyeur" | "signature_client"
+    const role: "convoyeur" | "client" = stepId === "signature_client" ? "client" : "convoyeur";
+    // Type document horodaté pour traçabilité (ex: pv_signature_depart_convoyeur)
+    const typeDoc = `pv_signature_${type}_${role}`;
+    setPhotos(prev => ({ ...prev, [stepId]: { status: "uploading" } }));
     try {
-      const path = `${attributionId}/${Date.now()}_signature_pv.png`;
+      const path = `${attributionId}/${type}_${role}_${Date.now()}.png`;
       const { error: uploadError } = await supabase.storage
         .from("mission-documents")
         .upload(path, file, { upsert: true, contentType: "image/png" });
       if (uploadError) throw uploadError;
       const { error: insertError } = await supabase.from("mission_documents").insert({
         attribution_id: attributionId,
-        type_document: "pv_signature",
-        nom_fichier: file.name,
+        type_document: typeDoc,
+        nom_fichier: `${typeDoc}_${Date.now()}.png`,
         url_fichier: path,
         uploaded_by: userId,
       });
       if (insertError) throw insertError;
+      // Trace dans l'historique d'étapes pour audit
+      await supabase.from("mission_etape_history").insert({
+        attribution_id: attributionId,
+        etape: typeDoc,
+        notes: role === "client" ? "Signature client recueillie" : "Signature convoyeur apposée",
+        created_by: userId,
+      }).then(({ error }) => { if (error) console.warn("etape history", error); });
       const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrl(path, 3600);
-      setPhotos(prev => ({ ...prev, signature: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
-      toast.success("Signature enregistrée");
+      setPhotos(prev => ({ ...prev, [stepId]: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
+      toast.success(role === "client" ? "Signature client enregistrée" : "Signature convoyeur enregistrée");
     } catch (err) {
       console.error("[EDL] signature failed", err);
-      setPhotos(prev => ({ ...prev, signature: { status: "error", error: "Signature non enregistrée" } }));
+      setPhotos(prev => ({ ...prev, [stepId]: { status: "error", error: "Signature non enregistrée" } }));
       toast.error("Impossible d'enregistrer la signature");
     }
   };
@@ -485,7 +498,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
             </div>
 
             {/* Sections */}
-            {(["exterieur", "interieur", "coffre", "tableau", "securite", "documents"] as StepKind[]).map(section => {
+            {(["exterieur", "interieur", "coffre", "tableau", "securite", "documents", "signature"] as StepKind[]).map(section => {
               const steps = STEPS.filter(s => s.section === section);
               if (steps.length === 0) return null;
               return (
@@ -776,11 +789,12 @@ function ExampleFrame({ stepId, label }: { stepId: string; label: string }) {
   const isWheel = stepId.includes("jante");
   const isRear = stepId.includes("arriere") || stepId === "coffre_ouvert";
   const isInterior = stepId.includes("siege") || stepId === "compteur";
-  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId === "signature";
+  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId.startsWith("signature");
+  const isSig = stepId.startsWith("signature");
   return (
     <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="relative flex aspect-[16/9] items-center justify-center bg-slate-100">
-        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={stepId === "signature"} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
+        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={isSig} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">Exemple</span>
       </div>
       <button type="button" className="w-full border-t border-slate-200 py-2 text-xs font-semibold text-blue-700 underline-offset-2 hover:underline">

@@ -35,6 +35,7 @@ import { RoleBadge } from "@/components/brand/LigneoBrand";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionReport } from "@/components/MissionReport";
+import { MissionTraceability } from "@/components/mission/MissionTraceability";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -611,32 +612,8 @@ function AdminMissionDetail() {
             <MissionDocuments attributionId={attribution.id} userId="" isAdmin />
           </Card>
 
-          {/* Signature */}
-          <Card>
-            <div className="flex items-center gap-2 mb-3">
-              <PenTool size={15} className="text-pro-accent" />
-              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
-                Signature client
-              </h3>
-            </div>
-            {signaturePhoto ? (
-              <div className="space-y-2">
-                <a href={signaturePhoto.url} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={signaturePhoto.url}
-                    alt="Signature client"
-                    className="bg-white max-h-48 rounded-md border border-pro-border"
-                  />
-                </a>
-                <p className="text-pro-muted text-xs">
-                  Signée le {new Date(signaturePhoto.at).toLocaleString("fr-FR")} ·{" "}
-                  {signaturePhoto.type === "depart" ? "Départ" : "Arrivée"}
-                </p>
-              </div>
-            ) : (
-              <p className="text-pro-muted text-sm">Aucune signature enregistrée.</p>
-            )}
-          </Card>
+          {/* Traçabilité double signature (départ + arrivée, convoyeur + client) */}
+          <MissionTraceability attributionId={attribution.id} variant="full" />
         </div>
 
         {/* Colonne droite : convoyeur + client + GPS + activité + admin */}
