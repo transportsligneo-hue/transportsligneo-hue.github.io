@@ -562,7 +562,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   return (
     <FullScreen>
       <Header
-        title={`${stepIndex + 1} / ${totalSteps}`}
+        title={`${safeStepIndex + 1} / ${totalSteps}`}
         subtitle={type === "depart" ? "État des lieux — Départ" : "État des lieux — Arrivée"}
         right={
           completedCount > 0 && (
@@ -661,7 +661,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
                   <Camera size={32} className="text-blue-600" />
                 </div>
                 <p className="text-slate-700 text-sm font-semibold">Touchez pour ouvrir l'appareil photo</p>
-                <p className="text-slate-400 text-xs">Étape {stepIndex + 1} sur {totalSteps}</p>
+                <p className="text-slate-400 text-xs">Étape {safeStepIndex + 1} sur {totalSteps}</p>
               </button>
             )}
           </div>
