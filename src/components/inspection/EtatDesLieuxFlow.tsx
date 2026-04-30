@@ -201,7 +201,14 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     return ALL_STEPS.filter(s => (s.conditional !== "ev_only" || ev) && (s.id !== "signature" || type === "arrivee"));
   }, [carburant, type]);
 
-  const currentStep = STEPS[Math.min(stepIndex, STEPS.length - 1)];
+  // Clamp stepIndex au cas où la liste filtrée raccourcit après coup (ex: type change, EV→non-EV)
+  // Empêche tout affichage du type "20/19".
+  const safeStepIndex = Math.min(Math.max(0, stepIndex), Math.max(0, STEPS.length - 1));
+  useEffect(() => {
+    if (stepIndex !== safeStepIndex) setStepIndex(safeStepIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [STEPS.length]);
+  const currentStep = STEPS[safeStepIndex];
   const currentPhoto = photos[currentStep.id];
   const isSignatureStep = currentStep.id === "signature";
   const totalSteps = STEPS.length;
