@@ -197,10 +197,10 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Filtre les étapes EV
+  // Filtre les étapes EV — la double signature (convoyeur + client) est OBLIGATOIRE au départ ET à l'arrivée
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(carburant);
-    return ALL_STEPS.filter(s => (s.conditional !== "ev_only" || ev) && (s.id !== "signature" || type === "arrivee"));
+    return ALL_STEPS.filter(s => s.conditional !== "ev_only" || ev);
   }, [carburant, type]);
 
   // Clamp stepIndex au cas où la liste filtrée raccourcit après coup (ex: type change, EV→non-EV)
@@ -212,7 +212,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   }, [STEPS.length]);
   const currentStep = STEPS[safeStepIndex];
   const currentPhoto = photos[currentStep.id];
-  const isSignatureStep = currentStep.id === "signature";
+  const isSignatureStep = currentStep.section === "signature";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
