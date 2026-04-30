@@ -35,6 +35,7 @@ import { RoleBadge } from "@/components/brand/LigneoBrand";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionReport } from "@/components/MissionReport";
+import { MissionTraceability } from "@/components/mission/MissionTraceability";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
