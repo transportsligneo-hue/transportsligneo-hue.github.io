@@ -789,11 +789,12 @@ function ExampleFrame({ stepId, label }: { stepId: string; label: string }) {
   const isWheel = stepId.includes("jante");
   const isRear = stepId.includes("arriere") || stepId === "coffre_ouvert";
   const isInterior = stepId.includes("siege") || stepId === "compteur";
-  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId === "signature";
+  const isDocument = stepId.includes("pv") || stepId.includes("carte") || stepId.startsWith("signature");
+  const isSig = stepId.startsWith("signature");
   return (
     <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="relative flex aspect-[16/9] items-center justify-center bg-slate-100">
-        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={stepId === "signature"} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
+        {isWheel ? <WheelExample /> : isDocument ? <DocumentExample signature={isSig} /> : isInterior ? <InteriorExample compteur={stepId === "compteur"} /> : <CarExample rear={isRear} openTrunk={stepId === "coffre_ouvert"} />}
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">Exemple</span>
       </div>
       <button type="button" className="w-full border-t border-slate-200 py-2 text-xs font-semibold text-blue-700 underline-offset-2 hover:underline">
