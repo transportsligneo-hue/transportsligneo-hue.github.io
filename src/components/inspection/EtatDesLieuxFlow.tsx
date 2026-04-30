@@ -84,7 +84,9 @@ const ALL_STEPS: StepDef[] = [
   // ───── DOCUMENTS ─────
   { id: "pv_livraison",                section: "documents", label: "PV livraison / restitution", hint: "Prenez une photo du PV de livraison" },
   { id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Prenez une photo de la carte grise du véhicule" },
-  { id: "signature",                   section: "signature", label: "Signature obligatoire",    hint: "Signez pour clôturer et envoyer la mission à l'admin" },
+  // ───── DOUBLE SIGNATURE OBLIGATOIRE (départ ET arrivée) ─────
+  { id: "signature_convoyeur",         section: "signature", label: "Signature convoyeur",      hint: "Signez pour attester de l'état du véhicule à cette étape" },
+  { id: "signature_client",            section: "signature", label: "Signature client",         hint: "Faites signer le client (donneur d'ordre ou réceptionnaire) sur l'écran" },
 ];
 
 const SECTION_LABEL: Record<StepKind, string> = {
