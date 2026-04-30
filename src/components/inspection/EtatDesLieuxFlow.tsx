@@ -347,8 +347,16 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   };
 
   const goNext = () => {
-    if (currentPhoto?.status !== "success") {
+    // On accepte d'avancer dès que la photo a été capturée (preview locale présente),
+    // même si l'upload est en cours. L'envoi continue en arrière-plan.
+    // Seules deux situations bloquent : aucune photo OU échec d'upload non réessayé.
+    const status = currentPhoto?.status;
+    if (!currentPhoto?.previewUrl) {
       toast.error("Prenez d'abord la photo de cette étape");
+      return;
+    }
+    if (status === "error") {
+      toast.error("Reprenez la photo : l'envoi a échoué");
       return;
     }
     if (stepIndex < STEPS.length - 1) {
