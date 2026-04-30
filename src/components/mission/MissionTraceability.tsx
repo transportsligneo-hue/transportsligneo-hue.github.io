@@ -1,0 +1,180 @@
+/**
+ * MissionTraceability — Affiche le bloc de double signature (départ + arrivée)
+ * pour Admin / Client / B2B / Flotte. Lecture seule.
+ *
+ * Recherche dans `mission_documents` les documents :
+ *   - pv_signature_depart_convoyeur
+ *   - pv_signature_depart_client
+ *   - pv_signature_arrivee_convoyeur
+ *   - pv_signature_arrivee_client
+ *
+ * Affiche pour chaque slot : statut (signé / manquant), horodatage, miniature
+ * de la signature (URL signée 1h depuis le bucket `mission-documents`).
+ */
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Check, AlertCircle, ShieldCheck, Loader2 } from "lucide-react";
+
+interface Props {
+  attributionId: string;
+  /** Affichage compact (1 ligne par slot) ou complet (cartes avec image) */
+  variant?: "full" | "compact";
+}
+
+type SlotKey =
+  | "pv_signature_depart_convoyeur"
+  | "pv_signature_depart_client"
+  | "pv_signature_arrivee_convoyeur"
+  | "pv_signature_arrivee_client";
+
+interface SlotData {
+  signedAt?: string;
+  url?: string;
+}
+
+const SLOT_LABEL: Record<SlotKey, { phase: "Départ" | "Arrivée"; role: "Convoyeur" | "Client" }> = {
+  pv_signature_depart_convoyeur: { phase: "Départ", role: "Convoyeur" },
+  pv_signature_depart_client: { phase: "Départ", role: "Client" },
+  pv_signature_arrivee_convoyeur: { phase: "Arrivée", role: "Convoyeur" },
+  pv_signature_arrivee_client: { phase: "Arrivée", role: "Client" },
+};
+
+const SLOTS: SlotKey[] = [
+  "pv_signature_depart_convoyeur",
+  "pv_signature_depart_client",
+  "pv_signature_arrivee_convoyeur",
+  "pv_signature_arrivee_client",
+];
+
+export function MissionTraceability({ attributionId, variant = "full" }: Props) {
+  const [slots, setSlots] = useState<Record<SlotKey, SlotData>>({} as Record<SlotKey, SlotData>);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("mission_documents")
+        .select("type_document, url_fichier, created_at")
+        .eq("attribution_id", attributionId)
+        .in("type_document", SLOTS)
+        .order("created_at", { ascending: false });
+      if (error || !data || cancelled) {
+        setLoading(false);
+        return;
+      }
+      const next: Record<string, SlotData> = {};
+      for (const row of data) {
+        if (next[row.type_document]) continue; // garde la plus récente
+        const { data: signed } = await supabase.storage
+          .from("mission-documents")
+          .createSignedUrl(row.url_fichier, 3600);
+        next[row.type_document] = { signedAt: row.created_at, url: signed?.signedUrl };
+      }
+      if (!cancelled) {
+        setSlots(next as Record<SlotKey, SlotData>);
+        setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
+
+  const departComplete = !!slots.pv_signature_depart_convoyeur && !!slots.pv_signature_depart_client;
+  const arriveeComplete = !!slots.pv_signature_arrivee_convoyeur && !!slots.pv_signature_arrivee_client;
+  const allComplete = departComplete && arriveeComplete;
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-2 text-sm text-slate-500">
+        <Loader2 className="animate-spin" size={16} /> Chargement de la traçabilité…
+      </div>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge label="Départ" ok={departComplete} />
+        <Badge label="Arrivée" ok={arriveeComplete} />
+        {allComplete && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <ShieldCheck size={12} /> Mission tracée
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Traçabilité signatures</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+          allComplete ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+        }`}>
+          {allComplete ? <ShieldCheck size={12} /> : <AlertCircle size={12} />}
+          {allComplete ? "Complet" : "Incomplet"}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {SLOTS.map(key => {
+          const slot = slots[key];
+          const meta = SLOT_LABEL[key];
+          const ok = !!slot;
+          return (
+            <div
+              key={key}
+              className={`rounded-xl border p-3 ${ok ? "border-emerald-200 bg-emerald-50/30" : "border-dashed border-slate-300 bg-slate-50"}`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500">{meta.phase}</p>
+                  <p className="text-sm font-semibold text-slate-900">{meta.role}</p>
+                </div>
+                {ok ? (
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">
+                    <Check size={14} strokeWidth={3} />
+                  </span>
+                ) : (
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                    <AlertCircle size={12} />
+                  </span>
+                )}
+              </div>
+              {ok ? (
+                <>
+                  {slot.url && (
+                    <div className="rounded-lg bg-white border border-slate-200 p-2 mb-2">
+                      <img src={slot.url} alt={`Signature ${meta.role} ${meta.phase}`} className="h-16 w-full object-contain" />
+                    </div>
+                  )}
+                  <p className="text-[11px] text-slate-500">
+                    Signé le {slot.signedAt ? new Date(slot.signedAt).toLocaleString("fr-FR") : "—"}
+                  </p>
+                </>
+              ) : (
+                <p className="text-[11px] text-slate-500">En attente de signature</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Badge({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+      ok ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-slate-100 text-slate-500 ring-1 ring-slate-200"
+    }`}>
+      {ok ? <Check size={11} /> : <AlertCircle size={11} />}
+      {label} {ok ? "✓" : "—"}
+    </span>
+  );
+}
