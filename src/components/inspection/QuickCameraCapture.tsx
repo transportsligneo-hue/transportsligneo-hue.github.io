@@ -105,6 +105,9 @@ export function QuickCameraCapture({
   };
 
   const validate = () => {
+    // On valide dès qu'une photo est prise. Si l'upload est encore en cours,
+    // on transmet quand même le futur path (calculé à l'upload) — la photo a déjà
+    // été enregistrée en BDD côté handleFile dès la fin réelle de l'upload.
     if (savedPath) onCaptured(savedPath);
     onClose();
   };
