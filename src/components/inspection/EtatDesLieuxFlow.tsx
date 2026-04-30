@@ -387,27 +387,38 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
 
   const uploadSignature = async (file: File) => {
     if (!inspectionId) return;
-    setPhotos(prev => ({ ...prev, signature: { status: "uploading" } }));
+    const stepId = currentStep.id; // "signature_convoyeur" | "signature_client"
+    const role: "convoyeur" | "client" = stepId === "signature_client" ? "client" : "convoyeur";
+    // Type document horodaté pour traçabilité (ex: pv_signature_depart_convoyeur)
+    const typeDoc = `pv_signature_${type}_${role}`;
+    setPhotos(prev => ({ ...prev, [stepId]: { status: "uploading" } }));
     try {
-      const path = `${attributionId}/${Date.now()}_signature_pv.png`;
+      const path = `${attributionId}/${type}_${role}_${Date.now()}.png`;
       const { error: uploadError } = await supabase.storage
         .from("mission-documents")
         .upload(path, file, { upsert: true, contentType: "image/png" });
       if (uploadError) throw uploadError;
       const { error: insertError } = await supabase.from("mission_documents").insert({
         attribution_id: attributionId,
-        type_document: "pv_signature",
-        nom_fichier: file.name,
+        type_document: typeDoc,
+        nom_fichier: `${typeDoc}_${Date.now()}.png`,
         url_fichier: path,
         uploaded_by: userId,
       });
       if (insertError) throw insertError;
+      // Trace dans l'historique d'étapes pour audit
+      await supabase.from("mission_etape_history").insert({
+        attribution_id: attributionId,
+        etape: typeDoc,
+        notes: role === "client" ? "Signature client recueillie" : "Signature convoyeur apposée",
+        created_by: userId,
+      }).then(({ error }) => { if (error) console.warn("etape history", error); });
       const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrl(path, 3600);
-      setPhotos(prev => ({ ...prev, signature: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
-      toast.success("Signature enregistrée");
+      setPhotos(prev => ({ ...prev, [stepId]: { storagePath: path, previewUrl: signed?.signedUrl, status: "success" } }));
+      toast.success(role === "client" ? "Signature client enregistrée" : "Signature convoyeur enregistrée");
     } catch (err) {
       console.error("[EDL] signature failed", err);
-      setPhotos(prev => ({ ...prev, signature: { status: "error", error: "Signature non enregistrée" } }));
+      setPhotos(prev => ({ ...prev, [stepId]: { status: "error", error: "Signature non enregistrée" } }));
       toast.error("Impossible d'enregistrer la signature");
     }
   };
