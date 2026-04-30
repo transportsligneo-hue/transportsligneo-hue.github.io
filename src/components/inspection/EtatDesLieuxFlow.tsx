@@ -498,7 +498,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
             </div>
 
             {/* Sections */}
-            {(["exterieur", "interieur", "coffre", "tableau", "securite", "documents"] as StepKind[]).map(section => {
+            {(["exterieur", "interieur", "coffre", "tableau", "securite", "documents", "signature"] as StepKind[]).map(section => {
               const steps = STEPS.filter(s => s.section === section);
               if (steps.length === 0) return null;
               return (
