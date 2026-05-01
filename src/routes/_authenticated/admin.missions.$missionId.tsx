@@ -36,6 +36,7 @@ import { GpsMapView } from "@/components/GpsMapView";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
+import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -614,6 +615,14 @@ function AdminMissionDetail() {
 
           {/* Traçabilité double signature (départ + arrivée, convoyeur + client) */}
           <MissionTraceability attributionId={attribution.id} variant="full" />
+
+          {/* Contrôle live admin — actions temps réel */}
+          <AdminLiveControl
+            attributionId={attribution.id}
+            currentStatut={attribution.statut}
+            currentEtape={attribution.etape_courante}
+            onChange={fetchAll}
+          />
         </div>
 
         {/* Colonne droite : convoyeur + client + GPS + activité + admin */}
