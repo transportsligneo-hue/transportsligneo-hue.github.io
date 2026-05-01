@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2 } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
@@ -36,6 +37,7 @@ function MissionDetail() {
   const { user } = useAuth();
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attributionId, setAttributionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -46,10 +48,32 @@ function MissionDetail() {
       .eq("id", missionId)
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) {
-          setMission(data as Mission | null);
-          setLoading(false);
+      .then(async ({ data }) => {
+        if (cancelled) return;
+        const m = data as Mission | null;
+        setMission(m);
+        setLoading(false);
+
+        // Résolution best-effort de l'attribution liée (via trajet correspondant)
+        if (m) {
+          const { data: trajets } = await supabase
+            .from("trajets")
+            .select("id")
+            .eq("depart", m.ville_depart)
+            .eq("arrivee", m.ville_arrivee)
+            .eq("date_trajet", m.date_prise_en_charge)
+            .limit(1);
+          const trajetId = trajets?.[0]?.id;
+          if (trajetId) {
+            const { data: attr } = await supabase
+              .from("attributions")
+              .select("id")
+              .eq("trajet_id", trajetId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (!cancelled && attr) setAttributionId(attr.id);
+          }
         }
       });
     return () => { cancelled = true; };
