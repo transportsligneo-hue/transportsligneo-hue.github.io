@@ -19,11 +19,11 @@ const QUICK_ETAPES = [
   { key: "livraison", label: "Livraison", icon: CheckCircle2 },
 ];
 
-const QUICK_STATUTS = [
-  { key: "en_cours", label: "Démarrer", icon: PlayCircle, tone: "primary" as const },
-  { key: "en_attente_validation", label: "À valider", icon: PauseCircle, tone: "primary" as const },
-  { key: "termine", label: "Terminer", icon: CheckCircle2, tone: "primary" as const },
-  { key: "annule", label: "Annuler", icon: XCircle, tone: "danger" as const },
+const QUICK_STATUTS: { key: string; label: string; icon: typeof PlayCircle; danger?: boolean }[] = [
+  { key: "en_cours", label: "Démarrer", icon: PlayCircle },
+  { key: "en_attente_validation", label: "À valider", icon: PauseCircle },
+  { key: "termine", label: "Terminer", icon: CheckCircle2 },
+  { key: "annule", label: "Annuler", icon: XCircle, danger: true },
 ];
 
 /**
@@ -98,19 +98,22 @@ export function AdminLiveControl({ attributionId, currentStatut, currentEtape, o
         <p className="text-[11px] uppercase tracking-wide text-pro-muted mb-2">Changer le statut</p>
         <div className="flex flex-wrap gap-2">
           {QUICK_STATUTS.map((s) => (
-            <Button
+            <button
               key={s.key}
-              tone={s.tone}
-              icon={<s.icon size={13} />}
               onClick={() => setStatut(s.key)}
               disabled={busy === s.key || currentStatut === s.key}
-              className="text-xs"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
+                s.danger
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-pro-accent text-white hover:opacity-90"
+              }`}
             >
+              <s.icon size={13} />
               {s.label}
-            </Button>
+            </button>
           ))}
           {currentStatut === "termine" && (
-            <Button tone="primary" icon={<RotateCcw size={13} />} onClick={reopenMission} disabled={busy === "reopen"} className="text-xs">
+            <Button icon={<RotateCcw size={13} />} onClick={reopenMission} disabled={busy === "reopen"} className="text-xs">
               Ré-ouvrir
             </Button>
           )}
