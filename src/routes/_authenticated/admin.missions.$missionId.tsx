@@ -258,26 +258,29 @@ function AdminMissionDetail() {
     fetchAll();
   }, [fetchAll]);
 
-  // Realtime GPS
+  // Realtime GPS + étapes + statut attribution
   useEffect(() => {
     const channel = supabase
       .channel(`mission-detail-${missionId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "mission_locations" },
+        { event: "INSERT", schema: "public", table: "mission_locations", filter: `attribution_id=eq.${missionId}` },
         (payload) => {
-          if (payload.new.attribution_id === missionId) {
-            setGpsPoints((prev) => [...prev, payload.new as unknown as GpsPoint]);
-          }
+          setGpsPoints((prev) => [...prev, payload.new as unknown as GpsPoint]);
         },
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "mission_etape_history" },
+        { event: "INSERT", schema: "public", table: "mission_etape_history", filter: `attribution_id=eq.${missionId}` },
         (payload) => {
-          if (payload.new.attribution_id === missionId) {
-            setHistory((prev) => [payload.new as unknown as EtapeHistoryRow, ...prev].slice(0, 20));
-          }
+          setHistory((prev) => [payload.new as unknown as EtapeHistoryRow, ...prev].slice(0, 20));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "attributions", filter: `id=eq.${missionId}` },
+        (payload) => {
+          setAttribution((prev) => prev ? { ...prev, ...(payload.new as Partial<AttributionFull>) } : prev);
         },
       )
       .subscribe();
