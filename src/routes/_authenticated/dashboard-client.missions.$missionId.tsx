@@ -121,6 +121,9 @@ function MissionDetail() {
         </div>
       </div>
 
+      {/* Suivi temps réel — apparaît dès qu'une attribution est rattachée */}
+      {attributionId && <MissionLiveTracker attributionId={attributionId} />}
+
       {/* Vehicule */}
       <Section title="Véhicule" icon={<Car size={16} />}>
         <Field label="Marque" value={mission.marque} />
