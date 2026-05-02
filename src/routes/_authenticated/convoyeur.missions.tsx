@@ -100,13 +100,13 @@ function ConvoyeurMissions() {
 
     const { data } = await supabase
       .from("attributions")
-      .select("id, statut, trajet_id, etape_courante" as never)
+      .select("id, statut, trajet_id, etape_courante, numero_mission" as never)
       .eq("convoyeur_id", conv.id)
       .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
 
     if (data) {
       const enriched: Mission[] = [];
-      for (const attr of data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null }>) {
+      for (const attr of data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>) {
         const { data: trajet } = await supabase
           .from("trajets")
           .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone")
