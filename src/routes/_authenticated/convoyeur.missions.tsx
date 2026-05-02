@@ -13,6 +13,7 @@ import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
+import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
