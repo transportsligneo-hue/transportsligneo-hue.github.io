@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   MapPin, Loader2, FileText, Navigation, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter, Phone,
-  Car, Calendar, Check, X,
+  Check, X,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EtatDesLieuxFlow } from "@/components/inspection/EtatDesLieuxFlow";
