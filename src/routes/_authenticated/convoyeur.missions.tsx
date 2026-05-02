@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
 
 interface Mission extends MissionCardData {
   trajet_id: string;
+  numero_mission?: string | null;
 }
 
 interface GpsPoint {
