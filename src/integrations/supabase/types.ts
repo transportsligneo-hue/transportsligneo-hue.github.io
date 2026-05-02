@@ -70,6 +70,7 @@ export type Database = {
           created_at: string
           etape_courante: string | null
           id: string
+          numero_mission: string | null
           statut: string
           trajet_id: string
           updated_at: string
@@ -79,6 +80,7 @@ export type Database = {
           created_at?: string
           etape_courante?: string | null
           id?: string
+          numero_mission?: string | null
           statut?: string
           trajet_id: string
           updated_at?: string
@@ -88,6 +90,7 @@ export type Database = {
           created_at?: string
           etape_courante?: string | null
           id?: string
+          numero_mission?: string | null
           statut?: string
           trajet_id?: string
           updated_at?: string
@@ -1124,6 +1127,30 @@ export type Database = {
           },
         ]
       }
+      mission_sequences: {
+        Row: {
+          current_value: number
+          id: string
+          prefix: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          current_value?: number
+          id?: string
+          prefix: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          current_value?: number
+          id?: string
+          prefix?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       missions: {
         Row: {
           carburant: string | null
@@ -1685,6 +1712,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      next_mission_number: {
+        Args: { _prefix: string; _year?: number }
+        Returns: string
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
