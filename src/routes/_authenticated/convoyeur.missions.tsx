@@ -241,92 +241,110 @@ function ConvoyeurMissions() {
     const isActive = openMission.id === activeMissionId;
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
+    // === Mappage 7 étapes affichage (image fournie) ===
+    // 1 Enlèvement · 2 Inspection · 3 Transport · 4 Livraison · 5 Inspection arrivée · 6 Validation · 7 Terminée
+    const etape = openMission.etape_courante;
+    const inspDepartOk = !!openMission.inspectionDepart;
+    const inspArriveeOk = !!openMission.inspectionArrivee;
+    const isTermine = ["termine", "validee"].includes(openMission.statut);
+    const isPendingValidation = openMission.statut === "en_attente_validation";
+
+    let currentIdx = 1;
+    if (etape === "acceptee" || openMission.statut === "accepte") currentIdx = 1;
+    else if (etape === "en_route" || etape === "sur_place") currentIdx = 1;
+    else if (etape === "vehicule_recupere") currentIdx = 2;
+    else if (etape === "edl_depart_fait" || (inspDepartOk && !inspArriveeOk)) currentIdx = 3;
+    else if (etape === "en_livraison") currentIdx = 3;
+    else if (etape === "arrive_destination") currentIdx = 4;
+    else if (etape === "edl_arrivee_fait" || inspArriveeOk) currentIdx = 5;
+    else if (isPendingValidation) currentIdx = 6;
+    else if (isTermine) currentIdx = 7;
+
+    const stepLabels = [
+      { label: "Enlèvement" },
+      { label: "Inspection" },
+      { label: "Transport" },
+      { label: "Livraison" },
+      { label: "Inspection\narrivée" },
+      { label: "Validation" },
+      { label: "Terminée" },
+    ];
+    const timelineSteps: TimelineStep[] = stepLabels.map((s, i) => {
+      const idx = i + 1;
+      const state: TimelineStep["state"] = idx < currentIdx ? "done" : idx === currentIdx ? "current" : "todo";
+      return {
+        index: idx,
+        label: s.label,
+        state,
+        sub: state === "done" ? "OK" : state === "current" ? "En cours" : "À venir",
+      };
+    });
+
+    const currentStepLabel = stepLabels[Math.min(currentIdx, stepLabels.length) - 1].label.replace("\n", " ");
+    const statutLabel = isTermine ? "Mission terminée"
+      : isPendingValidation ? "En attente de validation"
+      : isActive ? "Mission en cours"
+      : openMission.statut === "propose" ? "Mission proposée"
+      : "Mission planifiée";
+
+    // Split ville/adresse depuis le champ texte (best-effort)
+    const splitAddr = (full?: string | null) => {
+      if (!full) return { ville: "—", adresse: "" };
+      const parts = full.split(",").map(p => p.trim()).filter(Boolean);
+      if (parts.length >= 2) return { ville: parts[parts.length - 1], adresse: parts.slice(0, -1).join(", ") };
+      return { ville: full, adresse: "" };
+    };
+    const dep = splitAddr(t?.depart);
+    const arr = splitAddr(t?.arrivee);
+
     return (
       <>
       {inspectionOverlay}
       <div className="space-y-4 pb-32">
-        {/* Sticky back bar — toujours accessible au pouce en haut */}
-        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-pro-bg/95 backdrop-blur-sm border-b border-pro-border/60">
+        {/* Sticky back bar */}
+        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-white/95 backdrop-blur-sm border-b border-pro-border/60">
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => setOpenMissionId(null)}
-              className="flex items-center gap-1.5 text-pro-text hover:text-pro-accent text-sm font-medium py-1.5 px-2 -ml-2 rounded-md hover:bg-white/60 active:scale-95 transition"
+              className="flex items-center gap-1.5 text-pro-text hover:text-[var(--gold)] text-sm font-medium py-1.5 px-2 -ml-2 rounded-md hover:bg-pro-bg-soft active:scale-95 transition"
             >
               <ArrowLeft size={18} /> Missions
             </button>
             {isActive && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0b1026] bg-[var(--gold)]/20 border border-[var(--gold)]/40 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] animate-pulse" />
                 EN COURS
-                {getDuration() && <span className="text-emerald-600 font-medium">· {getDuration()}</span>}
+                {getDuration() && <span>· {getDuration()}</span>}
               </span>
             )}
           </div>
         </div>
 
-        {/* Trajet card */}
-        <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="flex flex-col items-center gap-1 pt-1.5">
-              <div className="w-3 h-3 rounded-full border-2 border-emerald-500 bg-emerald-100" />
-              <div className="w-0.5 h-10 bg-pro-border" />
-              <div className="w-3 h-3 rounded-full border-2 border-blue-500 bg-blue-100" />
-            </div>
-            <div className="flex-1 min-w-0 space-y-3">
-              <div>
-                <p className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">Départ</p>
-                <p className="text-pro-text text-sm">{t?.depart}</p>
-              </div>
-              <div>
-                <p className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">Arrivée</p>
-                <p className="text-pro-text text-sm">{t?.arrivee}</p>
-              </div>
-            </div>
-          </div>
-
-          {(t?.marque || t?.immatriculation) && (
-            <div className="mt-3 pt-3 border-t border-pro-border flex items-center gap-2 text-xs text-pro-text-soft">
-              <Car size={12} />
-              {[t.marque, t.modele, t.immatriculation].filter(Boolean).join(" · ")}
-            </div>
-          )}
-
-          {t?.date_trajet && (
-            <div className="mt-1 flex items-center gap-2 text-xs text-pro-text-soft">
-              <Calendar size={12} />
-              {new Date(t.date_trajet).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-              {t.heure_trajet && ` à ${t.heure_trajet}`}
-            </div>
-          )}
-
-          {typeConvoyeur === "independant" && t?.tarif_convoyeur != null && (
-            <div className="mt-3 pt-3 border-t border-pro-border flex items-center justify-between">
-              <span className="text-pro-muted text-xs uppercase tracking-wider">Tarif mission</span>
-              <span className="text-emerald-700 font-bold text-base">{t.tarif_convoyeur} €</span>
-            </div>
-          )}
-        </div>
-
-        {/* Quick actions */}
-        <div className="hidden lg:grid grid-cols-2 gap-2">
-          <a
-            href={t?.depart ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.depart)}` : "#"}
-            target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 active:scale-[0.98] transition"
-          >
-            <Navigation size={16} /> Ouvrir GPS
-          </a>
-          <a
-            href={t?.client_telephone ? `tel:${t.client_telephone}` : "#"}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${
-              t?.client_telephone
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98]"
-                : "bg-pro-bg-soft text-pro-muted pointer-events-none"
-            }`}
-          >
-            <Phone size={16} /> Appeler client
-          </a>
-        </div>
+        {/* HERO PREMIUM */}
+        <PremiumMissionHero
+          data={{
+            numeroMission: openMission.numero_mission ?? null,
+            statutLabel,
+            isLive: isActive,
+            depart: { ville: dep.ville, adresse: dep.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
+            arrivee: { ville: arr.ville, adresse: arr.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
+            vehicule: {
+              marque: t?.marque ?? undefined,
+              modele: t?.modele ?? undefined,
+              immatriculation: t?.immatriculation ?? undefined,
+            },
+            contactDepartTel: t?.client_telephone ?? null,
+            contactArriveeTel: t?.client_telephone ?? null,
+            gpsTarget: t?.depart ?? null,
+          }}
+          steps={timelineSteps}
+          currentStepIndex={Math.min(currentIdx, 7)}
+          totalSteps={7}
+          currentStepLabel={currentStepLabel}
+          onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
+          onOpenDocuments={() => setExpandedDocs(true)}
+          onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
+        />
 
         {/* Live GPS */}
         {isActive && (
