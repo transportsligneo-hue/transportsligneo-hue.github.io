@@ -126,6 +126,7 @@ function ConvoyeurMissions() {
           statut: attr.statut,
           etape_courante: attr.etape_courante,
           trajet_id: attr.trajet_id,
+          numero_mission: attr.numero_mission,
           trajet,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
