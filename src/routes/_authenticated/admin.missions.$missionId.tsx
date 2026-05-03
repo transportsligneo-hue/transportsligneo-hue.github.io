@@ -37,6 +37,7 @@ import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
+import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -626,6 +627,9 @@ function AdminMissionDetail() {
             currentEtape={attribution.etape_courante}
             onChange={fetchAll}
           />
+
+          {/* Surcouche admin : bypass / désactivation des étapes obligatoires */}
+          <AdminStepOverridesPanel attributionId={attribution.id} />
         </div>
 
         {/* Colonne droite : convoyeur + client + GPS + activité + admin */}
