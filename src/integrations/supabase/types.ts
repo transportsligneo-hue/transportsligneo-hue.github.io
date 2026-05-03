@@ -1127,6 +1127,42 @@ export type Database = {
           },
         ]
       }
+      mission_selfies: {
+        Row: {
+          accuracy: number | null
+          attribution_id: string
+          convoyeur_user_id: string
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          storage_path: string
+          taken_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          attribution_id: string
+          convoyeur_user_id: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          storage_path: string
+          taken_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          attribution_id?: string
+          convoyeur_user_id?: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          storage_path?: string
+          taken_at?: string
+        }
+        Relationships: []
+      }
       mission_sequences: {
         Row: {
           current_value: number
@@ -1148,6 +1184,75 @@ export type Database = {
           prefix?: string
           updated_at?: string
           year?: number
+        }
+        Relationships: []
+      }
+      mission_signatures: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          id: string
+          kind: string
+          latitude: number | null
+          longitude: number | null
+          signature_data: string
+          signed_at: string
+          signed_by_user_id: string | null
+          signer_name: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          latitude?: number | null
+          longitude?: number | null
+          signature_data: string
+          signed_at?: string
+          signed_by_user_id?: string | null
+          signer_name: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          latitude?: number | null
+          longitude?: number | null
+          signature_data?: string
+          signed_at?: string
+          signed_by_user_id?: string | null
+          signer_name?: string
+        }
+        Relationships: []
+      }
+      mission_step_overrides: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          override_mode: string
+          reason: string | null
+          step_key: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          override_mode?: string
+          reason?: string | null
+          step_key: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          override_mode?: string
+          reason?: string | null
+          step_key?: string
         }
         Relationships: []
       }
