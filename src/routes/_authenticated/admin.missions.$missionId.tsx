@@ -627,6 +627,9 @@ function AdminMissionDetail() {
             currentEtape={attribution.etape_courante}
             onChange={fetchAll}
           />
+
+          {/* Surcouche admin : bypass / désactivation des étapes obligatoires */}
+          <AdminStepOverridesPanel attributionId={attribution.id} />
         </div>
 
         {/* Colonne droite : convoyeur + client + GPS + activité + admin */}
