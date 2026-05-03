@@ -404,6 +404,18 @@ function ConvoyeurMissions() {
           </div>
         )}
 
+        {/* Validations obligatoires : selfie + double signatures */}
+        {openMission.statut !== "propose" && user && (
+          <MissionGatesPanel
+            attributionId={openMission.id}
+            userId={user.id}
+            driverName={`${user.user_metadata?.prenom ?? ""} ${user.user_metadata?.nom ?? ""}`.trim() || (user.email ?? "Convoyeur")}
+            clientName={openMission.trajet?.client_nom ?? undefined}
+            showEndSignatures={!!openMission.inspectionArrivee || ["arrive_destination","edl_arrivee_fait","en_attente_validation","validee","termine"].includes(openMission.etape_courante ?? openMission.statut)}
+            onChange={fetchMissions}
+          />
+        )}
+
         {/* Workflow étape par étape */}
         {openMission.statut !== "propose" && openMission.statut !== "termine" && user && (
           <MissionWorkflow
