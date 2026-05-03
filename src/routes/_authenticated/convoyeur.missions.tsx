@@ -14,6 +14,7 @@ import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
