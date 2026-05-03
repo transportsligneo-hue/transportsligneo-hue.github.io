@@ -14,6 +14,7 @@ import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
@@ -402,6 +403,18 @@ function ConvoyeurMissions() {
               <X size={18} /> Refuser
             </button>
           </div>
+        )}
+
+        {/* Validations obligatoires : selfie + double signatures */}
+        {openMission.statut !== "propose" && user && (
+          <MissionGatesPanel
+            attributionId={openMission.id}
+            userId={user.id}
+            driverName={`${user.user_metadata?.prenom ?? ""} ${user.user_metadata?.nom ?? ""}`.trim() || (user.email ?? "Convoyeur")}
+            clientName={undefined}
+            showEndSignatures={!!openMission.inspectionArrivee || ["arrive_destination","edl_arrivee_fait","en_attente_validation","validee","termine"].includes(openMission.etape_courante ?? openMission.statut)}
+            onChange={fetchMissions}
+          />
         )}
 
         {/* Workflow étape par étape */}
