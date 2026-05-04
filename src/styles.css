@@ -69,18 +69,19 @@
   * {
     border-color: var(--color-border);
   }
-  body {
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
     background-color: var(--color-background);
+  }
+  body {
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-  /* Réserve la place de la bottom nav mobile (hauteur 64px + safe-area) */
-  @media (max-width: 767px) {
-    body {
-      padding-bottom: calc(64px + env(safe-area-inset-bottom));
-    }
   }
   html {
     scroll-behavior: smooth;
@@ -93,6 +94,11 @@
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
   .pb-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
   .h-bottom-nav { height: calc(64px + env(safe-area-inset-bottom)); }
+
+  /* Driver main : compense le header fixed mobile (safe-area + 56px) */
+  @media (max-width: 767px) {
+    .driver-main { padding-top: calc(env(safe-area-inset-top) + 56px); }
+  }
 
   .mobile-card {
     background: rgba(15, 21, 48, 0.85);

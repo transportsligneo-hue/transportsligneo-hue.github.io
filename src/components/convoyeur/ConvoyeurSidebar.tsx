@@ -101,8 +101,9 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile Header premium glass === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-[rgba(212,175,55,0.18)] safe-top">
-        <div className="h-16 px-4 flex items-center justify-between">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 border-b border-[rgba(212,175,55,0.18)] bg-[#070b1f]/95 backdrop-blur-xl">
+        <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[#070b1f]" />
+        <div className="h-14 px-4 flex items-center justify-between">
           <DriverBrand />
           <button
             onClick={() => setMobileMenuOpen(true)}
@@ -163,14 +164,14 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 md:ml-64 pt-16 md:pt-0 pb-bottom-nav md:pb-0 min-h-screen flex flex-col">
-        <div className="p-4 sm:p-5 md:p-8 max-w-5xl mx-auto w-full flex-1">{children}</div>
+      <main className="flex-1 md:ml-64 pb-bottom-nav md:pb-0 min-h-screen flex flex-col w-full driver-main">
+        <div className="px-3 py-4 sm:px-4 sm:py-5 md:p-8 md:max-w-5xl md:mx-auto w-full flex-1">{children}</div>
       </main>
 
       {/* === Mobile Bottom Tab Bar premium === */}
       <nav
         aria-label="Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-bar border-t border-[rgba(212,175,55,0.20)] safe-bottom"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b1f]/95 backdrop-blur-xl border-t border-[rgba(212,175,55,0.20)] safe-bottom"
       >
         <div
           className="grid h-16 items-stretch"
