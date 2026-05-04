@@ -22,6 +22,7 @@ import {
   FormField,
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
+import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({
   component: AdminTrajets,
@@ -47,6 +48,13 @@ interface Trajet {
   created_at: string;
   prix_suggere?: number | null;
   statut_publication?: string;
+  // B1 — pricing mode
+  pricing_mode?: "fixe" | "enchere" | null;
+  prix_client_ttc?: number | null;
+  prix_convoyeur_fixe?: number | null;
+  prix_convoyeur_min?: number | null;
+  prix_convoyeur_max?: number | null;
+  marge_indicative_pct?: number | null;
 }
 
 interface Offre {
@@ -552,6 +560,22 @@ function AdminTrajets() {
                 ))}
               </Select>
             </FormField>
+
+            {/* === SECTION TARIFICATION (B1) === */}
+            <div className="mt-5 pt-5 border-t border-pro-border">
+              <PricingModeBlock
+                trajetId={selected.id}
+                initial={{
+                  pricing_mode: selected.pricing_mode ?? "fixe",
+                  prix_client_ttc: selected.prix_client_ttc,
+                  prix_convoyeur_fixe: selected.prix_convoyeur_fixe,
+                  prix_convoyeur_min: selected.prix_convoyeur_min,
+                  prix_convoyeur_max: selected.prix_convoyeur_max,
+                  marge_indicative_pct: selected.marge_indicative_pct,
+                }}
+                onSaved={(next) => setSelected({ ...selected, ...next })}
+              />
+            </div>
 
             {/* === SECTION ENCHÈRES === */}
             <div className="mt-5 pt-5 border-t border-pro-border">

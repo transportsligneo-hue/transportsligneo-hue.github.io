@@ -32,6 +32,11 @@ interface TrajetDispo {
   prix_suggere: number | null;
   statut_publication: string;
   created_at: string;
+  // B1 — pricing mode
+  pricing_mode: "fixe" | "enchere" | null;
+  prix_convoyeur_fixe: number | null;
+  prix_convoyeur_min: number | null;
+  prix_convoyeur_max: number | null;
 }
 
 interface MyOffre {
@@ -80,7 +85,7 @@ function ConvoyeurDisponibles() {
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
         .from("trajets")
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at" as never)
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max" as never)
         .eq("statut_publication" as never, "publie" as never)
         .order("created_at", { ascending: false }),
       supabase
@@ -134,27 +139,46 @@ function ConvoyeurDisponibles() {
     }).catch(() => {});
   };
 
+  /** Prix net convoyeur effectif d'un trajet (selon le mode). */
+  const prixDriverEffectif = (t: TrajetDispo): number | null => {
+    if (t.pricing_mode === "fixe" && t.prix_convoyeur_fixe != null) return t.prix_convoyeur_fixe;
+    return t.prix_suggere ?? null;
+  };
+
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
-    if (!convoyeurId || !trajet.prix_suggere) return;
+    const prix = prixDriverEffectif(trajet);
+    if (!convoyeurId || prix == null) return;
     setSubmitting(true);
     await supabase.from("mission_offres" as never).insert({
       trajet_id: trajet.id,
       convoyeur_id: convoyeurId,
-      prix_propose: trajet.prix_suggere,
-      prix_suggere_snapshot: trajet.prix_suggere,
+      prix_propose: prix,
+      prix_suggere_snapshot: prix,
       type_offre: "acceptation_directe",
       statut: "en_attente",
     } as never);
-    notifyAdmin(trajet, trajet.prix_suggere, "acceptation_directe");
+    notifyAdmin(trajet, prix, "acceptation_directe");
     setSubmitting(false);
     setOpenTrajetId(null);
     fetchData();
   };
 
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
+    if (trajet.pricing_mode === "fixe") {
+      alert("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
+      return;
+    }
     if (!convoyeurId || !contrePrix) return;
     const prix = parseFloat(contrePrix);
     if (isNaN(prix) || prix <= 0) return;
+    if (trajet.prix_convoyeur_min != null && prix < trajet.prix_convoyeur_min) {
+      alert(`Votre prix doit être au moins ${trajet.prix_convoyeur_min} €.`);
+      return;
+    }
+    if (trajet.prix_convoyeur_max != null && prix > trajet.prix_convoyeur_max) {
+      alert(`Votre prix doit être au maximum ${trajet.prix_convoyeur_max} €.`);
+      return;
+    }
     setSubmitting(true);
     await supabase.from("mission_offres" as never).insert({
       trajet_id: trajet.id,
@@ -242,12 +266,23 @@ function ConvoyeurDisponibles() {
                         )}
                       </div>
                     </div>
-                    {t.prix_suggere && (
-                      <div className="text-right shrink-0">
-                        <p className="text-pro-muted text-[10px] uppercase tracking-wider">Prix suggéré</p>
-                        <p className="text-emerald-700 font-bold text-lg leading-tight">{t.prix_suggere} €</p>
-                      </div>
-                    )}
+                    {(() => {
+                      const prixAffiche = prixDriverEffectif(t);
+                      const isFixe = t.pricing_mode === "fixe";
+                      return prixAffiche != null ? (
+                        <div className="text-right shrink-0">
+                          <p className="text-pro-muted text-[10px] uppercase tracking-wider">
+                            {isFixe ? "Prix fixe" : "À partir de"}
+                          </p>
+                          <p className="text-emerald-700 font-bold text-lg leading-tight">{prixAffiche} €</p>
+                          <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                            isFixe ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {isFixe ? "Fixe" : "Enchère"}
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
 
                   {/* Statut de mon offre */}
@@ -288,27 +323,39 @@ function ConvoyeurDisponibles() {
                   {!offre || offre.statut === "retiree" || offre.statut === "refusee" ? (
                     !open ? (
                       <div className="flex flex-col sm:flex-row gap-2">
-                        {t.prix_suggere && (
-                          <button
-                            onClick={() => accepterPrixSuggere(t)}
-                            disabled={submitting}
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
-                          >
-                            <CheckCircle2 size={15} />
-                            Accepter à {t.prix_suggere} €
-                          </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setOpenTrajetId(t.id);
-                            setContrePrix(t.prix_suggere?.toString() ?? "");
-                            setContreMessage("");
-                          }}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
-                        >
-                          <Euro size={15} />
-                          Proposer un autre prix
-                        </button>
+                        {(() => {
+                          const prixAcc = prixDriverEffectif(t);
+                          const isFixe = t.pricing_mode === "fixe";
+                          return (
+                            <>
+                              {prixAcc != null && (
+                                <button
+                                  onClick={() => accepterPrixSuggere(t)}
+                                  disabled={submitting}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
+                                >
+                                  <CheckCircle2 size={15} />
+                                  {isFixe ? `Accepter à ${prixAcc} €` : `Accepter à ${prixAcc} €`}
+                                </button>
+                              )}
+                              {!isFixe && (
+                                <button
+                                  onClick={() => {
+                                    setOpenTrajetId(t.id);
+                                    setContrePrix(prixAcc?.toString() ?? "");
+                                    setContreMessage("");
+                                  }}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
+                                >
+                                  <Euro size={15} />
+                                  {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
+                                    ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
+                                    : "Proposer un autre prix"}
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="space-y-2 border-t border-pro-border pt-3">

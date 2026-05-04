@@ -1669,10 +1669,16 @@ export type Database = {
           heure_trajet: string | null
           id: string
           immatriculation: string | null
+          marge_indicative_pct: number | null
           marque: string | null
           modele: string | null
           notes_internes: string | null
+          pricing_mode: string
           prix: number | null
+          prix_client_ttc: number | null
+          prix_convoyeur_fixe: number | null
+          prix_convoyeur_max: number | null
+          prix_convoyeur_min: number | null
           prix_suggere: number | null
           statut: string
           statut_publication: string
@@ -1691,10 +1697,16 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          marge_indicative_pct?: number | null
           marque?: string | null
           modele?: string | null
           notes_internes?: string | null
+          pricing_mode?: string
           prix?: number | null
+          prix_client_ttc?: number | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
           prix_suggere?: number | null
           statut?: string
           statut_publication?: string
@@ -1713,10 +1725,16 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          marge_indicative_pct?: number | null
           marque?: string | null
           modele?: string | null
           notes_internes?: string | null
+          pricing_mode?: string
           prix?: number | null
+          prix_client_ttc?: number | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
           prix_suggere?: number | null
           statut?: string
           statut_publication?: string
