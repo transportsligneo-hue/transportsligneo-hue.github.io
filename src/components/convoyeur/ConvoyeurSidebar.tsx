@@ -164,8 +164,11 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 md:ml-64 pt-16 md:pt-0 pb-bottom-nav md:pb-0 min-h-screen flex flex-col">
-        <div className="p-4 sm:p-5 md:p-8 max-w-5xl mx-auto w-full flex-1">{children}</div>
+      <main
+        className="flex-1 md:ml-64 md:pt-0 pb-bottom-nav md:pb-0 min-h-screen flex flex-col w-full"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 56px)" }}
+      >
+        <div className="px-3 py-4 sm:px-4 sm:py-5 md:p-8 md:max-w-5xl md:mx-auto w-full flex-1">{children}</div>
       </main>
 
       {/* === Mobile Bottom Tab Bar premium === */}
