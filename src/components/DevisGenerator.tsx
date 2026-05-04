@@ -243,19 +243,15 @@ export default function DevisGenerator() {
   const inputClasses = "w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
   return (
-    <section id="devis" className="py-24 section-bg">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <div className="gold-divider-short mb-4" />
-          <h2 className="font-heading text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary">
-            Estimez votre trajet
-          </h2>
-          <p className="text-cream/60 mt-4 max-w-lg mx-auto text-sm">
+    <div className="py-6 md:py-8">
+      <div className="max-w-6xl mx-auto px-2 md:px-4">
+        <div className="text-center mb-6 md:mb-8">
+          <p className="text-cream/70 text-sm">
             Sélectionnez vos villes de départ et d'arrivée pour obtenir une estimation instantanée.
           </p>
-          <p className="text-primary text-sm mt-3 font-medium tracking-wide">Péage et carburant inclus</p>
-          <p className="font-heading gold-gradient-text text-sm mt-2 tracking-wide uppercase">Tarif aller-retour avantageux</p>
-          <div className="gold-divider-short mt-4" />
+          <p className="text-[#5fb6ff] text-xs mt-2 font-medium tracking-wide">
+            Péage et carburant inclus · Tarif aller-retour avantageux
+          </p>
         </div>
 
         {/* Quick Estimator */}
@@ -557,6 +553,6 @@ export default function DevisGenerator() {
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Menu, X, User, Sparkles } from "lucide-react";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import ReservationModal from "./ReservationModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -19,9 +18,9 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [reserveOpen, setReserveOpen] = useState(false);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -29,9 +28,17 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const openReserve = () => {
+  // CTA principal : Estimer (scrolle vers #devis si on est sur l'accueil, sinon → /tarifs)
+  const goToEstimer = () => {
     setMobileOpen(false);
-    setReserveOpen(true);
+    if (location.pathname === "/") {
+      const el = document.getElementById("devis");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    navigate({ to: "/tarifs", hash: "devis" });
   };
 
   const goToEspace = () => {
@@ -77,10 +84,11 @@ export default function Navbar() {
             ))}
             <li>
               <button
-                onClick={openReserve}
-                className="px-5 py-2 bg-primary text-navy text-xs tracking-[0.15em] uppercase font-medium hover:bg-primary/90 transition-colors"
+                onClick={goToEstimer}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs tracking-[0.15em] uppercase font-medium edl-cta"
               >
-                Réserver
+                <Sparkles size={14} />
+                Estimer
               </button>
             </li>
             <li>
@@ -123,10 +131,11 @@ export default function Navbar() {
               ))}
               <li>
                 <button
-                  onClick={openReserve}
-                  className="px-6 py-2.5 bg-primary text-navy text-xs tracking-[0.15em] uppercase font-medium"
+                  onClick={goToEstimer}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs tracking-[0.15em] uppercase font-medium edl-cta"
                 >
-                  Réserver
+                  <Sparkles size={14} />
+                  Estimer
                 </button>
               </li>
               <li>
@@ -142,8 +151,6 @@ export default function Navbar() {
           </div>
         )}
       </nav>
-
-      <ReservationModal open={reserveOpen} onClose={() => setReserveOpen(false)} />
     </>
   );
 }

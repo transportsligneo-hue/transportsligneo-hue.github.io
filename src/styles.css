@@ -575,4 +575,79 @@
     -webkit-backdrop-filter: blur(16px) saturate(150%);
     border-radius: 1rem;
   }
+
+  /* ============================================================
+     === LOGO MARQUEE — défilement infini "Ils nous font confiance"
+     ============================================================ */
+  @keyframes logo-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .logo-marquee {
+    display: flex;
+    width: max-content;
+    animation: logo-marquee 28s linear infinite;
+  }
+  .logo-marquee-track {
+    display: flex;
+    align-items: center;
+    gap: 3.5rem;
+    padding-right: 3.5rem;
+  }
+  @media (max-width: 768px) {
+    .logo-marquee { animation-duration: 22s; }
+    .logo-marquee-track { gap: 2.25rem; padding-right: 2.25rem; }
+  }
+  .logo-marquee-mask {
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .logo-grayscale {
+    filter: grayscale(100%) brightness(1.6) contrast(0.85);
+    opacity: 0.55;
+    transition: filter 280ms ease, opacity 280ms ease;
+  }
+  .logo-grayscale:hover {
+    filter: grayscale(0%) brightness(1) contrast(1);
+    opacity: 1;
+  }
+
+  /* ============================================================
+     === EDL-CARD — carte glass réutilisable (style Inspection Driver)
+     Disponible sur tout le site (PC + mobile, non préfixée).
+     ============================================================ */
+  .edl-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(95, 182, 255, 0.20);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 16px 40px -18px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .edl-card-strong {
+    background: linear-gradient(180deg, rgba(20, 35, 90, 0.65), rgba(10, 19, 53, 0.55));
+    border: 1px solid rgba(95, 182, 255, 0.30);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 22px 55px -22px rgba(0,0,0,0.70),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+  .edl-eyebrow {
+    color: #5fb6ff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .edl-section-bg {
+    background:
+      radial-gradient(1100px 600px at 0% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.14), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(231, 199, 106, 0.08), transparent 60%),
+      linear-gradient(180deg, #0a1335 0%, #0e1a4a 50%, #0a1335 100%);
+  }
 }
