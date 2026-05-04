@@ -86,26 +86,29 @@ export default function MobileHomeScreen() {
               Convoyage automobile premium. <span className="text-primary italic">La tranquillité sur toute la ligne.</span>
             </p>
 
-            {/* CTA principal */}
+            {/* CTA principal — Estimer */}
             <button
-              onClick={() => setReserveOpen(true)}
-              className="mt-5 w-full h-14 rounded-2xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2 shadow-[0_10px_30px_-10px_rgba(212,175,55,0.7)]"
+              onClick={scrollToDevis}
+              className="edl-cta mt-5 w-full h-14 font-heading text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2"
             >
-              <Calendar size={18} />
-              Réserver un convoyage
+              <Sparkles size={18} />
+              Estimer mon trajet
             </button>
           </div>
         </div>
       </section>
 
-      {/* Estimateur — bloc visible sur la page d'accueil */}
-      <section className="px-5 pb-6">
-        <div className="home-glass-strong p-4">
+      {/* Estimateur — bloc principal visible sur la page d'accueil */}
+      <section id="mobile-devis" className="px-5 pb-6 scroll-mt-4">
+        <div className="edl-card-strong p-4">
           <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="font-heading text-primary text-sm tracking-[0.2em] uppercase">
-              Estimer mon trajet
-            </h2>
-            <span className="text-cream/60 text-[10px] uppercase tracking-wider">30 sec.</span>
+            <div>
+              <p className="edl-eyebrow">Estimation 30 sec.</p>
+              <h2 className="font-heading text-cream text-base tracking-wide mt-1">
+                Estimer mon trajet
+              </h2>
+            </div>
+            <span className="edl-chip">Gratuit</span>
           </div>
           <MobileDevisGenerator />
         </div>
@@ -197,8 +200,6 @@ export default function MobileHomeScreen() {
           © {new Date().getFullYear()} Transports Ligneo
         </p>
       </footer>
-
-      <ReservationModal open={reserveOpen} onClose={() => setReserveOpen(false)} />
     </div>
   );
 }
@@ -282,17 +283,3 @@ function Step({ n, title, desc }: { n: string; title: string; desc: string }) {
   );
 }
 
-function Review({ name, role, text, stars }: { name: string; role: string; text: string; stars: number }) {
-  return (
-    <div className="mobile-card p-4 min-w-[78%] snap-start">
-      <div className="flex gap-1 mb-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star key={i} size={12} className={i < stars ? "text-primary fill-primary" : "text-cream/20"} />
-        ))}
-      </div>
-      <p className="text-cream/75 text-xs leading-relaxed mb-3">"{text}"</p>
-      <p className="font-heading text-primary text-xs">{name}</p>
-      <p className="text-cream/45 text-[10px]">{role}</p>
-    </div>
-  );
-}
