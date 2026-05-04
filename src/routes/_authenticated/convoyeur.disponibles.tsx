@@ -85,7 +85,7 @@ function ConvoyeurDisponibles() {
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
         .from("trajets")
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at" as never)
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max" as never)
         .eq("statut_publication" as never, "publie" as never)
         .order("created_at", { ascending: false }),
       supabase
