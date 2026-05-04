@@ -266,12 +266,23 @@ function ConvoyeurDisponibles() {
                         )}
                       </div>
                     </div>
-                    {t.prix_suggere && (
-                      <div className="text-right shrink-0">
-                        <p className="text-pro-muted text-[10px] uppercase tracking-wider">Prix suggéré</p>
-                        <p className="text-emerald-700 font-bold text-lg leading-tight">{t.prix_suggere} €</p>
-                      </div>
-                    )}
+                    {(() => {
+                      const prixAffiche = prixDriverEffectif(t);
+                      const isFixe = t.pricing_mode === "fixe";
+                      return prixAffiche != null ? (
+                        <div className="text-right shrink-0">
+                          <p className="text-pro-muted text-[10px] uppercase tracking-wider">
+                            {isFixe ? "Prix fixe" : "À partir de"}
+                          </p>
+                          <p className="text-emerald-700 font-bold text-lg leading-tight">{prixAffiche} €</p>
+                          <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                            isFixe ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {isFixe ? "Fixe" : "Enchère"}
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
 
                   {/* Statut de mon offre */}
