@@ -522,4 +522,44 @@
     background-size: 200% 100%;
     animation: edl-shimmer 1800ms linear infinite;
   }
+
+  /* ============================================================
+     === HOME SHELL — bleu nuit moins foncé + glassmorphism global
+     Utilisé par la page d'accueil (PC + mobile).
+     ============================================================ */
+  .home-shell {
+    background:
+      radial-gradient(1100px 600px at 0% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.12), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(231, 199, 106, 0.08), transparent 60%),
+      linear-gradient(180deg, #111a3d 0%, #15214a 45%, #111a3d 100%);
+    color: var(--cream);
+  }
+  .home-glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(231, 199, 106, 0.22);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow:
+      0 16px 40px -18px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius: 1.25rem;
+  }
+  .home-glass-strong {
+    background: linear-gradient(180deg, rgba(20, 30, 70, 0.62), rgba(15, 22, 55, 0.55));
+    border: 1px solid rgba(231, 199, 106, 0.32);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    box-shadow:
+      0 22px 55px -22px rgba(0,0,0,0.65),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+    border-radius: 1.5rem;
+  }
+  .home-glass-soft {
+    background: rgba(20, 30, 70, 0.45);
+    border: 1px solid rgba(231, 199, 106, 0.18);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border-radius: 1rem;
+  }
 }

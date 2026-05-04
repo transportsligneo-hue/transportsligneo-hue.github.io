@@ -13,8 +13,10 @@ import {
   Euro,
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import heroChauffeur from "@/assets/hero-chauffeur-ligneo.jpg";
 import ReservationModal from "@/components/ReservationModal";
 import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
+import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -34,7 +36,7 @@ export default function MobileHomeScreen() {
   };
 
   return (
-    <div className="md:hidden section-bg min-h-screen pb-bottom-nav">
+    <div className="md:hidden home-shell min-h-screen pb-bottom-nav">
       {/* Header app — compact */}
       <header className="safe-top px-5 pt-4 pb-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2" aria-label="Accueil">
@@ -49,26 +51,62 @@ export default function MobileHomeScreen() {
         </button>
       </header>
 
-      {/* Hero compact */}
+      {/* Hero visuel — image chauffeur + carte glass */}
       <section className="px-5 pt-2 pb-6">
-        <p className="font-heading text-cream/50 text-[11px] tracking-[0.2em] uppercase">
-          Bienvenue chez
-        </p>
-        <h1 className="font-heading text-primary text-3xl tracking-[0.05em] mt-1 leading-tight">
-          Transports Ligneo
-        </h1>
-        <p className="text-cream/65 text-sm mt-3 leading-relaxed">
-          Convoyage automobile premium. <span className="text-gold-light italic">La tranquillité sur toute la ligne.</span>
-        </p>
+        <div className="relative rounded-3xl overflow-hidden home-glass-strong">
+          <div className="relative h-[260px] w-full overflow-hidden">
+            <img
+              src={heroChauffeur}
+              alt="Chauffeur Transports LIGNEO devant une Mercedes noire"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectPosition: "42% center" }}
+              loading="eager"
+              fetchPriority="high"
+            />
+            {/* Voile bas pour lisibilité du texte */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(17,26,61,0) 35%, rgba(17,26,61,0.85) 80%, #15214a 100%)",
+              }}
+            />
+          </div>
 
-        {/* CTA principal */}
-        <button
-          onClick={() => setReserveOpen(true)}
-          className="mt-5 w-full h-14 rounded-2xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2 shadow-[0_10px_30px_-10px_rgba(212,175,55,0.6)]"
-        >
-          <Calendar size={18} />
-          Réserver un convoyage
-        </button>
+          <div className="px-5 pt-4 pb-5">
+            <p className="font-heading text-cream/55 text-[10px] tracking-[0.25em] uppercase">
+              Bienvenue chez
+            </p>
+            <h1 className="font-heading gold-gradient-text text-3xl tracking-[0.04em] mt-1 leading-tight">
+              Transports Ligneo
+            </h1>
+            <p className="text-cream/80 text-sm mt-3 leading-relaxed">
+              Convoyage automobile premium. <span className="text-primary italic">La tranquillité sur toute la ligne.</span>
+            </p>
+
+            {/* CTA principal */}
+            <button
+              onClick={() => setReserveOpen(true)}
+              className="mt-5 w-full h-14 rounded-2xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2 shadow-[0_10px_30px_-10px_rgba(212,175,55,0.7)]"
+            >
+              <Calendar size={18} />
+              Réserver un convoyage
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Estimateur — bloc visible sur la page d'accueil */}
+      <section className="px-5 pb-6">
+        <div className="home-glass-strong p-4">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="font-heading text-primary text-sm tracking-[0.2em] uppercase">
+              Estimer mon trajet
+            </h2>
+            <span className="text-cream/60 text-[10px] uppercase tracking-wider">30 sec.</span>
+          </div>
+          <MobileDevisGenerator />
+        </div>
       </section>
 
       {/* Raccourcis — grille 2x2 */}
@@ -103,7 +141,7 @@ export default function MobileHomeScreen() {
 
       {/* Stats / preuves */}
       <section className="px-5 pb-6">
-        <div className="mobile-card p-4">
+        <div className="home-glass p-4">
           <div className="grid grid-cols-3 gap-2 text-center">
             <Stat value="6+" label="ans d'expérience" />
             <Divider />
