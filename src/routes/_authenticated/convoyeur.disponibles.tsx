@@ -139,27 +139,46 @@ function ConvoyeurDisponibles() {
     }).catch(() => {});
   };
 
+  /** Prix net convoyeur effectif d'un trajet (selon le mode). */
+  const prixDriverEffectif = (t: TrajetDispo): number | null => {
+    if (t.pricing_mode === "fixe" && t.prix_convoyeur_fixe != null) return t.prix_convoyeur_fixe;
+    return t.prix_suggere ?? null;
+  };
+
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
-    if (!convoyeurId || !trajet.prix_suggere) return;
+    const prix = prixDriverEffectif(trajet);
+    if (!convoyeurId || prix == null) return;
     setSubmitting(true);
     await supabase.from("mission_offres" as never).insert({
       trajet_id: trajet.id,
       convoyeur_id: convoyeurId,
-      prix_propose: trajet.prix_suggere,
-      prix_suggere_snapshot: trajet.prix_suggere,
+      prix_propose: prix,
+      prix_suggere_snapshot: prix,
       type_offre: "acceptation_directe",
       statut: "en_attente",
     } as never);
-    notifyAdmin(trajet, trajet.prix_suggere, "acceptation_directe");
+    notifyAdmin(trajet, prix, "acceptation_directe");
     setSubmitting(false);
     setOpenTrajetId(null);
     fetchData();
   };
 
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
+    if (trajet.pricing_mode === "fixe") {
+      alert("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
+      return;
+    }
     if (!convoyeurId || !contrePrix) return;
     const prix = parseFloat(contrePrix);
     if (isNaN(prix) || prix <= 0) return;
+    if (trajet.prix_convoyeur_min != null && prix < trajet.prix_convoyeur_min) {
+      alert(`Votre prix doit être au moins ${trajet.prix_convoyeur_min} €.`);
+      return;
+    }
+    if (trajet.prix_convoyeur_max != null && prix > trajet.prix_convoyeur_max) {
+      alert(`Votre prix doit être au maximum ${trajet.prix_convoyeur_max} €.`);
+      return;
+    }
     setSubmitting(true);
     await supabase.from("mission_offres" as never).insert({
       trajet_id: trajet.id,
