@@ -350,8 +350,8 @@ function ConvoyeurMissions() {
             gpsTarget: t?.depart ?? null,
           }}
           steps={timelineSteps}
-          currentStepIndex={Math.min(currentIdx, 7)}
-          totalSteps={7}
+          currentStepIndex={Math.min(currentIdx, TOTAL)}
+          totalSteps={TOTAL}
           currentStepLabel={currentStepLabel}
           onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
           onOpenDocuments={() => setExpandedDocs(true)}
