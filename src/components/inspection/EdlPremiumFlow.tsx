@@ -531,6 +531,26 @@ export function EdlPremiumFlow({
                       <Check size={11}/> Validée
                     </span>
                   )}
+                  {isStepBypassed(currentStep) && (
+                    <span className="edl-chip" style={{ background: "rgba(251,191,36,0.18)", borderColor: "rgba(251,191,36,0.4)", color: "#fde68a" }}>
+                      <ShieldAlert size={11}/> Bypass admin
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "pending" && (
+                    <span className="edl-chip">
+                      <Loader2 size={11} className="animate-spin"/> OCR en cours
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "completed" && (
+                    <span className="edl-chip edl-chip-success">
+                      <FileSearch size={11}/> OCR · {currentState.ocr.fieldsCount ?? 0} champs · {currentState.ocr.classification === "admin" ? "→ Admin" : currentState.ocr.classification === "client" ? "→ Client" : "→ Driver"}
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "failed" && (
+                    <span className="edl-chip" style={{ background: "rgba(239,68,68,0.18)", borderColor: "rgba(239,68,68,0.4)", color: "#fca5a5" }}>
+                      OCR indisponible
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
