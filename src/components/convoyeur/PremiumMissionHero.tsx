@@ -243,47 +243,64 @@ function ShortcutTile({
 }
 
 function Timeline({ steps }: { steps: TimelineStep[] }) {
+  const lastDoneIdx = [...steps].reverse().findIndex(s => s.state !== "todo");
+  const progressIdx = lastDoneIdx === -1 ? 0 : steps.length - 1 - lastDoneIdx;
+  const progressPct = (progressIdx / Math.max(1, steps.length - 1)) * 100;
+
   return (
-    <div className="relative">
+    <div className="relative pt-1 pb-2">
       {/* Ligne de fond */}
-      <div className="hidden sm:block absolute top-4 left-4 right-4 h-[2px] bg-pro-border" />
-      {/* Ligne progression */}
+      <div className="absolute top-[22px] left-5 right-5 h-[3px] rounded-full bg-[#0b1026]/10" />
+      {/* Ligne progression dorée */}
       <div
-        className="hidden sm:block absolute top-4 left-4 h-[2px] bg-[var(--gold)] transition-all duration-700"
-        style={{
-          width: (() => {
-            const lastDoneIdx = [...steps].reverse().findIndex(s => s.state !== "todo");
-            const idx = lastDoneIdx === -1 ? 0 : steps.length - 1 - lastDoneIdx;
-            return `calc(${(idx / Math.max(1, steps.length - 1)) * 100}% - ${idx === 0 ? 0 : 16}px)`;
-          })(),
-        }}
+        className="absolute top-[22px] left-5 h-[3px] rounded-full bg-gradient-to-r from-[var(--gold)] to-[#e7c76a] transition-all duration-700 shadow-[0_0_8px_rgba(212,175,55,0.5)]"
+        style={{ width: `calc((100% - 40px) * ${progressPct / 100})` }}
       />
-      <ol className="grid gap-3 sm:gap-2" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+      <ol
+        className="grid gap-x-2 gap-y-1 relative"
+        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+      >
         {steps.map((s) => {
           const isDone = s.state === "done";
           const isCurrent = s.state === "current";
+          const statusLabel = isDone ? "OK" : isCurrent ? "En cours" : "À venir";
           return (
-            <li key={s.index} className="relative flex flex-col items-center text-center">
+            <li key={s.index} className="relative flex flex-col items-center text-center px-0.5">
               <div
-                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold border-2 transition ${
+                className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition ${
                   isDone
-                    ? "bg-[var(--gold)] border-[var(--gold)] text-[#0b1026]"
+                    ? "bg-gradient-to-br from-[var(--gold)] to-[#b8902c] text-[#0b1026] shadow-[0_4px_12px_rgba(212,175,55,0.45)] ring-2 ring-[var(--gold)]/30"
                     : isCurrent
-                      ? "bg-[#0b1026] border-[#0b1026] text-white shadow-md"
-                      : "bg-white border-pro-border text-pro-muted"
+                      ? "bg-[#0b1026] text-[var(--gold)] ring-[3px] ring-[var(--gold)] shadow-[0_0_0_4px_rgba(212,175,55,0.18),0_6px_16px_rgba(212,175,55,0.35)] animate-pulse"
+                      : "bg-white text-[#0b1026]/45 ring-2 ring-[#0b1026]/15"
                 }`}
               >
-                {s.index}
+                {isDone ? "✓" : s.index}
               </div>
-              <p className={`mt-1.5 text-[11px] leading-tight font-medium ${
-                isCurrent ? "text-[#0b1026]" : isDone ? "text-[#0b1026]/80" : "text-pro-muted"
-              }`}>
+              <p
+                className={`mt-2.5 text-[11px] sm:text-[12px] leading-snug font-semibold min-h-[28px] ${
+                  isCurrent
+                    ? "text-[#0b1026]"
+                    : isDone
+                      ? "text-[#0b1026]"
+                      : "text-[#0b1026]/55"
+                }`}
+              >
                 {s.label}
               </p>
-              {s.sub && (
-                <p className={`text-[10px] leading-tight ${
-                  isCurrent ? "text-[var(--gold)] font-semibold" : "text-pro-muted"
-                }`}>
+              <span
+                className={`mt-1 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                  isDone
+                    ? "bg-[var(--gold)]/15 text-[#8a6a18] border border-[var(--gold)]/40"
+                    : isCurrent
+                      ? "bg-[#0b1026] text-[var(--gold)] border border-[var(--gold)] shadow-[0_2px_6px_rgba(11,16,38,0.2)]"
+                      : "bg-[#0b1026]/5 text-[#0b1026]/50 border border-[#0b1026]/10"
+                }`}
+              >
+                {statusLabel}
+              </span>
+              {s.sub && isCurrent && (
+                <p className="mt-1 text-[10px] leading-tight text-[#0b1026]/70 font-medium">
                   {s.sub}
                 </p>
               )}
