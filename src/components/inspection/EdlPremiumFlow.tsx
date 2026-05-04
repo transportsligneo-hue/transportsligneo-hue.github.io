@@ -118,6 +118,27 @@ export function EdlPremiumFlow({
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Bypass admin (étend useMissionGates aux IDs scan/photo)
+  const { isDisabled, reload: reloadGates } = useMissionGates(attributionId);
+
+  // Warm-up caméra : précharge l'API getUserMedia dès l'ouverture pour réduire la latence
+  // de la première prise photo (sur mobile, le 1er accès caméra peut prendre 1-2s).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }, audio: false,
+        });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        // Stop immédiat — on n'avait besoin que d'initialiser le pipeline
+        stream.getTracks().forEach(t => t.stop());
+      } catch { /* permission refusée → silence, le clic ouvrira le dialog */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   // Clamp pour éviter X/Y incohérent
   const safeIndex = Math.min(Math.max(0, stepIndex), TOTAL - 1);
   useEffect(() => {
