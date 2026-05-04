@@ -22,6 +22,7 @@ import {
   FormField,
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
+import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({
   component: AdminTrajets,
