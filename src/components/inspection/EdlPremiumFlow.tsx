@@ -865,9 +865,7 @@ function SignatureArea({
         </div>
       ) : (
         <div className="edl-glass p-3">
-          <div className="bg-white rounded-xl overflow-hidden" style={{ height: 220 }}>
-            <SignatureCanvas onValidate={onSign} disabled={state?.status === "uploading"} />
-          </div>
+          <SignatureCanvas onValidate={onSign} disabled={state?.status === "uploading"} />
         </div>
       )}
     </div>
