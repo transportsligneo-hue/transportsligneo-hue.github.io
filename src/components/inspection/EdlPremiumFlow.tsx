@@ -418,11 +418,20 @@ export function EdlPremiumFlow({
   };
 
   // ─────────────────────────── NAVIGATION ───────────────────────────
+  /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
+  const isStepBypassed = (step: EdlStepDef): boolean => {
+    if (step.kind === "signature" && step.signatureKind) return isDisabled(step.signatureKind);
+    if (step.kind === "selfie") return isDisabled("selfie");
+    // Photos + scans : bypass via step.id (ex: "pv_livraison", "carte_grise", ou tout vue_type)
+    return isDisabled(step.id);
+  };
+
   const canAdvance = () => {
     const s = currentState?.status;
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
       return false; // étape finale, attend validation externe
     }
+    if (isStepBypassed(currentStep)) return true;
     return s === "success";
   };
 
