@@ -119,7 +119,7 @@ export function EdlPremiumFlow({
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Bypass admin (étend useMissionGates aux IDs scan/photo)
-  const { isDisabled, reload: reloadGates } = useMissionGates(attributionId);
+  const { isDisabled } = useMissionGates(attributionId);
 
   // Warm-up caméra : précharge l'API getUserMedia dès l'ouverture pour réduire la latence
   // de la première prise photo (sur mobile, le 1er accès caméra peut prendre 1-2s).
