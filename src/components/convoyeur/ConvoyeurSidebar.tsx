@@ -101,8 +101,9 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile Header premium glass === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-[rgba(212,175,55,0.18)] safe-top">
-        <div className="h-16 px-4 flex items-center justify-between">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 border-b border-[rgba(212,175,55,0.18)] bg-[#070b1f]/95 backdrop-blur-xl">
+        <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[#070b1f]" />
+        <div className="h-14 px-4 flex items-center justify-between">
           <DriverBrand />
           <button
             onClick={() => setMobileMenuOpen(true)}
