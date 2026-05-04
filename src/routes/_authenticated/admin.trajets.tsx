@@ -561,12 +561,29 @@ function AdminTrajets() {
               </Select>
             </FormField>
 
+            {/* === SECTION TARIFICATION (B1) === */}
+            <div className="mt-5 pt-5 border-t border-pro-border">
+              <PricingModeBlock
+                trajetId={selected.id}
+                initial={{
+                  pricing_mode: selected.pricing_mode ?? "fixe",
+                  prix_client_ttc: selected.prix_client_ttc,
+                  prix_convoyeur_fixe: selected.prix_convoyeur_fixe,
+                  prix_convoyeur_min: selected.prix_convoyeur_min,
+                  prix_convoyeur_max: selected.prix_convoyeur_max,
+                  marge_indicative_pct: selected.marge_indicative_pct,
+                }}
+                onSaved={(next) => setSelected({ ...selected, ...next })}
+              />
+            </div>
+
             {/* === SECTION ENCHÈRES === */}
             <div className="mt-5 pt-5 border-t border-pro-border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-pro-text flex items-center gap-2">
                   <Gavel size={16} className="text-pro-accent" />
                   Publication & offres convoyeurs
+                </h3>
                 </h3>
                 <Badge
                   tone={
