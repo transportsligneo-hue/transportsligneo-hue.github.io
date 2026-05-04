@@ -65,7 +65,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Péage, carburant et mise en main inclus — Tarifs TTC</p>
+            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus — Tarifs HT</p>
           </div>
 
           <div className="card-premium p-8 rounded">
@@ -82,7 +82,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Péage, carburant et mise en main inclus — Tarifs TTC</p>
+            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus — Tarifs HT</p>
           </div>
 
           {/* Tarifs hors département 37 masqués sur le site (toujours utilisés en interne par l'estimateur) */}
