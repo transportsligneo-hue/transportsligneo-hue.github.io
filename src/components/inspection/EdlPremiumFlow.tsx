@@ -23,11 +23,13 @@ import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X, RefreshCw,
   ShieldCheck, PenLine, ScanLine, UserCircle2, Sparkles, FileText, MapPin,
+  ShieldAlert, FileSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { useMissionGates } from "@/hooks/useMissionGates";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
   EDL_PREMIUM_SEQUENCE,
@@ -51,6 +53,13 @@ interface StepState {
   previewUrl?: string;
   storagePath?: string;
   error?: string;
+  /** OCR uniquement pour kind="scan" */
+  ocr?: {
+    status: "pending" | "completed" | "failed";
+    classification?: "admin" | "client" | "driver";
+    fieldsCount?: number;
+    error?: string;
+  };
 }
 
 interface StoredState {
@@ -108,6 +117,27 @@ export function EdlPremiumFlow({
   const [completing, setCompleting] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Bypass admin (étend useMissionGates aux IDs scan/photo)
+  const { isDisabled } = useMissionGates(attributionId);
+
+  // Warm-up caméra : précharge l'API getUserMedia dès l'ouverture pour réduire la latence
+  // de la première prise photo (sur mobile, le 1er accès caméra peut prendre 1-2s).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }, audio: false,
+        });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        // Stop immédiat — on n'avait besoin que d'initialiser le pipeline
+        stream.getTracks().forEach(t => t.stop());
+      } catch { /* permission refusée → silence, le clic ouvrira le dialog */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Clamp pour éviter X/Y incohérent
   const safeIndex = Math.min(Math.max(0, stepIndex), TOTAL - 1);
@@ -208,25 +238,57 @@ export function EdlPremiumFlow({
           .insert({ inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size });
       }
 
-      setState(stepId, { status: "success", previewUrl, storagePath: path });
+      setState(stepId, {
+        status: "success", previewUrl, storagePath: path,
+        ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
+      });
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
       if (currentStep.kind === "scan") {
         supabase.functions.invoke("edl-document-ocr", {
-          body: { storage_path: path, document_type: stepId },
+          body: {
+            storage_path: path,
+            document_type: stepId,
+            inspection_id: insId,
+            attribution_id: attributionId,
+            vue_type: stepId,
+          },
         }).then(({ data, error }) => {
-          if (error) {
+          if (error || !data) {
             console.warn("[EDL OCR]", error);
+            setStates(prev => ({
+              ...prev,
+              [stepId]: { ...prev[stepId], ocr: { status: "failed", error: error?.message ?? "OCR indisponible" } },
+            }));
             toast.warning("OCR indisponible", { description: "Document enregistré sans extraction." });
             return;
           }
-          const fields = Object.entries((data?.structured ?? {}) as Record<string, unknown>)
+          const fields = Object.entries((data.structured ?? {}) as Record<string, unknown>)
             .filter(([k, v]) => k !== "raw_text" && typeof v === "string" && v)
             .length;
+          setStates(prev => ({
+            ...prev,
+            [stepId]: {
+              ...prev[stepId],
+              ocr: {
+                status: "completed",
+                classification: data.classification,
+                fieldsCount: fields,
+              },
+            },
+          }));
           if (fields > 0) {
-            toast.success(`Document scanné — ${fields} champ(s) extraits`);
+            toast.success(`Scan OCR · ${fields} champ(s) extraits`, {
+              description: `Classé : ${data.classification === "admin" ? "Admin" : data.classification === "client" ? "Client" : "Driver"}`,
+            });
           }
-        }).catch(e => console.warn("[EDL OCR] invoke failed", e));
+        }).catch(e => {
+          console.warn("[EDL OCR] invoke failed", e);
+          setStates(prev => ({
+            ...prev,
+            [stepId]: { ...prev[stepId], ocr: { status: "failed", error: String(e) } },
+          }));
+        });
       }
     } catch (err) {
       console.error("[EDL Premium] photo upload failed", err);
@@ -356,11 +418,20 @@ export function EdlPremiumFlow({
   };
 
   // ─────────────────────────── NAVIGATION ───────────────────────────
+  /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
+  const isStepBypassed = (step: EdlStepDef): boolean => {
+    if (step.kind === "signature" && step.signatureKind) return isDisabled(step.signatureKind);
+    if (step.kind === "selfie") return isDisabled("selfie");
+    // Photos + scans : bypass via step.id (ex: "pv_livraison", "carte_grise", ou tout vue_type)
+    return isDisabled(step.id);
+  };
+
   const canAdvance = () => {
     const s = currentState?.status;
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
       return false; // étape finale, attend validation externe
     }
+    if (isStepBypassed(currentStep)) return true;
     return s === "success";
   };
 
@@ -458,6 +529,26 @@ export function EdlPremiumFlow({
                   {currentState?.status === "success" && (
                     <span className="edl-chip edl-chip-success">
                       <Check size={11}/> Validée
+                    </span>
+                  )}
+                  {isStepBypassed(currentStep) && (
+                    <span className="edl-chip" style={{ background: "rgba(251,191,36,0.18)", borderColor: "rgba(251,191,36,0.4)", color: "#fde68a" }}>
+                      <ShieldAlert size={11}/> Bypass admin
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "pending" && (
+                    <span className="edl-chip">
+                      <Loader2 size={11} className="animate-spin"/> OCR en cours
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "completed" && (
+                    <span className="edl-chip edl-chip-success">
+                      <FileSearch size={11}/> OCR · {currentState.ocr.fieldsCount ?? 0} champs · {currentState.ocr.classification === "admin" ? "→ Admin" : currentState.ocr.classification === "client" ? "→ Client" : "→ Driver"}
+                    </span>
+                  )}
+                  {currentState?.ocr?.status === "failed" && (
+                    <span className="edl-chip" style={{ background: "rgba(239,68,68,0.18)", borderColor: "rgba(239,68,68,0.4)", color: "#fca5a5" }}>
+                      OCR indisponible
                     </span>
                   )}
                 </div>

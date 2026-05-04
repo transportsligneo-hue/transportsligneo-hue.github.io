@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SignatureKind = "driver_start" | "client_start" | "driver_end" | "client_end";
-export type StepKey = "selfie" | "driver_start" | "client_start" | "driver_end" | "client_end" | "edl_depart" | "edl_arrivee";
+export type StepKey = "selfie" | "driver_start" | "client_start" | "driver_end" | "client_end" | "edl_depart" | "edl_arrivee" | "pv_livraison" | "carte_grise" | string;
 export type OverrideMode = "skip" | "force" | "disable";
 
 interface Selfie { id: string; storage_path: string; taken_at: string }

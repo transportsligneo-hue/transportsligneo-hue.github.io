@@ -22,7 +22,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { storage_path, document_type } = await req.json();
+    const { storage_path, document_type, inspection_id, attribution_id, vue_type } = await req.json();
     if (!storage_path || !document_type) {
       return new Response(JSON.stringify({ error: "Missing storage_path or document_type" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -135,12 +135,26 @@ serve(async (req) => {
     }
 
     const classification = isCG ? "admin" : "client";
+    const rawText = (structured.raw_text as string) ?? "";
+
+    // Persistance dans inspection_document_ocr (upsert sur inspection_id+vue_type)
+    if (inspection_id && attribution_id && vue_type) {
+      const { error: upErr } = await admin
+        .from("inspection_document_ocr")
+        .upsert({
+          inspection_id, attribution_id, vue_type,
+          document_type, classification, storage_path,
+          raw_text: rawText, structured_data: structured,
+          ocr_status: "completed", ocr_error: null,
+        }, { onConflict: "inspection_id,vue_type" });
+      if (upErr) console.error("Persist OCR failed:", upErr);
+    }
 
     return new Response(JSON.stringify({
       document_type,
       classification,
       structured,
-      raw_text: structured.raw_text ?? "",
+      raw_text: rawText,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err) {
