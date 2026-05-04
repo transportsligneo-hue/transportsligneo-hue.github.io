@@ -32,6 +32,11 @@ interface TrajetDispo {
   prix_suggere: number | null;
   statut_publication: string;
   created_at: string;
+  // B1 — pricing mode
+  pricing_mode: "fixe" | "enchere" | null;
+  prix_convoyeur_fixe: number | null;
+  prix_convoyeur_min: number | null;
+  prix_convoyeur_max: number | null;
 }
 
 interface MyOffre {
