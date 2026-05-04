@@ -13,8 +13,10 @@ import {
   Euro,
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import heroChauffeur from "@/assets/hero-chauffeur-ligneo.jpg";
 import ReservationModal from "@/components/ReservationModal";
 import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
+import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
