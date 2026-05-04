@@ -23,11 +23,13 @@ import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X, RefreshCw,
   ShieldCheck, PenLine, ScanLine, UserCircle2, Sparkles, FileText, MapPin,
+  ShieldAlert, FastForward, FileSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { useMissionGates } from "@/hooks/useMissionGates";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
   EDL_PREMIUM_SEQUENCE,
