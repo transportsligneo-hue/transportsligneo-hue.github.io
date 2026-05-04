@@ -1,4 +1,8 @@
-import { MapPin, Car, Calendar, Navigation, Phone, Search, FileText, HeadphonesIcon, Bell, ChevronRight } from "lucide-react";
+import {
+  MapPin, Car, Calendar, Navigation, Phone, Search, FileText, HeadphonesIcon,
+  Bell, ChevronRight, Check, MapPinned, ClipboardCheck, Truck, PackageCheck,
+  ClipboardList, ShieldCheck, Loader2,
+} from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export interface PremiumMissionHeroData {
@@ -43,9 +47,17 @@ function fmtDate(d?: string, h?: string) {
 }
 
 /**
- * Hero premium fiche mission convoyeur — calque maquette TRANSPORTS LIGNEO.
- * Header navy + or, anneau étape X/N, 3 cartes Départ/Arrivée/Véhicule,
- * raccourcis 6 boutons, timeline horizontale.
+ * Hero premium fiche mission convoyeur — layout 2 colonnes (desktop) :
+ *   • Gauche : header navy + cartes Départ/Arrivée/Véhicule + raccourcis
+ *   • Droite : timeline VERTICALE 6 étapes (sticky desktop, sous le reste sur mobile)
+ *
+ * Timeline 6 étapes ordre fixe :
+ *   1. Arrivé au lieu d'enlèvement
+ *   2. Inspection d'enlèvement
+ *   3. Trajet
+ *   4. Arrivé au lieu de livraison
+ *   5. Inspection de livraison
+ *   6. Validation admin
  */
 export function PremiumMissionHero({
   data, steps, currentStepIndex, totalSteps, currentStepLabel,
@@ -57,15 +69,14 @@ export function PremiumMissionHero({
   const dash = (pct / 100) * circumference;
 
   return (
-    <div className="space-y-4 -mx-4 sm:-mx-5 md:-mx-8">
-      {/* === HEADER NAVY PREMIUM === */}
+    <div className="-mx-4 sm:-mx-5 md:-mx-8">
+      {/* === HEADER NAVY PREMIUM (pleine largeur) === */}
       <div
         className="relative px-4 sm:px-6 pt-5 pb-6 text-cream"
         style={{ background: "linear-gradient(135deg, #0b1026 0%, #131a3d 100%)" }}
       >
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-start gap-4">
-            {/* Logo TRANSPORTS LIGNEO */}
             <div className="shrink-0 flex flex-col items-center">
               <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
                 <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" />
@@ -75,7 +86,6 @@ export function PremiumMissionHero({
               </div>
             </div>
 
-            {/* Centre — numéro mission + trajet */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-cream/70">
                 <span>{data.statutLabel}</span>
@@ -95,13 +105,10 @@ export function PremiumMissionHero({
               </div>
             </div>
 
-            {/* Anneau étape + cloche */}
             <div className="shrink-0 flex flex-col items-end gap-2">
-              <div className="flex items-center gap-2">
-                <button className="relative w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-cream/80 hover:bg-white/10">
-                  <Bell size={15} />
-                </button>
-              </div>
+              <button className="relative w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-cream/80 hover:bg-white/10">
+                <Bell size={15} />
+              </button>
               <div className="relative w-[88px] h-[88px]">
                 <svg width="88" height="88" viewBox="0 0 88 88" className="rotate-[-90deg]">
                   <circle cx="44" cy="44" r={radius} stroke="rgba(255,255,255,0.12)" strokeWidth="6" fill="none" />
@@ -120,81 +127,78 @@ export function PremiumMissionHero({
                   <span className="text-[9px] uppercase tracking-wider text-cream/60 mt-0.5">Étape</span>
                 </div>
               </div>
-              <span className="text-[10px] text-[var(--gold)] uppercase tracking-wider">{currentStepLabel}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* === 3 CARTES DÉPART / ARRIVÉE / VÉHICULE === */}
+      {/* === LAYOUT 2 COLONNES : INFOS GAUCHE + TIMELINE DROITE === */}
       <div className="px-4 sm:px-5 md:px-8 -mt-10 relative z-10">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <InfoCard
-            label="Départ"
-            iconBg="bg-[#0b1026]"
-            icon={<MapPin size={16} className="text-white" />}
-            title={data.depart?.ville || "—"}
-            line1={data.depart?.adresse}
-            footer={fmtDate(data.depart?.date, data.depart?.heure)}
-          />
-          <InfoCard
-            label="Arrivée"
-            iconBg="bg-[var(--gold)]"
-            icon={<MapPin size={16} className="text-[#0b1026]" />}
-            title={data.arrivee?.ville || "—"}
-            line1={data.arrivee?.adresse}
-            footer={fmtDate(data.arrivee?.date, data.arrivee?.heure)}
-          />
-          <InfoCard
-            label="Véhicule"
-            iconBg="bg-[#0b1026]"
-            icon={<Car size={16} className="text-white" />}
-            title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || "—"}
-            badge={data.vehicule?.immatriculation}
-            footer={data.vehicule?.vin ? `VIN : ${data.vehicule.vin}` : null}
-          />
-        </div>
-      </div>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6 items-start">
+          {/* === COLONNE GAUCHE : cartes + raccourcis === */}
+          <div className="space-y-4 min-w-0">
+            {/* 3 cartes Départ / Arrivée / Véhicule */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <InfoCard
+                label="Départ"
+                iconBg="bg-[#0b1026]"
+                icon={<MapPin size={16} className="text-white" />}
+                title={data.depart?.ville || "—"}
+                line1={data.depart?.adresse}
+                footer={fmtDate(data.depart?.date, data.depart?.heure)}
+              />
+              <InfoCard
+                label="Arrivée"
+                iconBg="bg-[var(--gold)]"
+                icon={<MapPin size={16} className="text-[#0b1026]" />}
+                title={data.arrivee?.ville || "—"}
+                line1={data.arrivee?.adresse}
+                footer={fmtDate(data.arrivee?.date, data.arrivee?.heure)}
+              />
+              <InfoCard
+                label="Véhicule"
+                iconBg="bg-[#0b1026]"
+                icon={<Car size={16} className="text-white" />}
+                title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || "—"}
+                badge={data.vehicule?.immatriculation}
+                footer={data.vehicule?.vin ? `VIN : ${data.vehicule.vin}` : null}
+              />
+            </div>
 
-      {/* === RACCOURCIS 6 BOUTONS === */}
-      <div className="px-4 sm:px-5 md:px-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
-          <ShortcutTile
-            label="Ouvrir GPS"
-            icon={<Navigation size={20} />}
-            href={data.gpsTarget ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.gpsTarget)}` : undefined}
-          />
-          <ShortcutTile
-            label="Appeler enlèvement"
-            icon={<Phone size={20} />}
-            href={data.contactDepartTel ? `tel:${data.contactDepartTel}` : undefined}
-          />
-          <ShortcutTile
-            label="Appeler réception"
-            icon={<Phone size={20} />}
-            href={data.contactArriveeTel ? `tel:${data.contactArriveeTel}` : undefined}
-          />
-          <ShortcutTile label="Inspection" icon={<Search size={20} />} onClick={onOpenInspection} />
-          <ShortcutTile label="Documents" icon={<FileText size={20} />} onClick={onOpenDocuments} />
-          <ShortcutTile label="Aide / Incident" icon={<HeadphonesIcon size={20} />} onClick={onOpenIncident} />
-        </div>
-      </div>
-
-      {/* === TIMELINE AVANCEMENT === */}
-      <div className="px-4 sm:px-5 md:px-8">
-        <div className="max-w-5xl mx-auto bg-white rounded-2xl border border-pro-border p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[11px] uppercase tracking-[0.12em] font-semibold text-[#0b1026]">
-              Avancement de la mission
-            </h3>
-            <span className="text-[11px] text-pro-muted">{currentStepIndex}/{totalSteps}</span>
+            {/* Raccourcis 6 boutons */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+              <ShortcutTile
+                label="Ouvrir GPS"
+                icon={<Navigation size={20} />}
+                href={data.gpsTarget ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.gpsTarget)}` : undefined}
+              />
+              <ShortcutTile
+                label="Appeler enlèvement"
+                icon={<Phone size={20} />}
+                href={data.contactDepartTel ? `tel:${data.contactDepartTel}` : undefined}
+              />
+              <ShortcutTile
+                label="Appeler réception"
+                icon={<Phone size={20} />}
+                href={data.contactArriveeTel ? `tel:${data.contactArriveeTel}` : undefined}
+              />
+              <ShortcutTile label="Inspection" icon={<Search size={20} />} onClick={onOpenInspection} />
+              <ShortcutTile label="Documents" icon={<FileText size={20} />} onClick={onOpenDocuments} />
+              <ShortcutTile label="Aide / Incident" icon={<HeadphonesIcon size={20} />} onClick={onOpenIncident} />
+            </div>
           </div>
-          <Timeline steps={steps} />
+
+          {/* === COLONNE DROITE : TIMELINE VERTICALE STICKY === */}
+          <aside className="lg:sticky lg:top-4 self-start w-full">
+            <VerticalTimeline steps={steps} currentStepIndex={currentStepIndex} totalSteps={totalSteps} />
+          </aside>
         </div>
       </div>
     </div>
   );
 }
+
+/* === Sub-components === */
 
 function InfoCard({
   label, icon, iconBg, title, line1, badge, footer,
@@ -242,72 +246,90 @@ function ShortcutTile({
   return <button type="button" onClick={onClick} disabled={disabled} className={cls}>{content}</button>;
 }
 
-function Timeline({ steps }: { steps: TimelineStep[] }) {
-  const lastDoneIdx = [...steps].reverse().findIndex(s => s.state !== "todo");
-  const progressIdx = lastDoneIdx === -1 ? 0 : steps.length - 1 - lastDoneIdx;
-  const progressPct = (progressIdx / Math.max(1, steps.length - 1)) * 100;
+/* === TIMELINE VERTICALE — style EDL Inspection Driver === */
+
+const STEP_ICONS = [
+  MapPinned,        // 1. Arrivé au lieu d'enlèvement
+  ClipboardCheck,   // 2. Inspection d'enlèvement
+  Truck,            // 3. Trajet
+  PackageCheck,     // 4. Arrivé au lieu de livraison
+  ClipboardList,    // 5. Inspection de livraison
+  ShieldCheck,      // 6. Validation admin
+];
+
+function VerticalTimeline({
+  steps, currentStepIndex, totalSteps,
+}: { steps: TimelineStep[]; currentStepIndex: number; totalSteps: number }) {
+  const pct = totalSteps > 0 ? Math.min(100, Math.round(((currentStepIndex - 1) / (totalSteps - 1)) * 100)) : 0;
 
   return (
-    <div className="relative pt-1 pb-2 -mx-2 sm:mx-0">
-      {/* Wrapper scrollable sur petits écrans pour aérer les libellés */}
-      <div className="overflow-x-auto px-2 sm:px-0 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div
-          className="relative min-w-[640px] sm:min-w-0"
-        >
-          {/* Ligne de fond */}
-          <div className="absolute top-[22px] left-6 right-6 h-[3px] rounded-full bg-[#0b1026]/15" />
-          {/* Ligne progression dorée */}
-          <div
-            className="absolute top-[22px] left-6 h-[3px] rounded-full bg-gradient-to-r from-[var(--gold)] to-[#e7c76a] transition-all duration-700 shadow-[0_0_10px_rgba(212,175,55,0.55)]"
-            style={{ width: `calc((100% - 48px) * ${progressPct / 100})` }}
-          />
-          <ol
-            className="grid gap-x-3 gap-y-2 relative"
-            style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-          >
-            {steps.map((s) => {
-              const isDone = s.state === "done";
-              const isCurrent = s.state === "current";
-              const statusLabel = isDone ? "OK" : isCurrent ? "En cours" : "À venir";
-              return (
-                <li key={s.index} className="relative flex flex-col items-center text-center px-1">
-                  <div
-                    className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition ${
-                      isDone
-                        ? "bg-gradient-to-br from-[var(--gold)] to-[#b8902c] text-[#0b1026] shadow-[0_4px_12px_rgba(212,175,55,0.5)] ring-2 ring-[var(--gold)]/40"
-                        : isCurrent
-                          ? "bg-[#0b1026] text-[var(--gold)] ring-[3px] ring-[var(--gold)] shadow-[0_0_0_4px_rgba(212,175,55,0.22),0_6px_18px_rgba(212,175,55,0.45)] animate-pulse"
-                          : "bg-white text-[#0b1026]/55 ring-2 ring-[#0b1026]/20"
-                    }`}
-                  >
-                    {isDone ? "✓" : s.index}
-                  </div>
-                  <p
-                    className={`mt-3 text-[12px] sm:text-[13px] leading-tight font-semibold min-h-[34px] whitespace-pre-line px-1 ${
-                      isDone || isCurrent
-                        ? "text-[#0b1026]"
-                        : "text-[#0b1026]/65"
-                    }`}
-                  >
-                    {s.label}
-                  </p>
-                  <span
-                    className={`mt-1.5 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
-                      isDone
-                        ? "bg-[var(--gold)]/20 text-[#7a5d10] border border-[var(--gold)]/55"
-                        : isCurrent
-                          ? "bg-[#0b1026] text-[var(--gold)] border border-[var(--gold)] shadow-[0_2px_8px_rgba(11,16,38,0.25)]"
-                          : "bg-[#0b1026]/8 text-[#0b1026]/65 border border-[#0b1026]/15"
-                    }`}
-                  >
-                    {statusLabel}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+    <div className="edl-card p-5">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="edl-eyebrow">Avancement</p>
+          <h3 className="font-heading text-cream text-base mt-0.5">Mission</h3>
         </div>
+        <span className="edl-chip">
+          {currentStepIndex}/{totalSteps}
+        </span>
       </div>
+
+      <ol className="relative">
+        {/* Rail vertical de fond */}
+        <div className="absolute left-[18px] top-2 bottom-2 w-[2px] rounded-full bg-white/10" />
+        {/* Rail vertical de progression */}
+        <div
+          className="absolute left-[18px] top-2 w-[2px] rounded-full bg-gradient-to-b from-[#5fb6ff] via-[#2c6bff] to-[#e7c76a] transition-all duration-700"
+          style={{ height: `calc((100% - 16px) * ${pct / 100})`, boxShadow: "0 0 12px rgba(95,182,255,0.55)" }}
+        />
+
+        {steps.map((s, i) => {
+          const Icon = STEP_ICONS[i] ?? Check;
+          const isDone = s.state === "done";
+          const isCurrent = s.state === "current";
+          const statusLabel = isDone ? "Terminée" : isCurrent ? "En cours" : "À venir";
+
+          return (
+            <li key={s.index} className="relative pl-12 pb-5 last:pb-0">
+              {/* Pastille étape */}
+              <div
+                className={`absolute left-0 top-0 w-9 h-9 rounded-full flex items-center justify-center transition ${
+                  isDone
+                    ? "bg-gradient-to-br from-[#5fb6ff] to-[#2c6bff] text-white shadow-[0_4px_14px_rgba(44,107,255,0.55)] ring-2 ring-[#5fb6ff]/30"
+                    : isCurrent
+                      ? "bg-[#0a1335] text-[#5fb6ff] ring-[3px] ring-[#5fb6ff] shadow-[0_0_0_4px_rgba(95,182,255,0.18),0_6px_18px_rgba(44,107,255,0.45)] edl-pulse"
+                      : "bg-white/5 text-cream/45 ring-1 ring-white/15"
+                }`}
+              >
+                {isDone ? <Check size={16} strokeWidth={3} /> : <Icon size={16} />}
+              </div>
+
+              {/* Contenu */}
+              <div className={`pt-1 ${isCurrent ? "" : ""}`}>
+                <p
+                  className={`text-[13px] leading-tight font-semibold ${
+                    isDone ? "text-cream/90" : isCurrent ? "text-cream" : "text-cream/55"
+                  }`}
+                >
+                  {s.label}
+                </p>
+                <span
+                  className={`mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    isDone
+                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/40"
+                      : isCurrent
+                        ? "bg-[#5fb6ff]/15 text-[#5fb6ff] border border-[#5fb6ff]/50"
+                        : "bg-white/5 text-cream/45 border border-white/10"
+                  }`}
+                >
+                  {isCurrent && <Loader2 size={9} className="animate-spin" />}
+                  {statusLabel}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
