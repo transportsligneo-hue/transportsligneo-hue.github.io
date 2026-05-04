@@ -584,7 +584,6 @@ function AdminTrajets() {
                   <Gavel size={16} className="text-pro-accent" />
                   Publication & offres convoyeurs
                 </h3>
-                </h3>
                 <Badge
                   tone={
                     selected.statut_publication === "publie"
