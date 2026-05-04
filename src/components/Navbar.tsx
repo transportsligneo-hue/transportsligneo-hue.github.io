@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Menu, X, User, Sparkles } from "lucide-react";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import ReservationModal from "./ReservationModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
