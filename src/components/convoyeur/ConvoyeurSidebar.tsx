@@ -2,9 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { LigneoBrand } from "@/components/brand/LigneoBrand";
-
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export interface ConvoyeurSidebarItem {
   to: string;
@@ -21,24 +19,25 @@ interface Props {
 }
 
 /**
- * Sidebar convoyeur – mobile-first, thème SaaS clair.
- * Mobile : bottom tab bar (4 tabs + "Plus"), pas de sidebar.
- * Desktop : sidebar gauche fixe.
+ * Driver shell premium — fond navy, accents or, glassmorphism.
+ * Wrap ALL convoyeur.* routes via .driver-shell pour basculer
+ * automatiquement le thème SaaS clair → premium dark sans toucher
+ * aux composants enfants (overrides scoppés dans styles.css).
  */
 export function ConvoyeurSidebar({ items, children }: Props) {
   const location = useLocation();
   const { logout, user } = useAuth();
-  
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  // Force fond clair sur <html> et <body> tant qu'on est dans l'espace driver
-  // pour éviter de voir le fond bleu nuit du site vitrine derrière la safe-area mobile.
+  // Force fond navy sous html/body pendant la navigation Driver
+  // (sinon la safe-area iOS laisse voir le fond du site vitrine).
   useEffect(() => {
     const prevHtml = document.documentElement.style.background;
     const prevBody = document.body.style.background;
-    document.documentElement.style.background = "#f7f8fb";
-    document.body.style.background = "#f7f8fb";
+    document.documentElement.style.background = "#070b1f";
+    document.body.style.background = "#070b1f";
     return () => {
       document.documentElement.style.background = prevHtml;
       document.body.style.background = prevBody;
@@ -50,35 +49,39 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       ? location.pathname === item.to
       : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
 
-  // Mobile bottom nav: 4 visible + "Plus" overflow
   const MAX_TABS = 4;
   const hasOverflow = items.length > MAX_TABS;
   const visibleTabs = hasOverflow ? items.slice(0, 3) : items.slice(0, MAX_TABS);
   const overflowTabs = hasOverflow ? items.slice(3) : [];
 
   return (
-    <div className="min-h-screen flex bg-pro-bg text-pro-text">
-      {/* === Sidebar Desktop === */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-pro-border flex-col">
-        <div className="px-5 py-5 border-b border-pro-border">
-          <LigneoBrand role="driver" variant="light" />
-          <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
+    <div className="driver-shell flex">
+      {/* === Sidebar Desktop premium === */}
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r border-[rgba(212,175,55,0.18)] bg-[#0b1026]/80 backdrop-blur-xl">
+        <div className="px-5 py-5 border-b border-[rgba(212,175,55,0.18)]">
+          <DriverBrand />
+          {user?.email && (
+            <p className="text-[11px] text-[#8a90a8] truncate mt-2 pl-12 font-mono">{user.email}</p>
+          )}
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {items.map((item) => {
             const active = isActive(item);
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                   active
-                    ? "bg-emerald-50 text-emerald-700 font-medium"
-                    : "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text"
+                    ? "bg-gradient-to-r from-[rgba(212,175,55,0.18)] to-transparent text-[#e7c76a] font-semibold"
+                    : "text-[#c7cad8] hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <item.icon size={17} className={active ? "text-emerald-600" : "text-pro-muted"} />
+                {active && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#d4af37] rounded-r-full" />
+                )}
+                <item.icon size={17} className={active ? "text-[#d4af37]" : "text-[#8a90a8]"} />
                 <span className="flex-1">{item.label}</span>
                 {item.badge}
               </Link>
@@ -86,10 +89,10 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           })}
         </nav>
 
-        <div className="p-3 border-t border-pro-border">
+        <div className="p-3 border-t border-[rgba(212,175,55,0.18)]">
           <button
             onClick={() => logout()}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-[#c7cad8] hover:bg-red-500/10 hover:text-red-300 transition-colors"
           >
             <LogOut size={17} />
             Déconnexion
@@ -97,13 +100,13 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         </div>
       </aside>
 
-      {/* === Mobile Header === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
-        <div className="h-14 px-4 flex items-center justify-between">
-          <LigneoBrand role="driver" variant="light" compact />
+      {/* === Mobile Header premium glass === */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-[rgba(212,175,55,0.18)] safe-top">
+        <div className="h-16 px-4 flex items-center justify-between">
+          <DriverBrand />
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
+            className="w-10 h-10 rounded-full border border-[rgba(212,175,55,0.30)] bg-white/5 flex items-center justify-center text-[#e7c76a] active:scale-95 transition-transform"
             aria-label="Menu"
           >
             <Menu size={18} />
@@ -111,21 +114,21 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         </div>
       </header>
 
-      {/* === Mobile Drawer (full menu) === */}
+      {/* === Mobile Drawer === */}
       {mobileMenuOpen && (
         <>
-          <div className="md:hidden fixed inset-0 z-50 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
-          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
-            <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
-              <LigneoBrand role="driver" variant="light" />
+          <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] w-80 bg-[#0b1026] border-r border-[rgba(212,175,55,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
+            <div className="px-5 py-4 border-b border-[rgba(212,175,55,0.18)] flex items-center justify-between">
+              <DriverBrand />
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-8 h-8 rounded-md hover:bg-pro-bg-soft flex items-center justify-center text-pro-text-soft"
+                className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-[#e7c76a]"
               >
                 <X size={18} />
               </button>
             </div>
-            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
               {items.map((item) => {
                 const active = isActive(item);
                 return (
@@ -133,23 +136,23 @@ export function ConvoyeurSidebar({ items, children }: Props) {
                     key={item.to}
                     to={item.to}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all ${
                       active
-                        ? "bg-emerald-50 text-emerald-700 font-medium"
-                        : "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text"
+                        ? "bg-gradient-to-r from-[rgba(212,175,55,0.20)] to-transparent text-[#e7c76a] font-semibold"
+                        : "text-[#c7cad8] hover:bg-white/5"
                     }`}
                   >
-                    <item.icon size={17} className={active ? "text-emerald-600" : "text-pro-muted"} />
+                    <item.icon size={18} className={active ? "text-[#d4af37]" : "text-[#8a90a8]"} />
                     <span className="flex-1">{item.label}</span>
                     {item.badge}
                   </Link>
                 );
               })}
             </nav>
-            <div className="p-3 border-t border-pro-border">
+            <div className="p-3 border-t border-[rgba(212,175,55,0.18)]">
               <button
                 onClick={() => logout()}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600"
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-[#c7cad8] hover:bg-red-500/10 hover:text-red-300"
               >
                 <LogOut size={17} />
                 Déconnexion
@@ -160,17 +163,14 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 md:ml-60 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen flex flex-col">
-        <div className="hidden md:block">
-          <DashboardHeader variant="light" profileTo="/convoyeur/profil" />
-        </div>
+      <main className="flex-1 md:ml-64 pt-16 md:pt-0 pb-bottom-nav md:pb-0 min-h-screen flex flex-col">
         <div className="p-4 sm:p-5 md:p-8 max-w-5xl mx-auto w-full flex-1">{children}</div>
       </main>
 
-      {/* === Mobile Bottom Tab Bar === */}
+      {/* === Mobile Bottom Tab Bar premium === */}
       <nav
         aria-label="Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-pro-border safe-bottom"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-bar border-t border-[rgba(212,175,55,0.20)] safe-bottom"
       >
         <div
           className="grid h-16 items-stretch"
@@ -182,10 +182,13 @@ export function ConvoyeurSidebar({ items, children }: Props) {
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex flex-col items-center justify-center gap-0.5 h-full active:scale-95 transition-transform"
+                className="relative flex flex-col items-center justify-center gap-1 h-full active:scale-95 transition-transform"
               >
-                <item.icon size={20} className={active ? "text-emerald-600" : "text-pro-muted"} />
-                <span className={`text-[10px] tracking-wide uppercase ${active ? "text-emerald-600 font-semibold" : "text-pro-muted"}`}>
+                {active && (
+                  <span className="absolute top-1 w-8 h-0.5 bg-[#d4af37] rounded-full" />
+                )}
+                <item.icon size={20} className={active ? "text-[#d4af37]" : "text-[#8a90a8]"} />
+                <span className={`text-[10px] tracking-wide uppercase font-semibold ${active ? "text-[#e7c76a]" : "text-[#8a90a8]"}`}>
                   {item.shortLabel || item.label}
                 </span>
               </Link>
@@ -194,14 +197,17 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           {hasOverflow && (
             <button
               onClick={() => setMoreOpen(true)}
-              className="flex flex-col items-center justify-center gap-0.5 h-full active:scale-95 transition-transform"
+              className="relative flex flex-col items-center justify-center gap-1 h-full active:scale-95 transition-transform"
               aria-label="Plus"
             >
+              {overflowTabs.some(isActive) && (
+                <span className="absolute top-1 w-8 h-0.5 bg-[#d4af37] rounded-full" />
+              )}
               <MoreHorizontal
                 size={20}
-                className={overflowTabs.some(isActive) ? "text-emerald-600" : "text-pro-muted"}
+                className={overflowTabs.some(isActive) ? "text-[#d4af37]" : "text-[#8a90a8]"}
               />
-              <span className={`text-[10px] tracking-wide uppercase ${overflowTabs.some(isActive) ? "text-emerald-600 font-semibold" : "text-pro-muted"}`}>
+              <span className={`text-[10px] tracking-wide uppercase font-semibold ${overflowTabs.some(isActive) ? "text-[#e7c76a]" : "text-[#8a90a8]"}`}>
                 Plus
               </span>
             </button>
@@ -213,16 +219,17 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {moreOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 z-[55] bg-black/40"
+            className="md:hidden fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="md:hidden fixed inset-x-0 bottom-0 z-[60] safe-bottom">
-            <div className="bg-white border-t border-pro-border rounded-t-2xl p-4 pb-6">
+          <div className="md:hidden fixed inset-x-0 bottom-0 z-[60] safe-bottom animate-sheet-up">
+            <div className="bg-[#0b1026] border-t border-[rgba(212,175,55,0.30)] rounded-t-3xl p-4 pb-6">
+              <div className="w-10 h-1 bg-white/15 rounded-full mx-auto mb-3" />
               <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-pro-text font-semibold text-sm">Menu</h3>
+                <h3 className="text-white font-semibold text-sm">Menu</h3>
                 <button
                   onClick={() => setMoreOpen(false)}
-                  className="w-8 h-8 rounded-full bg-pro-bg-soft flex items-center justify-center text-pro-text-soft"
+                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[#e7c76a]"
                 >
                   <X size={16} />
                 </button>
@@ -235,14 +242,14 @@ export function ConvoyeurSidebar({ items, children }: Props) {
                       key={item.to}
                       to={item.to}
                       onClick={() => setMoreOpen(false)}
-                      className={`flex flex-col items-center justify-center gap-1.5 p-3 min-h-[76px] rounded-xl border transition-colors ${
+                      className={`flex flex-col items-center justify-center gap-1.5 p-3 min-h-[80px] rounded-2xl border transition-all ${
                         active
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-pro-border bg-white text-pro-text-soft hover:bg-pro-bg-soft"
+                          ? "border-[rgba(212,175,55,0.50)] bg-[rgba(212,175,55,0.12)] text-[#e7c76a]"
+                          : "border-[rgba(212,175,55,0.18)] bg-white/5 text-[#c7cad8]"
                       }`}
                     >
-                      <item.icon size={20} className={active ? "text-emerald-600" : "text-pro-muted"} />
-                      <span className="text-[10px] text-center leading-tight tracking-wide uppercase">
+                      <item.icon size={20} className={active ? "text-[#d4af37]" : "text-[#8a90a8]"} />
+                      <span className="text-[10px] text-center leading-tight tracking-wide uppercase font-semibold">
                         {item.label}
                       </span>
                     </Link>
@@ -253,6 +260,25 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/* Brand premium driver : logo officiel + wordmark + badge DRIVER or */
+function DriverBrand() {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-[rgba(212,175,55,0.40)] shrink-0 bg-[#070b1f] flex items-center justify-center p-1">
+        <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" />
+      </div>
+      <div className="min-w-0 flex flex-col leading-tight">
+        <span className="font-heading text-[13px] tracking-[0.06em] text-white truncate">
+          Transports Ligneo
+        </span>
+        <span className="inline-flex items-center self-start mt-0.5 px-1.5 py-[1px] rounded text-[9px] font-bold uppercase tracking-[0.14em] bg-gradient-to-r from-[#d4af37] to-[#e7c76a] text-[#0b1026]">
+          Driver
+        </span>
+      </div>
     </div>
   );
 }
