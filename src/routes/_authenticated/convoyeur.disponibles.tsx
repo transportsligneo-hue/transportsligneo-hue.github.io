@@ -323,27 +323,39 @@ function ConvoyeurDisponibles() {
                   {!offre || offre.statut === "retiree" || offre.statut === "refusee" ? (
                     !open ? (
                       <div className="flex flex-col sm:flex-row gap-2">
-                        {t.prix_suggere && (
-                          <button
-                            onClick={() => accepterPrixSuggere(t)}
-                            disabled={submitting}
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
-                          >
-                            <CheckCircle2 size={15} />
-                            Accepter à {t.prix_suggere} €
-                          </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setOpenTrajetId(t.id);
-                            setContrePrix(t.prix_suggere?.toString() ?? "");
-                            setContreMessage("");
-                          }}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
-                        >
-                          <Euro size={15} />
-                          Proposer un autre prix
-                        </button>
+                        {(() => {
+                          const prixAcc = prixDriverEffectif(t);
+                          const isFixe = t.pricing_mode === "fixe";
+                          return (
+                            <>
+                              {prixAcc != null && (
+                                <button
+                                  onClick={() => accepterPrixSuggere(t)}
+                                  disabled={submitting}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
+                                >
+                                  <CheckCircle2 size={15} />
+                                  {isFixe ? `Accepter à ${prixAcc} €` : `Accepter à ${prixAcc} €`}
+                                </button>
+                              )}
+                              {!isFixe && (
+                                <button
+                                  onClick={() => {
+                                    setOpenTrajetId(t.id);
+                                    setContrePrix(prixAcc?.toString() ?? "");
+                                    setContreMessage("");
+                                  }}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
+                                >
+                                  <Euro size={15} />
+                                  {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
+                                    ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
+                                    : "Proposer un autre prix"}
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="space-y-2 border-t border-pro-border pt-3">
