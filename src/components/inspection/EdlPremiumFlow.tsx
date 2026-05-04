@@ -632,10 +632,10 @@ export function EdlPremiumFlow({
 
         <button
           onClick={goNext}
-          disabled={!canAdvance() && currentStep.kind !== "validation"}
-          className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:edl-cta"
+          disabled={!canAdvance()}
+          className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {safeIndex === TOTAL - 1 ? "Terminer" : "Étape suivante"}
+          {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Étape suivante"}
           <ArrowRight size={18} />
         </button>
       </footer>
