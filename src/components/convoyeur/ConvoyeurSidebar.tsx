@@ -171,7 +171,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {/* === Mobile Bottom Tab Bar premium === */}
       <nav
         aria-label="Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-bar border-t border-[rgba(212,175,55,0.20)] safe-bottom"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b1f]/95 backdrop-blur-xl border-t border-[rgba(212,175,55,0.20)] safe-bottom"
       >
         <div
           className="grid h-16 items-stretch"
