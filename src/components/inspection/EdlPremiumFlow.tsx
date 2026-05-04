@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X, RefreshCw,
   ShieldCheck, PenLine, ScanLine, UserCircle2, Sparkles, FileText, MapPin,
-  ShieldAlert, FastForward, FileSearch,
+  ShieldAlert, FileSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
