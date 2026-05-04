@@ -892,6 +892,54 @@ export type Database = {
         }
         Relationships: []
       }
+      inspection_document_ocr: {
+        Row: {
+          attribution_id: string
+          classification: string
+          created_at: string
+          document_type: string
+          id: string
+          inspection_id: string
+          ocr_error: string | null
+          ocr_status: string
+          raw_text: string | null
+          storage_path: string
+          structured_data: Json | null
+          updated_at: string
+          vue_type: string
+        }
+        Insert: {
+          attribution_id: string
+          classification?: string
+          created_at?: string
+          document_type: string
+          id?: string
+          inspection_id: string
+          ocr_error?: string | null
+          ocr_status?: string
+          raw_text?: string | null
+          storage_path: string
+          structured_data?: Json | null
+          updated_at?: string
+          vue_type: string
+        }
+        Update: {
+          attribution_id?: string
+          classification?: string
+          created_at?: string
+          document_type?: string
+          id?: string
+          inspection_id?: string
+          ocr_error?: string | null
+          ocr_status?: string
+          raw_text?: string | null
+          storage_path?: string
+          structured_data?: Json | null
+          updated_at?: string
+          vue_type?: string
+        }
+        Relationships: []
+      }
       inspection_photos: {
         Row: {
           created_at: string
