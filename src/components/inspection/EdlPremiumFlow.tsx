@@ -51,6 +51,13 @@ interface StepState {
   previewUrl?: string;
   storagePath?: string;
   error?: string;
+  /** OCR uniquement pour kind="scan" */
+  ocr?: {
+    status: "pending" | "completed" | "failed";
+    classification?: "admin" | "client" | "driver";
+    fieldsCount?: number;
+    error?: string;
+  };
 }
 
 interface StoredState {
