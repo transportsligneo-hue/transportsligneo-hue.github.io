@@ -7,6 +7,7 @@ import AvisClientsDynamiques from "@/components/AvisClientsDynamiques";
 import Confiance from "@/components/Confiance";
 import MissionsCounter from "@/components/MissionsCounter";
 import Footer from "@/components/Footer";
+import DevisGenerator from "@/components/DevisGenerator";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
 
 export const Route = createFileRoute("/")({
@@ -31,6 +32,7 @@ function Index() {
       <div className="hidden md:block">
         <Navbar />
         <HeroDesktop />
+        <DevisGenerator />
         <MissionsCounter />
         <PourquoiNousChoisir />
         <CommentCaMarche />
