@@ -439,8 +439,10 @@ export function EdlPremiumFlow({
 
   const canAdvance = () => {
     const s = currentState?.status;
+    // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
+    // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
-      return false; // étape finale, attend validation externe
+      return true;
     }
     if (isStepBypassed(currentStep)) return true;
     return s === "success";
