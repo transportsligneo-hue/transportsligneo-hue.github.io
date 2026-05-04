@@ -248,8 +248,9 @@ function ConvoyeurMissions() {
     const isActive = openMission.id === activeMissionId;
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
-    // === Mappage 7 étapes affichage (image fournie) ===
-    // 1 Enlèvement · 2 Inspection · 3 Transport · 4 Livraison · 5 Inspection arrivée · 6 Validation · 7 Terminée
+    // === Mappage 6 étapes (nouvel ordre standardisé) ===
+    // 1 Arrivé enlèvement · 2 Inspection enlèvement · 3 Trajet
+    // 4 Arrivé livraison · 5 Inspection livraison · 6 Validation admin
     const etape = openMission.etape_courante;
     const inspDepartOk = !!openMission.inspectionDepart;
     const inspArriveeOk = !!openMission.inspectionArrivee;
@@ -258,36 +259,40 @@ function ConvoyeurMissions() {
 
     let currentIdx = 1;
     if (etape === "acceptee" || openMission.statut === "accepte") currentIdx = 1;
-    else if (etape === "en_route" || etape === "sur_place") currentIdx = 1;
+    else if (etape === "en_route") currentIdx = 1;
+    else if (etape === "sur_place") currentIdx = 1;
     else if (etape === "vehicule_recupere") currentIdx = 2;
-    else if (etape === "edl_depart_fait" || (inspDepartOk && !inspArriveeOk)) currentIdx = 3;
+    else if (etape === "edl_depart_fait" || (inspDepartOk && !inspArriveeOk && etape !== "arrive_destination" && etape !== "en_livraison" && etape !== "edl_arrivee_fait")) currentIdx = 3;
     else if (etape === "en_livraison") currentIdx = 3;
     else if (etape === "arrive_destination") currentIdx = 4;
     else if (etape === "edl_arrivee_fait" || inspArriveeOk) currentIdx = 5;
-    else if (isPendingValidation) currentIdx = 6;
-    else if (isTermine) currentIdx = 7;
+    if (isPendingValidation) currentIdx = 6;
+    if (isTermine) currentIdx = 6;
 
     const stepLabels = [
-      { label: "Enlèvement" },
-      { label: "Inspection" },
-      { label: "Transport" },
-      { label: "Livraison" },
-      { label: "Inspection\narrivée" },
-      { label: "Validation" },
-      { label: "Terminée" },
+      { label: "Arrivé au lieu d'enlèvement" },
+      { label: "Inspection d'enlèvement" },
+      { label: "Trajet" },
+      { label: "Arrivé au lieu de livraison" },
+      { label: "Inspection de livraison" },
+      { label: "Validation admin" },
     ];
+    const TOTAL = stepLabels.length;
     const timelineSteps: TimelineStep[] = stepLabels.map((s, i) => {
       const idx = i + 1;
-      const state: TimelineStep["state"] = idx < currentIdx ? "done" : idx === currentIdx ? "current" : "todo";
+      // Si terminé, toutes les étapes sont done
+      const state: TimelineStep["state"] = isTermine
+        ? "done"
+        : idx < currentIdx ? "done" : idx === currentIdx ? "current" : "todo";
       return {
         index: idx,
         label: s.label,
         state,
-        sub: state === "done" ? "OK" : state === "current" ? "En cours" : "À venir",
+        sub: state === "done" ? "Terminée" : state === "current" ? "En cours" : "À venir",
       };
     });
 
-    const currentStepLabel = stepLabels[Math.min(currentIdx, stepLabels.length) - 1].label.replace("\n", " ");
+    const currentStepLabel = stepLabels[Math.min(currentIdx, TOTAL) - 1].label;
     const statutLabel = isTermine ? "Mission terminée"
       : isPendingValidation ? "En attente de validation"
       : isActive ? "Mission en cours"
