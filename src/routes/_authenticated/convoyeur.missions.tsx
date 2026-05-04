@@ -8,7 +8,7 @@ import {
   Check, X,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
-import { EtatDesLieuxFlow } from "@/components/inspection/EtatDesLieuxFlow";
+import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
@@ -226,11 +226,17 @@ function ConvoyeurMissions() {
 
   // Overlay plein écran via Portal (dans EtatDesLieuxFlow) — rendu en parallèle du DOM normal,
   // ne dépend plus du re-render du parent. Survit aux fetchMissions / GPS realtime.
+  const inspectionMission = inspection ? missions.find(m => m.id === inspection.attributionId) : null;
+  const driverDisplayName =
+    user?.user_metadata?.prenom && user?.user_metadata?.nom
+      ? `${user.user_metadata.prenom} ${user.user_metadata.nom}`
+      : user?.email ?? "Convoyeur";
   const inspectionOverlay = inspection && user ? (
-    <EtatDesLieuxFlow
+    <EdlPremiumFlow
       attributionId={inspection.attributionId}
-      type={inspection.type}
       userId={user.id}
+      driverName={driverDisplayName}
+      defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
       onComplete={handleInspectionComplete}
       onClose={() => setInspection(null)}
     />
