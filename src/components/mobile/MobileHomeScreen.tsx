@@ -1,12 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import {
-  Calendar,
+  Sparkles,
   FileText,
   MapPin,
   Phone,
   ShieldCheck,
-  Star,
   ChevronRight,
   Truck,
   Clock,
@@ -14,7 +12,6 @@ import {
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import heroChauffeur from "@/assets/hero-chauffeur-ligneo.jpg";
-import ReservationModal from "@/components/ReservationModal";
 import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,9 +19,9 @@ import { useAuth } from "@/hooks/useAuth";
 /**
  * Écran d'accueil mobile type application native.
  * Visible uniquement sur mobile (md:hidden) — laisse la version desktop intacte.
+ * L'estimation est l'action principale du site.
  */
 export default function MobileHomeScreen() {
-  const [reserveOpen, setReserveOpen] = useState(false);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
 
@@ -33,6 +30,11 @@ export default function MobileHomeScreen() {
     if (role === "admin") return navigate({ to: "/admin" });
     if (role === "convoyeur") return navigate({ to: "/convoyeur" });
     return navigate({ to: "/dashboard-client" });
+  };
+
+  const scrollToDevis = () => {
+    const el = document.getElementById("mobile-devis");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
