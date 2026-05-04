@@ -248,66 +248,66 @@ function Timeline({ steps }: { steps: TimelineStep[] }) {
   const progressPct = (progressIdx / Math.max(1, steps.length - 1)) * 100;
 
   return (
-    <div className="relative pt-1 pb-2">
-      {/* Ligne de fond */}
-      <div className="absolute top-[22px] left-5 right-5 h-[3px] rounded-full bg-[#0b1026]/10" />
-      {/* Ligne progression dorée */}
-      <div
-        className="absolute top-[22px] left-5 h-[3px] rounded-full bg-gradient-to-r from-[var(--gold)] to-[#e7c76a] transition-all duration-700 shadow-[0_0_8px_rgba(212,175,55,0.5)]"
-        style={{ width: `calc((100% - 40px) * ${progressPct / 100})` }}
-      />
-      <ol
-        className="grid gap-x-2 gap-y-1 relative"
-        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-      >
-        {steps.map((s) => {
-          const isDone = s.state === "done";
-          const isCurrent = s.state === "current";
-          const statusLabel = isDone ? "OK" : isCurrent ? "En cours" : "À venir";
-          return (
-            <li key={s.index} className="relative flex flex-col items-center text-center px-0.5">
-              <div
-                className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition ${
-                  isDone
-                    ? "bg-gradient-to-br from-[var(--gold)] to-[#b8902c] text-[#0b1026] shadow-[0_4px_12px_rgba(212,175,55,0.45)] ring-2 ring-[var(--gold)]/30"
-                    : isCurrent
-                      ? "bg-[#0b1026] text-[var(--gold)] ring-[3px] ring-[var(--gold)] shadow-[0_0_0_4px_rgba(212,175,55,0.18),0_6px_16px_rgba(212,175,55,0.35)] animate-pulse"
-                      : "bg-white text-[#0b1026]/45 ring-2 ring-[#0b1026]/15"
-                }`}
-              >
-                {isDone ? "✓" : s.index}
-              </div>
-              <p
-                className={`mt-2.5 text-[11px] sm:text-[12px] leading-snug font-semibold min-h-[28px] ${
-                  isCurrent
-                    ? "text-[#0b1026]"
-                    : isDone
-                      ? "text-[#0b1026]"
-                      : "text-[#0b1026]/55"
-                }`}
-              >
-                {s.label}
-              </p>
-              <span
-                className={`mt-1 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
-                  isDone
-                    ? "bg-[var(--gold)]/15 text-[#8a6a18] border border-[var(--gold)]/40"
-                    : isCurrent
-                      ? "bg-[#0b1026] text-[var(--gold)] border border-[var(--gold)] shadow-[0_2px_6px_rgba(11,16,38,0.2)]"
-                      : "bg-[#0b1026]/5 text-[#0b1026]/50 border border-[#0b1026]/10"
-                }`}
-              >
-                {statusLabel}
-              </span>
-              {s.sub && isCurrent && (
-                <p className="mt-1 text-[10px] leading-tight text-[#0b1026]/70 font-medium">
-                  {s.sub}
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+    <div className="relative pt-1 pb-2 -mx-2 sm:mx-0">
+      {/* Wrapper scrollable sur petits écrans pour aérer les libellés */}
+      <div className="overflow-x-auto px-2 sm:px-0 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          className="relative min-w-[640px] sm:min-w-0"
+        >
+          {/* Ligne de fond */}
+          <div className="absolute top-[22px] left-6 right-6 h-[3px] rounded-full bg-[#0b1026]/15" />
+          {/* Ligne progression dorée */}
+          <div
+            className="absolute top-[22px] left-6 h-[3px] rounded-full bg-gradient-to-r from-[var(--gold)] to-[#e7c76a] transition-all duration-700 shadow-[0_0_10px_rgba(212,175,55,0.55)]"
+            style={{ width: `calc((100% - 48px) * ${progressPct / 100})` }}
+          />
+          <ol
+            className="grid gap-x-3 gap-y-2 relative"
+            style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+          >
+            {steps.map((s) => {
+              const isDone = s.state === "done";
+              const isCurrent = s.state === "current";
+              const statusLabel = isDone ? "OK" : isCurrent ? "En cours" : "À venir";
+              return (
+                <li key={s.index} className="relative flex flex-col items-center text-center px-1">
+                  <div
+                    className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition ${
+                      isDone
+                        ? "bg-gradient-to-br from-[var(--gold)] to-[#b8902c] text-[#0b1026] shadow-[0_4px_12px_rgba(212,175,55,0.5)] ring-2 ring-[var(--gold)]/40"
+                        : isCurrent
+                          ? "bg-[#0b1026] text-[var(--gold)] ring-[3px] ring-[var(--gold)] shadow-[0_0_0_4px_rgba(212,175,55,0.22),0_6px_18px_rgba(212,175,55,0.45)] animate-pulse"
+                          : "bg-white text-[#0b1026]/55 ring-2 ring-[#0b1026]/20"
+                    }`}
+                  >
+                    {isDone ? "✓" : s.index}
+                  </div>
+                  <p
+                    className={`mt-3 text-[12px] sm:text-[13px] leading-tight font-semibold min-h-[34px] whitespace-pre-line px-1 ${
+                      isDone || isCurrent
+                        ? "text-[#0b1026]"
+                        : "text-[#0b1026]/65"
+                    }`}
+                  >
+                    {s.label}
+                  </p>
+                  <span
+                    className={`mt-1.5 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                      isDone
+                        ? "bg-[var(--gold)]/20 text-[#7a5d10] border border-[var(--gold)]/55"
+                        : isCurrent
+                          ? "bg-[#0b1026] text-[var(--gold)] border border-[var(--gold)] shadow-[0_2px_8px_rgba(11,16,38,0.25)]"
+                          : "bg-[#0b1026]/8 text-[#0b1026]/65 border border-[#0b1026]/15"
+                    }`}
+                  >
+                    {statusLabel}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
     </div>
   );
 }

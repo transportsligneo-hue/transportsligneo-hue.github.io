@@ -223,19 +223,30 @@ export function EdlPremiumFlow({
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
 
-      // Upsert (table inspection_photos a une contrainte sur (inspection_id, vue_type) si elle existe,
-      // sinon delete+insert fallback)
-      const { error: upsertErr } = await supabase
+      // Stratégie robuste : delete-then-insert (plus fiable que upsert sur certaines configs RLS)
+      await supabase.from("inspection_photos")
+        .delete()
+        .eq("inspection_id", insId)
+        .eq("vue_type", stepId);
+
+      const { error: insertErr } = await supabase
         .from("inspection_photos")
-        .upsert(
-          { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
-          { onConflict: "inspection_id,vue_type" },
-        );
-      if (upsertErr) {
-        await supabase.from("inspection_photos")
-          .delete().eq("inspection_id", insId).eq("vue_type", stepId);
-        await supabase.from("inspection_photos")
-          .insert({ inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size });
+        .insert({
+          inspection_id: insId,
+          vue_type: stepId,
+          url_photo: path,
+          file_size_bytes: compressed.size,
+        });
+
+      if (insertErr) {
+        // Dernier recours : tente l'upsert si la contrainte unique existe
+        const { error: upsertErr } = await supabase
+          .from("inspection_photos")
+          .upsert(
+            { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
+            { onConflict: "inspection_id,vue_type" },
+          );
+        if (upsertErr) throw upsertErr;
       }
 
       setState(stepId, {
@@ -428,8 +439,10 @@ export function EdlPremiumFlow({
 
   const canAdvance = () => {
     const s = currentState?.status;
+    // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
+    // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
-      return false; // étape finale, attend validation externe
+      return true;
     }
     if (isStepBypassed(currentStep)) return true;
     return s === "success";
@@ -619,10 +632,10 @@ export function EdlPremiumFlow({
 
         <button
           onClick={goNext}
-          disabled={!canAdvance() && currentStep.kind !== "validation"}
-          className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:edl-cta"
+          disabled={!canAdvance()}
+          className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {safeIndex === TOTAL - 1 ? "Terminer" : "Étape suivante"}
+          {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Étape suivante"}
           <ArrowRight size={18} />
         </button>
       </footer>
@@ -852,9 +865,7 @@ function SignatureArea({
         </div>
       ) : (
         <div className="edl-glass p-3">
-          <div className="bg-white rounded-xl overflow-hidden" style={{ height: 220 }}>
-            <SignatureCanvas onValidate={onSign} disabled={state?.status === "uploading"} />
-          </div>
+          <SignatureCanvas onValidate={onSign} disabled={state?.status === "uploading"} />
         </div>
       )}
     </div>
