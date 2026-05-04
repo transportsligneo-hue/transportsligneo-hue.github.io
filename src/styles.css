@@ -396,4 +396,130 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
+
+  /* ============================================================
+     === EDL PREMIUM — bleu électrique + glassmorphism Apple/SaaS
+     Utilisé par EtatDesLieuxFlow refondu (lot 1).
+     Palette : électrique #2c6bff, halo cyan, navy profond, doré.
+     ============================================================ */
+  .edl-shell {
+    --edl-electric: #2c6bff;
+    --edl-electric-glow: #4f8bff;
+    --edl-cyan: #5fb6ff;
+    --edl-navy-deep: #050a1f;
+    --edl-navy: #0a1335;
+    --edl-navy-2: #0e1a4a;
+    --edl-text: #f5f8ff;
+    --edl-text-soft: #cfd6ee;
+    --edl-muted: #8d96b8;
+    --edl-gold: #e7c76a;
+
+    background:
+      radial-gradient(1100px 600px at 0% -10%, rgba(44, 107, 255, 0.28), transparent 60%),
+      radial-gradient(900px 500px at 120% 0%, rgba(95, 182, 255, 0.18), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(231, 199, 106, 0.10), transparent 60%),
+      linear-gradient(180deg, #050a1f 0%, #0a1335 50%, #050a1f 100%);
+    color: var(--edl-text);
+    min-height: 100vh;
+  }
+  .edl-glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow:
+      0 12px 36px -16px rgba(0,0,0,0.60),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+    border-radius: 1.25rem;
+  }
+  .edl-glass-strong {
+    background: linear-gradient(180deg, rgba(20, 35, 90, 0.65), rgba(10, 19, 53, 0.55));
+    border: 1px solid rgba(95, 182, 255, 0.25);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    box-shadow:
+      0 18px 50px -18px rgba(0,0,0,0.70),
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      0 0 0 1px rgba(44, 107, 255, 0.10);
+    border-radius: 1.25rem;
+  }
+  .edl-cta {
+    background: linear-gradient(135deg, #2c6bff 0%, #4f8bff 50%, #5fb6ff 100%);
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 1rem;
+    box-shadow:
+      0 14px 40px -10px rgba(44, 107, 255, 0.65),
+      inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+  }
+  .edl-cta:active { transform: scale(0.97); }
+  .edl-cta:hover { filter: brightness(1.08); box-shadow: 0 18px 48px -10px rgba(44, 107, 255, 0.75), inset 0 1px 0 rgba(255,255,255,0.30); }
+  .edl-cta:disabled { opacity: 0.45; pointer-events: none; }
+
+  .edl-cta-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
+    color: #0a1335;
+    font-weight: 700;
+    border-radius: 1rem;
+    box-shadow: 0 12px 36px -10px rgba(212,175,55,0.55), inset 0 1px 0 rgba(255,255,255,0.30);
+    transition: transform 120ms ease, filter 120ms ease;
+  }
+  .edl-cta-gold:active { transform: scale(0.97); }
+  .edl-cta-gold:hover { filter: brightness(1.08); }
+
+  .edl-chip {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.3rem 0.7rem; border-radius: 9999px;
+    background: rgba(44, 107, 255, 0.18);
+    border: 1px solid rgba(95, 182, 255, 0.40);
+    color: #cfe1ff;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    backdrop-filter: blur(10px);
+  }
+  .edl-chip-gold {
+    background: rgba(231, 199, 106, 0.16);
+    border-color: rgba(231, 199, 106, 0.45);
+    color: #f3dc92;
+  }
+  .edl-chip-success {
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.45);
+    color: #6ee7b7;
+  }
+  .edl-electric-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #2c6bff 0%, #5fb6ff 50%, #e7c76a 100%);
+    box-shadow: 0 0 14px rgba(95, 182, 255, 0.55);
+    border-radius: 9999px;
+  }
+  .edl-photo-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid rgba(95, 182, 255, 0.22);
+    background: linear-gradient(180deg, rgba(10,19,53,0.6), rgba(5,10,31,0.6));
+    box-shadow: 0 16px 40px -16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .edl-photo-frame::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(5,10,31,0.55) 100%);
+  }
+  @keyframes edl-pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(95, 182, 255, 0.55), 0 0 24px rgba(44, 107, 255, 0.55); }
+    50%      { box-shadow: 0 0 0 10px rgba(95, 182, 255, 0.0), 0 0 32px rgba(44, 107, 255, 0.75); }
+  }
+  .edl-pulse { animation: edl-pulse-ring 1800ms ease-in-out infinite; }
+  @keyframes edl-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .edl-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(95,182,255,0.18), transparent);
+    background-size: 200% 100%;
+    animation: edl-shimmer 1800ms linear infinite;
+  }
 }
