@@ -233,4 +233,161 @@
   .role-partner-text   { color: #7c3aed; }
   .role-partner-soft   { background-color: rgba(124, 58, 237, 0.10); }
   .role-partner-border { border-color: rgba(124, 58, 237, 0.25); }
+
+  /* ============================================================
+     === DRIVER PREMIUM SHELL — navy + or, glassmorphism premium
+     Toutes les pages convoyeur sont enveloppées dans .driver-shell.
+     Les overrides ci-dessous transforment le rendu "SaaS clair"
+     existant en thème "grand groupe / mobilité premium" sans
+     toucher aux composants de chaque écran.
+     ============================================================ */
+  .driver-shell {
+    --driver-bg: #070b1f;
+    --driver-bg-2: #0b1026;
+    --driver-surface: rgba(255, 255, 255, 0.04);
+    --driver-surface-strong: rgba(255, 255, 255, 0.06);
+    --driver-border: rgba(212, 175, 55, 0.18);
+    --driver-border-strong: rgba(212, 175, 55, 0.35);
+    --driver-text: #f5f1e8;
+    --driver-text-soft: #c7cad8;
+    --driver-muted: #8a90a8;
+
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(212, 175, 55, 0.08), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(37, 99, 235, 0.10), transparent 60%),
+      linear-gradient(180deg, #070b1f 0%, #0b1026 60%, #070b1f 100%);
+    color: var(--driver-text);
+    min-height: 100vh;
+  }
+  .driver-shell .bg-pro-bg,
+  .driver-shell .bg-pro-bg-soft { background-color: transparent !important; }
+  .driver-shell .text-pro-text { color: var(--driver-text) !important; font-family: 'Inter', system-ui, sans-serif; }
+  .driver-shell .text-pro-text-soft { color: var(--driver-text-soft) !important; }
+  .driver-shell .text-pro-muted { color: var(--driver-muted) !important; }
+  .driver-shell .border-pro-border,
+  .driver-shell .border-pro-border\/60 { border-color: var(--driver-border) !important; }
+
+  /* Cartes blanches → glass navy */
+  .driver-shell .bg-white {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-color: var(--driver-border) !important;
+  }
+  .driver-shell .shadow-sm,
+  .driver-shell .shadow-pro-card { box-shadow: 0 8px 24px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04) !important; }
+
+  /* Inputs/selects/textarea → glass dark */
+  .driver-shell input,
+  .driver-shell select,
+  .driver-shell textarea {
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--driver-text) !important;
+    border-color: var(--driver-border) !important;
+  }
+  .driver-shell input::placeholder,
+  .driver-shell textarea::placeholder { color: var(--driver-muted) !important; }
+  .driver-shell input:focus,
+  .driver-shell select:focus,
+  .driver-shell textarea:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18) !important;
+    outline: none !important;
+  }
+
+  /* Boutons primaires "emerald" remplacés par or premium */
+  .driver-shell .bg-emerald-600,
+  .driver-shell .bg-emerald-700 {
+    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%) !important;
+    color: #0b1026 !important;
+  }
+  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.05); }
+  .driver-shell .text-emerald-600,
+  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
+  .driver-shell .bg-emerald-50 { background: rgba(212, 175, 55, 0.10) !important; }
+  .driver-shell .border-emerald-200,
+  .driver-shell .border-emerald-300 { border-color: rgba(212, 175, 55, 0.30) !important; }
+  .driver-shell .text-emerald-800,
+  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
+  .driver-shell .bg-emerald-100 { background: rgba(16, 185, 129, 0.18) !important; }
+
+  /* Amber alerts → premium warm */
+  .driver-shell .bg-amber-50 { background: rgba(245, 158, 11, 0.10) !important; }
+  .driver-shell .border-amber-200 { border-color: rgba(245, 158, 11, 0.30) !important; }
+  .driver-shell .text-amber-700,
+  .driver-shell .text-amber-800,
+  .driver-shell .text-amber-900 { color: #f5c46b !important; }
+
+  /* Red destructive → tone down for dark */
+  .driver-shell .bg-red-50 { background: rgba(239, 68, 68, 0.10) !important; }
+  .driver-shell .border-red-200 { border-color: rgba(239, 68, 68, 0.30) !important; }
+  .driver-shell .text-red-600,
+  .driver-shell .text-red-700 { color: #ff8a8a !important; }
+
+  /* Blue & purple secondary tints */
+  .driver-shell .bg-blue-50 { background: rgba(59, 130, 246, 0.12) !important; }
+  .driver-shell .text-blue-600,
+  .driver-shell .text-blue-700 { color: #93c5fd !important; }
+
+  /* Stat tiles colored backgrounds → navy glass with subtle accent border */
+  .driver-shell [class*="border-amber-200"].rounded-xl,
+  .driver-shell [class*="border-blue-200"].rounded-xl,
+  .driver-shell [class*="border-emerald-200"].rounded-xl {
+    background: rgba(255,255,255,0.04) !important;
+  }
+
+  /* Premium driver utilities */
+  .driver-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid var(--driver-border);
+    border-radius: 1rem;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 8px 24px -12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .driver-cta {
+    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
+    color: #0b1026;
+    font-weight: 700;
+    border-radius: 0.875rem;
+    box-shadow: 0 10px 30px -10px rgba(212,175,55,0.55);
+    transition: transform 120ms ease, filter 120ms ease;
+  }
+  .driver-cta:active { transform: scale(0.98); }
+  .driver-cta:hover { filter: brightness(1.06); }
+  .driver-chip {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.25rem 0.625rem; border-radius: 9999px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.30);
+    color: #e7c76a;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .driver-chip-emerald {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.40);
+    color: #5fdab1;
+  }
+  .driver-chip-blue {
+    background: rgba(59, 130, 246, 0.14);
+    border-color: rgba(59, 130, 246, 0.40);
+    color: #93c5fd;
+  }
+  .driver-chip-purple {
+    background: rgba(168, 85, 247, 0.14);
+    border-color: rgba(168, 85, 247, 0.40);
+    color: #d8b4fe;
+  }
+  .driver-divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+  }
+  .driver-eyebrow {
+    color: var(--gold-light);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
 }
