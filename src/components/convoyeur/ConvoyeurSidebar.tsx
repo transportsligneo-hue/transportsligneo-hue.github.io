@@ -164,10 +164,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main
-        className="flex-1 md:ml-64 md:pt-0 pb-bottom-nav md:pb-0 min-h-screen flex flex-col w-full"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 56px)" }}
-      >
+      <main className="flex-1 md:ml-64 pb-bottom-nav md:pb-0 min-h-screen flex flex-col w-full driver-main">
         <div className="px-3 py-4 sm:px-4 sm:py-5 md:p-8 md:max-w-5xl md:mx-auto w-full flex-1">{children}</div>
       </main>
 
