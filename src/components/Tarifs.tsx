@@ -31,12 +31,14 @@ export default function Tarifs() {
           <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2 leading-tight">
             <span className="text-2xl align-middle mr-2">à partir de</span>0,85 €<span className="text-2xl">/km</span>
           </p>
-          <p className="text-cream/70 text-sm mt-2">Hors département 37 et limitrophes — pour les trajets de plus de 200 km</p>
+          <p className="text-cream/70 text-sm mt-2">
+            Hors département 37 et limitrophes — pour les trajets de plus de 200 km
+          </p>
           <p className="text-primary text-sm mt-3 font-medium tracking-wide">
-            Péages &amp; carburant inclus
+            Assurance tout risque avec péage et carburant inclus
           </p>
           <p className="text-cream/50 text-xs mt-2">
-            Options supplémentaires possibles selon vos besoins
+            Tarifs HT — options supplémentaires possibles selon vos besoins
           </p>
         </div>
 
