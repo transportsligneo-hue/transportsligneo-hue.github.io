@@ -238,25 +238,57 @@ export function EdlPremiumFlow({
           .insert({ inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size });
       }
 
-      setState(stepId, { status: "success", previewUrl, storagePath: path });
+      setState(stepId, {
+        status: "success", previewUrl, storagePath: path,
+        ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
+      });
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
       if (currentStep.kind === "scan") {
         supabase.functions.invoke("edl-document-ocr", {
-          body: { storage_path: path, document_type: stepId },
+          body: {
+            storage_path: path,
+            document_type: stepId,
+            inspection_id: insId,
+            attribution_id: attributionId,
+            vue_type: stepId,
+          },
         }).then(({ data, error }) => {
-          if (error) {
+          if (error || !data) {
             console.warn("[EDL OCR]", error);
+            setStates(prev => ({
+              ...prev,
+              [stepId]: { ...prev[stepId], ocr: { status: "failed", error: error?.message ?? "OCR indisponible" } },
+            }));
             toast.warning("OCR indisponible", { description: "Document enregistré sans extraction." });
             return;
           }
-          const fields = Object.entries((data?.structured ?? {}) as Record<string, unknown>)
+          const fields = Object.entries((data.structured ?? {}) as Record<string, unknown>)
             .filter(([k, v]) => k !== "raw_text" && typeof v === "string" && v)
             .length;
+          setStates(prev => ({
+            ...prev,
+            [stepId]: {
+              ...prev[stepId],
+              ocr: {
+                status: "completed",
+                classification: data.classification,
+                fieldsCount: fields,
+              },
+            },
+          }));
           if (fields > 0) {
-            toast.success(`Document scanné — ${fields} champ(s) extraits`);
+            toast.success(`Scan OCR · ${fields} champ(s) extraits`, {
+              description: `Classé : ${data.classification === "admin" ? "Admin" : data.classification === "client" ? "Client" : "Driver"}`,
+            });
           }
-        }).catch(e => console.warn("[EDL OCR] invoke failed", e));
+        }).catch(e => {
+          console.warn("[EDL OCR] invoke failed", e);
+          setStates(prev => ({
+            ...prev,
+            [stepId]: { ...prev[stepId], ocr: { status: "failed", error: String(e) } },
+          }));
+        });
       }
     } catch (err) {
       console.error("[EDL Premium] photo upload failed", err);
