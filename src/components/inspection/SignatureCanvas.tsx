@@ -99,7 +99,7 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="bg-white border-2 border-dashed border-pro-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden shadow-sm">
         <div className="relative h-56 sm:h-64 touch-none">
           <canvas
             ref={canvasRef}
@@ -112,21 +112,21 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
           />
           {!hasInk && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <p className="text-pro-muted text-sm font-medium select-none">
+              <p className="text-slate-500 text-sm font-medium select-none">
                 Signez ici avec le doigt
               </p>
             </div>
           )}
         </div>
-        <div className="border-t border-pro-border px-3 py-2 flex items-center justify-between bg-pro-bg-soft/40">
-          <span className="text-[11px] text-pro-muted">
+        <div className="border-t border-slate-200 px-3 py-2 flex items-center justify-between bg-slate-50">
+          <span className="text-[11px] text-slate-600">
             Le client signe directement sur l'écran
           </span>
           <button
             type="button"
             onClick={clear}
             disabled={!hasInk || disabled}
-            className="flex items-center gap-1 text-xs text-pro-text-soft hover:text-pro-text disabled:opacity-30 px-2 py-1"
+            className="flex items-center gap-1 text-xs text-slate-700 hover:text-slate-900 disabled:opacity-30 px-2 py-1"
           >
             <Eraser size={12} /> Effacer
           </button>
