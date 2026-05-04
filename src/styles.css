@@ -95,6 +95,11 @@
   .pb-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
   .h-bottom-nav { height: calc(64px + env(safe-area-inset-bottom)); }
 
+  /* Driver main : compense le header fixed mobile (safe-area + 56px) */
+  @media (max-width: 767px) {
+    .driver-main { padding-top: calc(env(safe-area-inset-top) + 56px); }
+  }
+
   .mobile-card {
     background: rgba(15, 21, 48, 0.85);
     border: 1px solid rgba(212, 175, 55, 0.18);
