@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Mail, Phone, Trash2, FileText } from "lucide-react";
+import { Loader2, Download, Mail, Phone, Trash2, FileText, ArrowRightCircle } from "lucide-react";
+import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
   PageHeader,
@@ -46,6 +47,8 @@ interface DevisRow {
   statut: string;
   email_envoye: boolean;
   created_at: string;
+  mission_id: string | null;
+  converted_at: string | null;
 }
 
 const STATUTS = [
@@ -61,6 +64,69 @@ function AdminDevisPage() {
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("");
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
+
+  const handleConvert = async (row: DevisRow) => {
+    if (row.mission_id) {
+      toast.info("Devis déjà converti", { description: `Mission ${row.mission_id.slice(0, 8)}…` });
+      return;
+    }
+    if (!confirm(`Convertir le devis ${row.numero} en mission ?`)) return;
+    setConvertingId(row.id);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) throw new Error("Utilisateur non authentifié");
+
+      const { data: mission, error: mErr } = await supabase
+        .from("missions")
+        .insert({
+          user_id: userId,
+          nom: row.nom,
+          prenom: row.prenom,
+          email: row.email,
+          telephone: row.telephone,
+          ville_depart: row.depart,
+          ville_arrivee: row.arrivee,
+          date_prise_en_charge: row.date_souhaitee ?? new Date().toISOString().slice(0, 10),
+          type_trajet: row.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
+          marque: row.marque,
+          modele: row.modele,
+          carburant: row.carburant,
+          remarques: row.message,
+          prix_total: row.prix_estime,
+          statut: "en_attente",
+        })
+        .select("id, numero")
+        .single();
+      if (mErr) throw mErr;
+
+      const { error: dErr } = await supabase
+        .from("devis")
+        .update({
+          statut: "convertit",
+          mission_id: mission.id,
+          converted_at: new Date().toISOString(),
+          converted_by: userId,
+        })
+        .eq("id", row.id);
+      if (dErr) throw dErr;
+
+      toast.success("Mission créée", { description: `${mission.numero} depuis ${row.numero}` });
+      setDevis((d) =>
+        d.map((x) =>
+          x.id === row.id
+            ? { ...x, statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString() }
+            : x
+        )
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      toast.error("Échec conversion", { description: msg });
+    } finally {
+      setConvertingId(null);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -196,6 +262,7 @@ function AdminDevisPage() {
                       </span>
                       <Badge tone={devisStatutTone[d.statut] ?? "neutral"}>{statut.label}</Badge>
                       {d.email_envoye && <Badge tone="success">Email envoyé</Badge>}
+                      {d.mission_id && <Badge tone="info">Mission créée</Badge>}
                       <span className="text-pro-muted text-xs">
                         {new Date(d.created_at).toLocaleString("fr-FR", {
                           day: "2-digit",
@@ -279,7 +346,7 @@ function AdminDevisPage() {
                       ))}
                     </Select>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap justify-end">
                       <Button
                         size="sm"
                         onClick={() => handleDownload(d)}
@@ -293,6 +360,20 @@ function AdminDevisPage() {
                         }
                       >
                         PDF
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleConvert(d)}
+                        disabled={convertingId === d.id || !!d.mission_id}
+                        icon={
+                          convertingId === d.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <ArrowRightCircle size={12} />
+                          )
+                        }
+                      >
+                        {d.mission_id ? "Converti" : "→ Mission"}
                       </Button>
                       <IconButton
                         onClick={() => handleDelete(d.id)}

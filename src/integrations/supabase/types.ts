@@ -622,6 +622,8 @@ export type Database = {
         Row: {
           arrivee: string
           carburant: string | null
+          converted_at: string | null
+          converted_by: string | null
           created_at: string
           date_souhaitee: string | null
           depart: string
@@ -633,6 +635,7 @@ export type Database = {
           id: string
           marque: string | null
           message: string | null
+          mission_id: string | null
           modele: string | null
           multiplier_label: string | null
           nom: string
@@ -652,6 +655,8 @@ export type Database = {
         Insert: {
           arrivee: string
           carburant?: string | null
+          converted_at?: string | null
+          converted_by?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart: string
@@ -663,6 +668,7 @@ export type Database = {
           id?: string
           marque?: string | null
           message?: string | null
+          mission_id?: string | null
           modele?: string | null
           multiplier_label?: string | null
           nom: string
@@ -682,6 +688,8 @@ export type Database = {
         Update: {
           arrivee?: string
           carburant?: string | null
+          converted_at?: string | null
+          converted_by?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart?: string
@@ -693,6 +701,7 @@ export type Database = {
           id?: string
           marque?: string | null
           message?: string | null
+          mission_id?: string | null
           modele?: string | null
           multiplier_label?: string | null
           nom?: string
