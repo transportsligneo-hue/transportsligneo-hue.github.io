@@ -553,6 +553,6 @@ export default function DevisGenerator() {
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
