@@ -209,6 +209,25 @@ export function EdlPremiumFlow({
       }
 
       setState(stepId, { status: "success", previewUrl, storagePath: path });
+
+      // OCR auto pour scans (PV livraison + carte grise) — non bloquant
+      if (currentStep.kind === "scan") {
+        supabase.functions.invoke("edl-document-ocr", {
+          body: { storage_path: path, document_type: stepId },
+        }).then(({ data, error }) => {
+          if (error) {
+            console.warn("[EDL OCR]", error);
+            toast.warning("OCR indisponible", { description: "Document enregistré sans extraction." });
+            return;
+          }
+          const fields = Object.entries((data?.structured ?? {}) as Record<string, unknown>)
+            .filter(([k, v]) => k !== "raw_text" && typeof v === "string" && v)
+            .length;
+          if (fields > 0) {
+            toast.success(`Document scanné — ${fields} champ(s) extraits`);
+          }
+        }).catch(e => console.warn("[EDL OCR] invoke failed", e));
+      }
     } catch (err) {
       console.error("[EDL Premium] photo upload failed", err);
       setState(stepId, {
