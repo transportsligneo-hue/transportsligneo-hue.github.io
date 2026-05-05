@@ -64,6 +64,48 @@ export type Database = {
           },
         ]
       }
+      admin_notifications: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          link: string | null
+          lu: boolean
+          lu_at: string | null
+          message: string | null
+          metadata: Json | null
+          titre: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          link?: string | null
+          lu?: boolean
+          lu_at?: string | null
+          message?: string | null
+          metadata?: Json | null
+          titre: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          link?: string | null
+          lu?: boolean
+          lu_at?: string | null
+          message?: string | null
+          metadata?: Json | null
+          titre?: string
+          type?: string
+        }
+        Relationships: []
+      }
       attributions: {
         Row: {
           convoyeur_id: string
@@ -1085,6 +1127,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mission_etape_history_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_incidents: {
+        Row: {
+          attribution_id: string
+          convoyeur_user_id: string
+          created_at: string
+          description: string
+          gravite: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          photos: Json | null
+          reponse_admin: string | null
+          resolu_at: string | null
+          statut: string
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          convoyeur_user_id: string
+          created_at?: string
+          description: string
+          gravite?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          photos?: Json | null
+          reponse_admin?: string | null
+          resolu_at?: string | null
+          statut?: string
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          convoyeur_user_id?: string
+          created_at?: string
+          description?: string
+          gravite?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          photos?: Json | null
+          reponse_admin?: string | null
+          resolu_at?: string | null
+          statut?: string
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_incidents_attribution_id_fkey"
             columns: ["attribution_id"]
             isOneToOne: false
             referencedRelation: "attributions"
