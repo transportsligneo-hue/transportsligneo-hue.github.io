@@ -15,6 +15,7 @@ import {
   Check, ChevronRight, MapPin, KeyRound, ClipboardCheck, Truck,
   Flag, AlertTriangle, Loader2, Clock, Navigation,
 } from "lucide-react";
+import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"
