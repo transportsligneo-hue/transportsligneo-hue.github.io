@@ -15,6 +15,7 @@ import {
   Check, ChevronRight, MapPin, KeyRound, ClipboardCheck, Truck,
   Flag, AlertTriangle, Loader2, Clock, Navigation,
 } from "lucide-react";
+import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"
@@ -80,7 +81,6 @@ export function MissionWorkflow({
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [incidentOpen, setIncidentOpen] = useState(false);
-  const [incidentNote, setIncidentNote] = useState("");
 
   // Étape effective : si rien en base, on déduit depuis le statut macro
   const effectiveEtape: EtapeKey = (currentEtape as EtapeKey) ||
@@ -145,10 +145,8 @@ export function MissionWorkflow({
     onUpdated();
   };
 
-  const reportIncident = async () => {
-    await persistEtape("incident", incidentNote || "Incident signalé sur le terrain");
-    setIncidentOpen(false);
-    setIncidentNote("");
+  const onIncidentReported = async () => {
+    await persistEtape("incident", "Incident signalé sur le terrain");
     onUpdated();
   };
 
@@ -299,34 +297,14 @@ export function MissionWorkflow({
         </div>
       )}
 
-      {/* === Modal incident === */}
+      {/* === Sheet incident plein écran === */}
       {incidentOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={() => setIncidentOpen(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-3" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-red-600" size={20} />
-              <h3 className="font-semibold text-pro-text">Signaler un incident</h3>
-            </div>
-            <textarea
-              value={incidentNote}
-              onChange={e => setIncidentNote(e.target.value)}
-              rows={3}
-              placeholder="Décrivez brièvement ce qui se passe (panne, retard, accident, accès impossible...)"
-              className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIncidentOpen(false)}
-                className="flex-1 px-3 py-2.5 bg-pro-bg-soft text-pro-text-soft rounded-lg text-sm font-medium"
-              >Annuler</button>
-              <button
-                onClick={reportIncident}
-                disabled={loading}
-                className="flex-1 px-3 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
-              >Signaler</button>
-            </div>
-          </div>
-        </div>
+        <IncidentReportSheet
+          attributionId={attributionId}
+          userId={userId}
+          onClose={() => setIncidentOpen(false)}
+          onReported={onIncidentReported}
+        />
       )}
     </div>
   );
