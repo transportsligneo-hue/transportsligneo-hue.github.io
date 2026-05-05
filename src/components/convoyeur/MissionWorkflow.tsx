@@ -145,10 +145,8 @@ export function MissionWorkflow({
     onUpdated();
   };
 
-  const reportIncident = async () => {
-    await persistEtape("incident", incidentNote || "Incident signalé sur le terrain");
-    setIncidentOpen(false);
-    setIncidentNote("");
+  const onIncidentReported = async () => {
+    await persistEtape("incident", "Incident signalé sur le terrain");
     onUpdated();
   };
 
