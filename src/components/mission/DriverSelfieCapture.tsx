@@ -44,6 +44,8 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     if (!raw) return;
+    // Révoque l'ancienne preview pour éviter les fuites mémoire
+    if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
     const local = URL.createObjectURL(raw);
     setPreview(local);
     setStatus("uploading");
@@ -53,11 +55,25 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       const pos = await getPosition();
       if (pos) setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy });
 
-      const file = await compressImage(raw);
-      const path = `${userId}/${attributionId}/selfie_${Date.now()}.jpg`;
-      const { error: upErr } = await supabase.storage
+      // Compression best-effort. Si HEIC iPhone ou échec, on garde l'original.
+      let file: File;
+      try { file = await compressImage(raw); } catch { file = raw; }
+
+      // Détecte le bon contentType (iPhone HEIC, Android jpg…)
+      const isJpeg = file.type === "image/jpeg" || file.name.toLowerCase().endsWith(".jpg");
+      const ext = isJpeg ? "jpg" : (file.type.split("/")[1] || "jpg").replace(/[^a-z0-9]/gi, "") || "jpg";
+      const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
+      const path = `${userId}/${attributionId}/selfie_${Date.now()}.${ext}`;
+
+      // Upload avec 1 retry en cas d'échec réseau passager
+      const upload = async () => supabase.storage
         .from("mission-selfies")
-        .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+        .upload(path, file, { upsert: true, contentType });
+      let { error: upErr } = await upload();
+      if (upErr) {
+        await new Promise(r => setTimeout(r, 800));
+        ({ error: upErr } = await upload());
+      }
       if (upErr) throw upErr;
 
       const { error: dbErr } = await supabase.from("mission_selfies" as never).insert({
