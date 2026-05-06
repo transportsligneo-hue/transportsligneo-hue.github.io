@@ -200,6 +200,16 @@ export default function MobileDevisGenerator() {
         message: comment,
       });
 
+      await notifyAdmin({
+        type: "estimation",
+        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} — ${prenom} ${nom}`,
+        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        link: "/admin/devis",
+        entityType: "devis",
+        entityId: devisRow?.id,
+        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, source: "mobile" },
+      });
+
       const devisData: DevisData = {
         numero: devisRow?.numero || `DEV-${Date.now()}`,
         nom, prenom, email, telephone,
