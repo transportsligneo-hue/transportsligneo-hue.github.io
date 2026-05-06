@@ -97,8 +97,15 @@ function MotDePasseOublie() {
             >
               {loading ? <><Loader2 size={16} className="animate-spin" />Envoi…</> : "Envoyer le lien"}
             </button>
-            <div className="text-center pt-2 border-t border-primary/10">
-              <Link to="/login" className="text-cream/50 text-xs hover:text-primary transition-colors">
+            <div className="text-center pt-2 border-t border-primary/10 space-y-3">
+              <p className="text-[10px] leading-relaxed text-cream/40 px-2">
+                Protégé par reCAPTCHA et soumis à la{" "}
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Politique de Confidentialité</a>
+                {" "}et aux{" "}
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Termes d'Utilisation</a>
+                {" "}de Google.
+              </p>
+              <Link to="/login" className="block text-cream/50 text-xs hover:text-primary transition-colors">
                 ← Retour à la connexion
               </Link>
             </div>
