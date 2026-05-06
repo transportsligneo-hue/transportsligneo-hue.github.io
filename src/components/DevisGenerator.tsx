@@ -3,6 +3,7 @@ import { MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, Send
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyAdmin } from "@/lib/admin-notifications";
 
 // Pre-defined distances (km) from Tours to major French cities
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
