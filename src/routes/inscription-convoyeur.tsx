@@ -302,7 +302,14 @@ function InscriptionConvoyeur() {
           </p>
         </form>
 
-        <div className="text-center mt-6 space-y-2">
+        <div className="text-center mt-6 space-y-3">
+          <p className="text-[10px] leading-relaxed text-cream/40 px-2">
+            Protégé par reCAPTCHA et soumis à la{" "}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Politique de Confidentialité</a>
+            {" "}et aux{" "}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Termes d'Utilisation</a>
+            {" "}de Google.
+          </p>
           <Link to="/login" className="block text-primary text-xs hover:text-gold-light transition-colors">
             Déjà inscrit ? Se connecter
           </Link>
