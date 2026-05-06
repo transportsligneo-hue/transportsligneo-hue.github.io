@@ -78,6 +78,7 @@ import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
 import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
@@ -478,6 +479,12 @@ const AuthenticatedAdminOrganisationsRoute =
     path: '/organisations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMessagesRoute =
   AuthenticatedAdminMessagesRouteImport.update({
     id: '/messages',
@@ -637,6 +644,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -721,6 +729,7 @@ export interface FileRoutesByTo {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -813,6 +822,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -905,6 +915,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/historique'
     | '/admin/messages'
+    | '/admin/notifications'
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
@@ -989,6 +1000,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/historique'
     | '/admin/messages'
+    | '/admin/notifications'
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
@@ -1080,6 +1092,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/organisations'
     | '/_authenticated/admin/paiements'
     | '/_authenticated/admin/parametres'
@@ -1649,6 +1662,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrganisationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/messages': {
       id: '/_authenticated/admin/messages'
       path: '/messages'
@@ -1818,6 +1838,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
   AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
@@ -1838,6 +1859,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminOrganisationsRoute:
     AuthenticatedAdminOrganisationsRouteWithChildren,
   AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
