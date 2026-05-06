@@ -21,6 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyAdmin } from "@/lib/admin-notifications";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
@@ -197,6 +198,16 @@ export default function MobileDevisGenerator() {
           comment,
         ].filter(Boolean).join(" | "),
         message: comment,
+      });
+
+      await notifyAdmin({
+        type: "estimation",
+        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} — ${prenom} ${nom}`,
+        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        link: "/admin/devis",
+        entityType: "devis",
+        entityId: devisRow?.id,
+        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, source: "mobile" },
       });
 
       const devisData: DevisData = {
