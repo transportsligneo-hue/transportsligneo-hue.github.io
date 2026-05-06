@@ -186,7 +186,21 @@ export default function DevisGenerator() {
         message: comment,
       });
 
-      const devisData: DevisData = {
+      // 2bis. Notification admin (feed temps réel) avec prix pré-rempli
+      await notifyAdmin({
+        type: "estimation",
+        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} — ${prenom} ${nom}`,
+        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        link: "/admin/devis",
+        entityType: "devis",
+        entityId: devisRow?.id,
+        metadata: {
+          email, telephone,
+          prix: pricing.finalPrice,
+          distance,
+          option,
+        },
+      });
         numero: devisRow?.numero || `DEV-${Date.now()}`,
         nom, prenom, email, telephone,
         depart: departure, arrivee: arrival,
