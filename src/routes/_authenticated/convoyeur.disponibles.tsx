@@ -120,12 +120,27 @@ function ConvoyeurDisponibles() {
       .select("prenom, nom")
       .eq("id", convoyeurId)
       .maybeSingle();
+    const convoyeurNom = conv ? `${conv.prenom} ${conv.nom}` : "Convoyeur";
+
+    // Notification interne admin (feed temps réel)
+    await supabase.from("admin_notifications" as never).insert({
+      type: "mission_offre",
+      titre: typeOffre === "acceptation_directe"
+        ? `${convoyeurNom} accepte la mission ${trajet.depart} → ${trajet.arrivee}`
+        : `${convoyeurNom} propose ${prix}€ pour ${trajet.depart} → ${trajet.arrivee}`,
+      message: message ?? null,
+      link: "/admin/attributions",
+      entity_type: "trajet",
+      entity_id: trajet.id,
+      metadata: { prix, type_offre: typeOffre, prix_suggere: trajet.prix_suggere },
+    } as never);
+
     sendTransactionalEmail({
       templateName: "nouvelle-offre-admin",
       recipientEmail: "contact@transportsligneo.fr",
       idempotencyKey: `nouvelle-offre-${trajet.id}-${convoyeurId}-${Date.now()}`,
       templateData: {
-        convoyeurNom: conv ? `${conv.prenom} ${conv.nom}` : "Convoyeur",
+        convoyeurNom,
         depart: trajet.depart,
         arrivee: trajet.arrivee,
         date: trajet.date_trajet
