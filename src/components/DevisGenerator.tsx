@@ -201,6 +201,8 @@ export default function DevisGenerator() {
           option,
         },
       });
+
+      const devisData: DevisData = {
         numero: devisRow?.numero || `DEV-${Date.now()}`,
         nom, prenom, email, telephone,
         depart: departure, arrivee: arrival,
