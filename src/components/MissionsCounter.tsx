@@ -8,10 +8,10 @@ interface Stat {
 
 export default function MissionsCounter() {
   const stats: Stat[] = [
-    { icon: Truck, value: "2 300+", label: "Missions réalisées" },
-    { icon: Route, value: "400 000+ km", label: "Kilomètres parcourus" },
-    { icon: Users, value: "600+", label: "Clients accompagnés" },
-    { icon: Calendar, value: "6 ans", label: "D'expérience terrain" },
+    { icon: Calendar, value: "6+ ans", label: "D'expérience" },
+    { icon: Truck, value: "0", label: "Annulation" },
+    { icon: Users, value: "7j/7", label: "Disponibilité" },
+    { icon: Route, value: "100%", label: "Péages & carburant inclus" },
   ];
 
   return (
