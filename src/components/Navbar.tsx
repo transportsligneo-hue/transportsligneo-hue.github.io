@@ -11,7 +11,6 @@ const navLinks = [
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/pro", label: "B2B" },
   { to: "/a-propos", label: "À propos" },
-  { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },
 ] as const;
 
@@ -58,8 +57,8 @@ export default function Navbar() {
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3" aria-label="Accueil — Transports Ligneo">
+        <div className="max-w-6xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-10">
+          <Link to="/" className="flex items-center gap-3 mr-6" aria-label="Accueil — Transports Ligneo">
             <img
               src={logoLigneo}
               alt="Transports Ligneo"

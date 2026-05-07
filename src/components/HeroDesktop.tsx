@@ -17,7 +17,7 @@ export default function HeroDesktop() {
         <img
           src={heroBg}
           alt="Convoyeur Transports Ligneo photographiant un véhicule premium"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-[center_30%] md:object-[35%_center]"
           width={1920}
           height={1080}
         />
@@ -68,7 +68,7 @@ export default function HeroDesktop() {
               className="edl-cta inline-flex items-center gap-3 px-7 py-4 font-heading text-sm tracking-[0.2em] uppercase"
             >
               <Calendar size={16} />
-              Demander un devis
+              Estimer mon trajet
             </a>
             <Link
               to="/tarifs"
