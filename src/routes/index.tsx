@@ -5,7 +5,6 @@ import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
 import CommentCaMarche from "@/components/CommentCaMarche";
 import AvisClientsDynamiques from "@/components/AvisClientsDynamiques";
 import PartnersMarquee from "@/components/PartnersMarquee";
-import MissionsCounter from "@/components/MissionsCounter";
 import Footer from "@/components/Footer";
 import DevisGenerator from "@/components/DevisGenerator";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
@@ -52,14 +51,14 @@ function Index() {
               <div className="mx-auto mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[#5fb6ff] to-transparent" />
             </div>
 
-            <div className="edl-card-strong p-1 lg:p-2">
+            <div className="relative rounded-3xl overflow-hidden border border-[#e7c76a]/30 bg-gradient-to-br from-[#0b1026]/95 via-[#0d1530]/95 to-black/95 backdrop-blur-xl shadow-[0_0_60px_-15px_rgba(231,199,106,0.35)] p-1 lg:p-2">
+              <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-[#e7c76a]/20" />
               <DevisGenerator />
             </div>
           </div>
         </section>
 
         <PartnersMarquee />
-        <MissionsCounter />
         <PourquoiNousChoisir />
         <CommentCaMarche />
         <AvisClientsDynamiques />
