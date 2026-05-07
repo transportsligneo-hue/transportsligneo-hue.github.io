@@ -103,7 +103,6 @@ export default function HeroDesktop() {
           </div>
         </div>
       </div>
-      </div>
 
       {/* Indicateur scroll vers l'estimateur */}
       <a
