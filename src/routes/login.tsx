@@ -3,6 +3,8 @@ import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, LogIn, User, Truck } from "lucide-react";
 import logoLigneo from "@/assets/logo-ligneo.png";
+import { getRecaptchaToken } from "@/lib/recaptcha";
+import { verifyRecaptcha } from "@/server/recaptcha.functions";
 
 type Tab = "client" | "pro";
 
@@ -103,6 +105,19 @@ function LoginPage() {
     submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
+      // reCAPTCHA v3 (best-effort, ne bloque pas si non configuré)
+      const token = await getRecaptchaToken("login");
+      if (token) {
+        try {
+          const r = await verifyRecaptcha({ data: { token, action: "login", minScore: 0.3 } });
+          if (!r.ok && !r.skipped) {
+            justLoggedInRef.current = false;
+            setSubmitting(false);
+            setError("Vérification de sécurité échouée. Réessayez.");
+            return;
+          }
+        } catch { /* skip on network error */ }
+      }
       await login(email.trim(), password);
       // Le useEffect prendra le relais une fois l'auth hydratée
     } catch (err: unknown) {
