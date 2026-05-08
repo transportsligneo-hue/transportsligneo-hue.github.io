@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, ArrowLeft, MapPin, Calendar, Clock, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/b2b/transport-ponctuel/retour")({
   component: RetourPage,
