@@ -59,6 +59,19 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        // Only admins / super_admins may trigger transactional sends to arbitrary recipients.
+        const { data: roleRows } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('actif', true)
+        const isAdmin = (roleRows ?? []).some(
+          (r: { role: string }) => r.role === 'admin' || r.role === 'super_admin'
+        )
+        if (!isAdmin) {
+          return Response.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
         // Parse request body
         let templateName: string
         let recipientEmail: string
