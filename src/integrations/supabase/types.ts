@@ -1938,6 +1938,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_admin_notification: {
+        Args: {
+          _entity_id?: string
+          _entity_type?: string
+          _link?: string
+          _message?: string
+          _metadata?: Json
+          _titre: string
+          _type: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
