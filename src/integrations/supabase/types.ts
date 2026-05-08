@@ -1950,6 +1950,26 @@ export type Database = {
         }
         Returns: string
       }
+      create_b2b_transport_request: {
+        Args: {
+          _company_id: string
+          _distance_km: number
+          _dropoff_address: string
+          _estimated_price_ht: number
+          _estimated_price_ttc: number
+          _notes: string
+          _pickup_address: string
+          _scheduled_date: string
+          _scheduled_time: string
+          _urgency: string
+          _vehicle_running: boolean
+          _vehicle_type: string
+        }
+        Returns: {
+          id: string
+          numero: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
