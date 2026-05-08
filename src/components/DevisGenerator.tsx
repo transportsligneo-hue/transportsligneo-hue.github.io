@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, Send, Loader2, CheckCircle, User, Phone, Mail, Download } from "lucide-react";
+import { MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, Send, Loader2, CheckCircle, User, Phone, Mail, Download, Shield, Wallet, Route as RouteIcon, MapPinned, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
