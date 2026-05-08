@@ -33,8 +33,8 @@ function Index() {
         <Navbar />
         <HeroDesktop />
 
-        {/* === ESTIMATEUR — bloc principal pleine largeur, juste après le hero === */}
-        <section id="devis" className="relative edl-section-bg py-16 lg:py-20 scroll-mt-24">
+        {/* === ESTIMATEUR — barre flottante intégrée, chevauche le bas du hero === */}
+        <section id="devis" className="relative -mt-20 mb-16 z-20 scroll-mt-24">
           <div className="max-w-6xl mx-auto px-6">
             <DevisGenerator />
           </div>
