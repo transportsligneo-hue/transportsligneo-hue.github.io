@@ -59,6 +59,18 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        // Role check — admins may target any recipient. Non-admins may only invoke
+        // templates that have a fixed recipient (template.to), so they cannot use
+        // the platform's verified sender to email arbitrary addresses.
+        const { data: roleRows } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('actif', true)
+        const isAdmin = (roleRows ?? []).some(
+          (r: { role: string }) => r.role === 'admin' || r.role === 'super_admin'
+        )
+
         // Parse request body
         let templateName: string
         let recipientEmail: string
@@ -113,6 +125,11 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             },
             { status: 400 }
           )
+        }
+
+        // Non-admins can only use templates with a fixed `to` recipient.
+        if (!isAdmin && !template.to) {
+          return Response.json({ error: 'Forbidden' }, { status: 403 })
         }
 
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)

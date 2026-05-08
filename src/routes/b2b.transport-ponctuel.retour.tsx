@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, ArrowLeft, MapPin, Calendar, Clock, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/b2b/transport-ponctuel/retour")({
   component: RetourPage,
@@ -39,17 +39,17 @@ function RetourPage() {
     let cancelled = false;
     async function fetchAndPoll() {
       if (!session_id) { setLoading(false); return; }
-      // Poll up to ~10s for the webhook to mark the request as paid
       for (let i = 0; i < 5; i++) {
-        const { data } = await supabase
-          .from("b2b_transport_requests")
-          .select("numero, pickup_address, dropoff_address, scheduled_date, scheduled_time, estimated_price_ttc, vehicle_type, urgency, payment_status")
-          .eq("stripe_session_id", session_id)
-          .maybeSingle();
-        if (cancelled) return;
-        if (data) {
-          setRequest(data as RequestRow);
-          if (data.payment_status === "paid") break;
+        try {
+          const res = await fetch(`/api/public/b2b/session-status?session_id=${encodeURIComponent(session_id)}`);
+          const json = await res.json();
+          if (cancelled) return;
+          if (json?.request) {
+            setRequest(json.request as RequestRow);
+            if (json.request.payment_status === "paid") break;
+          }
+        } catch (err) {
+          console.warn("[b2b retour] fetch failed", err);
         }
         await new Promise((r) => setTimeout(r, 2000));
       }

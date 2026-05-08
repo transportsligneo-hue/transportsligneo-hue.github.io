@@ -147,26 +147,24 @@ function TransportPonctuelPage() {
       });
       if (cErr || !companyId) throw cErr ?? new Error("Société introuvable");
 
-      // 2) Créer la demande (statut paiement = pending)
-      const { data: request, error: rErr } = await supabase
-        .from("b2b_transport_requests")
-        .insert({
-          company_id: companyId,
-          pickup_address: form.pickupAddress.trim(),
-          dropoff_address: form.dropoffAddress.trim(),
-          scheduled_date: form.scheduledDate,
-          scheduled_time: form.scheduledTime,
-          vehicle_type: form.vehicleType,
-          vehicle_running: form.vehicleRunning === "oui",
-          urgency: form.urgency,
-          notes: form.notes.trim() || null,
-          distance_km: estimate.distanceKm,
-          estimated_price_ht: estimate.priceHt,
-          estimated_price_ttc: estimate.priceTtc,
-        })
-        .select("id, numero")
-        .single();
+      // 2) Créer la demande via RPC sécurisée (pas de SELECT public sur la table)
+      const { data: rpcRows, error: rErr } = await supabase.rpc("create_b2b_transport_request" as never, {
+        _company_id: companyId,
+        _pickup_address: form.pickupAddress.trim(),
+        _dropoff_address: form.dropoffAddress.trim(),
+        _scheduled_date: form.scheduledDate,
+        _scheduled_time: form.scheduledTime,
+        _vehicle_type: form.vehicleType,
+        _vehicle_running: form.vehicleRunning === "oui",
+        _urgency: form.urgency,
+        _notes: form.notes.trim() || null,
+        _distance_km: estimate.distanceKm,
+        _estimated_price_ht: estimate.priceHt,
+        _estimated_price_ttc: estimate.priceTtc,
+      } as never);
       if (rErr) throw rErr;
+      const request = Array.isArray(rpcRows) ? (rpcRows[0] as { id: string; numero: string }) : (rpcRows as unknown as { id: string; numero: string });
+      if (!request?.id) throw new Error("Création échouée");
 
       setRequestId(request.id);
       setRequestNumero(request.numero);

@@ -22,15 +22,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { storage_path, document_type, inspection_id, attribution_id, vue_type } = await req.json();
-    if (!storage_path || !document_type) {
-      return new Response(JSON.stringify({ error: "Missing storage_path or document_type" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const ANON_KEY =
+      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
@@ -38,7 +33,62 @@ serve(async (req) => {
       });
     }
 
+    // --- AuthN: validate caller JWT ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader.toLowerCase().startsWith("bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerId = userData.user.id;
+
+    const { storage_path, document_type, inspection_id, attribution_id, vue_type } = await req.json();
+    if (!storage_path || !document_type) {
+      return new Response(JSON.stringify({ error: "Missing storage_path or document_type" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+
+    // --- AuthZ: caller must be admin OR own the attribution_id ---
+    const { data: rolesRows } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", callerId)
+      .eq("actif", true);
+    const isAdmin = (rolesRows ?? []).some(
+      (r: { role: string }) => r.role === "admin" || r.role === "super_admin",
+    );
+
+    if (!isAdmin) {
+      if (!attribution_id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: attr } = await admin
+        .from("attributions")
+        .select("id, convoyeur_id, convoyeurs:convoyeur_id ( user_id )")
+        .eq("id", attribution_id)
+        .maybeSingle();
+      const ownerUserId = (attr as any)?.convoyeurs?.user_id;
+      if (!attr || ownerUserId !== callerId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const { data: signed, error: sErr } = await admin.storage
       .from("inspection-photos")
       .createSignedUrl(storage_path, 60);

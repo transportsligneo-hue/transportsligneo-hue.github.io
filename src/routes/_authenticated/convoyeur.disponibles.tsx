@@ -122,17 +122,17 @@ function ConvoyeurDisponibles() {
       .maybeSingle();
     const convoyeurNom = conv ? `${conv.prenom} ${conv.nom}` : "Convoyeur";
 
-    // Notification interne admin (feed temps réel)
-    await supabase.from("admin_notifications" as never).insert({
-      type: "mission_offre",
-      titre: typeOffre === "acceptation_directe"
+    // Notification interne admin (feed temps réel) — via RPC sécurisée
+    await supabase.rpc("create_admin_notification" as never, {
+      _type: "mission_offre",
+      _titre: typeOffre === "acceptation_directe"
         ? `${convoyeurNom} accepte la mission ${trajet.depart} → ${trajet.arrivee}`
         : `${convoyeurNom} propose ${prix}€ pour ${trajet.depart} → ${trajet.arrivee}`,
-      message: message ?? null,
-      link: "/admin/attributions",
-      entity_type: "trajet",
-      entity_id: trajet.id,
-      metadata: { prix, type_offre: typeOffre, prix_suggere: trajet.prix_suggere },
+      _message: message ?? null,
+      _link: "/admin/attributions",
+      _entity_type: "trajet",
+      _entity_id: trajet.id,
+      _metadata: { prix, type_offre: typeOffre, prix_suggere: trajet.prix_suggere } as never,
     } as never);
 
     sendTransactionalEmail({

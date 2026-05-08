@@ -4,6 +4,25 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const ALLOWED_RETURN_HOSTS = new Set<string>([
+  "transportsligneo.fr",
+  "www.transportsligneo.fr",
+  "transportsligneo.lovable.app",
+]);
+
+function isAllowedReturnUrl(input: string, requestOrigin: string): boolean {
+  try {
+    const u = new URL(input);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+    if (u.origin === requestOrigin) return true;
+    if (ALLOWED_RETURN_HOSTS.has(u.hostname)) return true;
+    if (/\.lovable\.app$/.test(u.hostname)) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export const Route = createFileRoute("/api/b2b/checkout")({
   server: {
     handlers: {
@@ -20,6 +39,10 @@ export const Route = createFileRoute("/api/b2b/checkout")({
         }
         if (!returnUrl || typeof returnUrl !== "string") {
           return Response.json({ error: "Missing returnUrl" }, { status: 400 });
+        }
+        const requestOrigin = new URL(request.url).origin;
+        if (!isAllowedReturnUrl(returnUrl, requestOrigin)) {
+          return Response.json({ error: "Invalid returnUrl" }, { status: 400 });
         }
         const env: StripeEnv = environment === "live" ? "live" : "sandbox";
 

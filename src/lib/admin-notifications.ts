@@ -32,15 +32,17 @@ export interface NotifyAdminInput {
 
 export async function notifyAdmin(input: NotifyAdminInput): Promise<void> {
   try {
-    await supabase.from("admin_notifications" as never).insert({
-      type: input.type,
-      titre: input.titre,
-      message: input.message ?? null,
-      link: input.link ?? null,
-      entity_type: input.entityType ?? null,
-      entity_id: input.entityId ?? null,
-      metadata: input.metadata ?? {},
+    // Server-side validated RPC (SECURITY DEFINER, type whitelist enforced).
+    const { error } = await supabase.rpc("create_admin_notification" as never, {
+      _type: input.type,
+      _titre: input.titre,
+      _message: input.message ?? null,
+      _link: input.link ?? null,
+      _entity_type: input.entityType ?? null,
+      _entity_id: input.entityId ?? null,
+      _metadata: (input.metadata ?? {}) as never,
     } as never);
+    if (error) console.warn("[notifyAdmin] rpc failed", error);
   } catch (err) {
     console.warn("[notifyAdmin] insert failed", err);
   }
