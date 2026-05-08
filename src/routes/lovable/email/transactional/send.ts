@@ -127,6 +127,11 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
+        // Non-admins can only use templates with a fixed `to` recipient.
+        if (!isAdmin && !template.to) {
+          return Response.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)
         const { data: suppressed, error: suppressionError } = await supabase
           .from('suppressed_emails')
