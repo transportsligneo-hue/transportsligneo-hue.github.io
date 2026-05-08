@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
+import CursorSpotlight from "@/components/CursorSpotlight";
 
 import appCss from "../styles.css?url";
 
@@ -75,6 +76,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
+      <CursorSpotlight />
       <Outlet />
       <MobileBottomNav />
     </AuthProvider>
