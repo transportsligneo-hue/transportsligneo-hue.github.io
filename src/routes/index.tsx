@@ -8,7 +8,7 @@ import PartnersMarquee from "@/components/PartnersMarquee";
 import Footer from "@/components/Footer";
 import DevisGenerator from "@/components/DevisGenerator";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
-import { Sparkles } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   component: Index,
