@@ -256,149 +256,192 @@ export default function DevisGenerator() {
     downloadDevisPdf(blob, savedDevis.numero);
   };
 
-  const selectClasses = "w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors appearance-none";
-  const inputClasses = "w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
+  const selectClasses = "w-full bg-navy/60 border border-primary/20 rounded-xl px-4 py-3.5 text-cream text-sm focus:border-[#5fb6ff]/60 focus:outline-none focus:ring-2 focus:ring-[#5fb6ff]/20 transition-all appearance-none";
+  const inputClasses = "w-full bg-navy/60 border border-primary/20 rounded-xl px-4 py-3.5 text-cream text-sm focus:border-[#5fb6ff]/60 focus:outline-none focus:ring-2 focus:ring-[#5fb6ff]/20 transition-all";
+
+  // Prix HT / TVA / TTC dérivés du finalPrice
+  const priceHT = pricing?.finalPrice ?? 0;
+  const tva = Math.round(priceHT * 0.2);
+  const priceTTC = priceHT + tva;
+  const isComplete = !!(departure && arrival && vehicleType);
 
   return (
     <div className="py-6 md:py-8">
       <div className="max-w-6xl mx-auto px-2 md:px-4">
-        <div className="text-center mb-6 md:mb-8">
-          <p className="text-cream/70 text-sm">
-            Sélectionnez vos villes de départ et d'arrivée pour obtenir une estimation instantanée.
-          </p>
-          <p className="text-[#5fb6ff] text-xs mt-2 font-medium tracking-wide">
-            Péage et carburant inclus · Tarif aller-retour avantageux
-          </p>
+        <div className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden mb-8 group">
+          <div aria-hidden className="pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br from-[#5fb6ff]/30 via-[#e7c76a]/10 to-[#5fb6ff]/20 opacity-60 blur-md transition-opacity duration-700 group-hover:opacity-90" />
+          <div className="relative rounded-3xl bg-gradient-to-br from-[#0b1026]/95 via-[#0d1530]/95 to-black/95 backdrop-blur-xl border border-[#5fb6ff]/25 shadow-[0_30px_80px_-30px_rgba(95,182,255,0.45)] p-6 md:p-10">
+            <div className="text-center mb-8">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
+                <Sparkles size={11} /> Estimation instantanée
+              </span>
+              <h3 className="font-heading text-2xl md:text-3xl tracking-wide gold-gradient-text mt-4">
+                ESTIMEZ VOTRE TRAJET
+              </h3>
+              <p className="text-cream/70 text-sm md:text-base mt-2 max-w-xl mx-auto">
+                Obtenez un prix instantané, transparent et sans engagement.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-5 mb-5">
+              <div className="relative">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-2">
+                  <MapPin size={13} className="text-[#5fb6ff]" /> Départ
+                </label>
+                <div className="relative">
+                  <input type="text" value={departure || depFilter}
+                    onChange={(e) => { setDepFilter(e.target.value); setDeparture(""); setDepOpen(true); }}
+                    onFocus={() => setDepOpen(true)}
+                    placeholder="Adresse, ville ou code postal"
+                    className={inputClasses} />
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60" />
+                </div>
+                {depOpen && depFilter && (
+                  <div className="absolute z-30 w-full mt-1 bg-navy-light border border-[#5fb6ff]/25 rounded-xl max-h-48 overflow-y-auto shadow-2xl">
+                    {filteredDepCities.map(city => (
+                      <button key={city} type="button" className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff] transition-colors"
+                        onClick={() => { setDeparture(city); setDepFilter(""); setDepOpen(false); }}>{city}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-2">
+                  <MapPinned size={13} className="text-[#5fb6ff]" /> Arrivée
+                </label>
+                <div className="relative">
+                  <input type="text" value={arrival || arrFilter}
+                    onChange={(e) => { setArrFilter(e.target.value); setArrival(""); setArrOpen(true); }}
+                    onFocus={() => setArrOpen(true)}
+                    placeholder="Adresse, ville ou code postal"
+                    className={inputClasses} />
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60" />
+                </div>
+                {arrOpen && arrFilter && (
+                  <div className="absolute z-30 w-full mt-1 bg-navy-light border border-[#5fb6ff]/25 rounded-xl max-h-48 overflow-y-auto shadow-2xl">
+                    {filteredArrCities.map(city => (
+                      <button key={city} type="button" className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff] transition-colors"
+                        onClick={() => { setArrival(city); setArrFilter(""); setArrOpen(false); }}>{city}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-5 mb-6">
+              <div>
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-2">
+                  <Car size={13} className="text-[#5fb6ff]" /> Type de véhicule
+                </label>
+                <div className="relative">
+                  <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={selectClasses}>
+                    <option value="">Sélectionner</option>
+                    {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
+                </div>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-2">
+                  <Calendar size={13} className="text-[#5fb6ff]" /> Date souhaitée
+                </label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputClasses} />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-2">
+                  <Clock size={13} className="text-[#5fb6ff]" /> Heure souhaitée
+                </label>
+                <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputClasses} />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6 justify-center">
+              {[
+                { value: "aller-simple", label: "Aller simple" },
+                { value: "aller-retour", label: "Aller-retour" },
+                { value: "express", label: "Express (+20%)" },
+              ].map(o => (
+                <button key={o.value} type="button" onClick={() => setOption(o.value)}
+                  className={`px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.18em] font-heading transition-all duration-300 ${
+                    option === o.value
+                      ? "bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white shadow-[0_0_20px_-4px_rgba(95,182,255,0.7)]"
+                      : "border border-[#5fb6ff]/25 text-cream/60 hover:text-[#5fb6ff] hover:border-[#5fb6ff]/50"
+                  }`}>{o.label}</button>
+              ))}
+            </div>
+
+            {/* Bloc Prix en live */}
+            <div className="relative rounded-2xl border border-[#5fb6ff]/20 bg-gradient-to-br from-[#0b1026]/80 to-black/60 p-6 md:p-7 mb-6 overflow-hidden">
+              <div aria-hidden className="absolute -top-1/2 -right-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,rgba(95,182,255,0.12),transparent_60%)]" />
+              <div className="relative">
+                {!isComplete && (
+                  <p className="text-cream/60 text-sm text-center py-4">Complétez votre trajet pour voir le prix</p>
+                )}
+                {isComplete && distance !== null && distance > 0 && pricing && (
+                  <div className="animate-fade-in">
+                    <div className="flex items-end justify-between flex-wrap gap-4">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-cream/50 mb-1">Prix estimé HT</p>
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-heading text-5xl md:text-6xl gold-gradient-text leading-none">{priceHT}</span>
+                          <span className="font-heading text-2xl text-[#e7c76a]">€</span>
+                          <span className="text-cream/50 text-xs ml-1">HT</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-right">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</p>
+                          <p className="font-heading text-lg text-cream">{distance} km</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Durée</p>
+                          <p className="font-heading text-lg text-cream">{estimateDuration(distance)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <details className="mt-5 group/det">
+                      <summary className="cursor-pointer list-none inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[#5fb6ff] hover:text-[#e7c76a] transition-colors">
+                        <ChevronDown size={14} className="transition-transform group-open/det:rotate-180" />
+                        Voir le détail du prix
+                      </summary>
+                      <div className="mt-4 pt-4 border-t border-[#5fb6ff]/15 text-sm space-y-2 animate-fade-in">
+                        <div className="flex justify-between text-cream/75"><span>Prix de base ({pricing.label})</span><span>{pricing.price} €</span></div>
+                        {pricing.hasExtra && (
+                          <div className="flex justify-between text-cream/75"><span>{pricing.multiplierLabel}</span><span>+{priceHT - pricing.price} €</span></div>
+                        )}
+                        <div className="flex justify-between text-cream/60"><span>Péages, carburant, assurance, convoyeur pro</span><span>Inclus</span></div>
+                        <div className="flex justify-between text-cream/60 pt-2 border-t border-[#5fb6ff]/10"><span>TVA 20%</span><span>{tva} €</span></div>
+                        <div className="flex justify-between font-heading text-cream pt-2 border-t border-[#5fb6ff]/10"><span>Total TTC</span><span className="text-[#e7c76a]">{priceTTC} €</span></div>
+                      </div>
+                    </details>
+                  </div>
+                )}
+                {isComplete && distance === 0 && (
+                  <p className="text-cream/70 text-sm text-center py-4">Les villes de départ et d'arrivée sont identiques.</p>
+                )}
+                {isComplete && distance === null && (
+                  <p className="text-cream/70 text-sm text-center py-4">Nous allons vérifier manuellement votre trajet.</p>
+                )}
+              </div>
+            </div>
+
+            {!showForm && (
+              <div className="text-center">
+                <button onClick={() => setShowForm(true)} disabled={!isComplete}
+                  className="inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-sm tracking-[0.2em] uppercase shadow-[0_10px_40px_-10px_rgba(231,199,106,0.6)] hover:shadow-[0_14px_50px_-10px_rgba(231,199,106,0.8)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100">
+                  <Send size={15} /> OBTENIR MON PRIX
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Quick Estimator */}
-        <div className="max-w-3xl mx-auto card-premium p-8 md:p-10 rounded gold-border-strong mb-8">
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* Departure */}
-            <div className="relative">
-              <label className="flex items-center gap-2 text-xs uppercase tracking-wider text-cream/50 mb-2">
-                <MapPin size={14} className="text-primary" /> Ville de départ
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={departure || depFilter}
-                  onChange={(e) => { setDepFilter(e.target.value); setDeparture(""); setDepOpen(true); }}
-                  onFocus={() => setDepOpen(true)}
-                  placeholder="Rechercher une ville..."
-                  className={inputClasses}
-                />
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50" />
-              </div>
-              {depOpen && depFilter && (
-                <div className="absolute z-20 w-full mt-1 bg-navy-light border border-primary/20 rounded max-h-48 overflow-y-auto shadow-xl">
-                  {filteredDepCities.map(city => (
-                    <button key={city} type="button" className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-primary/10 hover:text-primary transition-colors"
-                      onClick={() => { setDeparture(city); setDepFilter(""); setDepOpen(false); }}>
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Arrival */}
-            <div className="relative">
-              <label className="flex items-center gap-2 text-xs uppercase tracking-wider text-cream/50 mb-2">
-                <Navigation size={14} className="text-primary" /> Ville d'arrivée
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={arrival || arrFilter}
-                  onChange={(e) => { setArrFilter(e.target.value); setArrival(""); setArrOpen(true); }}
-                  onFocus={() => setArrOpen(true)}
-                  placeholder="Rechercher une ville..."
-                  className={inputClasses}
-                />
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50" />
-              </div>
-              {arrOpen && arrFilter && (
-                <div className="absolute z-20 w-full mt-1 bg-navy-light border border-primary/20 rounded max-h-48 overflow-y-auto shadow-xl">
-                  {filteredArrCities.map(city => (
-                    <button key={city} type="button" className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-primary/10 hover:text-primary transition-colors"
-                      onClick={() => { setArrival(city); setArrFilter(""); setArrOpen(false); }}>
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Option selector */}
-          <div className="flex flex-wrap gap-3 mb-8 justify-center">
-            {[
-              { value: "aller-simple", label: "Aller simple" },
-              { value: "aller-retour", label: "Aller-retour" },
-              { value: "express", label: "Express (+20%)" },
-            ].map(o => (
-              <button
-                key={o.value} type="button"
-                onClick={() => setOption(o.value)}
-                className={`px-5 py-2 rounded text-xs uppercase tracking-wider font-heading transition-all duration-300 ${
-                  option === o.value
-                    ? "bg-primary text-primary-foreground"
-                    : "gold-border text-cream/60 hover:text-primary hover:border-primary/50"
-                }`}
-              >
-                {o.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Result */}
-          {distance !== null && distance > 0 && pricing && (
-            <>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="card-premium p-5 rounded">
-                  <Navigation size={20} className="text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-heading gold-gradient-text">{distance} km</p>
-                  <p className="text-cream/50 text-xs mt-1">Distance estimée</p>
-                </div>
-                <div className="card-premium p-5 rounded">
-                  <Clock size={20} className="text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-heading gold-gradient-text">{estimateDuration(distance)}</p>
-                  <p className="text-cream/50 text-xs mt-1">Durée estimée</p>
-                </div>
-                <div className="card-premium p-5 rounded">
-                  <Euro size={20} className="text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-heading gold-gradient-text">{pricing.finalPrice} €</p>
-                  <p className="text-cream/50 text-xs mt-1">{pricing.label}</p>
-                  {pricing.hasExtra && (
-                    <p className="font-heading gold-gradient-text text-sm mt-2 tracking-wide uppercase">
-                      {pricing.multiplierLabel}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <p className="text-center text-primary/70 text-xs mt-4 font-heading tracking-wider uppercase">
-                Péage et carburant inclus
-              </p>
-            </>
-          )}
-
-          {distance === 0 && departure && arrival && (
-            <div className="text-center card-premium p-5 rounded">
-              <p className="text-cream/60 text-sm">Les villes de départ et d'arrivée sont identiques.</p>
-            </div>
-          )}
-
-          {distance !== null && distance > 0 && !showForm && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => setShowForm(true)}
-                className="px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300"
-              >
-                Demander un devis
-              </button>
-            </div>
-          )}
+        <div className="max-w-4xl mx-auto mb-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.15em] text-cream/55">
+          <span className="inline-flex items-center gap-1.5"><Shield size={12} className="text-[#5fb6ff]" /> Assurance incluse</span>
+          <span className="inline-flex items-center gap-1.5"><RouteIcon size={12} className="text-[#5fb6ff]" /> Péages inclus</span>
+          <span className="inline-flex items-center gap-1.5"><Fuel size={12} className="text-[#5fb6ff]" /> Carburant inclus</span>
+          <span className="inline-flex items-center gap-1.5"><User size={12} className="text-[#5fb6ff]" /> Convoyeur professionnel</span>
+          <span className="inline-flex items-center gap-1.5"><Wallet size={12} className="text-[#5fb6ff]" /> Suivi temps réel</span>
         </div>
 
         {/* Full Quote Form */}
