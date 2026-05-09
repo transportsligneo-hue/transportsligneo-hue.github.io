@@ -114,7 +114,7 @@ export const Route = createFileRoute("/api/b2b/checkout")({
           return Response.json({ clientSecret: session.client_secret });
         } catch (e: any) {
           console.error("[b2b/checkout] Stripe error", e);
-          return Response.json({ error: e?.message ?? "Stripe error" }, { status: 500 });
+          return Response.json({ error: "Checkout failed — please try again" }, { status: 500 });
         }
       },
     },
