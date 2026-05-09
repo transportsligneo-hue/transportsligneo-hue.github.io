@@ -152,6 +152,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attributions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_publies_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       b2b_actions_history: {
@@ -1283,6 +1290,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mission_offres_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_publies_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mission_selfies: {
@@ -1935,7 +1949,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      trajets_publies_safe: {
+        Row: {
+          arrivee: string | null
+          created_at: string | null
+          date_trajet: string | null
+          depart: string | null
+          heure_trajet: string | null
+          id: string | null
+          marque: string | null
+          modele: string | null
+          pricing_mode: string | null
+          prix_convoyeur_fixe: number | null
+          prix_convoyeur_max: number | null
+          prix_convoyeur_min: number | null
+          prix_suggere: number | null
+          statut_publication: string | null
+        }
+        Insert: {
+          arrivee?: string | null
+          created_at?: string | null
+          date_trajet?: string | null
+          depart?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          marque?: string | null
+          modele?: string | null
+          pricing_mode?: string | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
+          prix_suggere?: number | null
+          statut_publication?: string | null
+        }
+        Update: {
+          arrivee?: string | null
+          created_at?: string | null
+          date_trajet?: string | null
+          depart?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          marque?: string | null
+          modele?: string | null
+          pricing_mode?: string | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
+          prix_suggere?: number | null
+          statut_publication?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_admin_notification: {
@@ -2007,6 +2071,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_validated_convoyeur: { Args: { _user_id: string }; Returns: boolean }
       log_activity: {
         Args: {
           _action: string

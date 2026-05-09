@@ -28,7 +28,6 @@ interface TrajetDispo {
   heure_trajet: string | null;
   marque: string | null;
   modele: string | null;
-  immatriculation: string | null;
   prix_suggere: number | null;
   statut_publication: string;
   created_at: string;
@@ -84,9 +83,8 @@ function ConvoyeurDisponibles() {
     setLoading(true);
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
-        .from("trajets")
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max" as never)
-        .eq("statut_publication" as never, "publie" as never)
+        .from("trajets_publies_safe" as never)
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max")
         .order("created_at", { ascending: false }),
       supabase
         .from("mission_offres" as never)
