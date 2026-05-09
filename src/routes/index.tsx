@@ -33,8 +33,11 @@ function Index() {
         <Navbar />
         <HeroDesktop />
 
-        {/* === ESTIMATEUR — barre flottante intégrée, chevauche le bas du hero === */}
-        <section id="devis" className="relative -mt-20 mb-16 z-20 scroll-mt-24">
+        {/* === ESTIMATEUR — intégré, descendu sous le hero, sans cadre lourd === */}
+        <section
+          id="devis"
+          className="relative mt-10 lg:mt-14 mb-20 z-20 scroll-mt-32"
+        >
           <div className="max-w-6xl mx-auto px-6">
             <DevisGenerator />
           </div>
