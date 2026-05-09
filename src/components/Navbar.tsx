@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles } from "lucide-react";
-import { Link, useNavigate, useLocation } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
@@ -20,7 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
