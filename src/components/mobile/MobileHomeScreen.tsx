@@ -97,7 +97,7 @@ export default function MobileHomeScreen() {
       </section>
 
       {/* Estimateur — bloc principal visible sur la page d'accueil */}
-      <section id="mobile-devis" className="px-5 pb-6 scroll-mt-4">
+      <section id="mobile-devis" className="px-5 pt-2 pb-6 scroll-mt-24">
         <div className="edl-card-strong p-4">
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
