@@ -53,48 +53,46 @@ export default function MobileHomeScreen() {
         </button>
       </header>
 
-      {/* Hero visuel — image chauffeur + carte glass */}
-      <section className="px-5 pt-2 pb-6">
-        <div className="relative rounded-3xl overflow-hidden home-glass-strong">
-          <div className="relative h-[260px] w-full overflow-hidden">
-            <img
-              src={heroChauffeur}
-              alt="Chauffeur Transports LIGNEO devant une Mercedes noire"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: "42% center" }}
-              loading="eager"
-              fetchPriority="high"
-            />
-            {/* Voile bas pour lisibilité du texte */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(17,26,61,0) 35%, rgba(17,26,61,0.85) 80%, #15214a 100%)",
-              }}
-            />
-          </div>
-
-          <div className="px-5 pt-4 pb-5">
-            <p className="font-heading text-cream/55 text-[10px] tracking-[0.25em] uppercase">
+      {/* Hero visuel — image full-bleed, intégrée naturellement (sans cadran) */}
+      <section className="relative mb-2">
+        <div className="relative h-[340px] w-full overflow-hidden">
+          <img
+            src={heroChauffeur}
+            alt="Chauffeur Transports LIGNEO devant une Mercedes noire"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: "42% center" }}
+            loading="eager"
+            fetchPriority="high"
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(11,16,38,0) 30%, rgba(11,16,38,0.6) 65%, var(--background) 100%)",
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
+            <p className="font-heading text-cream/65 text-[10px] tracking-[0.25em] uppercase">
               Bienvenue chez
             </p>
-            <h1 className="font-heading gold-gradient-text text-3xl tracking-[0.04em] mt-1 leading-tight">
+            <h1 className="font-heading gold-gradient-text text-[32px] tracking-[0.04em] mt-1 leading-tight">
               Transports Ligneo
             </h1>
-            <p className="text-cream/80 text-sm mt-3 leading-relaxed">
+            <p className="text-cream/85 text-sm mt-2 leading-relaxed">
               Convoyage automobile premium. <span className="text-primary italic">La tranquillité sur toute la ligne.</span>
             </p>
-
-            {/* CTA principal — Estimer */}
-            <button
-              onClick={handleScrollToDevis}
-              className="edl-cta mt-5 w-full h-14 font-heading text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2"
-            >
-              <Sparkles size={18} />
-              Estimer mon trajet
-            </button>
           </div>
+        </div>
+
+        {/* CTA Estimer — hors de l'image, espacé */}
+        <div className="px-5 pt-4">
+          <button
+            onClick={handleScrollToDevis}
+            className="edl-cta w-full h-14 font-heading text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2"
+          >
+            <Sparkles size={18} />
+            Estimer mon trajet
+          </button>
         </div>
       </section>
 
