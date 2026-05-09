@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Tag } from "lucide-react";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
+import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 /**
  * Hero desktop premium — image pleine largeur, headline gauche
@@ -63,13 +64,14 @@ export default function HeroDesktop() {
           </p>
 
           <div className="flex flex-wrap gap-4 mt-9">
-            <a
-              href="#devis"
+            <button
+              type="button"
+              onClick={() => scrollToDevis()}
               className="edl-cta inline-flex items-center gap-3 px-7 py-4 font-heading text-sm tracking-[0.2em] uppercase"
             >
               <Calendar size={16} />
               Estimer mon trajet
-            </a>
+            </button>
             <Link
               to="/tarifs"
               className="inline-flex items-center gap-3 px-7 py-4 rounded-2xl border border-[rgba(231,199,106,0.45)] text-cream font-heading text-sm tracking-[0.2em] uppercase hover:bg-white/5 hover:border-[#e7c76a] transition-all"

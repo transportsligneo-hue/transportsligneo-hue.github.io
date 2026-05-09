@@ -32,9 +32,9 @@ export default function MobileHomeScreen() {
     return navigate({ to: "/dashboard-client" });
   };
 
-  const scrollToDevis = () => {
+  const handleScrollToDevis = () => {
     const el = document.getElementById("mobile-devis");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
@@ -88,7 +88,7 @@ export default function MobileHomeScreen() {
 
             {/* CTA principal — Estimer */}
             <button
-              onClick={scrollToDevis}
+              onClick={handleScrollToDevis}
               className="edl-cta mt-5 w-full h-14 font-heading text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2"
             >
               <Sparkles size={18} />
