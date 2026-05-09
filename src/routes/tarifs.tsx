@@ -24,23 +24,24 @@ function TarifsPage() {
     <>
       <Navbar />
       <main className="pt-24 edl-section-bg">
-        <Tarifs />
-
-        {/* === ESTIMATEUR === */}
-        <section id="devis" className="py-12 lg:py-16 scroll-mt-24">
+        {/* === ESTIMATEUR — placé EN HAUT, au-dessus des prix === */}
+        <section id="devis" className="pt-6 pb-16 lg:pt-10 lg:pb-20 scroll-mt-32">
           <div className="max-w-6xl mx-auto px-5 lg:px-6">
             <div className="text-center mb-8">
               <span className="edl-chip inline-flex">
                 <Sparkles size={12} />
                 Estimation gratuite
               </span>
-              <h2 className="font-heading text-3xl lg:text-4xl tracking-wide gold-gradient-text mt-3">
+              <h1 className="font-heading text-3xl lg:text-5xl tracking-wide gold-gradient-text mt-3">
                 Estimez votre trajet
-              </h2>
+              </h1>
+              <p className="text-cream/65 text-sm lg:text-base mt-3 max-w-xl mx-auto">
+                Prix, distance et durée en quelques secondes. Péages, carburant et assurance inclus.
+              </p>
             </div>
 
-            {/* Estimateur desktop */}
-            <div className="hidden md:block edl-card-strong p-1 lg:p-2">
+            {/* Estimateur desktop — sans wrapper lourd, intégré directement */}
+            <div className="hidden md:block">
               <DevisGenerator />
             </div>
             {/* Estimateur mobile */}
@@ -49,6 +50,8 @@ function TarifsPage() {
             </div>
           </div>
         </section>
+
+        <Tarifs />
 
         <PartnersMarquee />
       </main>
