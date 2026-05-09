@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Home, Tag, User, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 /**
  * Bottom navigation publique (mobile uniquement).
@@ -26,13 +27,7 @@ export default function MobileBottomNav() {
   };
 
   const goEstimer = () => {
-    if (location.pathname === "/" || location.pathname.startsWith("/tarifs")) {
-      const el = document.getElementById("devis");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-    }
+    if (scrollToDevis()) return;
     navigate({ to: "/", hash: "devis" });
   };
 
