@@ -107,7 +107,8 @@ Deno.serve(async (req) => {
 
     return json({ ok: true, user_id: newUserId });
   } catch (err) {
-    return json({ error: (err as Error).message }, 500);
+    console.error("[admin-create-account] error", err);
+    return json({ error: "Internal server error" }, 500);
   }
 });
 

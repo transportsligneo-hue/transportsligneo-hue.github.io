@@ -210,7 +210,7 @@ serve(async (req) => {
   } catch (err) {
     console.error("edl-document-ocr error:", err);
     return new Response(JSON.stringify({
-      error: err instanceof Error ? err.message : "Unknown error",
+      error: "Internal server error",
     }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
