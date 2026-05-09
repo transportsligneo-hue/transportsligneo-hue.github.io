@@ -3,6 +3,7 @@ import { Menu, X, User, Sparkles } from "lucide-react";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
+import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 const navLinks = [
   { to: "/", label: "Accueil" },
@@ -27,16 +28,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // CTA principal : Estimer (scrolle vers #devis si on est sur l'accueil, sinon → /tarifs)
+  // CTA principal : Estimer — scrolle vers l'estimateur (centré) si présent, sinon → /tarifs
   const goToEstimer = () => {
     setMobileOpen(false);
-    if (location.pathname === "/") {
-      const el = document.getElementById("devis");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-    }
+    if (scrollToDevis()) return;
     navigate({ to: "/tarifs", hash: "devis" });
   };
 
