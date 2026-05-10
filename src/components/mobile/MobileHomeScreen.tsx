@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Sparkles,
@@ -9,6 +10,8 @@ import {
   Truck,
   Clock,
   Euro,
+  Zap,
+  Globe2,
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import heroChauffeur from "@/assets/hero-chauffeur-ligneo.jpg";
