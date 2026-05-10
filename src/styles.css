@@ -270,11 +270,14 @@
     --driver-text: #f5f1e8;
     --driver-text-soft: #c7cad8;
     --driver-muted: #8a90a8;
+    --driver-accent: #2c6bff;
+    --driver-accent-soft: rgba(44, 107, 255, 0.18);
 
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgba(212, 175, 55, 0.08), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgba(37, 99, 235, 0.10), transparent 60%),
-      linear-gradient(180deg, #070b1f 0%, #0b1026 60%, #070b1f 100%);
+      radial-gradient(1200px 600px at 10% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.10), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, rgba(212, 175, 55, 0.06), transparent 60%),
+      linear-gradient(180deg, #0a1230 0%, #0f1a44 60%, #0a1230 100%);
     color: var(--driver-text);
     min-height: 100vh;
   }
@@ -286,15 +289,27 @@
   .driver-shell .border-pro-border,
   .driver-shell .border-pro-border\/60 { border-color: var(--driver-border) !important; }
 
-  /* Cartes blanches → glass navy */
-  .driver-shell .bg-white {
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
+  /* Cartes blanches → glass navy (toutes opacités) */
+  .driver-shell .bg-white,
+  .driver-shell .bg-white\/95,
+  .driver-shell .bg-white\/90,
+  .driver-shell .bg-white\/80,
+  .driver-shell .bg-white\/70 {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     border-color: var(--driver-border) !important;
   }
   .driver-shell .shadow-sm,
   .driver-shell .shadow-pro-card { box-shadow: 0 8px 24px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04) !important; }
+
+  /* Sticky bar premium glass utilisé dans les détails de mission driver */
+  .driver-sticky-bar {
+    background: linear-gradient(180deg, rgba(10, 18, 48, 0.92), rgba(10, 18, 48, 0.78)) !important;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--driver-border);
+  }
 
   /* Inputs/selects/textarea → glass dark */
   .driver-shell input,
