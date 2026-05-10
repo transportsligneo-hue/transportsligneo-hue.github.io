@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/b2b/checkout")({
         // Charger la demande côté serveur (source de vérité prix)
         const { data: req2, error } = await supabaseAdmin
           .from("b2b_transport_requests")
-          .select("id, numero, pickup_address, dropoff_address, estimated_price_ttc, payment_status, company_id")
+          .select("id, numero, pickup_address, dropoff_address, estimated_price_ttc, payment_status, company_id, stripe_session_id")
           .eq("id", requestId)
           .maybeSingle();
 
