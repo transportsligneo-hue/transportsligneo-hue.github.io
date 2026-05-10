@@ -27,6 +27,13 @@ import { useAuth } from "@/hooks/useAuth";
 export default function MobileHomeScreen() {
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const goEspace = () => {
     if (!isAuthenticated) return navigate({ to: "/login" });
@@ -42,23 +49,43 @@ export default function MobileHomeScreen() {
 
   return (
     <div className="md:hidden home-shell min-h-screen pb-bottom-nav">
-      {/* Header app — compact */}
-      <header className="safe-top px-5 pt-4 pb-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2" aria-label="Accueil">
-          <img src={logoLigneo} alt="Transports Ligneo" className="h-10 w-auto object-contain" loading="eager" />
+      {/* Header mobile sticky — glass premium */}
+      <header
+        className={`safe-top sticky top-0 z-40 px-5 pt-3 pb-3 flex items-center justify-between transition-all duration-300 ${
+          scrolled
+            ? "bg-[#0b1026]/85 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]"
+            : "bg-transparent"
+        }`}
+      >
+        <Link to="/" className="flex items-center gap-2 tap-scale" aria-label="Accueil">
+          <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" loading="eager" />
         </Link>
-        <button
-          onClick={goEspace}
-          className="w-10 h-10 rounded-full gold-border flex items-center justify-center tap-scale"
-          aria-label="Mon espace"
-        >
-          <ShieldCheck size={18} className="text-primary" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleScrollToDevis}
+            className="h-9 px-3 rounded-full text-[10px] tracking-[0.18em] uppercase font-heading flex items-center gap-1.5 tap-scale"
+            style={{
+              background: "linear-gradient(135deg, #2c6bff 0%, #5fb6ff 100%)",
+              color: "#fff",
+              boxShadow: "0 6px 18px -6px rgba(44,107,255,0.55)",
+            }}
+            aria-label="Estimer"
+          >
+            <Sparkles size={12} /> Estimer
+          </button>
+          <button
+            onClick={goEspace}
+            className="w-9 h-9 rounded-full border border-white/15 bg-white/[0.04] flex items-center justify-center tap-scale"
+            aria-label="Mon espace"
+          >
+            <ShieldCheck size={16} className="text-[#9bcaff]" />
+          </button>
+        </div>
       </header>
 
-      {/* Hero visuel — image full-bleed, intégrée naturellement (sans cadran) */}
+      {/* Hero visuel — image full-bleed premium */}
       <section className="relative mb-2">
-        <div className="relative h-[340px] w-full overflow-hidden">
+        <div className="relative h-[380px] w-full overflow-hidden">
           <img
             src={heroChauffeur}
             alt="Chauffeur Transports LIGNEO devant une Mercedes noire"
@@ -71,47 +98,72 @@ export default function MobileHomeScreen() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "linear-gradient(180deg, rgba(11,16,38,0) 30%, rgba(11,16,38,0.6) 65%, var(--background) 100%)",
+                "linear-gradient(180deg, rgba(11,16,38,0.25) 0%, rgba(11,16,38,0.05) 35%, rgba(11,16,38,0.65) 70%, var(--background) 100%)",
             }}
           />
           <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
-            <p className="font-heading text-cream/65 text-[10px] tracking-[0.25em] uppercase">
-              Bienvenue chez
-            </p>
-            <h1 className="font-heading gold-gradient-text text-[32px] tracking-[0.04em] mt-1 leading-tight">
-              Transports Ligneo
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md text-[9px] tracking-[0.25em] uppercase text-cream/80">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5fb6ff] animate-pulse" />
+              Disponible 7j/7
+            </span>
+            <h1 className="font-heading text-cream text-[30px] tracking-[0.02em] mt-3 leading-[1.1]">
+              La tranquillité <br /><span className="gold-gradient-text">sur toute la ligne.</span>
             </h1>
-            <p className="text-cream/85 text-sm mt-2 leading-relaxed">
-              Convoyage automobile premium. <span className="text-primary italic">La tranquillité sur toute la ligne.</span>
+            <p className="text-cream/75 text-[13px] mt-2 leading-relaxed">
+              Convoyage automobile premium. Tarif live en 30 secondes.
             </p>
           </div>
         </div>
 
-        {/* CTA Estimer — hors de l'image, espacé */}
+        {/* CTA principal hors image */}
         <div className="px-5 pt-4">
           <button
             onClick={handleScrollToDevis}
-            className="edl-cta w-full h-14 font-heading text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2"
+            className="w-full h-14 rounded-2xl font-heading text-sm tracking-[0.18em] uppercase flex items-center justify-center gap-2 text-white tap-scale"
+            style={{
+              background: "linear-gradient(135deg, #2c6bff 0%, #5fb6ff 100%)",
+              boxShadow: "0 14px 32px -10px rgba(44,107,255,0.55)",
+            }}
           >
             <Sparkles size={18} />
             Estimer mon trajet
           </button>
+          <p className="text-center text-cream/45 text-[11px] mt-2 tracking-wide">
+            Réponse immédiate · Tarif transparent · Assurance incluse
+          </p>
         </div>
       </section>
 
-      {/* Estimateur — bloc principal visible sur la page d'accueil */}
-      <section id="mobile-devis" className="px-5 pt-2 pb-6 scroll-mt-24">
-        <div className="edl-card-strong p-4">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <div>
-              <p className="edl-eyebrow">Estimation 30 sec.</p>
-              <h2 className="font-heading text-cream text-base tracking-wide mt-1">
-                Estimer mon trajet
-              </h2>
-            </div>
-            <span className="edl-chip">Gratuit</span>
+      {/* Estimateur — présentation aérée, sans cadre lourd */}
+      <section id="mobile-devis" className="px-5 pt-4 pb-2 scroll-mt-24">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div>
+            <p className="text-[10px] tracking-[0.25em] uppercase text-[#9bcaff]/80 font-heading">Estimation 30 sec.</p>
+            <h2 className="font-heading text-cream text-lg tracking-wide mt-0.5">
+              Estimer mon trajet
+            </h2>
           </div>
+          <span className="px-2.5 py-1 rounded-full bg-[#5fb6ff]/12 border border-[#5fb6ff]/30 text-[10px] tracking-[0.18em] uppercase text-[#9bcaff]">
+            Gratuit
+          </span>
+        </div>
+        <div className="rounded-2xl border border-white/8 bg-white/[0.025] backdrop-blur-md p-1">
           <MobileDevisGenerator />
+        </div>
+
+        {/* Trust chips */}
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          {[
+            { icon: Zap, label: "Réponse immédiate" },
+            { icon: Euro, label: "Tarif transparent" },
+            { icon: ShieldCheck, label: "Assurance incluse" },
+            { icon: Globe2, label: "Service Europe" },
+          ].map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/8 bg-white/[0.03]">
+              <Icon size={14} className="text-[#9bcaff] shrink-0" />
+              <span className="text-cream/80 text-[11px] tracking-wide">{label}</span>
+            </div>
+          ))}
         </div>
       </section>
 
