@@ -1841,13 +1841,10 @@ export type Database = {
           heure_trajet: string | null
           id: string
           immatriculation: string | null
-          marge_indicative_pct: number | null
           marque: string | null
           modele: string | null
-          notes_internes: string | null
           pricing_mode: string
           prix: number | null
-          prix_client_ttc: number | null
           prix_convoyeur_fixe: number | null
           prix_convoyeur_max: number | null
           prix_convoyeur_min: number | null
@@ -1869,13 +1866,10 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
-          marge_indicative_pct?: number | null
           marque?: string | null
           modele?: string | null
-          notes_internes?: string | null
           pricing_mode?: string
           prix?: number | null
-          prix_client_ttc?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
@@ -1897,13 +1891,10 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
-          marge_indicative_pct?: number | null
           marque?: string | null
           modele?: string | null
-          notes_internes?: string | null
           pricing_mode?: string
           prix?: number | null
-          prix_client_ttc?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
@@ -1919,6 +1910,48 @@ export type Database = {
             columns: ["demande_id"]
             isOneToOne: false
             referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trajets_admin_data: {
+        Row: {
+          created_at: string
+          marge_indicative_pct: number | null
+          notes_internes: string | null
+          prix_client_ttc: number | null
+          trajet_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          marge_indicative_pct?: number | null
+          notes_internes?: string | null
+          prix_client_ttc?: number | null
+          trajet_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          marge_indicative_pct?: number | null
+          notes_internes?: string | null
+          prix_client_ttc?: number | null
+          trajet_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
         ]

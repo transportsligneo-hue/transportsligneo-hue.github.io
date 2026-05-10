@@ -67,7 +67,6 @@ interface TrajetFull {
   client_email: string | null;
   client_telephone: string | null;
   prix: number | null;
-  notes_internes: string | null;
 }
 
 interface ConvoyeurFull {
@@ -230,7 +229,16 @@ function AdminMissionDetail() {
     if (gpsRes.data) setGpsPoints(gpsRes.data as GpsPoint[]);
     if (docsRes.data) setDocuments(docsRes.data as DocRow[]);
     if (histRes.data) setHistory(histRes.data as EtapeHistoryRow[]);
-    if (trajRes.data?.notes_internes) setAdminNote(trajRes.data.notes_internes);
+    if (trajRes.data?.id) {
+      const { data: adminData } = await supabase
+        .from("trajets_admin_data" as never)
+        .select("notes_internes")
+        .eq("trajet_id" as never, trajRes.data.id as never)
+        .maybeSingle();
+      if (adminData && (adminData as { notes_internes?: string | null }).notes_internes) {
+        setAdminNote((adminData as { notes_internes: string }).notes_internes);
+      }
+    }
 
     // Photos par inspection (avec signed URLs)
     const inspWithPhotos: InspectionRow[] = [];
@@ -299,7 +307,9 @@ function AdminMissionDetail() {
   const saveAdminNote = async () => {
     if (!trajet) return;
     setSavingNote(true);
-    await supabase.from("trajets").update({ notes_internes: adminNote }).eq("id", trajet.id);
+    await supabase
+      .from("trajets_admin_data" as never)
+      .upsert({ trajet_id: trajet.id, notes_internes: adminNote } as never, { onConflict: "trajet_id" } as never);
     setSavingNote(false);
   };
 

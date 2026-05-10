@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/b2b/checkout")({
         // Charger la demande côté serveur (source de vérité prix)
         const { data: req2, error } = await supabaseAdmin
           .from("b2b_transport_requests")
-          .select("id, numero, pickup_address, dropoff_address, estimated_price_ttc, payment_status, company_id")
+          .select("id, numero, pickup_address, dropoff_address, estimated_price_ttc, payment_status, company_id, stripe_session_id")
           .eq("id", requestId)
           .maybeSingle();
 
@@ -77,6 +77,19 @@ export const Route = createFileRoute("/api/b2b/checkout")({
 
         try {
           const stripe = createStripeClient(env);
+
+          // Idempotency: reuse an existing open session if one already exists
+          if (req2.stripe_session_id) {
+            try {
+              const existing = await stripe.checkout.sessions.retrieve(req2.stripe_session_id);
+              if (existing.status === "open" && existing.client_secret) {
+                return Response.json({ clientSecret: existing.client_secret });
+              }
+            } catch {
+              // fall through and create a new session
+            }
+          }
+
           const session = await stripe.checkout.sessions.create({
             line_items: [{
               price_data: {

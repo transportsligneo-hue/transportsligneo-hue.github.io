@@ -68,25 +68,31 @@ export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBloc
 
   const handleSave = async () => {
     setSaving(true);
-    const updates = {
+    const trajetUpdates = {
       pricing_mode: mode,
-      prix_client_ttc: num(prixClient),
       prix_convoyeur_fixe: mode === "fixe" ? num(prixFixe) : null,
       prix_convoyeur_min: mode === "enchere" ? num(prixMin) : null,
       prix_convoyeur_max: mode === "enchere" ? num(prixMax) : null,
+    };
+    const adminUpdates = {
+      trajet_id: trajetId,
+      prix_client_ttc: num(prixClient),
       marge_indicative_pct: num(margeCible),
     };
     const { error } = await supabase
       .from("trajets")
-      .update(updates as never)
+      .update(trajetUpdates as never)
       .eq("id", trajetId);
+    const { error: adminError } = await supabase
+      .from("trajets_admin_data" as never)
+      .upsert(adminUpdates as never, { onConflict: "trajet_id" } as never);
     setSaving(false);
-    if (!error) {
+    if (!error && !adminError) {
       setSavedAt(Date.now());
-      onSaved?.(updates as PricingModeBlockProps["initial"]);
+      onSaved?.({ ...trajetUpdates, prix_client_ttc: adminUpdates.prix_client_ttc, marge_indicative_pct: adminUpdates.marge_indicative_pct } as PricingModeBlockProps["initial"]);
       setTimeout(() => setSavedAt(null), 2500);
     } else {
-      alert("Erreur de sauvegarde : " + error.message);
+      alert("Erreur de sauvegarde");
     }
   };
 
