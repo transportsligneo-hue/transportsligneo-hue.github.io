@@ -36,8 +36,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   useEffect(() => {
     const prevHtml = document.documentElement.style.background;
     const prevBody = document.body.style.background;
-    document.documentElement.style.background = "#070b1f";
-    document.body.style.background = "#070b1f";
+    document.documentElement.style.background = "#0a1230";
+    document.body.style.background = "#0a1230";
     return () => {
       document.documentElement.style.background = prevHtml;
       document.body.style.background = prevBody;
