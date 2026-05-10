@@ -43,7 +43,7 @@ interface Trajet {
   prix: number | null;
   tarif_convoyeur: number | null;
   statut: string;
-  notes_internes: string | null;
+  notes_internes?: string | null;
   demande_id: string | null;
   created_at: string;
   prix_suggere?: number | null;
@@ -269,7 +269,22 @@ function AdminTrajets() {
     let query = supabase.from("trajets").select("*").order("created_at", { ascending: false });
     if (filterStatut !== "all") query = query.eq("statut", filterStatut);
     const { data } = await query;
-    if (data) setTrajets(data as Trajet[]);
+    if (!data) return;
+    const ids = (data as { id: string }[]).map((d) => d.id);
+    let adminMap: Record<string, { notes_internes?: string | null; prix_client_ttc?: number | null; marge_indicative_pct?: number | null }> = {};
+    if (ids.length > 0) {
+      const { data: adminRows } = await supabase
+        .from("trajets_admin_data" as never)
+        .select("trajet_id, notes_internes, prix_client_ttc, marge_indicative_pct")
+        .in("trajet_id" as never, ids as never);
+      if (adminRows) {
+        adminMap = (adminRows as unknown as { trajet_id: string; notes_internes: string | null; prix_client_ttc: number | null; marge_indicative_pct: number | null }[]).reduce((acc, r) => {
+          acc[r.trajet_id] = { notes_internes: r.notes_internes, prix_client_ttc: r.prix_client_ttc, marge_indicative_pct: r.marge_indicative_pct };
+          return acc;
+        }, {} as typeof adminMap);
+      }
+    }
+    setTrajets((data as unknown as Trajet[]).map((t) => ({ ...t, ...adminMap[t.id] })));
   }, [filterStatut]);
 
   useEffect(() => {
@@ -278,7 +293,7 @@ function AdminTrajets() {
 
   const createTrajet = async () => {
     if (!form.depart || !form.arrivee) return;
-    await supabase.from("trajets").insert({
+    const { data: created } = await supabase.from("trajets").insert({
       depart: form.depart,
       arrivee: form.arrivee,
       date_trajet: form.date_trajet || null,
@@ -291,8 +306,12 @@ function AdminTrajets() {
       client_telephone: form.client_telephone || "",
       prix: form.prix ? parseFloat(form.prix) : null,
       tarif_convoyeur: form.tarif_convoyeur ? parseFloat(form.tarif_convoyeur) : null,
-      notes_internes: form.notes_internes || "",
-    });
+    }).select("id").maybeSingle();
+    if (created?.id && form.notes_internes) {
+      await supabase
+        .from("trajets_admin_data" as never)
+        .upsert({ trajet_id: created.id, notes_internes: form.notes_internes } as never, { onConflict: "trajet_id" } as never);
+    }
     setForm(emptyTrajet);
     setShowCreate(false);
     fetchTrajets();
@@ -315,9 +334,11 @@ function AdminTrajets() {
         client_telephone: form.client_telephone || "",
         prix: form.prix ? parseFloat(form.prix) : null,
         tarif_convoyeur: form.tarif_convoyeur ? parseFloat(form.tarif_convoyeur) : null,
-        notes_internes: form.notes_internes || "",
       })
       .eq("id", selected.id);
+    await supabase
+      .from("trajets_admin_data" as never)
+      .upsert({ trajet_id: selected.id, notes_internes: form.notes_internes || null } as never, { onConflict: "trajet_id" } as never);
     setEditing(false);
     setSelected(null);
     fetchTrajets();
