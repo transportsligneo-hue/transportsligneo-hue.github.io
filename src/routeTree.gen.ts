@@ -97,6 +97,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
@@ -597,6 +598,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDevisWebhookRoute = ApiPublicDevisWebhookRouteImport.update({
+  id: '/api/public/devis/webhook',
+  path: '/api/public/devis/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicB2bWebhookRoute = ApiPublicB2bWebhookRouteImport.update({
   id: '/api/public/b2b/webhook',
   path: '/api/public/b2b/webhook',
@@ -756,6 +762,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -850,6 +857,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -952,6 +960,7 @@ export interface FileRoutesById {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1054,6 +1063,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1148,6 +1158,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1249,6 +1260,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1288,6 +1300,7 @@ export interface RootRouteChildren {
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
+  ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1913,6 +1926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/devis/webhook': {
+      id: '/api/public/devis/webhook'
+      path: '/api/public/devis/webhook'
+      fullPath: '/api/public/devis/webhook'
+      preLoaderRoute: typeof ApiPublicDevisWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/b2b/webhook': {
       id: '/api/public/b2b/webhook'
       path: '/api/public/b2b/webhook'
@@ -2359,6 +2379,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
+  ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
