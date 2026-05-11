@@ -385,8 +385,9 @@ function AdminDashboard() {
           ) : (
             <ul className="space-y-2">
               {notifs.map((n) => {
-                const Container: React.ElementType = n.link ? Link : "div";
-                const props = n.link ? { to: n.link as never } : {};
+                const safeLink = n.link && n.link.startsWith("/") ? n.link : null;
+                const Container: React.ElementType = safeLink ? Link : "div";
+                const props = safeLink ? { to: safeLink as never } : {};
                 return (
                   <li key={n.id}>
                     <Container
