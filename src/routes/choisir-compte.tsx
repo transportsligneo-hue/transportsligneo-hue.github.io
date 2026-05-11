@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Car, UserCheck, Building2, ArrowRight } from "lucide-react";
+import { Car, UserCheck, Building2, Truck, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/choisir-compte")({
   component: ChoisirCompte,

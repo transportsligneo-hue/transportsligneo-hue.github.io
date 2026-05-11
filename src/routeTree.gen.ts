@@ -19,6 +19,7 @@ import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oubl
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
+import { Route as InscriptionFlotteRouteImport } from './routes/inscription-flotte'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -153,6 +154,11 @@ const LoginRoute = LoginRouteImport.update({
 const InscriptionProRoute = InscriptionProRouteImport.update({
   id: '/inscription-pro',
   path: '/inscription-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscriptionFlotteRoute = InscriptionFlotteRouteImport.update({
+  id: '/inscription-flotte',
+  path: '/inscription-flotte',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
@@ -649,6 +655,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -745,6 +752,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -837,6 +845,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
+  '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -935,6 +944,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
@@ -1031,6 +1041,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
@@ -1122,6 +1133,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/inscription-client'
     | '/inscription-convoyeur'
+    | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
     | '/mentions-legales'
@@ -1220,6 +1232,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
+  InscriptionFlotteRoute: typeof InscriptionFlotteRoute
   InscriptionProRoute: typeof InscriptionProRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
@@ -1313,6 +1326,13 @@ declare module '@tanstack/react-router' {
       path: '/inscription-pro'
       fullPath: '/inscription-pro'
       preLoaderRoute: typeof InscriptionProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription-flotte': {
+      id: '/inscription-flotte'
+      path: '/inscription-flotte'
+      fullPath: '/inscription-flotte'
+      preLoaderRoute: typeof InscriptionFlotteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscription-convoyeur': {
@@ -2232,6 +2252,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
+  InscriptionFlotteRoute: InscriptionFlotteRoute,
   InscriptionProRoute: InscriptionProRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
