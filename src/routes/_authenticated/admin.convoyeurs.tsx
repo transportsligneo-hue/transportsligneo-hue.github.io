@@ -14,7 +14,6 @@ import {
   TD,
   EmptyState,
   Modal,
-  DetailRow,
   Button,
   IconButton,
   Select,
