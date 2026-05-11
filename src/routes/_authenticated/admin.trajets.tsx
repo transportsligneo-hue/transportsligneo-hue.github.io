@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel } from "lucide-react";
+import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -55,6 +55,19 @@ interface Trajet {
   prix_convoyeur_min?: number | null;
   prix_convoyeur_max?: number | null;
   marge_indicative_pct?: number | null;
+  // Refonte dispatch — auto depuis devis
+  devis_id?: string | null;
+  prix_client?: number | null;
+  commission_convoyeur_pct?: number | null;
+  prix_convoyeur?: number | null;
+  prix_societe?: number | null;
+}
+
+interface DevisLink {
+  id: string;
+  numero: string;
+  prix_estime: number;
+  paid_at: string | null;
 }
 
 interface Offre {
@@ -106,6 +119,47 @@ function AdminTrajets() {
   const [offres, setOffres] = useState<Offre[]>([]);
   const [prixSuggereInput, setPrixSuggereInput] = useState<string>("");
   const [savingPub, setSavingPub] = useState(false);
+  const [linkedDevis, setLinkedDevis] = useState<DevisLink | null>(null);
+  const [pctInput, setPctInput] = useState<string>("65");
+  const [savingCommission, setSavingCommission] = useState(false);
+
+  // Charge le devis lié quand selected change
+  useEffect(() => {
+    if (!selected?.devis_id) {
+      setLinkedDevis(null);
+      return;
+    }
+    supabase
+      .from("devis")
+      .select("id, numero, prix_estime, paid_at")
+      .eq("id", selected.devis_id)
+      .maybeSingle()
+      .then(({ data }) => setLinkedDevis(data ?? null));
+    setPctInput((selected.commission_convoyeur_pct ?? 65).toString());
+  }, [selected?.devis_id, selected?.commission_convoyeur_pct]);
+
+  const saveCommission = async () => {
+    if (!selected) return;
+    const pct = parseFloat(pctInput);
+    if (isNaN(pct) || pct < 0 || pct > 100) {
+      alert("Pourcentage invalide (0-100)");
+      return;
+    }
+    setSavingCommission(true);
+    await supabase
+      .from("trajets")
+      .update({ commission_convoyeur_pct: pct } as never)
+      .eq("id", selected.id);
+    // Le trigger DB recalcule prix_convoyeur et prix_societe automatiquement
+    const { data: refreshed } = await supabase
+      .from("trajets")
+      .select("*")
+      .eq("id", selected.id)
+      .maybeSingle();
+    setSavingCommission(false);
+    if (refreshed) setSelected({ ...selected, ...(refreshed as Partial<Trajet>) });
+    fetchTrajets();
+  };
 
   const fetchOffres = useCallback(async (trajetId: string) => {
     const { data: offresData } = await supabase
@@ -581,6 +635,87 @@ function AdminTrajets() {
                 ))}
               </Select>
             </FormField>
+
+            {/* === SECTION DEVIS LIÉ + COMMISSION CONVOYEUR === */}
+            {(linkedDevis || selected.prix_client != null) && (
+              <div className="mt-5 pt-5 border-t border-pro-border">
+                <h3 className="font-semibold text-pro-text flex items-center gap-2 mb-3">
+                  <FileText size={16} className="text-pro-accent" />
+                  Devis & répartition automatique
+                </h3>
+
+                {linkedDevis && (
+                  <Card padded={false} className="mb-3">
+                    <div className="px-4 py-3 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-wider text-pro-muted">Devis source</p>
+                        <p className="font-mono text-sm text-pro-text mt-0.5">{linkedDevis.numero}</p>
+                        <p className="text-xs text-pro-text-soft mt-0.5">
+                          {linkedDevis.paid_at ? `Payé le ${new Date(linkedDevis.paid_at).toLocaleDateString("fr-FR")}` : "Non payé"}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] uppercase tracking-wider text-pro-muted">Montant client</p>
+                        <p className="text-pro-accent font-bold text-lg leading-tight">{linkedDevis.prix_estime} €</p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                <Card padded={false}>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-pro-text-soft mb-1.5">
+                        Commission convoyeur (%)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value={pctInput}
+                          onChange={(e) => setPctInput(e.target.value)}
+                          className="w-24 px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pro-accent"
+                        />
+                        <span className="text-pro-muted text-sm">%</span>
+                        <Button
+                          onClick={saveCommission}
+                          disabled={savingCommission}
+                          icon={<Save size={13} />}
+                          className="ml-auto"
+                        >
+                          Appliquer
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Aperçu live (avant sauvegarde) */}
+                    {selected.prix_client != null && (() => {
+                      const pct = parseFloat(pctInput) || 0;
+                      const conv = Math.round(selected.prix_client! * pct) / 100;
+                      const soc = Math.round((selected.prix_client! - conv) * 100) / 100;
+                      return (
+                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-pro-border">
+                          <div className="text-center">
+                            <p className="text-[10px] uppercase tracking-wider text-pro-muted">Client paie</p>
+                            <p className="text-pro-text font-bold text-base mt-1 tabular-nums">{selected.prix_client} €</p>
+                          </div>
+                          <div className="text-center bg-emerald-50 rounded-lg py-2">
+                            <p className="text-[10px] uppercase tracking-wider text-emerald-700">Convoyeur</p>
+                            <p className="text-emerald-700 font-bold text-base mt-1 tabular-nums">{conv} €</p>
+                          </div>
+                          <div className="text-center bg-amber-50 rounded-lg py-2">
+                            <p className="text-[10px] uppercase tracking-wider text-amber-700">Société</p>
+                            <p className="text-amber-700 font-bold text-base mt-1 tabular-nums">{soc} €</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </Card>
+              </div>
+            )}
 
             {/* === SECTION TARIFICATION (B1) === */}
             <div className="mt-5 pt-5 border-t border-pro-border">
