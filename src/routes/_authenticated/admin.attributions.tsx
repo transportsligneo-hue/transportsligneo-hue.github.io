@@ -390,6 +390,16 @@ function AdminAttributions() {
                   <IconButton onClick={() => setReportId(a.id)} title="Rapport mission" tone="primary">
                     <FileText size={15} />
                   </IconButton>
+                  {(a.statut === "termine" || a.statut === "validee") && (
+                    <IconButton
+                      onClick={() => handleEmitFacture(a)}
+                      title="Émettre la facture"
+                      tone="success"
+                      disabled={invoicingId === a.id}
+                    >
+                      {invoicingId === a.id ? <Loader2 size={15} className="animate-spin" /> : <Receipt size={15} />}
+                    </IconButton>
+                  )}
                 </div>
               </div>
 
