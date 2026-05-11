@@ -31,34 +31,6 @@ interface ClientRow {
   missions_count: number;
 }
 
-interface MissionItem {
-  id: string;
-  numero: string;
-  ville_depart: string;
-  ville_arrivee: string;
-  date_prise_en_charge: string;
-  statut: string;
-  prix_total: number;
-}
-
-const missionTone: Record<string, "neutral" | "info" | "primary" | "success" | "danger"> = {
-  en_attente: "neutral",
-  confirmee: "info",
-  en_cours: "primary",
-  livree: "success",
-  terminee: "success",
-  annulee: "danger",
-  refuse: "danger",
-};
-const missionLabel: Record<string, string> = {
-  en_attente: "En attente",
-  confirmee: "Confirmée",
-  en_cours: "En cours",
-  livree: "Livrée",
-  terminee: "Terminée",
-  annulee: "Annulée",
-  refuse: "Refusée",
-};
 
 function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
