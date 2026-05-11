@@ -51,6 +51,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
 import { Route as AuthenticatedFlotteSocieteRouteImport } from './routes/_authenticated/flotte.societe'
 import { Route as AuthenticatedFlotteMissionsRouteImport } from './routes/_authenticated/flotte.missions'
@@ -325,6 +326,11 @@ const B2bTransportPonctuelRetourRoute =
     path: '/retour',
     getParentRoute: () => B2bTransportPonctuelRoute,
   } as any)
+const ApiDevisCheckoutRoute = ApiDevisCheckoutRouteImport.update({
+  id: '/api/devis/checkout',
+  path: '/api/devis/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiB2bCheckoutRoute = ApiB2bCheckoutRouteImport.update({
   id: '/api/b2b/checkout',
   path: '/api/b2b/checkout',
@@ -730,6 +736,7 @@ export interface FileRoutesByFullPath {
   '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -823,6 +830,7 @@ export interface FileRoutesByTo {
   '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -924,6 +932,7 @@ export interface FileRoutesById {
   '/_authenticated/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
   '/_authenticated/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
+  '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1025,6 +1034,7 @@ export interface FileRouteTypes {
     | '/flotte/missions'
     | '/flotte/societe'
     | '/api/b2b/checkout'
+    | '/api/devis/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -1118,6 +1128,7 @@ export interface FileRouteTypes {
     | '/flotte/missions'
     | '/flotte/societe'
     | '/api/b2b/checkout'
+    | '/api/devis/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
@@ -1218,6 +1229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/flotte/missions'
     | '/_authenticated/flotte/societe'
     | '/api/b2b/checkout'
+    | '/api/devis/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1271,6 +1283,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
+  ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
@@ -1577,6 +1590,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/transport-ponctuel/retour'
       preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
       parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/devis/checkout': {
+      id: '/api/devis/checkout'
+      path: '/api/devis/checkout'
+      fullPath: '/api/devis/checkout'
+      preLoaderRoute: typeof ApiDevisCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/b2b/checkout': {
       id: '/api/b2b/checkout'
@@ -2334,6 +2354,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
+  ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
