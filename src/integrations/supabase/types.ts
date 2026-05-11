@@ -693,6 +693,7 @@ export type Database = {
       }
       devis: {
         Row: {
+          amount_paid_cents: number | null
           arrivee: string
           carburant: string | null
           converted_at: string | null
@@ -714,18 +715,23 @@ export type Database = {
           nom: string
           numero: string
           option_trajet: string | null
+          paid_at: string | null
           pdf_url: string | null
           prenom: string
           prestation: string | null
           prix_base: number | null
           prix_estime: number
           statut: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           tarif_label: string | null
           telephone: string | null
           type_vehicule: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          amount_paid_cents?: number | null
           arrivee: string
           carburant?: string | null
           converted_at?: string | null
@@ -747,18 +753,23 @@ export type Database = {
           nom: string
           numero?: string
           option_trajet?: string | null
+          paid_at?: string | null
           pdf_url?: string | null
           prenom: string
           prestation?: string | null
           prix_base?: number | null
           prix_estime: number
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           tarif_label?: string | null
           telephone?: string | null
           type_vehicule?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          amount_paid_cents?: number | null
           arrivee?: string
           carburant?: string | null
           converted_at?: string | null
@@ -780,16 +791,20 @@ export type Database = {
           nom?: string
           numero?: string
           option_trajet?: string | null
+          paid_at?: string | null
           pdf_url?: string | null
           prenom?: string
           prestation?: string | null
           prix_base?: number | null
           prix_estime?: number
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           tarif_label?: string | null
           telephone?: string | null
           type_vehicule?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
