@@ -140,6 +140,30 @@ function ConvoyeurDashboard() {
         <p className="text-[13px] text-[var(--driver-text-soft)] mt-1">Vos missions, en un coup d'œil.</p>
       </div>
 
+      {/* Bandeau "Nouvelles missions disponibles" — realtime */}
+      {availableCount > 0 && (
+        <Link
+          to="/convoyeur/disponibles"
+          className="brex-card flex items-center justify-between p-4 border border-[rgba(212,175,55,0.40)] bg-[rgba(212,175,55,0.06)] hover:bg-[rgba(212,175,55,0.10)] transition"
+        >
+          <div className="flex items-center gap-3">
+            <span className="brex-pill brex-pill--amber brex-pill--live">
+              <span className="brex-pill-dot" />
+              Nouveau
+            </span>
+            <div>
+              <p className="text-[14px] font-semibold text-[var(--driver-text)]">
+                {availableCount} mission{availableCount > 1 ? "s" : ""} disponible{availableCount > 1 ? "s" : ""}
+              </p>
+              <p className="text-[12px] text-[var(--driver-text-soft)] mt-0.5">
+                À accepter ou enchérir maintenant
+              </p>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-[#e7c76a] shrink-0" />
+        </Link>
+      )}
+
       {/* Hero : mission active */}
       {todayMission && todayMission.trajet && (
         <Link
