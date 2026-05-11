@@ -140,6 +140,17 @@ export function EdlPremiumFlow({
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
+  const [online, setOnline] = useState<boolean>(
+    typeof navigator === "undefined" ? true : navigator.onLine !== false
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener("online", up);
+    window.addEventListener("offline", down);
+    return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
+  }, []);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Bypass admin (étend useMissionGates aux IDs scan/photo)
