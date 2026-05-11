@@ -396,7 +396,7 @@ function AdminDashboard() {
                         n.lu
                           ? "border-[color:var(--admin-border)] bg-transparent"
                           : "border-[color:var(--admin-accent)]/30 bg-[color:var(--admin-accent-soft)]"
-                      } ${n.link ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
+                      } ${safeLink ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
                     >
                       <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
                       <div className="min-w-0 flex-1">
