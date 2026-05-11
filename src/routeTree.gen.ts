@@ -81,6 +81,7 @@ import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
+import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
@@ -501,6 +502,12 @@ const AuthenticatedAdminHistoriqueRoute =
     path: '/historique',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFacturesRoute =
+  AuthenticatedAdminFacturesRouteImport.update({
+    id: '/factures',
+    path: '/factures',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDocumentsRoute =
   AuthenticatedAdminDocumentsRouteImport.update({
     id: '/documents',
@@ -670,6 +677,7 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -759,6 +767,7 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -856,6 +865,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -953,6 +963,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/factures'
     | '/admin/historique'
     | '/admin/messages'
     | '/admin/notifications'
@@ -1042,6 +1053,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/factures'
     | '/admin/historique'
     | '/admin/messages'
     | '/admin/notifications'
@@ -1138,6 +1150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
+    | '/_authenticated/admin/factures'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/notifications'
@@ -1736,6 +1749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHistoriqueRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/factures': {
+      id: '/_authenticated/admin/factures'
+      path: '/factures'
+      fullPath: '/admin/factures'
+      preLoaderRoute: typeof AuthenticatedAdminFacturesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/documents': {
       id: '/_authenticated/admin/documents'
       path: '/documents'
@@ -1962,6 +1982,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRouteWithChildren
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
+  AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
@@ -1984,6 +2005,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRouteWithChildren,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
+  AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
