@@ -409,6 +409,24 @@ export function EdlPremiumFlow({
       }, { onConflict: "attribution_id,kind" });
       if (error) throw error;
 
+      // Remontée admin : insère également une entrée dans mission_documents
+      // pour MissionTraceability + PV avec un type canonique. On laisse "best-effort"
+      // (pas de throw) car la signature elle-même est déjà persistée.
+      const docKey = SIGNATURE_DOC_KEY[sigKind];
+      if (docKey) {
+        try {
+          await supabase.from("mission_documents").insert({
+            attribution_id: attributionId,
+            uploaded_by: userId,
+            type_document: docKey,
+            nom_fichier: `${docKey}.png`,
+            url_fichier: path,
+          });
+        } catch (docErr) {
+          console.warn("[EDL Premium] mission_documents insert failed (non bloquant)", docErr);
+        }
+      }
+
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
     } catch (err) {
