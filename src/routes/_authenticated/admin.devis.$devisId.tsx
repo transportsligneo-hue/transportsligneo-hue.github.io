@@ -231,7 +231,7 @@ function AdminDevisDetailPage() {
 
         {/* Right: PDF preview */}
         <div className="lg:col-span-2">
-          <Card className="p-0 overflow-hidden">
+          <Card padded={false} className="overflow-hidden">
             <div className="px-4 py-3 border-b border-pro-border flex items-center gap-2">
               <FileText size={14} className="text-pro-accent" />
               <span className="text-xs uppercase tracking-wider text-pro-muted font-medium">Aperçu PDF</span>
