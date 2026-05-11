@@ -32,19 +32,25 @@ function ProDocuments() {
   const { user } = useAuth();
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.email) { setLoading(false); return; }
     supabase
       .from("devis")
-      .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at")
-      .eq("email", user.email)
+      .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at")
+      .or(`user_id.eq.${user.id},email.eq.${user.email}`)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setDevis((data ?? []) as DevisRow[]);
         setLoading(false);
       });
   }, [user]);
+
+  const payingDevis = devis.find(d => d.id === payingId);
+  const returnUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/dashboard-pro/documents?paye=1`
+    : "/";
 
   return (
     <div className="space-y-5">
