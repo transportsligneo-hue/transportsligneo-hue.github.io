@@ -17,6 +17,8 @@ interface Props {
   title: string;
   subtitle?: string;
   items: SidebarItem[];
+  /** Classe additionnelle sur le wrapper racine (ex: "client-shell"). */
+  shellClass?: string;
   /** Contenu rendu dans le main */
   children: ReactNode;
 }
