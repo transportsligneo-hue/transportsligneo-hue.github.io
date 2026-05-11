@@ -55,6 +55,19 @@ interface Trajet {
   prix_convoyeur_min?: number | null;
   prix_convoyeur_max?: number | null;
   marge_indicative_pct?: number | null;
+  // Refonte dispatch — auto depuis devis
+  devis_id?: string | null;
+  prix_client?: number | null;
+  commission_convoyeur_pct?: number | null;
+  prix_convoyeur?: number | null;
+  prix_societe?: number | null;
+}
+
+interface DevisLink {
+  id: string;
+  numero: string;
+  prix_estime: number;
+  paid_at: string | null;
 }
 
 interface Offre {
