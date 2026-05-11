@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
-  CheckCircle, User, Phone, Mail, Download, Shield, Route as RouteIcon,
-  Sparkles, ArrowRight, ArrowLeft, FileText
+  CheckCircle, User, Download, Shield, Route as RouteIcon,
+  Sparkles, ArrowRight, ArrowLeft, FileText, Lock, MailCheck
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
