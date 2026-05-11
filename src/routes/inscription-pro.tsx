@@ -60,6 +60,7 @@ function InscriptionPro() {
           emailRedirectTo: `${window.location.origin}/login`,
           data: {
             role: "client",
+            type_client: "b2b",
             nom: form.nom,
             prenom: form.prenom,
             telephone: form.telephone,
