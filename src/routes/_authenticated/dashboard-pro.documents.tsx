@@ -137,6 +137,25 @@ function ProDocuments() {
           </div>
         )}
       </div>
+
+      {payingDevis && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => setPayingId(null)}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-semibold text-lg text-pro-text">Paiement — {payingDevis.numero}</h2>
+              <p className="text-pro-muted text-sm mt-1">{payingDevis.depart} → {payingDevis.arrivee} · {Number(payingDevis.prix_estime).toFixed(2)} €</p>
+            </div>
+            <DevisEmbeddedCheckout devisId={payingDevis.id} returnUrl={returnUrl} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
