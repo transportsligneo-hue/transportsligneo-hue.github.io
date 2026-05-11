@@ -290,33 +290,37 @@
   .driver-shell .border-pro-border,
   .driver-shell .border-pro-border\/60 { border-color: var(--driver-border) !important; }
 
-  /* Cartes blanches → glass navy (toutes opacités) */
+  /* Cartes blanches → glass premium lumineux (toutes opacités) */
   .driver-shell .bg-white,
   .driver-shell .bg-white\/95,
   .driver-shell .bg-white\/90,
   .driver-shell .bg-white\/80,
   .driver-shell .bg-white\/70 {
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     border-color: var(--driver-border) !important;
   }
   .driver-shell .shadow-sm,
-  .driver-shell .shadow-pro-card { box-shadow: 0 8px 24px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04) !important; }
+  .driver-shell .shadow-pro-card {
+    box-shadow:
+      0 18px 42px -22px rgba(8, 16, 48, 0.75),
+      inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
 
   /* Sticky bar premium glass utilisé dans les détails de mission driver */
   .driver-sticky-bar {
-    background: linear-gradient(180deg, rgba(10, 18, 48, 0.92), rgba(10, 18, 48, 0.78)) !important;
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    background: linear-gradient(180deg, rgba(15, 26, 70, 0.88), rgba(11, 18, 50, 0.82)) !important;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
     border-bottom: 1px solid var(--driver-border);
   }
 
-  /* Inputs/selects/textarea → glass dark */
+  /* Inputs/selects/textarea → glass dark, focus bleu électrique */
   .driver-shell input,
   .driver-shell select,
   .driver-shell textarea {
-    background: rgba(255,255,255,0.04) !important;
+    background: rgba(255,255,255,0.06) !important;
     color: var(--driver-text) !important;
     border-color: var(--driver-border) !important;
   }
@@ -325,26 +329,25 @@
   .driver-shell input:focus,
   .driver-shell select:focus,
   .driver-shell textarea:focus {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18) !important;
+    border-color: var(--driver-accent) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
     outline: none !important;
   }
 
-  /* Boutons primaires "emerald" remplacés par or premium */
+  /* Boutons primaires "emerald" remplacés par bleu électrique premium */
   .driver-shell .bg-emerald-600,
   .driver-shell .bg-emerald-700 {
-    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%) !important;
-    color: #0b1026 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%) !important;
+    color: #ffffff !important;
   }
-  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.05); }
+  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.06); }
   .driver-shell .text-emerald-600,
-  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
-  .driver-shell .bg-emerald-50 { background: rgba(212, 175, 55, 0.10) !important; }
+  .driver-shell .text-emerald-700 { color: var(--driver-accent-2) !important; }
+  .driver-shell .bg-emerald-50 { background: rgba(59, 130, 246, 0.12) !important; }
   .driver-shell .border-emerald-200,
-  .driver-shell .border-emerald-300 { border-color: rgba(212, 175, 55, 0.30) !important; }
-  .driver-shell .text-emerald-800,
-  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
-  .driver-shell .bg-emerald-100 { background: rgba(16, 185, 129, 0.18) !important; }
+  .driver-shell .border-emerald-300 { border-color: rgba(120, 165, 255, 0.32) !important; }
+  .driver-shell .text-emerald-800 { color: var(--driver-accent-2) !important; }
+  .driver-shell .bg-emerald-100 { background: rgba(59, 130, 246, 0.18) !important; }
 
   /* Amber alerts → premium warm */
   .driver-shell .bg-amber-50 { background: rgba(245, 158, 11, 0.10) !important; }
