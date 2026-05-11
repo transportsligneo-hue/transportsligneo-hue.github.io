@@ -122,8 +122,45 @@ export default function DevisGenerator() {
 
   async function handleSubmit() {
     if (!pricing || distance == null) return;
+    if (!cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
+    if (password.length < 8) { setAccountError("Le mot de passe doit contenir au moins 8 caractères."); return; }
+    setAccountError("");
     setSending(true);
     try {
+      // 1) Création du compte client (vérification email requise côté Supabase)
+      try {
+        const token = await getRecaptchaToken("signup_devis");
+        // reCAPTCHA token is optional; signup proceeds even if unavailable
+        void token;
+      } catch { /* ignore */ }
+
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          data: {
+            role: "client",
+            nom, prenom, telephone,
+            societe: societe || "",
+          },
+        },
+      });
+
+      let isExistingAccount = false;
+      if (signUpError) {
+        const msg = signUpError.message.toLowerCase();
+        if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("user already")) {
+          isExistingAccount = true;
+        } else {
+          setAccountError(signUpError.message);
+          setSending(false);
+          return;
+        }
+      }
+      setAccountCreated(!isExistingAccount);
+
+      // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
         nom, prenom, telephone, email,
         depart: departure, arrivee: arrival,
@@ -166,7 +203,7 @@ export default function DevisGenerator() {
         message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option },
+        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: isExistingAccount ? "existing" : "created" },
       });
 
       const devisData: DevisData = {
@@ -196,7 +233,7 @@ export default function DevisGenerator() {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      setSubmitted(true);
+      setAccountError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setSending(false);
     }
