@@ -136,7 +136,7 @@ function AdminPaiements() {
         <KpiCard label="CA TTC encaissé" value={eur(kpis.caTTC)} icon={TrendingUp} tone="success" />
         <KpiCard label="CA HT" value={eur(kpis.caHT)} icon={BarChart3} />
         <KpiCard label="TVA collectée" value={eur(kpis.tva)} icon={Wallet} />
-        <KpiCard label="Encours à percevoir" value={eur(kpis.encours)} icon={AlertTriangle} tone={kpis.encours > 0 ? "warning" : "neutral"} />
+        <KpiCard label="Encours à percevoir" value={eur(kpis.encours)} icon={AlertTriangle} tone={kpis.encours > 0 ? "warning" : "default"} />
       </div>
 
       {/* Mini chart 12 mois */}
