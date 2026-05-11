@@ -116,6 +116,20 @@ function ProDocuments() {
                         <span className="text-pro-muted text-xs">—</span>
                       )}
                     </td>
+                    <td className="px-5 py-3 text-right">
+                      {d.statut === "accepte" && !d.paid_at ? (
+                        <button
+                          onClick={() => setPayingId(d.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                        >
+                          <CreditCard size={13} /> Payer
+                        </button>
+                      ) : d.paid_at ? (
+                        <span className="text-emerald-600 text-xs font-medium">Payé</span>
+                      ) : (
+                        <span className="text-pro-muted text-xs">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
