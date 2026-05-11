@@ -79,8 +79,6 @@ export interface OptionItem {
 export const RESERVATION_OPTIONS: OptionItem[] = [
   { id: "lavage_int", label: "Lavage intérieur", price: 29.90 },
   { id: "lavage_complet", label: "Lavage intérieur + extérieur", price: 79.90 },
-  { id: "plein_carburant", label: "Plein de carburant (≈ 50L à 2,20 €/L)", price: 110 },
-  { id: "plein_electrique", label: "Plein électrique (≈ 60 kWh à 1,30 €/kWh)", price: 78 },
 ];
 
 export function calculateOptionsTotal(selectedIds: string[]): number {
