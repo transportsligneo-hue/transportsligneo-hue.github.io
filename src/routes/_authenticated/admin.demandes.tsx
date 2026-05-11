@@ -1,24 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, RefreshCw, ArrowRightCircle, Trash2, FileText } from "lucide-react";
+import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight } from "lucide-react";
 import {
-  PageHeader,
-  Card,
-  Badge,
-  Table,
-  THead,
-  TH,
-  TR,
-  TD,
-  EmptyState,
-  Modal,
-  DetailRow,
-  Button,
-  IconButton,
-  Select,
-  demandeStatutTone,
-} from "@/components/admin/AdminUI";
+  AdminPageHeader,
+  AdminSection,
+  AdminBadge,
+  AdminEmpty,
+} from "@/components/admin/ui";
 import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
 
@@ -58,12 +47,15 @@ const statutLabels: Record<string, string> = {
 
 function AdminDemandes() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
-  const [selected, setSelected] = useState<Demande | null>(null);
   const [filterStatut, setFilterStatut] = useState<string>("all");
+  const [search, setSearch] = useState("");
   const [converting, setConverting] = useState<string | null>(null);
 
   const fetchDemandes = useCallback(async () => {
-    let query = supabase.from("demandes_convoyage").select("*").order("created_at", { ascending: false });
+    let query = supabase
+      .from("demandes_convoyage")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (filterStatut !== "all") query = query.eq("statut", filterStatut);
     const { data } = await query;
     if (data) setDemandes(data as Demande[]);
@@ -72,12 +64,6 @@ function AdminDemandes() {
   useEffect(() => {
     fetchDemandes();
   }, [fetchDemandes]);
-
-  const updateStatut = async (id: string, statut: string) => {
-    await supabase.from("demandes_convoyage").update({ statut }).eq("id", id);
-    fetchDemandes();
-    if (selected?.id === id) setSelected((prev) => (prev ? { ...prev, statut } : null));
-  };
 
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
@@ -97,187 +83,181 @@ function AdminDemandes() {
         statut: "en_attente",
       });
       if (!error) {
-        await updateStatut(d.id, "convertie");
-        setSelected(null);
+        await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
+        fetchDemandes();
       }
     } finally {
       setConverting(null);
     }
   };
 
-  const deleteDemande = async (id: string) => {
-    if (!confirm("Supprimer cette demande ?")) return;
-    await supabase.from("demandes_convoyage").delete().eq("id", id);
-    setSelected(null);
-    fetchDemandes();
-  };
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return demandes;
+    return demandes.filter(
+      (d) =>
+        d.nom.toLowerCase().includes(q) ||
+        d.prenom.toLowerCase().includes(q) ||
+        d.email.toLowerCase().includes(q) ||
+        (d.telephone ?? "").toLowerCase().includes(q) ||
+        d.depart.toLowerCase().includes(q) ||
+        d.arrivee.toLowerCase().includes(q)
+    );
+  }, [demandes, search]);
 
   return (
-    <div>
-      <PageHeader
-        title="Demandes"
-        subtitle={`${demandes.length} demande${demandes.length > 1 ? "s" : ""}`}
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Pipeline"
+        title="Demandes de convoyage"
+        subtitle={`${filtered.length} demande${filtered.length > 1 ? "s" : ""} affichée${filtered.length > 1 ? "s" : ""}`}
+        breadcrumb={[{ label: "Admin", to: "/admin" }, { label: "Demandes" }]}
         actions={
-          <>
-            <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
-              <option value="all">Tous les statuts</option>
-              {statuts.map((s) => (
-                <option key={s} value={s}>
-                  {statutLabels[s]}
-                </option>
-              ))}
-            </Select>
-            <IconButton onClick={fetchDemandes} title="Actualiser">
-              <RefreshCw size={15} />
-            </IconButton>
-          </>
+          <button
+            onClick={fetchDemandes}
+            className="admin-btn-ghost inline-flex items-center gap-1.5"
+            title="Actualiser"
+          >
+            <RefreshCw size={14} /> Actualiser
+          </button>
         }
       />
 
-      {demandes.length === 0 ? (
-        <EmptyState
-          icon={FileText}
-          title="Aucune demande"
-          description="Les demandes du formulaire de devis apparaîtront ici."
-        />
-      ) : (
-        <Table>
-          <THead>
-            <TH>Client</TH>
-            <TH className="hidden sm:table-cell">Trajet</TH>
-            <TH className="hidden md:table-cell">Date</TH>
-            <TH className="hidden lg:table-cell">Prix estimé</TH>
-            <TH>Statut</TH>
-            <TH className="text-right">Actions</TH>
-          </THead>
-          <tbody>
-            {demandes.map((d) => {
-              const q = quoteFromDemande(d);
-              return (
-                <TR key={d.id}>
-                  <TD>
-                    <p className="font-medium text-pro-text">
-                      {d.prenom} {d.nom}
-                    </p>
-                    <p className="text-pro-muted text-xs sm:hidden">
-                      {d.depart} → {d.arrivee}
-                    </p>
-                  </TD>
-                  <TD className="hidden sm:table-cell text-pro-text-soft">
-                    {d.depart} → {d.arrivee}
-                  </TD>
-                  <TD className="hidden md:table-cell text-pro-muted text-xs">
-                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                  </TD>
-                  <TD className="hidden lg:table-cell">
-                    <PriceBlock quote={q} variant="compact" />
-                  </TD>
-                  <TD>
-                    <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
-                      {statutLabels[d.statut] ?? d.statut}
-                    </Badge>
-                  </TD>
-                  <TD>
-                    <div className="flex items-center justify-end gap-1">
-                      <Link
-                        to="/admin/demandes/$demandeId"
-                        params={{ demandeId: d.id }}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                        title="Voir la fiche"
-                      >
-                        <Eye size={15} />
-                      </Link>
-                      {d.statut !== "convertie" && d.statut !== "terminee" && (
-                        <IconButton
-                          onClick={() => convertToTrajet(d)}
-                          disabled={converting === d.id}
-                          title="Convertir en trajet"
-                          tone="success"
+      <AdminSection>
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--admin-muted)]"
+            />
+            <input
+              type="text"
+              placeholder="Rechercher (nom, email, trajet…)"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-sm focus:outline-none focus:border-[color:var(--admin-accent)]"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilterStatut("all")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                filterStatut === "all"
+                  ? "bg-[color:var(--admin-accent)] text-white border-[color:var(--admin-accent)]"
+                  : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[color:var(--admin-accent)]"
+              }`}
+            >
+              Tous
+            </button>
+            {statuts.map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilterStatut(s)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                  filterStatut === s
+                    ? "bg-[color:var(--admin-accent)] text-white border-[color:var(--admin-accent)]"
+                    : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[color:var(--admin-accent)]"
+                }`}
+              >
+                {statutLabels[s]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
+          <AdminEmpty
+            icon={FileText}
+            title="Aucune demande"
+            description="Les demandes du formulaire apparaîtront ici."
+          />
+        ) : (
+          <div className="overflow-x-auto -mx-1">
+            <table className="admin-table w-full">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th className="hidden sm:table-cell">Trajet</th>
+                  <th className="hidden md:table-cell">Date</th>
+                  <th className="hidden lg:table-cell">Prix estimé</th>
+                  <th>Statut</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((d) => {
+                  const q = quoteFromDemande(d);
+                  return (
+                    <tr key={d.id}>
+                      <td>
+                        <Link
+                          to="/admin/demandes/$demandeId"
+                          params={{ demandeId: d.id }}
+                          className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]"
                         >
-                          <ArrowRightCircle size={15} />
-                        </IconButton>
-                      )}
-                    </div>
-                  </TD>
-                </TR>
-              );
-            })}
-          </tbody>
-        </Table>
-      )}
-
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Détail demande" size="lg">
-        {selected && (
-          <>
-            <div className="grid md:grid-cols-[1fr_280px] gap-4 mb-4">
-              <Card padded={false}>
-                <div className="px-4 py-3 bg-pro-bg-soft/40 border-b border-pro-border flex items-center justify-between">
-                  <p className="text-pro-text font-medium">
-                    {selected.prenom} {selected.nom}
-                  </p>
-                  <Badge tone={demandeStatutTone[selected.statut] ?? "neutral"}>
-                    {statutLabels[selected.statut] ?? selected.statut}
-                  </Badge>
-                </div>
-                <div className="px-4 divide-y divide-pro-border">
-                  <DetailRow label="Email" value={selected.email} />
-                  <DetailRow label="Téléphone" value={selected.telephone} />
-                  <DetailRow label="Départ" value={selected.depart} />
-                  <DetailRow label="Arrivée" value={selected.arrivee} />
-                  <DetailRow label="Date souhaitée" value={selected.date_souhaitee} />
-                  <DetailRow label="Heure" value={selected.heure_souhaitee} />
-                  <DetailRow
-                    label="Véhicule"
-                    value={[selected.marque, selected.modele].filter(Boolean).join(" ") || null}
-                  />
-                  <DetailRow label="Immatriculation" value={selected.immatriculation} />
-                  <DetailRow label="Carburant" value={selected.carburant} />
-                  <DetailRow label="Options" value={selected.options} />
-                  <DetailRow label="Message" value={selected.message} />
-                </div>
-              </Card>
-
-              <PriceBlock quote={quoteFromDemande(selected)} title="Estimation" />
-            </div>
-
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-medium text-pro-text-soft">Statut</span>
-              <Select
-                value={selected.statut}
-                onChange={(e) => updateStatut(selected.id, e.target.value)}
-                className="ml-auto text-xs py-1.5"
-              >
-                {statuts.map((s) => (
-                  <option key={s} value={s}>
-                    {statutLabels[s]}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="flex gap-2">
-              {selected.statut !== "convertie" && selected.statut !== "terminee" && (
-                <Button
-                  variant="success"
-                  onClick={() => convertToTrajet(selected)}
-                  disabled={converting === selected.id}
-                  icon={<ArrowRightCircle size={14} />}
-                  className="flex-1"
-                >
-                  Convertir en trajet
-                </Button>
-              )}
-              <Button
-                variant="danger"
-                onClick={() => deleteDemande(selected.id)}
-                icon={<Trash2 size={14} />}
-              >
-                Supprimer
-              </Button>
-            </div>
-          </>
+                          {d.prenom} {d.nom}
+                        </Link>
+                        <p className="text-[color:var(--admin-muted)] text-xs">
+                          {d.email}
+                        </p>
+                        <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
+                          {d.depart} → {d.arrivee}
+                        </p>
+                      </td>
+                      <td className="hidden sm:table-cell">
+                        <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
+                          {d.depart}
+                          <ArrowRight
+                            size={11}
+                            className="text-[color:var(--admin-muted)]"
+                          />
+                          {d.arrivee}
+                        </span>
+                      </td>
+                      <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
+                        {new Date(d.created_at).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="hidden lg:table-cell">
+                        <PriceBlock quote={q} variant="compact" />
+                      </td>
+                      <td>
+                        <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-end gap-1">
+                          <Link
+                            to="/admin/demandes/$demandeId"
+                            params={{ demandeId: d.id }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-[color:var(--admin-accent)] hover:bg-[color:var(--admin-accent-soft)]"
+                            title="Voir la fiche"
+                          >
+                            <Eye size={15} />
+                          </Link>
+                          {d.statut !== "convertie" &&
+                            d.statut !== "terminee" && (
+                              <button
+                                onClick={() => convertToTrajet(d)}
+                                disabled={converting === d.id}
+                                title="Convertir en trajet"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
+                              >
+                                <ArrowRightCircle size={15} />
+                              </button>
+                            )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Modal>
+      </AdminSection>
     </div>
   );
 }
