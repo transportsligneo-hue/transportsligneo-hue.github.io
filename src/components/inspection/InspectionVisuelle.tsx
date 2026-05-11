@@ -106,7 +106,15 @@ export function InspectionVisuelle({
     })();
   }, [attributionId]);
 
-  // --- Hydrate from existing photos ---
+  // --- Hydrate from existing photos (signed URLs car bucket privé) ---
+  const signUrl = useCallback(async (path: string) => {
+    if (/^https?:\/\//i.test(path)) return path;
+    const { data } = await supabase.storage
+      .from("inspection-photos")
+      .createSignedUrl(path, 3600);
+    return data?.signedUrl ?? path;
+  }, []);
+
   useEffect(() => {
     if (!inspectionId) return;
     (async () => {
@@ -120,9 +128,10 @@ export function InspectionVisuelle({
       for (const p of data) {
         if (p.vue_type.startsWith("zone_")) {
           const zoneId = p.vue_type.replace("zone_", "");
-          next[zoneId] = { state: "ok", photoUrl: p.url_photo };
+          const url = await signUrl(p.url_photo);
+          next[zoneId] = { state: "ok", photoUrl: url };
         } else if (p.vue_type.startsWith("extra_")) {
-          extras.push(p.url_photo);
+          extras.push(await signUrl(p.url_photo));
         }
       }
       setZones(prev => ({ ...next, ...prev }));
