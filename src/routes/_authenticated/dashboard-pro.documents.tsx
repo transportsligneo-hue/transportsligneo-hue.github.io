@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X } from "lucide-react";
+import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/documents")({
   component: ProDocuments,
