@@ -95,8 +95,6 @@ export default function Tarifs() {
                 ["Livraison hors horaires / week-end / express (24h)", "+20 %"],
                 ["Lavage intérieur", "29,90 €"],
                 ["Lavage intérieur + extérieur", "79,90 €"],
-                ["Plein de carburant (client final)", "2,20 €/L"],
-                ["Plein électrique (client final)", "1,30 €/kWh"],
               ].map(([label, price], i) => (
                 <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
                   <span className="text-cream/75">{label}</span>
