@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X } from "lucide-react";
+import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/documents")({
   component: ProDocuments,
@@ -17,6 +18,7 @@ interface DevisRow {
   statut: string;
   pdf_url: string | null;
   created_at: string;
+  paid_at: string | null;
 }
 
 const statutPill: Record<string, string> = {
@@ -30,19 +32,25 @@ function ProDocuments() {
   const { user } = useAuth();
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.email) { setLoading(false); return; }
     supabase
       .from("devis")
-      .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at")
-      .eq("email", user.email)
+      .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at")
+      .or(`user_id.eq.${user.id},email.eq.${user.email}`)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setDevis((data ?? []) as DevisRow[]);
         setLoading(false);
       });
   }, [user]);
+
+  const payingDevis = devis.find(d => d.id === payingId);
+  const returnUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/dashboard-pro/documents?paye=1`
+    : "/";
 
   return (
     <div className="space-y-5">
@@ -75,6 +83,7 @@ function ProDocuments() {
                   <th className="text-left px-5 py-3 font-medium">Statut</th>
                   <th className="text-right px-5 py-3 font-medium">Montant</th>
                   <th className="text-right px-5 py-3 font-medium">PDF</th>
+                  <th className="text-right px-5 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,6 +116,20 @@ function ProDocuments() {
                         <span className="text-pro-muted text-xs">—</span>
                       )}
                     </td>
+                    <td className="px-5 py-3 text-right">
+                      {d.statut === "accepte" && !d.paid_at ? (
+                        <button
+                          onClick={() => setPayingId(d.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                        >
+                          <CreditCard size={13} /> Payer
+                        </button>
+                      ) : d.paid_at ? (
+                        <span className="text-emerald-600 text-xs font-medium">Payé</span>
+                      ) : (
+                        <span className="text-pro-muted text-xs">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -114,6 +137,25 @@ function ProDocuments() {
           </div>
         )}
       </div>
+
+      {payingDevis && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => setPayingId(null)}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-semibold text-lg text-pro-text">Paiement — {payingDevis.numero}</h2>
+              <p className="text-pro-muted text-sm mt-1">{payingDevis.depart} → {payingDevis.arrivee} · {Number(payingDevis.prix_estime).toFixed(2)} €</p>
+            </div>
+            <DevisEmbeddedCheckout devisId={payingDevis.id} returnUrl={returnUrl} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

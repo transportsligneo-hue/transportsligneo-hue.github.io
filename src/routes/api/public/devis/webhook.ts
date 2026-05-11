@@ -32,10 +32,18 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
             const amount = Number(s?.amount_total ?? 0);
 
             if (devisId) {
+              // 1. Fetch full devis
+              const { data: devis } = await supabaseAdmin
+                .from("devis")
+                .select("*")
+                .eq("id", devisId)
+                .maybeSingle();
+
+              // 2. Mark devis paid
               await supabaseAdmin
                 .from("devis")
                 .update({
-                  statut: "accepte",
+                  statut: "convertit",
                   paid_at: new Date().toISOString(),
                   stripe_session_id: sessionId,
                   stripe_payment_intent_id: paymentIntentId ?? null,
@@ -44,16 +52,95 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                 })
                 .eq("id", devisId);
 
-              // Notify admin
+              let missionId: string | null = devis?.mission_id ?? null;
+
+              // 3. Auto-create mission if needed
+              if (devis && !missionId && devis.user_id) {
+                const { data: mission } = await supabaseAdmin
+                  .from("missions")
+                  .insert({
+                    user_id: devis.user_id,
+                    ville_depart: devis.depart,
+                    ville_arrivee: devis.arrivee,
+                    date_prise_en_charge: devis.date_souhaitee ?? new Date().toISOString().slice(0, 10),
+                    type_trajet: devis.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
+                    options: [],
+                    marque: devis.marque ?? null,
+                    modele: devis.modele ?? null,
+                    carburant: devis.carburant ?? null,
+                    remarques: devis.message ?? null,
+                    nom: devis.nom,
+                    prenom: devis.prenom,
+                    email: devis.email,
+                    telephone: devis.telephone ?? null,
+                    prix_total: devis.prix_estime,
+                    statut: "confirmee",
+                  } as any)
+                  .select("id")
+                  .single();
+
+                missionId = mission?.id ?? null;
+                if (missionId) {
+                  await supabaseAdmin
+                    .from("devis")
+                    .update({ mission_id: missionId, converted_at: new Date().toISOString() })
+                    .eq("id", devisId);
+                }
+              }
+
+              // 4. Auto-create facture (payée)
+              if (devis) {
+                const prixTtc = Number(devis.prix_estime ?? 0);
+                const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
+                const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
+                await supabaseAdmin.from("factures").insert({
+                  mission_id: missionId,
+                  client_email: devis.email,
+                  client_nom: devis.nom,
+                  client_prenom: devis.prenom,
+                  type_facture: "particulier",
+                  date_mission: devis.date_souhaitee ?? null,
+                  prix_ht: prixHt,
+                  tva_taux: 20,
+                  prix_tva: prixTva,
+                  prix_ttc: prixTtc,
+                  statut: "payee",
+                  mode_paiement: "carte",
+                  date_paiement: new Date().toISOString().slice(0, 10),
+                } as any);
+              }
+
+              // 5. Enqueue confirmation email
+              try {
+                await supabaseAdmin.rpc("enqueue_email", {
+                  queue_name: "transactional_emails",
+                  payload: {
+                    to: devis?.email,
+                    subject: `Paiement confirmé — ${devis?.numero ?? ""}`,
+                    template: "devis-paye",
+                    data: {
+                      prenom: devis?.prenom,
+                      numero: devis?.numero,
+                      depart: devis?.depart,
+                      arrivee: devis?.arrivee,
+                      montant: Number(devis?.prix_estime ?? 0).toFixed(2),
+                    },
+                  },
+                });
+              } catch (e) {
+                console.error("[devis/webhook] email error", e);
+              }
+
+              // 6. Notify admin
               try {
                 await supabaseAdmin.rpc("create_admin_notification", {
                   _type: "b2b_paiement",
                   _titre: "Paiement devis confirmé",
-                  _message: `Devis ${s?.metadata?.devis_numero ?? devisId} payé`,
+                  _message: `Devis ${devis?.numero ?? devisId} payé · ${(amount / 100).toFixed(2)} €`,
                   _link: `/admin/devis/${devisId}`,
                   _entity_type: "devis",
                   _entity_id: devisId,
-                  _metadata: { session_id: sessionId, amount_cents: amount },
+                  _metadata: { session_id: sessionId, amount_cents: amount, mission_id: missionId },
                 });
               } catch (e) {
                 console.error("[devis/webhook] notification error", e);
