@@ -73,7 +73,7 @@ function ClientLayout() {
   }
 
   return (
-    <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems}>
+    <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems} shellClass="client-shell">
       <Outlet />
     </DashboardSidebar>
   );
