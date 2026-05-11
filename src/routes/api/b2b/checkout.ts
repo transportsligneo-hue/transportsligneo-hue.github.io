@@ -104,6 +104,7 @@ export const Route = createFileRoute("/api/b2b/checkout")({
             }],
             mode: "payment",
             ui_mode: "embedded",
+            payment_method_types: ["card"],
             return_url: returnUrl,
             ...(customerEmail && { customer_email: customerEmail }),
             metadata: {

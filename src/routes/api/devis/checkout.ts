@@ -90,6 +90,7 @@ export const Route = createFileRoute("/api/devis/checkout")({
             }],
             mode: "payment",
             ui_mode: "embedded",
+            payment_method_types: ["card"],
             return_url: returnUrl,
             ...(devis.email && { customer_email: devis.email }),
             metadata: {

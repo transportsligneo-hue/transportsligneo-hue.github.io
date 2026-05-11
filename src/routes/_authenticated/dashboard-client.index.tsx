@@ -172,10 +172,20 @@ function ClientDashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading text-lg text-cream tracking-wider">Mes devis</h2>
+            <Link
+              to="/dashboard-client/devis"
+              className="text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
+            >
+              Tout voir →
+            </Link>
           </div>
           <div className="space-y-3">
             {devisList.map(d => (
-              <div key={d.id} className="card-premium p-5 rounded flex items-center justify-between gap-4">
+              <Link
+                key={d.id}
+                to="/dashboard-client/devis"
+                className="card-premium p-5 rounded flex items-center justify-between gap-4 hover:border-primary/40 transition-colors cursor-pointer"
+              >
                 <div className="min-w-0">
                   <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-2">
                     <FileText size={12} className="text-primary" /> {d.numero}
@@ -190,7 +200,7 @@ function ClientDashboard() {
                   <p className="font-heading text-primary text-lg">{Number(d.prix_estime).toFixed(0)} €</p>
                   <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{d.statut}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
