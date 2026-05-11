@@ -102,6 +102,7 @@ import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
+import { Route as AuthenticatedAdminFacturesFactureIdRouteImport } from './routes/_authenticated/admin.factures.$factureId'
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
 import { Route as AuthenticatedAdminDemandesDemandeIdRouteImport } from './routes/_authenticated/admin.demandes.$demandeId'
 import { Route as AuthenticatedAdminConvoyeursConvoyeurIdRouteImport } from './routes/_authenticated/admin.convoyeurs.$convoyeurId'
@@ -624,6 +625,12 @@ const AuthenticatedAdminMissionsMissionIdRoute =
     path: '/missions/$missionId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFacturesFactureIdRoute =
+  AuthenticatedAdminFacturesFactureIdRouteImport.update({
+    id: '/$factureId',
+    path: '/$factureId',
+    getParentRoute: () => AuthenticatedAdminFacturesRoute,
+  } as any)
 const AuthenticatedAdminDevisDevisIdRoute =
   AuthenticatedAdminDevisDevisIdRouteImport.update({
     id: '/$devisId',
@@ -691,7 +698,7 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRouteWithChildren
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -735,6 +742,7 @@ export interface FileRoutesByFullPath {
   '/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/admin/demandes/$demandeId': typeof AuthenticatedAdminDemandesDemandeIdRoute
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
+  '/admin/factures/$factureId': typeof AuthenticatedAdminFacturesFactureIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -783,7 +791,7 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/factures': typeof AuthenticatedAdminFacturesRouteWithChildren
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -827,6 +835,7 @@ export interface FileRoutesByTo {
   '/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/admin/demandes/$demandeId': typeof AuthenticatedAdminDemandesDemandeIdRoute
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
+  '/admin/factures/$factureId': typeof AuthenticatedAdminFacturesFactureIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -883,7 +892,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRouteWithChildren
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRouteWithChildren
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -927,6 +936,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/_authenticated/admin/demandes/$demandeId': typeof AuthenticatedAdminDemandesDemandeIdRoute
   '/_authenticated/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
+  '/_authenticated/admin/factures/$factureId': typeof AuthenticatedAdminFacturesFactureIdRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1027,6 +1037,7 @@ export interface FileRouteTypes {
     | '/admin/convoyeurs/$convoyeurId'
     | '/admin/demandes/$demandeId'
     | '/admin/devis/$devisId'
+    | '/admin/factures/$factureId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
@@ -1119,6 +1130,7 @@ export interface FileRouteTypes {
     | '/admin/convoyeurs/$convoyeurId'
     | '/admin/demandes/$demandeId'
     | '/admin/devis/$devisId'
+    | '/admin/factures/$factureId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
@@ -1218,6 +1230,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/convoyeurs/$convoyeurId'
     | '/_authenticated/admin/demandes/$demandeId'
     | '/_authenticated/admin/devis/$devisId'
+    | '/_authenticated/admin/factures/$factureId'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
@@ -1922,6 +1935,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/factures/$factureId': {
+      id: '/_authenticated/admin/factures/$factureId'
+      path: '/$factureId'
+      fullPath: '/admin/factures/$factureId'
+      preLoaderRoute: typeof AuthenticatedAdminFacturesFactureIdRouteImport
+      parentRoute: typeof AuthenticatedAdminFacturesRoute
+    }
     '/_authenticated/admin/devis/$devisId': {
       id: '/_authenticated/admin/devis/$devisId'
       path: '/$devisId'
@@ -2012,6 +2032,21 @@ const AuthenticatedAdminDevisRouteWithChildren =
     AuthenticatedAdminDevisRouteChildren,
   )
 
+interface AuthenticatedAdminFacturesRouteChildren {
+  AuthenticatedAdminFacturesFactureIdRoute: typeof AuthenticatedAdminFacturesFactureIdRoute
+}
+
+const AuthenticatedAdminFacturesRouteChildren: AuthenticatedAdminFacturesRouteChildren =
+  {
+    AuthenticatedAdminFacturesFactureIdRoute:
+      AuthenticatedAdminFacturesFactureIdRoute,
+  }
+
+const AuthenticatedAdminFacturesRouteWithChildren =
+  AuthenticatedAdminFacturesRoute._addFileChildren(
+    AuthenticatedAdminFacturesRouteChildren,
+  )
+
 interface AuthenticatedAdminOrganisationsRouteChildren {
   AuthenticatedAdminOrganisationsOrgIdRoute: typeof AuthenticatedAdminOrganisationsOrgIdRoute
 }
@@ -2036,7 +2071,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRouteWithChildren
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
-  AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+  AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRouteWithChildren
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
@@ -2059,7 +2094,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRouteWithChildren,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRouteWithChildren,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
-  AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+  AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRouteWithChildren,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
