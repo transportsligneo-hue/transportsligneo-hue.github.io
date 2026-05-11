@@ -352,9 +352,16 @@ export function InspectionVisuelle({
             {extraPhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {extraPhotos.map((p, i) => (
-                  <div key={i} className="aspect-square bg-pro-bg-soft rounded-lg flex items-center justify-center text-pro-muted text-xs">
-                    Photo {i + 1}
-                  </div>
+                  <a
+                    key={i}
+                    href={p}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block aspect-square rounded-lg overflow-hidden border border-pro-border bg-pro-bg-soft"
+                  >
+                    <img src={p} alt={`Photo complémentaire ${i + 1}`} loading="lazy"
+                      className="w-full h-full object-cover" />
+                  </a>
                 ))}
               </div>
             )}
