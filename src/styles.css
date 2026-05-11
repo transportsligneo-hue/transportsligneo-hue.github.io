@@ -261,23 +261,24 @@
      toucher aux composants de chaque écran.
      ============================================================ */
   .driver-shell {
-    --driver-bg: #070b1f;
-    --driver-bg-2: #0b1026;
-    --driver-surface: rgba(255, 255, 255, 0.04);
-    --driver-surface-strong: rgba(255, 255, 255, 0.06);
-    --driver-border: rgba(212, 175, 55, 0.18);
-    --driver-border-strong: rgba(212, 175, 55, 0.35);
-    --driver-text: #f5f1e8;
-    --driver-text-soft: #c7cad8;
-    --driver-muted: #8a90a8;
-    --driver-accent: #2c6bff;
-    --driver-accent-soft: rgba(44, 107, 255, 0.18);
+    --driver-bg: #0b1530;
+    --driver-bg-2: #122353;
+    --driver-surface: rgba(255, 255, 255, 0.06);
+    --driver-surface-strong: rgba(255, 255, 255, 0.10);
+    --driver-border: rgba(120, 165, 255, 0.22);
+    --driver-border-strong: rgba(120, 165, 255, 0.40);
+    --driver-text: #f4f7ff;
+    --driver-text-soft: #cdd6f1;
+    --driver-muted: #8f9ac2;
+    --driver-accent: #3b82f6;
+    --driver-accent-2: #5fb6ff;
+    --driver-accent-soft: rgba(59, 130, 246, 0.22);
 
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.10), transparent 60%),
-      radial-gradient(700px 500px at 50% 110%, rgba(212, 175, 55, 0.06), transparent 60%),
-      linear-gradient(180deg, #0a1230 0%, #0f1a44 60%, #0a1230 100%);
+      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.30), transparent 60%),
+      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%),
+      radial-gradient(900px 700px at 50% 110%, rgba(120, 165, 255, 0.12), transparent 60%),
+      linear-gradient(180deg, #0e1740 0%, #1a2a6e 55%, #0e1740 100%);
     color: var(--driver-text);
     min-height: 100vh;
   }
@@ -289,33 +290,37 @@
   .driver-shell .border-pro-border,
   .driver-shell .border-pro-border\/60 { border-color: var(--driver-border) !important; }
 
-  /* Cartes blanches → glass navy (toutes opacités) */
+  /* Cartes blanches → glass premium lumineux (toutes opacités) */
   .driver-shell .bg-white,
   .driver-shell .bg-white\/95,
   .driver-shell .bg-white\/90,
   .driver-shell .bg-white\/80,
   .driver-shell .bg-white\/70 {
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     border-color: var(--driver-border) !important;
   }
   .driver-shell .shadow-sm,
-  .driver-shell .shadow-pro-card { box-shadow: 0 8px 24px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04) !important; }
+  .driver-shell .shadow-pro-card {
+    box-shadow:
+      0 18px 42px -22px rgba(8, 16, 48, 0.75),
+      inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
 
   /* Sticky bar premium glass utilisé dans les détails de mission driver */
   .driver-sticky-bar {
-    background: linear-gradient(180deg, rgba(10, 18, 48, 0.92), rgba(10, 18, 48, 0.78)) !important;
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    background: linear-gradient(180deg, rgba(15, 26, 70, 0.88), rgba(11, 18, 50, 0.82)) !important;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
     border-bottom: 1px solid var(--driver-border);
   }
 
-  /* Inputs/selects/textarea → glass dark */
+  /* Inputs/selects/textarea → glass dark, focus bleu électrique */
   .driver-shell input,
   .driver-shell select,
   .driver-shell textarea {
-    background: rgba(255,255,255,0.04) !important;
+    background: rgba(255,255,255,0.06) !important;
     color: var(--driver-text) !important;
     border-color: var(--driver-border) !important;
   }
@@ -324,26 +329,25 @@
   .driver-shell input:focus,
   .driver-shell select:focus,
   .driver-shell textarea:focus {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18) !important;
+    border-color: var(--driver-accent) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
     outline: none !important;
   }
 
-  /* Boutons primaires "emerald" remplacés par or premium */
+  /* Boutons primaires "emerald" remplacés par bleu électrique premium */
   .driver-shell .bg-emerald-600,
   .driver-shell .bg-emerald-700 {
-    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%) !important;
-    color: #0b1026 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%) !important;
+    color: #ffffff !important;
   }
-  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.05); }
+  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.06); }
   .driver-shell .text-emerald-600,
-  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
-  .driver-shell .bg-emerald-50 { background: rgba(212, 175, 55, 0.10) !important; }
+  .driver-shell .text-emerald-700 { color: var(--driver-accent-2) !important; }
+  .driver-shell .bg-emerald-50 { background: rgba(59, 130, 246, 0.12) !important; }
   .driver-shell .border-emerald-200,
-  .driver-shell .border-emerald-300 { border-color: rgba(212, 175, 55, 0.30) !important; }
-  .driver-shell .text-emerald-800,
-  .driver-shell .text-emerald-700 { color: var(--gold-light) !important; }
-  .driver-shell .bg-emerald-100 { background: rgba(16, 185, 129, 0.18) !important; }
+  .driver-shell .border-emerald-300 { border-color: rgba(120, 165, 255, 0.32) !important; }
+  .driver-shell .text-emerald-800 { color: var(--driver-accent-2) !important; }
+  .driver-shell .bg-emerald-100 { background: rgba(59, 130, 246, 0.18) !important; }
 
   /* Amber alerts → premium warm */
   .driver-shell .bg-amber-50 { background: rgba(245, 158, 11, 0.10) !important; }
@@ -372,19 +376,19 @@
 
   /* Premium driver utilities */
   .driver-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
     border: 1px solid var(--driver-border);
     border-radius: 1rem;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    box-shadow: 0 8px 24px -12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 18px 42px -22px rgba(8,16,48,0.75), inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .driver-cta {
-    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
-    color: #0b1026;
+    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%);
+    color: #ffffff;
     font-weight: 700;
     border-radius: 0.875rem;
-    box-shadow: 0 10px 30px -10px rgba(212,175,55,0.55);
+    box-shadow: 0 10px 30px -10px rgba(59,130,246,0.55);
     transition: transform 120ms ease, filter 120ms ease;
   }
   .driver-cta:active { transform: scale(0.98); }
@@ -392,34 +396,32 @@
   .driver-chip {
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.25rem 0.625rem; border-radius: 9999px;
-    background: rgba(212, 175, 55, 0.12);
-    border: 1px solid rgba(212, 175, 55, 0.30);
-    color: #e7c76a;
+    background: rgba(59, 130, 246, 0.14);
+    border: 1px solid rgba(120, 165, 255, 0.32);
+    color: #bcd4ff;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
   }
 
   /* ============================================================
-     === DRIVER STRIPE/BREX CARDS — sobre, KPI, tabular numerics
-     Refonte carte par carte : pilules mono-tone, chiffres énormes,
-     hiérarchie typographique premium, un seul accent or par carte.
+     === DRIVER STRIPE/BREX CARDS — SaaS premium, KPI, bleu électrique
      ============================================================ */
   .driver-shell { font-feature-settings: "tnum" 1, "cv11" 1; }
 
   /* KPI tile (Brex-style) */
   .brex-tile {
     position: relative;
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
     border: 1px solid var(--driver-border);
     border-radius: 16px;
     padding: 16px 18px;
     overflow: hidden;
     transition: border-color 160ms ease, transform 160ms ease;
   }
-  .brex-tile:hover { border-color: rgba(212,175,55,0.32); }
+  .brex-tile:hover { border-color: var(--driver-border-strong); }
   .brex-tile::after {
     content: ""; position: absolute; inset: 0;
-    background: radial-gradient(120% 60% at 100% 0%, rgba(212,175,55,0.06), transparent 60%);
+    background: radial-gradient(120% 60% at 100% 0%, rgba(59,130,246,0.10), transparent 60%);
     pointer-events: none;
   }
   .brex-tile-label {
@@ -440,7 +442,7 @@
     display: flex; align-items: center; gap: 6px;
   }
 
-  /* Status pills (Stripe-style — subtle dot + thin border) */
+  /* Status pills (Stripe-style) */
   .brex-pill {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 3px 9px; border-radius: 9999px;
@@ -454,8 +456,8 @@
     width: 6px; height: 6px; border-radius: 9999px;
     background: currentColor; flex-shrink: 0;
   }
-  .brex-pill--gold   { color: #e7c76a; border-color: rgba(212,175,55,0.30); background: rgba(212,175,55,0.08); }
-  .brex-pill--blue   { color: #93c5fd; border-color: rgba(59,130,246,0.30);  background: rgba(59,130,246,0.10); }
+  .brex-pill--gold   { color: #bcd4ff; border-color: rgba(120,165,255,0.32); background: rgba(59,130,246,0.10); }
+  .brex-pill--blue   { color: #93c5fd; border-color: rgba(59,130,246,0.32);  background: rgba(59,130,246,0.12); }
   .brex-pill--amber  { color: #f5c46b; border-color: rgba(245,158,11,0.30);  background: rgba(245,158,11,0.08); }
   .brex-pill--green  { color: #7ee2b8; border-color: rgba(16,185,129,0.30);  background: rgba(16,185,129,0.08); }
   .brex-pill--red    { color: #ff9a9a; border-color: rgba(239,68,68,0.30);   background: rgba(239,68,68,0.08); }
@@ -468,40 +470,40 @@
 
   /* Mission card refined */
   .brex-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
     border: 1px solid var(--driver-border);
     border-radius: 18px;
     overflow: hidden;
     transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
   }
-  .brex-card:hover { border-color: rgba(212,175,55,0.32); box-shadow: 0 16px 40px -24px rgba(0,0,0,0.6); }
+  .brex-card:hover { border-color: var(--driver-border-strong); box-shadow: 0 18px 42px -24px rgba(8,16,48,0.7); }
   .brex-card--active {
-    border-color: rgba(212,175,55,0.45);
-    box-shadow: 0 0 0 1px rgba(212,175,55,0.18), 0 16px 40px -22px rgba(212,175,55,0.20);
+    border-color: rgba(120, 165, 255, 0.55);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 18px 42px -22px rgba(59,130,246,0.30);
   }
   .brex-divider { border-top: 1px solid rgba(255,255,255,0.06); }
 
-  /* Quick-action button (Stripe ghost-style) */
+  /* Quick-action button */
   .brex-action {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 10px 12px; border-radius: 12px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
     color: var(--driver-text-soft);
     font-size: 12px; font-weight: 500;
     transition: all 140ms ease;
   }
-  .brex-action:hover { background: rgba(255,255,255,0.06); border-color: rgba(212,175,55,0.30); color: var(--driver-text); }
+  .brex-action:hover { background: rgba(255,255,255,0.08); border-color: var(--driver-border-strong); color: var(--driver-text); }
   .brex-action:active { transform: scale(0.97); }
   .brex-action--primary {
-    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
-    border-color: transparent; color: #0b1026; font-weight: 600;
-    box-shadow: 0 8px 22px -10px rgba(212,175,55,0.5);
+    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%);
+    border-color: transparent; color: #ffffff; font-weight: 600;
+    box-shadow: 0 8px 22px -10px rgba(59,130,246,0.55);
   }
-  .brex-action--primary:hover { filter: brightness(1.06); color: #0b1026; }
+  .brex-action--primary:hover { filter: brightness(1.06); color: #ffffff; }
 
   .brex-amount {
-    color: #e7c76a; font-weight: 600; font-size: 15px;
+    color: #bcd4ff; font-weight: 600; font-size: 15px;
     font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
   }
   .brex-label-xs {
@@ -634,10 +636,10 @@
   }
   .driver-divider-gold {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(95,182,255,0.45), transparent);
   }
   .driver-eyebrow {
-    color: var(--gold-light);
+    color: var(--driver-accent-2, #5fb6ff);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.14em;
