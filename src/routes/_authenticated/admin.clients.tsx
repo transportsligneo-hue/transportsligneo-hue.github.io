@@ -210,7 +210,11 @@ function AdminClients() {
             {filtered.map((c) => (
               <TR key={c.user_id}>
                 <TD>
-                  <div className="flex items-center gap-2">
+                  <Link
+                    to="/admin/clients/$clientId"
+                    params={{ clientId: c.user_id }}
+                    className="flex items-center gap-2 hover:text-pro-accent"
+                  >
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
                       {(c.prenom?.[0] ?? "?").toUpperCase()}
                     </div>
@@ -220,7 +224,7 @@ function AdminClients() {
                       </p>
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
-                  </div>
+                  </Link>
                 </TD>
                 <TD className="hidden sm:table-cell text-pro-text-soft">
                   <p className="text-sm">{c.email}</p>
@@ -239,9 +243,14 @@ function AdminClients() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(c)} title="Voir" tone="primary">
+                    <Link
+                      to="/admin/clients/$clientId"
+                      params={{ clientId: c.user_id }}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
+                      title="Voir la fiche"
+                    >
                       <Eye size={15} />
-                    </IconButton>
+                    </Link>
                     {c.actif ? (
                       <IconButton
                         onClick={() => toggleActif(c.user_id, false)}
