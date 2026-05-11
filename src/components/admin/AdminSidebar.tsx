@@ -78,7 +78,7 @@ export function AdminSidebar({ items, children }: Props) {
   );
 
   return (
-    <div className="min-h-screen flex bg-pro-bg text-pro-text">
+    <div className="admin-shell min-h-screen flex text-pro-text">
       {/* === Sidebar Desktop === */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col shadow-pro-card">
         {/* Bandeau brand bleu nuit (style Stripe / Qonto) */}
