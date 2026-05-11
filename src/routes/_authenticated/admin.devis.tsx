@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Mail, Phone, Trash2, FileText, ArrowRightCircle } from "lucide-react";
+import { Loader2, Download, Mail, Phone, Trash2, FileText, ArrowRightCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
