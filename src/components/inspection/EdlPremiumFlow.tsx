@@ -72,21 +72,45 @@ interface StoredState {
 
 const STORAGE_KEY = (attrId: string) => `edl-premium:${attrId}`;
 
+/** Attend que le navigateur revienne en ligne, jusqu'à `timeoutMs`. */
+async function waitForOnline(timeoutMs = 30000): Promise<void> {
+  if (typeof navigator === "undefined" || navigator.onLine !== false) return;
+  await new Promise<void>((resolve) => {
+    const handler = () => { window.removeEventListener("online", handler); resolve(); };
+    window.addEventListener("online", handler);
+    setTimeout(() => { window.removeEventListener("online", handler); resolve(); }, timeoutMs);
+  });
+}
+
+/** Upload résilient : backoff exponentiel + attente reconnexion réseau. */
 async function uploadWithRetry(
-  bucket: string, path: string, file: File, attempts = 3
+  bucket: string, path: string, file: File, attempts = 6
 ): Promise<void> {
   let lastErr: unknown = null;
   for (let i = 0; i < attempts; i++) {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      await waitForOnline();
+    }
     try {
       const { error } = await supabase.storage.from(bucket)
         .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
       if (!error) return;
       lastErr = error;
     } catch (e) { lastErr = e; }
-    await new Promise(r => setTimeout(r, 500 * (i + 1)));
+    // Backoff exponentiel borné : 500ms, 1s, 2s, 4s, 8s, 8s
+    const delay = Math.min(8000, 500 * Math.pow(2, i));
+    await new Promise(r => setTimeout(r, delay));
   }
   throw lastErr ?? new Error("Upload échoué");
 }
+
+/** Map short signature kind (driver_start, …) → slot doc canonique pour MissionTraceability/admin. */
+const SIGNATURE_DOC_KEY: Record<string, string> = {
+  driver_start: "pv_signature_depart_convoyeur",
+  client_start: "pv_signature_depart_client",
+  driver_end: "pv_signature_arrivee_convoyeur",
+  client_end: "pv_signature_arrivee_client",
+};
 
 export function EdlPremiumFlow({
   attributionId, userId, driverName, defaultClientName,
@@ -116,6 +140,17 @@ export function EdlPremiumFlow({
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
+  const [online, setOnline] = useState<boolean>(
+    typeof navigator === "undefined" ? true : navigator.onLine !== false
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener("online", up);
+    window.addEventListener("offline", down);
+    return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
+  }, []);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Bypass admin (étend useMissionGates aux IDs scan/photo)
@@ -385,6 +420,24 @@ export function EdlPremiumFlow({
       }, { onConflict: "attribution_id,kind" });
       if (error) throw error;
 
+      // Remontée admin : insère également une entrée dans mission_documents
+      // pour MissionTraceability + PV avec un type canonique. On laisse "best-effort"
+      // (pas de throw) car la signature elle-même est déjà persistée.
+      const docKey = SIGNATURE_DOC_KEY[sigKind];
+      if (docKey) {
+        try {
+          await supabase.from("mission_documents").insert({
+            attribution_id: attributionId,
+            uploaded_by: userId,
+            type_document: docKey,
+            nom_fichier: `${docKey}.png`,
+            url_fichier: path,
+          });
+        } catch (docErr) {
+          console.warn("[EDL Premium] mission_documents insert failed (non bloquant)", docErr);
+        }
+      }
+
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
     } catch (err) {
@@ -625,13 +678,21 @@ export function EdlPremiumFlow({
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         {/* Indicateur d'étape compact, lisible sur mobile */}
-        <div className="px-4 pt-2 pb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.12em]">
+        <div className="px-4 pt-2 pb-1 flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.12em]">
           <span className="text-[var(--edl-text-soft)] truncate">
             {EDL_SECTION_LABEL[currentStep.section]}
           </span>
-          <span className="text-white font-bold tabular-nums">
-            Étape {currentStep.num}/{TOTAL}
-          </span>
+          <div className="flex items-center gap-2">
+            {!online && (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-amber-500/15 text-amber-200 ring-1 ring-amber-400/40 normal-case tracking-normal">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                Hors-ligne — reprise auto
+              </span>
+            )}
+            <span className="text-white font-bold tabular-nums">
+              Étape {currentStep.num}/{TOTAL}
+            </span>
+          </div>
         </div>
         <div className="px-4 pt-2 pb-3 flex items-center gap-3">
           <button
