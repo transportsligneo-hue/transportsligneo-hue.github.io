@@ -173,7 +173,7 @@ function AdminNotifications() {
                   <p className="text-sm font-semibold text-pro-text mt-0.5">{n.titre}</p>
                   {n.message && <p className="text-sm text-pro-text-soft mt-1 line-clamp-2">{n.message}</p>}
                   <div className="flex items-center gap-2 mt-2">
-                    {n.link && (
+                    {n.link && n.link.startsWith("/") && (
                       <Link to={n.link} className="text-xs font-semibold text-pro-gold hover:underline">
                         Voir le détail →
                       </Link>
