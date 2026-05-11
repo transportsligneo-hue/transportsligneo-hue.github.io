@@ -76,32 +76,9 @@ function AdminConvoyeurs() {
     fetchConvoyeurs();
   }, [fetchConvoyeurs]);
 
-  useEffect(() => {
-    if (!selected) {
-      setHistorique([]);
-      return;
-    }
-    let cancelled = false;
-    const loadHisto = async () => {
-      setLoadingHisto(true);
-      const { data } = await supabase
-        .from("attributions")
-        .select("id, statut, created_at, trajet:trajets(depart, arrivee, date_trajet, tarif_convoyeur)")
-        .eq("convoyeur_id", selected.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (!cancelled && data) setHistorique(data as unknown as MissionHistorique[]);
-      if (!cancelled) setLoadingHisto(false);
-    };
-    loadHisto();
-    return () => {
-      cancelled = true;
-    };
-  }, [selected]);
-
   const updateStatut = async (id: string, statut: string) => {
     if (statut === "valide") {
-      const target = convoyeurs.find((c) => c.id === id) || (selected?.id === id ? selected : null);
+      const target = convoyeurs.find((c) => c.id === id) ?? null;
       if (target?.type_convoyeur === "independant") {
         const { data: docs } = await supabase
           .from("documents_convoyeurs")
@@ -132,7 +109,7 @@ function AdminConvoyeurs() {
         }
       }
     }
-    const previous = convoyeurs.find((c) => c.id === id) || (selected?.id === id ? selected : null);
+    const previous = convoyeurs.find((c) => c.id === id) ?? null;
     const wasNotValid = previous?.statut !== "valide";
 
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
@@ -151,7 +128,6 @@ function AdminConvoyeurs() {
     }
 
     fetchConvoyeurs();
-    if (selected?.id === id) setSelected((prev) => (prev ? { ...prev, statut } : null));
   };
 
   const createConvoyeur = async () => {
