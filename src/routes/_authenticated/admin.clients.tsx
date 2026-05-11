@@ -36,9 +36,6 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<ClientRow | null>(null);
-  const [missions, setMissions] = useState<MissionItem[]>([]);
-  const [loadingMissions, setLoadingMissions] = useState(false);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
