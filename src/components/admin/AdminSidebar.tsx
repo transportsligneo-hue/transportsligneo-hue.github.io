@@ -78,7 +78,7 @@ export function AdminSidebar({ items, children }: Props) {
   );
 
   return (
-    <div className="min-h-screen flex bg-pro-bg text-pro-text">
+    <div className="admin-shell min-h-screen flex text-pro-text">
       {/* === Sidebar Desktop === */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col shadow-pro-card">
         {/* Bandeau brand bleu nuit (style Stripe / Qonto) */}
@@ -150,7 +150,7 @@ export function AdminSidebar({ items, children }: Props) {
       {/* === Main === */}
       <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
         <DashboardHeader variant="light" enableGlobalSearch />
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-1">{children}</div>
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto w-full flex-1">{children}</div>
       </main>
     </div>
   );
