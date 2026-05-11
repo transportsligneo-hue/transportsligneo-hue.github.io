@@ -424,9 +424,9 @@
   .client-shell .section-bg,
   .client-shell.section-bg {
     background:
-      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.32), transparent 60%) !important,
-      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%) !important,
-      radial-gradient(900px 700px at 50% 110%, rgba(167, 139, 250, 0.14), transparent 60%) !important,
+      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.32), transparent 60%),
+      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%),
+      radial-gradient(900px 700px at 50% 110%, rgba(167, 139, 250, 0.14), transparent 60%),
       linear-gradient(180deg, #0e1740 0%, #1a2a6e 55%, #0e1740 100%) !important;
   }
 
