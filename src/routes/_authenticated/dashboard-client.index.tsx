@@ -2,12 +2,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
 });
+
+interface DevisRow {
+  id: string;
+  numero: string;
+  depart: string;
+  arrivee: string;
+  distance_km: number | null;
+  prix_estime: number;
+  statut: string;
+  created_at: string;
+}
 
 interface MissionRow {
   id: string;
