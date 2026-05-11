@@ -619,25 +619,39 @@ export function EdlPremiumFlow({
         />
       </main>
 
-      {/* === BARRE NAV BAS === */}
-      <footer className="edl-glass-strong rounded-none border-x-0 border-b-0 px-4 py-3 shrink-0 flex items-center gap-3 safe-bottom">
-        <button
-          onClick={goPrev}
-          disabled={safeIndex === 0}
-          className="w-12 h-12 rounded-xl edl-glass flex items-center justify-center disabled:opacity-30 hover:scale-95 transition"
-          aria-label="Précédent"
-        >
-          <ArrowLeft size={18} className="text-white" />
-        </button>
+      {/* === BARRE NAV STICKY BAS — toujours visible, mobile-first === */}
+      <footer
+        className="edl-glass-strong rounded-none border-x-0 border-b-0 shrink-0 safe-bottom"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        {/* Indicateur d'étape compact, lisible sur mobile */}
+        <div className="px-4 pt-2 pb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.12em]">
+          <span className="text-[var(--edl-text-soft)] truncate">
+            {EDL_SECTION_LABEL[currentStep.section]}
+          </span>
+          <span className="text-white font-bold tabular-nums">
+            Étape {currentStep.num}/{TOTAL}
+          </span>
+        </div>
+        <div className="px-4 pt-2 pb-3 flex items-center gap-3">
+          <button
+            onClick={goPrev}
+            disabled={safeIndex === 0}
+            className="w-12 h-12 rounded-xl edl-glass flex items-center justify-center disabled:opacity-30 hover:scale-95 transition shrink-0"
+            aria-label="Étape précédente"
+          >
+            <ArrowLeft size={18} className="text-white" />
+          </button>
 
-        <button
-          onClick={goNext}
-          disabled={!canAdvance()}
-          className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Étape suivante"}
-          <ArrowRight size={18} />
-        </button>
+          <button
+            onClick={goNext}
+            disabled={!canAdvance()}
+            className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50 text-sm font-semibold"
+          >
+            {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Page suivante"}
+            <ArrowRight size={18} />
+          </button>
+        </div>
       </footer>
 
       {/* Modal Quitter */}
