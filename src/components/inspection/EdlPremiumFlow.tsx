@@ -678,13 +678,21 @@ export function EdlPremiumFlow({
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         {/* Indicateur d'étape compact, lisible sur mobile */}
-        <div className="px-4 pt-2 pb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.12em]">
+        <div className="px-4 pt-2 pb-1 flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.12em]">
           <span className="text-[var(--edl-text-soft)] truncate">
             {EDL_SECTION_LABEL[currentStep.section]}
           </span>
-          <span className="text-white font-bold tabular-nums">
-            Étape {currentStep.num}/{TOTAL}
-          </span>
+          <div className="flex items-center gap-2">
+            {!online && (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-amber-500/15 text-amber-200 ring-1 ring-amber-400/40 normal-case tracking-normal">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                Hors-ligne — reprise auto
+              </span>
+            )}
+            <span className="text-white font-bold tabular-nums">
+              Étape {currentStep.num}/{TOTAL}
+            </span>
+          </div>
         </div>
         <div className="px-4 pt-2 pb-3 flex items-center gap-3">
           <button
