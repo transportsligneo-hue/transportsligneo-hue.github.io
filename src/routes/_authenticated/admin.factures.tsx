@@ -216,6 +216,11 @@ function AdminFacturesPage() {
                   >
                     {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </Select>
+                  <Link to="/admin/factures/$factureId" params={{ factureId: f.id }}>
+                    <IconButton title="Voir détail" tone="neutral">
+                      <Eye size={15} />
+                    </IconButton>
+                  </Link>
                   <IconButton
                     onClick={() => handleDownload(f)}
                     title="Télécharger PDF"
