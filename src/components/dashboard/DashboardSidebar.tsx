@@ -29,7 +29,7 @@ interface Props {
  * - Mobile : header compact sticky + bottom nav app-like (4 onglets visibles + "Plus" si > 4),
  *   les items "Plus" s'ouvrent dans une bottom sheet.
  */
-export function DashboardSidebar({ title, subtitle, items, children }: Props) {
+export function DashboardSidebar({ title, subtitle, items, shellClass, children }: Props) {
   const location = useLocation();
   const { logout } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -50,7 +50,7 @@ export function DashboardSidebar({ title, subtitle, items, children }: Props) {
       : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
 
   return (
-    <div className="min-h-screen flex section-bg">
+    <div className={`min-h-screen flex section-bg ${shellClass ?? ""}`}>
       {/* === MOBILE HEADER (compact, sticky) === */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-primary/15 safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
