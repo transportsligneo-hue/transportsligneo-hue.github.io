@@ -1990,10 +1990,12 @@ export type Database = {
           client_email: string | null
           client_nom: string | null
           client_telephone: string | null
+          commission_convoyeur_pct: number | null
           created_at: string
           date_trajet: string | null
           demande_id: string | null
           depart: string
+          devis_id: string | null
           heure_trajet: string | null
           id: string
           immatriculation: string | null
@@ -2001,10 +2003,14 @@ export type Database = {
           modele: string | null
           pricing_mode: string
           prix: number | null
+          prix_client: number | null
+          prix_convoyeur: number | null
           prix_convoyeur_fixe: number | null
           prix_convoyeur_max: number | null
           prix_convoyeur_min: number | null
+          prix_societe: number | null
           prix_suggere: number | null
+          published_at: string | null
           statut: string
           statut_publication: string
           tarif_convoyeur: number | null
@@ -2015,10 +2021,12 @@ export type Database = {
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
+          commission_convoyeur_pct?: number | null
           created_at?: string
           date_trajet?: string | null
           demande_id?: string | null
           depart: string
+          devis_id?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
@@ -2026,10 +2034,14 @@ export type Database = {
           modele?: string | null
           pricing_mode?: string
           prix?: number | null
+          prix_client?: number | null
+          prix_convoyeur?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
+          prix_societe?: number | null
           prix_suggere?: number | null
+          published_at?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
@@ -2040,10 +2052,12 @@ export type Database = {
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
+          commission_convoyeur_pct?: number | null
           created_at?: string
           date_trajet?: string | null
           demande_id?: string | null
           depart?: string
+          devis_id?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
@@ -2051,10 +2065,14 @@ export type Database = {
           modele?: string | null
           pricing_mode?: string
           prix?: number | null
+          prix_client?: number | null
+          prix_convoyeur?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
+          prix_societe?: number | null
           prix_suggere?: number | null
+          published_at?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
@@ -2066,6 +2084,13 @@ export type Database = {
             columns: ["demande_id"]
             isOneToOne: false
             referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
             referencedColumns: ["id"]
           },
         ]
@@ -2191,6 +2216,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       create_admin_notification: {
         Args: {
           _entity_id?: string
