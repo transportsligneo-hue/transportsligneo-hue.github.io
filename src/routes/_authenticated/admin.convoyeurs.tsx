@@ -282,9 +282,14 @@ function AdminConvoyeurs() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(c)} title="Voir" tone="primary">
+                    <Link
+                      to="/admin/convoyeurs/$convoyeurId"
+                      params={{ convoyeurId: c.id }}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
+                      title="Voir la fiche"
+                    >
                       <Eye size={15} />
-                    </IconButton>
+                    </Link>
                     {c.statut === "en_attente" && (
                       <>
                         <IconButton
