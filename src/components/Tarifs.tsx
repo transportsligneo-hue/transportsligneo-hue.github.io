@@ -1,10 +1,9 @@
 import { Check, Star } from "lucide-react";
 
 const nosPlus = [
-  "Équipe de convoyeurs salariés",
+  "Formation en présentiel et en ligne en continue de nos convoyeurs",
   "Convoyeur attitré pour vos livraisons",
   "Tenue professionnelle",
-  "Formation en présentiel et continue de nos convoyeurs",
   "Adaptation à vos process et à la présentation des véhicules",
   "0 annulation de notre part (sauf cas de force majeure)",
   "Livraison sur lieu de travail",
