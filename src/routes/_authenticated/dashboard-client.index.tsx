@@ -41,6 +41,7 @@ function ClientDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0 });
   const [lastMission, setLastMission] = useState<MissionRow | null>(null);
+  const [devisList, setDevisList] = useState<DevisRow[]>([]);
   const [prenom, setPrenom] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -48,23 +49,33 @@ function ClientDashboard() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      // Profil pour le prénom
+      // Profil pour le prénom + email
       const { data: prof } = await supabase
         .from("profiles")
-        .select("prenom")
+        .select("prenom, email")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!cancelled && prof?.prenom) setPrenom(prof.prenom);
+      const clientEmail = prof?.email ?? user.email ?? "";
 
       // Missions
-      const { data } = await supabase
+      const { data: missionData } = await supabase
         .from("missions")
         .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
+
+      // Devis liés par email (RLS autorise via politique "Clients can read own devis")
+      const { data: devisData } = await supabase
+        .from("devis")
+        .select("id, numero, depart, arrivee, distance_km, prix_estime, statut, created_at")
+        .eq("email", clientEmail)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
       if (cancelled) return;
 
-      const missions = (data ?? []) as MissionRow[];
+      const missions = (missionData ?? []) as MissionRow[];
       const today = new Date().toISOString().slice(0, 10);
       setStats({
         enCours: missions.filter(m => m.statut === "en_cours").length,
@@ -72,6 +83,7 @@ function ClientDashboard() {
         aVenir: missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length,
       });
       setLastMission(missions[0] ?? null);
+      setDevisList((devisData ?? []) as DevisRow[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
