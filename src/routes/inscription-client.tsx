@@ -60,6 +60,7 @@ function InscriptionClient() {
           emailRedirectTo: `${window.location.origin}/login`,
           data: {
             role: "client",
+            type_client: "particulier",
             nom: form.nom,
             prenom: form.prenom,
             telephone: form.telephone,
