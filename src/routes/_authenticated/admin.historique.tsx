@@ -1,23 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, History } from "lucide-react";
+import {
+  Loader2, Search, History, FileText, Receipt, Route as RouteIcon,
+  UserRound, CreditCard, ShieldCheck, AlertCircle, Mail, Settings,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/historique")({
@@ -36,15 +27,29 @@ type LogRow = {
   created_at: string;
 };
 
+const ICONS: Record<string, { icon: typeof FileText; tone: string }> = {
+  user: { icon: UserRound, tone: "bg-blue-100 text-blue-700" },
+  devis: { icon: FileText, tone: "bg-purple-100 text-purple-700" },
+  facture: { icon: Receipt, tone: "bg-emerald-100 text-emerald-700" },
+  trajet: { icon: RouteIcon, tone: "bg-amber-100 text-amber-700" },
+  attribution: { icon: ShieldCheck, tone: "bg-indigo-100 text-indigo-700" },
+  paiement: { icon: CreditCard, tone: "bg-teal-100 text-teal-700" },
+  message: { icon: Mail, tone: "bg-slate-100 text-slate-700" },
+  incident: { icon: AlertCircle, tone: "bg-red-100 text-red-700" },
+  parametre: { icon: Settings, tone: "bg-gray-100 text-gray-700" },
+};
+
+function iconFor(entity: string) {
+  return ICONS[entity] ?? { icon: History, tone: "bg-gray-100 text-gray-700" };
+}
+
 function AdminHistorique() {
   const [rows, setRows] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [entityFilter, setEntityFilter] = useState("all");
 
-  useEffect(() => {
-    void load();
-  }, []);
+  useEffect(() => { void load(); }, []);
 
   async function load() {
     setLoading(true);
@@ -55,14 +60,13 @@ function AdminHistorique() {
         .order("created_at", { ascending: false })
         .limit(500);
       setRows((data as LogRow[]) ?? []);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
-  const entityTypes = useMemo(() => {
-    return Array.from(new Set(rows.map((r) => r.entity_type))).sort();
-  }, [rows]);
+  const entityTypes = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.entity_type))).sort(),
+    [rows],
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -77,6 +81,17 @@ function AdminHistorique() {
     });
   }, [rows, search, entityFilter]);
 
+  // Group by day
+  const grouped = useMemo(() => {
+    const map = new Map<string, LogRow[]>();
+    filtered.forEach((r) => {
+      const day = new Date(r.created_at).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      if (!map.has(day)) map.set(day, []);
+      map.get(day)!.push(r);
+    });
+    return Array.from(map.entries());
+  }, [filtered]);
+
   return (
     <div className="space-y-6">
       <header>
@@ -85,8 +100,8 @@ function AdminHistorique() {
             <History className="text-pro-accent" size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Historique &amp; activité</h1>
-            <p className="text-sm text-pro-muted">Audit log centralisé de toutes les actions de la plateforme.</p>
+            <h1 className="text-2xl font-semibold text-pro-text">Historique d'activité</h1>
+            <p className="text-sm text-pro-muted">Toutes les actions de la plateforme, chronologiquement.</p>
           </div>
         </div>
       </header>
@@ -94,60 +109,60 @@ function AdminHistorique() {
       <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" size={16} />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher (action, acteur, entité)…"
-            className="pl-9"
-          />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (action, acteur, entité)…" className="pl-9" />
         </div>
         <Select value={entityFilter} onValueChange={setEntityFilter}>
           <SelectTrigger className="w-full md:w-56"><SelectValue placeholder="Type d'entité" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes les entités</SelectItem>
-            {entityTypes.map((e) => (
-              <SelectItem key={e} value={e}>{e}</SelectItem>
-            ))}
+            {entityTypes.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="bg-white border border-pro-border rounded-xl overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-pro-accent" size={24} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-pro-muted text-sm">Aucune activité.</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Entité</TableHead>
-                <TableHead>Acteur</TableHead>
-                <TableHead>Détails</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="text-xs text-pro-muted whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString("fr-FR")}
-                  </TableCell>
-                  <TableCell><Badge variant="outline">{r.action}</Badge></TableCell>
-                  <TableCell className="text-sm">{r.entity_type}</TableCell>
-                  <TableCell className="text-xs text-pro-text-soft">{r.actor_label ?? r.actor_user_id?.slice(0, 8) ?? "système"}</TableCell>
-                  <TableCell className="text-xs text-pro-muted max-w-md truncate">
-                    {r.metadata ? JSON.stringify(r.metadata) : "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-16"><Loader2 className="animate-spin text-pro-accent" size={24} /></div>
+      ) : grouped.length === 0 ? (
+        <div className="bg-white border border-pro-border rounded-xl text-center py-16 text-pro-muted text-sm">
+          Aucune activité enregistrée pour le moment.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {grouped.map(([day, items]) => (
+            <div key={day}>
+              <p className="text-xs uppercase tracking-wider text-pro-muted font-semibold mb-3 capitalize">{day}</p>
+              <div className="bg-white border border-pro-border rounded-xl divide-y divide-pro-border">
+                {items.map((r) => {
+                  const { icon: Icon, tone } = iconFor(r.entity_type);
+                  return (
+                    <div key={r.id} className="flex items-start gap-3 p-4">
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${tone}`}>
+                        <Icon size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className="text-[10px]">{r.action}</Badge>
+                          <span className="text-xs text-pro-muted">{r.entity_type}</span>
+                        </div>
+                        <p className="text-sm text-pro-text mt-1">
+                          {r.actor_label ?? r.actor_user_id?.slice(0, 8) ?? "système"}
+                          {r.metadata?.email && <span className="text-pro-muted"> · {r.metadata.email}</span>}
+                        </p>
+                        {r.metadata && Object.keys(r.metadata).length > 0 && (
+                          <p className="text-[11px] text-pro-muted truncate mt-0.5">{JSON.stringify(r.metadata)}</p>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-pro-muted shrink-0">
+                        {new Date(r.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
