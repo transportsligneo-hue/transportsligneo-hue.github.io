@@ -636,10 +636,10 @@
   }
   .driver-divider-gold {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(95,182,255,0.45), transparent);
   }
   .driver-eyebrow {
-    color: var(--gold-light);
+    color: var(--driver-accent-2, #5fb6ff);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.14em;
