@@ -18,6 +18,7 @@ interface DevisRow {
   statut: string;
   pdf_url: string | null;
   created_at: string;
+  paid_at: string | null;
 }
 
 const statutPill: Record<string, string> = {
