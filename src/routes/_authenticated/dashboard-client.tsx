@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2 } from "lucide-react";
+import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
