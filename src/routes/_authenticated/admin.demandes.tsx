@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, RefreshCw, ArrowRightCircle, Trash2, FileText } from "lucide-react";
@@ -179,9 +179,14 @@ function AdminDemandes() {
                   </TD>
                   <TD>
                     <div className="flex items-center justify-end gap-1">
-                      <IconButton onClick={() => setSelected(d)} title="Voir" tone="primary">
+                      <Link
+                        to="/admin/demandes/$demandeId"
+                        params={{ demandeId: d.id }}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
+                        title="Voir la fiche"
+                      >
                         <Eye size={15} />
-                      </IconButton>
+                      </Link>
                       {d.statut !== "convertie" && d.statut !== "terminee" && (
                         <IconButton
                           onClick={() => convertToTrajet(d)}

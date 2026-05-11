@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Eye, Ban, CheckCircle, UserRound } from "lucide-react";
@@ -12,9 +12,6 @@ import {
   TR,
   TD,
   EmptyState,
-  Modal,
-  DetailRow,
-  Button,
   IconButton,
   SearchInput,
 } from "@/components/admin/AdminUI";
@@ -34,42 +31,11 @@ interface ClientRow {
   missions_count: number;
 }
 
-interface MissionItem {
-  id: string;
-  numero: string;
-  ville_depart: string;
-  ville_arrivee: string;
-  date_prise_en_charge: string;
-  statut: string;
-  prix_total: number;
-}
-
-const missionTone: Record<string, "neutral" | "info" | "primary" | "success" | "danger"> = {
-  en_attente: "neutral",
-  confirmee: "info",
-  en_cours: "primary",
-  livree: "success",
-  terminee: "success",
-  annulee: "danger",
-  refuse: "danger",
-};
-const missionLabel: Record<string, string> = {
-  en_attente: "En attente",
-  confirmee: "Confirmée",
-  en_cours: "En cours",
-  livree: "Livrée",
-  terminee: "Terminée",
-  annulee: "Annulée",
-  refuse: "Refusée",
-};
 
 function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<ClientRow | null>(null);
-  const [missions, setMissions] = useState<MissionItem[]>([]);
-  const [loadingMissions, setLoadingMissions] = useState(false);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -122,30 +88,6 @@ function AdminClients() {
     fetchClients();
   }, [fetchClients]);
 
-  useEffect(() => {
-    if (!selected) {
-      setMissions([]);
-      return;
-    }
-    let cancelled = false;
-    setLoadingMissions(true);
-    supabase
-      .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total")
-      .eq("user_id", selected.user_id)
-      .order("date_prise_en_charge", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        if (!cancelled) {
-          setMissions((data as MissionItem[]) ?? []);
-          setLoadingMissions(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selected]);
-
   const toggleActif = async (userId: string, nextActif: boolean) => {
     if (
       !nextActif &&
@@ -158,8 +100,6 @@ function AdminClients() {
       .eq("user_id", userId)
       .eq("role", "client");
     await fetchClients();
-    if (selected?.user_id === userId)
-      setSelected((prev) => (prev ? { ...prev, actif: nextActif } : null));
   };
 
   const filtered = clients.filter((c) => {
@@ -210,7 +150,11 @@ function AdminClients() {
             {filtered.map((c) => (
               <TR key={c.user_id}>
                 <TD>
-                  <div className="flex items-center gap-2">
+                  <Link
+                    to="/admin/clients/$clientId"
+                    params={{ clientId: c.user_id }}
+                    className="flex items-center gap-2 hover:text-pro-accent"
+                  >
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
                       {(c.prenom?.[0] ?? "?").toUpperCase()}
                     </div>
@@ -220,7 +164,7 @@ function AdminClients() {
                       </p>
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
-                  </div>
+                  </Link>
                 </TD>
                 <TD className="hidden sm:table-cell text-pro-text-soft">
                   <p className="text-sm">{c.email}</p>
@@ -239,9 +183,14 @@ function AdminClients() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(c)} title="Voir" tone="primary">
+                    <Link
+                      to="/admin/clients/$clientId"
+                      params={{ clientId: c.user_id }}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
+                      title="Voir la fiche"
+                    >
                       <Eye size={15} />
-                    </IconButton>
+                    </Link>
                     {c.actif ? (
                       <IconButton
                         onClick={() => toggleActif(c.user_id, false)}
@@ -267,86 +216,6 @@ function AdminClients() {
         </Table>
       )}
 
-      <Modal
-        open={!!selected}
-        onClose={() => setSelected(null)}
-        title={selected ? `${selected.prenom} ${selected.nom}` : ""}
-        size="lg"
-      >
-        {selected && (
-          <>
-            <Card padded={false} className="mb-4">
-              <div className="px-4 grid sm:grid-cols-2 gap-x-6">
-                <DetailRow label="Email" value={selected.email} />
-                <DetailRow label="Téléphone" value={selected.telephone} />
-                <DetailRow label="Missions" value={selected.missions_count} />
-                <DetailRow
-                  label="Inscrit le"
-                  value={new Date(selected.created_at).toLocaleDateString("fr-FR")}
-                />
-              </div>
-            </Card>
-
-            <div className="flex items-center justify-between mb-4">
-              <Badge tone={selected.actif ? "success" : "danger"}>
-                {selected.actif ? "Compte actif" : "Compte suspendu"}
-              </Badge>
-              {selected.actif ? (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => toggleActif(selected.user_id, false)}
-                  icon={<Ban size={13} />}
-                >
-                  Suspendre
-                </Button>
-              ) : (
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => toggleActif(selected.user_id, true)}
-                  icon={<CheckCircle size={13} />}
-                >
-                  Réactiver
-                </Button>
-              )}
-            </div>
-
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-pro-text-soft mb-2">
-                Historique missions {missions.length > 0 && `(${missions.length})`}
-              </h4>
-              {loadingMissions ? (
-                <p className="text-pro-muted text-sm">Chargement…</p>
-              ) : missions.length === 0 ? (
-                <p className="text-pro-muted text-sm">Ce client n'a pas encore de mission.</p>
-              ) : (
-                <div className="space-y-1.5 max-h-72 overflow-y-auto">
-                  {missions.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between gap-3 px-3 py-2 rounded-md bg-pro-bg-soft/50 border border-pro-border text-sm"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-pro-text truncate">
-                          {m.ville_depart} → {m.ville_arrivee}
-                        </p>
-                        <p className="text-pro-muted text-xs">
-                          {m.numero} · {new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}
-                          {m.prix_total > 0 && ` · ${m.prix_total} €`}
-                        </p>
-                      </div>
-                      <Badge tone={missionTone[m.statut] ?? "neutral"}>
-                        {missionLabel[m.statut] ?? m.statut}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </Modal>
     </div>
   );
 }
