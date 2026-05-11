@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   FileText,
@@ -17,20 +17,17 @@ import {
   Activity,
   Euro,
   Clock,
+  BellRing,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 import {
-  PageHeader,
-  Card,
-  Badge,
-  Table,
-  THead,
-  TH,
-  TR,
-  TD,
-  EmptyState,
-  demandeStatutTone,
-} from "@/components/admin/AdminUI";
+  AdminPageHeader,
+  AdminStatCard,
+  AdminBadge,
+  AdminSection,
+  AdminEmpty,
+} from "@/components/admin/ui";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -45,21 +42,31 @@ const statutLabel: Record<string, string> = {
   annulee: "Annulée",
 };
 
-type HubCard = {
-  to: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  count: number;
-  badge?: { label: string; tone: "warning" | "info" | "success" | "danger" };
-  accent: string;
+type RecentDemande = {
+  id: string;
+  nom: string;
+  prenom: string;
+  telephone: string | null;
+  depart: string;
+  arrivee: string;
+  statut: string;
+  created_at: string;
+};
+
+type Notif = {
+  id: string;
+  titre: string;
+  message: string | null;
+  type: string;
+  link: string | null;
+  lu: boolean;
+  created_at: string;
 };
 
 type Alerte = {
   to: string;
   icon: LucideIcon;
   title: string;
-  count: number;
   tone: "warning" | "danger" | "info";
 };
 
@@ -79,452 +86,429 @@ function AdminDashboard() {
     devisEnvoyes: 0,
     docsEnAttente: 0,
     caTotal: 0,
+    caMois: 0,
   });
-  const [recentDemandes, setRecentDemandes] = useState<Array<{
-    id: string;
-    nom: string;
-    prenom: string;
-    telephone: string | null;
-    depart: string;
-    arrivee: string;
-    statut: string;
-    created_at: string;
-  }>>([]);
+  const [recentDemandes, setRecentDemandes] = useState<RecentDemande[]>([]);
+  const [notifs, setNotifs] = useState<Notif[]>([]);
+  const [demandes7j, setDemandes7j] = useState<Array<{ day: string; count: number }>>([]);
+
+  async function fetchAll() {
+    const now = new Date();
+    const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const start7j = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+
+    const [
+      demandes, nouvelles,
+      trajets, trajetsActifs,
+      convoyeurs, convAttente,
+      clients, clientsB2B,
+      enCours, terminees,
+      devis, devisEnvoyes,
+      docsAttente,
+      missionsTerm,
+      missionsMois,
+      demandesWeek,
+    ] = await Promise.all([
+      supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
+      supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
+      supabase.from("trajets").select("id", { count: "exact", head: true }),
+      supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
+      supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
+      supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("type_client", "b2b"),
+      supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
+      supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
+      supabase.from("devis").select("id", { count: "exact", head: true }),
+      supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye"),
+      supabase.from("documents_convoyeurs").select("id", { count: "exact", head: true }).eq("statut_validation", "en_attente"),
+      supabase.from("missions").select("prix_total").in("statut", ["livree", "terminee"]),
+      supabase.from("missions").select("prix_total, created_at").in("statut", ["livree", "terminee"]).gte("created_at", startMonth),
+      supabase.from("demandes_convoyage").select("created_at").gte("created_at", start7j),
+    ]);
+
+    const ca = (missionsTerm.data ?? []).reduce(
+      (s: number, m: { prix_total: number | null }) => s + Number(m.prix_total ?? 0), 0
+    );
+    const caMois = (missionsMois.data ?? []).reduce(
+      (s: number, m: { prix_total: number | null }) => s + Number(m.prix_total ?? 0), 0
+    );
+
+    // 7 day buckets
+    const buckets: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 3600 * 1000);
+      const k = d.toISOString().slice(0, 10);
+      buckets[k] = 0;
+    }
+    (demandesWeek.data ?? []).forEach((r: { created_at: string }) => {
+      const k = r.created_at.slice(0, 10);
+      if (k in buckets) buckets[k]++;
+    });
+    setDemandes7j(
+      Object.entries(buckets).map(([day, count]) => ({ day, count }))
+    );
+
+    setStats({
+      demandes: demandes.count ?? 0,
+      demandesNouvelles: nouvelles.count ?? 0,
+      trajets: trajets.count ?? 0,
+      trajetsActifs: trajetsActifs.count ?? 0,
+      convoyeurs: convoyeurs.count ?? 0,
+      convoyeursEnAttente: convAttente.count ?? 0,
+      clients: clients.count ?? 0,
+      clientsB2B: clientsB2B.count ?? 0,
+      missionsEnCours: enCours.count ?? 0,
+      missionsTerminees: terminees.count ?? 0,
+      devisTotal: devis.count ?? 0,
+      devisEnvoyes: devisEnvoyes.count ?? 0,
+      docsEnAttente: docsAttente.count ?? 0,
+      caTotal: ca,
+      caMois,
+    });
+  }
+
+  async function fetchRecent() {
+    const { data } = await supabase
+      .from("demandes_convoyage")
+      .select("id, nom, prenom, telephone, depart, arrivee, statut, created_at")
+      .order("created_at", { ascending: false })
+      .limit(6);
+    if (data) setRecentDemandes(data);
+  }
+
+  async function fetchNotifs() {
+    const { data } = await supabase
+      .from("admin_notifications")
+      .select("id, titre, message, type, link, lu, created_at")
+      .order("created_at", { ascending: false })
+      .limit(6);
+    if (data) setNotifs(data);
+  }
 
   useEffect(() => {
-    async function fetchAll() {
-      const [
-        demandes,
-        nouvelles,
-        trajets,
-        trajetsActifs,
-        convoyeurs,
-        convAttente,
-        clients,
-        clientsB2B,
-        enCours,
-        terminees,
-        devis,
-        devisEnvoyes,
-        docsAttente,
-        missionsTerm,
-      ] = await Promise.all([
-        supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
-        supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
-        supabase.from("trajets").select("id", { count: "exact", head: true }),
-        supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
-        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
-        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("type_client", "b2b"),
-        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
-        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
-        supabase.from("devis").select("id", { count: "exact", head: true }),
-        supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye"),
-        supabase.from("documents_convoyeurs").select("id", { count: "exact", head: true }).eq("statut_validation", "en_attente"),
-        supabase.from("missions").select("prix_total").in("statut", ["livree", "terminee"]),
-      ]);
-
-      const ca = (missionsTerm.data ?? []).reduce(
-        (sum: number, m: { prix_total: number | null }) => sum + Number(m.prix_total ?? 0),
-        0
-      );
-
-      setStats({
-        demandes: demandes.count ?? 0,
-        demandesNouvelles: nouvelles.count ?? 0,
-        trajets: trajets.count ?? 0,
-        trajetsActifs: trajetsActifs.count ?? 0,
-        convoyeurs: convoyeurs.count ?? 0,
-        convoyeursEnAttente: convAttente.count ?? 0,
-        clients: clients.count ?? 0,
-        clientsB2B: clientsB2B.count ?? 0,
-        missionsEnCours: enCours.count ?? 0,
-        missionsTerminees: terminees.count ?? 0,
-        devisTotal: devis.count ?? 0,
-        devisEnvoyes: devisEnvoyes.count ?? 0,
-        docsEnAttente: docsAttente.count ?? 0,
-        caTotal: ca,
-      });
-    }
-
-    async function fetchRecent() {
-      const { data } = await supabase
-        .from("demandes_convoyage")
-        .select("id, nom, prenom, telephone, depart, arrivee, statut, created_at")
-        .order("created_at", { ascending: false })
-        .limit(6);
-      if (data) setRecentDemandes(data);
-    }
-
     fetchAll();
     fetchRecent();
+    fetchNotifs();
+
+    const channel = supabase
+      .channel("admin-home-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "missions" }, () => fetchAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "devis" }, () => fetchAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, () => {
+        fetchAll();
+        fetchRecent();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_notifications" }, () => fetchNotifs())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  const alertes: Alerte[] = [
-    stats.demandesNouvelles > 0 && {
-      to: "/admin/demandes",
-      icon: FileText,
-      title: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""} demande${stats.demandesNouvelles > 1 ? "s" : ""}`,
-      count: stats.demandesNouvelles,
-      tone: "warning" as const,
-    },
-    stats.convoyeursEnAttente > 0 && {
-      to: "/admin/convoyeurs",
-      icon: UserCheck,
-      title: `${stats.convoyeursEnAttente} convoyeur${stats.convoyeursEnAttente > 1 ? "s" : ""} à valider`,
-      count: stats.convoyeursEnAttente,
-      tone: "danger" as const,
-    },
-    stats.docsEnAttente > 0 && {
-      to: "/admin/documents",
-      icon: FolderOpen,
-      title: `${stats.docsEnAttente} document${stats.docsEnAttente > 1 ? "s" : ""} en attente`,
-      count: stats.docsEnAttente,
-      tone: "info" as const,
-    },
-    stats.devisEnvoyes > 0 && {
-      to: "/admin/devis",
-      icon: Receipt,
-      title: `${stats.devisEnvoyes} devis envoyé${stats.devisEnvoyes > 1 ? "s" : ""} en attente`,
-      count: stats.devisEnvoyes,
-      tone: "info" as const,
-    },
-  ].filter(Boolean) as Alerte[];
+  const alertes = useMemo<Alerte[]>(
+    () =>
+      [
+        stats.demandesNouvelles > 0 && {
+          to: "/admin/demandes",
+          icon: FileText,
+          title: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""} demande${stats.demandesNouvelles > 1 ? "s" : ""}`,
+          tone: "warning" as const,
+        },
+        stats.convoyeursEnAttente > 0 && {
+          to: "/admin/convoyeurs",
+          icon: UserCheck,
+          title: `${stats.convoyeursEnAttente} convoyeur${stats.convoyeursEnAttente > 1 ? "s" : ""} à valider`,
+          tone: "danger" as const,
+        },
+        stats.docsEnAttente > 0 && {
+          to: "/admin/documents",
+          icon: FolderOpen,
+          title: `${stats.docsEnAttente} document${stats.docsEnAttente > 1 ? "s" : ""} en attente`,
+          tone: "info" as const,
+        },
+        stats.devisEnvoyes > 0 && {
+          to: "/admin/devis",
+          icon: Receipt,
+          title: `${stats.devisEnvoyes} devis envoyé${stats.devisEnvoyes > 1 ? "s" : ""} en attente`,
+          tone: "info" as const,
+        },
+      ].filter(Boolean) as Alerte[],
+    [stats]
+  );
 
-  const hubCards: HubCard[] = [
-    {
-      to: "/admin/demandes",
-      title: "Demandes",
-      description: "Demandes de convoyage entrantes",
-      icon: ClipboardList,
-      count: stats.demandes,
-      badge:
-        stats.demandesNouvelles > 0
-          ? { label: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""}`, tone: "warning" }
-          : undefined,
-      accent: "bg-amber-50 text-amber-600",
-    },
-    {
-      to: "/admin/trajets",
-      title: "Trajets",
-      description: "Planification et publication",
-      icon: RouteIcon,
-      count: stats.trajets,
-      badge:
-        stats.trajetsActifs > 0
-          ? { label: `${stats.trajetsActifs} actif${stats.trajetsActifs > 1 ? "s" : ""}`, tone: "info" }
-          : undefined,
-      accent: "bg-blue-50 text-blue-600",
-    },
-    {
-      to: "/admin/attributions",
-      title: "Missions",
-      description: "Suivi des missions en cours",
-      icon: Truck,
-      count: stats.missionsEnCours,
-      badge:
-        stats.missionsEnCours > 0
-          ? { label: "En cours", tone: "success" }
-          : undefined,
-      accent: "bg-emerald-50 text-emerald-600",
-    },
-    {
-      to: "/admin/convoyeurs",
-      title: "Convoyeurs",
-      description: "Validation et gestion du staff",
-      icon: Users,
-      count: stats.convoyeurs,
-      badge:
-        stats.convoyeursEnAttente > 0
-          ? { label: `${stats.convoyeursEnAttente} à valider`, tone: "warning" }
-          : undefined,
-      accent: "bg-violet-50 text-violet-600",
-    },
-    {
-      to: "/admin/clients",
-      title: "Clients",
-      description: "Particuliers et professionnels",
-      icon: Briefcase,
-      count: stats.clients,
-      badge:
-        stats.clientsB2B > 0
-          ? { label: `${stats.clientsB2B} B2B`, tone: "info" }
-          : undefined,
-      accent: "bg-sky-50 text-sky-600",
-    },
-    {
-      to: "/admin/devis",
-      title: "Devis & Facturation",
-      description: "Devis et historique facturation",
-      icon: Receipt,
-      count: stats.devisTotal,
-      accent: "bg-rose-50 text-rose-600",
-    },
-    {
-      to: "/admin/documents",
-      title: "Documents",
-      description: "Pièces convoyeurs à valider",
-      icon: FolderOpen,
-      count: stats.docsEnAttente,
-      badge:
-        stats.docsEnAttente > 0
-          ? { label: "À valider", tone: "warning" }
-          : undefined,
-      accent: "bg-slate-100 text-slate-600",
-    },
+  const hubCards = [
+    { to: "/admin/demandes", title: "Demandes", icon: ClipboardList, count: stats.demandes, accent: "warning" as const },
+    { to: "/admin/trajets", title: "Trajets", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
+    { to: "/admin/attributions", title: "Missions", icon: Truck, count: stats.missionsEnCours, accent: "success" as const },
+    { to: "/admin/convoyeurs", title: "Convoyeurs", icon: Users, count: stats.convoyeurs, accent: "default" as const },
+    { to: "/admin/clients", title: "Clients", icon: Briefcase, count: stats.clients, accent: "info" as const },
+    { to: "/admin/devis", title: "Devis", icon: Receipt, count: stats.devisTotal, accent: "danger" as const },
+    { to: "/admin/documents", title: "Documents", icon: FolderOpen, count: stats.docsEnAttente, accent: "warning" as const },
+    { to: "/admin/notifications", title: "Notifications", icon: BellRing, count: notifs.filter((n) => !n.lu).length, accent: "default" as const },
   ];
 
-  const toneAlerte: Record<Alerte["tone"], string> = {
-    warning: "border-l-amber-500 bg-amber-50/50 hover:bg-amber-50",
-    danger: "border-l-red-500 bg-red-50/50 hover:bg-red-50",
-    info: "border-l-blue-500 bg-blue-50/50 hover:bg-blue-50",
-  };
+  const maxBar = Math.max(1, ...demandes7j.map((d) => d.count));
+
   const toneAlerteIcon: Record<Alerte["tone"], string> = {
-    warning: "text-amber-600 bg-amber-100",
-    danger: "text-red-600 bg-red-100",
-    info: "text-blue-600 bg-blue-100",
+    warning: "bg-[color:var(--admin-warning-soft)] text-amber-700",
+    danger: "bg-[color:var(--admin-danger-soft)] text-red-700",
+    info: "bg-[color:var(--admin-info-soft)] text-sky-700",
   };
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <AdminPageHeader
+        eyebrow="Centre de contrôle"
         title="Tableau de bord"
-        subtitle="Vue d'ensemble de l'activité Transports Ligneo"
+        subtitle="Vue temps réel de l'activité Transports Ligneo"
+        status={
+          <span className="inline-flex items-center gap-2 text-xs text-[color:var(--admin-muted)]">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            Données en direct
+          </span>
+        }
       />
 
-      {/* === KPI STRIP (style Stripe / Qonto) === */}
+      {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <KpiTile
-          icon={Activity}
-          label="Missions actives"
-          value={stats.missionsEnCours}
-          tone="emerald"
-        />
-        <KpiTile
-          icon={Truck}
-          label="Missions terminées"
-          value={stats.missionsTerminees}
-          tone="blue"
-        />
-        <KpiTile
+        <AdminStatCard icon={Activity} label="Missions actives" value={stats.missionsEnCours} accent="success" />
+        <AdminStatCard icon={Truck} label="Missions terminées" value={stats.missionsTerminees} accent="info" />
+        <AdminStatCard
           icon={Users}
           label="Convoyeurs validés"
           value={stats.convoyeurs}
           hint={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
-          tone="violet"
+          accent="default"
         />
-        <KpiTile
+        <AdminStatCard
           icon={Briefcase}
-          label="Clients actifs"
+          label="Clients"
           value={stats.clients}
           hint={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
-          tone="sky"
+          accent="info"
         />
-        <KpiTile
+        <AdminStatCard
           icon={Euro}
           label="CA réalisé"
           value={`${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
-          tone="gold"
-          premium
+          hint={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
+          accent="success"
         />
-        <KpiTile
-          icon={Clock}
-          label="Demandes nouvelles"
-          value={stats.demandesNouvelles}
-          tone="amber"
-        />
+        <AdminStatCard icon={Clock} label="Demandes nouvelles" value={stats.demandesNouvelles} accent="warning" />
       </section>
 
-      {/* === ALERTES À TRAITER === */}
+      {/* === ALERTES === */}
       {alertes.length > 0 && (
-        <section>
-          <h2 className="text-pro-text font-semibold text-sm mb-3 flex items-center gap-2">
-            <AlertCircle size={15} className="text-amber-600" />
-            À traiter en priorité
-          </h2>
+        <AdminSection
+          title={
+            <span className="inline-flex items-center gap-2">
+              <AlertCircle size={16} className="text-amber-600" /> À traiter en priorité
+            </span>
+          }
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {alertes.map((a) => (
               <Link
                 key={a.to}
                 to={a.to}
-                className={`group flex items-center gap-3 px-4 py-3 bg-white border border-pro-border border-l-4 rounded-md transition-all ${toneAlerte[a.tone]}`}
+                className="group flex items-center gap-3 px-4 py-3 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-2)] hover:border-[color:var(--admin-accent)] transition-all"
               >
-                <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${toneAlerteIcon[a.tone]}`}>
+                <span className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${toneAlerteIcon[a.tone]}`}>
                   <a.icon size={17} />
-                </div>
+                </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-pro-text font-medium text-sm">{a.title}</p>
-                  <p className="text-pro-muted text-xs">Action requise</p>
+                  <p className="font-medium text-sm text-[color:var(--admin-text)]">{a.title}</p>
+                  <p className="text-xs text-[color:var(--admin-muted)]">Action requise</p>
                 </div>
-                <ChevronRight
-                  size={16}
-                  className="text-pro-muted group-hover:translate-x-1 group-hover:text-pro-text transition-all shrink-0"
-                />
+                <ChevronRight size={16} className="text-[color:var(--admin-muted)] group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
           </div>
-        </section>
+        </AdminSection>
       )}
 
-      {/* === HUB DE NAVIGATION === */}
-      <section>
-        <h2 className="text-pro-text font-semibold text-sm mb-3">Sections de gestion</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {hubCards.map((card) => (
+      {/* === DUO : graphe demandes + feed live === */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <AdminSection
+          title={
+            <span className="inline-flex items-center gap-2">
+              <TrendingUp size={16} className="text-[color:var(--admin-accent)]" /> Demandes — 7 derniers jours
+            </span>
+          }
+          description={`Total: ${demandes7j.reduce((s, d) => s + d.count, 0)} demande(s)`}
+        >
+          <div className="flex items-end justify-between gap-1.5 h-32 mt-2">
+            {demandes7j.map((d) => {
+              const h = Math.round((d.count / maxBar) * 100);
+              const date = new Date(d.day);
+              const label = date.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3);
+              return (
+                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
+                  <div className="w-full relative flex items-end h-full">
+                    <div
+                      className="w-full rounded-t-md bg-gradient-to-t from-[color:var(--admin-accent)] to-[color:var(--admin-accent-strong)] transition-all"
+                      style={{ height: `${Math.max(h, 4)}%` }}
+                      title={`${d.count} demande${d.count > 1 ? "s" : ""}`}
+                    />
+                    {d.count > 0 && (
+                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-[color:var(--admin-text)]">
+                        {d.count}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-[color:var(--admin-muted)] capitalize">{label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </AdminSection>
+
+        <AdminSection
+          title={
+            <span className="inline-flex items-center gap-2">
+              <BellRing size={16} className="text-[color:var(--admin-accent)]" /> Activité en direct
+            </span>
+          }
+          actions={
+            <Link to="/admin/notifications" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
+              Tout voir <ArrowRight size={12} />
+            </Link>
+          }
+        >
+          {notifs.length === 0 ? (
+            <AdminEmpty icon={BellRing} title="Aucune notification" description="Les nouveaux événements apparaîtront ici en direct." />
+          ) : (
+            <ul className="space-y-2">
+              {notifs.map((n) => {
+                const Container: React.ElementType = n.link ? Link : "div";
+                const props = n.link ? { to: n.link as never } : {};
+                return (
+                  <li key={n.id}>
+                    <Container
+                      {...props}
+                      className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                        n.lu
+                          ? "border-[color:var(--admin-border)] bg-transparent"
+                          : "border-[color:var(--admin-accent)]/30 bg-[color:var(--admin-accent-soft)]"
+                      } ${n.link ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
+                    >
+                      <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-[color:var(--admin-text)] truncate">{n.titre}</p>
+                        {n.message && (
+                          <p className="text-xs text-[color:var(--admin-muted)] line-clamp-2">{n.message}</p>
+                        )}
+                        <p className="text-[10px] text-[color:var(--admin-muted)] mt-1">
+                          {new Date(n.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </Container>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </AdminSection>
+      </div>
+
+      {/* === HUB === */}
+      <AdminSection title="Sections de gestion" description="Accès rapide à tout l'écosystème">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {hubCards.map((c) => (
             <Link
-              key={card.to}
-              to={card.to}
-              className="group relative bg-white border border-pro-border rounded-xl p-4 shadow-pro-card hover:shadow-pro-card-hover hover:border-pro-accent/40 transition-all flex flex-col gap-3"
+              key={c.to}
+              to={c.to}
+              className="group rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 hover:border-[color:var(--admin-accent)] hover:shadow-sm transition-all flex flex-col gap-3"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${card.accent}`}
-                >
-                  <card.icon size={18} />
-                </div>
-                {card.badge && (
-                  <Badge tone={card.badge.tone}>{card.badge.label}</Badge>
-                )}
+              <div className="flex items-start justify-between">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--admin-accent-soft)] text-[color:var(--admin-accent-strong)]">
+                  <c.icon size={17} />
+                </span>
+                <span className="text-xs font-semibold text-[color:var(--admin-text)]">{c.count}</span>
               </div>
-
-              <div className="flex-1">
-                <div className="flex items-baseline gap-2 mb-0.5">
-                  <h3 className="text-pro-text font-semibold text-[15px]">{card.title}</h3>
-                  <span className="text-pro-muted text-xs font-medium">· {card.count}</span>
-                </div>
-                <p className="text-pro-muted text-xs leading-relaxed">{card.description}</p>
-              </div>
-
-              <div className="flex items-center justify-end pt-2 border-t border-pro-border/60">
-                <span className="text-xs text-pro-text-soft group-hover:text-pro-accent inline-flex items-center gap-1 transition-colors">
-                  Ouvrir
-                  <ChevronRight
-                    size={13}
-                    className="group-hover:translate-x-0.5 transition-transform"
-                  />
+              <div>
+                <p className="font-semibold text-sm text-[color:var(--admin-text)]">{c.title}</p>
+                <span className="text-[11px] text-[color:var(--admin-muted)] inline-flex items-center gap-1 mt-1 group-hover:text-[color:var(--admin-accent)] transition-colors">
+                  Ouvrir <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </div>
             </Link>
           ))}
         </div>
-      </section>
+      </AdminSection>
 
       {/* === DERNIÈRES DEMANDES === */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-pro-text font-semibold text-sm">Dernières demandes</h2>
-          <Link
-            to="/admin/demandes"
-            className="text-xs text-pro-accent hover:underline inline-flex items-center gap-1"
-          >
+      <AdminSection
+        title="Dernières demandes"
+        actions={
+          <Link to="/admin/demandes" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
             Tout voir <ArrowRight size={12} />
           </Link>
-        </div>
+        }
+      >
         {recentDemandes.length === 0 ? (
-          <EmptyState
-            icon={FileText}
-            title="Aucune demande"
-            description="Les nouvelles demandes apparaîtront ici."
-          />
+          <AdminEmpty icon={FileText} title="Aucune demande" description="Les nouvelles demandes apparaîtront ici." />
         ) : (
-          <Card padded={false}>
-            <Table>
-              <THead>
-                <TH>Client</TH>
-                <TH className="hidden sm:table-cell">Trajet</TH>
-                <TH className="hidden lg:table-cell">Téléphone</TH>
-                <TH>Statut</TH>
-                <TH className="hidden md:table-cell">Reçue le</TH>
-              </THead>
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <table className="admin-table w-full">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th className="hidden sm:table-cell">Trajet</th>
+                  <th className="hidden lg:table-cell">Téléphone</th>
+                  <th>Statut</th>
+                  <th className="hidden md:table-cell">Reçue le</th>
+                  <th></th>
+                </tr>
+              </thead>
               <tbody>
                 {recentDemandes.map((d) => (
-                  <TR key={d.id}>
-                    <TD>
-                      <p className="font-medium text-pro-text">
+                  <tr key={d.id}>
+                    <td>
+                      <Link to="/admin/demandes/$demandeId" params={{ demandeId: d.id }} className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
                         {d.prenom} {d.nom}
-                      </p>
-                      <p className="text-pro-muted text-xs sm:hidden">
+                      </Link>
+                      <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
                         {d.depart} → {d.arrivee}
                       </p>
-                    </TD>
-                    <TD className="hidden sm:table-cell text-pro-text-soft">
+                    </td>
+                    <td className="hidden sm:table-cell text-[color:var(--admin-text)]">
                       <span className="inline-flex items-center gap-1.5">
                         {d.depart}
-                        <ArrowRight size={11} className="text-pro-muted" />
+                        <ArrowRight size={11} className="text-[color:var(--admin-muted)]" />
                         {d.arrivee}
                       </span>
-                    </TD>
-                    <TD className="hidden lg:table-cell text-pro-text-soft text-xs font-mono">
+                    </td>
+                    <td className="hidden lg:table-cell text-[color:var(--admin-muted)] text-xs font-mono">
                       {d.telephone ?? "—"}
-                    </TD>
-                    <TD>
-                      <Badge tone={demandeStatutTone[d.statut] ?? "neutral"}>
-                        {statutLabel[d.statut] ?? d.statut}
-                      </Badge>
-                    </TD>
-                    <TD className="hidden md:table-cell text-pro-muted text-xs">
-                      {new Date(d.created_at).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
-                    </TD>
-                  </TR>
+                    </td>
+                    <td>
+                      <AdminBadge label={statutLabel[d.statut] ?? d.statut} />
+                    </td>
+                    <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
+                      {new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}
+                    </td>
+                    <td className="text-right">
+                      <Link
+                        to="/admin/demandes/$demandeId"
+                        params={{ demandeId: d.id }}
+                        className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
+                      >
+                        Ouvrir <ChevronRight size={12} />
+                      </Link>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
-            </Table>
-          </Card>
+            </table>
+          </div>
         )}
-      </section>
-    </div>
-  );
-}
-
-/* ============= KpiTile (premium SaaS look) ============= */
-function KpiTile({
-  icon: Icon,
-  label,
-  value,
-  hint,
-  tone,
-  premium = false,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: number | string;
-  hint?: string;
-  tone: "amber" | "blue" | "emerald" | "violet" | "sky" | "gold";
-  premium?: boolean;
-}) {
-  const tones: Record<string, string> = {
-    amber: "bg-amber-50 text-amber-600",
-    blue: "bg-blue-50 text-blue-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    violet: "bg-violet-50 text-violet-600",
-    sky: "bg-sky-50 text-sky-600",
-    gold: "bg-pro-gold-soft text-pro-gold",
-  };
-  return (
-    <div
-      className={`bg-white rounded-xl p-4 shadow-pro-card hover:shadow-pro-card-hover transition-shadow ${
-        premium ? "border border-pro-gold ring-1 ring-pro-gold/20" : "border border-pro-border"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${tones[tone]}`}>
-          <Icon size={17} />
-        </div>
-        {premium && (
-          <span className="text-[9px] font-bold uppercase tracking-wider text-pro-gold bg-pro-gold-soft px-1.5 py-0.5 rounded">
-            Premium
-          </span>
-        )}
-      </div>
-      <p className="text-pro-muted text-[11px] uppercase tracking-wider font-medium truncate">
-        {label}
-      </p>
-      <p className="text-pro-text text-2xl font-semibold leading-tight mt-1">{value}</p>
-      {hint && <p className="text-pro-muted text-[11px] mt-1 truncate">{hint}</p>}
+      </AdminSection>
     </div>
   );
 }
