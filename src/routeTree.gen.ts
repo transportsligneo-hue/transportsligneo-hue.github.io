@@ -69,6 +69,7 @@ import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
 import { Route as AuthenticatedDashboardClientMissionsRouteImport } from './routes/_authenticated/dashboard-client.missions'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
+import { Route as AuthenticatedDashboardClientDevisRouteImport } from './routes/_authenticated/dashboard-client.devis'
 import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_authenticated/convoyeur.profil'
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
 import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_authenticated/convoyeur.historique'
@@ -433,6 +434,12 @@ const AuthenticatedDashboardClientDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedDashboardClientDevisRoute =
+  AuthenticatedDashboardClientDevisRouteImport.update({
+    id: '/devis',
+    path: '/devis',
+    getParentRoute: () => AuthenticatedDashboardClientRoute,
+  } as any)
 const AuthenticatedConvoyeurProfilRoute =
   AuthenticatedConvoyeurProfilRouteImport.update({
     id: '/profil',
@@ -725,6 +732,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -820,6 +828,7 @@ export interface FileRoutesByTo {
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -923,6 +932,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/_authenticated/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/_authenticated/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -1026,6 +1036,7 @@ export interface FileRouteTypes {
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
+    | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
@@ -1121,6 +1132,7 @@ export interface FileRouteTypes {
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
+    | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
@@ -1223,6 +1235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/historique'
     | '/_authenticated/convoyeur/missions'
     | '/_authenticated/convoyeur/profil'
+    | '/_authenticated/dashboard-client/devis'
     | '/_authenticated/dashboard-client/documents'
     | '/_authenticated/dashboard-client/missions'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
@@ -1730,6 +1743,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientDocumentsRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/dashboard-client/devis': {
+      id: '/_authenticated/dashboard-client/devis'
+      path: '/devis'
+      fullPath: '/dashboard-client/devis'
+      preLoaderRoute: typeof AuthenticatedDashboardClientDevisRouteImport
+      parentRoute: typeof AuthenticatedDashboardClientRoute
+    }
     '/_authenticated/convoyeur/profil': {
       id: '/_authenticated/convoyeur/profil'
       path: '/profil'
@@ -2197,6 +2217,7 @@ const AuthenticatedDashboardClientMissionsRouteWithChildren =
   )
 
 interface AuthenticatedDashboardClientRouteChildren {
+  AuthenticatedDashboardClientDevisRoute: typeof AuthenticatedDashboardClientDevisRoute
   AuthenticatedDashboardClientDocumentsRoute: typeof AuthenticatedDashboardClientDocumentsRoute
   AuthenticatedDashboardClientMissionsRoute: typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   AuthenticatedDashboardClientNouvelleReservationRoute: typeof AuthenticatedDashboardClientNouvelleReservationRoute
@@ -2206,6 +2227,8 @@ interface AuthenticatedDashboardClientRouteChildren {
 
 const AuthenticatedDashboardClientRouteChildren: AuthenticatedDashboardClientRouteChildren =
   {
+    AuthenticatedDashboardClientDevisRoute:
+      AuthenticatedDashboardClientDevisRoute,
     AuthenticatedDashboardClientDocumentsRoute:
       AuthenticatedDashboardClientDocumentsRoute,
     AuthenticatedDashboardClientMissionsRoute:
