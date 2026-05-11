@@ -88,30 +88,6 @@ function AdminClients() {
     fetchClients();
   }, [fetchClients]);
 
-  useEffect(() => {
-    if (!selected) {
-      setMissions([]);
-      return;
-    }
-    let cancelled = false;
-    setLoadingMissions(true);
-    supabase
-      .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total")
-      .eq("user_id", selected.user_id)
-      .order("date_prise_en_charge", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        if (!cancelled) {
-          setMissions((data as MissionItem[]) ?? []);
-          setLoadingMissions(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selected]);
-
   const toggleActif = async (userId: string, nextActif: boolean) => {
     if (
       !nextActif &&
@@ -124,8 +100,6 @@ function AdminClients() {
       .eq("user_id", userId)
       .eq("role", "client");
     await fetchClients();
-    if (selected?.user_id === userId)
-      setSelected((prev) => (prev ? { ...prev, actif: nextActif } : null));
   };
 
   const filtered = clients.filter((c) => {
