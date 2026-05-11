@@ -48,7 +48,8 @@ function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string 
   // Org-based redirection (flotte / entreprise)
   if (p.orgRole === "flotte_partenaire") return "/flotte";
   if (p.orgRole === "client_b2b") return "/entreprise";
-  // Fallback B2B sans org rattachée
+  // Fallback selon typeClient
+  if (p.typeClient === "flotte") return "/flotte";
   if (p.typeClient === "b2b") return "/dashboard-pro";
   return "/dashboard-client";
 }
