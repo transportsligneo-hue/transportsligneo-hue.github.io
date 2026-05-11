@@ -166,6 +166,35 @@ function ClientDashboard() {
           </div>
         )}
       </div>
+
+      {/* Mes devis */}
+      {devisList.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-heading text-lg text-cream tracking-wider">Mes devis</h2>
+          </div>
+          <div className="space-y-3">
+            {devisList.map(d => (
+              <div key={d.id} className="card-premium p-5 rounded flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <FileText size={12} className="text-primary" /> {d.numero}
+                  </p>
+                  <p className="text-cream font-heading text-sm mt-1 truncate">{d.depart} → {d.arrivee}</p>
+                  <p className="text-cream/50 text-xs mt-1">
+                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                    {d.distance_km ? ` · ${d.distance_km} km` : ""}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-heading text-primary text-lg">{Number(d.prix_estime).toFixed(0)} €</p>
+                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{d.statut}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
