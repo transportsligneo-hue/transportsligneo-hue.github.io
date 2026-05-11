@@ -162,6 +162,26 @@ function ConvoyeurDisponibles() {
     const prix = prixDriverEffectif(trajet);
     if (!convoyeurId || prix == null) return;
     setSubmitting(true);
+
+    // PRIX FIXE → attribution instantanée via RPC (premier arrivé = attribué)
+    if (trajet.pricing_mode === "fixe") {
+      const { error } = await supabase.rpc("accept_mission_fixe" as never, {
+        _trajet_id: trajet.id,
+      } as never);
+      if (error) {
+        alert(error.message || "Cette mission n'est plus disponible.");
+        setSubmitting(false);
+        fetchData();
+        return;
+      }
+      notifyAdmin(trajet, prix, "acceptation_directe");
+      setSubmitting(false);
+      setOpenTrajetId(null);
+      fetchData();
+      return;
+    }
+
+    // ENCHÈRE → offre en attente de validation admin
     await supabase.from("mission_offres" as never).insert({
       trajet_id: trajet.id,
       convoyeur_id: convoyeurId,

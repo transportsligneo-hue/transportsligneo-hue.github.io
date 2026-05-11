@@ -1,109 +1,111 @@
-## Objectif
+## Refonte Dispatch Premium — Trajets / Attribution / Publication / Missions
 
-Ajouter un parcours "Nouvelle demande de convoyage" dans chaque espace client, avec paiement Stripe obligatoire pour les particuliers/pros, et workflow devis/facturation pour B2B/flotte/partenaire. Finir en parallèle la page détail mission admin et la QA visuelle des 3 PDFs.
+Objectif : transformer la gestion admin en vraie plateforme de dispatch automatisée, sans casser les flux backend existants (webhooks Stripe, RLS, séquences MIS-TLG).
 
-## Lot 1 — Finir l'admin (reste du tour précédent)
+---
 
-1. **Page détail mission** `src/routes/_authenticated/admin.missions.$missionId.tsx`
-   - Bloc client (nom, email, tel, société, type)
-   - Bloc trajet (départ → arrivée, distance, durée, date)
-   - Bloc véhicule (marque, modèle, immat, carburant)
-   - Bloc convoyeur attribué + bouton réattribuer
-   - Aperçu PDF iframe + bouton télécharger
-   - Actions : changer statut, annuler, ouvrir incident
-2. Bouton œil dans `admin.missions.tsx` vers la page détail
-3. **QA visuelle des 3 PDFs** : génération échantillon → `pdftoppm` → inspection → corrections
+### 1. Modèle de données (migration ciblée, non destructive)
 
-## Lot 2 — Composant partagé "Nouvelle demande"
+Ajouts sur `trajets` :
+- `devis_id` (uuid, nullable) — lien direct devis source
+- `prix_client` (numeric) — repris auto du devis
+- `mode_attribution` (text: `prix_fixe` | `enchere`) — défaut `prix_fixe`
+- `commission_convoyeur_pct` (numeric, défaut 65)
+- `prix_convoyeur` (numeric, calculé)
+- `prix_societe` (numeric, calculé)
+- `statut_publication` (text: `brouillon` | `pret_publier` | `publie` | `attribue` | `en_cours` | `termine`)
+- `published_at` (timestamptz)
 
-Wizard mobile-first en 5 étapes, réutilisable :
+Trigger DB :
+- `calc_prix_trajet` : au INSERT/UPDATE recalcule `prix_convoyeur = prix_client * pct/100` et `prix_societe = prix_client - prix_convoyeur`.
+- `auto_create_trajet_from_devis` : quand `devis.paid_at` passe non-null, créer trajet en `brouillon` avec `prix_client = devis.prix_estime`.
 
-```text
-[1 Départ/Arrivée] → [2 Véhicule] → [3 Date] → [4 Récap + Prix] → [5 Paiement OU Confirmation]
+Aucune suppression de colonne existante — compat ascendante garantie.
+
+---
+
+### 2. Automatisation Devis payé → Trajet
+
+Dans `src/routes/api/public/devis/webhook.ts` (déjà en place) : à la réception du `checkout.session.completed`, après update du devis, créer automatiquement un trajet lié (`statut_publication = brouillon`, mode par défaut `prix_fixe`).
+
+---
+
+### 3. Logique d'attribution
+
+**Prix fixe** :
+- Publication → visible immédiatement chez tous les convoyeurs validés.
+- Premier qui accepte → INSERT `attributions` (statut `accepte`) + UPDATE `trajets.statut_publication = attribue` en transaction.
+- Pas de validation admin.
+
+**Enchère** :
+- Convoyeurs créent des `mission_offres` (table déjà existante).
+- Admin compare, valide → crée l'attribution manuellement.
+
+Server function `acceptMissionFixe(trajet_id)` avec `requireSupabaseAuth` + lock SQL (`SELECT … FOR UPDATE`) pour éviter race conditions.
+
+---
+
+### 4. UI Admin — Page Trajets refondue
+
+Remplacer la page `admin.trajets.tsx` actuelle :
+- Liste avec colonnes : N°, Client, Devis, Trajet, Prix client, Mode, Statut publication, Convoyeur attribué.
+- Filtres par statut, mode.
+- Click ligne → **Drawer latéral** (pas de modal) avec blocs :
+  - Bloc Client (nom, email, tel)
+  - Bloc Devis (numéro, montant, lien)
+  - Bloc Prix (input pct convoyeur, calcul live, lecture seule prix_client)
+  - Bloc Attribution (radio prix fixe / enchère, bouton Publier)
+  - Bloc Convoyeur (assigné ou liste offres si enchère)
+  - Bloc Statut / Timeline (devis → trajet → publié → attribué → en cours → terminé)
+  - Bloc Paiement (statut Stripe)
+
+Suppression du bouton œil → toute la fiche dans le drawer.
+
+---
+
+### 5. UI Driver — Missions disponibles
+
+`convoyeur.disponibles.tsx` :
+- Affiche tous les trajets `statut_publication = publie` ET convoyeur non encore attribué.
+- Badge `Prix fixe` (vert) ou `Enchère` (or).
+- Bouton **Accepter** (prix fixe, attribution instantanée) ou **Proposer** (enchère, ouvre modal offre).
+- Realtime via Supabase channel sur `trajets`.
+
+Sur accueil driver (`convoyeur.index.tsx`) : widget "Nouvelle mission disponible" si au moins une.
+
+---
+
+### 6. Statuts unifiés
+
+```
+Devis     : envoye → accepte → paye
+Trajet    : brouillon → pret_publier → publie → attribue → en_cours → termine
+Offre     : en_attente → accepte → refuse
 ```
 
-- Fichiers :
-  - `src/components/quick-request/QuickRequestWizard.tsx` (orchestrateur)
-  - `src/components/quick-request/Step{1..5}.tsx`
-  - `src/hooks/useQuickRequest.ts` (état + calcul prix via logique existante de l'estimateur)
-- Variantes par mode :
-  - `mode: "paid"` (particulier, pro non-B2B) → étape 5 = paiement Stripe Embedded
-  - `mode: "invoiced"` (B2B, flotte, partenaire) → étape 5 = "Demande envoyée, devis à valider"
-- Calcul prix : réutiliser la formule existante de `/tarifs` (per-km + forfaits Tours)
+Badges centralisés dans `StatusBadge.tsx` (déjà existant) — étendre avec mappings `trajetStatutKind` et `modeAttributionKind`.
 
-## Lot 3 — Intégration dans les 4 espaces
+---
 
-Ajouter un bouton CTA "+ Nouvelle demande" en haut de chaque dashboard :
+### 7. Découpage en étapes livrables
 
-1. `src/routes/_authenticated/espace-client.tsx` (particulier) → mode `paid`
-2. `src/routes/_authenticated/espace-pro.tsx` (pro non-B2B) → mode `paid`
-3. `src/routes/_authenticated/espace-b2b.tsx` (B2B/flotte) → mode `invoiced`
-4. `src/routes/_authenticated/espace-partenaire.tsx` → mode `invoiced`
+1. **Migration DB** (colonnes + triggers) — étape isolée à valider
+2. **Webhook devis** : auto-create trajet
+3. **Page admin trajets** refonte (drawer + bloc prix auto)
+4. **Server fn** `acceptMissionFixe` + RLS adjustments
+5. **UI driver** missions disponibles + realtime
+6. **Polish** : badges, timeline, accueil driver
 
-Le routage espace ↔ mode est déterminé par `profiles.type_client` (`particulier` / `b2b` / `flotte`) et le rôle.
+Chaque étape testable indépendamment, rien ne casse l'existant tant que les anciens champs (`prix`, `statut`) restent peuplés.
 
-## Lot 4 — Paiement Stripe (mode `paid`)
+---
 
-Stripe sandbox déjà actif dans le projet (`STRIPE_SANDBOX_API_KEY`, `PAYMENTS_SANDBOX_WEBHOOK_SECRET`).
+### Périmètre exclu (pour cette PR)
 
-1. **Edge function** `supabase/functions/create-checkout/index.ts`
-   - Reçoit `{ demandeId, environment }`
-   - Crée Stripe Customer (`resolveOrCreateCustomer` avec `metadata.userId`)
-   - Crée session `ui_mode: "embedded_page"` avec `price_data` (prix dynamique calculé côté serveur, jamais côté client)
-   - Retourne `clientSecret`
-2. **Edge function** `supabase/functions/stripe-webhook/index.ts`
-   - Vérifie signature
-   - Sur `checkout.session.completed` : crée mission, génère facture, marque demande `payee`, envoie email confirmation, crée admin_notification
-3. **Composant** `src/components/quick-request/StripeCheckoutStep.tsx` (Embedded Checkout)
-4. **Page retour** `src/routes/checkout-return.tsx`
-5. `supabase/config.toml` : `verify_jwt = false` sur `create-checkout` et `stripe-webhook`
+- Pas de modification du flow paiement Stripe actuel
+- Pas de changement RLS sauf ajout policy pour `acceptMissionFixe`
+- Pas de refonte des autres pages admin (factures, clients, etc.)
 
-## Lot 5 — Workflow B2B (mode `invoiced`)
+---
 
-1. Insert dans `demandes_convoyage` avec `statut = "en_attente_devis"`
-2. Création automatique d'un `devis` en `statut = "envoye"`
-3. Email client + admin_notification
-4. Aucune mission tant que devis non `accepte` (statut visible dans l'espace)
-5. Affichage badge statut dans la liste des demandes : `en_attente`, `validee`, `facturee`, `payee`
-
-## Lot 6 — Schéma DB
-
-Migration nécessaire :
-
-- Ajouter colonne `demandes_convoyage.stripe_session_id text`
-- Ajouter colonne `demandes_convoyage.payment_status text default 'pending'` (`pending` / `paid` / `invoiced`)
-- Ajouter colonne `demandes_convoyage.user_id uuid` (lien avec auth.users) + index
-- Trigger : à l'insert si `auth.uid()` non null, set `user_id = auth.uid()`
-- RLS : `Users can read own demandes` (par `user_id`), `Users can create own demandes`
-
-## Lot 7 — Email & notifications
-
-- Réutiliser l'infra emails existante (`enqueue_email`)
-- Templates :
-  - `demande-paiement-confirme` (particulier/pro)
-  - `demande-recue-b2b` (B2B/flotte/partenaire)
-- Notifications admin via `create_admin_notification` avec les nouveaux types autorisés (déjà whitelistés : `estimation`, `devis`, `b2b_lead`)
-
-## Détails techniques
-
-- Calcul prix **côté serveur** dans `create-checkout` (interdiction de faire confiance au montant envoyé par le client)
-- Stripe utilise `createStripeClient` du `_shared/stripe.ts` (gateway, jamais clé directe)
-- Le wizard est responsive (≤768 = 1 col, ≥1024 = 2 col avec récap latéral)
-- Animations CSS/Tailwind uniquement (pas de framer-motion — contrainte mémoire)
-- Tokens design midnight blue/gold conservés
-
-## Ordre d'exécution
-
-1. Lot 1 (admin mission detail + QA PDFs) — court
-2. Lot 6 (migration DB) — bloque la suite
-3. Lot 2 (wizard composant)
-4. Lot 4 (Stripe edge functions + webhook)
-5. Lot 5 (workflow B2B)
-6. Lot 3 (intégration dans les 4 espaces)
-7. Lot 7 (emails) — polissage final
-
-## Hors scope (à clarifier si besoin)
-
-- Modification du tunnel public `/estimation` (reste devis only, pas de paiement)
-- Annulation / remboursement Stripe (workflow séparé)
-- Paiement sur facture B2B via lien Stripe (peut être un Lot 8 séparé)
+**Question avant de commencer** : je lance la migration DB (étape 1) en premier — ok ? Ou tu préfères que je découpe encore plus finement (ex : commencer juste par le drawer admin sur l'existant, sans migration) ?
