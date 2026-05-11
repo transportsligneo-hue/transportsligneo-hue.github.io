@@ -261,23 +261,24 @@
      toucher aux composants de chaque écran.
      ============================================================ */
   .driver-shell {
-    --driver-bg: #070b1f;
-    --driver-bg-2: #0b1026;
-    --driver-surface: rgba(255, 255, 255, 0.04);
-    --driver-surface-strong: rgba(255, 255, 255, 0.06);
-    --driver-border: rgba(212, 175, 55, 0.18);
-    --driver-border-strong: rgba(212, 175, 55, 0.35);
-    --driver-text: #f5f1e8;
-    --driver-text-soft: #c7cad8;
-    --driver-muted: #8a90a8;
-    --driver-accent: #2c6bff;
-    --driver-accent-soft: rgba(44, 107, 255, 0.18);
+    --driver-bg: #0b1530;
+    --driver-bg-2: #122353;
+    --driver-surface: rgba(255, 255, 255, 0.06);
+    --driver-surface-strong: rgba(255, 255, 255, 0.10);
+    --driver-border: rgba(120, 165, 255, 0.22);
+    --driver-border-strong: rgba(120, 165, 255, 0.40);
+    --driver-text: #f4f7ff;
+    --driver-text-soft: #cdd6f1;
+    --driver-muted: #8f9ac2;
+    --driver-accent: #3b82f6;
+    --driver-accent-2: #5fb6ff;
+    --driver-accent-soft: rgba(59, 130, 246, 0.22);
 
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.10), transparent 60%),
-      radial-gradient(700px 500px at 50% 110%, rgba(212, 175, 55, 0.06), transparent 60%),
-      linear-gradient(180deg, #0a1230 0%, #0f1a44 60%, #0a1230 100%);
+      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.30), transparent 60%),
+      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%),
+      radial-gradient(900px 700px at 50% 110%, rgba(120, 165, 255, 0.12), transparent 60%),
+      linear-gradient(180deg, #0e1740 0%, #1a2a6e 55%, #0e1740 100%);
     color: var(--driver-text);
     min-height: 100vh;
   }
