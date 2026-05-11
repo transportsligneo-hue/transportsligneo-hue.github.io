@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel } from "lucide-react";
+import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
 import {
   PageHeader,
   Card,
