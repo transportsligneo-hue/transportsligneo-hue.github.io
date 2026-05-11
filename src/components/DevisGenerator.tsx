@@ -644,21 +644,24 @@ export default function DevisGenerator() {
                   disabled={
                     (step === 1 && (!departure || !arrival)) ||
                     (step === 2 && !vehicleType) ||
-                    (step === 3 && (!nom || !prenom || !email || !telephone))
+                    (step === 3 && (!nom || !prenom || !email || !telephone || password.length < 8 || !cguAccepted))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Continuer <ArrowRight size={13} />
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={sending}
-                  className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(231,199,106,0.6)] hover:brightness-110 disabled:opacity-50"
-                >
-                  {sending ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <><Send size={13} /> Envoyer ma demande</>}
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  {accountError && <p className="text-red-300 text-[11px]">{accountError}</p>}
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={sending}
+                    className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(231,199,106,0.6)] hover:brightness-110 disabled:opacity-50"
+                  >
+                    {sending ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <><Send size={13} /> Confirmer ma demande</>}
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -668,25 +671,55 @@ export default function DevisGenerator() {
       {/* === Confirmation === */}
       {submitted && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-xl rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
             <div className="w-16 h-16 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="text-[#e7c76a]" size={30} />
             </div>
             <h3 className="font-heading text-xl text-[#e7c76a] tracking-[0.15em] uppercase mb-2">Devis envoyé</h3>
-            {savedDevis && <p className="text-cream/70 text-xs tracking-wider uppercase mb-3">N° {savedDevis.numero}</p>}
+            {savedDevis && <p className="text-cream/70 text-xs tracking-wider uppercase mb-4">N° {savedDevis.numero}</p>}
             <p className="text-cream/70 text-sm leading-relaxed max-w-md mx-auto">
               Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email
               et notre équipe vous recontactera dans les plus brefs délais.
             </p>
+
+            <div className="mt-6 rounded-2xl border border-[#5fb6ff]/30 bg-[#5fb6ff]/[0.05] p-5 text-left">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
+                  <MailCheck size={16} className="text-[#5fb6ff]" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-heading text-sm text-cream tracking-wide mb-1">
+                    {accountCreated ? "Vérifiez votre email" : "Votre espace client est prêt"}
+                  </p>
+                  <p className="text-cream/60 text-xs leading-relaxed">
+                    {accountCreated
+                      ? <>Nous venons de vous envoyer un lien de vérification à <strong className="text-cream/90">{email}</strong>. Cliquez dessus pour activer votre compte et retrouver votre devis dans votre espace client.</>
+                      : <>Un compte existe déjà avec <strong className="text-cream/90">{email}</strong>. Connectez-vous pour retrouver votre devis.</>
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110">
+                <User size={13} /> Mon espace client
+              </Link>
               {savedDevis && (
                 <button onClick={handleDownloadPdf}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase">
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
                   <Download size={13} /> Télécharger le PDF
                 </button>
               )}
               <button
-                onClick={() => { setSubmitted(false); setStep(0); setSavedDevis(null); setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment(""); setImmatriculation(""); setPlaqueInconnue(false); }}
+                onClick={() => {
+                  setSubmitted(false); setStep(0); setSavedDevis(null);
+                  setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment("");
+                  setImmatriculation(""); setPlaqueInconnue(false);
+                  setPassword(""); setCguAccepted(false); setAccountCreated(false); setAccountError("");
+                }}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-white/15 text-cream/80 hover:text-cream hover:border-white/30 font-heading text-xs tracking-[0.2em] uppercase">
                 <FileText size={13} /> Nouvelle estimation
               </button>
