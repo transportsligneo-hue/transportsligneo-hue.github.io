@@ -170,6 +170,7 @@ function AdminMissionDetail() {
   const [trajet, setTrajet] = useState<TrajetFull | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurFull | null>(null);
   const [inspections, setInspections] = useState<InspectionRow[]>([]);
+  const [selfies, setSelfies] = useState<{ id: string; url: string; taken_at: string; latitude: number | null; longitude: number | null }[]>([]);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [documents, setDocuments] = useState<DocRow[]>([]);
   const [history, setHistory] = useState<EtapeHistoryRow[]>([]);
