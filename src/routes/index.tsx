@@ -58,7 +58,9 @@ function Index() {
               </h2>
               <p className="text-cream/70 text-base lg:text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
                 Renseignez votre trajet, votre véhicule et obtenez immédiatement
-                un tarif transparent. Péage, carburant et assurance inclus.
+                un tarif transparent.
+                <br />
+                Péage, carburant et assurance inclus.
               </p>
             </div>
 
