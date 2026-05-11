@@ -93,6 +93,7 @@ function AdminLayout() {
     { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
 
     // Finance
+    { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
     { to: "/admin/paiements", label: "Paiements & facturation", icon: CreditCard, group: "Finance" },
 
     // Système

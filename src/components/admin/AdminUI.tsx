@@ -158,6 +158,12 @@ export const devisStatutTone: Record<string, BadgeTone> = {
   refuse: "danger",
   convertit: "primary",
 };
+export const factureStatutTone: Record<string, BadgeTone> = {
+  emise: "info",
+  payee: "success",
+  en_retard: "danger",
+  annulee: "neutral",
+};
 
 /* ============= Inputs ============= */
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
