@@ -347,6 +347,11 @@ function AdminDevisPage() {
                     </Select>
 
                     <div className="flex gap-2 flex-wrap justify-end">
+                      <Link to="/admin/devis/$devisId" params={{ devisId: d.id }}>
+                        <IconButton title="Voir le détail" tone="primary">
+                          <Eye size={14} />
+                        </IconButton>
+                      </Link>
                       <Button
                         size="sm"
                         onClick={() => handleDownload(d)}
