@@ -398,6 +398,114 @@
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
   }
+
+  /* ============================================================
+     === CLIENT PREMIUM SHELL — luminous glassmorphism + electric blue
+     L'espace client est plus clair, plus lumineux, accent bleu
+     électrique (vs gold). On override .section-bg, .card-premium,
+     .glass-bar et la sidebar uniquement dans .client-shell.
+     ============================================================ */
+  .client-shell {
+    --client-bg: #0e1740;
+    --client-bg-2: #16245c;
+    --client-surface: rgba(255, 255, 255, 0.06);
+    --client-surface-strong: rgba(255, 255, 255, 0.10);
+    --client-border: rgba(120, 165, 255, 0.22);
+    --client-border-strong: rgba(120, 165, 255, 0.40);
+    --client-text: #f3f6ff;
+    --client-text-soft: #c9d3ee;
+    --client-muted: #8c97bd;
+    --client-accent: #3b82f6;
+    --client-accent-2: #5fb6ff;
+    --client-accent-soft: rgba(59, 130, 246, 0.22);
+  }
+
+  /* Fond plus lumineux que .section-bg classique : bleu électrique dominant */
+  .client-shell .section-bg,
+  .client-shell.section-bg {
+    background:
+      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.32), transparent 60%) !important,
+      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%) !important,
+      radial-gradient(900px 700px at 50% 110%, rgba(167, 139, 250, 0.14), transparent 60%) !important,
+      linear-gradient(180deg, #0e1740 0%, #1a2a6e 55%, #0e1740 100%) !important;
+  }
+
+  /* Cartes glass plus lumineuses, halo bleu */
+  .client-shell .card-premium {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)) !important;
+    border: 1px solid var(--client-border) !important;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow:
+      0 20px 50px -22px rgba(8, 16, 48, 0.75),
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 1px 0 rgba(255,255,255,0.10) inset !important;
+    border-radius: 16px;
+  }
+  .client-shell .card-premium:hover { border-color: var(--client-border-strong) !important; }
+
+  /* Sidebar premium light glass (vs bg-navy/85 d'origine) */
+  .client-shell aside.bg-navy\/85 {
+    background: linear-gradient(180deg, rgba(15, 26, 70, 0.78), rgba(11, 18, 50, 0.85)) !important;
+    border-right: 1px solid var(--client-border) !important;
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+  }
+
+  /* Mobile header glass plus lumineux */
+  .client-shell .glass-bar {
+    background: linear-gradient(180deg, rgba(15, 26, 70, 0.78), rgba(11, 18, 50, 0.85)) !important;
+    border-color: var(--client-border) !important;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+  }
+
+  /* Lien sidebar actif → bleu électrique au lieu de gold */
+  .client-shell aside nav a.bg-primary\/15 {
+    background: var(--client-accent-soft) !important;
+    color: var(--client-accent-2) !important;
+    border-color: var(--client-border-strong) !important;
+    box-shadow: 0 0 24px -4px rgba(59, 130, 246, 0.40), 0 0 0 1px rgba(59, 130, 246, 0.20) inset !important;
+  }
+  .client-shell aside nav a.text-primary { color: var(--client-accent-2) !important; }
+
+  /* Bottom nav mobile : item actif passe en bleu électrique */
+  .client-shell nav[aria-label="Navigation"] .text-primary { color: var(--client-accent-2) !important; }
+
+  /* Boutons primaires gold → bleu électrique dans l'espace client */
+  .client-shell .bg-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%) !important;
+    color: #ffffff !important;
+  }
+  .client-shell .hover\:bg-gold-light:hover { filter: brightness(1.08); }
+  .client-shell .text-primary { color: var(--client-accent-2) !important; }
+  .client-shell .text-navy { color: #ffffff !important; }
+
+  /* Titres conservent Playfair mais en blanc lumineux */
+  .client-shell .font-heading { color: var(--client-text); }
+
+  /* Chips / accents secondaires */
+  .client-shell .border-primary\/30,
+  .client-shell .border-primary\/40,
+  .client-shell .border-primary\/20,
+  .client-shell .border-primary\/15 { border-color: var(--client-border) !important; }
+  .client-shell .border-primary\/50 { border-color: var(--client-border-strong) !important; }
+
+  /* Status badges blue tones */
+  .client-shell .text-blue-300 { color: var(--client-accent-2) !important; }
+
+  /* Utilitaires client */
+  .client-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    border: 1px solid rgba(120, 165, 255, 0.22);
+    border-radius: 18px;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow: 0 20px 50px -22px rgba(8, 16, 48, 0.75), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+  .client-glow {
+    box-shadow: 0 0 60px -12px rgba(59, 130, 246, 0.45);
+  }
   .driver-chip-emerald {
     background: rgba(16, 185, 129, 0.14);
     border-color: rgba(16, 185, 129, 0.40);
