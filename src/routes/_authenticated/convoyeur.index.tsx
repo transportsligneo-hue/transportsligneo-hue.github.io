@@ -33,7 +33,30 @@ function ConvoyeurDashboard() {
   const [convoyeurName, setConvoyeurName] = useState("");
   const [todayMission, setTodayMission] = useState<TodayMission | null>(null);
   const [nextMission, setNextMission] = useState<TodayMission | null>(null);
+  const [availableCount, setAvailableCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Compte des missions publiées (prix fixe ou enchère) disponibles
+  useEffect(() => {
+    let cancelled = false;
+    const fetchAvail = async () => {
+      const { count } = await supabase
+        .from("trajets")
+        .select("id", { count: "exact", head: true })
+        .eq("statut_publication", "publie");
+      if (!cancelled) setAvailableCount(count ?? 0);
+    };
+    fetchAvail();
+    // Realtime: refresh quand un trajet est publié/attribué
+    const channel = supabase
+      .channel("driver-home-trajets")
+      .on("postgres_changes", { event: "*", schema: "public", table: "trajets" }, fetchAvail)
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
