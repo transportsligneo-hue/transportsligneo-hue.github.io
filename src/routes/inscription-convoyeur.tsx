@@ -60,6 +60,17 @@ function InscriptionConvoyeur() {
 
     setLoading(true);
     try {
+      const rcToken = await getRecaptchaToken("signup_convoyeur");
+      if (rcToken) {
+        try {
+          const r = await verifyRecaptcha({ data: { token: rcToken, action: "signup_convoyeur", minScore: 0.3 } });
+          if (!r.ok && !r.skipped) {
+            setError("Vérification de sécurité échouée. Réessayez.");
+            setLoading(false);
+            return;
+          }
+        } catch { /* skip on network error */ }
+      }
       console.log("[inscription-convoyeur] signUp →", form.email);
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
