@@ -42,7 +42,7 @@ function ClientLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg">
+      <div className="min-h-screen flex items-center justify-center section-bg client-shell">
         <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
@@ -50,7 +50,7 @@ function ClientLayout() {
 
   if (!roleActif) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg px-4">
+      <div className="min-h-screen flex items-center justify-center section-bg client-shell px-4">
         <div className="text-center space-y-4 max-w-md">
           <h1 className="font-heading text-xl text-destructive tracking-[0.1em] uppercase">Compte suspendu</h1>
           <p className="text-cream/50 text-sm">
@@ -66,14 +66,14 @@ function ClientLayout() {
 
   if (!isAuthenticated || role === "admin" || role === "convoyeur" || typeClient === "b2b") {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg">
+      <div className="min-h-screen flex items-center justify-center section-bg client-shell">
         <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
   }
 
   return (
-    <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems}>
+    <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems} shellClass="client-shell">
       <Outlet />
     </DashboardSidebar>
   );
