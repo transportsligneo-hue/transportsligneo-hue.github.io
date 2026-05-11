@@ -385,8 +385,9 @@ function AdminDashboard() {
           ) : (
             <ul className="space-y-2">
               {notifs.map((n) => {
-                const Container: React.ElementType = n.link ? Link : "div";
-                const props = n.link ? { to: n.link as never } : {};
+                const safeLink = n.link && n.link.startsWith("/") ? n.link : null;
+                const Container: React.ElementType = safeLink ? Link : "div";
+                const props = safeLink ? { to: safeLink as never } : {};
                 return (
                   <li key={n.id}>
                     <Container
@@ -395,7 +396,7 @@ function AdminDashboard() {
                         n.lu
                           ? "border-[color:var(--admin-border)] bg-transparent"
                           : "border-[color:var(--admin-accent)]/30 bg-[color:var(--admin-accent-soft)]"
-                      } ${n.link ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
+                      } ${safeLink ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
                     >
                       <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
                       <div className="min-w-0 flex-1">
