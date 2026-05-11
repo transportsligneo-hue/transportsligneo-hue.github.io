@@ -941,6 +941,123 @@ export type Database = {
         }
         Relationships: []
       }
+      factures: {
+        Row: {
+          arrivee: string | null
+          attribution_id: string | null
+          client_adresse: string | null
+          client_email: string
+          client_nom: string
+          client_prenom: string | null
+          client_siret: string | null
+          client_societe: string | null
+          client_tva: string | null
+          conditions_paiement: string | null
+          created_at: string
+          date_echeance: string | null
+          date_facture: string
+          date_mission: string | null
+          date_paiement: string | null
+          depart: string | null
+          designation: string | null
+          distance_km: number | null
+          id: string
+          metadata: Json
+          mission_id: string | null
+          mode_paiement: string | null
+          numero: string
+          pdf_url: string | null
+          prix_ht: number
+          prix_ttc: number
+          prix_tva: number
+          statut: string
+          tva_taux: number
+          type_facture: string
+          updated_at: string
+        }
+        Insert: {
+          arrivee?: string | null
+          attribution_id?: string | null
+          client_adresse?: string | null
+          client_email: string
+          client_nom: string
+          client_prenom?: string | null
+          client_siret?: string | null
+          client_societe?: string | null
+          client_tva?: string | null
+          conditions_paiement?: string | null
+          created_at?: string
+          date_echeance?: string | null
+          date_facture?: string
+          date_mission?: string | null
+          date_paiement?: string | null
+          depart?: string | null
+          designation?: string | null
+          distance_km?: number | null
+          id?: string
+          metadata?: Json
+          mission_id?: string | null
+          mode_paiement?: string | null
+          numero: string
+          pdf_url?: string | null
+          prix_ht?: number
+          prix_ttc?: number
+          prix_tva?: number
+          statut?: string
+          tva_taux?: number
+          type_facture?: string
+          updated_at?: string
+        }
+        Update: {
+          arrivee?: string | null
+          attribution_id?: string | null
+          client_adresse?: string | null
+          client_email?: string
+          client_nom?: string
+          client_prenom?: string | null
+          client_siret?: string | null
+          client_societe?: string | null
+          client_tva?: string | null
+          conditions_paiement?: string | null
+          created_at?: string
+          date_echeance?: string | null
+          date_facture?: string
+          date_mission?: string | null
+          date_paiement?: string | null
+          depart?: string | null
+          designation?: string | null
+          distance_km?: number | null
+          id?: string
+          metadata?: Json
+          mission_id?: string | null
+          mode_paiement?: string | null
+          numero?: string
+          pdf_url?: string | null
+          prix_ht?: number
+          prix_ttc?: number
+          prix_tva?: number
+          statut?: string
+          tva_taux?: number
+          type_facture?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factures_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factures_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inspection_document_ocr: {
         Row: {
           attribution_id: string
@@ -2123,6 +2240,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      next_document_number: {
+        Args: { _doc_prefix: string; _year?: number }
+        Returns: string
       }
       next_mission_number: {
         Args: { _prefix: string; _year?: number }
