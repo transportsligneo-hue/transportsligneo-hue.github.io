@@ -606,11 +606,13 @@ export type Database = {
       }
       demandes_convoyage: {
         Row: {
+          amount_paid_cents: number | null
           arrivee: string
           carburant: string | null
           created_at: string
           date_souhaitee: string | null
           depart: string
+          distance_km: number | null
           email: string
           heure_souhaitee: string | null
           id: string
@@ -620,17 +622,25 @@ export type Database = {
           modele: string | null
           nom: string
           options: string | null
+          paid_at: string | null
+          payment_status: string
           prenom: string
+          prix_estime: number | null
           statut: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           telephone: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          amount_paid_cents?: number | null
           arrivee: string
           carburant?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart: string
+          distance_km?: number | null
           email: string
           heure_souhaitee?: string | null
           id?: string
@@ -640,17 +650,25 @@ export type Database = {
           modele?: string | null
           nom: string
           options?: string | null
+          paid_at?: string | null
+          payment_status?: string
           prenom: string
+          prix_estime?: number | null
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           telephone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          amount_paid_cents?: number | null
           arrivee?: string
           carburant?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart?: string
+          distance_km?: number | null
           email?: string
           heure_souhaitee?: string | null
           id?: string
@@ -660,10 +678,16 @@ export type Database = {
           modele?: string | null
           nom?: string
           options?: string | null
+          paid_at?: string | null
+          payment_status?: string
           prenom?: string
+          prix_estime?: number | null
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           telephone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
