@@ -81,8 +81,14 @@ export default function DevisGenerator() {
   const [societe, setSociete] = useState("");
   const [comment, setComment] = useState("");
 
+  // --- compte client ---
+  const [password, setPassword] = useState("");
+  const [cguAccepted, setCguAccepted] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
+  const [accountError, setAccountError] = useState("");
+
   // --- ui ---
-  const [step, setStep] = useState(0); // 0 = bar, 1 = véhicule, 2 = coordonnées, 3 = récap
+  const [step, setStep] = useState(0); // 0 = bar, 1 = trajet, 2 = véhicule, 3 = coordonnées+compte, 4 = récap
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [savedDevis, setSavedDevis] = useState<DevisData | null>(null);
