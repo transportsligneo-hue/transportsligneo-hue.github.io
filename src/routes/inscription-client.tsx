@@ -42,6 +42,17 @@ function InscriptionClient() {
 
     setLoading(true);
     try {
+      const token = await getRecaptchaToken("signup_client");
+      if (token) {
+        try {
+          const r = await verifyRecaptcha({ data: { token, action: "signup_client", minScore: 0.3 } });
+          if (!r.ok && !r.skipped) {
+            setError("Vérification de sécurité échouée. Réessayez.");
+            setLoading(false);
+            return;
+          }
+        } catch { /* skip on network error */ }
+      }
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
