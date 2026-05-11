@@ -1,83 +1,109 @@
-# Refonte Dashboard Admin — SaaS Premium
+# Stabilisation Transports Ligneo — Plan d'exécution
 
-Refonte complète de la partie admin sans casser le backend ni les flux existants. Découpage en 5 lots pour livrer progressivement et permettre de valider visuellement entre chaque étape.
+> Règle absolue : **on corrige les fonctionnels avant tout redesign**.
+> Les refontes visuelles (devis/factures/mission PDF, emails) viennent
+> APRÈS que les bugs critiques aient été reproduits, corrigés et vérifiés.
 
-## Principes directeurs
+## Lot A — Bugs critiques fonctionnels (PRIORITAIRE)
 
-- **Pleine page partout** : suppression des modales/overlays sur clients, convoyeurs, demandes, missions. Chaque clic ouvre une vraie route `/admin/<entité>/:id`.
-- **Design tokens admin** : nouveau thème clair, bleu électrique, glassmorphism subtil, scoped via `.admin-shell` pour ne pas impacter le reste du site (client / driver).
-- **Hiérarchie typographique forte** : titres XL, sous-titres, labels muted, valeurs gros/foncés, badges colorés pour les statuts.
-- **Connectivité** : chaque page détail relie client ↔ demandes ↔ devis ↔ missions ↔ convoyeur ↔ inspection ↔ paiements ↔ factures.
-- **Realtime** : abonnements Supabase sur les tables clés pour MAJ sans refresh.
-- **Aucune migration DB** nécessaire — uniquement frontend + lecture des données existantes.
+### A1. Inspection mobile convoyeur (driver)
+- Footer/CTA sticky toujours visible (bouton "Suivant" jamais coupé).
+- Capture selfie convoyeur : prise → preview → enregistrement Storage
+  (`mission-selfies`) → ligne `mission_selfies` → visible côté convoyeur
+  ET admin (`/admin/missions/$missionId`).
+- Photos état des lieux : flux Photo → Preview → Confirmer → Étape
+  suivante, sans perte, et upload réel dans `inspection-photos` +
+  insertion `inspection_photos`.
+- Vérification : poser 1 selfie + 1 photo par zone sur une mission test
+  et confirmer la présence dans la fiche admin.
 
-## Lot 1 — Fondation visuelle & layout admin
+### A2. Demande de devis end-to-end
+- Vérifier que le formulaire écrit bien dans `demandes_convoyage` ET
+  crée la ligne `devis` correspondante (selon le parcours actuel).
+- Le devis remonte : espace client (`/dashboard-client`), admin
+  (`/admin/devis`, `/admin/demandes`), email transactionnel envoyé,
+  PDF généré et téléchargeable, numéro `DEV-TLG-2026-XXX` cohérent.
+- Corriger les éventuels statuts bloqués (`envoye` jamais mis à jour).
 
-```text
-[ Topbar : recherche universelle | alertes | profil ]
-+----------+----------------------------------------+
-| Sidebar  |  Contenu pleine largeur (admin-shell)  |
-| fixe     |  - breadcrumb                          |
-| (icônes  |  - header sticky                       |
-|  + badges|  - sections                            |
-|  compteur|                                        |
-+----------+----------------------------------------+
-```
+### A3. Inscription — types de compte
+- Particulier / Professionnel-Partenaire / B2B-Flotte.
+- Sélecteur clair à l'inscription, écriture du `type_client` correct
+  dans `profiles` + rôle adéquat dans `user_roles`.
+- Redirection vers le bon dashboard après login :
+  - particulier → `/dashboard-client`
+  - pro/partenaire → `/dashboard-pro`
+  - b2b/flotte → `/dashboard-pro` (vue flotte) ou route dédiée.
 
-- Nouveau layout `_authenticated/admin.tsx` avec sidebar fixe + topbar premium.
-- Tokens CSS `.admin-shell` dans `src/styles.css` : fond gris/bleu clair, cartes blanches, bordures fines, ombres douces, bleu électrique `#2563eb`/`#3b82f6`, accents.
-- Composants partagés : `AdminPageHeader`, `AdminBreadcrumb`, `AdminStatCard`, `AdminBadge`, `AdminTable` (sticky header, tri, filtres, recherche, pagination).
-- Sidebar : Dashboard, Demandes, Estimations, Devis, Missions, Convoyeurs, Clients, Factures, Paiements, Inspections, Notifications, Support, Paramètres.
+### A4. Sécurité / sessions
+- Audit rapide : "vérification sécurité échouée", déconnexions
+  intempestives, redirection après refresh.
+- Hardening du `_authenticated` gate + `beforeLoad`.
 
-## Lot 2 — Dashboard home (tour de contrôle)
+## Lot B — Numérotation officielle centralisée
 
-- KPI cards : nouvelles demandes, estimations, devis, missions actives, convoyeurs dispo, CA HT/TVA/TTC, taux conversion, alertes.
-- Widgets : missions en cours (live), alertes critiques (selfie/signatures/photos manquants, paiement échoué), dernières demandes, top convoyeurs.
-- Graphiques simples (CA 30j, conversion).
-- Realtime : `missions`, `devis`, `admin_notifications`.
+- Étendre `mission_sequences` à 3 préfixes : `DEV-TLG`, `FAC-TLG`,
+  `MIS-TLG` (déjà partiellement en place via `next_mission_number`).
+- Format strict : `XXX-TLG-YYYY-NNN` (NNN = padding 3 chiffres).
+- Triggers ou RPC `next_document_number(prefix)` appelée à la création
+  d'un devis, d'une facture, d'une mission/attribution.
+- Backfill conservatif : on **ne réécrit pas** les numéros déjà émis,
+  on aligne uniquement les nouveaux.
+- Vérification : impossible de créer deux devis avec le même numéro.
 
-## Lot 3 — Routes détail pleine page (suppression des modales)
+## Lot C — Documents PDF premium (refonte exacte des captures)
 
-Création / refonte de :
+Réutilisation du moteur PDF existant (`@/lib/devis-pdf`), refonte
+template-par-template avec **identité midnight blue + or + Playfair**
+et structure conforme aux captures fournies :
 
-- `/admin/clients/:id` — header + coordonnées + historique (demandes/devis/missions/incidents) + financier + notifications.
-- `/admin/convoyeurs/:id` — profil + documents + disponibilités + missions + notation + paiements.
-- `/admin/demandes/:id` — détails demande + client lié + devis générés + mission(s) + timeline.
-- `/admin/missions/:id` — refonte de la page existante au nouveau design, en gardant la traçabilité EDL/signatures déjà connectée au Lot 4 driver.
+- **C1. Devis PDF** (`DEV-TLG-…`) — header logo + coords + bloc
+  référence/dates/validité/mode paiement, tableau prestation, détails
+  inclus, bloc HT/TVA/TTC, cachet, signature, mentions légales.
+- **C2. Facture particulier** (`FAC-TLG-…`) — bandeau "FACTURE
+  ACQUITTÉE" si payée, sinon statut + date d'échéance.
+- **C3. Facture B2B / Flottes / Partenaires** — bloc IBAN/BIC,
+  échéance 30j fin de mois, conditions de paiement L441-10.
+- **C4. Fiche de mission convoyeur** (`MIS-TLG-…`) — infos mission,
+  rappel important, lieux départ/arrivée, instructions, documents,
+  urgences, blocs signatures départ/arrivée.
 
-Suppression / remplacement des `Dialog`/overlays actuels par `<Link>` vers ces routes.
+Chaque PDF est téléchargeable depuis : estimateur, espace client,
+espace pro, admin, dashboard convoyeur, emails.
 
-## Lot 4 — Tableaux & listes premium
+## Lot D — Emails corporate
 
-- Refonte des listes : Demandes, Devis, Missions, Convoyeurs, Clients, Factures, Paiements, Inspections.
-- Colonnes claires, tri, filtres, recherche, pagination, sticky header, version mobile lisible (cards), export.
-- Badges statuts cohérents (vert/orange/rouge/bleu).
+Refonte des templates React Email (`src/lib/email-templates/`) avec
+header bleu nuit + or, logo, CTA premium, références (`DEV-TLG`,
+`FAC-TLG`, `MIS-TLG`), lisibilité mobile :
 
-## Lot 5 — Notifications, realtime & alertes auto
+- Confirmation devis
+- Facture émise
+- Mission attribuée / acceptée / terminée
+- Inscription / validation compte convoyeur
+- Notifications client (état de la mission)
 
-- Centre de notifications admin (déjà partiellement présent) refondu : filtres, mark all read, deep links.
-- Alertes automatiques calculées côté front à partir des données :
-  - selfie convoyeur manquant
-  - signatures départ/arrivée manquantes
-  - paiement échoué
-  - inspection incomplète (photos manquantes)
-- Realtime branché sur `admin_notifications`, `missions`, `mission_documents`, `inspection_photos`.
+## Lot E — Dashboards dédiés par type de compte
 
-## Détails techniques
+- Particulier : suivi missions, devis, factures, documents.
+- Pro / Partenaire : devis, missions, facturation, équipe.
+- B2B / Flotte : demandes ponctuelles + leads flotte, factures B2B.
+- Admin : déjà fait (lots 1-4 précédents).
 
-- Stack inchangée : TanStack Router file-based, TanStack Query, Tailwind, shadcn.
-- Tout est scopé sous `.admin-shell` pour ne pas impacter `driver-shell` ni le site public.
-- Pas de framer-motion (mémoire projet) — animations CSS/Tailwind uniquement.
-- Pas de migration : on lit `profiles`, `convoyeurs`, `missions`, `devis`, `b2b_transport_requests`, `mission_documents`, `inspection_photos`, `admin_notifications`, `factures`, etc. déjà existants.
-- Realtime : `ALTER PUBLICATION supabase_realtime` déjà actif pour `admin_notifications`, à étendre si besoin sur `missions` / `mission_documents` (migration ciblée si non actif).
-- Sécurité : RLS existant inchangé, accès admin via `has_role(auth.uid(), 'admin')`.
+## Ordre d'exécution proposé
 
-## Ordre de livraison proposé
+1. **A1** (driver mobile / inspection / selfie / photos)
+2. **A2** (devis end-to-end)
+3. **A3** (types de compte)
+4. **A4** (sécurité / sessions)
+5. **B**  (numérotation centralisée)
+6. **C1 → C4** (PDF premium)
+7. **D**  (emails)
+8. **E**  (dashboards par type)
 
-1. Lot 1 — Fondation (layout + tokens + composants partagés)
-2. Lot 3 — Routes détail pleine page (priorité car c'est le point bloquant UX cité)
-3. Lot 2 — Dashboard home
-4. Lot 4 — Tableaux premium
-5. Lot 5 — Notifications & realtime
+## Note importante
 
-Dis-moi si tu valides ce découpage, ou si tu veux qu'on commence par un autre lot (par ex. Lot 3 en premier pour tuer les pop-ups tout de suite).
+Je ne peux pas faire le tout en une réponse sans risquer de casser le
+site. Chaque lot est livré → testé → validé avant le suivant. Le
+redesign des tables admin (Lot 4 précédent) est mis en pause sur les
+écrans restants (devis, missions, paiements, etc.) tant que A et B ne
+sont pas verts.
