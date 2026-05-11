@@ -72,21 +72,45 @@ interface StoredState {
 
 const STORAGE_KEY = (attrId: string) => `edl-premium:${attrId}`;
 
+/** Attend que le navigateur revienne en ligne, jusqu'à `timeoutMs`. */
+async function waitForOnline(timeoutMs = 30000): Promise<void> {
+  if (typeof navigator === "undefined" || navigator.onLine !== false) return;
+  await new Promise<void>((resolve) => {
+    const handler = () => { window.removeEventListener("online", handler); resolve(); };
+    window.addEventListener("online", handler);
+    setTimeout(() => { window.removeEventListener("online", handler); resolve(); }, timeoutMs);
+  });
+}
+
+/** Upload résilient : backoff exponentiel + attente reconnexion réseau. */
 async function uploadWithRetry(
-  bucket: string, path: string, file: File, attempts = 3
+  bucket: string, path: string, file: File, attempts = 6
 ): Promise<void> {
   let lastErr: unknown = null;
   for (let i = 0; i < attempts; i++) {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      await waitForOnline();
+    }
     try {
       const { error } = await supabase.storage.from(bucket)
         .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
       if (!error) return;
       lastErr = error;
     } catch (e) { lastErr = e; }
-    await new Promise(r => setTimeout(r, 500 * (i + 1)));
+    // Backoff exponentiel borné : 500ms, 1s, 2s, 4s, 8s, 8s
+    const delay = Math.min(8000, 500 * Math.pow(2, i));
+    await new Promise(r => setTimeout(r, delay));
   }
   throw lastErr ?? new Error("Upload échoué");
 }
+
+/** Map short signature kind (driver_start, …) → slot doc canonique pour MissionTraceability/admin. */
+const SIGNATURE_DOC_KEY: Record<string, string> = {
+  driver_start: "pv_signature_depart_convoyeur",
+  client_start: "pv_signature_depart_client",
+  driver_end: "pv_signature_arrivee_convoyeur",
+  client_end: "pv_signature_arrivee_client",
+};
 
 export function EdlPremiumFlow({
   attributionId, userId, driverName, defaultClientName,
