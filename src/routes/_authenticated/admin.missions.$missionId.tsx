@@ -261,6 +261,25 @@ function AdminMissionDetail() {
       inspWithPhotos.push({ ...(insp as Omit<InspectionRow, "photos">), photos: enriched });
     }
     setInspections(inspWithPhotos);
+
+    // Selfies convoyeur (bucket privé → signed URLs)
+    const { data: selfiesRaw } = await supabase
+      .from("mission_selfies" as never)
+      .select("id, storage_path, taken_at, latitude, longitude")
+      .eq("attribution_id" as never, missionId as never)
+      .order("taken_at" as never, { ascending: false } as never);
+    if (selfiesRaw) {
+      const enriched = await Promise.all(
+        (selfiesRaw as unknown as { id: string; storage_path: string; taken_at: string; latitude: number | null; longitude: number | null }[]).map(async (s) => {
+          const { data: signed } = await supabase.storage
+            .from("mission-selfies")
+            .createSignedUrl(s.storage_path, 3600);
+          return { id: s.id, url: signed?.signedUrl ?? "", taken_at: s.taken_at, latitude: s.latitude, longitude: s.longitude };
+        })
+      );
+      setSelfies(enriched);
+    }
+
     setLoading(false);
   }, [missionId]);
 
