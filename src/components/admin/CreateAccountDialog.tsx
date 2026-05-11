@@ -138,7 +138,7 @@ export function CreateAccountDialog({ onCreated }: Props) {
             <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
           </Field>
           <Field label="Mot de passe * (min. 8)">
-            <Input type="text" value={form.password} onChange={(e) => set("password", e.target.value)} />
+            <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => set("password", e.target.value)} />
           </Field>
           <Field label="Prénom">
             <Input value={form.prenom} onChange={(e) => set("prenom", e.target.value)} />

@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, CheckCircle } from "lucide-react";
+import { getRecaptchaToken } from "@/lib/recaptcha";
+import { verifyRecaptcha } from "@/server/recaptcha.functions";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
@@ -40,6 +42,17 @@ function InscriptionClient() {
 
     setLoading(true);
     try {
+      const token = await getRecaptchaToken("signup_client");
+      if (token) {
+        try {
+          const r = await verifyRecaptcha({ data: { token, action: "signup_client", minScore: 0.3 } });
+          if (!r.ok && !r.skipped) {
+            setError("Vérification de sécurité échouée. Réessayez.");
+            setLoading(false);
+            return;
+          }
+        } catch { /* skip on network error */ }
+      }
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
