@@ -123,6 +123,101 @@ function AdminAttributions() {
   const [photosView, setPhotosView] = useState<{ id: string; type: string; photos: InspectionPhoto[] } | null>(null);
   const [reportId, setReportId] = useState<string | null>(null);
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
+  const [invoicingId, setInvoicingId] = useState<string | null>(null);
+
+  const handleEmitFacture = async (a: Attribution) => {
+    setInvoicingId(a.id);
+    try {
+      // 1. Refuse si une facture existe déjà
+      const { data: existing } = await supabase
+        .from("factures")
+        .select("id, numero")
+        .eq("attribution_id", a.id)
+        .maybeSingle();
+      if (existing) {
+        toast.info("Facture déjà émise", { description: existing.numero });
+        return;
+      }
+      // 2. Charge trajet
+      const { data: trajet, error: tErr } = await supabase
+        .from("trajets")
+        .select("id, depart, arrivee, date_trajet, client_email, client_nom, client_telephone, marque, modele, immatriculation, prix")
+        .eq("id", a.trajet_id)
+        .maybeSingle();
+      if (tErr || !trajet) throw new Error("Trajet introuvable");
+      if (!trajet.client_email) throw new Error("Email client manquant sur le trajet");
+
+      const prixHT = Number(trajet.prix ?? 0) > 0 ? Number(trajet.prix) / 1.2 : 0;
+      const prixTTC = Number(trajet.prix ?? 0);
+      const prixTVA = +(prixTTC - prixHT).toFixed(2);
+      const isB2B = false; // par défaut particulier (B2B = via factures B2B flow)
+
+      // 3. Insertion — trigger remplit numero automatiquement
+      const today = new Date();
+      const echeance = new Date(today.getTime() + 30 * 86400000);
+      const [prenom, ...rest] = (trajet.client_nom || "").trim().split(/\s+/);
+      const nomFamille = rest.join(" ") || prenom || "Client";
+
+      const { data: inserted, error: iErr } = await supabase
+        .from("factures")
+        .insert({
+          numero: "AUTO", // remplacé par le trigger
+          type_facture: isB2B ? "b2b" : "particulier",
+          attribution_id: a.id,
+          mission_id: trajet.id,
+          client_email: trajet.client_email,
+          client_nom: nomFamille,
+          client_prenom: rest.length ? prenom : null,
+          date_facture: today.toISOString().slice(0, 10),
+          date_mission: trajet.date_trajet,
+          date_echeance: echeance.toISOString().slice(0, 10),
+          mode_paiement: "Virement bancaire",
+          designation: "Prestation de convoyage automobile",
+          depart: trajet.depart,
+          arrivee: trajet.arrivee,
+          prix_ht: +prixHT.toFixed(2),
+          prix_tva: prixTVA,
+          prix_ttc: prixTTC,
+          tva_taux: 20,
+          statut: "emise",
+        })
+        .select("*")
+        .single();
+      if (iErr || !inserted) throw new Error(iErr?.message || "Insertion impossible");
+
+      // 4. PDF + téléchargement
+      const blob = await generateFacturePdf({
+        numero: inserted.numero,
+        type_facture: inserted.type_facture as "particulier" | "b2b",
+        date_facture: inserted.date_facture,
+        date_mission: inserted.date_mission,
+        date_echeance: inserted.date_echeance,
+        mode_paiement: inserted.mode_paiement,
+        conditions_paiement: inserted.conditions_paiement,
+        client_nom: inserted.client_nom,
+        client_prenom: inserted.client_prenom,
+        client_societe: inserted.client_societe,
+        client_email: inserted.client_email,
+        client_adresse: inserted.client_adresse,
+        client_siret: inserted.client_siret,
+        client_tva: inserted.client_tva,
+        designation: inserted.designation,
+        depart: inserted.depart,
+        arrivee: inserted.arrivee,
+        distance_km: inserted.distance_km,
+        prix_ht: Number(inserted.prix_ht),
+        tva_taux: Number(inserted.tva_taux),
+        prix_tva: Number(inserted.prix_tva),
+        prix_ttc: Number(inserted.prix_ttc),
+      });
+      downloadFacturePdf(blob, inserted.numero);
+      toast.success(`Facture ${inserted.numero} émise`);
+    } catch (e) {
+      toast.error("Impossible d'émettre la facture", { description: (e as Error).message });
+    } finally {
+      setInvoicingId(null);
+    }
+  };
 
   const fetchAttributions = useCallback(async () => {
     const { data } = await supabase
