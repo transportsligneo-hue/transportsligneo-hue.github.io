@@ -164,14 +164,15 @@ export function InspectionVisuelle({
     setActiveZone(null);
   };
 
-  const handleZonePhotoSaved = (storagePath: string) => {
+  const handleZonePhotoSaved = async (storagePath: string) => {
     if (!cameraZone) return;
+    const url = await signUrl(storagePath);
     setZones(prev => ({
       ...prev,
       [cameraZone.id]: {
         state: prev[cameraZone.id]?.state ?? "ok",
         comment: prev[cameraZone.id]?.comment,
-        photoUrl: storagePath,
+        photoUrl: url,
       },
     }));
   };
@@ -196,7 +197,8 @@ export function InspectionVisuelle({
         file_size_bytes: file.size,
       });
       if (dbErr) throw dbErr;
-      setExtraPhotos(prev => [...prev, path]);
+      const signed = await signUrl(path);
+      setExtraPhotos(prev => [...prev, signed]);
       toast.success("Photo complémentaire ajoutée");
     } catch (e) {
       console.error("[InspectionVisuelle] extra upload error:", e);
