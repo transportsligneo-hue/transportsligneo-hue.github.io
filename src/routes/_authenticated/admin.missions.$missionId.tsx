@@ -170,6 +170,7 @@ function AdminMissionDetail() {
   const [trajet, setTrajet] = useState<TrajetFull | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurFull | null>(null);
   const [inspections, setInspections] = useState<InspectionRow[]>([]);
+  const [selfies, setSelfies] = useState<{ id: string; url: string; taken_at: string; latitude: number | null; longitude: number | null }[]>([]);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [documents, setDocuments] = useState<DocRow[]>([]);
   const [history, setHistory] = useState<EtapeHistoryRow[]>([]);
@@ -260,6 +261,25 @@ function AdminMissionDetail() {
       inspWithPhotos.push({ ...(insp as Omit<InspectionRow, "photos">), photos: enriched });
     }
     setInspections(inspWithPhotos);
+
+    // Selfies convoyeur (bucket privé → signed URLs)
+    const { data: selfiesRaw } = await supabase
+      .from("mission_selfies" as never)
+      .select("id, storage_path, taken_at, latitude, longitude")
+      .eq("attribution_id" as never, missionId as never)
+      .order("taken_at" as never, { ascending: false } as never);
+    if (selfiesRaw) {
+      const enriched = await Promise.all(
+        (selfiesRaw as unknown as { id: string; storage_path: string; taken_at: string; latitude: number | null; longitude: number | null }[]).map(async (s) => {
+          const { data: signed } = await supabase.storage
+            .from("mission-selfies")
+            .createSignedUrl(s.storage_path, 3600);
+          return { id: s.id, url: signed?.signedUrl ?? "", taken_at: s.taken_at, latitude: s.latitude, longitude: s.longitude };
+        })
+      );
+      setSelfies(enriched);
+    }
+
     setLoading(false);
   }, [missionId]);
 
@@ -559,6 +579,40 @@ function AdminMissionDetail() {
                 )}
               </div>
             </div>
+          </Card>
+
+          {/* Selfie identité convoyeur */}
+          <Card>
+            <div className="flex items-center gap-2 mb-3">
+              <Camera size={15} className="text-pro-accent" />
+              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+                Selfie convoyeur ({selfies.length})
+              </h3>
+            </div>
+            {selfies.length === 0 ? (
+              <p className="text-pro-muted text-sm">Pas encore de selfie envoyé par le convoyeur.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {selfies.map((s) => (
+                  <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" className="block group">
+                    <img
+                      src={s.url}
+                      alt="Selfie convoyeur"
+                      loading="lazy"
+                      className="w-full aspect-[3/4] object-cover rounded-md border border-pro-border group-hover:border-pro-accent transition-colors"
+                    />
+                    <p className="text-pro-text-soft text-[10px] mt-1 truncate">
+                      {new Date(s.taken_at).toLocaleString("fr-FR")}
+                    </p>
+                    {s.latitude !== null && s.longitude !== null && (
+                      <p className="text-pro-muted text-[10px] truncate">
+                        {s.latitude.toFixed(4)}, {s.longitude.toFixed(4)}
+                      </p>
+                    )}
+                  </a>
+                ))}
+              </div>
+            )}
           </Card>
 
           {/* Photos état des lieux */}

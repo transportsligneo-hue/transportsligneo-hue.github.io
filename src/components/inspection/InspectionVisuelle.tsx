@@ -106,7 +106,15 @@ export function InspectionVisuelle({
     })();
   }, [attributionId]);
 
-  // --- Hydrate from existing photos ---
+  // --- Hydrate from existing photos (signed URLs car bucket privé) ---
+  const signUrl = useCallback(async (path: string) => {
+    if (/^https?:\/\//i.test(path)) return path;
+    const { data } = await supabase.storage
+      .from("inspection-photos")
+      .createSignedUrl(path, 3600);
+    return data?.signedUrl ?? path;
+  }, []);
+
   useEffect(() => {
     if (!inspectionId) return;
     (async () => {
@@ -120,9 +128,10 @@ export function InspectionVisuelle({
       for (const p of data) {
         if (p.vue_type.startsWith("zone_")) {
           const zoneId = p.vue_type.replace("zone_", "");
-          next[zoneId] = { state: "ok", photoUrl: p.url_photo };
+          const url = await signUrl(p.url_photo);
+          next[zoneId] = { state: "ok", photoUrl: url };
         } else if (p.vue_type.startsWith("extra_")) {
-          extras.push(p.url_photo);
+          extras.push(await signUrl(p.url_photo));
         }
       }
       setZones(prev => ({ ...next, ...prev }));
@@ -155,14 +164,15 @@ export function InspectionVisuelle({
     setActiveZone(null);
   };
 
-  const handleZonePhotoSaved = (storagePath: string) => {
+  const handleZonePhotoSaved = async (storagePath: string) => {
     if (!cameraZone) return;
+    const url = await signUrl(storagePath);
     setZones(prev => ({
       ...prev,
       [cameraZone.id]: {
         state: prev[cameraZone.id]?.state ?? "ok",
         comment: prev[cameraZone.id]?.comment,
-        photoUrl: storagePath,
+        photoUrl: url,
       },
     }));
   };
@@ -187,7 +197,8 @@ export function InspectionVisuelle({
         file_size_bytes: file.size,
       });
       if (dbErr) throw dbErr;
-      setExtraPhotos(prev => [...prev, path]);
+      const signed = await signUrl(path);
+      setExtraPhotos(prev => [...prev, signed]);
       toast.success("Photo complémentaire ajoutée");
     } catch (e) {
       console.error("[InspectionVisuelle] extra upload error:", e);
@@ -341,9 +352,16 @@ export function InspectionVisuelle({
             {extraPhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {extraPhotos.map((p, i) => (
-                  <div key={i} className="aspect-square bg-pro-bg-soft rounded-lg flex items-center justify-center text-pro-muted text-xs">
-                    Photo {i + 1}
-                  </div>
+                  <a
+                    key={i}
+                    href={p}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block aspect-square rounded-lg overflow-hidden border border-pro-border bg-pro-bg-soft"
+                  >
+                    <img src={p} alt={`Photo complémentaire ${i + 1}`} loading="lazy"
+                      className="w-full h-full object-cover" />
+                  </a>
                 ))}
               </div>
             )}
