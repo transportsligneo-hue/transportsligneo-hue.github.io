@@ -49,13 +49,6 @@ const statutLabels: Record<string, string> = {
   refuse: "Refusé",
   suspendu: "Suspendu",
 };
-const dispoLabels: Record<string, string> = {
-  temps_plein: "Temps plein",
-  temps_partiel: "Temps partiel",
-  weekend: "Weekends",
-  ponctuel: "Ponctuel",
-};
-
 function AdminConvoyeurs() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
