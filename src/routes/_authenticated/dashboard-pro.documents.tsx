@@ -83,6 +83,7 @@ function ProDocuments() {
                   <th className="text-left px-5 py-3 font-medium">Statut</th>
                   <th className="text-right px-5 py-3 font-medium">Montant</th>
                   <th className="text-right px-5 py-3 font-medium">PDF</th>
+                  <th className="text-right px-5 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
