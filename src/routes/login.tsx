@@ -105,19 +105,42 @@ function LoginPage() {
     submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
-      // reCAPTCHA v3 (best-effort, ne bloque pas si non configuré)
-      const token = await getRecaptchaToken("login");
-      if (token) {
+      // reCAPTCHA v3 — best-effort, avec retry transparent.
+      // Un token expire ~2 min ; en cas d'échec on régénère un token frais
+      // une seconde fois. Les erreurs transitoires (timeout-or-duplicate,
+      // réseau) ne doivent JAMAIS bloquer le login : Supabase a déjà sa propre
+      // protection anti brute-force côté serveur.
+      const TRANSIENT = new Set([
+        "timeout-or-duplicate",
+        "missing-input-response",
+        "invalid-input-response",
+        "network",
+      ]);
+      const tryVerify = async () => {
+        const token = await getRecaptchaToken("login");
+        if (!token) return { proceed: true } as const;
         try {
           const r = await verifyRecaptcha({ data: { token, action: "login", minScore: 0.3 } });
-          if (!r.ok && !r.skipped) {
-            justLoggedInRef.current = false;
-            setSubmitting(false);
-            setError("Vérification de sécurité échouée. Réessayez.");
-            return;
-          }
-        } catch { /* skip on network error */ }
+          if (r.ok || r.skipped) return { proceed: true } as const;
+          const transient = (r.errors ?? []).some((e: string) => TRANSIENT.has(e));
+          return { proceed: false, transient } as const;
+        } catch {
+          return { proceed: false, transient: true } as const;
+        }
+      };
+      let verify = await tryVerify();
+      if (!verify.proceed && verify.transient) {
+        // Token expiré / réseau — on retente avec un token frais
+        await new Promise((r) => setTimeout(r, 400));
+        verify = await tryVerify();
       }
+      if (!verify.proceed && !verify.transient) {
+        justLoggedInRef.current = false;
+        setSubmitting(false);
+        setError("Vérification de sécurité refusée. Si le problème persiste, contactez-nous.");
+        return;
+      }
+      // Erreur transitoire persistante → on poursuit (best-effort).
       await login(email.trim(), password);
       // Le useEffect prendra le relais une fois l'auth hydratée
     } catch (err: unknown) {
