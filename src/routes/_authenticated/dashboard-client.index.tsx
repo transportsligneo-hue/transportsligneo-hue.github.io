@@ -2,12 +2,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
 });
+
+interface DevisRow {
+  id: string;
+  numero: string;
+  depart: string;
+  arrivee: string;
+  distance_km: number | null;
+  prix_estime: number;
+  statut: string;
+  created_at: string;
+}
 
 interface MissionRow {
   id: string;
@@ -30,6 +41,7 @@ function ClientDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0 });
   const [lastMission, setLastMission] = useState<MissionRow | null>(null);
+  const [devisList, setDevisList] = useState<DevisRow[]>([]);
   const [prenom, setPrenom] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -37,23 +49,33 @@ function ClientDashboard() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      // Profil pour le prénom
+      // Profil pour le prénom + email
       const { data: prof } = await supabase
         .from("profiles")
-        .select("prenom")
+        .select("prenom, email")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!cancelled && prof?.prenom) setPrenom(prof.prenom);
+      const clientEmail = prof?.email ?? user.email ?? "";
 
       // Missions
-      const { data } = await supabase
+      const { data: missionData } = await supabase
         .from("missions")
         .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
+
+      // Devis liés par email (RLS autorise via politique "Clients can read own devis")
+      const { data: devisData } = await supabase
+        .from("devis")
+        .select("id, numero, depart, arrivee, distance_km, prix_estime, statut, created_at")
+        .eq("email", clientEmail)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
       if (cancelled) return;
 
-      const missions = (data ?? []) as MissionRow[];
+      const missions = (missionData ?? []) as MissionRow[];
       const today = new Date().toISOString().slice(0, 10);
       setStats({
         enCours: missions.filter(m => m.statut === "en_cours").length,
@@ -61,6 +83,7 @@ function ClientDashboard() {
         aVenir: missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length,
       });
       setLastMission(missions[0] ?? null);
+      setDevisList((devisData ?? []) as DevisRow[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -143,6 +166,35 @@ function ClientDashboard() {
           </div>
         )}
       </div>
+
+      {/* Mes devis */}
+      {devisList.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-heading text-lg text-cream tracking-wider">Mes devis</h2>
+          </div>
+          <div className="space-y-3">
+            {devisList.map(d => (
+              <div key={d.id} className="card-premium p-5 rounded flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <FileText size={12} className="text-primary" /> {d.numero}
+                  </p>
+                  <p className="text-cream font-heading text-sm mt-1 truncate">{d.depart} → {d.arrivee}</p>
+                  <p className="text-cream/50 text-xs mt-1">
+                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                    {d.distance_km ? ` · ${d.distance_km} km` : ""}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-heading text-primary text-lg">{Number(d.prix_estime).toFixed(0)} €</p>
+                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{d.statut}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
