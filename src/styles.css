@@ -400,6 +400,117 @@
   }
 
   /* ============================================================
+     === DRIVER STRIPE/BREX CARDS — sobre, KPI, tabular numerics
+     Refonte carte par carte : pilules mono-tone, chiffres énormes,
+     hiérarchie typographique premium, un seul accent or par carte.
+     ============================================================ */
+  .driver-shell { font-feature-settings: "tnum" 1, "cv11" 1; }
+
+  /* KPI tile (Brex-style) */
+  .brex-tile {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border: 1px solid var(--driver-border);
+    border-radius: 16px;
+    padding: 16px 18px;
+    overflow: hidden;
+    transition: border-color 160ms ease, transform 160ms ease;
+  }
+  .brex-tile:hover { border-color: rgba(212,175,55,0.32); }
+  .brex-tile::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(120% 60% at 100% 0%, rgba(212,175,55,0.06), transparent 60%);
+    pointer-events: none;
+  }
+  .brex-tile-label {
+    color: var(--driver-muted);
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .brex-tile-value {
+    color: var(--driver-text);
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.1;
+    margin-top: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .brex-tile-delta {
+    margin-top: 6px; font-size: 11px; color: var(--driver-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* Status pills (Stripe-style — subtle dot + thin border) */
+  .brex-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 9999px;
+    font-size: 11px; font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    color: var(--driver-text-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .brex-pill-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: currentColor; flex-shrink: 0;
+  }
+  .brex-pill--gold   { color: #e7c76a; border-color: rgba(212,175,55,0.30); background: rgba(212,175,55,0.08); }
+  .brex-pill--blue   { color: #93c5fd; border-color: rgba(59,130,246,0.30);  background: rgba(59,130,246,0.10); }
+  .brex-pill--amber  { color: #f5c46b; border-color: rgba(245,158,11,0.30);  background: rgba(245,158,11,0.08); }
+  .brex-pill--green  { color: #7ee2b8; border-color: rgba(16,185,129,0.30);  background: rgba(16,185,129,0.08); }
+  .brex-pill--red    { color: #ff9a9a; border-color: rgba(239,68,68,0.30);   background: rgba(239,68,68,0.08); }
+  .brex-pill--muted  { color: var(--driver-muted); }
+  .brex-pill--live .brex-pill-dot { animation: brex-pulse 1.6s ease-in-out infinite; box-shadow: 0 0 0 0 currentColor; }
+  @keyframes brex-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(126,226,184,0.55); }
+    50%      { box-shadow: 0 0 0 5px rgba(126,226,184,0); }
+  }
+
+  /* Mission card refined */
+  .brex-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border: 1px solid var(--driver-border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+  .brex-card:hover { border-color: rgba(212,175,55,0.32); box-shadow: 0 16px 40px -24px rgba(0,0,0,0.6); }
+  .brex-card--active {
+    border-color: rgba(212,175,55,0.45);
+    box-shadow: 0 0 0 1px rgba(212,175,55,0.18), 0 16px 40px -22px rgba(212,175,55,0.20);
+  }
+  .brex-divider { border-top: 1px solid rgba(255,255,255,0.06); }
+
+  /* Quick-action button (Stripe ghost-style) */
+  .brex-action {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 12px; border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--driver-text-soft);
+    font-size: 12px; font-weight: 500;
+    transition: all 140ms ease;
+  }
+  .brex-action:hover { background: rgba(255,255,255,0.06); border-color: rgba(212,175,55,0.30); color: var(--driver-text); }
+  .brex-action:active { transform: scale(0.97); }
+  .brex-action--primary {
+    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
+    border-color: transparent; color: #0b1026; font-weight: 600;
+    box-shadow: 0 8px 22px -10px rgba(212,175,55,0.5);
+  }
+  .brex-action--primary:hover { filter: brightness(1.06); color: #0b1026; }
+
+  .brex-amount {
+    color: #e7c76a; font-weight: 600; font-size: 15px;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+  .brex-label-xs {
+    color: var(--driver-muted);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.10em;
+  }
+
+  /* ============================================================
      === CLIENT PREMIUM SHELL — luminous glassmorphism + electric blue
      L'espace client est plus clair, plus lumineux, accent bleu
      électrique (vs gold). On override .section-bg, .card-premium,
