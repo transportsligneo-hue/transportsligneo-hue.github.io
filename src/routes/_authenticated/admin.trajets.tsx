@@ -119,6 +119,47 @@ function AdminTrajets() {
   const [offres, setOffres] = useState<Offre[]>([]);
   const [prixSuggereInput, setPrixSuggereInput] = useState<string>("");
   const [savingPub, setSavingPub] = useState(false);
+  const [linkedDevis, setLinkedDevis] = useState<DevisLink | null>(null);
+  const [pctInput, setPctInput] = useState<string>("65");
+  const [savingCommission, setSavingCommission] = useState(false);
+
+  // Charge le devis lié quand selected change
+  useEffect(() => {
+    if (!selected?.devis_id) {
+      setLinkedDevis(null);
+      return;
+    }
+    supabase
+      .from("devis")
+      .select("id, numero, prix_estime, paid_at")
+      .eq("id", selected.devis_id)
+      .maybeSingle()
+      .then(({ data }) => setLinkedDevis(data ?? null));
+    setPctInput((selected.commission_convoyeur_pct ?? 65).toString());
+  }, [selected?.devis_id, selected?.commission_convoyeur_pct]);
+
+  const saveCommission = async () => {
+    if (!selected) return;
+    const pct = parseFloat(pctInput);
+    if (isNaN(pct) || pct < 0 || pct > 100) {
+      alert("Pourcentage invalide (0-100)");
+      return;
+    }
+    setSavingCommission(true);
+    await supabase
+      .from("trajets")
+      .update({ commission_convoyeur_pct: pct } as never)
+      .eq("id", selected.id);
+    // Le trigger DB recalcule prix_convoyeur et prix_societe automatiquement
+    const { data: refreshed } = await supabase
+      .from("trajets")
+      .select("*")
+      .eq("id", selected.id)
+      .maybeSingle();
+    setSavingCommission(false);
+    if (refreshed) setSelected({ ...selected, ...(refreshed as Partial<Trajet>) });
+    fetchTrajets();
+  };
 
   const fetchOffres = useCallback(async (trajetId: string) => {
     const { data: offresData } = await supabase
