@@ -383,24 +383,24 @@ function AdminDemandes() {
                   <DrawerField
                     label="Prix HT"
                     value={
-                      typeof quote.priceHT === "number"
-                        ? `${quote.priceHT.toFixed(2)} €`
+                      typeof quote.priceHt === "number"
+                        ? `${quote.priceHt.toFixed(2)} €`
                         : "—"
                     }
                   />
                   <DrawerField
                     label="TVA"
                     value={
-                      typeof quote.priceTVA === "number"
-                        ? `${quote.priceTVA.toFixed(2)} €`
+                      typeof quote.priceTva === "number"
+                        ? `${quote.priceTva.toFixed(2)} €`
                         : "—"
                     }
                   />
                   <DrawerField
                     label="Prix TTC"
                     value={
-                      typeof quote.priceTTC === "number"
-                        ? `${quote.priceTTC.toFixed(2)} €`
+                      typeof quote.priceTtc === "number"
+                        ? `${quote.priceTtc.toFixed(2)} €`
                         : "—"
                     }
                   />
