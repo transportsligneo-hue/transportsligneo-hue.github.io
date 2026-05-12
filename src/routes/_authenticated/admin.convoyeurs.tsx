@@ -66,6 +66,13 @@ const statutLabels: Record<string, string> = {
   refuse: "Refusé",
   suspendu: "Suspendu",
 };
+interface DocRow {
+  id: string;
+  type_document: string;
+  nom_fichier: string;
+  statut_validation: string;
+}
+
 function AdminConvoyeurs() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
@@ -73,6 +80,28 @@ function AdminConvoyeurs() {
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [selected, setSelected] = useState<Convoyeur | null>(null);
+  const [docs, setDocs] = useState<DocRow[]>([]);
+  const [missionsCount, setMissionsCount] = useState(0);
+
+  const openConvoyeur = async (c: Convoyeur) => {
+    setSelected(c);
+    setDocs([]);
+    setMissionsCount(0);
+    const [docsRes, attrRes] = await Promise.all([
+      supabase
+        .from("documents_convoyeurs")
+        .select("id, type_document, nom_fichier, statut_validation" as never)
+        .eq("convoyeur_id", c.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("attributions")
+        .select("id", { count: "exact", head: true })
+        .eq("convoyeur_id", c.id),
+    ]);
+    setDocs((docsRes.data ?? []) as DocRow[]);
+    setMissionsCount(attrRes.count ?? 0);
+  };
 
   const fetchConvoyeurs = useCallback(async () => {
     let query = supabase.from("convoyeurs").select("*").order("created_at", { ascending: false });
