@@ -41,7 +41,7 @@ interface ClientRow {
 
 interface ClientHistory {
   devis: Array<{ id: string; numero: string; created_at: string; statut: string; prix_estime: number }>;
-  missions: Array<{ id: string; numero_mission: string | null; statut: string; created_at: string }>;
+  missions: Array<{ id: string; numero: string | null; statut: string; created_at: string }>;
   factures: Array<{ id: string; numero: string; prix_ttc: number; statut: string; date_facture: string }>;
 }
 
@@ -129,7 +129,7 @@ function AdminClients() {
         .limit(20),
       supabase
         .from("missions")
-        .select("id, numero_mission, statut, created_at")
+        .select("id, numero, statut, created_at")
         .eq("user_id", c.user_id)
         .order("created_at", { ascending: false })
         .limit(20),
