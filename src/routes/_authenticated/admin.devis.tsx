@@ -519,3 +519,39 @@ function DevisDrawer({
     </AdminDetailDrawer>
   );
 }
+
+function CarteGriseLinks({ recto, verso }: { recto: string | null; verso: string | null }) {
+  const [urls, setUrls] = useState<{ recto: string | null; verso: string | null }>({ recto: null, verso: null });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const next: { recto: string | null; verso: string | null } = { recto: null, verso: null };
+      if (recto) {
+        const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(recto, 600);
+        if (data?.signedUrl) next.recto = data.signedUrl;
+      }
+      if (verso) {
+        const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(verso, 600);
+        if (data?.signedUrl) next.verso = data.signedUrl;
+      }
+      if (!cancelled) setUrls(next);
+    })();
+    return () => { cancelled = true; };
+  }, [recto, verso]);
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {(["recto", "verso"] as const).map((k) => {
+        const url = urls[k];
+        const path = k === "recto" ? recto : verso;
+        if (!path) return <div key={k} className="rounded border border-white/10 bg-white/5 p-3 text-center text-[11px] text-white/40">{k} non fourni</div>;
+        return (
+          <a key={k} href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block rounded border border-white/10 overflow-hidden hover:border-blue-400/50 transition">
+            {url ? <img src={url} alt={`Carte grise ${k}`} className="w-full h-32 object-cover" /> : <div className="h-32 flex items-center justify-center text-white/30 text-xs">Chargement…</div>}
+            <p className="text-[10px] text-center text-white/60 py-1 capitalize">{k}</p>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
