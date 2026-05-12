@@ -110,12 +110,12 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
   return { success: true }
 }
 
-/** Resolve admin notification email: first active admin in user_roles, else fallback. */
+/** Resolve admin notification email: first active super admin/admin in user_roles, else fallback. */
 export async function getAdminNotificationEmail(): Promise<string> {
   const FALLBACK = 'contact@transportsligneo.fr'
   try {
     const { data: roles } = await supabaseAdmin
-      .from('user_roles').select('user_id').eq('role', 'admin').eq('actif', true).limit(1)
+      .from('user_roles').select('user_id, role').in('role', ['super_admin', 'admin']).eq('actif', true)
     const userId = roles?.[0]?.user_id
     if (!userId) return FALLBACK
     const { data: profile } = await supabaseAdmin
