@@ -182,7 +182,7 @@ function AdminDemandes() {
                   <th>Client</th>
                   <th className="hidden sm:table-cell">Trajet</th>
                   <th className="hidden md:table-cell">Date</th>
-                  <th className="hidden lg:table-cell">Prix estimé</th>
+                  <th>TTC</th>
                   <th>Statut</th>
                   <th className="text-right">Actions</th>
                 </tr>
@@ -196,10 +196,10 @@ function AdminDemandes() {
                         <span className="font-medium text-[color:var(--admin-text)]">
                           {d.prenom} {d.nom}
                         </span>
-                        <p className="text-[color:var(--admin-muted)] text-xs">
+                        <p className="text-[color:var(--admin-muted)] text-xs truncate max-w-[180px]">
                           {d.email}
                         </p>
-                        <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
+                        <p className="text-[color:var(--admin-muted)] text-xs sm:hidden truncate max-w-[180px]">
                           {d.depart} → {d.arrivee}
                         </p>
                       </td>
@@ -213,8 +213,10 @@ function AdminDemandes() {
                       <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
                         {new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
-                      <td className="hidden lg:table-cell">
-                        <PriceBlock quote={q} variant="compact" />
+                      <td>
+                        <span className="font-semibold text-[color:var(--admin-text)] tabular-nums whitespace-nowrap">
+                          {q?.ttc != null ? `${Number(q.ttc).toFixed(0)} €` : "—"}
+                        </span>
                       </td>
                       <td>
                         <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
@@ -244,6 +246,7 @@ function AdminDemandes() {
                   );
                 })}
               </tbody>
+
             </table>
           </div>
         )}
