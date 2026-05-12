@@ -27,12 +27,21 @@ export interface PricingModeBlockProps {
     prix_convoyeur_max?: number | null;
     marge_indicative_pct?: number | null;
   };
+  /** Si fourni (ex. devis accepté), le prix client TTC est verrouillé sur cette valeur. */
+  lockedClientPrice?: number | null;
+  /** Numéro du devis source pour affichage explicatif. */
+  lockedSourceLabel?: string | null;
   onSaved?: (next: PricingModeBlockProps["initial"]) => void;
 }
 
-export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBlockProps) {
+/** Bornes recommandées par défaut pour la rémunération convoyeur (en % du prix client TTC). */
+const RECO_MIN_PCT = 55;
+const RECO_MAX_PCT = 65;
+
+export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedSourceLabel, onSaved }: PricingModeBlockProps) {
+  const effectiveClient = lockedClientPrice ?? initial.prix_client_ttc ?? null;
   const [mode, setMode] = useState<"fixe" | "enchere">(initial.pricing_mode ?? "fixe");
-  const [prixClient, setPrixClient] = useState<string>(initial.prix_client_ttc?.toString() ?? "");
+  const [prixClient, setPrixClient] = useState<string>(effectiveClient?.toString() ?? "");
   const [prixFixe, setPrixFixe] = useState<string>(initial.prix_convoyeur_fixe?.toString() ?? "");
   const [prixMin, setPrixMin] = useState<string>(initial.prix_convoyeur_min?.toString() ?? "");
   const [prixMax, setPrixMax] = useState<string>(initial.prix_convoyeur_max?.toString() ?? "");
@@ -42,13 +51,15 @@ export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBloc
 
   useEffect(() => {
     setMode(initial.pricing_mode ?? "fixe");
-    setPrixClient(initial.prix_client_ttc?.toString() ?? "");
+    const next = lockedClientPrice ?? initial.prix_client_ttc ?? null;
+    setPrixClient(next?.toString() ?? "");
     setPrixFixe(initial.prix_convoyeur_fixe?.toString() ?? "");
     setPrixMin(initial.prix_convoyeur_min?.toString() ?? "");
     setPrixMax(initial.prix_convoyeur_max?.toString() ?? "");
     setMargeCible(initial.marge_indicative_pct?.toString() ?? "35");
-  }, [trajetId, initial.pricing_mode, initial.prix_client_ttc, initial.prix_convoyeur_fixe,
+  }, [trajetId, lockedClientPrice, initial.pricing_mode, initial.prix_client_ttc, initial.prix_convoyeur_fixe,
       initial.prix_convoyeur_min, initial.prix_convoyeur_max, initial.marge_indicative_pct]);
+
 
   const num = (s: string) => (s.trim() === "" ? null : parseFloat(s));
 
@@ -149,14 +160,18 @@ export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBloc
 
         {/* === Inputs prix === */}
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <FormField label="Prix client TTC (€)">
+          <FormField label={lockedClientPrice != null ? "Prix client TTC (verrouillé devis)" : "Prix client TTC (€)"}>
             <TextInput
               type="number"
               step="0.01"
               value={prixClient}
               onChange={(e) => setPrixClient(e.target.value)}
               placeholder="ex: 380"
+              disabled={lockedClientPrice != null}
             />
+            {lockedSourceLabel && (
+              <p className="mt-1 text-[10px] text-pro-muted">Auto depuis {lockedSourceLabel}</p>
+            )}
           </FormField>
 
           {mode === "fixe" ? (
@@ -166,54 +181,65 @@ export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBloc
                 step="0.01"
                 value={prixFixe}
                 onChange={(e) => setPrixFixe(e.target.value)}
-                placeholder="ex: 250"
+                placeholder={effectiveClient ? `ex: ${Math.round(effectiveClient * (RECO_MIN_PCT + RECO_MAX_PCT) / 200)}` : "ex: 250"}
               />
             </FormField>
+
           ) : (
-            <FormField label="Marge cible indicative (%)">
-              <Select value={margeCible} onChange={(e) => setMargeCible(e.target.value)}>
-                <option value="30">30 %</option>
-                <option value="35">35 %</option>
-                <option value="40">40 %</option>
-                <option value="0">Pas d'objectif</option>
-              </Select>
+            <FormField label="Estimation convoyeur recommandée">
+              <div className="px-3 py-2 rounded-lg border border-pro-border bg-pro-bg-soft/40 text-sm tabular-nums">
+                {effectiveClient ? (
+                  <>
+                    <span className="text-emerald-700 font-semibold">
+                      {Math.round(effectiveClient * RECO_MIN_PCT / 100)} € – {Math.round(effectiveClient * RECO_MAX_PCT / 100)} €
+                    </span>
+                    <span className="text-[11px] text-pro-muted ml-2">({RECO_MIN_PCT}–{RECO_MAX_PCT}%)</span>
+                  </>
+                ) : (
+                  <span className="text-pro-muted text-xs">Saisir prix client TTC</span>
+                )}
+              </div>
             </FormField>
           )}
         </div>
 
         {mode === "enchere" && (
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="Min convoyeur (€) — optionnel">
-              <TextInput
-                type="number"
-                step="0.01"
-                value={prixMin}
-                onChange={(e) => setPrixMin(e.target.value)}
-                placeholder="vide = libre"
-              />
-            </FormField>
-            <FormField label="Max convoyeur (€) — optionnel">
-              <TextInput
-                type="number"
-                step="0.01"
-                value={prixMax}
-                onChange={(e) => setPrixMax(e.target.value)}
-                placeholder="vide = libre"
-              />
-            </FormField>
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Min convoyeur (€)">
+                <TextInput
+                  type="number"
+                  step="0.01"
+                  value={prixMin}
+                  onChange={(e) => setPrixMin(e.target.value)}
+                  placeholder={effectiveClient ? `auto: ${Math.round(effectiveClient * RECO_MIN_PCT / 100)}` : "vide = libre"}
+                />
+              </FormField>
+              <FormField label="Max convoyeur (€)">
+                <TextInput
+                  type="number"
+                  step="0.01"
+                  value={prixMax}
+                  onChange={(e) => setPrixMax(e.target.value)}
+                  placeholder={effectiveClient ? `auto: ${Math.round(effectiveClient * RECO_MAX_PCT / 100)}` : "vide = libre"}
+                />
+              </FormField>
+            </div>
+            {effectiveClient && (!prixMin || !prixMax) && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!prixMin) setPrixMin(String(Math.round(effectiveClient * RECO_MIN_PCT / 100)));
+                  if (!prixMax) setPrixMax(String(Math.round(effectiveClient * RECO_MAX_PCT / 100)));
+                }}
+                className="text-xs text-pro-accent hover:underline"
+              >
+                Appliquer la fourchette recommandée ({Math.round(effectiveClient * RECO_MIN_PCT / 100)} € – {Math.round(effectiveClient * RECO_MAX_PCT / 100)} €)
+              </button>
+            )}
+          </>
         )}
 
-        {mode === "fixe" && (
-          <FormField label="Marge cible indicative (%)">
-            <Select value={margeCible} onChange={(e) => setMargeCible(e.target.value)}>
-              <option value="30">30 %</option>
-              <option value="35">35 %</option>
-              <option value="40">40 %</option>
-              <option value="0">Pas d'objectif</option>
-            </Select>
-          </FormField>
-        )}
 
         {/* === Indicateur de marge (informatif) === */}
         <div className={`flex items-start gap-2 p-2.5 rounded-lg border text-[12px] ${
