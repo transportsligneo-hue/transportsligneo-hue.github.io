@@ -39,10 +39,18 @@ interface ClientRow {
 }
 
 
+interface ClientHistory {
+  devis: Array<{ id: string; numero: string; created_at: string; statut: string; prix_estime: number }>;
+  missions: Array<{ id: string; numero_mission: string | null; statut: string; created_at: string }>;
+  factures: Array<{ id: string; numero: string; prix_ttc: number; statut: string; date_facture: string }>;
+}
+
 function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<ClientRow | null>(null);
+  const [history, setHistory] = useState<ClientHistory>({ devis: [], missions: [], factures: [] });
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
