@@ -589,38 +589,137 @@ function AdminTrajets() {
         </div>
       </Modal>
 
-      {/* Modal détail (lecture seule) */}
-      <Modal
+      {/* Drawer détail premium bleu */}
+      <AdminDetailDrawer
         open={!!selected && !editing && !showCreate}
         onClose={() => setSelected(null)}
-        title="Détail trajet"
-        size="md"
+        title={selected ? `${selected.depart} → ${selected.arrivee}` : ""}
+        subtitle={
+          selected
+            ? `${selected.client_nom || "—"}${selected.date_trajet ? " · " + new Date(selected.date_trajet).toLocaleDateString("fr-FR") : ""}`
+            : ""
+        }
+        badge={
+          selected ? (
+            <DrawerBadge
+              tone={
+                selected.statut === "termine"
+                  ? "green"
+                  : selected.statut === "annule"
+                    ? "red"
+                    : selected.statut === "en_cours" || selected.statut === "accepte"
+                      ? "blue"
+                      : "amber"
+              }
+            >
+              {statutLabels[selected.statut] ?? selected.statut}
+            </DrawerBadge>
+          ) : null
+        }
+        footer={
+          selected ? (
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button
+                onClick={() => openEdit(selected)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 hover:bg-white/15 px-3 py-2 text-sm font-medium text-white"
+              >
+                <Edit2 size={14} /> Modifier
+              </button>
+            </div>
+          ) : null
+        }
+        width="2xl"
       >
-        {selected && !editing && (
+        {selected && (
           <>
-            <Card padded={false} className="mb-4">
-              <div className="px-4 divide-y divide-pro-border">
-                <DetailRow label="Départ" value={selected.depart} />
-                <DetailRow label="Arrivée" value={selected.arrivee} />
-                <DetailRow label="Date" value={selected.date_trajet} />
-                <DetailRow label="Heure" value={selected.heure_trajet} />
-                <DetailRow
-                  label="Véhicule"
-                  value={[selected.marque, selected.modele].filter(Boolean).join(" ") || null}
-                />
-                <DetailRow label="Immatriculation" value={selected.immatriculation} />
-                <DetailRow label="Client" value={selected.client_nom} />
-                <DetailRow label="Email" value={selected.client_email} />
-                <DetailRow label="Téléphone" value={selected.client_telephone} />
-                <DetailRow label="Prix client" value={selected.prix ? `${selected.prix} €` : null} />
-                <DetailRow
-                  label="Tarif convoyeur (interne)"
-                  value={selected.tarif_convoyeur ? `${selected.tarif_convoyeur} €` : null}
-                />
-                <DetailRow label="Notes" value={selected.notes_internes} />
-              </div>
-            </Card>
-            <FormField label="Statut">
+            <DrawerSection title="Client" icon={<User size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Nom" value={selected.client_nom || "—"} />
+                <DrawerField label="Email" value={selected.client_email || "—"} />
+                <DrawerField label="Téléphone" value={selected.client_telephone || "—"} />
+                <DrawerField label="Date" value={selected.date_trajet ? new Date(selected.date_trajet).toLocaleDateString("fr-FR") : "—"} />
+              </DrawerGrid>
+            </DrawerSection>
+
+            <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Départ" value={selected.depart} />
+                <DrawerField label="Arrivée" value={selected.arrivee} />
+                <DrawerField label="Heure" value={selected.heure_trajet || "—"} />
+                <DrawerField label="Immat." value={selected.immatriculation || "—"} mono />
+              </DrawerGrid>
+            </DrawerSection>
+
+            <DrawerSection title="Véhicule" icon={<Car size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Marque" value={selected.marque || "—"} />
+                <DrawerField label="Modèle" value={selected.modele || "—"} />
+              </DrawerGrid>
+            </DrawerSection>
+
+            {/* Prix client — verrouillé si devis lié */}
+            <DrawerSection
+              title="Prix client TTC"
+              icon={<FileText size={12} />}
+              action={
+                linkedDevis ? (
+                  <DrawerBadge tone="green">
+                    <Lock size={10} /> Auto depuis devis
+                  </DrawerBadge>
+                ) : (
+                  <DrawerBadge tone="amber">Manuel</DrawerBadge>
+                )
+              }
+            >
+              {linkedDevis ? (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs text-blue-200">{linkedDevis.numero}</p>
+                    <p className="text-[11px] text-white/50 mt-0.5">
+                      {linkedDevis.paid_at
+                        ? `Payé le ${new Date(linkedDevis.paid_at).toLocaleDateString("fr-FR")}`
+                        : "Non payé"}
+                    </p>
+                  </div>
+                  <p className="text-2xl font-bold text-emerald-300 tabular-nums">
+                    {linkedDevis.prix_estime} €
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-white/60">
+                  {selected.prix
+                    ? <>Prix saisi manuellement : <strong className="text-white">{selected.prix} €</strong></>
+                    : "Aucun devis lié — saisir un prix manuel via Modifier."}
+                </p>
+              )}
+
+              {/* Estimation convoyeur min/max auto */}
+              {(linkedDevis?.prix_estime || selected.prix_client || selected.prix) && (() => {
+                const ttc = linkedDevis?.prix_estime ?? selected.prix_client ?? selected.prix ?? 0;
+                const min = Math.round(ttc * 0.55);
+                const max = Math.round(ttc * 0.65);
+                return (
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-[10px] uppercase tracking-wider text-white/45 mb-2">
+                      Estimation convoyeur recommandée (55–65 %)
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-lg bg-blue-500/15 border border-blue-400/30 p-3 text-center">
+                        <p className="text-[10px] uppercase text-blue-200/80">Min</p>
+                        <p className="text-xl font-bold text-blue-100 tabular-nums">{min} €</p>
+                      </div>
+                      <div className="rounded-lg bg-blue-500/25 border border-blue-400/40 p-3 text-center">
+                        <p className="text-[10px] uppercase text-blue-200/80">Max</p>
+                        <p className="text-xl font-bold text-blue-100 tabular-nums">{max} €</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </DrawerSection>
+
+            {/* Statut */}
+            <DrawerSection title="Statut opérationnel">
               <Select
                 value={selected.statut}
                 onChange={(e) => {
@@ -634,254 +733,195 @@ function AdminTrajets() {
                   </option>
                 ))}
               </Select>
-            </FormField>
+            </DrawerSection>
 
-            {/* === SECTION DEVIS LIÉ + COMMISSION CONVOYEUR === */}
+            {/* Commission */}
             {(linkedDevis || selected.prix_client != null) && (
-              <div className="mt-5 pt-5 border-t border-pro-border">
-                <h3 className="font-semibold text-pro-text flex items-center gap-2 mb-3">
-                  <FileText size={16} className="text-pro-accent" />
-                  Devis & répartition automatique
-                </h3>
-
-                {linkedDevis && (
-                  <Card padded={false} className="mb-3">
-                    <div className="px-4 py-3 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] uppercase tracking-wider text-pro-muted">Devis source</p>
-                        <p className="font-mono text-sm text-pro-text mt-0.5">{linkedDevis.numero}</p>
-                        <p className="text-xs text-pro-text-soft mt-0.5">
-                          {linkedDevis.paid_at ? `Payé le ${new Date(linkedDevis.paid_at).toLocaleDateString("fr-FR")}` : "Non payé"}
-                        </p>
+              <DrawerSection title="Commission convoyeur" icon={<FileText size={12} />}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={pctInput}
+                    onChange={(e) => setPctInput(e.target.value)}
+                    className="w-24 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-sm text-white focus:outline-none focus:border-blue-400"
+                  />
+                  <span className="text-white/60 text-sm">%</span>
+                  <button
+                    onClick={saveCommission}
+                    disabled={savingCommission}
+                    className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-blue-500 hover:bg-blue-400 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  >
+                    <Save size={13} /> Appliquer
+                  </button>
+                </div>
+                {selected.prix_client != null && (() => {
+                  const pct = parseFloat(pctInput) || 0;
+                  const conv = Math.round(selected.prix_client! * pct) / 100;
+                  const soc = Math.round((selected.prix_client! - conv) * 100) / 100;
+                  return (
+                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/10">
+                      <div className="text-center">
+                        <p className="text-[10px] uppercase text-white/50">Client</p>
+                        <p className="font-bold text-white tabular-nums">{selected.prix_client} €</p>
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-[10px] uppercase tracking-wider text-pro-muted">Montant client</p>
-                        <p className="text-pro-accent font-bold text-lg leading-tight">{linkedDevis.prix_estime} €</p>
+                      <div className="text-center bg-emerald-500/15 rounded-lg py-2">
+                        <p className="text-[10px] uppercase text-emerald-200">Convoyeur</p>
+                        <p className="font-bold text-emerald-200 tabular-nums">{conv} €</p>
                       </div>
-                    </div>
-                  </Card>
-                )}
-
-                <Card padded={false}>
-                  <div className="p-4 space-y-4">
-                    <div>
-                      <label className="block text-xs font-medium text-pro-text-soft mb-1.5">
-                        Commission convoyeur (%)
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="1"
-                          value={pctInput}
-                          onChange={(e) => setPctInput(e.target.value)}
-                          className="w-24 px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pro-accent"
-                        />
-                        <span className="text-pro-muted text-sm">%</span>
-                        <Button
-                          onClick={saveCommission}
-                          disabled={savingCommission}
-                          icon={<Save size={13} />}
-                          className="ml-auto"
-                        >
-                          Appliquer
-                        </Button>
+                      <div className="text-center bg-amber-500/15 rounded-lg py-2">
+                        <p className="text-[10px] uppercase text-amber-200">Société</p>
+                        <p className="font-bold text-amber-200 tabular-nums">{soc} €</p>
                       </div>
                     </div>
-
-                    {/* Aperçu live (avant sauvegarde) */}
-                    {selected.prix_client != null && (() => {
-                      const pct = parseFloat(pctInput) || 0;
-                      const conv = Math.round(selected.prix_client! * pct) / 100;
-                      const soc = Math.round((selected.prix_client! - conv) * 100) / 100;
-                      return (
-                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-pro-border">
-                          <div className="text-center">
-                            <p className="text-[10px] uppercase tracking-wider text-pro-muted">Client paie</p>
-                            <p className="text-pro-text font-bold text-base mt-1 tabular-nums">{selected.prix_client} €</p>
-                          </div>
-                          <div className="text-center bg-emerald-50 rounded-lg py-2">
-                            <p className="text-[10px] uppercase tracking-wider text-emerald-700">Convoyeur</p>
-                            <p className="text-emerald-700 font-bold text-base mt-1 tabular-nums">{conv} €</p>
-                          </div>
-                          <div className="text-center bg-amber-50 rounded-lg py-2">
-                            <p className="text-[10px] uppercase tracking-wider text-amber-700">Société</p>
-                            <p className="text-amber-700 font-bold text-base mt-1 tabular-nums">{soc} €</p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </Card>
-              </div>
+                  );
+                })()}
+              </DrawerSection>
             )}
 
-            {/* === SECTION TARIFICATION (B1) === */}
-            <div className="mt-5 pt-5 border-t border-pro-border">
-              <PricingModeBlock
-                trajetId={selected.id}
-                initial={{
-                  pricing_mode: selected.pricing_mode ?? "fixe",
-                  prix_client_ttc: selected.prix_client_ttc,
-                  prix_convoyeur_fixe: selected.prix_convoyeur_fixe,
-                  prix_convoyeur_min: selected.prix_convoyeur_min,
-                  prix_convoyeur_max: selected.prix_convoyeur_max,
-                  marge_indicative_pct: selected.marge_indicative_pct,
-                }}
-                onSaved={(next) => setSelected({ ...selected, ...next })}
-              />
-            </div>
+            {/* Mode tarification */}
+            <DrawerSection title="Mode de tarification">
+              <div className="bg-white rounded-lg p-3 -m-1">
+                <PricingModeBlock
+                  trajetId={selected.id}
+                  initial={{
+                    pricing_mode: selected.pricing_mode ?? "fixe",
+                    prix_client_ttc: selected.prix_client_ttc,
+                    prix_convoyeur_fixe: selected.prix_convoyeur_fixe,
+                    prix_convoyeur_min: selected.prix_convoyeur_min,
+                    prix_convoyeur_max: selected.prix_convoyeur_max,
+                    marge_indicative_pct: selected.marge_indicative_pct,
+                  }}
+                  onSaved={(next) => setSelected({ ...selected, ...next })}
+                />
+              </div>
+            </DrawerSection>
 
-            {/* === SECTION ENCHÈRES === */}
-            <div className="mt-5 pt-5 border-t border-pro-border">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-pro-text flex items-center gap-2">
-                  <Gavel size={16} className="text-pro-accent" />
-                  Publication & offres convoyeurs
-                </h3>
-                <Badge
+            {/* Publication & offres */}
+            <DrawerSection
+              title="Publication & offres"
+              icon={<Gavel size={12} />}
+              action={
+                <DrawerBadge
                   tone={
                     selected.statut_publication === "publie"
-                      ? "success"
+                      ? "green"
                       : selected.statut_publication === "attribue"
-                      ? "info"
-                      : "neutral"
+                        ? "blue"
+                        : "slate"
                   }
                 >
                   {selected.statut_publication === "publie"
                     ? "Publié"
                     : selected.statut_publication === "attribue"
-                    ? "Attribué"
-                    : "Brouillon"}
-                </Badge>
-              </div>
-
+                      ? "Attribué"
+                      : "Brouillon"}
+                </DrawerBadge>
+              }
+            >
               {selected.statut_publication !== "attribue" && (
-                <Card padded={false} className="mb-3">
-                  <div className="p-3 space-y-3">
-                    <FormField label="Prix suggéré aux convoyeurs (€)">
-                      <TextInput
-                        type="number"
-                        value={prixSuggereInput}
-                        onChange={(e) => setPrixSuggereInput(e.target.value)}
-                        placeholder="ex: 250"
-                      />
-                    </FormField>
-                    <div className="flex gap-2">
-                      {selected.statut_publication !== "publie" ? (
-                        <Button
-                          variant="success"
-                          onClick={() => togglePublication(true)}
-                          disabled={savingPub || !prixSuggereInput}
-                          icon={<Send size={14} />}
-                          className="flex-1"
-                        >
-                          Publier aux convoyeurs
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="danger"
-                          onClick={() => togglePublication(false)}
-                          disabled={savingPub}
-                          className="flex-1"
-                        >
-                          Dépublier
-                        </Button>
-                      )}
-                    </div>
+                <div className="space-y-3 mb-3">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wider text-white/50 mb-1 block">
+                      Prix suggéré convoyeurs (€)
+                    </label>
+                    <input
+                      type="number"
+                      value={prixSuggereInput}
+                      onChange={(e) => setPrixSuggereInput(e.target.value)}
+                      placeholder="ex: 250"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-blue-400"
+                    />
                   </div>
-                </Card>
+                  {selected.statut_publication !== "publie" ? (
+                    <button
+                      onClick={() => togglePublication(true)}
+                      disabled={savingPub || !prixSuggereInput}
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                      <Send size={14} /> Publier aux convoyeurs
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => togglePublication(false)}
+                      disabled={savingPub}
+                      className="w-full rounded-md bg-red-500/20 border border-red-400/40 hover:bg-red-500/30 px-3 py-2 text-sm font-medium text-red-200"
+                    >
+                      Dépublier
+                    </button>
+                  )}
+                </div>
               )}
 
-              <p className="text-xs text-pro-muted mb-2">
+              <p className="text-[11px] text-white/50 mb-2">
                 {offres.length} offre{offres.length > 1 ? "s" : ""} reçue{offres.length > 1 ? "s" : ""}
               </p>
 
               {offres.length === 0 ? (
-                <div className="text-center py-6 text-pro-muted text-sm bg-pro-bg-soft/30 rounded-lg border border-dashed border-pro-border">
-                  Aucune offre pour le moment.
-                </div>
+                <p className="text-center py-4 text-white/40 text-xs border border-dashed border-white/15 rounded-lg">
+                  Aucune offre pour le moment
+                </p>
               ) : (
                 <div className="space-y-2">
                   {offres.map((o) => (
                     <div
                       key={o.id}
-                      className={`border rounded-lg p-3 ${
+                      className={`rounded-lg border p-3 ${
                         o.statut === "acceptee"
-                          ? "border-emerald-200 bg-emerald-50/50"
+                          ? "border-emerald-400/40 bg-emerald-500/10"
                           : o.statut === "refusee" || o.statut === "retiree"
-                          ? "border-pro-border bg-slate-50 opacity-60"
-                          : "border-pro-border bg-white"
+                            ? "border-white/10 bg-white/[0.02] opacity-60"
+                            : "border-white/15 bg-white/[0.05]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="font-medium text-pro-text text-sm">
+                          <p className="font-medium text-white text-sm">
                             {o.convoyeur?.prenom} {o.convoyeur?.nom}
                           </p>
-                          <p className="text-pro-muted text-xs">
+                          <p className="text-white/50 text-[11px]">
                             {o.convoyeur?.telephone} · {o.convoyeur?.email}
                           </p>
-                          <p className="text-xs mt-1">
-                            <span className="text-pro-muted">Type :</span>{" "}
-                            {o.type_offre === "acceptation_directe" ? "Accepte le prix suggéré" : "Contre-proposition"}
-                            {o.prix_suggere_snapshot != null && o.type_offre === "contre_proposition" && (
-                              <span className="text-pro-muted"> (suggéré : {o.prix_suggere_snapshot} €)</span>
-                            )}
-                          </p>
                           {o.message && (
-                            <p className="text-xs text-pro-text-soft mt-1 italic">"{o.message}"</p>
+                            <p className="text-[11px] text-white/70 mt-1 italic">"{o.message}"</p>
                           )}
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-emerald-700 font-bold text-lg leading-none">{o.prix_propose} €</p>
-                          <Badge
-                            tone={
-                              o.statut === "acceptee"
-                                ? "success"
-                                : o.statut === "refusee" || o.statut === "retiree"
-                                ? "neutral"
-                                : "warning"
-                            }
-                          >
-                            {o.statut === "en_attente"
-                              ? "En attente"
-                              : o.statut === "acceptee"
-                              ? "Acceptée"
-                              : o.statut === "refusee"
-                              ? "Refusée"
-                              : "Retirée"}
-                          </Badge>
+                          <p className="text-emerald-300 font-bold text-lg leading-none">{o.prix_propose} €</p>
                         </div>
                       </div>
                       {o.statut === "en_attente" && selected.statut_publication !== "attribue" && (
-                        <div className="flex gap-2 mt-3 pt-3 border-t border-pro-border">
-                          <Button
-                            variant="success"
+                        <div className="flex gap-2 mt-3 pt-3 border-t border-white/10">
+                          <button
                             onClick={() => validerOffre(o)}
-                            icon={<CheckCircle2 size={13} />}
-                            className="flex-1"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-500 hover:bg-emerald-400 px-3 py-1.5 text-xs font-medium text-white"
                           >
-                            Valider ce convoyeur
-                          </Button>
-                          <Button
-                            variant="ghost"
+                            <CheckCircle2 size={12} /> Valider
+                          </button>
+                          <button
                             onClick={() => refuserOffre(o)}
-                            icon={<XCircle size={13} />}
+                            className="rounded-md border border-white/20 hover:bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80"
                           >
-                            Refuser
-                          </Button>
+                            <XCircle size={12} className="inline mr-1" /> Refuser
+                          </button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </DrawerSection>
+
+            {selected.notes_internes && (
+              <DrawerSection title="Notes internes">
+                <p className="text-sm text-white/80 whitespace-pre-wrap">{selected.notes_internes}</p>
+              </DrawerSection>
+            )}
           </>
         )}
-      </Modal>
+      </AdminDetailDrawer>
     </div>
   );
 }
