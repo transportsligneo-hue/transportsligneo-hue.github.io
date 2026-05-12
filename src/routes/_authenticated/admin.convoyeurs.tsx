@@ -10,7 +10,7 @@ import {
   IdCard,
   User,
   Briefcase,
-  MapPin,
+  Briefcase,
   FileText,
 } from "lucide-react";
 import { sendTransactionalEmail } from "@/lib/email/send";
