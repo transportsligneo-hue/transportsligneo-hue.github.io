@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
+import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, MapPin, Car, User, Lock } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -14,7 +14,6 @@ import {
   TD,
   EmptyState,
   Modal,
-  DetailRow,
   Button,
   IconButton,
   Select,
@@ -23,6 +22,13 @@ import {
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
+import {
+  AdminDetailDrawer,
+  DrawerSection,
+  DrawerGrid,
+  DrawerField,
+  DrawerBadge,
+} from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({
   component: AdminTrajets,
