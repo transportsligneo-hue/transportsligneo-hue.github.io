@@ -50,6 +50,10 @@ interface DevisRow {
   created_at: string;
   mission_id: string | null;
   converted_at: string | null;
+  vin: string | null;
+  carte_grise_recto_url: string | null;
+  carte_grise_verso_url: string | null;
+  vehicule_docs_completed: boolean;
 }
 
 const STATUTS = [
@@ -471,7 +475,24 @@ function DevisDrawer({
           <DrawerField label="Marque" value={devis.marque} />
           <DrawerField label="Modèle" value={devis.modele} />
           <DrawerField label="Carburant" value={devis.carburant} />
+          <DrawerField label="VIN" value={devis.vin} mono />
+          <DrawerField
+            label="Documents"
+            value={
+              devis.vehicule_docs_completed ? (
+                <DrawerBadge tone="green">Complétés par le client</DrawerBadge>
+              ) : (
+                <DrawerBadge tone="amber">En attente client</DrawerBadge>
+              )
+            }
+          />
         </DrawerGrid>
+        {(devis.carte_grise_recto_url || devis.carte_grise_verso_url) && (
+          <div className="mt-3">
+            <p className="text-[10px] uppercase tracking-wider text-white/45 mb-2">Carte grise</p>
+            <CarteGriseLinks recto={devis.carte_grise_recto_url} verso={devis.carte_grise_verso_url} />
+          </div>
+        )}
       </DrawerSection>
 
       <DrawerSection title="Planification" icon={<Calendar size={12} />}>
