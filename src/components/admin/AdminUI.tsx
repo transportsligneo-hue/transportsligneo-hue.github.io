@@ -322,37 +322,23 @@ export function TH({ children, className = "" }: { children: ReactNode; classNam
 export function TR({
   children,
   onClick,
-  className = "",
 }: {
   children: ReactNode;
   onClick?: () => void;
-  className?: string;
 }) {
   return (
     <tr
       onClick={onClick}
       className={`border-b border-pro-border last:border-0 hover:bg-pro-bg-soft/60 transition-colors ${
         onClick ? "cursor-pointer" : ""
-      } ${className}`}
+      }`}
     >
       {children}
     </tr>
   );
 }
-export function TD({
-  children,
-  className = "",
-  onClick,
-}: {
-  children: ReactNode;
-  className?: string;
-  onClick?: (e: React.MouseEvent<HTMLTableCellElement>) => void;
-}) {
-  return (
-    <td onClick={onClick} className={`py-3.5 px-4 text-pro-text` + " " + className}>
-      {children}
-    </td>
-  );
+export function TD({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <td className={`py-3.5 px-4 text-pro-text`+ " " + className}>{children}</td>;
 }
 
 /* ============= EmptyState ============= */
