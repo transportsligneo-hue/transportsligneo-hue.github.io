@@ -391,8 +391,8 @@ function AdminDemandes() {
                   <DrawerField
                     label="TVA"
                     value={
-                      typeof quote.priceTva === "number"
-                        ? `${quote.priceTva.toFixed(2)} €`
+                      typeof quote.vat === "number"
+                        ? `${quote.vat.toFixed(2)} €`
                         : "—"
                     }
                   />
