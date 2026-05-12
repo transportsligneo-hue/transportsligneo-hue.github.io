@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, User, Briefcase } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -15,6 +15,13 @@ import {
   IconButton,
   SearchInput,
 } from "@/components/admin/AdminUI";
+import {
+  AdminDetailDrawer,
+  DrawerSection,
+  DrawerGrid,
+  DrawerField,
+  DrawerBadge,
+} from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -32,10 +39,18 @@ interface ClientRow {
 }
 
 
+interface ClientHistory {
+  devis: Array<{ id: string; numero: string; created_at: string; statut: string; prix_estime: number }>;
+  missions: Array<{ id: string; numero: string | null; statut: string; created_at: string }>;
+  factures: Array<{ id: string; numero: string; prix_ttc: number; statut: string; date_facture: string }>;
+}
+
 function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<ClientRow | null>(null);
+  const [history, setHistory] = useState<ClientHistory>({ devis: [], missions: [], factures: [] });
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -102,6 +117,36 @@ function AdminClients() {
     await fetchClients();
   };
 
+  const openClient = async (c: ClientRow) => {
+    setSelected(c);
+    setHistory({ devis: [], missions: [], factures: [] });
+    const [devisRes, missionsRes, facturesRes] = await Promise.all([
+      supabase
+        .from("devis")
+        .select("id, numero, created_at, statut, prix_estime")
+        .eq("email", c.email ?? "")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("missions")
+        .select("id, numero, statut, created_at")
+        .eq("user_id", c.user_id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("factures")
+        .select("id, numero, prix_ttc, statut, date_facture")
+        .eq("client_email", c.email ?? "")
+        .order("date_facture", { ascending: false })
+        .limit(20),
+    ]);
+    setHistory({
+      devis: (devisRes.data ?? []) as ClientHistory["devis"],
+      missions: (missionsRes.data ?? []) as ClientHistory["missions"],
+      factures: (facturesRes.data ?? []) as ClientHistory["factures"],
+    });
+  };
+
   const filtered = clients.filter((c) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -148,13 +193,9 @@ function AdminClients() {
           </THead>
           <tbody>
             {filtered.map((c) => (
-              <TR key={c.user_id}>
+              <TR key={c.user_id} className="cursor-pointer" onClick={() => openClient(c)}>
                 <TD>
-                  <Link
-                    to="/admin/clients/$clientId"
-                    params={{ clientId: c.user_id }}
-                    className="flex items-center gap-2 hover:text-pro-accent"
-                  >
+                  <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
                       {(c.prenom?.[0] ?? "?").toUpperCase()}
                     </div>
@@ -164,7 +205,7 @@ function AdminClients() {
                       </p>
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
-                  </Link>
+                  </div>
                 </TD>
                 <TD className="hidden sm:table-cell text-pro-text-soft">
                   <p className="text-sm">{c.email}</p>
@@ -181,16 +222,11 @@ function AdminClients() {
                     {c.actif ? "Actif" : "Suspendu"}
                   </Badge>
                 </TD>
-                <TD>
+                <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
+                    <IconButton onClick={() => openClient(c)} title="Voir la fiche" tone="primary">
                       <Eye size={15} />
-                    </Link>
+                    </IconButton>
                     {c.actif ? (
                       <IconButton
                         onClick={() => toggleActif(c.user_id, false)}
@@ -216,6 +252,117 @@ function AdminClients() {
         </Table>
       )}
 
+      <AdminDetailDrawer
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        badge={
+          selected ? (
+            <DrawerBadge tone={selected.actif ? "green" : "red"}>
+              {selected.actif ? "Compte actif" : "Compte suspendu"}
+            </DrawerBadge>
+          ) : null
+        }
+        title={selected ? `${selected.prenom} ${selected.nom}` : ""}
+        subtitle={selected?.email ?? ""}
+        footer={
+          selected ? (
+            <div className="flex gap-2 justify-end">
+              {selected.actif ? (
+                <button
+                  onClick={() => toggleActif(selected.user_id, false)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-red-400/40 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 text-sm font-medium text-red-200"
+                >
+                  <Ban size={14} /> Suspendre
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleActif(selected.user_id, true)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-sm font-medium text-white"
+                >
+                  <CheckCircle size={14} /> Réactiver
+                </button>
+              )}
+            </div>
+          ) : null
+        }
+      >
+        {selected ? (
+          <>
+            <DrawerSection title="Identité" icon={<User size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Prénom" value={selected.prenom} />
+                <DrawerField label="Nom" value={selected.nom} />
+                <DrawerField label="Email" value={selected.email || "—"} />
+                <DrawerField label="Téléphone" value={selected.telephone || "—"} />
+                <DrawerField
+                  label="Inscrit le"
+                  value={new Date(selected.created_at).toLocaleString("fr-FR")}
+                />
+                <DrawerField label="ID utilisateur" value={selected.user_id} mono />
+              </DrawerGrid>
+            </DrawerSection>
+
+            <DrawerSection title={`Devis (${history.devis.length})`} icon={<Briefcase size={12} />}>
+              {history.devis.length === 0 ? (
+                <p className="text-sm text-white/50">Aucun devis.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.devis.map((d) => (
+                    <li
+                      key={d.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{d.numero}</span>
+                      <span className="text-white/70">{d.statut}</span>
+                      <span className="text-white/90">{Number(d.prix_estime ?? 0).toFixed(2)} €</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+
+            <DrawerSection title={`Missions (${history.missions.length})`} icon={<Briefcase size={12} />}>
+              {history.missions.length === 0 ? (
+                <p className="text-sm text-white/50">Aucune mission.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.missions.map((m) => (
+                    <li
+                      key={m.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{m.numero ?? m.id.slice(0, 8)}</span>
+                      <span className="text-white/70">{m.statut}</span>
+                      <span className="text-white/50 text-xs">
+                        {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+
+            <DrawerSection title={`Factures (${history.factures.length})`} icon={<Briefcase size={12} />}>
+              {history.factures.length === 0 ? (
+                <p className="text-sm text-white/50">Aucune facture.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.factures.map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{f.numero}</span>
+                      <span className="text-white/70">{f.statut}</span>
+                      <span className="text-white/90">{Number(f.prix_ttc ?? 0).toFixed(2)} €</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+          </>
+        ) : null}
+      </AdminDetailDrawer>
     </div>
   );
 }
