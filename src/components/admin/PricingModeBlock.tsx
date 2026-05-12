@@ -160,18 +160,6 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
 
         {/* === Inputs prix === */}
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <FormField label="Prix client TTC (€)">
-            <TextInput
-              type="number"
-              step="0.01"
-              value={prixClient}
-              onChange={(e) => setPrixClient(e.target.value)}
-              placeholder="ex: 380"
-            />
-          </FormField>
-
-        {/* === Inputs prix === */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
           <FormField label={lockedClientPrice != null ? "Prix client TTC (verrouillé devis)" : "Prix client TTC (€)"}>
             <TextInput
               type="number"
