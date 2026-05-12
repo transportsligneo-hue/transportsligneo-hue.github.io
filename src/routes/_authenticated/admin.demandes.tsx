@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight } from "lucide-react";
+import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User } from "lucide-react";
 import {
   AdminPageHeader,
   AdminSection,
@@ -10,6 +10,8 @@ import {
 } from "@/components/admin/ui";
 import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
@@ -50,6 +52,7 @@ function AdminDemandes() {
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [converting, setConverting] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Demande | null>(null);
 
   const fetchDemandes = useCallback(async () => {
     let query = supabase
@@ -188,15 +191,11 @@ function AdminDemandes() {
                 {filtered.map((d) => {
                   const q = quoteFromDemande(d);
                   return (
-                    <tr key={d.id}>
+                    <tr key={d.id} className="cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40" onClick={() => setSelected(d)}>
                       <td>
-                        <Link
-                          to="/admin/demandes/$demandeId"
-                          params={{ demandeId: d.id }}
-                          className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]"
-                        >
+                        <span className="font-medium text-[color:var(--admin-text)]">
                           {d.prenom} {d.nom}
-                        </Link>
+                        </span>
                         <p className="text-[color:var(--admin-muted)] text-xs">
                           {d.email}
                         </p>
@@ -207,19 +206,12 @@ function AdminDemandes() {
                       <td className="hidden sm:table-cell">
                         <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
                           {d.depart}
-                          <ArrowRight
-                            size={11}
-                            className="text-[color:var(--admin-muted)]"
-                          />
+                          <ArrowRight size={11} className="text-[color:var(--admin-muted)]" />
                           {d.arrivee}
                         </span>
                       </td>
                       <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
-                        {new Date(d.created_at).toLocaleDateString("fr-FR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="hidden lg:table-cell">
                         <PriceBlock quote={q} variant="compact" />
@@ -227,27 +219,25 @@ function AdminDemandes() {
                       <td>
                         <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
                       </td>
-                      <td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
-                          <Link
-                            to="/admin/demandes/$demandeId"
-                            params={{ demandeId: d.id }}
+                          <button
+                            onClick={() => setSelected(d)}
                             className="inline-flex items-center justify-center w-8 h-8 rounded-md text-[color:var(--admin-accent)] hover:bg-[color:var(--admin-accent-soft)]"
                             title="Voir la fiche"
                           >
                             <Eye size={15} />
-                          </Link>
-                          {d.statut !== "convertie" &&
-                            d.statut !== "terminee" && (
-                              <button
-                                onClick={() => convertToTrajet(d)}
-                                disabled={converting === d.id}
-                                title="Convertir en trajet"
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
-                              >
-                                <ArrowRightCircle size={15} />
-                              </button>
-                            )}
+                          </button>
+                          {d.statut !== "convertie" && d.statut !== "terminee" && (
+                            <button
+                              onClick={() => convertToTrajet(d)}
+                              disabled={converting === d.id}
+                              title="Convertir en trajet"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
+                            >
+                              <ArrowRightCircle size={15} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -258,6 +248,102 @@ function AdminDemandes() {
           </div>
         )}
       </AdminSection>
+
+      <DemandeDrawer
+        demande={selected}
+        onClose={() => setSelected(null)}
+        onConvert={(d) => { void convertToTrajet(d); setSelected(null); }}
+        onChanged={(updated) => { setSelected(updated); fetchDemandes(); }}
+        onDelete={async (id) => {
+          if (!window.confirm("Supprimer cette demande ?")) return;
+          await supabase.from("demandes_convoyage").delete().eq("id", id);
+          setSelected(null);
+          fetchDemandes();
+        }}
+      />
     </div>
+  );
+}
+
+function DemandeDrawer({
+  demande, onClose, onConvert, onChanged, onDelete,
+}: {
+  demande: Demande | null;
+  onClose: () => void;
+  onConvert: (d: Demande) => void;
+  onChanged: (d: Demande) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (!demande) return null;
+  const quote = quoteFromDemande(demande);
+  const updateStatut = async (statut: string) => {
+    await supabase.from("demandes_convoyage").update({ statut }).eq("id", demande.id);
+    onChanged({ ...demande, statut });
+  };
+  return (
+    <AdminDetailDrawer
+      open={!!demande}
+      onClose={onClose}
+      title={`${demande.depart} → ${demande.arrivee}`}
+      subtitle={`${demande.prenom} ${demande.nom} · ${new Date(demande.created_at).toLocaleString("fr-FR")}`}
+      badge={<DrawerBadge tone="blue">{statutLabels[demande.statut] ?? demande.statut}</DrawerBadge>}
+      footer={
+        <div className="flex flex-wrap gap-2 items-center">
+          {demande.statut !== "convertie" && demande.statut !== "terminee" && (
+            <Button size="sm" onClick={() => onConvert(demande)} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+              <ArrowRightCircle size={12} className="mr-1" /> Convertir en trajet
+            </Button>
+          )}
+          <select
+            value={demande.statut}
+            onChange={(e) => updateStatut(e.target.value)}
+            className="text-xs bg-white/10 text-white border border-white/20 rounded px-2 py-1.5"
+          >
+            {statuts.map((s) => (
+              <option key={s} value={s} className="text-black">{statutLabels[s]}</option>
+            ))}
+          </select>
+          <Button size="sm" variant="destructive" onClick={() => onDelete(demande.id)} className="ml-auto">
+            <Trash2 size={12} className="mr-1" /> Supprimer
+          </Button>
+        </div>
+      }
+    >
+      <DrawerSection title="Client" icon={<User size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Nom" value={`${demande.prenom} ${demande.nom}`} />
+          <DrawerField label="Email" value={demande.email} />
+          <DrawerField label="Téléphone" value={demande.telephone} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Départ" value={demande.depart} />
+          <DrawerField label="Arrivée" value={demande.arrivee} />
+          <DrawerField label="Date" value={demande.date_souhaitee ? new Date(demande.date_souhaitee).toLocaleDateString("fr-FR") : null} />
+          <DrawerField label="Heure" value={demande.heure_souhaitee} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Véhicule" icon={<Car size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Marque / Modèle" value={[demande.marque, demande.modele].filter(Boolean).join(" ")} />
+          <DrawerField label="Immatriculation" value={demande.immatriculation} mono />
+          <DrawerField label="Carburant" value={demande.carburant} />
+          <DrawerField label="Options" value={demande.options} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
+        <PriceBlock quote={quote} title="Estimation" />
+      </DrawerSection>
+
+      {demande.message && (
+        <DrawerSection title="Message client" icon={<Mail size={12} />}>
+          <p className="text-sm italic text-white/80 whitespace-pre-wrap">"{demande.message}"</p>
+        </DrawerSection>
+      )}
+    </AdminDetailDrawer>
   );
 }

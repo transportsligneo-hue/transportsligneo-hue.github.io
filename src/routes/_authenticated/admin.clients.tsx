@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, Mail, Phone, Building2, Calendar, MapPin, Truck, Receipt, AlertTriangle } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -16,6 +16,8 @@ import {
   SearchInput,
 } from "@/components/admin/AdminUI";
 import { getHighestActiveRole } from "@/lib/roles";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -37,6 +39,19 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<ClientRow | null>(null);
+  const [missions, setMissions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!selected) { setMissions([]); return; }
+    void supabase
+      .from("missions")
+      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total")
+      .eq("user_id", selected.user_id)
+      .order("date_prise_en_charge", { ascending: false })
+      .limit(50)
+      .then(({ data }) => setMissions(data ?? []));
+  }, [selected]);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -166,23 +181,17 @@ function AdminClients() {
           </THead>
           <tbody>
             {filtered.map((c) => (
-              <TR key={c.user_id}>
+              <TR key={c.user_id} className="cursor-pointer" onClick={() => setSelected(c)}>
                 <TD>
-                  <Link
-                    to="/admin/clients/$clientId"
-                    params={{ clientId: c.user_id }}
-                    className="flex items-center gap-2 hover:text-pro-accent"
-                  >
+                  <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
                       {(c.prenom?.[0] ?? "?").toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-pro-text truncate">
-                        {c.prenom} {c.nom}
-                      </p>
+                      <p className="font-medium text-pro-text truncate">{c.prenom} {c.nom}</p>
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
-                  </Link>
+                  </div>
                 </TD>
                 <TD className="hidden sm:table-cell text-pro-text-soft">
                   <p className="text-sm">{c.email}</p>
@@ -195,36 +204,21 @@ function AdminClients() {
                   {new Date(c.created_at).toLocaleDateString("fr-FR")}
                 </TD>
                 <TD>
-                  <Badge tone={c.actif ? "success" : "danger"}>
-                    {c.actif ? "Actif" : "Suspendu"}
-                  </Badge>
+                  <Badge tone={c.actif ? "success" : "danger"}>{c.actif ? "Actif" : "Suspendu"}</Badge>
                 </TD>
-                <TD>
+                <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
+                    <button
+                      onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
                       title="Voir la fiche"
                     >
                       <Eye size={15} />
-                    </Link>
+                    </button>
                     {c.actif ? (
-                      <IconButton
-                        onClick={() => toggleActif(c.user_id, false)}
-                        title="Suspendre"
-                        tone="danger"
-                      >
-                        <Ban size={15} />
-                      </IconButton>
+                      <IconButton onClick={() => toggleActif(c.user_id, false)} title="Suspendre" tone="danger"><Ban size={15} /></IconButton>
                     ) : (
-                      <IconButton
-                        onClick={() => toggleActif(c.user_id, true)}
-                        title="Réactiver"
-                        tone="success"
-                      >
-                        <CheckCircle size={15} />
-                      </IconButton>
+                      <IconButton onClick={() => toggleActif(c.user_id, true)} title="Réactiver" tone="success"><CheckCircle size={15} /></IconButton>
                     )}
                   </div>
                 </TD>
@@ -232,6 +226,56 @@ function AdminClients() {
             ))}
           </tbody>
         </Table>
+      )}
+
+      {selected && (
+        <AdminDetailDrawer
+          open={!!selected}
+          onClose={() => setSelected(null)}
+          title={`${selected.prenom} ${selected.nom}`.trim() || "Client"}
+          subtitle={selected.email ?? undefined}
+          badge={<DrawerBadge tone={selected.actif ? "green" : "red"}>{selected.actif ? "Actif" : "Suspendu"}</DrawerBadge>}
+          footer={
+            <div className="flex flex-wrap gap-2">
+              {selected.actif ? (
+                <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                  <Ban size={12} className="mr-1" /> Suspendre
+                </Button>
+              ) : (
+                <Button size="sm" onClick={async () => { await toggleActif(selected.user_id, true); setSelected({ ...selected, actif: true }); }} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                  <CheckCircle size={12} className="mr-1" /> Réactiver
+                </Button>
+              )}
+            </div>
+          }
+        >
+          <DrawerSection title="Coordonnées" icon={<UserRound size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Email" value={selected.email} />
+              <DrawerField label="Téléphone" value={selected.telephone} />
+              <DrawerField label="Inscrit le" value={new Date(selected.created_at).toLocaleDateString("fr-FR")} />
+              <DrawerField label="Missions" value={String(selected.missions_count)} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title={`Historique missions (${missions.length})`} icon={<Truck size={12} />}>
+            {missions.length === 0 ? (
+              <p className="text-sm text-white/50 text-center py-4">Aucune mission.</p>
+            ) : (
+              <div className="space-y-2">
+                {missions.map((m) => (
+                  <div key={m.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white flex items-center gap-2"><MapPin size={12} />{m.ville_depart ?? "?"} → {m.ville_arrivee ?? "?"}</p>
+                      <p className="text-xs text-white/50 font-mono">{m.numero ?? "—"} · {m.statut}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-white shrink-0 ml-3">{m.prix_total ? `${Number(m.prix_total).toLocaleString("fr-FR")} €` : "—"}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DrawerSection>
+        </AdminDetailDrawer>
       )}
 
     </div>

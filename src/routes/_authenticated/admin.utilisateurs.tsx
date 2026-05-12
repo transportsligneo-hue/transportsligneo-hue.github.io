@@ -295,23 +295,112 @@ function UserDetailDrawer({
   useEffect(() => {
     if (!user) { setDevis([]); setFactures([]); setLogs([]); setMissions([]); setPaiements([]); return; }
     (async () => {
-      if (user.email) {
-        const [{ data: d }, { data: f }, { data: m }] = await Promise.all([
-          supabase.from("devis").select("id, numero, statut, prix_estime, created_at, paid_at, amount_paid_cents").eq("email", user.email).order("created_at", { ascending: false }).limit(50),
-          supabase.from("factures").select("id, numero, statut, prix_ttc, created_at, date_paiement").eq("client_email", user.email).order("created_at", { ascending: false }).limit(50),
-          supabase.from("demandes_convoyage").select("id, depart, arrivee, statut, prix_estime, paid_at, created_at").eq("email", user.email).order("created_at", { ascending: false }).limit(50),
-        ]);
-        setDevis(d ?? []); setFactures(f ?? []); setMissions(m ?? []);
-        setPaiements((d ?? []).filter((x: any) => x.paid_at).map((x: any) => ({
-          id: x.id, source: "Devis", numero: x.numero, montant: (x.amount_paid_cents ?? 0) / 100, date: x.paid_at,
-        })));
-      }
+      const email = (user.email ?? "").trim();
+      const emailLower = email.toLowerCase();
+      const uid = user.user_id;
+
+      // Helper: ilike + user_id fallback
+      const orEmailUid = (emailCol: string) =>
+        email
+          ? `${emailCol}.ilike.${emailLower},user_id.eq.${uid}`
+          : `user_id.eq.${uid}`;
+
+      const [{ data: d }, { data: f }, { data: m }, { data: b2b }] = await Promise.all([
+        supabase
+          .from("devis")
+          .select("id, numero, statut, prix_estime, created_at, paid_at, amount_paid_cents, depart, arrivee")
+          .or(orEmailUid("email"))
+          .order("created_at", { ascending: false })
+          .limit(100),
+        email
+          ? supabase
+              .from("factures")
+              .select("id, numero, statut, prix_ttc, created_at, date_paiement, depart, arrivee")
+              .ilike("client_email", emailLower)
+              .order("created_at", { ascending: false })
+              .limit(100)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("demandes_convoyage")
+          .select("id, depart, arrivee, statut, prix_estime, paid_at, amount_paid_cents, created_at")
+          .or(orEmailUid("email"))
+          .order("created_at", { ascending: false })
+          .limit(100),
+        email
+          ? supabase
+              .from("b2b_transport_requests")
+              .select("id, numero, pickup_address, dropoff_address, payment_status, estimated_price_ttc, created_at, operational_status, company_id")
+              .order("created_at", { ascending: false })
+              .limit(100)
+              .then(async (res) => {
+                // filter by company contact email match
+                const ids = (res.data ?? []).map((r: any) => r.company_id).filter(Boolean);
+                if (ids.length === 0) return { data: [] as any[] };
+                const { data: cs } = await supabase
+                  .from("companies")
+                  .select("id, contact_email")
+                  .in("id", ids);
+                const ok = new Set(
+                  (cs ?? [])
+                    .filter((c: any) => (c.contact_email ?? "").toLowerCase() === emailLower)
+                    .map((c: any) => c.id),
+                );
+                return { data: (res.data ?? []).filter((r: any) => ok.has(r.company_id)) };
+              })
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      setDevis(d ?? []);
+      setFactures(f ?? []);
+      // Combine demandes + b2b requests under "missions"
+      const b2bAsMissions = (b2b ?? []).map((r: any) => ({
+        id: r.id,
+        depart: r.pickup_address,
+        arrivee: r.dropoff_address,
+        statut: r.operational_status,
+        prix_estime: r.estimated_price_ttc,
+        paid_at: r.payment_status === "paid" ? r.created_at : null,
+        created_at: r.created_at,
+        source: "B2B",
+      }));
+      setMissions([...(m ?? []), ...b2bAsMissions]);
+
+      // Paiements multi-source
+      const paiementsList: any[] = [];
+      (d ?? []).forEach((x: any) => {
+        if (x.paid_at) paiementsList.push({
+          id: `dev-${x.id}`, source: "Devis", numero: x.numero,
+          montant: (x.amount_paid_cents ?? Number(x.prix_estime) * 100) / 100, date: x.paid_at,
+        });
+      });
+      (m ?? []).forEach((x: any) => {
+        if (x.paid_at) paiementsList.push({
+          id: `dem-${x.id}`, source: "Demande", numero: x.id.slice(0, 8),
+          montant: (x.amount_paid_cents ?? Number(x.prix_estime ?? 0) * 100) / 100, date: x.paid_at,
+        });
+      });
+      (f ?? []).filter((x: any) => x.date_paiement).forEach((x: any) => {
+        paiementsList.push({
+          id: `fac-${x.id}`, source: "Facture", numero: x.numero,
+          montant: Number(x.prix_ttc ?? 0), date: x.date_paiement,
+        });
+      });
+      (b2b ?? []).filter((x: any) => x.payment_status === "paid").forEach((x: any) => {
+        paiementsList.push({
+          id: `b2b-${x.id}`, source: "B2B", numero: x.numero,
+          montant: Number(x.estimated_price_ttc ?? 0), date: x.created_at,
+        });
+      });
+      paiementsList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setPaiements(paiementsList);
+
+      // Logs : actor OR entity = user
       const { data: l } = await supabase
         .from("activity_logs")
         .select("id, action, entity_type, created_at, metadata")
-        .eq("entity_id", user.user_id)
+        .or(`actor_user_id.eq.${uid},entity_id.eq.${uid}`)
         .order("created_at", { ascending: false })
-        .limit(30);
+        .limit(50);
       setLogs(l ?? []);
     })();
   }, [user]);

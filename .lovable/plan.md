@@ -1,119 +1,101 @@
+## Objectif
 
-# Refonte admin premium — ERP/CRM type grand groupe
-
-Plan structuré pour transformer l'admin actuel en plateforme de pilotage complète, sans casser le backend existant. Découpé en 3 lots livrables.
-
----
-
-## LOT 1 — Nettoyage, structure & contrôle utilisateurs
-
-### 1.1 — Sidebar premium simplifiée
-- Réorganiser `src/routes/_authenticated/admin.tsx` :
-  - **Pilotage** : Tableau de bord, Notifications
-  - **Comptes** : Utilisateurs, Organisations, Convoyeurs, Documents
-  - **Activité** : Devis, Demandes, Messages
-  - **Opérations** : Trajets, Attributions
-  - **Finance** : Factures, Paiements
-  - **Système** : Historique, Paramètres
-- **Masquer** : Dispatch B2B + CRM Flotte (pas opérationnels) → flag `hidden`
-- Typo plus claire, hiérarchie visuelle resserrée, dégrouper `Clients particuliers` (fusionné dans Utilisateurs)
-
-### 1.2 — Utilisateurs : contrôle total
-Refonte `admin.utilisateurs.tsx` avec **drawer détail** (pas modale) :
-- Liste : avatar, nom, email, rôle, type, statut, date inscription, dernière connexion
-- Filtres : rôle, type (particulier/pro/B2B/convoyeur/admin), statut
-- Drawer détail (onglets) :
-  - **Profil** : édition prenom/nom/téléphone/societe/siret/type_client
-  - **Rôle & accès** : changer rôle (`user_roles`), suspendre/réactiver (`profiles.statut`), supprimer (soft delete)
-  - **Sécurité** : envoyer reset password (admin API), forcer logout
-  - **Historique** : devis liés, missions, paiements, documents (lecture seule, liens vers détails)
-- Actions rapides en haut : Suspendre, Reset MDP, Supprimer
-
-### 1.3 — Historique d'activité fonctionnel
-- La table `activity_logs` existe mais est peu alimentée. Ajouter `log_activity()` aux points clés :
-  - Création devis, paiement reçu, trajet publié, mission acceptée, inspection terminée, facture émise
-- Refonte `admin.historique.tsx` : timeline chronologique avec icônes, filtre par entity_type/date/acteur, recherche
-- Sur chaque page détail (devis, mission, facture) : section "Historique de ce dossier" filtrée
+Un seul système d'affichage détail dans tout l'admin : le **drawer latéral bleu premium** (`AdminDetailDrawer`) déjà utilisé sur la page Utilisateurs. Plus aucune page séparée `/$id`, plus aucune modale. Et : remplir correctement le drawer Utilisateurs avec les vraies données.
 
 ---
 
-## LOT 2 — Finance premium (Factures + Paiements)
+## Périmètre
 
-### 2.1 — Factures
-Refonte `admin.factures.tsx` :
-- Tableau : N°, Client, Type, Mission liée, Date, HT, TVA, TTC, Statut (badge couleur)
-- Filtres : statut, type (particulier/B2B), période, recherche
-- Stats en haut : total émis, payé, en attente, en retard
-- Actions par ligne (menu …) : Voir, Télécharger PDF, Envoyer email, Marquer payée, Annuler, Dupliquer
-- Drawer détail (réutilise `admin.factures.$factureId.tsx` en mode drawer)
+### Pages à convertir au drawer (suppression des routes `$id`)
+- `admin/devis` → drawer Devis (supprime `admin.devis.$devisId.tsx`)
+- `admin/missions` (via attributions) → drawer Mission (supprime `admin.missions.$missionId.tsx` côté admin)
+- `admin/clients` → drawer Client (supprime `admin.clients.$clientId.tsx`)
+- `admin/factures` → drawer Facture (supprime `admin.factures.$factureId.tsx`)
+- `admin/demandes` → drawer Demande (supprime `admin.demandes.$demandeId.tsx`)
+- `admin/convoyeurs` → drawer Convoyeur (supprime `admin.convoyeurs.$convoyeurId.tsx`)
+- `admin/trajets`, `admin/paiements`, `admin/attributions` → drawer dédié
 
-### 2.2 — Paiements & facturation (dashboard finance)
-Refonte `admin.paiements.tsx` en vrai cockpit :
-- **KPI cards** : CA HT mois, TVA collectée, CA TTC, encours, échecs
-- **Tabs** :
-  - **Paiements Stripe** (particulier) : liste depuis `devis.paid_at` + `demandes_convoyage.paid_at`
-  - **Paiements B2B** : depuis `b2b_transport_requests`
-  - **Échecs & remboursements** : statuts `failed`/`refunded`
-  - **Échéances** : factures non payées, regroupées par retard
-- Graphique CA 12 derniers mois (recharts existant)
-- Actions : marquer payée, relancer (email template), rembourser (manuel ref Stripe)
+Tous les `<Link to="/admin/.../$id">` et `navigate({ to: ... })` remplacés par `setSelected(row)` qui ouvre le drawer. Les boutons œil et lignes cliquables déclenchent le même drawer.
+
+### Drawer Utilisateurs — bug données vides
+
+Cause racine identifiée :
+1. `devis / factures / demandes` filtrés uniquement par `email` exact (sensible casse, NULL ignorés).
+2. Téléphone et adresse parfois absents en base (formulaires d'inscription ne demandent pas l'adresse).
+3. `paiements` ne récupèrent que ceux des `devis` (pas les `b2b_transport_requests` ni `factures`).
+4. `logs` filtrés sur `entity_id = user_id` uniquement → invisible pour entités liées (devis, missions).
+
+Corrections :
+- Requêtes par `lower(email) = lower(?)` + fallback `user_id` quand présent (`devis.user_id`, `demandes_convoyage.user_id`).
+- Récupérer paiements depuis `devis.paid_at`, `factures.statut='payee'`, `b2b_transport_requests.payment_status='paid'`.
+- Récupérer `logs` par `actor_user_id = user_id OR entity_id = user_id`.
+- Ajouter section **Inscription** avec date, source (formulaire utilisé), métadonnées.
+- Charger `auth.users.user_metadata` via edge function `admin-user-actions` (action `get_user_full`) pour récupérer téléphone/adresse stockés en metadata si absents du profil.
+
+### Inscription — champs manquants en base
+- Ajouter champ **adresse** (optionnel) aux 4 formulaires (`inscription-client/pro/flotte/convoyeur`).
+- Passer `adresse` dans `raw_user_meta_data` au `signUp`.
+- Migration : étendre `handle_new_user()` pour copier `adresse` dans `profiles.adresse`.
+- Téléphone : déjà obligatoire, vérifier mapping dans le trigger (OK).
 
 ---
 
-## LOT 3 — Trajets/Attribution + Paramètres + Polish
+## Architecture cible
 
-### 3.1 — Trajets : drawer premium
-Refonte `admin.trajets.tsx` (déjà commencée) → drawer plein écran avec sections accordéon :
-- **Source** : devis lié (numéro, date paiement, montant) — non éditable
-- **Trajet** : départ/arrivée/date/véhicule — éditable
-- **Prix** : prix client (auto du devis), input `commission_convoyeur_pct` avec preview live 3 colonnes (Client/Convoyeur/Société)
-- **Attribution** : radio `prix_fixe` / `enchère`
-- **Publication** : bouton "Publier" (statut → `publie`, déclenche `published_at`)
-- **Convoyeur** : si attribué, fiche compacte + bouton désattribuer
-- **Statut & timeline** : badges + historique étapes
-- Suppression boutons œil, suppression modales legacy
+```text
+Liste admin (table)
+  └── clic ligne / œil / 3 points
+        └── setSelected(row)
+              └── <XxxDetailDrawer xxx={selected} onClose={...} onChanged={refresh} />
+                    └── AdminDetailDrawer (Sheet bleu, déjà existant)
+                          ├── Header (titre + sous-titre + badges)
+                          ├── Tabs (Détails / Historique / Documents / Logs)
+                          └── Footer (actions : modifier, supprimer, statut, etc.)
+```
 
-### 3.2 — Paramètres & rôles
-Refonte `admin.parametres.tsx` en tabs :
-- **Entreprise** : logo, signature, coordonnées, mentions facture
-- **Facturation** : TVA, numérotation (préfixes/year), conditions de paiement
-- **Templates emails** : liste lecture, lien vers preview (`/lovable/email/...`)
-- **Stripe** : statut connexion (sandbox/live), webhook URL
-- **Rôles & permissions** : tableau matrice (rôle × action), édition par rôle via `user_roles` + table de permissions futures
+Toutes les vues détail héritent du même `AdminDetailDrawer` + `DrawerSection` + `DrawerField` + `DrawerGrid` + `DrawerBadge` (déjà dispo dans `src/components/admin/AdminDetailDrawer.tsx`).
 
-### 3.3 — Design global admin
-- Tokens `--pro-*` déjà en place, renforcer hiérarchie
-- Card premium uniforme, badges statuts cohérents (extension `StatusBadge.tsx`)
-- Drawer (sheet) systématique pour les détails, plus de modales agressives
-- Mobile : refresh `AdminSidebar` drawer, tableaux scrollables, cards stack
-- Suppression de tous les boutons œil sans page de destination
+---
+
+## Étapes d'implémentation
+
+1. **Fix drawer Utilisateurs (priorité 1)**
+   - Patch `UserDetailDrawer` : requêtes case-insensitive + fallback `user_id`, agrégation paiements multi-source, logs élargis.
+   - Édition du téléphone/adresse depuis le drawer (action `update_profile`).
+
+2. **Drawers métier** (un fichier par entité dans `src/components/admin/drawers/`)
+   - `DevisDrawer.tsx`, `MissionDrawer.tsx`, `ClientDrawer.tsx`, `FactureDrawer.tsx`, `DemandeDrawer.tsx`, `ConvoyeurDrawer.tsx`, `TrajetDrawer.tsx`, `PaiementDrawer.tsx`.
+   - Chaque drawer : props `{ id, open, onClose, onChanged }`, charge ses données, affiche en sections + footer d'actions.
+
+3. **Conversion des pages liste**
+   - Pour chaque `admin.<entity>.tsx` : supprimer les `<Link>` détail, ajouter `useState<XxxRow|null>(null)`, monter le drawer en bas du composant.
+   - `admin.attributions.tsx`, `admin.index.tsx` : remplacer les liens vers `/$id` par ouverture drawer (état levé ou navigation contrôlée).
+
+4. **Suppression des routes détail**
+   - Supprimer les 6 fichiers `admin.<entity>.$id.tsx` côté admin (le routeTree se régénère).
+   - Garder les routes détail côté client/convoyeur (hors admin).
+
+5. **Migration & inscription**
+   - Migration SQL : `handle_new_user()` ajoute `adresse` depuis metadata.
+   - Ajouter input adresse aux 4 formulaires d'inscription + envoi dans `data:` du `signUp`.
+
+6. **Edge function**
+   - Étendre `admin-user-actions` avec action `get_user_full` (lit auth.users + profile + convoyeur, fusionne).
 
 ---
 
 ## Détails techniques
 
-- **Aucune migration DB destructive** : on réutilise tables existantes (`profiles`, `user_roles`, `activity_logs`, `factures`, `devis`, `trajets`, `attributions`)
-- **Nouvelle migration mineure** : ajouter quelques `log_activity()` triggers ou plutôt appels côté serveur (préféré, plus contrôlable)
-- **Composants partagés** : créer `src/components/admin/AdminDrawer.tsx` (sheet plein écran) + `src/components/admin/KPICard.tsx` + extension `AdminUI.tsx`
-- **RLS** : aucun changement, déjà OK pour admin role
-- **Auth admin actions** (suspend/delete/reset password) : edge function `admin-user-actions` (admin-only via `has_role`)
-- **Pas de framer-motion** (respecte la contrainte projet — CSS/Tailwind only)
+- **Bleu électrique** : déjà dans `AdminDetailDrawer` (gradient `#0b1026 → #0d1430`, accents `bg-blue-500/15`).
+- **Largeur** : `width="2xl"` pour drawers riches (mission/client), `xl` par défaut.
+- **Animations** : héritées du `Sheet` shadcn (slide-in droit, 300ms).
+- **Fermeture** : clic en dehors, touche Échap, croix.
+- **Scroll interne** : `overflow-y-auto` sur le body, header/footer fixes.
+- **Deep-linking optionnel** : on garde l'URL inchangée (drawer = état UI), pas de routing. Si besoin partage URL plus tard : query param `?selected=<id>` géré par chaque page liste.
 
 ---
 
-## Livraison
-
-Volume important — je propose de livrer en **3 messages séquentiels** :
-1. **Lot 1** (sidebar + utilisateurs + historique) — la base contrôle
-2. **Lot 2** (factures + paiements cockpit) — le finance
-3. **Lot 3** (trajets drawer + paramètres + polish) — l'opérationnel
-
-À chaque lot : build vérifié, pas de régression backend.
-
----
-
-## Question
-
-**Confirme-tu :**
-1. Masquage CRM Dispatch B2B + Flotte (oui/non — ou les garder visibles mais marqués "bêta") ?
-2. On démarre par le **Lot 1** maintenant ?
+## Hors périmètre
+- Refonte des pages côté client/convoyeur (uniquement admin).
+- Changement de thème global hors drawer.
+- Migration des modales d'action (AlertDialog confirmations restent inline).
