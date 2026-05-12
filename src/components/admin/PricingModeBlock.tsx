@@ -170,6 +170,22 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
             />
           </FormField>
 
+        {/* === Inputs prix === */}
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <FormField label={lockedClientPrice != null ? "Prix client TTC (verrouillé devis)" : "Prix client TTC (€)"}>
+            <TextInput
+              type="number"
+              step="0.01"
+              value={prixClient}
+              onChange={(e) => setPrixClient(e.target.value)}
+              placeholder="ex: 380"
+              disabled={lockedClientPrice != null}
+            />
+            {lockedSourceLabel && (
+              <p className="mt-1 text-[10px] text-pro-muted">Auto depuis {lockedSourceLabel}</p>
+            )}
+          </FormField>
+
           {mode === "fixe" ? (
             <FormField label="Prix convoyeur net (€)">
               <TextInput
@@ -177,9 +193,10 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
                 step="0.01"
                 value={prixFixe}
                 onChange={(e) => setPrixFixe(e.target.value)}
-                placeholder="ex: 250"
+                placeholder={effectiveClient ? `ex: ${Math.round(effectiveClient * (RECO_MIN_PCT + RECO_MAX_PCT) / 200)}` : "ex: 250"}
               />
             </FormField>
+
           ) : (
             <FormField label="Marge cible indicative (%)">
               <Select value={margeCible} onChange={(e) => setMargeCible(e.target.value)}>
