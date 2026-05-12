@@ -471,7 +471,7 @@ function AdminDashboard() {
                 {recentDemandes.map((d) => (
                   <tr key={d.id}>
                     <td>
-                      <Link to="/admin/demandes/$demandeId" params={{ demandeId: d.id }} className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
+                      <Link to="/admin/demandes" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
                         {d.prenom} {d.nom}
                       </Link>
                       <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
@@ -496,8 +496,7 @@ function AdminDashboard() {
                     </td>
                     <td className="text-right">
                       <Link
-                        to="/admin/demandes/$demandeId"
-                        params={{ demandeId: d.id }}
+                        to="/admin/demandes"
                         className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
                       >
                         Ouvrir <ChevronRight size={12} />
