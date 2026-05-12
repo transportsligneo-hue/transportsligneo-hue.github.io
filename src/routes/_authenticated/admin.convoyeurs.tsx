@@ -11,7 +11,6 @@ import {
   User,
   Briefcase,
   FileText,
-  FileText,
 } from "lucide-react";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
