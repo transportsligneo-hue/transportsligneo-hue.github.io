@@ -91,7 +91,7 @@ function AdminConvoyeurs() {
     const [docsRes, attrRes] = await Promise.all([
       supabase
         .from("documents_convoyeurs")
-        .select("id, type_document, nom_fichier, statut_validation" as never)
+        .select("id, type_document, nom_fichier, statut_validation")
         .eq("convoyeur_id", c.id)
         .order("created_at", { ascending: false }),
       supabase
