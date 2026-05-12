@@ -76,7 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("user_roles")
           .select("role, actif")
           .eq("user_id", userId)
-          .order("created_at", { ascending: false })
+          .eq("actif", true)
+          .order("role", { ascending: true })
           .limit(1)
           .maybeSingle(),
         supabase
