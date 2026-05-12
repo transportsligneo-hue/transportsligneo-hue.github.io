@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, User, Phone, Mail, Briefcase } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, User, Briefcase } from "lucide-react";
 import {
   PageHeader,
   Card,
