@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, FileText, CheckCircle2, Eye } from "lucide-react";
+import { Loader2, Download, FileText, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 import {
@@ -10,11 +10,13 @@ import {
   KpiCard,
   Badge,
   EmptyState,
+  Button,
   IconButton,
   Select,
   SearchInput,
   factureStatutTone,
 } from "@/components/admin/AdminUI";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminFacturesPage,
@@ -56,6 +58,7 @@ const STATUTS = [
 ];
 
 function AdminFacturesPage() {
+  const [selected, setSelected] = useState<FactureRow | null>(null);
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -216,11 +219,9 @@ function AdminFacturesPage() {
                   >
                     {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </Select>
-                  <Link to="/admin/factures/$factureId" params={{ factureId: f.id }}>
-                    <IconButton title="Voir détail" tone="neutral">
-                      <Eye size={15} />
-                    </IconButton>
-                  </Link>
+                  <IconButton title="Voir détail" tone="neutral" onClick={() => setSelected(f)}>
+                    <Eye size={15} />
+                  </IconButton>
                   <IconButton
                     onClick={() => handleDownload(f)}
                     title="Télécharger PDF"
@@ -239,6 +240,72 @@ function AdminFacturesPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {selected && (
+        <AdminDetailDrawer
+          open={!!selected}
+          onClose={() => setSelected(null)}
+          title={selected.numero}
+          subtitle={selected.client_societe || `${selected.client_prenom ?? ""} ${selected.client_nom ?? ""}`.trim()}
+          badge={
+            <div className="flex flex-wrap gap-2">
+              <DrawerBadge tone={selected.statut === "payee" ? "green" : selected.statut === "en_retard" ? "red" : "blue"}>
+                {STATUTS.find(s => s.value === selected.statut)?.label ?? selected.statut}
+              </DrawerBadge>
+              <DrawerBadge tone="slate">{selected.type_facture === "b2b" ? "B2B" : "Particulier"}</DrawerBadge>
+            </div>
+          }
+          footer={
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => handleDownload(selected)} icon={<Download size={12} />}>Télécharger PDF</Button>
+              {selected.statut !== "payee" && (
+                <Button size="sm" onClick={() => { handleStatut(selected.id, "payee"); setSelected({ ...selected, statut: "payee" }); }} className="bg-emerald-500 hover:bg-emerald-600 text-white" icon={<CheckCircle2 size={12} />}>Marquer payée</Button>
+              )}
+            </div>
+          }
+        >
+          <DrawerSection title="Client" icon={<User size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Nom" value={`${selected.client_prenom ?? ""} ${selected.client_nom ?? ""}`.trim()} />
+              <DrawerField label="Email" value={selected.client_email} />
+              <DrawerField label="Société" value={selected.client_societe} />
+              <DrawerField label="Adresse" value={selected.client_adresse} />
+              <DrawerField label="SIRET" value={selected.client_siret} mono />
+              <DrawerField label="TVA" value={selected.client_tva} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Départ" value={selected.depart} />
+              <DrawerField label="Arrivée" value={selected.arrivee} />
+              <DrawerField label="Distance" value={selected.distance_km ? `${selected.distance_km} km` : null} />
+              <DrawerField label="Désignation" value={selected.designation} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Dates & paiement" icon={<Building2 size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Date facture" value={selected.date_facture ? new Date(selected.date_facture).toLocaleDateString("fr-FR") : null} />
+              <DrawerField label="Date mission" value={selected.date_mission ? new Date(selected.date_mission).toLocaleDateString("fr-FR") : null} />
+              <DrawerField label="Échéance" value={selected.date_echeance ? new Date(selected.date_echeance).toLocaleDateString("fr-FR") : null} />
+              <DrawerField label="Mode paiement" value={selected.mode_paiement} />
+              <DrawerField label="Conditions" value={selected.conditions_paiement} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Montants" icon={<Receipt size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Prix HT" value={eur(Number(selected.prix_ht))} />
+              <DrawerField label={`TVA ${selected.tva_taux}%`} value={eur(Number(selected.prix_tva))} />
+            </DrawerGrid>
+            <div className="mt-3 pt-3 border-t border-white/10 flex items-baseline justify-between">
+              <span className="text-xs uppercase tracking-wider text-white/50">Total TTC</span>
+              <span className="text-3xl font-semibold text-white">{eur(Number(selected.prix_ttc))}</span>
+            </div>
+          </DrawerSection>
+        </AdminDetailDrawer>
       )}
     </div>
   );

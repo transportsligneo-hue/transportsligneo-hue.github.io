@@ -8,8 +8,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
@@ -41,6 +41,8 @@ type UnifiedUser = {
   account_status: string;
   organization_id: string | null;
   societe: string | null;
+  siret: string | null;
+  adresse: string | null;
   created_at: string;
   source: "profile" | "convoyeur";
 };
@@ -76,32 +78,34 @@ function AdminUtilisateurs() {
     try {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, created_at")
+        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, siret, adresse, created_at")
         .order("created_at", { ascending: false });
 
       const { data: convoyeurs } = await supabase
         .from("convoyeurs")
-        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, created_at");
+        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, ville, created_at");
 
       const { data: roles } = await supabase.from("user_roles").select("user_id, role").eq("actif", true);
       const roleByUser = new Map<string, string>();
       (roles ?? []).forEach((r) => roleByUser.set(r.user_id, r.role));
 
       const rows: UnifiedUser[] = [];
-      (profiles ?? []).forEach((p) => {
+      (profiles ?? []).forEach((p: any) => {
         const role = roleByUser.get(p.user_id) ?? p.type_client ?? "client";
         rows.push({
           user_id: p.user_id, email: p.email, nom: p.nom, prenom: p.prenom, telephone: p.telephone,
           role, type_client: p.type_client, account_status: p.account_status ?? "active",
-          organization_id: p.organization_id, societe: p.societe, created_at: p.created_at, source: "profile",
+          organization_id: p.organization_id, societe: p.societe, siret: p.siret ?? null,
+          adresse: p.adresse ?? null, created_at: p.created_at, source: "profile",
         });
       });
-      (convoyeurs ?? []).forEach((c) => {
+      (convoyeurs ?? []).forEach((c: any) => {
         if (rows.some((r) => r.user_id === c.user_id)) return;
         rows.push({
           user_id: c.user_id, email: c.email, nom: c.nom, prenom: c.prenom, telephone: c.telephone,
           role: "convoyeur", type_client: null, account_status: c.account_status ?? "active",
-          organization_id: c.organization_id, societe: null, created_at: c.created_at, source: "convoyeur",
+          organization_id: c.organization_id, societe: null, siret: null, adresse: c.ville ?? null,
+          created_at: c.created_at, source: "convoyeur",
         });
       });
       setUsers(rows);
@@ -275,15 +279,22 @@ function UserDetailDrawer({
   const [factures, setFactures] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
 
+  const [missions, setMissions] = useState<any[]>([]);
+  const [paiements, setPaiements] = useState<any[]>([]);
+
   useEffect(() => {
-    if (!user) { setDevis([]); setFactures([]); setLogs([]); return; }
+    if (!user) { setDevis([]); setFactures([]); setLogs([]); setMissions([]); setPaiements([]); return; }
     (async () => {
       if (user.email) {
-        const [{ data: d }, { data: f }] = await Promise.all([
-          supabase.from("devis").select("id, numero, statut, prix_estime, created_at").eq("email", user.email).order("created_at", { ascending: false }).limit(20),
-          supabase.from("factures").select("id, numero, statut, prix_ttc, created_at").eq("client_email", user.email).order("created_at", { ascending: false }).limit(20),
+        const [{ data: d }, { data: f }, { data: m }] = await Promise.all([
+          supabase.from("devis").select("id, numero, statut, prix_estime, created_at, paid_at, amount_paid_cents").eq("email", user.email).order("created_at", { ascending: false }).limit(50),
+          supabase.from("factures").select("id, numero, statut, prix_ttc, created_at, date_paiement").eq("client_email", user.email).order("created_at", { ascending: false }).limit(50),
+          supabase.from("demandes_convoyage").select("id, depart, arrivee, statut, prix_estime, paid_at, created_at").eq("email", user.email).order("created_at", { ascending: false }).limit(50),
         ]);
-        setDevis(d ?? []); setFactures(f ?? []);
+        setDevis(d ?? []); setFactures(f ?? []); setMissions(m ?? []);
+        setPaiements((d ?? []).filter((x: any) => x.paid_at).map((x: any) => ({
+          id: x.id, source: "Devis", numero: x.numero, montant: (x.amount_paid_cents ?? 0) / 100, date: x.paid_at,
+        })));
       }
       const { data: l } = await supabase
         .from("activity_logs")
@@ -311,32 +322,38 @@ function UserDetailDrawer({
   }
 
   const suspended = user.account_status === "suspended";
+  const roleMeta = roleLabels[user.role] ?? roleLabels.client;
 
   return (
-    <Sheet open={!!user} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{user.prenom} {user.nom}</SheetTitle>
-          <SheetDescription>{user.email}</SheetDescription>
-        </SheetHeader>
-
-        {/* Actions rapides */}
-        <div className="flex flex-wrap gap-2 mt-4">
+    <AdminDetailDrawer
+      open={!!user}
+      onClose={onClose}
+      title={`${user.prenom} ${user.nom}`.trim() || "Utilisateur"}
+      subtitle={user.email ?? "—"}
+      badge={
+        <div className="flex flex-wrap gap-2">
+          <DrawerBadge tone="blue">{roleMeta.label}</DrawerBadge>
+          <DrawerBadge tone={suspended ? "red" : "green"}>{user.account_status}</DrawerBadge>
+          {user.type_client && <DrawerBadge tone="slate">{user.type_client}</DrawerBadge>}
+        </div>
+      }
+      footer={
+        <div className="flex flex-wrap gap-2">
           {suspended ? (
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reactivate", user_id: user.user_id })}>
+            <Button size="sm" disabled={busy} onClick={() => callAction({ action: "reactivate", user_id: user.user_id })} className="bg-emerald-500 hover:bg-emerald-600 text-white">
               <CheckCircle2 size={14} className="mr-1" /> Réactiver
             </Button>
           ) : (
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "suspend", user_id: user.user_id })}>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "suspend", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
               <Ban size={14} className="mr-1" /> Suspendre
             </Button>
           )}
-          <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })}>
-            <KeyRound size={14} className="mr-1" /> Reset mot de passe
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <KeyRound size={14} className="mr-1" /> Reset MDP
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" disabled={busy}><UserCog size={14} className="mr-1" /> Rôle</Button>
+              <Button size="sm" variant="outline" disabled={busy} className="bg-white/10 border-white/20 text-white hover:bg-white/20"><UserCog size={14} className="mr-1" /> Rôle</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Changer le rôle</DropdownMenuLabel>
@@ -350,7 +367,7 @@ function UserDetailDrawer({
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" disabled={busy}><Building2 size={14} className="mr-1" /> Type</Button>
+              <Button size="sm" variant="outline" disabled={busy} className="bg-white/10 border-white/20 text-white hover:bg-white/20"><Building2 size={14} className="mr-1" /> Type</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Type de client</DropdownMenuLabel>
@@ -362,96 +379,138 @@ function UserDetailDrawer({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" variant="destructive" disabled={busy} onClick={() => setConfirmDelete(true)}>
+          <Button size="sm" variant="destructive" disabled={busy} onClick={() => setConfirmDelete(true)} className="ml-auto">
             <Trash2 size={14} className="mr-1" /> Supprimer
           </Button>
         </div>
+      }
+    >
+      <Tabs defaultValue="profil" className="w-full">
+        <TabsList className="grid grid-cols-5 w-full bg-white/10">
+          <TabsTrigger value="profil" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Profil</TabsTrigger>
+          <TabsTrigger value="devis" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Devis ({devis.length})</TabsTrigger>
+          <TabsTrigger value="missions" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Missions ({missions.length})</TabsTrigger>
+          <TabsTrigger value="factures" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Factures ({factures.length})</TabsTrigger>
+          <TabsTrigger value="logs" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Logs</TabsTrigger>
+        </TabsList>
 
-        <Tabs defaultValue="profil" className="mt-6">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="profil">Profil</TabsTrigger>
-            <TabsTrigger value="devis">Devis ({devis.length})</TabsTrigger>
-            <TabsTrigger value="factures">Factures ({factures.length})</TabsTrigger>
-            <TabsTrigger value="logs">Historique</TabsTrigger>
-          </TabsList>
+        <TabsContent value="profil" className="mt-4 space-y-4">
+          <DrawerSection title="Identité" icon={<UserRound size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Prénom" value={user.prenom} />
+              <DrawerField label="Nom" value={user.nom} />
+              <DrawerField label="Email" value={user.email} />
+              <DrawerField label="Téléphone" value={user.telephone} />
+              <DrawerField label="Adresse" value={user.adresse} />
+              <DrawerField label="Créé le" value={new Date(user.created_at).toLocaleString("fr-FR")} />
+            </DrawerGrid>
+          </DrawerSection>
 
-          <TabsContent value="profil" className="space-y-3 mt-4">
-            <Field label="ID utilisateur" value={user.user_id} mono />
-            <Field label="Téléphone" value={user.telephone || "—"} />
-            <Field label="Société" value={user.societe || "—"} />
-            <Field label="Rôle" value={roleLabels[user.role]?.label ?? user.role} />
-            <Field label="Type client" value={user.type_client ?? "—"} />
-            <Field label="Statut" value={user.account_status} />
-            <Field label="Créé le" value={new Date(user.created_at).toLocaleString("fr-FR")} />
-          </TabsContent>
+          <DrawerSection title="Compte" icon={<Shield size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="ID utilisateur" value={user.user_id} mono />
+              <DrawerField label="Rôle" value={roleMeta.label} />
+              <DrawerField label="Type" value={user.type_client ?? "—"} />
+              <DrawerField label="Statut" value={user.account_status} />
+            </DrawerGrid>
+          </DrawerSection>
 
-          <TabsContent value="devis" className="mt-4 space-y-2">
-            {devis.length === 0 ? (
-              <p className="text-sm text-pro-muted text-center py-8">Aucun devis lié.</p>
-            ) : devis.map((d) => (
-              <div key={d.id} className="border border-pro-border rounded-lg p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-pro-text flex items-center gap-2"><FileText size={14} />{d.numero}</p>
-                  <p className="text-xs text-pro-muted">{new Date(d.created_at).toLocaleDateString("fr-FR")} · {d.statut}</p>
-                </div>
-                <p className="text-sm font-semibold">{Number(d.prix_estime).toFixed(2)} €</p>
+          {(user.societe || user.siret) && (
+            <DrawerSection title="Entreprise" icon={<Building2 size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Société" value={user.societe} />
+                <DrawerField label="SIRET" value={user.siret} mono />
+                <DrawerField label="Organisation" value={user.organization_id} mono />
+              </DrawerGrid>
+            </DrawerSection>
+          )}
+
+          {paiements.length > 0 && (
+            <DrawerSection title={`Paiements (${paiements.length})`} icon={<Receipt size={12} />}>
+              <div className="space-y-2">
+                {paiements.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-sm">
+                    <div>
+                      <p className="text-white/90">{p.source} · {p.numero}</p>
+                      <p className="text-xs text-white/50">{new Date(p.date).toLocaleString("fr-FR")}</p>
+                    </div>
+                    <p className="font-semibold text-emerald-300">{p.montant.toFixed(2)} €</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </TabsContent>
+            </DrawerSection>
+          )}
+        </TabsContent>
 
-          <TabsContent value="factures" className="mt-4 space-y-2">
-            {factures.length === 0 ? (
-              <p className="text-sm text-pro-muted text-center py-8">Aucune facture liée.</p>
-            ) : factures.map((f) => (
-              <div key={f.id} className="border border-pro-border rounded-lg p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-pro-text flex items-center gap-2"><Receipt size={14} />{f.numero}</p>
-                  <p className="text-xs text-pro-muted">{new Date(f.created_at).toLocaleDateString("fr-FR")} · {f.statut}</p>
-                </div>
-                <p className="text-sm font-semibold">{Number(f.prix_ttc).toFixed(2)} €</p>
+        <TabsContent value="devis" className="mt-4 space-y-2">
+          {devis.length === 0 ? (
+            <p className="text-sm text-white/50 text-center py-8">Aucun devis lié.</p>
+          ) : devis.map((d) => (
+            <div key={d.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white flex items-center gap-2"><FileText size={14} />{d.numero}</p>
+                <p className="text-xs text-white/50">{new Date(d.created_at).toLocaleDateString("fr-FR")} · {d.statut}</p>
               </div>
-            ))}
-          </TabsContent>
+              <p className="text-sm font-semibold text-white">{Number(d.prix_estime).toFixed(2)} €</p>
+            </div>
+          ))}
+        </TabsContent>
 
-          <TabsContent value="logs" className="mt-4 space-y-2">
-            {logs.length === 0 ? (
-              <p className="text-sm text-pro-muted text-center py-8">Aucune activité enregistrée.</p>
-            ) : logs.map((l) => (
-              <div key={l.id} className="border border-pro-border rounded-lg p-3">
-                <p className="text-sm font-medium text-pro-text">{l.action}</p>
-                <p className="text-xs text-pro-muted">{new Date(l.created_at).toLocaleString("fr-FR")} · {l.entity_type}</p>
+        <TabsContent value="missions" className="mt-4 space-y-2">
+          {missions.length === 0 ? (
+            <p className="text-sm text-white/50 text-center py-8">Aucune mission liée.</p>
+          ) : missions.map((m) => (
+            <div key={m.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+              <p className="text-sm font-medium text-white">{m.depart} → {m.arrivee}</p>
+              <p className="text-xs text-white/50">{new Date(m.created_at).toLocaleDateString("fr-FR")} · {m.statut}{m.prix_estime ? ` · ${Number(m.prix_estime).toFixed(2)} €` : ""}</p>
+            </div>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="factures" className="mt-4 space-y-2">
+          {factures.length === 0 ? (
+            <p className="text-sm text-white/50 text-center py-8">Aucune facture liée.</p>
+          ) : factures.map((f) => (
+            <div key={f.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white flex items-center gap-2"><Receipt size={14} />{f.numero}</p>
+                <p className="text-xs text-white/50">{new Date(f.created_at).toLocaleDateString("fr-FR")} · {f.statut}</p>
               </div>
-            ))}
-          </TabsContent>
-        </Tabs>
+              <p className="text-sm font-semibold text-white">{Number(f.prix_ttc).toFixed(2)} €</p>
+            </div>
+          ))}
+        </TabsContent>
 
-        <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Supprimer définitivement ce compte ?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Cette action est irréversible. Toutes les données associées (devis, missions, documents) resteront mais le compte sera supprimé de l'authentification.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => { setConfirmDelete(false); await callAction({ action: "delete", user_id: user.user_id }); onClose(); }}
-                className="bg-red-600 hover:bg-red-700"
-              >Supprimer</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </SheetContent>
-    </Sheet>
+        <TabsContent value="logs" className="mt-4 space-y-2">
+          {logs.length === 0 ? (
+            <p className="text-sm text-white/50 text-center py-8">Aucune activité enregistrée.</p>
+          ) : logs.map((l) => (
+            <div key={l.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+              <p className="text-sm font-medium text-white">{l.action}</p>
+              <p className="text-xs text-white/50">{new Date(l.created_at).toLocaleString("fr-FR")} · {l.entity_type}</p>
+            </div>
+          ))}
+        </TabsContent>
+      </Tabs>
+
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer définitivement ce compte ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Toutes les données associées (devis, missions, documents) resteront mais le compte sera supprimé de l'authentification.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => { setConfirmDelete(false); await callAction({ action: "delete", user_id: user.user_id }); onClose(); }}
+              className="bg-red-600 hover:bg-red-700"
+            >Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </AdminDetailDrawer>
   );
 }
 
-function Field({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex justify-between gap-4 border-b border-pro-border pb-2">
-      <span className="text-xs uppercase tracking-wider text-pro-muted">{label}</span>
-      <span className={`text-sm text-pro-text ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
-    </div>
-  );
-}
