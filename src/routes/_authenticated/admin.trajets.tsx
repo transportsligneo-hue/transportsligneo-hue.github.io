@@ -715,6 +715,8 @@ function AdminTrajets() {
             <div className="mt-5 pt-5 border-t border-pro-border">
               <PricingModeBlock
                 trajetId={selected.id}
+                lockedClientPrice={linkedDevis?.prix_estime ?? null}
+                lockedSourceLabel={linkedDevis ? `devis ${linkedDevis.numero}` : null}
                 initial={{
                   pricing_mode: selected.pricing_mode ?? "fixe",
                   prix_client_ttc: selected.prix_client_ttc,
