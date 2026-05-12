@@ -27,12 +27,21 @@ export interface PricingModeBlockProps {
     prix_convoyeur_max?: number | null;
     marge_indicative_pct?: number | null;
   };
+  /** Si fourni (ex. devis accepté), le prix client TTC est verrouillé sur cette valeur. */
+  lockedClientPrice?: number | null;
+  /** Numéro du devis source pour affichage explicatif. */
+  lockedSourceLabel?: string | null;
   onSaved?: (next: PricingModeBlockProps["initial"]) => void;
 }
 
-export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBlockProps) {
+/** Bornes recommandées par défaut pour la rémunération convoyeur (en % du prix client TTC). */
+const RECO_MIN_PCT = 55;
+const RECO_MAX_PCT = 65;
+
+export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedSourceLabel, onSaved }: PricingModeBlockProps) {
+  const effectiveClient = lockedClientPrice ?? initial.prix_client_ttc ?? null;
   const [mode, setMode] = useState<"fixe" | "enchere">(initial.pricing_mode ?? "fixe");
-  const [prixClient, setPrixClient] = useState<string>(initial.prix_client_ttc?.toString() ?? "");
+  const [prixClient, setPrixClient] = useState<string>(effectiveClient?.toString() ?? "");
   const [prixFixe, setPrixFixe] = useState<string>(initial.prix_convoyeur_fixe?.toString() ?? "");
   const [prixMin, setPrixMin] = useState<string>(initial.prix_convoyeur_min?.toString() ?? "");
   const [prixMax, setPrixMax] = useState<string>(initial.prix_convoyeur_max?.toString() ?? "");
@@ -42,13 +51,15 @@ export function PricingModeBlock({ trajetId, initial, onSaved }: PricingModeBloc
 
   useEffect(() => {
     setMode(initial.pricing_mode ?? "fixe");
-    setPrixClient(initial.prix_client_ttc?.toString() ?? "");
+    const next = lockedClientPrice ?? initial.prix_client_ttc ?? null;
+    setPrixClient(next?.toString() ?? "");
     setPrixFixe(initial.prix_convoyeur_fixe?.toString() ?? "");
     setPrixMin(initial.prix_convoyeur_min?.toString() ?? "");
     setPrixMax(initial.prix_convoyeur_max?.toString() ?? "");
     setMargeCible(initial.marge_indicative_pct?.toString() ?? "35");
-  }, [trajetId, initial.pricing_mode, initial.prix_client_ttc, initial.prix_convoyeur_fixe,
+  }, [trajetId, lockedClientPrice, initial.pricing_mode, initial.prix_client_ttc, initial.prix_convoyeur_fixe,
       initial.prix_convoyeur_min, initial.prix_convoyeur_max, initial.marge_indicative_pct]);
+
 
   const num = (s: string) => (s.trim() === "" ? null : parseFloat(s));
 
