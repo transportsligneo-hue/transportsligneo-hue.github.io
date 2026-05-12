@@ -21,7 +21,7 @@ export default function MobileBottomNav() {
 
   const goEspace = () => {
     if (!isAuthenticated) return navigate({ to: "/login" });
-    if (role === "admin") return navigate({ to: "/admin" });
+    if (role === "admin" || role === "super_admin") return navigate({ to: "/admin" });
     if (role === "convoyeur") return navigate({ to: "/convoyeur" });
     return navigate({ to: "/dashboard-client" });
   };
