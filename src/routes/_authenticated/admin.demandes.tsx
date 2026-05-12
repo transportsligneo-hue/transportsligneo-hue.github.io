@@ -215,7 +215,7 @@ function AdminDemandes() {
                       </td>
                       <td>
                         <span className="font-semibold text-[color:var(--admin-text)] tabular-nums whitespace-nowrap">
-                          {q?.ttc != null ? `${Number(q.ttc).toFixed(0)} €` : "—"}
+                          {q?.priceTtc != null ? `${Number(q.priceTtc).toFixed(0)} €` : "—"}
                         </span>
                       </td>
                       <td>
