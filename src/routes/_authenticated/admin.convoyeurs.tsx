@@ -373,6 +373,122 @@ function AdminConvoyeurs() {
           {creating ? "Création..." : "Créer le compte"}
         </Button>
       </Modal>
+
+      <AdminDetailDrawer
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        badge={
+          selected ? (
+            <DrawerBadge
+              tone={
+                selected.statut === "valide"
+                  ? "green"
+                  : selected.statut === "refuse" || selected.statut === "suspendu"
+                    ? "red"
+                    : "amber"
+              }
+            >
+              {statutLabels[selected.statut] ?? selected.statut}
+            </DrawerBadge>
+          ) : null
+        }
+        title={selected ? `${selected.prenom} ${selected.nom}` : ""}
+        subtitle={selected ? `${selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} · ${selected.email}` : ""}
+        footer={
+          selected ? (
+            <div className="flex flex-wrap gap-2 justify-end">
+              {selected.statut !== "valide" && (
+                <button
+                  onClick={() => {
+                    updateStatut(selected.id, "valide");
+                    setSelected(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-sm font-medium text-white"
+                >
+                  <CheckCircle size={14} /> Valider
+                </button>
+              )}
+              {selected.statut !== "refuse" && (
+                <button
+                  onClick={() => {
+                    updateStatut(selected.id, "refuse");
+                    setSelected(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-red-400/40 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 text-sm font-medium text-red-200"
+                >
+                  <XCircle size={14} /> Refuser
+                </button>
+              )}
+              {selected.statut !== "suspendu" && selected.statut === "valide" && (
+                <button
+                  onClick={() => {
+                    updateStatut(selected.id, "suspendu");
+                    setSelected(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-200"
+                >
+                  Suspendre
+                </button>
+              )}
+            </div>
+          ) : null
+        }
+      >
+        {selected ? (
+          <>
+            <DrawerSection title="Identité" icon={<User size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Prénom" value={selected.prenom} />
+                <DrawerField label="Nom" value={selected.nom} />
+                <DrawerField label="Email" value={selected.email} />
+                <DrawerField label="Téléphone" value={selected.telephone} />
+                <DrawerField label="Type" value={selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} />
+                <DrawerField label="Inscrit le" value={new Date(selected.created_at).toLocaleString("fr-FR")} />
+              </DrawerGrid>
+            </DrawerSection>
+
+            <DrawerSection title="Profil professionnel" icon={<Briefcase size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Ville" value={selected.ville || "—"} />
+                <DrawerField label="Disponibilité" value={selected.disponibilite || "—"} />
+                <DrawerField label="Permis" value={selected.permis || "—"} />
+                <DrawerField label="Missions effectuées" value={String(missionsCount)} />
+              </DrawerGrid>
+              {selected.message ? (
+                <p className="mt-3 text-sm text-white/70 whitespace-pre-wrap">{selected.message}</p>
+              ) : null}
+            </DrawerSection>
+
+            <DrawerSection title={`Documents (${docs.length})`} icon={<FileText size={12} />}>
+              {docs.length === 0 ? (
+                <p className="text-sm text-white/50">Aucun document envoyé.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {docs.map((d) => (
+                    <li
+                      key={d.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="text-white/90">{d.type_document}</span>
+                      <DrawerBadge
+                        tone={
+                          d.statut_validation === "approuve"
+                            ? "green"
+                            : d.statut_validation === "refuse"
+                              ? "red"
+                              : "amber"
+                        }
+                      >
+                        {d.statut_validation}
+                      </DrawerBadge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+          </>
+        ) : null}
+      </AdminDetailDrawer>
     </div>
   );
 }
