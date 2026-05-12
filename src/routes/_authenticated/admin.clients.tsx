@@ -252,6 +252,117 @@ function AdminClients() {
         </Table>
       )}
 
+      <AdminDetailDrawer
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        badge={
+          selected ? (
+            <DrawerBadge tone={selected.actif ? "green" : "red"}>
+              {selected.actif ? "Compte actif" : "Compte suspendu"}
+            </DrawerBadge>
+          ) : null
+        }
+        title={selected ? `${selected.prenom} ${selected.nom}` : ""}
+        subtitle={selected?.email ?? ""}
+        footer={
+          selected ? (
+            <div className="flex gap-2 justify-end">
+              {selected.actif ? (
+                <button
+                  onClick={() => toggleActif(selected.user_id, false)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-red-400/40 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 text-sm font-medium text-red-200"
+                >
+                  <Ban size={14} /> Suspendre
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleActif(selected.user_id, true)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-sm font-medium text-white"
+                >
+                  <CheckCircle size={14} /> Réactiver
+                </button>
+              )}
+            </div>
+          ) : null
+        }
+      >
+        {selected ? (
+          <>
+            <DrawerSection title="Identité" icon={<User size={12} />}>
+              <DrawerGrid>
+                <DrawerField label="Prénom" value={selected.prenom} />
+                <DrawerField label="Nom" value={selected.nom} />
+                <DrawerField label="Email" value={selected.email || "—"} />
+                <DrawerField label="Téléphone" value={selected.telephone || "—"} />
+                <DrawerField
+                  label="Inscrit le"
+                  value={new Date(selected.created_at).toLocaleString("fr-FR")}
+                />
+                <DrawerField label="ID utilisateur" value={selected.user_id} mono />
+              </DrawerGrid>
+            </DrawerSection>
+
+            <DrawerSection title={`Devis (${history.devis.length})`} icon={<Briefcase size={12} />}>
+              {history.devis.length === 0 ? (
+                <p className="text-sm text-white/50">Aucun devis.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.devis.map((d) => (
+                    <li
+                      key={d.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{d.numero}</span>
+                      <span className="text-white/70">{d.statut}</span>
+                      <span className="text-white/90">{Number(d.prix_estime ?? 0).toFixed(2)} €</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+
+            <DrawerSection title={`Missions (${history.missions.length})`} icon={<Briefcase size={12} />}>
+              {history.missions.length === 0 ? (
+                <p className="text-sm text-white/50">Aucune mission.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.missions.map((m) => (
+                    <li
+                      key={m.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{m.numero ?? m.id.slice(0, 8)}</span>
+                      <span className="text-white/70">{m.statut}</span>
+                      <span className="text-white/50 text-xs">
+                        {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+
+            <DrawerSection title={`Factures (${history.factures.length})`} icon={<Briefcase size={12} />}>
+              {history.factures.length === 0 ? (
+                <p className="text-sm text-white/50">Aucune facture.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {history.factures.map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex items-center justify-between text-sm bg-white/5 rounded-md px-3 py-2"
+                    >
+                      <span className="font-mono text-blue-200 text-xs">{f.numero}</span>
+                      <span className="text-white/70">{f.statut}</span>
+                      <span className="text-white/90">{Number(f.prix_ttc ?? 0).toFixed(2)} €</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DrawerSection>
+          </>
+        ) : null}
+      </AdminDetailDrawer>
     </div>
   );
 }
