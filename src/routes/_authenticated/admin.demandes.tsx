@@ -52,6 +52,7 @@ function AdminDemandes() {
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [converting, setConverting] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Demande | null>(null);
 
   const fetchDemandes = useCallback(async () => {
     let query = supabase
