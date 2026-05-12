@@ -39,6 +39,19 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<ClientRow | null>(null);
+  const [missions, setMissions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!selected) { setMissions([]); return; }
+    void supabase
+      .from("missions")
+      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total")
+      .eq("user_id", selected.user_id)
+      .order("date_prise_en_charge", { ascending: false })
+      .limit(50)
+      .then(({ data }) => setMissions(data ?? []));
+  }, [selected]);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
