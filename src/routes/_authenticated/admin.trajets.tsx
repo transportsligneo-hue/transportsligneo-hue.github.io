@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Eye, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
+import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -470,7 +470,7 @@ function AdminTrajets() {
           </THead>
           <tbody>
             {trajets.map((t) => (
-              <TR key={t.id}>
+              <TR key={t.id} onClick={() => { setSelected(t); setEditing(false); }}>
                 <TD>
                   <p className="font-medium text-pro-text">
                     {t.depart} → {t.arrivee}
@@ -496,16 +496,10 @@ function AdminTrajets() {
                 <TD>
                   <div className="flex items-center justify-end gap-1">
                     <IconButton
-                      onClick={() => {
-                        setSelected(t);
-                        setEditing(false);
-                      }}
-                      title="Voir"
+                      onClick={(e) => { e.stopPropagation(); openEdit(t); }}
+                      title="Modifier"
                       tone="primary"
                     >
-                      <Eye size={15} />
-                    </IconButton>
-                    <IconButton onClick={() => openEdit(t)} title="Modifier" tone="primary">
                       <Edit2 size={15} />
                     </IconButton>
                   </div>
