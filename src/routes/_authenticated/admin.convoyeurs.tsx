@@ -1,11 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard } from "lucide-react";
+import {
+  RefreshCw,
+  Eye,
+  CheckCircle,
+  XCircle,
+  UserPlus,
+  IdCard,
+  User,
+  Briefcase,
+  MapPin,
+  FileText,
+} from "lucide-react";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
   PageHeader,
-  Card,
   Badge,
   Table,
   THead,
@@ -21,6 +31,13 @@ import {
   FormField,
   convoyeurStatutTone,
 } from "@/components/admin/AdminUI";
+import {
+  AdminDetailDrawer,
+  DrawerSection,
+  DrawerGrid,
+  DrawerField,
+  DrawerBadge,
+} from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,
