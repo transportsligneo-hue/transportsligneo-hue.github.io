@@ -496,8 +496,7 @@ function AdminDashboard() {
                     </td>
                     <td className="text-right">
                       <Link
-                        to="/admin/demandes/$demandeId"
-                        params={{ demandeId: d.id }}
+                        to="/admin/demandes"
                         className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
                       >
                         Ouvrir <ChevronRight size={12} />
