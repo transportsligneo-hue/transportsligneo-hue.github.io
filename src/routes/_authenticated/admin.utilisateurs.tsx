@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
+import { getHighestActiveRole } from "@/lib/roles";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
@@ -85,9 +86,18 @@ function AdminUtilisateurs() {
         .from("convoyeurs")
         .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, ville, created_at");
 
-      const { data: roles } = await supabase.from("user_roles").select("user_id, role").eq("actif", true);
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role, actif").eq("actif", true);
       const roleByUser = new Map<string, string>();
-      (roles ?? []).forEach((r) => roleByUser.set(r.user_id, r.role));
+      const groupedRoles = new Map<string, Array<{ role: string | null; actif?: boolean | null }>>();
+      (roles ?? []).forEach((r) => {
+        const existing = groupedRoles.get(r.user_id) ?? [];
+        existing.push({ role: r.role, actif: r.actif });
+        groupedRoles.set(r.user_id, existing);
+      });
+      groupedRoles.forEach((entries, userId) => {
+        const resolvedRole = getHighestActiveRole(entries);
+        if (resolvedRole) roleByUser.set(userId, resolvedRole);
+      });
 
       const rows: UnifiedUser[] = [];
       (profiles ?? []).forEach((p: any) => {
