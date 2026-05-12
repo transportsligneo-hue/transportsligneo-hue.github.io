@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, User, Phone, Mail, Briefcase } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -15,6 +15,13 @@ import {
   IconButton,
   SearchInput,
 } from "@/components/admin/AdminUI";
+import {
+  AdminDetailDrawer,
+  DrawerSection,
+  DrawerGrid,
+  DrawerField,
+  DrawerBadge,
+} from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
