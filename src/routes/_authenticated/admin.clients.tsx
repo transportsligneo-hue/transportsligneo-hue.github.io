@@ -117,6 +117,36 @@ function AdminClients() {
     await fetchClients();
   };
 
+  const openClient = async (c: ClientRow) => {
+    setSelected(c);
+    setHistory({ devis: [], missions: [], factures: [] });
+    const [devisRes, missionsRes, facturesRes] = await Promise.all([
+      supabase
+        .from("devis")
+        .select("id, numero, created_at, statut, prix_estime")
+        .eq("email", c.email ?? "")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("missions")
+        .select("id, numero_mission, statut, created_at")
+        .eq("user_id", c.user_id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("factures")
+        .select("id, numero, prix_ttc, statut, date_facture")
+        .eq("client_email", c.email ?? "")
+        .order("date_facture", { ascending: false })
+        .limit(20),
+    ]);
+    setHistory({
+      devis: (devisRes.data ?? []) as ClientHistory["devis"],
+      missions: (missionsRes.data ?? []) as ClientHistory["missions"],
+      factures: (facturesRes.data ?? []) as ClientHistory["factures"],
+    });
+  };
+
   const filtered = clients.filter((c) => {
     if (!search) return true;
     const q = search.toLowerCase();
