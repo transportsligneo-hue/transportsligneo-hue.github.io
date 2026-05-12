@@ -41,6 +41,8 @@ type UnifiedUser = {
   account_status: string;
   organization_id: string | null;
   societe: string | null;
+  siret: string | null;
+  adresse: string | null;
   created_at: string;
   source: "profile" | "convoyeur";
 };
