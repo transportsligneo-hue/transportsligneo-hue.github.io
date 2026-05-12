@@ -232,6 +232,11 @@ function AdminDemandes() {
                         <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
                           {d.depart} → {d.arrivee}
                         </p>
+                        {q.isEstimable && (
+                          <p className="lg:hidden mt-1 text-[13px] font-semibold text-[color:var(--admin-accent)] tabular-nums">
+                            {q.priceTtc.toFixed(2)} € TTC
+                          </p>
+                        )}
                       </td>
                       <td className="hidden sm:table-cell">
                         <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
