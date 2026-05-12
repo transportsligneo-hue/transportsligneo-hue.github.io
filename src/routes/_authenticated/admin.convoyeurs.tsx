@@ -255,7 +255,7 @@ function AdminConvoyeurs() {
           </THead>
           <tbody>
             {convoyeurs.map((c) => (
-              <TR key={c.id}>
+              <TR key={c.id} onClick={() => openConvoyeur(c)}>
                 <TD>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
@@ -284,16 +284,11 @@ function AdminConvoyeurs() {
                     {statutLabels[c.statut] ?? c.statut}
                   </Badge>
                 </TD>
-                <TD>
+                <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/convoyeurs/$convoyeurId"
-                      params={{ convoyeurId: c.id }}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
+                    <IconButton onClick={() => openConvoyeur(c)} title="Voir la fiche" tone="primary">
                       <Eye size={15} />
-                    </Link>
+                    </IconButton>
                     {c.statut === "en_attente" && (
                       <>
                         <IconButton
