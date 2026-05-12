@@ -78,32 +78,34 @@ function AdminUtilisateurs() {
     try {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, created_at")
+        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, siret, adresse, created_at")
         .order("created_at", { ascending: false });
 
       const { data: convoyeurs } = await supabase
         .from("convoyeurs")
-        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, created_at");
+        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, ville, created_at");
 
       const { data: roles } = await supabase.from("user_roles").select("user_id, role").eq("actif", true);
       const roleByUser = new Map<string, string>();
       (roles ?? []).forEach((r) => roleByUser.set(r.user_id, r.role));
 
       const rows: UnifiedUser[] = [];
-      (profiles ?? []).forEach((p) => {
+      (profiles ?? []).forEach((p: any) => {
         const role = roleByUser.get(p.user_id) ?? p.type_client ?? "client";
         rows.push({
           user_id: p.user_id, email: p.email, nom: p.nom, prenom: p.prenom, telephone: p.telephone,
           role, type_client: p.type_client, account_status: p.account_status ?? "active",
-          organization_id: p.organization_id, societe: p.societe, created_at: p.created_at, source: "profile",
+          organization_id: p.organization_id, societe: p.societe, siret: p.siret ?? null,
+          adresse: p.adresse ?? null, created_at: p.created_at, source: "profile",
         });
       });
-      (convoyeurs ?? []).forEach((c) => {
+      (convoyeurs ?? []).forEach((c: any) => {
         if (rows.some((r) => r.user_id === c.user_id)) return;
         rows.push({
           user_id: c.user_id, email: c.email, nom: c.nom, prenom: c.prenom, telephone: c.telephone,
           role: "convoyeur", type_client: null, account_status: c.account_status ?? "active",
-          organization_id: c.organization_id, societe: null, created_at: c.created_at, source: "convoyeur",
+          organization_id: c.organization_id, societe: null, siret: null, adresse: c.ville ?? null,
+          created_at: c.created_at, source: "convoyeur",
         });
       });
       setUsers(rows);
