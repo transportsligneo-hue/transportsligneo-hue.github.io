@@ -395,6 +395,106 @@ function AdminDevisPage() {
           })}
         </div>
       )}
+
+      <DevisDrawer
+        devis={selected}
+        onClose={() => setSelected(null)}
+        onDownload={handleDownload}
+        onConvert={handleConvert}
+        onDelete={(id) => { handleDelete(id); setSelected(null); }}
+      />
     </div>
+  );
+}
+
+function DevisDrawer({
+  devis,
+  onClose,
+  onDownload,
+  onConvert,
+  onDelete,
+}: {
+  devis: DevisRow | null;
+  onClose: () => void;
+  onDownload: (d: DevisRow) => void;
+  onConvert: (d: DevisRow) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (!devis) return null;
+  const statut = STATUTS.find((s) => s.value === devis.statut);
+  return (
+    <AdminDetailDrawer
+      open={!!devis}
+      onClose={onClose}
+      title={devis.numero}
+      subtitle={`${devis.prenom} ${devis.nom}`}
+      badge={
+        <div className="flex flex-wrap gap-2">
+          <DrawerBadge tone="blue">{statut?.label ?? devis.statut}</DrawerBadge>
+          {devis.email_envoye && <DrawerBadge tone="green">Email envoyé</DrawerBadge>}
+          {devis.mission_id && <DrawerBadge tone="amber">Mission créée</DrawerBadge>}
+        </div>
+      }
+      footer={
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => onDownload(devis)} icon={<Download size={12} />}>PDF</Button>
+          <Button size="sm" onClick={() => onConvert(devis)} disabled={!!devis.mission_id} icon={<ArrowRightCircle size={12} />}>
+            {devis.mission_id ? "Converti" : "→ Mission"}
+          </Button>
+          <Button size="sm" onClick={() => onDelete(devis.id)} className="ml-auto bg-red-600 hover:bg-red-700 text-white" icon={<Trash2 size={12} />}>Supprimer</Button>
+        </div>
+      }
+    >
+      <DrawerSection title="Client" icon={<User size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Nom" value={`${devis.prenom} ${devis.nom}`} />
+          <DrawerField label="Email" value={devis.email} />
+          <DrawerField label="Téléphone" value={devis.telephone} />
+          <DrawerField label="Créé le" value={new Date(devis.created_at).toLocaleString("fr-FR")} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Départ" value={devis.depart} />
+          <DrawerField label="Arrivée" value={devis.arrivee} />
+          <DrawerField label="Distance" value={devis.distance_km ? `${devis.distance_km} km` : null} />
+          <DrawerField label="Durée estimée" value={devis.duree_estimee} />
+          <DrawerField label="Option" value={devis.option_trajet} />
+          <DrawerField label="Prestation" value={devis.prestation} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Véhicule" icon={<Car size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Type" value={devis.type_vehicule} />
+          <DrawerField label="Marque" value={devis.marque} />
+          <DrawerField label="Modèle" value={devis.modele} />
+          <DrawerField label="Carburant" value={devis.carburant} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Planification" icon={<Calendar size={12} />}>
+        <DrawerGrid>
+          <DrawerField label="Date souhaitée" value={devis.date_souhaitee ? new Date(devis.date_souhaitee).toLocaleDateString("fr-FR") : null} />
+          <DrawerField label="Heure" value={devis.heure_souhaitee} />
+          <DrawerField label="Tarif" value={devis.tarif_label} />
+          <DrawerField label="Multiplicateur" value={devis.multiplier_label} />
+        </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Tarification">
+        <div className="flex items-baseline justify-between">
+          <span className="text-xs uppercase tracking-wider text-white/50">Prix estimé TTC</span>
+          <span className="text-3xl font-semibold text-white">{Number(devis.prix_estime).toFixed(2)} €</span>
+        </div>
+      </DrawerSection>
+
+      {devis.message && (
+        <DrawerSection title="Message client">
+          <p className="text-sm italic text-white/80">"{devis.message}"</p>
+        </DrawerSection>
+      )}
+    </AdminDetailDrawer>
   );
 }
