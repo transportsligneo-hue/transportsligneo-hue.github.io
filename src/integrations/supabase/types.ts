@@ -696,6 +696,8 @@ export type Database = {
           amount_paid_cents: number | null
           arrivee: string
           carburant: string | null
+          carte_grise_recto_url: string | null
+          carte_grise_verso_url: string | null
           converted_at: string | null
           converted_by: string | null
           created_at: string
@@ -729,11 +731,15 @@ export type Database = {
           type_vehicule: string | null
           updated_at: string
           user_id: string | null
+          vehicule_docs_completed: boolean
+          vin: string | null
         }
         Insert: {
           amount_paid_cents?: number | null
           arrivee: string
           carburant?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
@@ -767,11 +773,15 @@ export type Database = {
           type_vehicule?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicule_docs_completed?: boolean
+          vin?: string | null
         }
         Update: {
           amount_paid_cents?: number | null
           arrivee?: string
           carburant?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
@@ -805,6 +815,8 @@ export type Database = {
           type_vehicule?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicule_docs_completed?: boolean
+          vin?: string | null
         }
         Relationships: []
       }
@@ -1587,6 +1599,8 @@ export type Database = {
       missions: {
         Row: {
           carburant: string | null
+          carte_grise_recto_url: string | null
+          carte_grise_verso_url: string | null
           created_at: string
           date_prise_en_charge: string
           email: string
@@ -1609,9 +1623,12 @@ export type Database = {
           user_id: string
           ville_arrivee: string
           ville_depart: string
+          vin: string | null
         }
         Insert: {
           carburant?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           created_at?: string
           date_prise_en_charge: string
           email: string
@@ -1634,9 +1651,12 @@ export type Database = {
           user_id: string
           ville_arrivee: string
           ville_depart: string
+          vin?: string | null
         }
         Update: {
           carburant?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           created_at?: string
           date_prise_en_charge?: string
           email?: string
@@ -1659,6 +1679,7 @@ export type Database = {
           user_id?: string
           ville_arrivee?: string
           ville_depart?: string
+          vin?: string | null
         }
         Relationships: [
           {
@@ -1990,6 +2011,8 @@ export type Database = {
       trajets: {
         Row: {
           arrivee: string
+          carte_grise_recto_url: string | null
+          carte_grise_verso_url: string | null
           client_email: string | null
           client_nom: string | null
           client_telephone: string | null
@@ -2018,9 +2041,12 @@ export type Database = {
           statut_publication: string
           tarif_convoyeur: number | null
           updated_at: string
+          vin: string | null
         }
         Insert: {
           arrivee: string
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
@@ -2049,9 +2075,12 @@ export type Database = {
           statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
+          vin?: string | null
         }
         Update: {
           arrivee?: string
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
@@ -2080,6 +2109,7 @@ export type Database = {
           statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
+          vin?: string | null
         }
         Relationships: [
           {
