@@ -193,13 +193,9 @@ function AdminClients() {
           </THead>
           <tbody>
             {filtered.map((c) => (
-              <TR key={c.user_id}>
+              <TR key={c.user_id} className="cursor-pointer" onClick={() => openClient(c)}>
                 <TD>
-                  <Link
-                    to="/admin/clients/$clientId"
-                    params={{ clientId: c.user_id }}
-                    className="flex items-center gap-2 hover:text-pro-accent"
-                  >
+                  <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
                       {(c.prenom?.[0] ?? "?").toUpperCase()}
                     </div>
@@ -209,7 +205,7 @@ function AdminClients() {
                       </p>
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
-                  </Link>
+                  </div>
                 </TD>
                 <TD className="hidden sm:table-cell text-pro-text-soft">
                   <p className="text-sm">{c.email}</p>
@@ -226,16 +222,11 @@ function AdminClients() {
                     {c.actif ? "Actif" : "Suspendu"}
                   </Badge>
                 </TD>
-                <TD>
+                <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
+                    <IconButton onClick={() => openClient(c)} title="Voir la fiche" tone="primary">
                       <Eye size={15} />
-                    </Link>
+                    </IconButton>
                     {c.actif ? (
                       <IconButton
                         onClick={() => toggleActif(c.user_id, false)}
