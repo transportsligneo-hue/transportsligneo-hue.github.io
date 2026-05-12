@@ -76,8 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("user_roles")
           .select("role, actif")
           .eq("user_id", userId)
-          .eq("actif", true)
-          ,
+          .eq("actif", true),
         supabase
           .from("profiles")
           .select("type_client")
