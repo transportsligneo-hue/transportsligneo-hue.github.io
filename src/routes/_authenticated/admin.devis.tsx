@@ -60,6 +60,7 @@ const STATUTS = [
 ];
 
 function AdminDevisPage() {
+  const [selected, setSelected] = useState<DevisRow | null>(null);
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
