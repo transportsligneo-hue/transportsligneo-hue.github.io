@@ -32,7 +32,7 @@ function ClientLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (role === "admin" || role === "convoyeur") {
+    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
       navigate({ to: homeRoute });
       return;
     }
@@ -65,7 +65,7 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated || role === "admin" || role === "convoyeur" || typeClient === "b2b") {
+  if (!isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "b2b") {
     return (
       <div className="min-h-screen flex items-center justify-center section-bg client-shell">
         <Loader2 className="animate-spin text-primary" size={32} />
