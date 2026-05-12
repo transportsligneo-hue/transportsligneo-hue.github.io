@@ -1,101 +1,102 @@
-## Objectif
+# Refonte finale admin + parcours client véhicule
 
-Un seul système d'affichage détail dans tout l'admin : le **drawer latéral bleu premium** (`AdminDetailDrawer`) déjà utilisé sur la page Utilisateurs. Plus aucune page séparée `/$id`, plus aucune modale. Et : remplir correctement le drawer Utilisateurs avec les vraies données.
+## 1. Base de données (1 migration)
 
----
+Ajouter les colonnes véhicule manquantes pour faire circuler les infos du devis → mission → driver.
 
-## Périmètre
+- `devis` : `vin text`, `carte_grise_recto_url text`, `carte_grise_verso_url text`, `vehicule_docs_completed boolean default false`
+- `trajets` : `vin text`, `carte_grise_recto_url text`, `carte_grise_verso_url text` (copiés au moment de la création depuis devis)
+- `missions` : idem (copiés depuis trajet/devis)
+- `profiles` : `adresse text` (déjà demandé précédemment)
+- Bucket storage `cartes-grises` (privé) + RLS : client lit/écrit ses propres fichiers `{user_id}/...`, admin lit tout, convoyeur lit ceux de ses missions assignées
+- Trigger `auto_create_trajet_from_devis` : étendre pour copier `vin`, `carte_grise_*`
 
-### Pages à convertir au drawer (suppression des routes `$id`)
-- `admin/devis` → drawer Devis (supprime `admin.devis.$devisId.tsx`)
-- `admin/missions` (via attributions) → drawer Mission (supprime `admin.missions.$missionId.tsx` côté admin)
-- `admin/clients` → drawer Client (supprime `admin.clients.$clientId.tsx`)
-- `admin/factures` → drawer Facture (supprime `admin.factures.$factureId.tsx`)
-- `admin/demandes` → drawer Demande (supprime `admin.demandes.$demandeId.tsx`)
-- `admin/convoyeurs` → drawer Convoyeur (supprime `admin.convoyeurs.$convoyeurId.tsx`)
-- `admin/trajets`, `admin/paiements`, `admin/attributions` → drawer dédié
+## 2. Auto-prix client TTC partout (pricing engine)
 
-Tous les `<Link to="/admin/.../$id">` et `navigate({ to: ... })` remplacés par `setSelected(row)` qui ouvre le drawer. Les boutons œil et lignes cliquables déclenchent le même drawer.
+Règle unique : quand un devis accepté/payé existe pour la demande/trajet, `prix_client_ttc` est :
+- pré-rempli automatiquement depuis `devis.prix_estime`
+- verrouillé par défaut (read-only)
+- modifiable seulement via un toggle "ajustement admin" (promo / pénalité)
 
-### Drawer Utilisateurs — bug données vides
+Composant : `PricingModeBlock` accepte déjà `lockedClientPrice`. Il faut :
+- l'utiliser dans `admin.attributions.tsx` (création depuis demande)
+- l'utiliser dans le drawer "Modifier trajet"
+- l'utiliser dans le drawer Demande (bouton "Convertir en trajet" passe le prix)
+- helper `resolveDevisPrice(demande_id|email|trajet_id)` dans `src/lib/pricing-resolver.ts`
 
-Cause racine identifiée :
-1. `devis / factures / demandes` filtrés uniquement par `email` exact (sensible casse, NULL ignorés).
-2. Téléphone et adresse parfois absents en base (formulaires d'inscription ne demandent pas l'adresse).
-3. `paiements` ne récupèrent que ceux des `devis` (pas les `b2b_transport_requests` ni `factures`).
-4. `logs` filtrés sur `entity_id = user_id` uniquement → invisible pour entités liées (devis, missions).
+## 3. Drawer bleu unique — finir la conversion
 
-Corrections :
-- Requêtes par `lower(email) = lower(?)` + fallback `user_id` quand présent (`devis.user_id`, `demandes_convoyage.user_id`).
-- Récupérer paiements depuis `devis.paid_at`, `factures.statut='payee'`, `b2b_transport_requests.payment_status='paid'`.
-- Récupérer `logs` par `actor_user_id = user_id OR entity_id = user_id`.
-- Ajouter section **Inscription** avec date, source (formulaire utilisé), métadonnées.
-- Charger `auth.users.user_metadata` via edge function `admin-user-actions` (action `get_user_full`) pour récupérer téléphone/adresse stockés en metadata si absents du profil.
+Créer/finir `src/components/admin/drawers/` :
+- `TrajetDrawer.tsx` — voir / modifier trajet, prix verrouillé, attribution inline
+- `AttributionDrawer.tsx` — voir attribution, changer convoyeur, statut
+- `MissionDrawer.tsx` — détail mission complet (étapes, photos, docs, VIN, carte grise)
+- `DevisDrawer.tsx` — détail devis + paiement + véhicule
+- `FactureDrawer.tsx` — détail facture + PDF
+- `ConvoyeurDrawer.tsx` — fiche convoyeur + missions + docs
 
-### Inscription — champs manquants en base
-- Ajouter champ **adresse** (optionnel) aux 4 formulaires (`inscription-client/pro/flotte/convoyeur`).
-- Passer `adresse` dans `raw_user_meta_data` au `signUp`.
-- Migration : étendre `handle_new_user()` pour copier `adresse` dans `profiles.adresse`.
-- Téléphone : déjà obligatoire, vérifier mapping dans le trigger (OK).
+Pages liste à convertir (supprimer Links vers `$id`, ajouter `useState` + drawer en bas) :
+- `admin.trajets.tsx`, `admin.attributions.tsx`, `admin.devis.tsx`, `admin.factures.tsx`, `admin.convoyeurs.tsx`
+
+Suppression des routes détail admin :
+- `admin.devis.$devisId.tsx`
+- `admin.factures.$factureId.tsx`
+- `admin.missions.$missionId.tsx`
+- `admin.clients.$clientId.tsx`
+- `admin.convoyeurs.$convoyeurId.tsx`
+
+Tous remplacés par état `selected` qui ouvre le drawer.
+
+## 4. Parcours client — upload obligatoire avant paiement
+
+Nouveau composant `src/components/devis/VehiculeDocsStep.tsx` :
+- Champ VIN (validation 17 caractères alphanumériques sans I/O/Q)
+- Upload carte grise recto (obligatoire)
+- Upload carte grise verso (optionnel)
+- Compression image client-side (`compressImage` existe déjà)
+- Preview immédiate
+- Mobile-friendly avec `capture="environment"` pour caméra directe
+
+Intégration dans le parcours :
+- `dashboard-client/devis` (si devis non payé) → bouton "Compléter avant paiement"
+- Bloque `DevisEmbeddedCheckout` tant que `vehicule_docs_completed = false`
+- Sauvegarde sur `devis.vin` / `devis.carte_grise_*` + flag
+
+## 5. Visibilité VIN / carte grise
+
+- **Admin** : section "Véhicule" dans drawers Devis/Trajet/Mission avec aperçu carte grise + VIN copiable
+- **Convoyeur** : `convoyeur.missions.tsx` + `MissionWorkflow` → bloc "Documents véhicule" avec liens signés vers carte grise
+- RLS bucket : convoyeur peut lire les fichiers carte grise via path = `{user_id_du_client}/{devis_id}/...` si attribution active
+
+## 6. Mobile
+
+- Drawer admin : `w-full` sur mobile (déjà OK via Sheet)
+- Upload carte grise : `<input type="file" accept="image/*" capture="environment">` pour caméra
+- Aperçu image fluide, barre de progression Tailwind
 
 ---
 
 ## Architecture cible
 
 ```text
-Liste admin (table)
-  └── clic ligne / œil / 3 points
-        └── setSelected(row)
-              └── <XxxDetailDrawer xxx={selected} onClose={...} onChanged={refresh} />
-                    └── AdminDetailDrawer (Sheet bleu, déjà existant)
-                          ├── Header (titre + sous-titre + badges)
-                          ├── Tabs (Détails / Historique / Documents / Logs)
-                          └── Footer (actions : modifier, supprimer, statut, etc.)
+DEVIS accepté
+  └── client complète : VIN + carte grise (NOUVEAU step bloquant)
+        └── PAIEMENT
+              └── trigger auto crée TRAJET (avec VIN + carte grise copiés)
+                    └── ADMIN attribue → ATTRIBUTION (prix verrouillé depuis devis)
+                          └── MISSION (convoyeur voit VIN + carte grise)
 ```
 
-Toutes les vues détail héritent du même `AdminDetailDrawer` + `DrawerSection` + `DrawerField` + `DrawerGrid` + `DrawerBadge` (déjà dispo dans `src/components/admin/AdminDetailDrawer.tsx`).
+## Ordre d'exécution
 
----
-
-## Étapes d'implémentation
-
-1. **Fix drawer Utilisateurs (priorité 1)**
-   - Patch `UserDetailDrawer` : requêtes case-insensitive + fallback `user_id`, agrégation paiements multi-source, logs élargis.
-   - Édition du téléphone/adresse depuis le drawer (action `update_profile`).
-
-2. **Drawers métier** (un fichier par entité dans `src/components/admin/drawers/`)
-   - `DevisDrawer.tsx`, `MissionDrawer.tsx`, `ClientDrawer.tsx`, `FactureDrawer.tsx`, `DemandeDrawer.tsx`, `ConvoyeurDrawer.tsx`, `TrajetDrawer.tsx`, `PaiementDrawer.tsx`.
-   - Chaque drawer : props `{ id, open, onClose, onChanged }`, charge ses données, affiche en sections + footer d'actions.
-
-3. **Conversion des pages liste**
-   - Pour chaque `admin.<entity>.tsx` : supprimer les `<Link>` détail, ajouter `useState<XxxRow|null>(null)`, monter le drawer en bas du composant.
-   - `admin.attributions.tsx`, `admin.index.tsx` : remplacer les liens vers `/$id` par ouverture drawer (état levé ou navigation contrôlée).
-
-4. **Suppression des routes détail**
-   - Supprimer les 6 fichiers `admin.<entity>.$id.tsx` côté admin (le routeTree se régénère).
-   - Garder les routes détail côté client/convoyeur (hors admin).
-
-5. **Migration & inscription**
-   - Migration SQL : `handle_new_user()` ajoute `adresse` depuis metadata.
-   - Ajouter input adresse aux 4 formulaires d'inscription + envoi dans `data:` du `signUp`.
-
-6. **Edge function**
-   - Étendre `admin-user-actions` avec action `get_user_full` (lit auth.users + profile + convoyeur, fusionne).
-
----
-
-## Détails techniques
-
-- **Bleu électrique** : déjà dans `AdminDetailDrawer` (gradient `#0b1026 → #0d1430`, accents `bg-blue-500/15`).
-- **Largeur** : `width="2xl"` pour drawers riches (mission/client), `xl` par défaut.
-- **Animations** : héritées du `Sheet` shadcn (slide-in droit, 300ms).
-- **Fermeture** : clic en dehors, touche Échap, croix.
-- **Scroll interne** : `overflow-y-auto` sur le body, header/footer fixes.
-- **Deep-linking optionnel** : on garde l'URL inchangée (drawer = état UI), pas de routing. Si besoin partage URL plus tard : query param `?selected=<id>` géré par chaque page liste.
-
----
+1. Migration BDD + bucket storage + RLS
+2. Helper `pricing-resolver.ts`
+3. `VehiculeDocsStep` + intégration dashboard-client
+4. Drawers manquants (Trajet, Attribution, Mission, Devis, Facture, Convoyeur)
+5. Conversion pages liste + suppression routes `$id`
+6. Affichage carte grise/VIN côté admin et convoyeur
 
 ## Hors périmètre
-- Refonte des pages côté client/convoyeur (uniquement admin).
-- Changement de thème global hors drawer.
-- Migration des modales d'action (AlertDialog confirmations restent inline).
+
+- Refonte visuelle des autres composants client/convoyeur
+- OCR carte grise (peut venir dans une itération suivante)
+- Validation manuelle admin de la carte grise (peut être ajoutée plus tard)
