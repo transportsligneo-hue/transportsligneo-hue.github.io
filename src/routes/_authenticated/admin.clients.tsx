@@ -15,6 +15,7 @@ import {
   IconButton,
   SearchInput,
 } from "@/components/admin/AdminUI";
+import { getHighestActiveRole } from "@/lib/roles";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -41,8 +42,7 @@ function AdminClients() {
     setLoading(true);
     const { data: roles } = await supabase
       .from("user_roles")
-      .select("user_id, actif, created_at")
-      .eq("role", "client");
+      .select("user_id, role, actif, created_at");
 
     if (!roles || roles.length === 0) {
       setClients([]);
@@ -50,18 +50,36 @@ function AdminClients() {
       return;
     }
 
-    const userIds = roles.map((r) => r.user_id);
-    const actifMap = new Map(roles.map((r) => [r.user_id, r.actif]));
+    const groupedRoles = new Map<string, Array<{ role: string | null; actif?: boolean | null; created_at?: string }>>();
+    roles.forEach((role) => {
+      const existing = groupedRoles.get(role.user_id) ?? [];
+      existing.push(role);
+      groupedRoles.set(role.user_id, existing);
+    });
+
+    const clientUserIds = Array.from(groupedRoles.entries())
+      .filter(([, entries]) => getHighestActiveRole(entries) === "client")
+      .map(([userId]) => userId);
+
+    const actifMap = new Map(
+      Array.from(groupedRoles.entries()).map(([userId, entries]) => [userId, entries.some((entry) => entry.role === "client" && entry.actif !== false)]),
+    );
+
+    if (clientUserIds.length === 0) {
+      setClients([]);
+      setLoading(false);
+      return;
+    }
 
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, prenom, nom, email, telephone, created_at")
-      .in("user_id", userIds);
+      .in("user_id", clientUserIds);
 
     const { data: missionsRaw } = await supabase
       .from("missions")
       .select("user_id")
-      .in("user_id", userIds);
+      .in("user_id", clientUserIds);
 
     const countMap = new Map<string, number>();
     (missionsRaw ?? []).forEach((m) => {

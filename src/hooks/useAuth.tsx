@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import { getHighestActiveRole, type AppRole } from "@/lib/roles";
 
-type AppRole = "admin" | "super_admin" | "manager" | "convoyeur" | "client" | "sous_traitant";
 type TypeClient = "particulier" | "b2b" | "flotte";
 type ConvoyeurStatut = "en_attente" | "valide" | "actif" | "refuse" | "suspendu";
 
@@ -76,10 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("user_roles")
           .select("role, actif")
           .eq("user_id", userId)
-          .eq("actif", true)
-          .order("role", { ascending: true })
-          .limit(1)
-          .maybeSingle(),
+          .eq("actif", true),
         supabase
           .from("profiles")
           .select("type_client")
@@ -87,8 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle(),
       ]);
 
-      const role = (rolesRes.data?.role as AppRole | undefined) ?? null;
-      const roleActif = rolesRes.data?.actif !== false;
+      const activeRoles = ((rolesRes.data as Array<{ role: string; actif?: boolean | null }> | null) ?? []);
+      const role = getHighestActiveRole(activeRoles);
+      const roleActif = activeRoles.length > 0;
       const typeClient = ((profileRes.data as { type_client?: string } | null)?.type_client as TypeClient | undefined) ?? "particulier";
 
       let convoyeurStatut: ConvoyeurStatut | null = null;
