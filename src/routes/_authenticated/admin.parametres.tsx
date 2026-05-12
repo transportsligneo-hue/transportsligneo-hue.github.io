@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EMAIL_TEMPLATES } from "@/lib/email-templates/registry";
+import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
+
+const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
+  name,
+  subject: (t as { subject?: string }).subject ?? null,
+}));
 
 export const Route = createFileRoute("/_authenticated/admin/parametres")({
   component: AdminParametres,
