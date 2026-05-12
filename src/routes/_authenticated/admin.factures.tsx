@@ -58,6 +58,7 @@ const STATUTS = [
 ];
 
 function AdminFacturesPage() {
+  const [selected, setSelected] = useState<FactureRow | null>(null);
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
