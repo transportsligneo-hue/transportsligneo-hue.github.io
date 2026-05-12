@@ -9,7 +9,7 @@ async function assertAdmin(context: { supabase: typeof supabaseAdmin; userId: st
     .from("user_roles")
     .select("id")
     .eq("user_id", context.userId)
-    .in("role", ["admin", "super_admin"])
+    .eq("role", "admin")
     .eq("actif", true)
     .maybeSingle();
 
@@ -38,8 +38,7 @@ export const notifyNewDemande = createServerFn({ method: "POST" })
     const { data: adminRoles } = await supabaseAdmin
       .from("user_roles")
       .select("user_id")
-      .in("role", ["admin", "super_admin"])
-      .eq("actif", true);
+      .eq("role", "admin");
 
     if (!adminRoles?.length) return { success: false };
 

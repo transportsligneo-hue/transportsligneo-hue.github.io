@@ -30,7 +30,7 @@ function FlotteLayout() {
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) { navigate({ to: "/login" }); return; }
-    if (role === "admin" || role === "super_admin") { navigate({ to: homeRoute }); return; }
+    if (role === "admin") { navigate({ to: homeRoute }); return; }
 
     (async () => {
       if (!user) return;

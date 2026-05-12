@@ -56,7 +56,7 @@ function LoginPage() {
     const usedTab = submittedTabRef.current;
     justLoggedInRef.current = false;
 
-    if (role === "admin" || role === "super_admin") {
+    if (role === "admin") {
       navigate({ to: "/admin" });
       return;
     }

@@ -29,7 +29,6 @@ function AdminLayout() {
   const { isAuthenticated, role, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
-  const isAdminRole = role === "admin" || role === "super_admin";
 
   useEffect(() => {
     if (isLoading) return;
@@ -37,13 +36,13 @@ function AdminLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (!isAdminRole) {
+    if (role !== "admin") {
       navigate({ to: homeRoute });
     }
-  }, [isLoading, isAuthenticated, isAdminRole, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, role, homeRoute, navigate]);
 
   useEffect(() => {
-    if (!isAdminRole) return;
+    if (role !== "admin") return;
     const fetchUnread = async () => {
       const { count } = await supabase
         .from("admin_notifications" as never)
@@ -57,7 +56,7 @@ function AdminLayout() {
       .on("postgres_changes", { event: "*", schema: "public", table: "admin_notifications" }, fetchUnread)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [isAdminRole]);
+  }, [role]);
 
   const navItems: AdminSidebarItem[] = [
     // Pilotage
@@ -96,7 +95,7 @@ function AdminLayout() {
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
   ];
 
-  if (isLoading || !isAuthenticated || !isAdminRole) {
+  if (isLoading || !isAuthenticated || role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />

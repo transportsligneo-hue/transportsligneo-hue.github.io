@@ -33,7 +33,7 @@ function EntrepriseLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
+    if (role === "admin" || role === "convoyeur") {
       navigate({ to: homeRoute });
       return;
     }
