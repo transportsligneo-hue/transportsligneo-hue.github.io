@@ -340,9 +340,10 @@ export function TR({
   );
 }
 
-export function TD({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <td className={`py-3.5 px-4 text-pro-text`+ " " + className}>{children}</td>;
+export function TD({ children, className = "", onClick }: { children: ReactNode; className?: string; onClick?: (e: React.MouseEvent<HTMLTableCellElement>) => void }) {
+  return <td onClick={onClick} className={`py-3.5 px-4 text-pro-text`+ " " + className}>{children}</td>;
 }
+
 
 /* ============= EmptyState ============= */
 export function EmptyState({
