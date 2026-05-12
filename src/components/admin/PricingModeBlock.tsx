@@ -186,50 +186,60 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
             </FormField>
 
           ) : (
-            <FormField label="Marge cible indicative (%)">
-              <Select value={margeCible} onChange={(e) => setMargeCible(e.target.value)}>
-                <option value="30">30 %</option>
-                <option value="35">35 %</option>
-                <option value="40">40 %</option>
-                <option value="0">Pas d'objectif</option>
-              </Select>
+            <FormField label="Estimation convoyeur recommandée">
+              <div className="px-3 py-2 rounded-lg border border-pro-border bg-pro-bg-soft/40 text-sm tabular-nums">
+                {effectiveClient ? (
+                  <>
+                    <span className="text-emerald-700 font-semibold">
+                      {Math.round(effectiveClient * RECO_MIN_PCT / 100)} € – {Math.round(effectiveClient * RECO_MAX_PCT / 100)} €
+                    </span>
+                    <span className="text-[11px] text-pro-muted ml-2">({RECO_MIN_PCT}–{RECO_MAX_PCT}%)</span>
+                  </>
+                ) : (
+                  <span className="text-pro-muted text-xs">Saisir prix client TTC</span>
+                )}
+              </div>
             </FormField>
           )}
         </div>
 
         {mode === "enchere" && (
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="Min convoyeur (€) — optionnel">
-              <TextInput
-                type="number"
-                step="0.01"
-                value={prixMin}
-                onChange={(e) => setPrixMin(e.target.value)}
-                placeholder="vide = libre"
-              />
-            </FormField>
-            <FormField label="Max convoyeur (€) — optionnel">
-              <TextInput
-                type="number"
-                step="0.01"
-                value={prixMax}
-                onChange={(e) => setPrixMax(e.target.value)}
-                placeholder="vide = libre"
-              />
-            </FormField>
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Min convoyeur (€)">
+                <TextInput
+                  type="number"
+                  step="0.01"
+                  value={prixMin}
+                  onChange={(e) => setPrixMin(e.target.value)}
+                  placeholder={effectiveClient ? `auto: ${Math.round(effectiveClient * RECO_MIN_PCT / 100)}` : "vide = libre"}
+                />
+              </FormField>
+              <FormField label="Max convoyeur (€)">
+                <TextInput
+                  type="number"
+                  step="0.01"
+                  value={prixMax}
+                  onChange={(e) => setPrixMax(e.target.value)}
+                  placeholder={effectiveClient ? `auto: ${Math.round(effectiveClient * RECO_MAX_PCT / 100)}` : "vide = libre"}
+                />
+              </FormField>
+            </div>
+            {effectiveClient && (!prixMin || !prixMax) && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!prixMin) setPrixMin(String(Math.round(effectiveClient * RECO_MIN_PCT / 100)));
+                  if (!prixMax) setPrixMax(String(Math.round(effectiveClient * RECO_MAX_PCT / 100)));
+                }}
+                className="text-xs text-pro-accent hover:underline"
+              >
+                Appliquer la fourchette recommandée ({Math.round(effectiveClient * RECO_MIN_PCT / 100)} € – {Math.round(effectiveClient * RECO_MAX_PCT / 100)} €)
+              </button>
+            )}
+          </>
         )}
 
-        {mode === "fixe" && (
-          <FormField label="Marge cible indicative (%)">
-            <Select value={margeCible} onChange={(e) => setMargeCible(e.target.value)}>
-              <option value="30">30 %</option>
-              <option value="35">35 %</option>
-              <option value="40">40 %</option>
-              <option value="0">Pas d'objectif</option>
-            </Select>
-          </FormField>
-        )}
 
         {/* === Indicateur de marge (informatif) === */}
         <div className={`flex items-start gap-2 p-2.5 rounded-lg border text-[12px] ${
