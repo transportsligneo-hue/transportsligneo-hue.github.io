@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, FileText, CheckCircle2, Eye } from "lucide-react";
+import { Loader2, Download, FileText, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 import {
@@ -10,11 +10,13 @@ import {
   KpiCard,
   Badge,
   EmptyState,
+  Button,
   IconButton,
   Select,
   SearchInput,
   factureStatutTone,
 } from "@/components/admin/AdminUI";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminFacturesPage,
