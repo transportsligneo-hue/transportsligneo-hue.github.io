@@ -633,7 +633,14 @@ function AdminAttributions() {
             )}
           </DrawerSection>
 
-          <DrawerSection title="Documents mission" icon={<FileText size={12} />}>
+          <InspectionPreuvesBlock
+            attributionId={selectedAttr.id}
+            fallbackCarteGriseRecto={attrDetail?.carte_grise_recto_url}
+            fallbackCarteGriseVerso={attrDetail?.carte_grise_verso_url}
+            fallbackVin={attrDetail?.vin}
+          />
+
+          <DrawerSection title="Documents mission (uploads convoyeur)" icon={<FileText size={12} />}>
             <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
           </DrawerSection>
         </AdminDetailDrawer>
