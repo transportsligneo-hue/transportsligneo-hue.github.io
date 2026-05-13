@@ -51,7 +51,21 @@ function ConvoyeurMissions() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
-  const [openMissionId, setOpenMissionId] = useState<string | null>(null);
+  const [openMissionId, setOpenMissionIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { return sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId"); } catch { return null; }
+  });
+  const setOpenMissionId = useCallback((id: string | null) => {
+    setOpenMissionIdState(id);
+    if (typeof window === "undefined") return;
+    if (id) {
+      sessionStorage.setItem("driver:openMissionId", id);
+      localStorage.setItem("driver:openMissionId", id);
+    } else {
+      sessionStorage.removeItem("driver:openMissionId");
+      localStorage.removeItem("driver:openMissionId");
+    }
+  }, []);
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
   const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
