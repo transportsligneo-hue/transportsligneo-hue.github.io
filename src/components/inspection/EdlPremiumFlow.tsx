@@ -112,6 +112,37 @@ const SIGNATURE_DOC_KEY: Record<string, string> = {
   client_end: "pv_signature_arrivee_client",
 };
 
+async function materializeCapturedFile(raw: File) {
+  const buffer = await raw.arrayBuffer();
+  const safeType = raw.type && raw.type.startsWith("image/") ? raw.type : "image/jpeg";
+  const safeName = raw.name || `capture_${Date.now()}.jpg`;
+
+  return new File([buffer], safeName, {
+    type: safeType,
+    lastModified: raw.lastModified || Date.now(),
+  });
+}
+
+async function prepareCapturedImage(raw: File) {
+  const stableFile = await materializeCapturedFile(raw);
+  const looksLikeImage = stableFile.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(stableFile.name);
+
+  if (!stableFile.size) {
+    throw new Error("Image vide. Réessayez.");
+  }
+
+  if (!looksLikeImage) {
+    throw new Error("Format de photo non reconnu.");
+  }
+
+  return stableFile;
+}
+
+function revokeBlobUrl(url?: string) {
+  if (!url?.startsWith("blob:")) return;
+  try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+}
+
 export function EdlPremiumFlow({
   attributionId, userId, driverName, defaultClientName,
   onComplete, onClose,
@@ -249,12 +280,15 @@ export function EdlPremiumFlow({
     if (!raw) return;
 
     const stepId = currentStep.id;
-    const previewUrl = URL.createObjectURL(raw);
-    setState(stepId, { status: "uploading", previewUrl });
+    let previewUrl: string | undefined;
 
     try {
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setState(stepId, { status: "uploading", previewUrl });
+
       const insId = await ensureInspectionDepart();
-      const compressed = await compressImage(raw);
+      const compressed = await compressImage(stableFile);
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
 
@@ -342,7 +376,9 @@ export function EdlPremiumFlow({
         status: "error", previewUrl,
         error: err instanceof Error ? err.message : "Erreur réseau",
       });
-      toast.error("Échec d'envoi", { description: "Réessayez la photo." });
+      toast.error("Échec d'envoi", {
+        description: err instanceof Error ? err.message : "Réessayez la photo.",
+      });
     }
   };
 
@@ -352,11 +388,14 @@ export function EdlPremiumFlow({
     if (!raw) return;
 
     const stepId = currentStep.id;
-    const previewUrl = URL.createObjectURL(raw);
-    setState(stepId, { status: "uploading", previewUrl });
+    let previewUrl: string | undefined;
 
     try {
-      const compressed = await compressImage(raw);
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setState(stepId, { status: "uploading", previewUrl });
+
+      const compressed = await compressImage(stableFile);
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.jpg`;
       await uploadWithRetry("mission-selfies", path, compressed);
 
@@ -387,7 +426,9 @@ export function EdlPremiumFlow({
         status: "error", previewUrl,
         error: err instanceof Error ? err.message : "Erreur",
       });
-      toast.error("Échec selfie");
+      toast.error("Échec selfie", {
+        description: err instanceof Error ? err.message : "Réessayez.",
+      });
     }
   };
 
@@ -520,6 +561,7 @@ export function EdlPremiumFlow({
   const retake = () => {
     setStates(prev => {
       const next = { ...prev };
+      revokeBlobUrl(next[currentStep.id]?.previewUrl);
       delete next[currentStep.id];
       return next;
     });
@@ -709,7 +751,11 @@ export function EdlPremiumFlow({
             disabled={!canAdvance()}
             className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50 text-sm font-semibold"
           >
-            {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Page suivante"}
+            {safeIndex === TOTAL - 1
+              ? "Terminer la mission"
+              : currentStep.kind === "photo" || currentStep.kind === "scan"
+                ? "Photo suivante"
+                : "Étape suivante"}
             <ArrowRight size={18} />
           </button>
         </div>
@@ -771,7 +817,7 @@ function PhotoOrScanArea({
 }: {
   step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void;
 }) {
-  const taken = state?.status === "success" || state?.status === "uploading";
+  const taken = Boolean(state?.previewUrl);
 
   return (
     <div className="space-y-3">
@@ -827,6 +873,12 @@ function PhotoOrScanArea({
         </div>
       )}
 
+      {state?.error && (
+        <div className="edl-glass p-3 text-sm text-red-200 border border-red-400/30">
+          {state.error}
+        </div>
+      )}
+
       {/* CTA prise / reprise */}
       {!state || state.status === "idle" || state.status === "error" ? (
         <button
@@ -874,6 +926,11 @@ function SelfieArea({
         <p className="mt-2 text-xs text-[var(--edl-cyan)] flex items-center justify-center gap-1.5">
           <MapPin size={12}/> Géolocalisation activée
         </p>
+        {state?.error && (
+          <p className="mt-3 text-sm text-red-200">
+            {state.error}
+          </p>
+        )}
       </div>
 
       {!state || state.status === "idle" || state.status === "error" ? (
