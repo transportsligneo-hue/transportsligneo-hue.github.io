@@ -17,6 +17,7 @@ import {
   devisStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
@@ -510,6 +511,13 @@ function DevisDrawer({
           <span className="text-3xl font-semibold text-white">{Number(devis.prix_estime).toFixed(2)} €</span>
         </div>
       </DrawerSection>
+
+      <InspectionPreuvesBlock
+        attributionId={null}
+        fallbackCarteGriseRecto={devis.carte_grise_recto_url}
+        fallbackCarteGriseVerso={devis.carte_grise_verso_url}
+        fallbackVin={devis.vin}
+      />
 
       {devis.message && (
         <DrawerSection title="Message client">

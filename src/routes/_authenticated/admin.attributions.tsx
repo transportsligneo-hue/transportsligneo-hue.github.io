@@ -17,6 +17,7 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { toast } from "sonner";
@@ -633,7 +634,14 @@ function AdminAttributions() {
             )}
           </DrawerSection>
 
-          <DrawerSection title="Documents mission" icon={<FileText size={12} />}>
+          <InspectionPreuvesBlock
+            attributionId={selectedAttr.id}
+            fallbackCarteGriseRecto={attrDetail?.carte_grise_recto_url}
+            fallbackCarteGriseVerso={attrDetail?.carte_grise_verso_url}
+            fallbackVin={attrDetail?.vin}
+          />
+
+          <DrawerSection title="Documents mission (uploads convoyeur)" icon={<FileText size={12} />}>
             <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
           </DrawerSection>
         </AdminDetailDrawer>
