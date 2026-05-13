@@ -13,9 +13,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Check, ChevronRight, MapPin, KeyRound, ClipboardCheck, Truck,
-  Flag, AlertTriangle, Loader2, Clock, Navigation,
+  Flag, AlertTriangle, Loader2, Clock, Navigation, Camera, Lock,
 } from "lucide-react";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
+import { useMissionGates } from "@/hooks/useMissionGates";
 
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"
@@ -81,6 +82,8 @@ export function MissionWorkflow({
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [incidentOpen, setIncidentOpen] = useState(false);
+  const { hasSelfie, isDisabled } = useMissionGates(attributionId);
+  const selfieOK = hasSelfie || isDisabled("selfie");
 
   // Étape effective : si rien en base, on déduit depuis le statut macro
   const effectiveEtape: EtapeKey = (currentEtape as EtapeKey) ||
@@ -121,6 +124,13 @@ export function MissionWorkflow({
   };
 
   const advance = async () => {
+    // Garde-fou : selfie obligatoire avant toute prise en charge / EDL
+    const stepsRequiringSelfie: EtapeKey[] = ["sur_place", "vehicule_recupere", "arrive_destination"];
+    if (!selfieOK && stepsRequiringSelfie.includes(effectiveEtape)) {
+      alert("Selfie d'identité obligatoire avant de prendre en charge le véhicule. Faites-le dans le bloc 'Validations obligatoires' au-dessus.");
+      return;
+    }
+
     // Étapes spéciales : EDL démarre l'inspection (le composant InspectionGuidee
     // est ouvert par le parent). On ne marque l'EDL "fait" qu'à la complétion,
     // déclenchée par le parent qui appellera markEtape.
@@ -203,14 +213,25 @@ export function MissionWorkflow({
 
         {/* CTA principal */}
         {!isFinished && !isIncident && (
-          <button
-            onClick={advance}
-            disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 px-5 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : <ChevronRight size={20} />}
-            {currentDef.cta}
-          </button>
+          <>
+            {!selfieOK && ["sur_place","vehicule_recupere","arrive_destination"].includes(effectiveEtape) && (
+              <div className="mt-3 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <Lock size={14} className="mt-0.5 shrink-0" />
+                <p className="text-xs leading-snug">
+                  <strong>Selfie d'identité requis</strong> avant de continuer. Faites-le dans le bloc <em>Validations obligatoires</em> ci-dessus
+                  <Camera size={12} className="inline ml-1 -mt-0.5" />.
+                </p>
+              </div>
+            )}
+            <button
+              onClick={advance}
+              disabled={loading || (!selfieOK && ["sur_place","vehicule_recupere","arrive_destination"].includes(effectiveEtape))}
+              className="w-full mt-4 flex items-center justify-center gap-2 px-5 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : <ChevronRight size={20} />}
+              {currentDef.cta}
+            </button>
+          </>
         )}
 
         {isFinished && (
