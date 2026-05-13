@@ -72,6 +72,8 @@ interface Props {
   onStartInspection: (type: "depart" | "arrivee") => void;
   onMacroStatusChange: (newStatut: string) => Promise<boolean> | boolean;
   onUpdated: () => Promise<void> | void;
+  forceOpenSelfie?: boolean;
+  onSelfieModalStateChange?: (open: boolean) => void;
 }
 
 export function MissionCockpit({
@@ -84,6 +86,8 @@ export function MissionCockpit({
   onStartInspection,
   onMacroStatusChange,
   onUpdated,
+  forceOpenSelfie = false,
+  onSelfieModalStateChange,
 }: Props) {
   const gates = useMissionGates(attributionId);
   const [busy, setBusy] = useState(false);
@@ -96,6 +100,15 @@ export function MissionCockpit({
   }, [currentEtape]);
 
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
+
+  useEffect(() => {
+    if (!forceOpenSelfie || selfieOK) return;
+    setOpenSelfie(true);
+  }, [forceOpenSelfie, selfieOK]);
+
+  useEffect(() => {
+    onSelfieModalStateChange?.(openSelfie);
+  }, [onSelfieModalStateChange, openSelfie]);
 
   const currentKey: ActionKind = useMemo(() => {
     if (["validee", "termine", "en_attente_validation"].includes(statut)) return "done";
