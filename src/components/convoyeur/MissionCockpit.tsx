@@ -118,11 +118,28 @@ export function MissionCockpit({
     onSelfieModalStateChange?.(openSelfie);
   }, [onSelfieModalStateChange, openSelfie]);
 
+  const normalizedEtape = useMemo(() => {
+    const etape = optimisticEtape ?? currentEtape;
+    if (!etape) return null;
+
+    if (etape === "en_validation_admin" || etape === "envoi_validation_admin") {
+      return "en_attente_validation";
+    }
+
+    if (etape === "terminee") {
+      return "termine";
+    }
+
+    return etape;
+  }, [currentEtape, optimisticEtape]);
+
   const currentKey: ActionKind = useMemo(() => {
     if (["validee", "termine", "en_attente_validation"].includes(statut)) return "done";
     if (!selfieOK) return "selfie";
 
-    const e = optimisticEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
+    const e = normalizedEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
+
+    if (e === "en_attente_validation" || e === "termine") return "done";
 
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
@@ -138,21 +155,21 @@ export function MissionCockpit({
     }
     if (e === "edl_arrivee_fait") return "cloturer";
     return "demarrer";
-  }, [inspectionArriveeDone, inspectionDepartDone, optimisticEtape, selfieOK, statut]);
+  }, [inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
   const currentDef = STEPS[currentIdx] ?? STEPS[0];
   const isDone = currentKey === "done";
 
   useEffect(() => {
-    const e = optimisticEtape ?? currentEtape;
+    const e = normalizedEtape;
     if (inspectionDepartDone && (e === "vehicule_recupere" || e === "sur_place")) {
       void persistEtape("edl_depart_fait").catch(() => undefined);
     }
     if (inspectionArriveeDone && e === "arrive_destination") {
       void persistEtape("edl_arrivee_fait").catch(() => undefined);
     }
-  }, [inspectionDepartDone, inspectionArriveeDone, currentEtape, optimisticEtape]);
+  }, [inspectionDepartDone, inspectionArriveeDone, normalizedEtape]);
 
   async function persistEtape(etape: string, notes?: string) {
     const previousEtape = optimisticEtape ?? currentEtape;
