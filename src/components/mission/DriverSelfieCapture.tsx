@@ -38,6 +38,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const completionRef = useRef(false);
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
   const canGoNext = status === "success";
 
@@ -70,11 +71,13 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     setPreview(null);
     setStatus("idle");
     setError(null);
+    completionRef.current = false;
     setTimeout(openCamera, 50);
   };
 
   const goNext = () => {
-    if (!canGoNext) return;
+    if (!canGoNext || completionRef.current) return;
+    completionRef.current = true;
     void Promise.resolve(onCaptured()).finally(onClose);
   };
 
@@ -117,12 +120,15 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       setStatus("success");
       toast.success("Selfie validé", { description: "Appuyez sur Page suivante pour continuer la mission." });
       setTimeout(() => {
+        if (completionRef.current) return;
+        completionRef.current = true;
         void Promise.resolve(onCaptured()).finally(onClose);
       }, 350);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
       setError(msg);
+      completionRef.current = false;
       toast.error("Échec selfie", { description: msg });
     }
   };
