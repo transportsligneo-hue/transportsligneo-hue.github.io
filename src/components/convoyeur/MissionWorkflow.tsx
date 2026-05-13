@@ -124,6 +124,13 @@ export function MissionWorkflow({
   };
 
   const advance = async () => {
+    // Garde-fou : selfie obligatoire avant toute prise en charge / EDL
+    const stepsRequiringSelfie: EtapeKey[] = ["sur_place", "vehicule_recupere", "arrive_destination"];
+    if (!selfieOK && stepsRequiringSelfie.includes(effectiveEtape)) {
+      alert("Selfie d'identité obligatoire avant de prendre en charge le véhicule. Faites-le dans le bloc 'Validations obligatoires' au-dessus.");
+      return;
+    }
+
     // Étapes spéciales : EDL démarre l'inspection (le composant InspectionGuidee
     // est ouvert par le parent). On ne marque l'EDL "fait" qu'à la complétion,
     // déclenchée par le parent qui appellera markEtape.
