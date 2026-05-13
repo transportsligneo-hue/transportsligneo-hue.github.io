@@ -1861,6 +1861,7 @@ export type Database = {
         Row: {
           account_status: string
           adresse: string | null
+          avatar_url: string | null
           created_at: string
           email: string | null
           id: string
@@ -1878,6 +1879,7 @@ export type Database = {
         Insert: {
           account_status?: string
           adresse?: string | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1895,6 +1897,7 @@ export type Database = {
         Update: {
           account_status?: string
           adresse?: string | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
