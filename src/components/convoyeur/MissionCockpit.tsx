@@ -268,25 +268,6 @@ export function MissionCockpit({
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-pro-border p-3">
-        <p className="text-[10px] uppercase tracking-wider text-pro-muted font-semibold px-1 mb-2">Parcours mission</p>
-        <ol className="space-y-0.5">
-          {visualSteps.map((s, i) => {
-            const done = i < visualIdx || isDone;
-            const active = i === visualIdx && !isDone;
-            return (
-              <li key={s.key} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${done ? "bg-emerald-600 text-white" : active ? "bg-[#d4af37] text-[#0b1026] ring-2 ring-[#d4af37]/40" : "bg-pro-bg-soft text-pro-muted"}`}>
-                  {done ? <Check size={11} /> : i + 1}
-                </div>
-                <span className={`text-xs ${active ? "text-pro-text font-semibold" : done ? "text-pro-text-soft" : "text-pro-muted"}`}>{s.short}</span>
-                {active && <span className="ml-auto text-[10px] text-[#0b1026] font-bold uppercase tracking-wider">En cours</span>}
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-
       {openSelfie && (
         <DriverSelfieCapture
           attributionId={attributionId}
