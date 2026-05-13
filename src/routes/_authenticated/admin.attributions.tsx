@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, ExternalLink, Receipt, Loader2 } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
@@ -16,6 +16,7 @@ import {
   Select,
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { toast } from "sonner";
@@ -124,6 +125,28 @@ function AdminAttributions() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
   const [invoicingId, setInvoicingId] = useState<string | null>(null);
+  const [selectedAttr, setSelectedAttr] = useState<Attribution | null>(null);
+  const [attrDetail, setAttrDetail] = useState<{ vin?: string | null; carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null; marque?: string | null; modele?: string | null; immatriculation?: string | null; client_email?: string | null; client_telephone?: string | null; prix?: number | null; numero_mission?: string | null; etape_courante?: string | null; cgRectoSigned?: string | null; cgVersoSigned?: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!selectedAttr) { setAttrDetail(null); return; }
+    (async () => {
+      const { data: t } = await supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle();
+      const { data: a } = await supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle();
+      const sign = async (path: string | null | undefined) => {
+        if (!path) return null;
+        if (/^https?:\/\//.test(path)) return path;
+        const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(path, 3600);
+        return data?.signedUrl ?? null;
+      };
+      setAttrDetail({
+        ...(t ?? {}),
+        ...(a ?? {}),
+        cgRectoSigned: await sign(t?.carte_grise_recto_url),
+        cgVersoSigned: await sign(t?.carte_grise_verso_url),
+      });
+    })();
+  }, [selectedAttr]);
 
   const handleEmitFacture = async (a: Attribution) => {
     setInvoicingId(a.id);
@@ -370,14 +393,13 @@ function AdminAttributions() {
                       </option>
                     ))}
                   </Select>
-                  <Link
-                    to="/admin/missions/$missionId"
-                    params={{ missionId: a.id }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium role-admin-bg text-white hover:opacity-90 transition-opacity"
+                  <IconButton
+                    onClick={() => setSelectedAttr(a)}
                     title="Ouvrir la fiche mission"
+                    tone="primary"
                   >
-                    <ExternalLink size={12} /> Ouvrir
-                  </Link>
+                    <Eye size={15} />
+                  </IconButton>
                   <IconButton onClick={() => viewGps(a.id)} title="Suivi GPS" tone="primary">
                     <MapPin size={15} />
                   </IconButton>
@@ -547,6 +569,75 @@ function AdminAttributions() {
 
       {/* Mission Report Modal */}
       {reportId && <MissionReport attributionId={reportId} onClose={() => setReportId(null)} />}
+
+      {/* Drawer bleu — détail attribution */}
+      {selectedAttr && (
+        <AdminDetailDrawer
+          open={!!selectedAttr}
+          onClose={() => setSelectedAttr(null)}
+          title={attrDetail?.numero_mission || `Mission ${selectedAttr.id.slice(0, 8)}`}
+          subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
+          badge={
+            <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
+              {statutLabels[selectedAttr.statut] ?? selectedAttr.statut}
+            </DrawerBadge>
+          }
+          footer={
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setReportId(selectedAttr.id)} icon={<FileText size={12} />}>Rapport mission</Button>
+              <Button size="sm" onClick={() => viewGps(selectedAttr.id)} icon={<MapPin size={12} />}>Suivi GPS</Button>
+              <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "depart")} icon={<Image size={12} />}>Photos départ</Button>
+              <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "arrivee")} icon={<Image size={12} />}>Photos arrivée</Button>
+            </div>
+          }
+        >
+          <DrawerSection title="Convoyeur" icon={<User size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Nom" value={selectedAttr.convoyeur ? `${selectedAttr.convoyeur.prenom} ${selectedAttr.convoyeur.nom}` : null} />
+              <DrawerField label="Étape courante" value={attrDetail?.etape_courante} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Départ" value={selectedAttr.trajet?.depart} />
+              <DrawerField label="Arrivée" value={selectedAttr.trajet?.arrivee} />
+              <DrawerField label="Date" value={selectedAttr.trajet?.date_trajet ? new Date(selectedAttr.trajet.date_trajet).toLocaleDateString("fr-FR") : null} />
+              <DrawerField label="Prix client" value={attrDetail?.prix ? `${attrDetail.prix} €` : null} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Véhicule" icon={<Car size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Marque / modèle" value={[attrDetail?.marque, attrDetail?.modele].filter(Boolean).join(" ")} />
+              <DrawerField label="Immatriculation" value={attrDetail?.immatriculation} mono />
+              <DrawerField label="VIN" value={attrDetail?.vin} mono />
+              <DrawerField label="Email client" value={attrDetail?.client_email} />
+              <DrawerField label="Téléphone" value={attrDetail?.client_telephone} />
+            </DrawerGrid>
+            {(attrDetail?.cgRectoSigned || attrDetail?.cgVersoSigned) && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {attrDetail.cgRectoSigned && (
+                  <a href={attrDetail.cgRectoSigned} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 hover:border-blue-400/50">
+                    <img src={attrDetail.cgRectoSigned} alt="Carte grise recto" className="w-full h-32 object-cover" />
+                    <p className="text-[10px] text-center text-white/60 py-1">Carte grise — recto</p>
+                  </a>
+                )}
+                {attrDetail.cgVersoSigned && (
+                  <a href={attrDetail.cgVersoSigned} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 hover:border-blue-400/50">
+                    <img src={attrDetail.cgVersoSigned} alt="Carte grise verso" className="w-full h-32 object-cover" />
+                    <p className="text-[10px] text-center text-white/60 py-1">Carte grise — verso</p>
+                  </a>
+                )}
+              </div>
+            )}
+          </DrawerSection>
+
+          <DrawerSection title="Documents mission" icon={<FileText size={12} />}>
+            <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
+          </DrawerSection>
+        </AdminDetailDrawer>
+      )}
     </div>
   );
 }

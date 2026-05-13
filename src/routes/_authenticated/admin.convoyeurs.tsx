@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard } from "lucide-react";
+import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, Phone, MapPin } from "lucide-react";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
   PageHeader,
@@ -56,6 +57,15 @@ function AdminConvoyeurs() {
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [selected, setSelected] = useState<Convoyeur | null>(null);
+  const [docs, setDocs] = useState<Array<{ type_document: string; nom_fichier: string; url_fichier: string; statut_validation: string }>>([]);
+  const [missionsCount, setMissionsCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!selected) { setDocs([]); setMissionsCount(0); return; }
+    supabase.from("documents_convoyeurs").select("type_document, nom_fichier, url_fichier, statut_validation").eq("convoyeur_id", selected.id).then(({ data }) => setDocs(data ?? []));
+    supabase.from("attributions").select("id", { count: "exact", head: true }).eq("convoyeur_id", selected.id).then(({ count }) => setMissionsCount(count ?? 0));
+  }, [selected]);
 
   const fetchConvoyeurs = useCallback(async () => {
     let query = supabase.from("convoyeurs").select("*").order("created_at", { ascending: false });
@@ -209,7 +219,7 @@ function AdminConvoyeurs() {
           </THead>
           <tbody>
             {convoyeurs.map((c) => (
-              <TR key={c.id}>
+              <TR key={c.id} onClick={() => setSelected(c)} className="cursor-pointer">
                 <TD>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
@@ -238,16 +248,11 @@ function AdminConvoyeurs() {
                     {statutLabels[c.statut] ?? c.statut}
                   </Badge>
                 </TD>
-                <TD>
+                <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/convoyeurs/$convoyeurId"
-                      params={{ convoyeurId: c.id }}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
+                    <IconButton onClick={() => setSelected(c)} title="Voir la fiche" tone="neutral">
                       <Eye size={15} />
-                    </Link>
+                    </IconButton>
                     {c.statut === "en_attente" && (
                       <>
                         <IconButton
@@ -272,6 +277,78 @@ function AdminConvoyeurs() {
             ))}
           </tbody>
         </Table>
+      )}
+
+
+      {/* Drawer bleu — fiche convoyeur */}
+      {selected && (
+        <AdminDetailDrawer
+          open={!!selected}
+          onClose={() => setSelected(null)}
+          title={`${selected.prenom} ${selected.nom}`}
+          subtitle={selected.email}
+          badge={
+            <div className="flex flex-wrap gap-2">
+              <DrawerBadge tone={selected.statut === "valide" ? "green" : selected.statut === "en_attente" ? "amber" : "red"}>
+                {statutLabels[selected.statut] ?? selected.statut}
+              </DrawerBadge>
+              <DrawerBadge tone="slate">{selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}</DrawerBadge>
+            </div>
+          }
+          footer={
+            selected.statut === "en_attente" ? (
+              <div className="flex gap-2">
+                <Button onClick={() => { updateStatut(selected.id, "valide"); setSelected(null); }} className="bg-emerald-500 hover:bg-emerald-600 text-white" icon={<CheckCircle size={14} />}>Valider</Button>
+                <Button onClick={() => { updateStatut(selected.id, "refuse"); setSelected(null); }} className="bg-red-500 hover:bg-red-600 text-white" icon={<XCircle size={14} />}>Refuser</Button>
+              </div>
+            ) : null
+          }
+        >
+          <DrawerSection title="Contact" icon={<User size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Prénom" value={selected.prenom} />
+              <DrawerField label="Nom" value={selected.nom} />
+              <DrawerField label="Email" value={selected.email} />
+              <DrawerField label="Téléphone" value={selected.telephone} />
+              <DrawerField label="Ville" value={selected.ville} />
+              <DrawerField label="Disponibilité" value={selected.disponibilite} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Activité" icon={<MapPin size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Missions totales" value={missionsCount.toString()} />
+              <DrawerField label="Permis" value={selected.permis} />
+              <DrawerField label="Inscrit le" value={new Date(selected.created_at).toLocaleDateString("fr-FR")} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title={`Documents (${docs.length})`} icon={<FileText size={12} />}>
+            {docs.length === 0 ? (
+              <p className="text-sm text-white/50">Aucun document fourni.</p>
+            ) : (
+              <div className="space-y-2">
+                {docs.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between gap-3 p-2 rounded-lg bg-white/[0.03] border border-white/10">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-white/95 capitalize">{d.type_document}</p>
+                      <p className="text-[11px] text-white/40 truncate">{d.nom_fichier}</p>
+                    </div>
+                    <DrawerBadge tone={d.statut_validation === "approuve" ? "green" : d.statut_validation === "refuse" ? "red" : "amber"}>
+                      {d.statut_validation}
+                    </DrawerBadge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DrawerSection>
+
+          {selected.message && (
+            <DrawerSection title="Message d'inscription" icon={<Mail size={12} />}>
+              <p className="text-sm text-white/85 whitespace-pre-wrap">{selected.message}</p>
+            </DrawerSection>
+          )}
+        </AdminDetailDrawer>
       )}
 
 

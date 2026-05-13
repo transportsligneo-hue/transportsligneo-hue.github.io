@@ -15,6 +15,7 @@ import { MissionCard, type MissionCardData } from "@/components/convoyeur/Missio
 import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
+import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
@@ -110,7 +111,7 @@ function ConvoyeurMissions() {
       for (const attr of data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>) {
         const { data: trajet } = await supabase
           .from("trajets")
-          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone")
+          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
           .eq("id", attr.trajet_id)
           .maybeSingle();
 
@@ -357,6 +358,15 @@ function ConvoyeurMissions() {
           onOpenDocuments={() => setExpandedDocs(true)}
           onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
         />
+
+        {/* Documents véhicule (VIN + carte grise) */}
+        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
+          <VehiculeDocsView
+            vin={t?.vin ?? null}
+            rectoPath={t?.carte_grise_recto_url ?? null}
+            versoPath={t?.carte_grise_verso_url ?? null}
+          />
+        )}
 
         {/* Live GPS */}
         {isActive && (
