@@ -194,7 +194,7 @@ export function InspectionPreuvesBlock({
             <ZoomIn size={12} />
           </button>
         )}
-        <button onClick={() => download(a)} className="p-1 rounded bg-black/60 hover:bg-black text-white">
+        <button onClick={() => download(a)} className={`p-1 rounded bg-black/60 hover:bg-black text-white ${!a.storagePath ? "hidden" : ""}`}>
           <Download size={12} />
         </button>
       </div>
