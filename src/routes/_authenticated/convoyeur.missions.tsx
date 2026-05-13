@@ -180,16 +180,43 @@ function ConvoyeurMissions() {
   useEffect(() => {
     if (!missions.length) return;
 
-    const missionToResume = missions.find((mission) => hasPendingDriverSelfie(mission.id));
-    if (!missionToResume) {
+    const candidates = missions.filter((mission) => hasPendingDriverSelfie(mission.id));
+    if (candidates.length === 0) {
       setResumeSelfieMissionId(null);
       return;
     }
 
-    setResumeSelfieMissionId(missionToResume.id);
-    if (openMissionId !== missionToResume.id) {
-      setOpenMissionId(missionToResume.id);
-    }
+    let cancelled = false;
+    (async () => {
+      // Vérifie en base si un selfie existe déjà — si oui, on nettoie
+      // le flag local et on ne re-bloque plus la mission.
+      const ids = candidates.map((m) => m.id);
+      const { data } = await supabase
+        .from("mission_selfies" as never)
+        .select("attribution_id")
+        .in("attribution_id" as never, ids as never);
+      if (cancelled) return;
+
+      const alreadyDone = new Set<string>(((data ?? []) as Array<{ attribution_id: string }>).map((r) => r.attribution_id));
+      const stillPending = candidates.find((m) => !alreadyDone.has(m.id));
+
+      // Nettoie les flags périmés
+      candidates.forEach((m) => {
+        if (alreadyDone.has(m.id)) setPendingDriverSelfie(m.id, false);
+      });
+
+      if (!stillPending) {
+        setResumeSelfieMissionId(null);
+        return;
+      }
+
+      setResumeSelfieMissionId(stillPending.id);
+      if (openMissionId !== stillPending.id) {
+        setOpenMissionId(stillPending.id);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [missions, openMissionId, setOpenMissionId]);
 
   // GPS realtime
