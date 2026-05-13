@@ -12,9 +12,8 @@ import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
-import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
+import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
-import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
@@ -440,29 +439,19 @@ function ConvoyeurMissions() {
           </div>
         )}
 
-        {/* Validations obligatoires : selfie + double signatures */}
+        {/* === COCKPIT MISSION : étape en cours unifiée (selfie + signatures + EDL + workflow) === */}
         {openMission.statut !== "propose" && user && (
-          <MissionGatesPanel
+          <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}
-            driverName={`${user.user_metadata?.prenom ?? ""} ${user.user_metadata?.nom ?? ""}`.trim() || (user.email ?? "Convoyeur")}
+            driverName={driverDisplayName}
             clientName={undefined}
-            showEndSignatures={!!openMission.inspectionArrivee || ["arrive_destination","edl_arrivee_fait","en_attente_validation","validee","termine"].includes(openMission.etape_courante ?? openMission.statut)}
-            onChange={fetchMissions}
-          />
-        )}
-
-        {/* Workflow étape par étape */}
-        {openMission.statut !== "propose" && openMission.statut !== "termine" && user && (
-          <MissionWorkflow
-            attributionId={openMission.id}
-            userId={user.id}
             currentEtape={openMission.etape_courante ?? null}
             statut={openMission.statut}
             inspectionDepartDone={!!openMission.inspectionDepart}
             inspectionArriveeDone={!!openMission.inspectionArrivee}
-            onStartInspection={(type) => openInspection({ attributionId: openMission.id, type })}
-            onMacroStatusChange={(s) => updateStatus(openMission.id, s)}
+            onStartInspection={(type: "depart" | "arrivee") => openInspection({ attributionId: openMission.id, type })}
+            onMacroStatusChange={(s: string) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
           />
         )}
