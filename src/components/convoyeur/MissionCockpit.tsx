@@ -99,6 +99,8 @@ export function MissionCockpit({
     setOptimisticEtape(currentEtape);
   }, [currentEtape]);
 
+  const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
+
   useEffect(() => {
     if (!forceOpenSelfie || selfieOK) return;
     setOpenSelfie(true);
@@ -107,8 +109,6 @@ export function MissionCockpit({
   useEffect(() => {
     onSelfieModalStateChange?.(openSelfie);
   }, [onSelfieModalStateChange, openSelfie]);
-
-  const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
 
   const currentKey: ActionKind = useMemo(() => {
     if (["validee", "termine", "en_attente_validation"].includes(statut)) return "done";
