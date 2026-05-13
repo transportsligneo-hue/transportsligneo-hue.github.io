@@ -139,6 +139,8 @@ export function MissionCockpit({
 
     const e = normalizedEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
 
+    if (e === "en_attente_validation" || e === "termine") return "done";
+
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
     if (e === "sur_place" || e === "vehicule_recupere") {
