@@ -22,6 +22,9 @@ export interface MissionCardData {
     immatriculation: string | null;
     tarif_convoyeur: number | null;
     client_telephone?: string | null;
+    vin?: string | null;
+    carte_grise_recto_url?: string | null;
+    carte_grise_verso_url?: string | null;
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
