@@ -20,6 +20,41 @@ interface Props {
   onClose: () => void;
 }
 
+const SELFIE_RESUME_PREFIX = "driver:selfie-resume:";
+
+function getSelfieResumeKey(attributionId: string) {
+  return `${SELFIE_RESUME_PREFIX}${attributionId}`;
+}
+
+export function hasPendingDriverSelfie(attributionId: string) {
+  if (typeof window === "undefined") return false;
+  const key = getSelfieResumeKey(attributionId);
+
+  try {
+    return sessionStorage.getItem(key) === "1" || localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setPendingDriverSelfie(attributionId: string, active: boolean) {
+  if (typeof window === "undefined") return;
+  const key = getSelfieResumeKey(attributionId);
+
+  try {
+    if (active) {
+      sessionStorage.setItem(key, "1");
+      localStorage.setItem(key, "1");
+      return;
+    }
+
+    sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage quota or privacy mode errors.
+  }
+}
+
 function getPosition(): Promise<GeolocationPosition | null> {
   return new Promise(resolve => {
     if (!navigator.geolocation) return resolve(null);
@@ -28,6 +63,17 @@ function getPosition(): Promise<GeolocationPosition | null> {
       () => resolve(null),
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     );
+  });
+}
+
+async function materializeCapturedFile(raw: File) {
+  const buffer = await raw.arrayBuffer();
+  const safeType = raw.type && raw.type.startsWith("image/") ? raw.type : "image/jpeg";
+  const safeName = raw.name || `selfie_${Date.now()}.jpg`;
+
+  return new File([buffer], safeName, {
+    type: safeType,
+    lastModified: raw.lastModified || Date.now(),
   });
 }
 
@@ -42,6 +88,10 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
 
   useEffect(() => {
+    setPendingDriverSelfie(attributionId, true);
+  }, [attributionId]);
+
+  useEffect(() => {
     return () => {
       if (preview) {
         try { URL.revokeObjectURL(preview); } catch { /* ignore */ }
@@ -51,17 +101,27 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
   const openCamera = () => fileRef.current?.click();
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
-    if (!raw) return;
-    if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
-    setCapturedFile(raw);
-    setPreview(URL.createObjectURL(raw));
-    setStatus("idle");
-    setError(null);
-    // Géoloc en arrière-plan, non bloquante
-    getPosition().then(p => { if (p) setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); });
     if (fileRef.current) fileRef.current.value = "";
+    if (!raw) return;
+
+    try {
+      const stableFile = await materializeCapturedFile(raw);
+      if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
+
+      setCapturedFile(stableFile);
+      setPreview(URL.createObjectURL(stableFile));
+      setStatus("idle");
+      setError(null);
+
+      getPosition().then(p => { if (p) setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Le selfie n’a pas pu être préparé.";
+      setStatus("error");
+      setError(msg);
+      toast.error("Échec selfie", { description: "Le selfie n’a pas pu être enregistré. Réessayez." });
+    }
   };
 
   const retake = () => {
@@ -125,6 +185,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
+      setPendingDriverSelfie(attributionId, false);
       toast.success("Selfie validé", { description: "Passage automatique à l'étape suivante." });
       setTimeout(finalizeStep, 180);
     } catch (err) {
