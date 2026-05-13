@@ -1,15 +1,14 @@
 /**
  * DriverSelfieCapture — Étape 0 : selfie identité du convoyeur.
  *
- * - Caméra avant (capture="user")
- * - Géolocalisation horodatée
- * - Upload vers bucket mission-selfies
- * - Insert dans mission_selfies
- *
- * Bypass possible via mission_step_overrides (step_key='selfie', mode='disable'/'skip').
+ * Flow:
+ *   1. Ouvrir caméra (capture="user") via clic direct utilisateur
+ *   2. Preview immédiate du selfie capturé
+ *   3. Footer sticky : Reprendre / Valider et continuer
+ *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
 import { useRef, useState } from "react";
-import { Camera, Loader2, Check, X, AlertCircle, MapPin } from "lucide-react";
+import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
@@ -33,39 +32,53 @@ function getPosition(): Promise<GeolocationPosition | null> {
 }
 
 export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose }: Props) {
+  const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle"|"uploading"|"success"|"error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{lat:number;lng:number;acc:number|null}|null>(null);
+  const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const open = () => fileRef.current?.click();
+  const openCamera = () => fileRef.current?.click();
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     if (!raw) return;
-    // Révoque l'ancienne preview pour éviter les fuites mémoire
     if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
-    const local = URL.createObjectURL(raw);
-    setPreview(local);
+    setCapturedFile(raw);
+    setPreview(URL.createObjectURL(raw));
+    setStatus("idle");
+    setError(null);
+    // Géoloc en arrière-plan, non bloquante
+    getPosition().then(p => { if (p) setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); });
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const retake = () => {
+    if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
+    setCapturedFile(null);
+    setPreview(null);
+    setStatus("idle");
+    setError(null);
+    setTimeout(openCamera, 50);
+  };
+
+  const validate = async () => {
+    if (!capturedFile) return;
     setStatus("uploading");
     setError(null);
-
     try {
       const pos = await getPosition();
-      if (pos) setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy });
+      if (pos) setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
 
-      // Compression best-effort. Si HEIC iPhone ou échec, on garde l'original.
       let file: File;
-      try { file = await compressImage(raw); } catch { file = raw; }
+      try { file = await compressImage(capturedFile); } catch { file = capturedFile; }
 
-      // Détecte le bon contentType (iPhone HEIC, Android jpg…)
       const isJpeg = file.type === "image/jpeg" || file.name.toLowerCase().endsWith(".jpg");
       const ext = isJpeg ? "jpg" : (file.type.split("/")[1] || "jpg").replace(/[^a-z0-9]/gi, "") || "jpg";
       const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.${ext}`;
 
-      // Upload avec 1 retry en cas d'échec réseau passager
       const upload = async () => supabase.storage
         .from("mission-selfies")
         .upload(path, file, { upsert: true, contentType });
@@ -87,30 +100,28 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
-      toast.success("Selfie identité enregistré");
-      setTimeout(() => { onCaptured(); onClose(); }, 600);
+      toast.success("Selfie validé");
+      setTimeout(() => { onCaptured(); onClose(); }, 500);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
       setError(msg);
       toast.error("Échec selfie", { description: msg });
-    } finally {
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
   return (
     <div className="fixed inset-0 z-[80] bg-[#0b1026] flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 bg-black/40 text-white">
-        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg"><X size={20}/></button>
+      <div className="flex items-center justify-between px-4 py-3 bg-black/40 text-white shrink-0">
+        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-wider opacity-60">Étape 0 — Identité</p>
-          <p className="text-sm font-semibold">Selfie convoyeur obligatoire</p>
+          <p className="text-[10px] uppercase tracking-wider opacity-60">Étape 1 — Identité</p>
+          <p className="text-sm font-semibold">Selfie convoyeur</p>
         </div>
         <div className="w-9"/>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 relative">
+      <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
         {preview ? (
           <img src={preview} alt="Selfie" className="max-w-full max-h-full rounded-2xl object-contain border-2 border-[#d4af37]"/>
         ) : (
@@ -119,7 +130,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
               <Camera size={40} className="text-[#d4af37]"/>
             </div>
             <p className="text-base font-semibold text-white mb-2">Prenez un selfie</p>
-            <p className="text-sm opacity-80">Photo d'identité horodatée et géolocalisée pour valider votre prise de mission. Visage net, bien éclairé.</p>
+            <p className="text-sm opacity-80">Photo d'identité horodatée et géolocalisée. Visage net, bien éclairé.</p>
           </div>
         )}
 
@@ -134,26 +145,46 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
           </div>
         )}
         {status === "error" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-full text-xs">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-full text-xs max-w-[90%] truncate">
             <AlertCircle size={14}/> {error}
           </div>
         )}
-        {coords && (
+        {coords && preview && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-black/70 text-white/80 rounded-full text-[10px]">
             <MapPin size={11}/> {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </div>
         )}
       </div>
 
-      <div className="px-4 py-4 bg-black/40 safe-bottom">
+      {/* Sticky footer toujours visible */}
+      <div className="px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)] bg-black/60 backdrop-blur border-t border-white/10 shrink-0">
         <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={handleFile} className="hidden"/>
-        <button
-          onClick={open}
-          disabled={status === "uploading"}
-          className="w-full flex items-center justify-center gap-2 py-4 bg-[#d4af37] text-[#0b1026] rounded-xl text-base font-bold hover:bg-[#e7c76a] active:scale-[0.98] transition disabled:opacity-50"
-        >
-          <Camera size={20}/> {preview ? "Reprendre" : "Ouvrir l'appareil photo"}
-        </button>
+        {!preview ? (
+          <button
+            onClick={openCamera}
+            className="w-full flex items-center justify-center gap-2 py-4 bg-[#d4af37] text-[#0b1026] rounded-xl text-base font-bold hover:bg-[#e7c76a] active:scale-[0.98] transition"
+          >
+            <Camera size={20}/> Ouvrir l'appareil photo
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={retake}
+              disabled={status === "uploading" || status === "success"}
+              className="flex items-center justify-center gap-1.5 px-4 py-3.5 bg-white/10 text-white rounded-xl text-sm font-semibold hover:bg-white/20 active:scale-[0.98] transition disabled:opacity-40"
+            >
+              <RotateCcw size={16}/> Reprendre
+            </button>
+            <button
+              onClick={validate}
+              disabled={status === "uploading" || status === "success"}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-emerald-500 text-[#0b1026] rounded-xl text-base font-bold hover:bg-emerald-400 active:scale-[0.98] transition disabled:opacity-50"
+            >
+              {status === "uploading" ? <Loader2 className="animate-spin" size={18}/> : <Check size={18}/>}
+              {status === "success" ? "Validé" : "Valider et continuer"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
