@@ -94,12 +94,20 @@ export function MissionCockpit({
   const [openSelfie, setOpenSelfie] = useState(false);
   const [openIncident, setOpenIncident] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
+  // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
+  // l'UI sans attendre la propagation Supabase / fetch parent.
+  const [selfieJustDone, setSelfieJustDone] = useState(false);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
   }, [currentEtape]);
 
-  const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
+  const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
+
+  // Si la base confirme désormais le selfie, on peut relâcher l'optimiste.
+  useEffect(() => {
+    if (gates.hasSelfie && selfieJustDone) setSelfieJustDone(false);
+  }, [gates.hasSelfie, selfieJustDone]);
 
   useEffect(() => {
     if (!forceOpenSelfie || selfieOK) return;
