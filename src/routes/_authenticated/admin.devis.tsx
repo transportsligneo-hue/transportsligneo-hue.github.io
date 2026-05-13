@@ -17,6 +17,7 @@ import {
   devisStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
