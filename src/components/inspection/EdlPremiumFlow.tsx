@@ -112,6 +112,37 @@ const SIGNATURE_DOC_KEY: Record<string, string> = {
   client_end: "pv_signature_arrivee_client",
 };
 
+async function materializeCapturedFile(raw: File) {
+  const buffer = await raw.arrayBuffer();
+  const safeType = raw.type && raw.type.startsWith("image/") ? raw.type : "image/jpeg";
+  const safeName = raw.name || `capture_${Date.now()}.jpg`;
+
+  return new File([buffer], safeName, {
+    type: safeType,
+    lastModified: raw.lastModified || Date.now(),
+  });
+}
+
+async function prepareCapturedImage(raw: File) {
+  const stableFile = await materializeCapturedFile(raw);
+  const looksLikeImage = stableFile.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(stableFile.name);
+
+  if (!stableFile.size) {
+    throw new Error("Image vide. Réessayez.");
+  }
+
+  if (!looksLikeImage) {
+    throw new Error("Format de photo non reconnu.");
+  }
+
+  return stableFile;
+}
+
+function revokeBlobUrl(url?: string) {
+  if (!url?.startsWith("blob:")) return;
+  try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+}
+
 export function EdlPremiumFlow({
   attributionId, userId, driverName, defaultClientName,
   onComplete, onClose,
