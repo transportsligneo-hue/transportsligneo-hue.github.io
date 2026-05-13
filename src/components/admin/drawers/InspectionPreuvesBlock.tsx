@@ -88,7 +88,7 @@ export function InspectionPreuvesBlock({
     const [sR, igR, sigR, dR] = await Promise.all([
       supabase.from("mission_selfies" as never).select("id,storage_path,taken_at").eq("attribution_id" as never, attributionId as never).order("taken_at", { ascending: false }),
       supabase.from("inspections").select("id,type,inspection_photos(id,vue_type,url_photo,created_at,notes)").eq("attribution_id", attributionId),
-      supabase.from("mission_signatures" as never).select("id,kind,signer_name,signed_at,storage_path").eq("attribution_id" as never, attributionId as never),
+      supabase.from("mission_signatures" as never).select("id,kind,signer_name,signed_at,signature_data").eq("attribution_id" as never, attributionId as never),
       supabase.from("mission_documents").select("id,nom_fichier,type_document,url_fichier,created_at").eq("attribution_id", attributionId).order("created_at", { ascending: false }),
     ]);
 
