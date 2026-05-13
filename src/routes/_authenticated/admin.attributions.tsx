@@ -569,6 +569,75 @@ function AdminAttributions() {
 
       {/* Mission Report Modal */}
       {reportId && <MissionReport attributionId={reportId} onClose={() => setReportId(null)} />}
+
+      {/* Drawer bleu — détail attribution */}
+      {selectedAttr && (
+        <AdminDetailDrawer
+          open={!!selectedAttr}
+          onClose={() => setSelectedAttr(null)}
+          title={attrDetail?.numero_mission || `Mission ${selectedAttr.id.slice(0, 8)}`}
+          subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
+          badge={
+            <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
+              {statutLabels[selectedAttr.statut] ?? selectedAttr.statut}
+            </DrawerBadge>
+          }
+          footer={
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setReportId(selectedAttr.id)} icon={<FileText size={12} />}>Rapport mission</Button>
+              <Button size="sm" onClick={() => viewGps(selectedAttr.id)} icon={<MapPin size={12} />}>Suivi GPS</Button>
+              <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "depart")} icon={<Image size={12} />}>Photos départ</Button>
+              <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "arrivee")} icon={<Image size={12} />}>Photos arrivée</Button>
+            </div>
+          }
+        >
+          <DrawerSection title="Convoyeur" icon={<User size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Nom" value={selectedAttr.convoyeur ? `${selectedAttr.convoyeur.prenom} ${selectedAttr.convoyeur.nom}` : null} />
+              <DrawerField label="Étape courante" value={attrDetail?.etape_courante} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Départ" value={selectedAttr.trajet?.depart} />
+              <DrawerField label="Arrivée" value={selectedAttr.trajet?.arrivee} />
+              <DrawerField label="Date" value={selectedAttr.trajet?.date_trajet ? new Date(selectedAttr.trajet.date_trajet).toLocaleDateString("fr-FR") : null} />
+              <DrawerField label="Prix client" value={attrDetail?.prix ? `${attrDetail.prix} €` : null} />
+            </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Véhicule" icon={<Car size={12} />}>
+            <DrawerGrid>
+              <DrawerField label="Marque / modèle" value={[attrDetail?.marque, attrDetail?.modele].filter(Boolean).join(" ")} />
+              <DrawerField label="Immatriculation" value={attrDetail?.immatriculation} mono />
+              <DrawerField label="VIN" value={attrDetail?.vin} mono />
+              <DrawerField label="Email client" value={attrDetail?.client_email} />
+              <DrawerField label="Téléphone" value={attrDetail?.client_telephone} />
+            </DrawerGrid>
+            {(attrDetail?.cgRectoSigned || attrDetail?.cgVersoSigned) && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {attrDetail.cgRectoSigned && (
+                  <a href={attrDetail.cgRectoSigned} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 hover:border-blue-400/50">
+                    <img src={attrDetail.cgRectoSigned} alt="Carte grise recto" className="w-full h-32 object-cover" />
+                    <p className="text-[10px] text-center text-white/60 py-1">Carte grise — recto</p>
+                  </a>
+                )}
+                {attrDetail.cgVersoSigned && (
+                  <a href={attrDetail.cgVersoSigned} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 hover:border-blue-400/50">
+                    <img src={attrDetail.cgVersoSigned} alt="Carte grise verso" className="w-full h-32 object-cover" />
+                    <p className="text-[10px] text-center text-white/60 py-1">Carte grise — verso</p>
+                  </a>
+                )}
+              </div>
+            )}
+          </DrawerSection>
+
+          <DrawerSection title="Documents mission" icon={<FileText size={12} />}>
+            <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
+          </DrawerSection>
+        </AdminDetailDrawer>
+      )}
     </div>
   );
 }
