@@ -13,24 +13,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Camera, PenLine, ClipboardCheck, Truck, MapPin, KeyRound,
+  Camera, ClipboardCheck, Truck, MapPin, KeyRound,
   Navigation, Flag, Check, ChevronRight, Loader2, AlertTriangle, Lock, Send,
 } from "lucide-react";
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { DriverSelfieCapture } from "@/components/mission/DriverSelfieCapture";
-import { DoubleSignatureModal } from "@/components/mission/DoubleSignatureModal";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 type ActionKind =
   | "selfie"
   | "demarrer"
   | "arrive_depart"
-  | "sig_start"
   | "edl_depart"
   | "demarrer_livraison"
   | "arrive_livraison"
   | "edl_arrivee"
-  | "sig_end"
   | "cloturer"
   | "done";
 
@@ -47,12 +44,10 @@ const STEPS: StepDef[] = [
   { key: "selfie",             short: "Selfie",          label: "Selfie d'identité",                 icon: Camera,         cta: "Prendre mon selfie",        hint: "Photo obligatoire avant de commencer." },
   { key: "demarrer",           short: "Démarrer",        label: "Démarrer le trajet",                icon: Navigation,     cta: "Démarrer le trajet",        hint: "Active le GPS et part vers le point d'enlèvement." },
   { key: "arrive_depart",      short: "Arrivée enlèv.",  label: "Arrivé sur le lieu d'enlèvement",   icon: MapPin,         cta: "Je suis arrivé sur place",  hint: "Confirme ta présence au point d'enlèvement." },
-  { key: "sig_start",          short: "Signature dép.",  label: "Signatures de départ",              icon: PenLine,        cta: "Recueillir les signatures", hint: "Convoyeur puis client." },
-  { key: "edl_depart",         short: "EDL départ",      label: "État des lieux d'enlèvement",       icon: ClipboardCheck, cta: "Faire l'état des lieux",    hint: "Photos + vérifications du véhicule." },
+  { key: "edl_depart",         short: "EDL départ",      label: "Inspection de départ",              icon: ClipboardCheck, cta: "Ouvrir l'inspection départ", hint: "Photos, signatures, PV et carte grise dans un seul flow." },
   { key: "demarrer_livraison", short: "En route",        label: "Démarrer la livraison",             icon: Truck,          cta: "Prendre la route",          hint: "Direction le point de livraison." },
   { key: "arrive_livraison",   short: "Arrivée livr.",   label: "Arrivé sur le lieu de livraison",   icon: MapPin,         cta: "Je suis arrivé à destination" },
-  { key: "edl_arrivee",        short: "EDL arrivée",     label: "État des lieux de livraison",       icon: ClipboardCheck, cta: "Faire l'état des lieux d'arrivée" },
-  { key: "sig_end",            short: "Signature arr.",  label: "Signatures d'arrivée",              icon: PenLine,        cta: "Recueillir les signatures" },
+  { key: "edl_arrivee",        short: "EDL arrivée",     label: "Inspection d'arrivée",              icon: ClipboardCheck, cta: "Ouvrir l'inspection arrivée", hint: "Photos, signatures, PV et clôture dans le même parcours." },
   { key: "cloturer",           short: "Clôture",         label: "Envoyer la mission à validation",   icon: Send,           cta: "Envoyer pour validation",   hint: "L'équipe vérifie puis valide." },
   { key: "done",               short: "Validation",      label: "En attente de validation admin",    icon: Flag,           cta: "Mission envoyée" },
 ];
@@ -79,14 +74,14 @@ export function MissionCockpit({
   const gates = useMissionGates(attributionId);
   const [busy, setBusy] = useState(false);
   const [openSelfie, setOpenSelfie] = useState(false);
-  const [openSig, setOpenSig] = useState<null | "start" | "end">(null);
   const [openIncident, setOpenIncident] = useState(false);
+  const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
+
+  useEffect(() => {
+    setOptimisticEtape(currentEtape);
+  }, [currentEtape]);
 
   const selfieOK     = gates.hasSelfie || gates.isDisabled("selfie");
-  const sigStartOK   = (gates.hasSignature("driver_start") || gates.isDisabled("driver_start"))
-                    && (gates.hasSignature("client_start") || gates.isDisabled("client_start"));
-  const sigEndOK     = (gates.hasSignature("driver_end")   || gates.isDisabled("driver_end"))
-                    && (gates.hasSignature("client_end")   || gates.isDisabled("client_end"));
 
   // === Détermine l'étape actuelle (la première non-terminée) ===
   const currentKey: ActionKind = useMemo(() => {
@@ -94,32 +89,27 @@ export function MissionCockpit({
     if (statut === "en_attente_validation") return "done";
     if (!selfieOK) return "selfie";
 
-    const e = currentEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
+    const e = optimisticEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
 
-    // Avant le départ : il faut signer côté départ AVANT l'EDL
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
     if (e === "sur_place" || e === "vehicule_recupere") {
-      if (!sigStartOK) return "sig_start";
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
     if (e === "edl_depart_fait") {
-      if (!sigStartOK) return "sig_start";
       return "demarrer_livraison";
     }
     if (e === "en_livraison") return "arrive_livraison";
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
-      if (!sigEndOK) return "sig_end";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
-      if (!sigEndOK) return "sig_end";
       return "cloturer";
     }
     return "demarrer";
-  }, [statut, currentEtape, selfieOK, sigStartOK, sigEndOK, inspectionDepartDone, inspectionArriveeDone]);
+  }, [statut, optimisticEtape, selfieOK, inspectionDepartDone, inspectionArriveeDone]);
 
   const currentIdx = STEPS.findIndex(s => s.key === currentKey);
   const currentDef = STEPS[currentIdx] ?? STEPS[0];
