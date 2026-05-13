@@ -137,15 +137,14 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const finalizeStep = () => {
     if (closingRef.current) return;
     closingRef.current = true;
-    void Promise.resolve(onCaptured())
-      .then(() => onClose())
-      .catch((err) => {
-        closingRef.current = false;
-        const msg = err instanceof Error ? err.message : "Réessayez dans quelques secondes.";
-        setStatus("error");
-        setError(msg);
-        toast.error("Mission non synchronisée", { description: msg });
-      });
+    // Le selfie est déjà sauvegardé en base. On ferme tout de suite,
+    // puis on déclenche la synchro parent en arrière-plan. Si le refresh
+    // échoue, ça ne re-bloque PAS la mission : la prochaine lecture ira
+    // bien chercher le selfie qui existe déjà.
+    onClose();
+    void Promise.resolve(onCaptured()).catch(() => {
+      // silencieux : le parent retentera au prochain render / fetch
+    });
   };
 
   const validate = async () => {
