@@ -39,7 +39,7 @@ type InspectionSession = { attributionId: string; type: "depart" | "arrivee" };
 
 const EDL_SESSION_KEY = "edl:inspection";
 
-function normalizeMissionEtape(etape: string | null) {
+function normalizeMissionEtape(etape: string | null | undefined) {
   if (!etape) return null;
   if (etape === "en_validation_admin" || etape === "envoi_validation_admin") return "en_attente_validation";
   if (etape === "terminee") return "termine";
