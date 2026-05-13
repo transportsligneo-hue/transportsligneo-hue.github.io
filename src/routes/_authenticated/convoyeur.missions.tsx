@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import {
   MapPin, Loader2, FileText, Navigation, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter, Phone,
@@ -192,10 +193,15 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
-    await supabase.from("attributions").update({ statut }).eq("id", id);
+    const { error } = await supabase.from("attributions").update({ statut }).eq("id", id);
+    if (error) {
+      toast.error("Mise à jour impossible", { description: error.message });
+      return false;
+    }
     if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
     if (statut === "termine") { setActiveMissionId(null); setShowMap(false); }
-    fetchMissions();
+    await fetchMissions();
+    return true;
   };
 
   const handleInspectionComplete = () => {
