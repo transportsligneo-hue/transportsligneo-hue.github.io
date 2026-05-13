@@ -105,20 +105,30 @@ function ConvoyeurMissions() {
 
   const fetchMissions = useCallback(async () => {
     if (!user) return;
-    const { data: conv } = await supabase
+    const { data: conv, error: convError } = await supabase
       .from("convoyeurs")
       .select("id, type_convoyeur")
       .eq("user_id", user.id)
       .maybeSingle();
 
+    if (convError) {
+      setLoading(false);
+      throw convError;
+    }
+
     if (!conv) { setLoading(false); return; }
     setTypeConvoyeur(conv.type_convoyeur || "salarie");
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante, numero_mission" as never)
       .eq("convoyeur_id", conv.id)
       .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
+
+    if (error) {
+      setLoading(false);
+      throw error;
+    }
 
     if (data) {
       const enriched: Mission[] = [];
@@ -157,7 +167,13 @@ function ConvoyeurMissions() {
     setLoading(false);
   }, [user, activeMissionId]);
 
-  useEffect(() => { fetchMissions(); }, [fetchMissions]);
+  useEffect(() => {
+    fetchMissions().catch((error) => {
+      toast.error("Chargement des missions impossible", {
+        description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+      });
+    });
+  }, [fetchMissions]);
 
   // GPS realtime
   useEffect(() => {
