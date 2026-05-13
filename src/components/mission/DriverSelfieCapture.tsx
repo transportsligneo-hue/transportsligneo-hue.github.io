@@ -200,7 +200,10 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   return (
     <div className="driver-selfie-shell fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden overscroll-none">
       <div className="driver-selfie-header flex items-center justify-between px-4 py-3 text-white shrink-0">
-        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
+        <button onClick={() => {
+          setPendingDriverSelfie(attributionId, false);
+          onClose();
+        }} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
         <div className="text-center">
           <p className="driver-eyebrow opacity-80">Étape 1 — Identité</p>
           <p className="text-sm font-semibold">Selfie convoyeur</p>
