@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 interface Selfie { id: string; storage_path: string; taken_at: string; }
-interface Signature { id: string; kind: string; signer_name: string; signed_at: string; storage_path: string | null; }
+interface Signature { id: string; kind: string; signer_name: string; signed_at: string; signature_data: string | null; }
 interface InspectionPhoto { id: string; vue_type: string; url_photo: string; created_at: string; inspection_type: string; notes: string | null; }
 interface MissionDoc { id: string; nom_fichier: string; type_document: string; url_fichier: string; created_at: string; }
 
