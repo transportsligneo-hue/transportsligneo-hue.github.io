@@ -511,6 +511,13 @@ function DevisDrawer({
         </div>
       </DrawerSection>
 
+      <InspectionPreuvesBlock
+        attributionId={null}
+        fallbackCarteGriseRecto={devis.carte_grise_recto_url}
+        fallbackCarteGriseVerso={devis.carte_grise_verso_url}
+        fallbackVin={devis.vin}
+      />
+
       {devis.message && (
         <DrawerSection title="Message client">
           <p className="text-sm italic text-white/80">"{devis.message}"</p>
