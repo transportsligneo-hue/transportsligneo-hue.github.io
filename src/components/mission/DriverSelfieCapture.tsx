@@ -8,7 +8,7 @@
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, ChevronRight } from "lucide-react";
+import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
@@ -38,9 +38,8 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const completionRef = useRef(false);
+  const closingRef = useRef(false);
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
-  const canGoNext = status === "success";
 
   useEffect(() => {
     return () => {
@@ -71,14 +70,22 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     setPreview(null);
     setStatus("idle");
     setError(null);
-    completionRef.current = false;
+    closingRef.current = false;
     setTimeout(openCamera, 50);
   };
 
-  const goNext = () => {
-    if (!canGoNext || completionRef.current) return;
-    completionRef.current = true;
-    void Promise.resolve(onCaptured()).finally(onClose);
+  const finalizeStep = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    void Promise.resolve(onCaptured())
+      .then(() => onClose())
+      .catch((err) => {
+        closingRef.current = false;
+        const msg = err instanceof Error ? err.message : "Réessayez dans quelques secondes.";
+        setStatus("error");
+        setError(msg);
+        toast.error("Mission non synchronisée", { description: msg });
+      });
   };
 
   const validate = async () => {
@@ -118,39 +125,36 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
-      toast.success("Selfie validé", { description: "Appuyez sur Page suivante pour continuer la mission." });
-      setTimeout(() => {
-        if (completionRef.current) return;
-        completionRef.current = true;
-        void Promise.resolve(onCaptured()).finally(onClose);
-      }, 350);
+      toast.success("Selfie validé", { description: "Passage automatique à l'étape suivante." });
+      setTimeout(finalizeStep, 180);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
       setError(msg);
-      completionRef.current = false;
+      closingRef.current = false;
       toast.error("Échec selfie", { description: msg });
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-[#0b1026] overscroll-none">
-      <div className="flex items-center justify-between px-4 py-3 bg-black/40 text-white shrink-0">
+    <div className="driver-selfie-shell fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden overscroll-none">
+      <div className="driver-selfie-header flex items-center justify-between px-4 py-3 text-white shrink-0">
         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-wider opacity-60">Étape 1 — Identité</p>
+          <p className="driver-eyebrow opacity-80">Étape 1 — Identité</p>
           <p className="text-sm font-semibold">Selfie convoyeur</p>
         </div>
         <div className="w-9"/>
       </div>
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 py-3 pb-4">
+        <div className="driver-selfie-stage relative flex h-full w-full max-w-md items-center justify-center overflow-hidden rounded-[24px] px-4 py-5">
         {preview ? (
-          <img src={preview} alt="Selfie" className="max-w-full max-h-full rounded-2xl object-contain border-2 border-[#d4af37]"/>
+          <img src={preview} alt="Selfie" className="max-h-full w-full rounded-[20px] object-contain"/>
         ) : (
           <div className="text-center text-white/70 max-w-sm">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-[#d4af37]/10 border-2 border-[#d4af37]/40 flex items-center justify-center">
-              <Camera size={40} className="text-[#d4af37]"/>
+            <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border border-[var(--driver-border-strong)] bg-white/6 shadow-[0_0_36px_-12px_rgba(59,130,246,0.55)]">
+              <Camera size={40} className="text-[var(--driver-accent-2)]"/>
             </div>
             <p className="text-base font-semibold text-white mb-2">Prenez un selfie</p>
             <p className="text-sm opacity-80">Photo d'identité horodatée et géolocalisée. Visage net, bien éclairé.</p>
@@ -158,43 +162,44 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
         )}
 
         {status === "uploading" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-black/80 text-white rounded-full text-xs">
+          <div className="driver-selfie-status absolute top-4 left-1/2 flex max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full px-3 py-1.5 text-xs text-white">
             <Loader2 className="animate-spin" size={14}/> Envoi…
           </div>
         )}
         {status === "success" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-emerald-600 text-white rounded-full text-xs">
-            <Check size={14}/> Validé
+          <div className="absolute top-4 left-1/2 flex max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+            <Check size={14}/> Selfie validé
           </div>
         )}
         {status === "error" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-full text-xs max-w-[90%] truncate">
+          <div className="absolute top-4 left-1/2 flex max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700 truncate">
             <AlertCircle size={14}/> {error}
           </div>
         )}
         {coords && preview && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-black/70 text-white/80 rounded-full text-[10px]">
+          <div className="driver-selfie-status absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-3 py-1 text-[10px] text-white/80">
             <MapPin size={11}/> {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </div>
         )}
+        </div>
       </div>
 
       {/* Sticky footer toujours visible */}
-      <div className="sticky bottom-0 shrink-0 border-t border-white/10 bg-black/70 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
+      <div className="driver-selfie-footer sticky bottom-0 shrink-0 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
         <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={handleFile} className="hidden"/>
         {!preview ? (
           <button
             onClick={openCamera}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-[#d4af37] text-[#0b1026] rounded-xl text-base font-bold hover:bg-[#e7c76a] active:scale-[0.98] transition"
+            className="driver-cta flex w-full items-center justify-center gap-2 py-4 text-base font-bold"
           >
             <Camera size={20}/> Ouvrir l'appareil photo
           </button>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
             <button
               onClick={retake}
               disabled={status === "uploading" || status === "success"}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-2 py-2 text-center text-[11px] font-semibold text-white transition hover:bg-white/20 active:scale-[0.98] disabled:opacity-40"
+              className="driver-secondary-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
             >
               <RotateCcw size={16}/>
               <span className="leading-tight">Reprendre selfie</span>
@@ -202,18 +207,10 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
             <button
               onClick={validate}
               disabled={!canValidate}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-emerald-500 px-2 py-2 text-center text-[11px] font-bold text-[#0b1026] transition hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50"
+              className="driver-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
             >
               {status === "uploading" ? <Loader2 className="animate-spin" size={18}/> : <Check size={18}/>}
-              <span className="leading-tight">{status === "success" ? "Selfie validé" : "Valider et continuer"}</span>
-            </button>
-            <button
-              onClick={goNext}
-              disabled={!canGoNext}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#d4af37] px-2 py-2 text-center text-[11px] font-bold text-[#0b1026] transition hover:bg-[#e7c76a] active:scale-[0.98] disabled:opacity-40"
-            >
-              <ChevronRight size={18}/>
-              <span className="leading-tight">Page suivante</span>
+              <span className="leading-tight">{status === "success" ? "Validation en cours" : "Valider et continuer"}</span>
             </button>
           </div>
         )}
