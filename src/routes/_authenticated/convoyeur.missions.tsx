@@ -16,7 +16,7 @@ import { MissionCard, type MissionCardData } from "@/components/convoyeur/Missio
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
-import { hasPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
+import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
