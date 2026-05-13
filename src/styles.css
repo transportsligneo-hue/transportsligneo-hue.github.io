@@ -393,6 +393,19 @@
   }
   .driver-cta:active { transform: scale(0.98); }
   .driver-cta:hover { filter: brightness(1.06); }
+  .driver-secondary-cta {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    color: var(--driver-text);
+    border: 1px solid var(--driver-border);
+    font-weight: 600;
+    border-radius: 0.875rem;
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+  }
+  .driver-secondary-cta:active { transform: scale(0.98); }
+  .driver-secondary-cta:hover { border-color: var(--driver-border-strong); background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)); }
+  .driver-secondary-cta:disabled { opacity: 0.45; pointer-events: none; }
   .driver-chip {
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.25rem 0.625rem; border-radius: 9999px;
@@ -644,6 +657,38 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+  .driver-selfie-shell {
+    background:
+      radial-gradient(900px 540px at 0% -10%, rgba(59, 130, 246, 0.28), transparent 60%),
+      radial-gradient(760px 500px at 100% 0%, rgba(95, 182, 255, 0.18), transparent 58%),
+      linear-gradient(180deg, rgba(7, 15, 44, 0.98) 0%, rgba(10, 20, 58, 0.98) 100%);
+    color: var(--driver-text);
+  }
+  .driver-selfie-header {
+    background: linear-gradient(180deg, rgba(17, 30, 78, 0.82), rgba(10, 20, 58, 0.58));
+    border-bottom: 1px solid var(--driver-border);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+  }
+  .driver-selfie-stage {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    border: 1px solid var(--driver-border);
+    box-shadow: 0 24px 60px -28px rgba(6, 12, 38, 0.9), inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+  .driver-selfie-footer {
+    background: linear-gradient(180deg, rgba(15, 26, 70, 0.92), rgba(9, 18, 51, 0.98));
+    border-top: 1px solid var(--driver-border);
+    backdrop-filter: blur(24px) saturate(175%);
+    -webkit-backdrop-filter: blur(24px) saturate(175%);
+  }
+  .driver-selfie-status {
+    background: rgba(7, 15, 44, 0.72);
+    border: 1px solid rgba(120, 165, 255, 0.24);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
   }
 
   /* ============================================================
