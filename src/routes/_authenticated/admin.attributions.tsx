@@ -125,6 +125,28 @@ function AdminAttributions() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
   const [invoicingId, setInvoicingId] = useState<string | null>(null);
+  const [selectedAttr, setSelectedAttr] = useState<Attribution | null>(null);
+  const [attrDetail, setAttrDetail] = useState<{ vin?: string | null; carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null; marque?: string | null; modele?: string | null; immatriculation?: string | null; client_email?: string | null; client_telephone?: string | null; prix?: number | null; numero_mission?: string | null; etape_courante?: string | null; cgRectoSigned?: string | null; cgVersoSigned?: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!selectedAttr) { setAttrDetail(null); return; }
+    (async () => {
+      const { data: t } = await supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle();
+      const { data: a } = await supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle();
+      const sign = async (path: string | null | undefined) => {
+        if (!path) return null;
+        if (/^https?:\/\//.test(path)) return path;
+        const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(path, 3600);
+        return data?.signedUrl ?? null;
+      };
+      setAttrDetail({
+        ...(t ?? {}),
+        ...(a ?? {}),
+        cgRectoSigned: await sign(t?.carte_grise_recto_url),
+        cgVersoSigned: await sign(t?.carte_grise_verso_url),
+      });
+    })();
+  }, [selectedAttr]);
 
   const handleEmitFacture = async (a: Attribution) => {
     setInvoicingId(a.id);
@@ -371,14 +393,13 @@ function AdminAttributions() {
                       </option>
                     ))}
                   </Select>
-                  <Link
-                    to="/admin/missions/$missionId"
-                    params={{ missionId: a.id }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium role-admin-bg text-white hover:opacity-90 transition-opacity"
+                  <IconButton
+                    onClick={() => setSelectedAttr(a)}
                     title="Ouvrir la fiche mission"
+                    tone="primary"
                   >
-                    <ExternalLink size={12} /> Ouvrir
-                  </Link>
+                    <Eye size={15} />
+                  </IconButton>
                   <IconButton onClick={() => viewGps(a.id)} title="Suivi GPS" tone="primary">
                     <MapPin size={15} />
                   </IconButton>
