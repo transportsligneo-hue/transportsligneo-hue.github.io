@@ -117,7 +117,7 @@ export function MissionCockpit({
 
   // Auto-avance d'étape (silencieux) quand une porte ouvre la voie
   useEffect(() => {
-    const e = currentEtape;
+    const e = optimisticEtape ?? currentEtape;
     // EDL départ vient d'être terminée → on cale etape_courante à edl_depart_fait
     if (inspectionDepartDone && (e === "vehicule_recupere" || e === "sur_place")) {
       void persistEtape("edl_depart_fait");
@@ -126,9 +126,10 @@ export function MissionCockpit({
       void persistEtape("edl_arrivee_fait");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inspectionDepartDone, inspectionArriveeDone, currentEtape]);
+  }, [inspectionDepartDone, inspectionArriveeDone, currentEtape, optimisticEtape]);
 
   async function persistEtape(etape: string, notes?: string) {
+    setOptimisticEtape(etape);
     await Promise.all([
       supabase.from("attributions").update({ etape_courante: etape }).eq("id", attributionId),
       supabase.from("mission_etape_history" as never).insert({
@@ -142,13 +143,15 @@ export function MissionCockpit({
     try {
       switch (currentKey) {
         case "selfie":             setOpenSelfie(true); break;
-        case "sig_start":          setOpenSig("start"); break;
-        case "sig_end":            setOpenSig("end");   break;
         case "edl_depart":         onStartInspection("depart"); break;
         case "edl_arrivee":        onStartInspection("arrivee"); break;
         case "demarrer":
           await persistEtape("en_route");
-          await onMacroStatusChange("en_cours");
+          try {
+            await onMacroStatusChange("en_cours");
+          } catch {
+            // L'étape reste prioritaire pour éviter un blocage visuel si le statut serveur tarde.
+          }
           onUpdated();
           break;
         case "arrive_depart":
@@ -300,20 +303,6 @@ export function MissionCockpit({
         />
       )}
 
-      {openSig && (
-        <DoubleSignatureModal
-          attributionId={attributionId}
-          userId={userId}
-          mode={openSig}
-          driverName={driverName}
-          defaultClientName={clientName}
-          alreadyDriver={openSig === "start" ? gates.hasSignature("driver_start") : gates.hasSignature("driver_end")}
-          alreadyClient={openSig === "start" ? gates.hasSignature("client_start") : gates.hasSignature("client_end")}
-          onComplete={() => { setOpenSig(null); refreshAll(); }}
-          onClose={() => setOpenSig(null)}
-        />
-      )}
-
       {openIncident && (
         <IncidentReportSheet
           attributionId={attributionId}
@@ -339,23 +328,17 @@ export function MissionCockpitStickyCTA({
 }) {
   const gates = useMissionGates(attributionId);
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
-  const sigStartOK = (gates.hasSignature("driver_start") || gates.isDisabled("driver_start"))
-                  && (gates.hasSignature("client_start") || gates.isDisabled("client_start"));
-  const sigEndOK = (gates.hasSignature("driver_end") || gates.isDisabled("driver_end"))
-                && (gates.hasSignature("client_end") || gates.isDisabled("client_end"));
 
   let label = "Continuer";
   if (statut === "en_attente_validation" || statut === "validee" || statut === "termine") label = "Mission envoyée";
   else if (!selfieOK) label = "Prendre selfie";
   else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "Démarrer le trajet";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
-  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !sigStartOK) label = "Signatures départ";
-  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "État des lieux";
+  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
   else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && inspectionDepartDone)) label = "Prendre la route";
   else if (currentEtape === "en_livraison") label = "Je suis arrivé";
-  else if (currentEtape === "arrive_destination" && !inspectionArriveeDone) label = "EDL arrivée";
-  else if ((currentEtape === "arrive_destination" || currentEtape === "edl_arrivee_fait") && !sigEndOK) label = "Signatures arrivée";
-  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && inspectionArriveeDone && sigEndOK)) label = "Envoyer";
+  else if (currentEtape === "arrive_destination" && !inspectionArriveeDone) label = "Inspection arrivée";
+  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && inspectionArriveeDone)) label = "Envoyer";
 
   const isDone = ["en_attente_validation","validee","termine"].includes(statut);
 
