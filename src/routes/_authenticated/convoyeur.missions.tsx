@@ -110,7 +110,7 @@ function ConvoyeurMissions() {
       for (const attr of data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>) {
         const { data: trajet } = await supabase
           .from("trajets")
-          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone")
+          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
           .eq("id", attr.trajet_id)
           .maybeSingle();
 
