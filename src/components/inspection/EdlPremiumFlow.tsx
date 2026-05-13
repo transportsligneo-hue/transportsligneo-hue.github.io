@@ -751,7 +751,11 @@ export function EdlPremiumFlow({
             disabled={!canAdvance()}
             className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50 text-sm font-semibold"
           >
-            {safeIndex === TOTAL - 1 ? "Terminer la mission" : "Page suivante"}
+            {safeIndex === TOTAL - 1
+              ? "Terminer la mission"
+              : currentStep.kind === "photo" || currentStep.kind === "scan"
+                ? "Photo suivante"
+                : "Étape suivante"}
             <ArrowRight size={18} />
           </button>
         </div>
@@ -813,7 +817,7 @@ function PhotoOrScanArea({
 }: {
   step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void;
 }) {
-  const taken = state?.status === "success" || state?.status === "uploading";
+  const taken = Boolean(state?.previewUrl);
 
   return (
     <div className="space-y-3">
@@ -869,6 +873,12 @@ function PhotoOrScanArea({
         </div>
       )}
 
+      {state?.error && (
+        <div className="edl-glass p-3 text-sm text-red-200 border border-red-400/30">
+          {state.error}
+        </div>
+      )}
+
       {/* CTA prise / reprise */}
       {!state || state.status === "idle" || state.status === "error" ? (
         <button
@@ -916,6 +926,11 @@ function SelfieArea({
         <p className="mt-2 text-xs text-[var(--edl-cyan)] flex items-center justify-center gap-1.5">
           <MapPin size={12}/> Géolocalisation activée
         </p>
+        {state?.error && (
+          <p className="mt-3 text-sm text-red-200">
+            {state.error}
+          </p>
+        )}
       </div>
 
       {!state || state.status === "idle" || state.status === "error" ? (
