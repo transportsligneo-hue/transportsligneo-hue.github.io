@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, ExternalLink, Receipt, Loader2 } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
@@ -16,6 +16,7 @@ import {
   Select,
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
+import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { toast } from "sonner";
