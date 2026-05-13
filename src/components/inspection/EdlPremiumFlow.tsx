@@ -280,12 +280,15 @@ export function EdlPremiumFlow({
     if (!raw) return;
 
     const stepId = currentStep.id;
-    const previewUrl = URL.createObjectURL(raw);
-    setState(stepId, { status: "uploading", previewUrl });
+    let previewUrl: string | undefined;
 
     try {
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setState(stepId, { status: "uploading", previewUrl });
+
       const insId = await ensureInspectionDepart();
-      const compressed = await compressImage(raw);
+      const compressed = await compressImage(stableFile);
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
 
@@ -373,7 +376,9 @@ export function EdlPremiumFlow({
         status: "error", previewUrl,
         error: err instanceof Error ? err.message : "Erreur réseau",
       });
-      toast.error("Échec d'envoi", { description: "Réessayez la photo." });
+      toast.error("Échec d'envoi", {
+        description: err instanceof Error ? err.message : "Réessayez la photo.",
+      });
     }
   };
 
@@ -383,11 +388,14 @@ export function EdlPremiumFlow({
     if (!raw) return;
 
     const stepId = currentStep.id;
-    const previewUrl = URL.createObjectURL(raw);
-    setState(stepId, { status: "uploading", previewUrl });
+    let previewUrl: string | undefined;
 
     try {
-      const compressed = await compressImage(raw);
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setState(stepId, { status: "uploading", previewUrl });
+
+      const compressed = await compressImage(stableFile);
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.jpg`;
       await uploadWithRetry("mission-selfies", path, compressed);
 
@@ -418,7 +426,9 @@ export function EdlPremiumFlow({
         status: "error", previewUrl,
         error: err instanceof Error ? err.message : "Erreur",
       });
-      toast.error("Échec selfie");
+      toast.error("Échec selfie", {
+        description: err instanceof Error ? err.message : "Réessayez.",
+      });
     }
   };
 
@@ -551,6 +561,7 @@ export function EdlPremiumFlow({
   const retake = () => {
     setStates(prev => {
       const next = { ...prev };
+      revokeBlobUrl(next[currentStep.id]?.previewUrl);
       delete next[currentStep.id];
       return next;
     });
