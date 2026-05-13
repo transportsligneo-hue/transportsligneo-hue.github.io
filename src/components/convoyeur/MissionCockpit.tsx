@@ -23,6 +23,7 @@ import {
   Lock,
   Send,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { DriverSelfieCapture } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
@@ -69,8 +70,8 @@ interface Props {
   inspectionDepartDone: boolean;
   inspectionArriveeDone: boolean;
   onStartInspection: (type: "depart" | "arrivee") => void;
-  onMacroStatusChange: (newStatut: string) => Promise<void> | void;
-  onUpdated: () => void;
+  onMacroStatusChange: (newStatut: string) => Promise<boolean> | boolean;
+  onUpdated: () => Promise<void> | void;
 }
 
 export function MissionCockpit({
@@ -125,16 +126,17 @@ export function MissionCockpit({
   useEffect(() => {
     const e = optimisticEtape ?? currentEtape;
     if (inspectionDepartDone && (e === "vehicule_recupere" || e === "sur_place")) {
-      void persistEtape("edl_depart_fait");
+      void persistEtape("edl_depart_fait").catch(() => undefined);
     }
     if (inspectionArriveeDone && e === "arrive_destination") {
-      void persistEtape("edl_arrivee_fait");
+      void persistEtape("edl_arrivee_fait").catch(() => undefined);
     }
   }, [inspectionDepartDone, inspectionArriveeDone, currentEtape, optimisticEtape]);
 
   async function persistEtape(etape: string, notes?: string) {
+    const previousEtape = optimisticEtape ?? currentEtape;
     setOptimisticEtape(etape);
-    await Promise.all([
+    const [{ error: attributionError }, { error: historyError }] = await Promise.all([
       supabase.from("attributions").update({ etape_courante: etape }).eq("id", attributionId),
       supabase.from("mission_etape_history" as never).insert({
         attribution_id: attributionId,
@@ -143,6 +145,11 @@ export function MissionCockpit({
         created_by: userId,
       } as never),
     ]);
+
+    if (attributionError || historyError) {
+      setOptimisticEtape(previousEtape);
+      throw attributionError ?? historyError;
+    }
   }
 
   async function handleAdvance() {
@@ -160,37 +167,36 @@ export function MissionCockpit({
           break;
         case "demarrer":
           await persistEtape("en_route");
-          try {
-            await onMacroStatusChange("en_cours");
-          } catch {
-            // Ne pas bloquer l'UX si le statut macro est refusé par la règle serveur.
+          if ((await onMacroStatusChange("en_cours")) === false) {
+            toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
           }
-          onUpdated();
+          await Promise.resolve(onUpdated());
           break;
         case "arrive_depart":
           await persistEtape("sur_place");
-          onUpdated();
+          await Promise.resolve(onUpdated());
           break;
         case "demarrer_livraison":
           await persistEtape("en_livraison");
-          onUpdated();
+          await Promise.resolve(onUpdated());
           break;
         case "arrive_livraison":
           await persistEtape("arrive_destination");
-          onUpdated();
+          await Promise.resolve(onUpdated());
           break;
         case "cloturer":
           await persistEtape("en_attente_validation", "Mission envoyée pour validation");
-          try {
-            await onMacroStatusChange("en_attente_validation");
-          } catch {
-            // Même logique : on ne casse pas l'avancement mobile.
+          if ((await onMacroStatusChange("en_attente_validation")) === false) {
+            toast.warning("Mission envoyée, mais le statut général n'a pas pu être synchronisé.");
           }
-          onUpdated();
+          await Promise.resolve(onUpdated());
           break;
         case "done":
           break;
       }
+    } catch (error) {
+      const description = error instanceof Error ? error.message : "Réessayez dans quelques secondes.";
+      toast.error("Impossible d'avancer dans la mission", { description });
     } finally {
       setBusy(false);
     }
