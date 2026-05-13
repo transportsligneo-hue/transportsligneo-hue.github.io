@@ -439,29 +439,19 @@ function ConvoyeurMissions() {
           </div>
         )}
 
-        {/* Validations obligatoires : selfie + double signatures */}
+        {/* === COCKPIT MISSION : étape en cours unifiée (selfie + signatures + EDL + workflow) === */}
         {openMission.statut !== "propose" && user && (
-          <MissionGatesPanel
+          <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}
-            driverName={`${user.user_metadata?.prenom ?? ""} ${user.user_metadata?.nom ?? ""}`.trim() || (user.email ?? "Convoyeur")}
+            driverName={driverDisplayName}
             clientName={undefined}
-            showEndSignatures={!!openMission.inspectionArrivee || ["arrive_destination","edl_arrivee_fait","en_attente_validation","validee","termine"].includes(openMission.etape_courante ?? openMission.statut)}
-            onChange={fetchMissions}
-          />
-        )}
-
-        {/* Workflow étape par étape */}
-        {openMission.statut !== "propose" && openMission.statut !== "termine" && user && (
-          <MissionWorkflow
-            attributionId={openMission.id}
-            userId={user.id}
             currentEtape={openMission.etape_courante ?? null}
             statut={openMission.statut}
             inspectionDepartDone={!!openMission.inspectionDepart}
             inspectionArriveeDone={!!openMission.inspectionArrivee}
-            onStartInspection={(type) => openInspection({ attributionId: openMission.id, type })}
-            onMacroStatusChange={(s) => updateStatus(openMission.id, s)}
+            onStartInspection={(type: "depart" | "arrivee") => openInspection({ attributionId: openMission.id, type })}
+            onMacroStatusChange={(s: string) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
           />
         )}
