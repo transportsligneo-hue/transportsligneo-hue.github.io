@@ -39,6 +39,13 @@ type InspectionSession = { attributionId: string; type: "depart" | "arrivee" };
 
 const EDL_SESSION_KEY = "edl:inspection";
 
+function normalizeMissionEtape(etape: string | null) {
+  if (!etape) return null;
+  if (etape === "en_validation_admin" || etape === "envoi_validation_admin") return "en_attente_validation";
+  if (etape === "terminee") return "termine";
+  return etape;
+}
+
 function readStoredInspection(): InspectionSession | null {
   if (typeof window === "undefined") return null;
   try {
@@ -152,7 +159,7 @@ function ConvoyeurMissions() {
         enriched.push({
           id: attr.id,
           statut: attr.statut,
-          etape_courante: attr.etape_courante,
+          etape_courante: normalizeMissionEtape(attr.etape_courante),
           trajet_id: attr.trajet_id,
           numero_mission: attr.numero_mission,
           trajet,
@@ -331,7 +338,7 @@ function ConvoyeurMissions() {
     // === Mappage 6 étapes (nouvel ordre standardisé) ===
     // 1 Arrivé enlèvement · 2 Inspection enlèvement · 3 Trajet
     // 4 Arrivé livraison · 5 Inspection livraison · 6 Validation admin
-    const etape = openMission.etape_courante;
+    const etape = normalizeMissionEtape(openMission.etape_courante);
     const inspDepartOk = !!openMission.inspectionDepart;
     const inspArriveeOk = !!openMission.inspectionArrivee;
     const isTermine = ["termine", "validee"].includes(openMission.statut);
