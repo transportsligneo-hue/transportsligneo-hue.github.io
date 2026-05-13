@@ -13,9 +13,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Check, ChevronRight, MapPin, KeyRound, ClipboardCheck, Truck,
-  Flag, AlertTriangle, Loader2, Clock, Navigation,
+  Flag, AlertTriangle, Loader2, Clock, Navigation, Camera, Lock,
 } from "lucide-react";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
+import { useMissionGates } from "@/hooks/useMissionGates";
 
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"
