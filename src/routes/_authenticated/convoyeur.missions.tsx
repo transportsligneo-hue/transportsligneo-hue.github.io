@@ -16,6 +16,7 @@ import { MissionCard, type MissionCardData } from "@/components/convoyeur/Missio
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
+import { hasPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
@@ -85,6 +86,7 @@ function ConvoyeurMissions() {
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
+  const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
 
   // Sync inspection state to sessionStorage
   useEffect(() => {
@@ -174,6 +176,21 @@ function ConvoyeurMissions() {
       });
     });
   }, [fetchMissions]);
+
+  useEffect(() => {
+    if (!missions.length) return;
+
+    const missionToResume = missions.find((mission) => hasPendingDriverSelfie(mission.id));
+    if (!missionToResume) {
+      setResumeSelfieMissionId(null);
+      return;
+    }
+
+    setResumeSelfieMissionId(missionToResume.id);
+    if (openMissionId !== missionToResume.id) {
+      setOpenMissionId(missionToResume.id);
+    }
+  }, [missions, openMissionId, setOpenMissionId]);
 
   // GPS realtime
   useEffect(() => {
@@ -475,6 +492,12 @@ function ConvoyeurMissions() {
             onStartInspection={(type: "depart" | "arrivee") => openInspection({ attributionId: openMission.id, type })}
             onMacroStatusChange={(s: string) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
+            forceOpenSelfie={resumeSelfieMissionId === openMission.id}
+            onSelfieModalStateChange={(open) => {
+              if (!open && resumeSelfieMissionId === openMission.id) {
+                setResumeSelfieMissionId(null);
+              }
+            }}
           />
         )}
 
