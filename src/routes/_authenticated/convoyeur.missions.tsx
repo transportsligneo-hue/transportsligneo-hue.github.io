@@ -326,7 +326,7 @@ function ConvoyeurMissions() {
     return (
       <>
       {inspectionOverlay}
-      <div className="space-y-4 pb-32">
+      <div className="space-y-4 pb-[calc(144px+env(safe-area-inset-bottom))]">
         {/* Sticky back bar */}
         <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 driver-sticky-bar">
           <div className="flex items-center justify-between gap-3">

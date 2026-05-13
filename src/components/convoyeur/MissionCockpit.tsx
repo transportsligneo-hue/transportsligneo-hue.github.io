@@ -196,9 +196,9 @@ export function MissionCockpit({
     }
   }
 
-  const refreshAll = () => {
-    gates.reload();
-    onUpdated();
+  const refreshAll = async () => {
+    await gates.reload();
+    await Promise.resolve(onUpdated());
   };
 
   const visualSteps = STEPS.filter((s) => s.key !== "done");
@@ -272,10 +272,7 @@ export function MissionCockpit({
         <DriverSelfieCapture
           attributionId={attributionId}
           userId={userId}
-          onCaptured={() => {
-            setOpenSelfie(false);
-            refreshAll();
-          }}
+          onCaptured={refreshAll}
           onClose={() => setOpenSelfie(false)}
         />
       )}
