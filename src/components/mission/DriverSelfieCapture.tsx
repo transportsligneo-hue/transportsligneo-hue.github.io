@@ -8,7 +8,7 @@
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
 import { useRef, useState } from "react";
-import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw } from "lucide-react";
+import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
@@ -38,6 +38,8 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
+  const canGoNext = status === "success";
 
   const openCamera = () => fileRef.current?.click();
 
@@ -61,6 +63,12 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     setStatus("idle");
     setError(null);
     setTimeout(openCamera, 50);
+  };
+
+  const goNext = () => {
+    if (!canGoNext) return;
+    onCaptured();
+    onClose();
   };
 
   const validate = async () => {
@@ -100,8 +108,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
-      toast.success("Selfie validé");
-      setTimeout(() => { onCaptured(); onClose(); }, 500);
+      toast.success("Selfie validé", { description: "Appuyez sur Page suivante pour continuer la mission." });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
@@ -111,7 +118,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   };
 
   return (
-    <div className="fixed inset-0 z-[80] bg-[#0b1026] flex flex-col">
+    <div className="fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-[#0b1026] overscroll-none">
       <div className="flex items-center justify-between px-4 py-3 bg-black/40 text-white shrink-0">
         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
         <div className="text-center">
@@ -121,7 +128,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
         <div className="w-9"/>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 py-3 pb-4">
         {preview ? (
           <img src={preview} alt="Selfie" className="max-w-full max-h-full rounded-2xl object-contain border-2 border-[#d4af37]"/>
         ) : (
@@ -157,7 +164,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       </div>
 
       {/* Sticky footer toujours visible */}
-      <div className="px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)] bg-black/60 backdrop-blur border-t border-white/10 shrink-0">
+      <div className="sticky bottom-0 shrink-0 border-t border-white/10 bg-black/70 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
         <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={handleFile} className="hidden"/>
         {!preview ? (
           <button
@@ -167,21 +174,30 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
             <Camera size={20}/> Ouvrir l'appareil photo
           </button>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               onClick={retake}
               disabled={status === "uploading" || status === "success"}
-              className="flex items-center justify-center gap-1.5 px-4 py-3.5 bg-white/10 text-white rounded-xl text-sm font-semibold hover:bg-white/20 active:scale-[0.98] transition disabled:opacity-40"
+              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-2 py-2 text-center text-[11px] font-semibold text-white transition hover:bg-white/20 active:scale-[0.98] disabled:opacity-40"
             >
-              <RotateCcw size={16}/> Reprendre
+              <RotateCcw size={16}/>
+              <span className="leading-tight">Reprendre selfie</span>
             </button>
             <button
               onClick={validate}
-              disabled={status === "uploading" || status === "success"}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-emerald-500 text-[#0b1026] rounded-xl text-base font-bold hover:bg-emerald-400 active:scale-[0.98] transition disabled:opacity-50"
+              disabled={!canValidate}
+              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-emerald-500 px-2 py-2 text-center text-[11px] font-bold text-[#0b1026] transition hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50"
             >
               {status === "uploading" ? <Loader2 className="animate-spin" size={18}/> : <Check size={18}/>}
-              {status === "success" ? "Validé" : "Valider et continuer"}
+              <span className="leading-tight">{status === "success" ? "Selfie validé" : "Valider et continuer"}</span>
+            </button>
+            <button
+              onClick={goNext}
+              disabled={!canGoNext}
+              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#d4af37] px-2 py-2 text-center text-[11px] font-bold text-[#0b1026] transition hover:bg-[#e7c76a] active:scale-[0.98] disabled:opacity-40"
+            >
+              <ChevronRight size={18}/>
+              <span className="leading-tight">Page suivante</span>
             </button>
           </div>
         )}
