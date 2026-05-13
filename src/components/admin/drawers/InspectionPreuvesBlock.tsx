@@ -125,21 +125,18 @@ export function InspectionPreuvesBlock({
     setPhotosDepart(valid.filter(p => p._type === "depart"));
     setPhotosArrivee(valid.filter(p => p._type === "arrivee"));
 
-    // Signatures
+    // Signatures (signature_data = data URL base64 généré côté SignaturePad)
     const sigRows = ((sigR.data ?? []) as unknown as Signature[]);
-    const sigsSigned = await Promise.all(sigRows.map(async (r) => {
-      const url = r.storage_path ? await sign(BUCKETS.documents, r.storage_path) : null;
-      return {
-        key: `sig-${r.id}`,
-        url: url || "",
-        label: SIG_LABELS[r.kind] ?? r.kind,
-        sublabel: `${r.signer_name} · ${new Date(r.signed_at).toLocaleString("fr-FR")}`,
-        bucket: BUCKETS.documents,
-        storagePath: r.storage_path ?? "",
-        isImage: !!url,
-      };
+    const sigsAssets: SignedAsset[] = sigRows.map((r) => ({
+      key: `sig-${r.id}`,
+      url: r.signature_data || "",
+      label: SIG_LABELS[r.kind] ?? r.kind,
+      sublabel: `${r.signer_name} · ${new Date(r.signed_at).toLocaleString("fr-FR")}`,
+      bucket: BUCKETS.documents,
+      storagePath: "",
+      isImage: !!r.signature_data,
     }));
-    setSignatures(sigsSigned);
+    setSignatures(sigsAssets);
 
     // Mission documents (PV, autres)
     const docRows = ((dR.data ?? []) as unknown as MissionDoc[]);
