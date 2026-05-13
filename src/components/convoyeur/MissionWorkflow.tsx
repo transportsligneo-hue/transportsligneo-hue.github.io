@@ -82,6 +82,8 @@ export function MissionWorkflow({
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [incidentOpen, setIncidentOpen] = useState(false);
+  const { hasSelfie, isDisabled } = useMissionGates(attributionId);
+  const selfieOK = hasSelfie || isDisabled("selfie");
 
   // Étape effective : si rien en base, on déduit depuis le statut macro
   const effectiveEtape: EtapeKey = (currentEtape as EtapeKey) ||
