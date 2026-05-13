@@ -493,7 +493,7 @@ function ConvoyeurMissions() {
             onMacroStatusChange={(s: string) => updateStatus(openMission.id, s)}
             onUpdated={fetchMissions}
             forceOpenSelfie={resumeSelfieMissionId === openMission.id}
-            onSelfieModalStateChange={(open) => {
+            onSelfieModalStateChange={(open: boolean) => {
               if (!open && resumeSelfieMissionId === openMission.id) {
                 setResumeSelfieMissionId(null);
               }
