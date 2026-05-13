@@ -7,7 +7,7 @@
  *   3. Footer sticky : Reprendre / Valider et continuer
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +16,7 @@ import { compressImage } from "@/lib/image-compression";
 interface Props {
   attributionId: string;
   userId: string;
-  onCaptured: () => void;
+  onCaptured: () => Promise<void> | void;
   onClose: () => void;
 }
 
@@ -40,6 +40,14 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const fileRef = useRef<HTMLInputElement>(null);
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
   const canGoNext = status === "success";
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        try { URL.revokeObjectURL(preview); } catch { /* ignore */ }
+      }
+    };
+  }, [preview]);
 
   const openCamera = () => fileRef.current?.click();
 
@@ -67,8 +75,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
   const goNext = () => {
     if (!canGoNext) return;
-    onCaptured();
-    onClose();
+    void Promise.resolve(onCaptured()).finally(onClose);
   };
 
   const validate = async () => {
@@ -109,6 +116,9 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
       setStatus("success");
       toast.success("Selfie validé", { description: "Appuyez sur Page suivante pour continuer la mission." });
+      setTimeout(() => {
+        void Promise.resolve(onCaptured()).finally(onClose);
+      }, 350);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
