@@ -224,8 +224,16 @@ export function MissionCockpit({
   }
 
   const refreshAll = async () => {
-    await gates.reload();
-    await Promise.resolve(onUpdated());
+    // Déverrouillage optimiste immédiat — l'utilisateur voit l'étape suivante
+    // sans attendre la propagation realtime / fetch parent.
+    setSelfieJustDone(true);
+    setOpenSelfie(false);
+    try {
+      await gates.reload();
+    } catch { /* ignore : l'optimiste tient le coup */ }
+    try {
+      await Promise.resolve(onUpdated());
+    } catch { /* ignore */ }
   };
 
   const visualSteps = STEPS.filter((s) => s.key !== "done");
