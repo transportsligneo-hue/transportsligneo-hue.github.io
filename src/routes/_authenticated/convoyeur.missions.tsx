@@ -15,6 +15,7 @@ import { MissionCard, type MissionCardData } from "@/components/convoyeur/Missio
 import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
+import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   component: ConvoyeurMissions,
