@@ -12,9 +12,8 @@ import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
-import { MissionWorkflow } from "@/components/convoyeur/MissionWorkflow";
+import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
-import { MissionGatesPanel } from "@/components/mission/MissionGatesPanel";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
