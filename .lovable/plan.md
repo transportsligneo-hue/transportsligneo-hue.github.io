@@ -1,102 +1,115 @@
-# Refonte finale admin + parcours client véhicule
+# Refonte critique — Admin preuves / Driver workflow / Documents
 
-## 1. Base de données (1 migration)
+Vu l'ampleur (7 chantiers indépendants touchant ~25 fichiers), je découpe en lots cohérents et je livre tout en séquence dans cette même conversation après ton GO.
 
-Ajouter les colonnes véhicule manquantes pour faire circuler les infos du devis → mission → driver.
+## Lot 1 — Bloc "Inspection & preuves" dans les drawers admin
 
-- `devis` : `vin text`, `carte_grise_recto_url text`, `carte_grise_verso_url text`, `vehicule_docs_completed boolean default false`
-- `trajets` : `vin text`, `carte_grise_recto_url text`, `carte_grise_verso_url text` (copiés au moment de la création depuis devis)
-- `missions` : idem (copiés depuis trajet/devis)
-- `profiles` : `adresse text` (déjà demandé précédemment)
-- Bucket storage `cartes-grises` (privé) + RLS : client lit/écrit ses propres fichiers `{user_id}/...`, admin lit tout, convoyeur lit ceux de ses missions assignées
-- Trigger `auto_create_trajet_from_devis` : étendre pour copier `vin`, `carte_grise_*`
+**Composant nouveau** : `src/components/admin/drawers/InspectionPreuvesBlock.tsx`
+- Charge en parallèle pour une `attribution_id` :
+  - `mission_selfies` (selfie convoyeur)
+  - `inspection_photos` joint à `inspections` (filtré par `vue_type` → départ / arrivée)
+  - `mission_signatures` (4 types : driver_start, client_start, driver_end, client_end)
+  - `mission_documents` (PV, autres)
+- Génère **signed URLs** via buckets `mission-selfies`, `inspection-photos`, `mission-documents`
+- Affichage : grille HD avec lightbox zoom (clic → overlay plein écran), badge date/heure, bouton télécharger
+- Persistant : `useQuery` avec `staleTime: 0` + invalidation au refresh
 
-## 2. Auto-prix client TTC partout (pricing engine)
+**Intégration drawers** : `admin.attributions.tsx`, `admin.trajets.tsx`, `admin.devis.tsx` (quand `attribution_id` existe via trajet→attribution).
 
-Règle unique : quand un devis accepté/payé existe pour la demande/trajet, `prix_client_ttc` est :
-- pré-rempli automatiquement depuis `devis.prix_estime`
-- verrouillé par défaut (read-only)
-- modifiable seulement via un toggle "ajustement admin" (promo / pénalité)
+## Lot 2 — Drawer bleu pour pages admin restantes
 
-Composant : `PricingModeBlock` accepte déjà `lockedClientPrice`. Il faut :
-- l'utiliser dans `admin.attributions.tsx` (création depuis demande)
-- l'utiliser dans le drawer "Modifier trajet"
-- l'utiliser dans le drawer Demande (bouton "Convertir en trajet" passe le prix)
-- helper `resolveDevisPrice(demande_id|email|trajet_id)` dans `src/lib/pricing-resolver.ts`
+Reste à convertir : `admin.factures.tsx`, `admin.paiements.tsx`, `admin.missions.$missionId.tsx` (à supprimer + drawer dans liste). Les autres (utilisateurs, clients, demandes, convoyeurs, attributions, devis, trajets) sont déjà OK.
 
-## 3. Drawer bleu unique — finir la conversion
+- Supprimer routes détail isolées : `admin.devis.$devisId.tsx`, `admin.factures.$factureId.tsx`, `admin.missions.$missionId.tsx`, `admin.clients.$clientId.tsx`, `admin.convoyeurs.$convoyeurId.tsx` → tout dans drawer.
+- `admin.paiements.tsx` : drawer paiement avec détails Stripe + lien facture.
+- `admin.factures.tsx` : drawer facture (déjà existant ? à vérifier/convertir).
 
-Créer/finir `src/components/admin/drawers/` :
-- `TrajetDrawer.tsx` — voir / modifier trajet, prix verrouillé, attribution inline
-- `AttributionDrawer.tsx` — voir attribution, changer convoyeur, statut
-- `MissionDrawer.tsx` — détail mission complet (étapes, photos, docs, VIN, carte grise)
-- `DevisDrawer.tsx` — détail devis + paiement + véhicule
-- `FactureDrawer.tsx` — détail facture + PDF
-- `ConvoyeurDrawer.tsx` — fiche convoyeur + missions + docs
+## Lot 3 — Driver accueil "missions disponibles"
 
-Pages liste à convertir (supprimer Links vers `$id`, ajouter `useState` + drawer en bas) :
-- `admin.trajets.tsx`, `admin.attributions.tsx`, `admin.devis.tsx`, `admin.factures.tsx`, `admin.convoyeurs.tsx`
+`convoyeur.index.tsx` :
+- Query `trajets` où `statut_publication = 'publie'` ET aucune `attribution` du convoyeur courant
+- Si > 0 : remplacer "Aucune mission" par carte premium **"X nouvelles missions disponibles"** avec mini-liste (n°, depart, arrivée, prix, distance, date) + CTA → `/convoyeur/disponibles`
+- Toast/badge notification rouge sur l'item sidebar "Disponibles"
 
-Suppression des routes détail admin :
-- `admin.devis.$devisId.tsx`
-- `admin.factures.$factureId.tsx`
-- `admin.missions.$missionId.tsx`
-- `admin.clients.$clientId.tsx`
-- `admin.convoyeurs.$convoyeurId.tsx`
+## Lot 4 — Workflow mission driver (9 étapes strictes)
 
-Tous remplacés par état `selected` qui ouvre le drawer.
+**Refonte `src/components/convoyeur/MissionWorkflow.tsx`** avec machine d'états :
 
-## 4. Parcours client — upload obligatoire avant paiement
-
-Nouveau composant `src/components/devis/VehiculeDocsStep.tsx` :
-- Champ VIN (validation 17 caractères alphanumériques sans I/O/Q)
-- Upload carte grise recto (obligatoire)
-- Upload carte grise verso (optionnel)
-- Compression image client-side (`compressImage` existe déjà)
-- Preview immédiate
-- Mobile-friendly avec `capture="environment"` pour caméra directe
-
-Intégration dans le parcours :
-- `dashboard-client/devis` (si devis non payé) → bouton "Compléter avant paiement"
-- Bloque `DevisEmbeddedCheckout` tant que `vehicule_docs_completed = false`
-- Sauvegarde sur `devis.vin` / `devis.carte_grise_*` + flag
-
-## 5. Visibilité VIN / carte grise
-
-- **Admin** : section "Véhicule" dans drawers Devis/Trajet/Mission avec aperçu carte grise + VIN copiable
-- **Convoyeur** : `convoyeur.missions.tsx` + `MissionWorkflow` → bloc "Documents véhicule" avec liens signés vers carte grise
-- RLS bucket : convoyeur peut lire les fichiers carte grise via path = `{user_id_du_client}/{devis_id}/...` si attribution active
-
-## 6. Mobile
-
-- Drawer admin : `w-full` sur mobile (déjà OK via Sheet)
-- Upload carte grise : `<input type="file" accept="image/*" capture="environment">` pour caméra
-- Aperçu image fluide, barre de progression Tailwind
-
----
-
-## Architecture cible
-
-```text
-DEVIS accepté
-  └── client complète : VIN + carte grise (NOUVEAU step bloquant)
-        └── PAIEMENT
-              └── trigger auto crée TRAJET (avec VIN + carte grise copiés)
-                    └── ADMIN attribue → ATTRIBUTION (prix verrouillé depuis devis)
-                          └── MISSION (convoyeur voit VIN + carte grise)
+```
+selfie → trajet_vers_depart → arrivee_depart → edl_depart 
+→ en_route → arrivee_livraison → edl_arrivee → soumis_admin → valide_admin
 ```
 
-## Ordre d'exécution
+- Selfie obligatoire = ÉTAPE 1, blocante (pas de skip)
+- Validations intégrées DANS l'étape (pas un panel séparé) — supprimer/cacher `MissionGatesPanel` au profit d'inline gates
+- **Sticky footer mobile** : `fixed bottom-0` avec :
+  - Étape courante (ex: "3/9 · Arrivée départ")
+  - Bouton "Retour" (étape précédente, désactivé si validations faites)
+  - Bouton "Continuer" (désactivé tant que gates étape pas remplies)
+- Persistance : à chaque transition → `UPDATE attributions SET etape_courante = ...` + `INSERT mission_etape_history`
+- Au mount : lire `attributions.etape_courante` → reprendre exactement à cette étape
 
-1. Migration BDD + bucket storage + RLS
-2. Helper `pricing-resolver.ts`
-3. `VehiculeDocsStep` + intégration dashboard-client
-4. Drawers manquants (Trajet, Attribution, Mission, Devis, Facture, Convoyeur)
-5. Conversion pages liste + suppression routes `$id`
-6. Affichage carte grise/VIN côté admin et convoyeur
+**Bug "Démarrer trajet"** : vérifier que `setEtape('trajet_vers_depart')` déclenche bien le `update` Supabase + la transition UI (sans doute un `await` manquant ou un guard qui bloque).
 
-## Hors périmètre
+## Lot 5 — Sauvegarde mission au refresh
 
-- Refonte visuelle des autres composants client/convoyeur
-- OCR carte grise (peut venir dans une itération suivante)
-- Validation manuelle admin de la carte grise (peut être ajoutée plus tard)
+- Étape courante déjà en BDD via `etape_courante`
+- Photos/signatures déjà en BDD (uploads atomiques)
+- Au mount du dashboard convoyeur : si une `attribution` a `statut IN ('accepte','en_cours')` ET `etape_courante NOT IN ('soumis_admin','valide_admin')` → **redirect auto** vers `/convoyeur/missions/{id}` (banner "Reprendre votre mission en cours")
+
+## Lot 6 — Documents convoyeur (refonte UI)
+
+`convoyeur.documents.tsx` + table `documents_convoyeurs` :
+
+**Liste fixe (10 docs)** :
+1. CNI recto
+2. CNI verso
+3. Permis recto
+4. Permis verso
+5. Contrat signé
+6. Assurance RC Pro
+7. RIB
+8. Kbis
+9. Attestation de vigilance
+10. W Garage
++ **Photo de profil** (stockée dans `profiles.avatar_url`, bucket `convoyeur-permis` ou nouveau)
+
+- UI : 1 carte par doc → upload / preview / badge statut (validé vert / en attente ambre / refusé rouge + motif)
+- Supprimer toute notion de "signature" du dashboard convoyeur (signatures = uniquement dans workflow mission)
+- Migration : ajouter contrainte `type_document IN (...)` ou simplement filtrer côté UI
+
+## Lot 7 — Admin : voir docs convoyeur dans drawer
+
+Déjà partiellement fait dans `admin.convoyeurs.tsx` — vérifier que tous les types sont listés + previews HD avec signed URLs + badge statut + bouton "valider/refuser" inline.
+
+## Migrations BDD
+
+```sql
+-- Photo profil convoyeur si pas déjà sur profiles
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url text;
+
+-- Bucket public pour avatars
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('avatars', 'avatars', true) 
+ON CONFLICT DO NOTHING;
+```
+
+(Tout le reste est déjà en place : `mission_selfies`, `mission_signatures`, `inspection_photos`, `mission_documents`, `cartes-grises`, `attributions.etape_courante`.)
+
+## Hors scope (ne sera PAS fait pour rester focus)
+
+- Refonte visuelle pages publiques
+- OCR carte grise auto
+- Système de notifications push (uniquement badge UI)
+- Refacto facturation convoyeur (validation finale admin → juste un bouton qui flag)
+
+## Ordre d'exécution proposé
+
+1. Migration BDD (avatars)
+2. Lot 1 (bloc Inspection & preuves) — impact admin immédiat
+3. Lot 4 + 5 (workflow driver + persistance) — bug critique
+4. Lot 3 (accueil driver missions dispo)
+5. Lot 6 + 7 (documents)
+6. Lot 2 (finir conversion drawers admin)
+
+Je livre lot par lot, en t'indiquant à chaque fois ce qui est fait et ce qui reste, pour que tu puisses tester en continu.
