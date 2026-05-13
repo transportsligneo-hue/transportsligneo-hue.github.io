@@ -358,6 +358,15 @@ function ConvoyeurMissions() {
           onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
         />
 
+        {/* Documents véhicule (VIN + carte grise) */}
+        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
+          <VehiculeDocsView
+            vin={t?.vin ?? null}
+            rectoPath={t?.carte_grise_recto_url ?? null}
+            versoPath={t?.carte_grise_verso_url ?? null}
+          />
+        )}
+
         {/* Live GPS */}
         {isActive && (
           <>
