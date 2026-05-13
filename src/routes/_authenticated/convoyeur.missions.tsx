@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import {
   MapPin, Loader2, FileText, Navigation, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter, Phone,
@@ -104,20 +105,30 @@ function ConvoyeurMissions() {
 
   const fetchMissions = useCallback(async () => {
     if (!user) return;
-    const { data: conv } = await supabase
+    const { data: conv, error: convError } = await supabase
       .from("convoyeurs")
       .select("id, type_convoyeur")
       .eq("user_id", user.id)
       .maybeSingle();
 
+    if (convError) {
+      setLoading(false);
+      throw convError;
+    }
+
     if (!conv) { setLoading(false); return; }
     setTypeConvoyeur(conv.type_convoyeur || "salarie");
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante, numero_mission" as never)
       .eq("convoyeur_id", conv.id)
       .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
+
+    if (error) {
+      setLoading(false);
+      throw error;
+    }
 
     if (data) {
       const enriched: Mission[] = [];
@@ -156,7 +167,13 @@ function ConvoyeurMissions() {
     setLoading(false);
   }, [user, activeMissionId]);
 
-  useEffect(() => { fetchMissions(); }, [fetchMissions]);
+  useEffect(() => {
+    fetchMissions().catch((error) => {
+      toast.error("Chargement des missions impossible", {
+        description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+      });
+    });
+  }, [fetchMissions]);
 
   // GPS realtime
   useEffect(() => {
@@ -192,10 +209,15 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
-    await supabase.from("attributions").update({ statut }).eq("id", id);
+    const { error } = await supabase.from("attributions").update({ statut }).eq("id", id);
+    if (error) {
+      toast.error("Mise à jour impossible", { description: error.message });
+      return false;
+    }
     if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
     if (statut === "termine") { setActiveMissionId(null); setShowMap(false); }
-    fetchMissions();
+    await fetchMissions();
+    return true;
   };
 
   const handleInspectionComplete = () => {
