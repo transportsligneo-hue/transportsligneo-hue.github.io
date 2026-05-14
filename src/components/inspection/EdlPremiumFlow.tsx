@@ -597,9 +597,20 @@ export function EdlPremiumFlow({
     if (safeIndex < TOTAL - 1) {
       setStepIndex(safeIndex + 1);
     } else {
-      // Fin de parcours
-      try { localStorage.removeItem(STORAGE_KEY(attributionId, type)); } catch { /* ignore */ }
-      onComplete();
+      setCompleting(true);
+      void finalizeInspection()
+        .then(() => {
+          try { localStorage.removeItem(STORAGE_KEY(attributionId, type)); } catch { /* ignore */ }
+          onComplete();
+        })
+        .catch((error) => {
+          toast.error("Impossible de finaliser l'inspection", {
+            description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+          });
+        })
+        .finally(() => {
+          setCompleting(false);
+        });
     }
   };
 
