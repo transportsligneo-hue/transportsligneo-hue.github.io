@@ -20,6 +20,7 @@ import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge 
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
+import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
@@ -291,52 +292,17 @@ function AdminAttributions() {
     };
   }, [gpsView?.id]);
 
-  const syncTrajetStatus = async (attribution: Attribution, nextStatut: string) => {
-    let updates: Record<string, unknown> | null = null;
-
-    if (["propose", "accepte"].includes(nextStatut)) {
-      updates = { statut: "attribue", statut_publication: "attribue" };
-    } else if (["en_cours", "en_attente_validation"].includes(nextStatut)) {
-      updates = { statut: "en_cours", statut_publication: "attribue" };
-    } else if (["validee", "termine"].includes(nextStatut)) {
-      updates = { statut: "termine", statut_publication: "attribue" };
-    } else if (nextStatut === "refusee") {
-      updates = { statut: "en_attente", statut_publication: "publie" };
-    } else if (nextStatut === "annule") {
-      updates = { statut: "annule", statut_publication: "brouillon" };
-    }
-
-    if (!updates) return;
-
-    const { error } = await supabase.from("trajets").update(updates as never).eq("id", attribution.trajet_id);
-    if (error) throw error;
-  };
-
   const updateStatut = async (attribution: Attribution, statut: string, options?: { resetStep?: boolean; note?: string }) => {
     const actionKey = `${attribution.id}-${statut}`;
     setBusyAction(actionKey);
     try {
-      const payload: Record<string, unknown> = { statut };
-      if (options?.resetStep || statut === "propose" || statut === "refusee" || statut === "annule") {
-        payload.etape_courante = null;
-      }
-
-      const { error } = await supabase.from("attributions").update(payload as never).eq("id", attribution.id);
-      if (error) {
-        console.error("[admin.attributions] update error:", error);
-        throw error;
-      }
-
-      try {
-        await syncTrajetStatus(attribution, statut);
-      } catch (syncErr) {
-        console.error("[admin.attributions] syncTrajetStatus error:", syncErr);
-      }
-      await supabase.from("mission_etape_history").insert({
-        attribution_id: attribution.id,
-        etape: `admin_statut_${statut}`,
-        notes: options?.note ?? "Statut modifié depuis le dashboard admin",
-      } as never);
+      const payload = await updateAdminMissionStatus({
+        attributionId: attribution.id,
+        trajetId: attribution.trajet_id,
+        statut,
+        note: options?.note,
+        resetStep: options?.resetStep,
+      });
 
       if (selectedAttr?.id === attribution.id) {
         setSelectedAttr((prev) => (prev ? { ...prev, statut, etape_courante: payload.etape_courante as string | null | undefined ?? prev.etape_courante } : prev));
