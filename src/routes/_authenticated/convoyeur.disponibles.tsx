@@ -106,6 +106,41 @@ function ConvoyeurDisponibles() {
     if (convoyeurId) fetchData();
   }, [convoyeurId, fetchData]);
 
+  useEffect(() => {
+    if (!convoyeurId) return;
+
+    const channel = supabase
+      .channel(`convoyeur-disponibles-${convoyeurId}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "trajets",
+      }, () => {
+        void fetchData();
+      })
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "mission_offres",
+        filter: `convoyeur_id=eq.${convoyeurId}`,
+      }, () => {
+        void fetchData();
+      })
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "attributions",
+        filter: `convoyeur_id=eq.${convoyeurId}`,
+      }, () => {
+        void fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [convoyeurId, fetchData]);
+
   const notifyAdmin = async (
     trajet: TrajetDispo,
     prix: number,
