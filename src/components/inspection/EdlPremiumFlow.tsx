@@ -538,6 +538,37 @@ export function EdlPremiumFlow({
     }
   };
 
+  const finalizeInspection = useCallback(async () => {
+    if (!inspectionId) {
+      throw new Error("Inspection introuvable.");
+    }
+
+    const { error: inspectionError } = await supabase
+      .from("inspections")
+      .update({ statut: "complete" })
+      .eq("id", inspectionId);
+
+    if (inspectionError) throw inspectionError;
+
+    if (type === "arrivee") {
+      const [{ error: attributionError }, { error: historyError }] = await Promise.all([
+        supabase.from("attributions")
+          .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
+          .eq("id", attributionId),
+        supabase.from("mission_etape_history").insert({
+          attribution_id: attributionId,
+          etape: "envoi_validation_admin",
+          notes: "EDL arrivée terminé, mission envoyée pour validation",
+          created_by: userId,
+        }),
+      ]);
+
+      if (attributionError || historyError) {
+        throw attributionError ?? historyError;
+      }
+    }
+  }, [attributionId, inspectionId, type, userId]);
+
   // ─────────────────────────── NAVIGATION ───────────────────────────
   /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
   const isStepBypassed = (step: EdlStepDef): boolean => {
