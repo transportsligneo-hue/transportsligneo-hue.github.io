@@ -23,15 +23,22 @@ export function useMissionGates(attributionId: string | null) {
   const reload = useCallback(async () => {
     if (!attributionId) return;
     setLoading(true);
-    const [s1, s2, s3] = await Promise.all([
-      supabase.from("mission_selfies" as never).select("id,storage_path,taken_at").eq("attribution_id" as never, attributionId as never),
-      supabase.from("mission_signatures" as never).select("id,kind,signer_name,signed_at").eq("attribution_id" as never, attributionId as never),
-      supabase.from("mission_step_overrides" as never).select("step_key,override_mode").eq("attribution_id" as never, attributionId as never),
-    ]);
-    setSelfies((s1.data as unknown as Selfie[]) ?? []);
-    setSignatures((s2.data as unknown as Signature[]) ?? []);
-    setOverrides((s3.data as unknown as Override[]) ?? []);
-    setLoading(false);
+    try {
+      const [s1, s2, s3] = await Promise.all([
+        supabase.from("mission_selfies" as never).select("id,storage_path,taken_at").eq("attribution_id" as never, attributionId as never),
+        supabase.from("mission_signatures" as never).select("id,kind,signer_name,signed_at").eq("attribution_id" as never, attributionId as never),
+        supabase.from("mission_step_overrides" as never).select("step_key,override_mode").eq("attribution_id" as never, attributionId as never),
+      ]);
+      setSelfies((s1.data as unknown as Selfie[]) ?? []);
+      setSignatures((s2.data as unknown as Signature[]) ?? []);
+      setOverrides((s3.data as unknown as Override[]) ?? []);
+    } catch {
+      setSelfies([]);
+      setSignatures([]);
+      setOverrides([]);
+    } finally {
+      setLoading(false);
+    }
   }, [attributionId]);
 
   useEffect(() => { reload(); }, [reload]);
