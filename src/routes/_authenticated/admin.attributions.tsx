@@ -363,7 +363,10 @@ function AdminAttributions() {
     }
 
     if (!["annule", "validee", "termine"].includes(attribution.statut)) {
-      buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: () => void updateStatut(attribution, "annule", { note: "Mission annulée par l'admin" }) });
+      buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: () => {
+        if (!confirm("Annuler définitivement cette mission ?")) return;
+        void updateStatut(attribution, "annule", { note: "Mission annulée par l'admin" });
+      } });
     }
 
     if (["refusee", "annule"].includes(attribution.statut)) {
