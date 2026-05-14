@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2 } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2, ExternalLink, Shield } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
@@ -17,6 +17,8 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
+import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
@@ -33,8 +35,9 @@ interface Attribution {
   convoyeur_id: string;
   statut: string;
   etape_courante?: string | null;
+  numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
@@ -119,6 +122,7 @@ function vueLabelFor(vueType: string): string {
 }
 
 function AdminAttributions() {
+  const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -249,7 +253,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, type_transport), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (data) setAttributions(data as unknown as Attribution[]);
   }, []);
@@ -429,29 +433,45 @@ function AdminAttributions() {
         <div className="space-y-3">
           {attributions.map((a) => (
             <Card key={a.id}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } }); }}
+                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-pro-accent/40"
+                title="Ouvrir le menu complet de la mission"
+              >
               <div className="flex items-start justify-between flex-wrap gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-pro-text font-medium">
-                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : a.trajet_id.slice(0, 8)}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-pro-text font-semibold">
+                      {a.numero_mission || `MIS-${a.id.slice(0, 8)}`}
+                    </p>
+                    <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
+                      {statutLabels[a.statut] ?? a.statut}
+                    </Badge>
+                    {a.trajet?.type_transport && (
+                      <span className="text-[10px] uppercase tracking-wider text-pro-muted">
+                        {a.trajet.type_transport}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-pro-text-soft text-sm mt-1">
+                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
-                  <p className="text-pro-muted text-xs mt-0.5">
-                    Convoyeur :{" "}
-                    <span className="text-pro-text-soft">
-                      {a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "—"}
-                    </span>
+                  <p className="text-pro-muted text-xs mt-1">
+                    Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
+                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
                     {a.trajet?.date_trajet && (
                       <> · {new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR")}</>
                     )}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
-                    {statutLabels[a.statut] ?? a.statut}
-                  </Badge>
+                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
                   <IconButton
                     onClick={() => setSelectedAttr(a)}
-                    title="Ouvrir la fiche mission"
+                    title="Aperçu rapide (panneau latéral)"
                     tone="primary"
                   >
                     <Eye size={15} />
@@ -480,8 +500,9 @@ function AdminAttributions() {
                   )}
                 </div>
               </div>
+              </div>
 
-              <div className="mt-3 pt-3 border-t border-pro-border">
+              <div className="mt-3 pt-3 border-t border-pro-border" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
                   className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-accent transition-colors"
@@ -640,6 +661,14 @@ function AdminAttributions() {
           }
           footer={
             <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="success"
+                icon={<ExternalLink size={12} />}
+                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: selectedAttr.id } })}
+              >
+                Menu complet mission
+              </Button>
               <Button size="sm" onClick={() => setReportId(selectedAttr.id)} icon={<FileText size={12} />}>Rapport mission</Button>
               <Button size="sm" onClick={() => viewGps(selectedAttr.id)} icon={<MapPin size={12} />}>Suivi GPS</Button>
               <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "depart")} icon={<Image size={12} />}>Photos départ</Button>
@@ -698,6 +727,20 @@ function AdminAttributions() {
 
           <DrawerSection title="Documents mission (uploads convoyeur)" icon={<FileText size={12} />}>
             <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
+          </DrawerSection>
+
+          <DrawerSection title="Contrôle live admin" icon={<Shield size={12} />}>
+            <AdminLiveControl
+              attributionId={selectedAttr.id}
+              trajetId={selectedAttr.trajet_id}
+              currentStatut={selectedAttr.statut}
+              currentEtape={selectedAttr.etape_courante ?? null}
+              onChange={() => { void fetchAttributions(); }}
+            />
+          </DrawerSection>
+
+          <DrawerSection title="Bypass étapes obligatoires" icon={<Shield size={12} />}>
+            <AdminStepOverridesPanel attributionId={selectedAttr.id} />
           </DrawerSection>
         </AdminDetailDrawer>
       )}
