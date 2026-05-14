@@ -218,16 +218,16 @@ export function EdlPremiumFlow({
     return () => { cancelled = true; };
   }, []);
 
-  // Clamp pour éviter X/Y incohérent
-  const safeIndex = Math.min(Math.max(0, stepIndex), TOTAL - 1);
+  // Clamp pour éviter X/Y incohérent (TOTAL peut être 0 si filtre vide)
+  const safeIndex = TOTAL > 0 ? Math.min(Math.max(0, stepIndex), TOTAL - 1) : 0;
   useEffect(() => {
-    if (stepIndex !== safeIndex) setStepIndex(safeIndex);
-  }, [stepIndex, safeIndex]);
+    if (TOTAL > 0 && stepIndex !== safeIndex) setStepIndex(safeIndex);
+  }, [stepIndex, safeIndex, TOTAL]);
 
   const currentStep = STEPS[safeIndex];
-  const currentState = states[currentStep.id];
+  const currentState = currentStep ? states[currentStep.id] : undefined;
   const completed = STEPS.filter(s => states[s.id]?.status === "success").length;
-  const progressPct = Math.round((completed / TOTAL) * 100);
+  const progressPct = TOTAL > 0 ? Math.round((completed / TOTAL) * 100) : 0;
 
   // === Persistence
   useEffect(() => {
@@ -254,12 +254,14 @@ export function EdlPremiumFlow({
 
     const hydrateRemoteProgress = async () => {
       try {
-        const { data: existingInspection } = await supabase
+        const { data: existingInspection, error: inspErr } = await supabase
           .from("inspections")
           .select("id")
           .eq("attribution_id", attributionId)
           .eq("type", type)
           .maybeSingle();
+
+        if (inspErr) console.warn("[EDL hydrate] inspections lookup failed", inspErr);
 
         if (!existingInspection?.id || cancelled) {
           hydratedRemoteStateRef.current = true;
@@ -268,7 +270,7 @@ export function EdlPremiumFlow({
 
         setInspectionId(existingInspection.id);
 
-        const [{ data: photoRows }, { data: signatureRows }, { data: selfieRows }] = await Promise.all([
+        const [photoRes, signatureRes, selfieRes] = await Promise.all([
           supabase
             .from("inspection_photos")
             .select("vue_type, url_photo")
@@ -285,20 +287,28 @@ export function EdlPremiumFlow({
             .limit(1),
         ]);
 
+        const photoRows = Array.isArray(photoRes?.data) ? photoRes.data : [];
+        const signatureRows = Array.isArray(signatureRes?.data) ? signatureRes.data : [];
+        const selfieRows = Array.isArray(selfieRes?.data) ? selfieRes.data : [];
+
         if (cancelled) return;
 
-        const photoPaths = (photoRows ?? []).map((row) => row.url_photo).filter(Boolean);
-        const selfiePath = selfieRows?.[0]?.storage_path ?? null;
+        const photoPaths = photoRows.map((row) => row?.url_photo).filter(Boolean) as string[];
+        const selfiePath = selfieRows[0]?.storage_path ?? null;
 
         const [photoPreviewEntries, selfiePreviewUrl] = await Promise.all([
           Promise.all(
             photoPaths.map(async (path) => {
-              const { data } = await supabase.storage.from("inspection-photos").createSignedUrl(path, 3600);
-              return [path, data?.signedUrl] as const;
+              try {
+                const { data } = await supabase.storage.from("inspection-photos").createSignedUrl(path, 3600);
+                return [path, data?.signedUrl] as const;
+              } catch {
+                return [path, undefined] as const;
+              }
             }),
           ),
           selfiePath
-            ? supabase.storage.from("mission-selfies").createSignedUrl(selfiePath, 3600).then(({ data }) => data?.signedUrl ?? undefined)
+            ? supabase.storage.from("mission-selfies").createSignedUrl(selfiePath, 3600).then(({ data }) => data?.signedUrl ?? undefined).catch(() => undefined)
             : Promise.resolve(undefined),
         ]);
 
@@ -309,7 +319,8 @@ export function EdlPremiumFlow({
         setStates((prev) => {
           const next = { ...prev };
 
-          for (const row of photoRows ?? []) {
+          for (const row of photoRows) {
+            if (!row?.vue_type) continue;
             next[row.vue_type] = {
               status: "success",
               storagePath: row.url_photo,
@@ -318,7 +329,8 @@ export function EdlPremiumFlow({
             };
           }
 
-          for (const row of signatureRows ?? []) {
+          for (const row of signatureRows) {
+            if (!row?.kind) continue;
             const signatureStep = STEPS.find((step) => step.signatureKind === row.kind);
             if (signatureStep) {
               next[signatureStep.id] = {
@@ -347,6 +359,8 @@ export function EdlPremiumFlow({
 
           return next;
         });
+      } catch (e) {
+        console.error("[EDL hydrate] non-blocking error", e);
       } finally {
         hydratedRemoteStateRef.current = true;
       }
@@ -739,7 +753,26 @@ export function EdlPremiumFlow({
   };
 
   // ─────────────────────────── RENDER ───────────────────────────
-  if (!currentStep) return null;
+  if (!currentStep) {
+    if (typeof document === "undefined") return null;
+    return createPortal(
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#06091e] p-6 text-center text-white">
+        <div className="max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+          <h2 className="text-lg font-bold">Aucun point de contrôle configuré</h2>
+          <p className="mt-2 text-sm text-white/70">
+            Aucune étape d'inspection n'est disponible pour cette phase. Revenez à la mission et contactez l'admin si le problème persiste.
+          </p>
+          <button
+            onClick={onClose}
+            className="mt-5 w-full h-11 rounded-xl bg-emerald-500/20 text-emerald-100 font-semibold hover:bg-emerald-500/30 transition"
+          >
+            Retour à la mission
+          </button>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   const overlay = (
     <div className="edl-shell fixed inset-0 z-[100] flex flex-col">

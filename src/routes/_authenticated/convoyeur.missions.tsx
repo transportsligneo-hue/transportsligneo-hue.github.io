@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
+import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
@@ -371,16 +372,19 @@ function ConvoyeurMissions() {
     user?.user_metadata?.prenom && user?.user_metadata?.nom
       ? `${user.user_metadata.prenom} ${user.user_metadata.nom}`
       : user?.email ?? "Convoyeur";
+  const closeInspection = useCallback(() => setInspection(null), []);
   const inspectionOverlay = inspection && user ? (
-    <EdlPremiumFlow
-      attributionId={inspection.attributionId}
-      type={inspection.type}
-      userId={user.id}
-      driverName={driverDisplayName}
-      defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
-      onComplete={handleInspectionComplete}
-      onClose={() => setInspection(null)}
-    />
+    <EdlErrorBoundary onClose={closeInspection}>
+      <EdlPremiumFlow
+        attributionId={inspection.attributionId}
+        type={inspection.type}
+        userId={user.id}
+        driverName={driverDisplayName}
+        defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
+        onComplete={handleInspectionComplete}
+        onClose={closeInspection}
+      />
+    </EdlErrorBoundary>
   ) : null;
 
   // === FICHE MISSION DÉTAILLÉE ===
