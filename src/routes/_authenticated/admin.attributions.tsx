@@ -122,6 +122,7 @@ function vueLabelFor(vueType: string): string {
 }
 
 function AdminAttributions() {
+  const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [showCreate, setShowCreate] = useState(false);
