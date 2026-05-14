@@ -254,12 +254,14 @@ export function EdlPremiumFlow({
 
     const hydrateRemoteProgress = async () => {
       try {
-        const { data: existingInspection } = await supabase
+        const { data: existingInspection, error: inspErr } = await supabase
           .from("inspections")
           .select("id")
           .eq("attribution_id", attributionId)
           .eq("type", type)
           .maybeSingle();
+
+        if (inspErr) console.warn("[EDL hydrate] inspections lookup failed", inspErr);
 
         if (!existingInspection?.id || cancelled) {
           hydratedRemoteStateRef.current = true;
@@ -268,7 +270,7 @@ export function EdlPremiumFlow({
 
         setInspectionId(existingInspection.id);
 
-        const [{ data: photoRows }, { data: signatureRows }, { data: selfieRows }] = await Promise.all([
+        const [photoRes, signatureRes, selfieRes] = await Promise.all([
           supabase
             .from("inspection_photos")
             .select("vue_type, url_photo")
@@ -285,20 +287,28 @@ export function EdlPremiumFlow({
             .limit(1),
         ]);
 
+        const photoRows = Array.isArray(photoRes?.data) ? photoRes.data : [];
+        const signatureRows = Array.isArray(signatureRes?.data) ? signatureRes.data : [];
+        const selfieRows = Array.isArray(selfieRes?.data) ? selfieRes.data : [];
+
         if (cancelled) return;
 
-        const photoPaths = (photoRows ?? []).map((row) => row.url_photo).filter(Boolean);
-        const selfiePath = selfieRows?.[0]?.storage_path ?? null;
+        const photoPaths = photoRows.map((row) => row?.url_photo).filter(Boolean) as string[];
+        const selfiePath = selfieRows[0]?.storage_path ?? null;
 
         const [photoPreviewEntries, selfiePreviewUrl] = await Promise.all([
           Promise.all(
             photoPaths.map(async (path) => {
-              const { data } = await supabase.storage.from("inspection-photos").createSignedUrl(path, 3600);
-              return [path, data?.signedUrl] as const;
+              try {
+                const { data } = await supabase.storage.from("inspection-photos").createSignedUrl(path, 3600);
+                return [path, data?.signedUrl] as const;
+              } catch {
+                return [path, undefined] as const;
+              }
             }),
           ),
           selfiePath
-            ? supabase.storage.from("mission-selfies").createSignedUrl(selfiePath, 3600).then(({ data }) => data?.signedUrl ?? undefined)
+            ? supabase.storage.from("mission-selfies").createSignedUrl(selfiePath, 3600).then(({ data }) => data?.signedUrl ?? undefined).catch(() => undefined)
             : Promise.resolve(undefined),
         ]);
 
@@ -309,7 +319,8 @@ export function EdlPremiumFlow({
         setStates((prev) => {
           const next = { ...prev };
 
-          for (const row of photoRows ?? []) {
+          for (const row of photoRows) {
+            if (!row?.vue_type) continue;
             next[row.vue_type] = {
               status: "success",
               storagePath: row.url_photo,
@@ -318,7 +329,8 @@ export function EdlPremiumFlow({
             };
           }
 
-          for (const row of signatureRows ?? []) {
+          for (const row of signatureRows) {
+            if (!row?.kind) continue;
             const signatureStep = STEPS.find((step) => step.signatureKind === row.kind);
             if (signatureStep) {
               next[signatureStep.id] = {
@@ -347,6 +359,8 @@ export function EdlPremiumFlow({
 
           return next;
         });
+      } catch (e) {
+        console.error("[EDL hydrate] non-blocking error", e);
       } finally {
         hydratedRemoteStateRef.current = true;
       }
