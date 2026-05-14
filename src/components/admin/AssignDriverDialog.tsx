@@ -38,10 +38,11 @@ interface Props {
     /** Source — détermine quelle table on update */
     source: "trajet" | "b2b_request" | "mission";
   };
+  existingAttributionId?: string;
   onAssigned?: (target: { type: "convoyeur" | "fleet"; id: string; label: string }) => void;
 }
 
-export function AssignDriverDialog({ open, onClose, trip, onAssigned }: Props) {
+export function AssignDriverDialog({ open, onClose, trip, existingAttributionId, onAssigned }: Props) {
   const [tab, setTab] = useState<"convoyeur" | "flotte">("convoyeur");
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [fleets, setFleets] = useState<FleetOrg[]>([]);
@@ -160,14 +161,21 @@ export function AssignDriverDialog({ open, onClose, trip, onAssigned }: Props) {
         if (trip.source === "trajet") {
           await supabase
             .from("trajets")
-            .update({ statut: "attribue" })
+            .update({ statut: "attribue", statut_publication: "attribue" } as never)
             .eq("id", trip.id);
-          // Créer attribution
-          await supabase.from("attributions").insert({
-            trajet_id: trip.id,
-            convoyeur_id: selected,
-            statut: "propose",
-          });
+
+          if (existingAttributionId) {
+            await supabase
+              .from("attributions")
+              .update({ convoyeur_id: selected, statut: "propose", etape_courante: null } as never)
+              .eq("id", existingAttributionId);
+          } else {
+            await supabase.from("attributions").insert({
+              trajet_id: trip.id,
+              convoyeur_id: selected,
+              statut: "propose",
+            });
+          }
         } else if (trip.source === "b2b_request") {
           await supabase
             .from("b2b_transport_requests")
