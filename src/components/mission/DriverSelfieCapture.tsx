@@ -21,9 +21,34 @@ interface Props {
 }
 
 const SELFIE_RESUME_PREFIX = "driver:selfie-resume:";
+const SELFIE_DONE_PREFIX = "driver:selfie-done:";
 
 function getSelfieResumeKey(attributionId: string) {
   return `${SELFIE_RESUME_PREFIX}${attributionId}`;
+}
+
+function getSelfieDoneKey(attributionId: string) {
+  return `${SELFIE_DONE_PREFIX}${attributionId}`;
+}
+
+export function hasLocalSelfieDone(attributionId: string) {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(getSelfieDoneKey(attributionId)) === "1"
+      || sessionStorage.getItem(getSelfieDoneKey(attributionId)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markLocalSelfieDone(attributionId: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(getSelfieDoneKey(attributionId), "1");
+    sessionStorage.setItem(getSelfieDoneKey(attributionId), "1");
+  } catch {
+    // ignore
+  }
 }
 
 export function hasPendingDriverSelfie(attributionId: string) {
@@ -184,6 +209,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
+      markLocalSelfieDone(attributionId);
       setPendingDriverSelfie(attributionId, false);
       toast.success("Selfie validé", { description: "Passage automatique à l'étape suivante." });
       setTimeout(finalizeStep, 180);

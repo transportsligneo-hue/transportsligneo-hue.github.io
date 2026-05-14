@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
-import { DriverSelfieCapture } from "@/components/mission/DriverSelfieCapture";
+import { DriverSelfieCapture, hasLocalSelfieDone } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 type ActionKind =
@@ -96,17 +96,22 @@ export function MissionCockpit({
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
-  const [selfieJustDone, setSelfieJustDone] = useState(false);
+  const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
   }, [currentEtape]);
 
+  // Re-check local marker if attribution changes
+  useEffect(() => {
+    if (hasLocalSelfieDone(attributionId)) setSelfieJustDone(true);
+  }, [attributionId]);
+
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
 
-  // Si la base confirme désormais le selfie, on peut relâcher l'optimiste.
+  // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
-    if (gates.hasSelfie && selfieJustDone) setSelfieJustDone(false);
+    if (gates.hasSelfie && !selfieJustDone) setSelfieJustDone(true);
   }, [gates.hasSelfie, selfieJustDone]);
 
   useEffect(() => {
@@ -297,7 +302,7 @@ export function MissionCockpit({
           {!isDone && (
             <button
               onClick={handleAdvance}
-              disabled={busy || gates.loading}
+              disabled={busy}
               className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {busy ? <Loader2 className="animate-spin" size={18} /> : <ChevronRight size={20} />}
