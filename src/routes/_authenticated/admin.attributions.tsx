@@ -728,6 +728,20 @@ function AdminAttributions() {
           <DrawerSection title="Documents mission (uploads convoyeur)" icon={<FileText size={12} />}>
             <MissionDocuments attributionId={selectedAttr.id} userId="" isAdmin />
           </DrawerSection>
+
+          <DrawerSection title="Contrôle live admin" icon={<Shield size={12} />}>
+            <AdminLiveControl
+              attributionId={selectedAttr.id}
+              trajetId={selectedAttr.trajet_id}
+              currentStatut={selectedAttr.statut}
+              currentEtape={selectedAttr.etape_courante ?? null}
+              onMutated={() => { void fetchAttributions(); }}
+            />
+          </DrawerSection>
+
+          <DrawerSection title="Bypass étapes obligatoires" icon={<Shield size={12} />}>
+            <AdminStepOverridesPanel attributionId={selectedAttr.id} />
+          </DrawerSection>
         </AdminDetailDrawer>
       )}
     </div>
