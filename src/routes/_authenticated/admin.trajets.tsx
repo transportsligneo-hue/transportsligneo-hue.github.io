@@ -443,7 +443,44 @@ function AdminTrajets() {
   };
 
   const updateStatut = async (id: string, statut: string) => {
-    await supabase.from("trajets").update({ statut }).eq("id", id);
+    const updates: Record<string, unknown> = { statut };
+    // Synchroniser statut_publication pour éviter les incohérences
+    if (statut === "annule") {
+      updates.statut_publication = "brouillon";
+    } else if (statut === "en_attente") {
+      updates.statut_publication = "publie";
+    } else if (["attribue", "accepte", "en_cours", "termine"].includes(statut)) {
+      updates.statut_publication = "attribue";
+    }
+
+    const { error: trajetError } = await supabase
+      .from("trajets")
+      .update(updates as never)
+      .eq("id", id);
+    if (trajetError) {
+      alert(`Erreur lors de la mise à jour du trajet : ${trajetError.message}`);
+      return;
+    }
+
+    // Cascader sur les attributions actives liées
+    if (statut === "annule") {
+      const { error: attrError } = await supabase
+        .from("attributions")
+        .update({ statut: "annule", etape_courante: null } as never)
+        .eq("trajet_id", id)
+        .not("statut", "in", "(annule,validee,termine,refusee)");
+      if (attrError) {
+        console.error("Erreur cascade attributions:", attrError);
+      }
+    } else if (statut === "en_attente") {
+      // Réouvre : libère les attributions actives
+      await supabase
+        .from("attributions")
+        .update({ statut: "annule", etape_courante: null } as never)
+        .eq("trajet_id", id)
+        .in("statut", ["propose", "accepte", "en_cours"]);
+    }
+
     fetchTrajets();
   };
 
