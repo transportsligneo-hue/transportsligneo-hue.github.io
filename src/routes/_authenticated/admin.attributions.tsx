@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car } from "lucide-react";
+import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2 } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
@@ -31,8 +31,9 @@ interface Attribution {
   trajet_id: string;
   convoyeur_id: string;
   statut: string;
+  etape_courante?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
@@ -127,6 +128,7 @@ function AdminAttributions() {
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
   const [invoicingId, setInvoicingId] = useState<string | null>(null);
   const [selectedAttr, setSelectedAttr] = useState<Attribution | null>(null);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
   const [attrDetail, setAttrDetail] = useState<{ vin?: string | null; carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null; marque?: string | null; modele?: string | null; immatriculation?: string | null; client_email?: string | null; client_telephone?: string | null; prix?: number | null; numero_mission?: string | null; etape_courante?: string | null; cgRectoSigned?: string | null; cgVersoSigned?: string | null } | null>(null);
 
   useEffect(() => {
@@ -246,7 +248,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data } = await supabase
       .from("attributions")
-      .select("*, trajet:trajets(depart, arrivee, date_trajet, statut), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (data) setAttributions(data as unknown as Attribution[]);
   }, []);
@@ -289,10 +291,97 @@ function AdminAttributions() {
     };
   }, [gpsView?.id]);
 
+  const syncTrajetStatus = async (attribution: Attribution, nextStatut: string) => {
+    let updates: Record<string, unknown> | null = null;
 
-  const updateStatut = async (id: string, statut: string) => {
-    await supabase.from("attributions").update({ statut }).eq("id", id);
-    fetchAttributions();
+    if (["propose", "accepte"].includes(nextStatut)) {
+      updates = { statut: "attribue", statut_publication: "attribue" };
+    } else if (["en_cours", "en_attente_validation"].includes(nextStatut)) {
+      updates = { statut: "en_cours", statut_publication: "attribue" };
+    } else if (["validee", "termine"].includes(nextStatut)) {
+      updates = { statut: "termine", statut_publication: "attribue" };
+    } else if (nextStatut === "refusee") {
+      updates = { statut: "en_attente", statut_publication: "publie" };
+    } else if (nextStatut === "annule") {
+      updates = { statut: "annule", statut_publication: "brouillon" };
+    }
+
+    if (!updates) return;
+
+    const { error } = await supabase.from("trajets").update(updates as never).eq("id", attribution.trajet_id);
+    if (error) throw error;
+  };
+
+  const updateStatut = async (attribution: Attribution, statut: string, options?: { resetStep?: boolean; note?: string }) => {
+    const actionKey = `${attribution.id}-${statut}`;
+    setBusyAction(actionKey);
+    try {
+      const payload: Record<string, unknown> = { statut };
+      if (options?.resetStep || statut === "propose" || statut === "refusee" || statut === "annule") {
+        payload.etape_courante = null;
+      }
+
+      const { error } = await supabase.from("attributions").update(payload as never).eq("id", attribution.id);
+      if (error) throw error;
+
+      await syncTrajetStatus(attribution, statut);
+      await supabase.from("mission_etape_history").insert({
+        attribution_id: attribution.id,
+        etape: `admin_statut_${statut}`,
+        notes: options?.note ?? "Statut modifié depuis le dashboard admin",
+      } as never);
+
+      if (selectedAttr?.id === attribution.id) {
+        setSelectedAttr((prev) => (prev ? { ...prev, statut, etape_courante: payload.etape_courante as string | null | undefined ?? prev.etape_courante } : prev));
+      }
+
+      toast.success(`Attribution mise à jour : ${statutLabels[statut] ?? statut}`);
+      await Promise.all([fetchAttributions(), fetchOptions()]);
+    } catch (error) {
+      toast.error("Impossible de mettre à jour l'attribution", {
+        description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+      });
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const renderAttributionActions = (attribution: Attribution) => {
+    const buttons: Array<{ key: string; label: string; icon: typeof CheckCircle2; variant: "secondary" | "success" | "danger"; onClick: () => void }> = [];
+
+    if (attribution.statut === "propose") {
+      buttons.push({ key: "confirm", label: "Confirmer", icon: CheckCircle2, variant: "success", onClick: () => void updateStatut(attribution, "accepte", { note: "Attribution confirmée par l'admin" }) });
+      buttons.push({ key: "refuse", label: "Refuser", icon: XCircle, variant: "danger", onClick: () => void updateStatut(attribution, "refusee", { note: "Attribution refusée par l'admin" }) });
+    }
+
+    if (["propose", "accepte", "en_cours", "en_attente_validation", "refusee", "annule"].includes(attribution.statut)) {
+      buttons.push({ key: "edit", label: "Modifier", icon: Edit2, variant: "secondary", onClick: () => setAssignTrajet({ id: attribution.trajet_id, depart: attribution.trajet?.depart ?? "", arrivee: attribution.trajet?.arrivee ?? "", date_trajet: attribution.trajet?.date_trajet ?? null, statut: attribution.trajet?.statut ?? "attribue" }) });
+    }
+
+    if (attribution.statut === "en_attente_validation") {
+      buttons.push({ key: "validate", label: "Valider", icon: CheckCircle2, variant: "success", onClick: () => void updateStatut(attribution, "validee", { note: "Mission validée par l'admin" }) });
+    }
+
+    if (!["annule", "validee", "termine"].includes(attribution.statut)) {
+      buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: () => void updateStatut(attribution, "annule", { note: "Mission annulée par l'admin" }) });
+    }
+
+    if (["refusee", "annule"].includes(attribution.statut)) {
+      buttons.push({ key: "reset", label: "Réinitialiser", icon: RotateCcw, variant: "secondary", onClick: () => void updateStatut(attribution, "propose", { resetStep: true, note: "Attribution réinitialisée par l'admin" }) });
+    }
+
+    return buttons.map((action) => (
+      <Button
+        key={action.key}
+        size="sm"
+        variant={action.variant}
+        icon={<action.icon size={12} />}
+        onClick={action.onClick}
+        disabled={busyAction === `${attribution.id}-${action.key}` || busyAction === `${attribution.id}-${action.key === "confirm" ? "accepte" : action.key === "refuse" ? "refusee" : action.key === "cancel" ? "annule" : action.key === "validate" ? "validee" : action.key === "reset" ? "propose" : attribution.statut}`}
+      >
+        {action.label}
+      </Button>
+    ));
   };
 
   const viewGps = async (attributionId: string) => {
