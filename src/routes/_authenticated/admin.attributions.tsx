@@ -322,9 +322,16 @@ function AdminAttributions() {
       }
 
       const { error } = await supabase.from("attributions").update(payload as never).eq("id", attribution.id);
-      if (error) throw error;
+      if (error) {
+        console.error("[admin.attributions] update error:", error);
+        throw error;
+      }
 
-      await syncTrajetStatus(attribution, statut);
+      try {
+        await syncTrajetStatus(attribution, statut);
+      } catch (syncErr) {
+        console.error("[admin.attributions] syncTrajetStatus error:", syncErr);
+      }
       await supabase.from("mission_etape_history").insert({
         attribution_id: attribution.id,
         etape: `admin_statut_${statut}`,
