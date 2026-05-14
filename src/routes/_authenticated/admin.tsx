@@ -86,7 +86,7 @@ function AdminLayout() {
 
     // Opérations
     { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
-    { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
+    { to: "/admin/attributions", label: "Missions", icon: Truck, group: "Opérations" },
 
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
