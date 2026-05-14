@@ -137,6 +137,7 @@ function ConvoyeurMissions() {
 
     if (!conv) { setLoading(false); return; }
     setTypeConvoyeur(conv.type_convoyeur || "salarie");
+    setActiveMissionId((prev) => (prev && prev !== "" ? prev : null));
 
     const { data, error } = await supabase
       .from("attributions")
@@ -150,23 +151,24 @@ function ConvoyeurMissions() {
     }
 
     if (data) {
-      const enriched: Mission[] = [];
-      for (const attr of data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>) {
-        const { data: trajet } = await supabase
-          .from("trajets")
-          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
-          .eq("id", attr.trajet_id)
-          .maybeSingle();
-
-        const { data: inspections } = await supabase
-          .from("inspections")
-          .select("type, statut")
-          .eq("attribution_id", attr.id);
+      const rows = data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>;
+      const enriched = await Promise.all(rows.map(async (attr) => {
+        const [{ data: trajet }, { data: inspections }] = await Promise.all([
+          supabase
+            .from("trajets")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
+            .eq("id", attr.trajet_id)
+            .maybeSingle(),
+          supabase
+            .from("inspections")
+            .select("type, statut")
+            .eq("attribution_id", attr.id),
+        ]);
 
         const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
         const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
 
-        enriched.push({
+        return {
           id: attr.id,
           statut: attr.statut,
           etape_courante: normalizeMissionEtape(attr.etape_courante),
@@ -175,16 +177,15 @@ function ConvoyeurMissions() {
           trajet,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
-        });
+        };
+      }));
 
-        if (attr.statut === "en_cours" && !activeMissionId) {
-          setActiveMissionId(attr.id);
-        }
-      }
+      const nextActiveMission = enriched.find((mission) => mission.statut === "en_cours")?.id ?? null;
+      setActiveMissionId(nextActiveMission);
       setMissions(enriched);
     }
     setLoading(false);
-  }, [user, activeMissionId]);
+  }, [user]);
 
   useEffect(() => {
     fetchMissions().catch((error) => {
@@ -193,6 +194,48 @@ function ConvoyeurMissions() {
       });
     });
   }, [fetchMissions]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setupRealtime = async () => {
+      const { data: conv } = await supabase
+        .from("convoyeurs")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!conv?.id || cancelled) return;
+
+      channel = supabase
+        .channel(`convoyeur-missions-${conv.id}`)
+        .on("postgres_changes", {
+          event: "*",
+          schema: "public",
+          table: "attributions",
+          filter: `convoyeur_id=eq.${conv.id}`,
+        }, () => {
+          void fetchMissions();
+        })
+        .on("postgres_changes", {
+          event: "*",
+          schema: "public",
+          table: "inspections",
+        }, () => {
+          void fetchMissions();
+        })
+        .subscribe();
+    };
+
+    void setupRealtime();
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [fetchMissions, user]);
 
   useEffect(() => {
     if (!missions.length) return;
@@ -515,7 +558,7 @@ function ConvoyeurMissions() {
               <Check size={18} /> Accepter
             </button>
             <button
-              onClick={() => updateStatus(openMission.id, "refuse")}
+              onClick={() => updateStatus(openMission.id, "refusee")}
               className="flex items-center justify-center gap-2 py-4 bg-white text-red-600 border border-red-200 rounded-xl text-base font-semibold hover:bg-red-50 active:scale-[0.98]"
             >
               <X size={18} /> Refuser
