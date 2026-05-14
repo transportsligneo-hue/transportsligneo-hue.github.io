@@ -303,7 +303,7 @@ export function EdlPremiumFlow({
       previewUrl = URL.createObjectURL(stableFile);
       setState(stepId, { status: "uploading", previewUrl });
 
-      const insId = await ensureInspectionDepart();
+      const insId = await ensureInspection();
       const compressed = await compressImage(stableFile);
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
@@ -567,7 +567,7 @@ export function EdlPremiumFlow({
       setStepIndex(safeIndex + 1);
     } else {
       // Fin de parcours
-      try { localStorage.removeItem(STORAGE_KEY(attributionId)); } catch { /* ignore */ }
+      try { localStorage.removeItem(STORAGE_KEY(attributionId, type)); } catch { /* ignore */ }
       onComplete();
     }
   };
