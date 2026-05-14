@@ -469,13 +469,6 @@ function AdminAttributions() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
-                  <Button
-                    onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
-                    variant="primary"
-                  >
-                    <ExternalLink size={14} className="mr-1.5" />
-                    Ouvrir la mission
-                  </Button>
                   <IconButton
                     onClick={() => setSelectedAttr(a)}
                     title="Aperçu rapide (panneau latéral)"

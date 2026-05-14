@@ -17,7 +17,6 @@ import {
   CreditCard,
   Bell,
   Handshake,
-  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -87,7 +86,7 @@ function AdminLayout() {
 
     // Opérations
     { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
-    { to: "/admin/attributions", label: "Missions", icon: Truck, group: "Opérations" },
+    { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
 
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
