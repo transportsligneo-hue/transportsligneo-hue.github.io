@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
+import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
