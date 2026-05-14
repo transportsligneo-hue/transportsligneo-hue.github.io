@@ -321,6 +321,7 @@ function ConvoyeurMissions() {
   const inspectionOverlay = inspection && user ? (
     <EdlPremiumFlow
       attributionId={inspection.attributionId}
+      type={inspection.type}
       userId={user.id}
       driverName={driverDisplayName}
       defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
