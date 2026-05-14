@@ -236,11 +236,15 @@ export function EdlPremiumFlow({
         .map(([k, v]) => [k, { ...v, previewUrl: v.previewUrl?.startsWith("blob:") ? undefined : v.previewUrl }])
     );
     const data: StoredState = {
-      attributionId, stepIndex, states: safeStates as Record<string, StepState>,
-      inspectionDepartId, updatedAt: Date.now(),
+      attributionId,
+      type,
+      stepIndex,
+      states: safeStates as Record<string, StepState>,
+      inspectionId,
+      updatedAt: Date.now(),
     };
-    try { localStorage.setItem(STORAGE_KEY(attributionId), JSON.stringify(data)); } catch { /* ignore */ }
-  }, [attributionId, stepIndex, states, inspectionDepartId]);
+    try { localStorage.setItem(STORAGE_KEY(attributionId, type), JSON.stringify(data)); } catch { /* ignore */ }
+  }, [attributionId, inspectionId, states, stepIndex, type]);
 
   // === Préchargement image exemple suivante (perf)
   useEffect(() => {
@@ -258,27 +262,27 @@ export function EdlPremiumFlow({
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // === Inspection (départ) — créée à la première photo nécessaire
-  const ensureInspectionDepart = useCallback(async () => {
-    if (inspectionDepartId) return inspectionDepartId;
+  // === Inspection de la phase courante — créée à la première photo nécessaire
+  const ensureInspection = useCallback(async () => {
+    if (inspectionId) return inspectionId;
     const { data: existing } = await supabase
       .from("inspections")
       .select("id")
       .eq("attribution_id", attributionId)
-      .eq("type", "depart")
+      .eq("type", type)
       .maybeSingle();
     if (existing?.id) {
-      setInspectionDepartId(existing.id);
+      setInspectionId(existing.id);
       return existing.id;
     }
     const { data, error } = await supabase
       .from("inspections")
-      .insert({ attribution_id: attributionId, type: "depart", statut: "en_cours" })
+      .insert({ attribution_id: attributionId, type, statut: "en_cours" })
       .select("id").single();
     if (error) throw error;
-    setInspectionDepartId(data.id);
+    setInspectionId(data.id);
     return data.id;
-  }, [attributionId, inspectionDepartId]);
+  }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
   const triggerCapture = () => fileRef.current?.click();
