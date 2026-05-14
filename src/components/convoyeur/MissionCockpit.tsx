@@ -110,11 +110,6 @@ export function MissionCockpit({
   }, [gates.hasSelfie, selfieJustDone]);
 
   useEffect(() => {
-    if (!forceOpenSelfie || selfieOK) return;
-    setOpenSelfie(true);
-  }, [forceOpenSelfie, selfieOK]);
-
-  useEffect(() => {
     onSelfieModalStateChange?.(openSelfie);
   }, [onSelfieModalStateChange, openSelfie]);
 
@@ -135,7 +130,6 @@ export function MissionCockpit({
 
   const currentKey: ActionKind = useMemo(() => {
     if (["validee", "termine", "en_attente_validation"].includes(statut)) return "done";
-    if (!selfieOK) return "selfie";
 
     const e = normalizedEtape ?? (statut === "en_cours" ? "en_route" : statut === "accepte" ? "acceptee" : "assignee");
 
@@ -143,6 +137,7 @@ export function MissionCockpit({
 
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
+    if (!selfieOK && (e === "sur_place" || e === "vehicule_recupere")) return "selfie";
     if (e === "sur_place" || e === "vehicule_recupere") {
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
@@ -156,6 +151,11 @@ export function MissionCockpit({
     if (e === "edl_arrivee_fait") return "cloturer";
     return "demarrer";
   }, [inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
+
+  useEffect(() => {
+    if (!forceOpenSelfie || currentKey !== "selfie") return;
+    setOpenSelfie(true);
+  }, [currentKey, forceOpenSelfie]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
   const currentDef = STEPS[currentIdx] ?? STEPS[0];
@@ -364,9 +364,9 @@ export function MissionCockpitStickyCTA({
 
   let label = "Continuer";
   if (["en_attente_validation", "validee", "termine"].includes(statut)) label = "Mission envoyée";
-  else if (!selfieOK) label = "Prendre selfie";
   else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "Démarrer le trajet";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
+  else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
   else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
   else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && inspectionDepartDone)) label = "Prendre la route";
   else if (currentEtape === "en_livraison") label = "Je suis arrivé";
