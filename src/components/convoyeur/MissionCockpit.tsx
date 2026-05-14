@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
-import { DriverSelfieCapture } from "@/components/mission/DriverSelfieCapture";
+import { DriverSelfieCapture, hasLocalSelfieDone } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 type ActionKind =
