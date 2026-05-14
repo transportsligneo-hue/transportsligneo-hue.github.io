@@ -661,6 +661,14 @@ function AdminAttributions() {
           }
           footer={
             <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="success"
+                icon={<ExternalLink size={12} />}
+                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: selectedAttr.id } })}
+              >
+                Menu complet mission
+              </Button>
               <Button size="sm" onClick={() => setReportId(selectedAttr.id)} icon={<FileText size={12} />}>Rapport mission</Button>
               <Button size="sm" onClick={() => viewGps(selectedAttr.id)} icon={<MapPin size={12} />}>Suivi GPS</Button>
               <Button size="sm" onClick={() => viewPhotos(selectedAttr.id, "depart")} icon={<Image size={12} />}>Photos départ</Button>
