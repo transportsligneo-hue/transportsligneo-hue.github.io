@@ -687,6 +687,7 @@ function AdminMissionDetail() {
           {/* Contrôle live admin — actions temps réel */}
           <AdminLiveControl
             attributionId={attribution.id}
+            trajetId={trajet.id}
             currentStatut={attribution.statut}
             currentEtape={attribution.etape_courante}
             onChange={fetchAll}
