@@ -35,8 +35,9 @@ interface Attribution {
   convoyeur_id: string;
   statut: string;
   etape_courante?: string | null;
+  numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
