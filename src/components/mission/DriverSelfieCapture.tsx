@@ -209,6 +209,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (dbErr) throw dbErr;
 
       setStatus("success");
+      markLocalSelfieDone(attributionId);
       setPendingDriverSelfie(attributionId, false);
       toast.success("Selfie validé", { description: "Passage automatique à l'étape suivante." });
       setTimeout(finalizeStep, 180);
