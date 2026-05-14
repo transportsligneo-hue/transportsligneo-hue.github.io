@@ -472,11 +472,6 @@ function AdminTrajets() {
       if (attrError) {
         console.error("Erreur cascade attributions:", attrError);
       }
-      await supabase.from("mission_etape_history").insert({
-        attribution_id: null as unknown as string,
-        etape: "admin_trajet_annule",
-        notes: `Trajet ${id} annulé depuis la section Trajets`,
-      } as never).then(() => {}, () => {});
     } else if (statut === "en_attente") {
       // Réouvre : libère les attributions actives
       await supabase
