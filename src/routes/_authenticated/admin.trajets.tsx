@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -122,6 +122,23 @@ function AdminTrajets() {
   const [linkedDevis, setLinkedDevis] = useState<DevisLink | null>(null);
   const [pctInput, setPctInput] = useState<string>("65");
   const [savingCommission, setSavingCommission] = useState(false);
+
+  const isPartnershipTrajet = useCallback((trajet: Pick<Trajet, "depart" | "arrivee">) => {
+    const depart = (trajet.depart ?? "").trim().toLowerCase();
+    return depart.includes("partenariat");
+  }, []);
+
+  const getTrajetPriority = useCallback((trajet: Trajet) => {
+    const priorityByStatut: Record<string, number> = {
+      en_cours: 60,
+      attribue: 50,
+      accepte: 40,
+      en_attente: 30,
+      termine: 20,
+      annule: 10,
+    };
+    return priorityByStatut[trajet.statut] ?? 0;
+  }, []);
 
   // Charge le devis lié quand selected change
   useEffect(() => {
@@ -338,8 +355,35 @@ function AdminTrajets() {
         }, {} as typeof adminMap);
       }
     }
-    setTrajets((data as unknown as Trajet[]).map((t) => ({ ...t, ...adminMap[t.id] })));
-  }, [filterStatut]);
+    const enriched = (data as unknown as Trajet[]).map((t) => ({ ...t, ...adminMap[t.id] }));
+    const operational = enriched.filter((trajet) => !isPartnershipTrajet(trajet));
+    const deduped = new Map<string, Trajet>();
+
+    operational.forEach((trajet) => {
+      const key = trajet.demande_id ? `demande:${trajet.demande_id}` : `trajet:${trajet.id}`;
+      const existing = deduped.get(key);
+      if (!existing) {
+        deduped.set(key, trajet);
+        return;
+      }
+
+      const existingPriority = getTrajetPriority(existing);
+      const nextPriority = getTrajetPriority(trajet);
+      const shouldReplace =
+        nextPriority > existingPriority ||
+        (nextPriority === existingPriority && new Date(trajet.created_at).getTime() > new Date(existing.created_at).getTime());
+
+      if (shouldReplace) {
+        deduped.set(key, trajet);
+      }
+    });
+
+    setTrajets(
+      Array.from(deduped.values()).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      ),
+    );
+  }, [filterStatut, getTrajetPriority, isPartnershipTrajet]);
 
   useEffect(() => {
     fetchTrajets();
@@ -455,6 +499,23 @@ function AdminTrajets() {
           </>
         }
       />
+
+      <Card className="mb-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium text-pro-text">La liste Trajets n'affiche plus les demandes de partenariat.</p>
+            <p className="text-xs text-pro-muted mt-1">
+              Les demandes de partenariat sont désormais suivies dans la section dédiée.
+            </p>
+          </div>
+          <Link
+            to="/admin/b2b-leads"
+            className="inline-flex items-center justify-center rounded-md bg-pro-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-pro-accent-hover"
+          >
+            Ouvrir les demandes de partenariat
+          </Link>
+        </div>
+      </Card>
 
       {trajets.length === 0 ? (
         <EmptyState icon={RouteIcon} title="Aucun trajet" description="Créez un trajet ou convertissez une demande." />
