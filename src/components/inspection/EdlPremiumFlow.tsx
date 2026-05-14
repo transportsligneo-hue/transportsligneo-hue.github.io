@@ -40,6 +40,7 @@ import {
 
 interface Props {
   attributionId: string;
+  type: "depart" | "arrivee";
   userId: string;
   driverName: string;
   /** Pour signatures client : nom à afficher par défaut */
@@ -64,13 +65,14 @@ interface StepState {
 
 interface StoredState {
   attributionId: string;
+  type: "depart" | "arrivee";
   stepIndex: number;
   states: Record<string, StepState>;
-  inspectionDepartId: string | null;
+  inspectionId: string | null;
   updatedAt: number;
 }
 
-const STORAGE_KEY = (attrId: string) => `edl-premium:${attrId}`;
+const STORAGE_KEY = (attrId: string, type: "depart" | "arrivee") => `edl-premium:${attrId}:${type}`;
 
 /** Attend que le navigateur revienne en ligne, jusqu'à `timeoutMs`. */
 async function waitForOnline(timeoutMs = 30000): Promise<void> {
@@ -144,29 +146,39 @@ function revokeBlobUrl(url?: string) {
 }
 
 export function EdlPremiumFlow({
-  attributionId, userId, driverName, defaultClientName,
+  attributionId, type, userId, driverName, defaultClientName,
   onComplete, onClose,
 }: Props) {
-  const STEPS = EDL_PREMIUM_SEQUENCE;
-  const TOTAL = EDL_TOTAL_STEPS;
+  const STEPS = useMemo(() => {
+    if (type === "depart") {
+      return EDL_PREMIUM_SEQUENCE.filter(
+        (step) => step.phase === "depart" && step.kind !== "selfie",
+      );
+    }
+
+    return EDL_PREMIUM_SEQUENCE.filter(
+      (step) => step.phase === "arrivee" && step.kind !== "validation",
+    );
+  }, [type]);
+  const TOTAL = STEPS.length;
 
   // Reprise via localStorage
   const initialState = useMemo<StoredState | null>(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY(attributionId));
+      const raw = localStorage.getItem(STORAGE_KEY(attributionId, type));
       if (!raw) return null;
       const parsed = JSON.parse(raw) as StoredState;
-      return parsed.attributionId === attributionId ? parsed : null;
+      return parsed.attributionId === attributionId && parsed.type === type ? parsed : null;
     } catch { return null; }
-  }, [attributionId]);
+  }, [attributionId, type]);
 
   const [stepIndex, setStepIndex] = useState(() => initialState?.stepIndex ?? 0);
   const [states, setStates] = useState<Record<string, StepState>>(
     () => initialState?.states ?? {}
   );
-  const [inspectionDepartId, setInspectionDepartId] = useState<string | null>(
-    initialState?.inspectionDepartId ?? null
+  const [inspectionId, setInspectionId] = useState<string | null>(
+    initialState?.inspectionId ?? null
   );
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
