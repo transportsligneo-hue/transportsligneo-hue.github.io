@@ -615,6 +615,15 @@ function AdminTrajets() {
                     >
                       <Edit2 size={15} />
                     </IconButton>
+                    {t.statut !== "annule" && t.statut !== "termine" && (
+                      <IconButton
+                        onClick={(e) => { e.stopPropagation(); void cancelTrajet(t); }}
+                        title="Annuler la mission"
+                        tone="danger"
+                      >
+                        <Ban size={15} />
+                      </IconButton>
+                    )}
                   </div>
                 </TD>
               </TR>
