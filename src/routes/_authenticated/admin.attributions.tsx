@@ -472,17 +472,7 @@ function AdminAttributions() {
                   <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                     {statutLabels[a.statut] ?? a.statut}
                   </Badge>
-                  <Select
-                    value={a.statut}
-                    onChange={(e) => updateStatut(a.id, e.target.value)}
-                    className="text-xs py-1.5"
-                  >
-                    {Object.entries(statutLabels).map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {v}
-                      </option>
-                    ))}
-                  </Select>
+                  {renderAttributionActions(a)}
                   <IconButton
                     onClick={() => setSelectedAttr(a)}
                     title="Ouvrir la fiche mission"
