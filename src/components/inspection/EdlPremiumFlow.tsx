@@ -218,16 +218,16 @@ export function EdlPremiumFlow({
     return () => { cancelled = true; };
   }, []);
 
-  // Clamp pour éviter X/Y incohérent
-  const safeIndex = Math.min(Math.max(0, stepIndex), TOTAL - 1);
+  // Clamp pour éviter X/Y incohérent (TOTAL peut être 0 si filtre vide)
+  const safeIndex = TOTAL > 0 ? Math.min(Math.max(0, stepIndex), TOTAL - 1) : 0;
   useEffect(() => {
-    if (stepIndex !== safeIndex) setStepIndex(safeIndex);
-  }, [stepIndex, safeIndex]);
+    if (TOTAL > 0 && stepIndex !== safeIndex) setStepIndex(safeIndex);
+  }, [stepIndex, safeIndex, TOTAL]);
 
   const currentStep = STEPS[safeIndex];
-  const currentState = states[currentStep.id];
+  const currentState = currentStep ? states[currentStep.id] : undefined;
   const completed = STEPS.filter(s => states[s.id]?.status === "success").length;
-  const progressPct = Math.round((completed / TOTAL) * 100);
+  const progressPct = TOTAL > 0 ? Math.round((completed / TOTAL) * 100) : 0;
 
   // === Persistence
   useEffect(() => {
