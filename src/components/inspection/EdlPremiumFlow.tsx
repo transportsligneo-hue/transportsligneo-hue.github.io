@@ -753,7 +753,26 @@ export function EdlPremiumFlow({
   };
 
   // ─────────────────────────── RENDER ───────────────────────────
-  if (!currentStep) return null;
+  if (!currentStep) {
+    if (typeof document === "undefined") return null;
+    return createPortal(
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#06091e] p-6 text-center text-white">
+        <div className="max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+          <h2 className="text-lg font-bold">Aucun point de contrôle configuré</h2>
+          <p className="mt-2 text-sm text-white/70">
+            Aucune étape d'inspection n'est disponible pour cette phase. Revenez à la mission et contactez l'admin si le problème persiste.
+          </p>
+          <button
+            onClick={onClose}
+            className="mt-5 w-full h-11 rounded-xl bg-emerald-500/20 text-emerald-100 font-semibold hover:bg-emerald-500/30 transition"
+          >
+            Retour à la mission
+          </button>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   const overlay = (
     <div className="edl-shell fixed inset-0 z-[100] flex flex-col">
