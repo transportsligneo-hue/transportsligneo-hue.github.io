@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText } from "lucide-react";
+import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, Ban } from "lucide-react";
+import { toast } from "sonner";
 import {
   PageHeader,
   Card,
@@ -458,7 +459,8 @@ function AdminTrajets() {
       .update(updates as never)
       .eq("id", id);
     if (trajetError) {
-      alert(`Erreur lors de la mise à jour du trajet : ${trajetError.message}`);
+      console.error("[admin.trajets] update statut error:", trajetError);
+      toast.error("Échec mise à jour", { description: trajetError.message });
       return;
     }
 
@@ -470,8 +472,9 @@ function AdminTrajets() {
         .eq("trajet_id", id)
         .not("statut", "in", "(annule,validee,termine,refusee)");
       if (attrError) {
-        console.error("Erreur cascade attributions:", attrError);
+        console.error("[admin.trajets] cascade attributions error:", attrError);
       }
+      toast.success("Mission annulée");
     } else if (statut === "en_attente") {
       // Réouvre : libère les attributions actives
       await supabase
@@ -479,9 +482,21 @@ function AdminTrajets() {
         .update({ statut: "annule", etape_courante: null } as never)
         .eq("trajet_id", id)
         .in("statut", ["propose", "accepte", "en_cours"]);
+      toast.success("Trajet rouvert");
+    } else {
+      toast.success(`Statut → ${statutLabels[statut] ?? statut}`);
     }
 
     fetchTrajets();
+  };
+
+  const cancelTrajet = async (t: Trajet) => {
+    if (t.statut === "annule") return;
+    if (!confirm(`Annuler la mission ${t.depart} → ${t.arrivee} ?`)) return;
+    await updateStatut(t.id, "annule");
+    if (selected?.id === t.id) {
+      setSelected({ ...selected, statut: "annule", statut_publication: "brouillon" });
+    }
   };
 
   const openEdit = (t: Trajet) => {
@@ -600,6 +615,15 @@ function AdminTrajets() {
                     >
                       <Edit2 size={15} />
                     </IconButton>
+                    {t.statut !== "annule" && t.statut !== "termine" && (
+                      <IconButton
+                        onClick={(e) => { e.stopPropagation(); void cancelTrajet(t); }}
+                        title="Annuler la mission"
+                        tone="danger"
+                      >
+                        <Ban size={15} />
+                      </IconButton>
+                    )}
                   </div>
                 </TD>
               </TR>

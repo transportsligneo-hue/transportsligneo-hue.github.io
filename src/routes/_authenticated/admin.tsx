@@ -16,6 +16,7 @@ import {
   Shield,
   CreditCard,
   Bell,
+  Handshake,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -80,6 +81,7 @@ function AdminLayout() {
     // Activité commerciale
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
     { to: "/admin/demandes", label: "Demandes", icon: FileText, group: "Activité" },
+    { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
 
     // Opérations
