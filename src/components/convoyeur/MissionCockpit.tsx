@@ -302,7 +302,7 @@ export function MissionCockpit({
           {!isDone && (
             <button
               onClick={handleAdvance}
-              disabled={busy || gates.loading}
+              disabled={busy}
               className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {busy ? <Loader2 className="animate-spin" size={18} /> : <ChevronRight size={20} />}
