@@ -735,7 +735,7 @@ function AdminAttributions() {
               trajetId={selectedAttr.trajet_id}
               currentStatut={selectedAttr.statut}
               currentEtape={selectedAttr.etape_courante ?? null}
-              onMutated={() => { void fetchAttributions(); }}
+              onChange={() => { void fetchAttributions(); }}
             />
           </DrawerSection>
 
