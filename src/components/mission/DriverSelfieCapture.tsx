@@ -275,7 +275,18 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
       {/* Sticky footer toujours visible */}
       <div className="driver-selfie-footer sticky bottom-0 shrink-0 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
-        <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={handleFile} className="hidden"/>
+        {/* Input réel : visuellement caché mais PAS display:none (sinon
+            certains Android/Chrome bloquent l'ouverture caméra). */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          capture="user"
+          onChange={handleFile}
+          style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999 }}
+          tabIndex={-1}
+          aria-hidden="true"
+        />
         {!preview ? (
           <button
             onClick={openCamera}
