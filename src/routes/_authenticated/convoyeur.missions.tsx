@@ -59,10 +59,7 @@ function ConvoyeurMissions() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
-  const [openMissionId, setOpenMissionIdState] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    try { return sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId"); } catch { return null; }
-  });
+  const [openMissionId, setOpenMissionIdState] = useState<string | null>(null);
   const setOpenMissionId = useCallback((id: string | null) => {
     setOpenMissionIdState(id);
     if (typeof window === "undefined") return;
@@ -76,7 +73,7 @@ function ConvoyeurMissions() {
   }, []);
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
-  const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
+  const [inspection, setInspection] = useState<InspectionSession | null>(null);
   const openInspection = useCallback((next: InspectionSession) => {
     if (typeof window !== "undefined") {
       const raw = JSON.stringify(next);
@@ -94,6 +91,19 @@ function ConvoyeurMissions() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const storedOpenMissionId = sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
+      const storedInspection = readStoredInspection();
+
+      if (storedOpenMissionId) setOpenMissionIdState(storedOpenMissionId);
+      if (storedInspection) setInspection(storedInspection);
+    } catch {
+      // Ignore storage restoration issues on privacy-restricted devices.
+    }
+  }, []);
 
   // Sync inspection state to sessionStorage
   useEffect(() => {

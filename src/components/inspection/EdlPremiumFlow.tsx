@@ -195,6 +195,7 @@ export function EdlPremiumFlow({
     return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
   }, []);
   const fileRef = useRef<HTMLInputElement>(null);
+  const hydratedRemoteStateRef = useRef(false);
 
   // Bypass admin (étend useMissionGates aux IDs scan/photo)
   const { isDisabled } = useMissionGates(attributionId);
@@ -245,6 +246,118 @@ export function EdlPremiumFlow({
     };
     try { localStorage.setItem(STORAGE_KEY(attributionId, type), JSON.stringify(data)); } catch { /* ignore */ }
   }, [attributionId, inspectionId, states, stepIndex, type]);
+
+  useEffect(() => {
+    if (hydratedRemoteStateRef.current) return;
+
+    let cancelled = false;
+
+    const hydrateRemoteProgress = async () => {
+      try {
+        const { data: existingInspection } = await supabase
+          .from("inspections")
+          .select("id")
+          .eq("attribution_id", attributionId)
+          .eq("type", type)
+          .maybeSingle();
+
+        if (!existingInspection?.id || cancelled) {
+          hydratedRemoteStateRef.current = true;
+          return;
+        }
+
+        setInspectionId(existingInspection.id);
+
+        const [{ data: photoRows }, { data: signatureRows }, { data: selfieRows }] = await Promise.all([
+          supabase
+            .from("inspection_photos")
+            .select("vue_type, url_photo")
+            .eq("inspection_id", existingInspection.id),
+          supabase
+            .from("mission_signatures")
+            .select("kind")
+            .eq("attribution_id", attributionId),
+          supabase
+            .from("mission_selfies")
+            .select("storage_path")
+            .eq("attribution_id", attributionId)
+            .order("taken_at", { ascending: false })
+            .limit(1),
+        ]);
+
+        if (cancelled) return;
+
+        const photoPaths = (photoRows ?? []).map((row) => row.url_photo).filter(Boolean);
+        const selfiePath = selfieRows?.[0]?.storage_path ?? null;
+
+        const [photoPreviewEntries, selfiePreviewUrl] = await Promise.all([
+          Promise.all(
+            photoPaths.map(async (path) => {
+              const { data } = await supabase.storage.from("inspection-photos").createSignedUrl(path, 3600);
+              return [path, data?.signedUrl] as const;
+            }),
+          ),
+          selfiePath
+            ? supabase.storage.from("mission-selfies").createSignedUrl(selfiePath, 3600).then(({ data }) => data?.signedUrl ?? undefined)
+            : Promise.resolve(undefined),
+        ]);
+
+        if (cancelled) return;
+
+        const photoPreviewMap = new Map(photoPreviewEntries);
+
+        setStates((prev) => {
+          const next = { ...prev };
+
+          for (const row of photoRows ?? []) {
+            next[row.vue_type] = {
+              status: "success",
+              storagePath: row.url_photo,
+              previewUrl: photoPreviewMap.get(row.url_photo) ?? prev[row.vue_type]?.previewUrl,
+              ocr: prev[row.vue_type]?.ocr,
+            };
+          }
+
+          for (const row of signatureRows ?? []) {
+            const signatureStep = STEPS.find((step) => step.signatureKind === row.kind);
+            if (signatureStep) {
+              next[signatureStep.id] = {
+                status: "success",
+                previewUrl: prev[signatureStep.id]?.previewUrl,
+                storagePath: prev[signatureStep.id]?.storagePath,
+              };
+            }
+          }
+
+          if (selfiePath) {
+            const selfieStep = STEPS.find((step) => step.kind === "selfie");
+            if (selfieStep) {
+              next[selfieStep.id] = {
+                status: "success",
+                storagePath: selfiePath,
+                previewUrl: selfiePreviewUrl ?? prev[selfieStep.id]?.previewUrl,
+              };
+            }
+          }
+
+          const firstIncompleteIndex = STEPS.findIndex((step) => next[step.id]?.status !== "success");
+          if (firstIncompleteIndex >= 0) {
+            setStepIndex((current) => Math.max(current, firstIncompleteIndex));
+          }
+
+          return next;
+        });
+      } finally {
+        hydratedRemoteStateRef.current = true;
+      }
+    };
+
+    void hydrateRemoteProgress();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [STEPS, attributionId, type]);
 
   // === Préchargement image exemple suivante (perf)
   useEffect(() => {
