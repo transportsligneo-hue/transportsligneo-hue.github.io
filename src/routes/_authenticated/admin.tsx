@@ -16,6 +16,7 @@ import {
   Shield,
   CreditCard,
   Bell,
+  Handshake,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
