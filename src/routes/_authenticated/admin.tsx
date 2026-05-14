@@ -17,6 +17,7 @@ import {
   CreditCard,
   Bell,
   Handshake,
+  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
