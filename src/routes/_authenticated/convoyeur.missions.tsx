@@ -361,6 +361,8 @@ function ConvoyeurMissions() {
     return list;
   }, [missions, filter, search]);
 
+  const closeInspection = useCallback(() => setInspection(null), []);
+
   const openMission = openMissionId ? missions.find(m => m.id === openMissionId) : null;
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
@@ -372,7 +374,6 @@ function ConvoyeurMissions() {
     user?.user_metadata?.prenom && user?.user_metadata?.nom
       ? `${user.user_metadata.prenom} ${user.user_metadata.nom}`
       : user?.email ?? "Convoyeur";
-  const closeInspection = useCallback(() => setInspection(null), []);
   const inspectionOverlay = inspection && user ? (
     <EdlErrorBoundary onClose={closeInspection}>
       <EdlPremiumFlow
