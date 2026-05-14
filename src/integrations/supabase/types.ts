@@ -2254,6 +2254,16 @@ export type Database = {
     Functions: {
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_reset_operational_data: { Args: never; Returns: Json }
+      can_driver_update_attribution: {
+        Args: {
+          _attribution_id: string
+          _convoyeur_id: string
+          _numero_mission: string
+          _statut: string
+          _trajet_id: string
+        }
+        Returns: boolean
+      }
       create_admin_notification: {
         Args: {
           _entity_id?: string
