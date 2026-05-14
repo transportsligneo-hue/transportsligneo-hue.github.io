@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
-import logoLigneo from "@/assets/logo-ligneo.png";
+// Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export interface DevisData {
   numero: string;
@@ -130,24 +131,20 @@ function drawFooter(doc: jsPDF, pageW: number, pageH: number) {
 }
 
 function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
-  // Société emettrice (SIREN / SIRET / RCS / TVA)
+  // Bandeau émetteur simplifié — informations légales retirées en attendant validation officielle.
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, pageW - 28, 18, 1, 1, "S");
+  doc.roundedRect(14, y, pageW - 28, 10, 1, 1, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Transports Ligneo", 20, y + 7);
+  doc.text("Transports Ligneo", 20, y + 6.5);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("12 Rue du Prieure  -  37000 Tours, France", 20, y + 13);
+  doc.text("Convoyage automobile premium", pageW / 2, y + 6.5, { align: "center" });
   doc.setTextColor(...TEXT);
-  const x2 = 110;
-  doc.text("SIREN : 987 654 321", x2, y + 7);
-  doc.text("SIRET : 987 654 321 00019", x2, y + 12);
-  doc.text("TVA Intracom. : FR98 987654321", x2, y + 17);
-  doc.text("RCS Tours B 987 654 321", pageW - 20, y + 12, { align: "right" });
+  doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
 }
 
 function drawInfoRow(doc: jsPDF, x: number, y: number, w: number, label: string, value: string) {
@@ -341,7 +338,12 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.text(eur(d.prix_estime), tx + 50 + 23, ty + 7.5, { align: "right" });
 
   // ===== CONDITIONS + SIGNATURE =====
+  // Limite haute de la zone : on doit s'arrêter au-dessus du bandeau émetteur (pageH - 42)
+  // pour empêcher tout chevauchement entre les conditions et le bloc société.
   y = Math.max(dy, ty + 12) + 8;
+  const maxY = pageH - 50;
+  if (y > maxY - 26) y = maxY - 26;
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...NAVY);
@@ -355,22 +357,23 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.text("Aucun acompte n'est demande a la reservation.", 14, y); y += 4.5;
   doc.text("Merci pour votre confiance.", 14, y);
 
-  // Signature right
+  // Signature (remontée + alignée, plus collée au cadre)
+  const sigBaseY = y - 18;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Pour Transports Ligneo", pageW - 14, y - 14, { align: "right" });
+  doc.text("Pour Transports Ligneo", pageW - 18, sigBaseY, { align: "right" });
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("Signature", pageW - 14, y - 9, { align: "right" });
+  doc.text("Signature", pageW - 18, sigBaseY + 5, { align: "right" });
   doc.setFont("helvetica", "italic");
   doc.setFontSize(16);
   doc.setTextColor(...NAVY);
-  doc.text("J. Ligneo", pageW - 14, y - 2, { align: "right" });
+  doc.text("G.O", pageW - 18, sigBaseY + 14, { align: "right" });
 
-  // Société block + footer
-  drawSocietyBlock(doc, pageW, pageH - 50);
+  // Société block + footer (placé juste au-dessus du footer pour éviter tout chevauchement)
+  drawSocietyBlock(doc, pageW, pageH - 40);
   drawFooter(doc, pageW, pageH);
 
   return doc.output("blob");

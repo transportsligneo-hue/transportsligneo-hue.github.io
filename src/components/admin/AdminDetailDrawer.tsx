@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,15 +43,8 @@ export function AdminDetailDrawer({
           "bg-[color:var(--admin-drawer-bg)] text-[color:var(--admin-drawer-text)] shadow-[0_24px_64px_-24px_rgba(15,23,42,0.35)]",
         )}
       >
-        {/* Header premium */}
+        {/* Header premium — la croix de fermeture est fournie par SheetContent (shadcn) pour éviter tout doublon */}
         <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.98))]">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 w-8 h-8 rounded-full border border-[color:var(--admin-drawer-border)] bg-white hover:bg-slate-50 transition flex items-center justify-center text-slate-500 hover:text-slate-900"
-            aria-label="Fermer"
-          >
-            <X size={16} />
-          </button>
           {badge ? <div className="mb-2">{badge}</div> : null}
           <h2 className="text-xl sm:text-2xl font-semibold tracking-tight pr-10 text-slate-950">
             {title}
