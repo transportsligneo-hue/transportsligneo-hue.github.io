@@ -17,6 +17,8 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
+import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
