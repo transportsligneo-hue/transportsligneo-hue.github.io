@@ -135,9 +135,11 @@ export function MissionCockpit({
 
     if (e === "en_attente_validation" || e === "termine") return "done";
 
+    // Selfie obligatoire dès le démarrage du trajet (et sur toutes les
+    // étapes terrain tant qu'il n'est pas pris/validé/bypassé).
+    if (!selfieOK && ["assignee","acceptee","en_route","sur_place","vehicule_recupere"].includes(e)) return "selfie";
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
-    if (!selfieOK && (e === "sur_place" || e === "vehicule_recupere")) return "selfie";
     if (e === "sur_place" || e === "vehicule_recupere") {
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";

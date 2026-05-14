@@ -36,6 +36,20 @@ export function useMissionGates(attributionId: string | null) {
 
   useEffect(() => { reload(); }, [reload]);
 
+  // Realtime : dès qu'un selfie / signature / override est inséré ou modifié
+  // pour cette mission, on recharge — évite les états bloqués "selfie requis"
+  // après upload réussi.
+  useEffect(() => {
+    if (!attributionId) return;
+    const channel = supabase
+      .channel(`mission-gates-${attributionId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "mission_selfies", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "mission_signatures", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "mission_step_overrides", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [attributionId, reload]);
+
   const isOverridden = (key: StepKey, mode: OverrideMode = "skip") =>
     overrides.some(o => o.step_key === key && o.override_mode === mode);
   const isDisabled = (key: StepKey) => isOverridden(key, "disable") || isOverridden(key, "skip");
