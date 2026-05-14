@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
-import { DriverSelfieCapture, hasLocalSelfieDone } from "@/components/mission/DriverSelfieCapture";
+import { DriverSelfieCapture, hasLocalSelfieDone, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 
 type ActionKind =
@@ -111,8 +111,10 @@ export function MissionCockpit({
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
-    if (gates.hasSelfie && !selfieJustDone) setSelfieJustDone(true);
-  }, [gates.hasSelfie, selfieJustDone]);
+    if (!gates.hasSelfie) return;
+    if (!selfieJustDone) setSelfieJustDone(true);
+    setPendingDriverSelfie(attributionId, false);
+  }, [attributionId, gates.hasSelfie, selfieJustDone]);
 
   useEffect(() => {
     onSelfieModalStateChange?.(openSelfie);
@@ -251,6 +253,7 @@ export function MissionCockpit({
     // Déverrouillage optimiste immédiat — l'utilisateur voit l'étape suivante
     // sans attendre la propagation realtime / fetch parent.
     setSelfieJustDone(true);
+    setPendingDriverSelfie(attributionId, false);
     setOpenSelfie(false);
     try {
       await gates.reload();

@@ -431,7 +431,12 @@ export function EdlPremiumFlow({
       setState(stepId, { status: "uploading", previewUrl });
 
       const insId = await ensureInspection();
-      const compressed = await compressImage(stableFile);
+      let compressed: File;
+      try {
+        compressed = await compressImage(stableFile);
+      } catch {
+        compressed = stableFile;
+      }
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
 
@@ -538,7 +543,12 @@ export function EdlPremiumFlow({
       previewUrl = URL.createObjectURL(stableFile);
       setState(stepId, { status: "uploading", previewUrl });
 
-      const compressed = await compressImage(stableFile);
+      let compressed: File;
+      try {
+        compressed = await compressImage(stableFile);
+      } catch {
+        compressed = stableFile;
+      }
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.jpg`;
       await uploadWithRetry("mission-selfies", path, compressed);
 
@@ -913,8 +923,10 @@ export function EdlPremiumFlow({
           type="file"
           accept="image/*"
           capture={currentStep.kind === "selfie" ? "user" : "environment"}
-          className="hidden"
           onChange={currentStep.kind === "selfie" ? handleSelfieFile : handlePhotoFile}
+          style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999 }}
+          tabIndex={-1}
+          aria-hidden="true"
         />
       </main>
 
