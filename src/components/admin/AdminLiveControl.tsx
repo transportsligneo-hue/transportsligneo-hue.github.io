@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Activity, AlertTriangle, RotateCcw, PlayCircle, PauseCircle, CheckCircle2, XCircle, Send } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
+import { forceAdminMissionStep, updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 
 interface AdminLiveControlProps {
   attributionId: string;
+  trajetId: string;
   currentStatut: string | null;
   currentEtape: string | null;
   onChange?: () => void;
@@ -30,57 +31,62 @@ const QUICK_STATUTS: { key: string; label: string; icon: typeof PlayCircle; dang
  * Panneau de contrôle admin live — agit en direct sur l'attribution.
  * Toutes les modifs passent par realtime → Driver et Client voient l'effet immédiatement.
  */
-export function AdminLiveControl({ attributionId, currentStatut, currentEtape, onChange }: AdminLiveControlProps) {
+export function AdminLiveControl({ attributionId, trajetId, currentStatut, currentEtape, onChange }: AdminLiveControlProps) {
   const [busy, setBusy] = useState<string | null>(null);
 
   const setStatut = async (statut: string) => {
     setBusy(statut);
-    const { error } = await supabase.from("attributions").update({ statut }).eq("id", attributionId);
-    setBusy(null);
-    if (error) {
-      toast.error("Échec mise à jour statut");
-      return;
+    try {
+      await updateAdminMissionStatus({
+        attributionId,
+        trajetId,
+        statut,
+        note: "Modifié par admin",
+      });
+      toast.success(`Statut → ${statut}`);
+      onChange?.();
+    } catch (error) {
+      toast.error("Échec mise à jour statut", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
     }
-    toast.success(`Statut → ${statut}`);
-    await supabase.from("mission_etape_history").insert({
-      attribution_id: attributionId,
-      etape: `admin_statut_${statut}`,
-      notes: "Modifié par admin",
-    });
-    onChange?.();
   };
 
   const forceEtape = async (etape: string) => {
     setBusy(etape);
-    const { error } = await supabase
-      .from("attributions")
-      .update({ etape_courante: etape })
-      .eq("id", attributionId);
-    if (!error) {
-      await supabase.from("mission_etape_history").insert({
-        attribution_id: attributionId,
-        etape: `admin_force_${etape}`,
-        notes: "Étape forcée par admin",
-      });
+    try {
+      await forceAdminMissionStep({ attributionId, etape });
       toast.success(`Étape → ${etape}`);
       onChange?.();
-    } else toast.error("Échec mise à jour étape");
-    setBusy(null);
+    } catch (error) {
+      toast.error("Échec mise à jour étape", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
+    }
   };
 
   const reopenMission = async () => {
     setBusy("reopen");
-    const { error } = await supabase.from("attributions").update({ statut: "en_cours" }).eq("id", attributionId);
-    if (!error) {
-      await supabase.from("mission_etape_history").insert({
-        attribution_id: attributionId,
-        etape: "admin_reopen",
-        notes: "Mission ré-ouverte par admin",
+    try {
+      await updateAdminMissionStatus({
+        attributionId,
+        trajetId,
+        statut: "en_cours",
+        note: "Mission ré-ouverte par admin",
       });
       toast.success("Mission ré-ouverte");
       onChange?.();
+    } catch (error) {
+      toast.error("Échec ré-ouverture mission", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
     }
-    setBusy(null);
   };
 
   return (
