@@ -40,6 +40,7 @@ import {
 
 interface Props {
   attributionId: string;
+  type: "depart" | "arrivee";
   userId: string;
   driverName: string;
   /** Pour signatures client : nom à afficher par défaut */
@@ -64,13 +65,14 @@ interface StepState {
 
 interface StoredState {
   attributionId: string;
+  type: "depart" | "arrivee";
   stepIndex: number;
   states: Record<string, StepState>;
-  inspectionDepartId: string | null;
+  inspectionId: string | null;
   updatedAt: number;
 }
 
-const STORAGE_KEY = (attrId: string) => `edl-premium:${attrId}`;
+const STORAGE_KEY = (attrId: string, type: "depart" | "arrivee") => `edl-premium:${attrId}:${type}`;
 
 /** Attend que le navigateur revienne en ligne, jusqu'à `timeoutMs`. */
 async function waitForOnline(timeoutMs = 30000): Promise<void> {
@@ -144,29 +146,39 @@ function revokeBlobUrl(url?: string) {
 }
 
 export function EdlPremiumFlow({
-  attributionId, userId, driverName, defaultClientName,
+  attributionId, type, userId, driverName, defaultClientName,
   onComplete, onClose,
 }: Props) {
-  const STEPS = EDL_PREMIUM_SEQUENCE;
-  const TOTAL = EDL_TOTAL_STEPS;
+  const STEPS = useMemo(() => {
+    if (type === "depart") {
+      return EDL_PREMIUM_SEQUENCE.filter(
+        (step) => step.phase === "depart" && step.kind !== "selfie",
+      );
+    }
+
+    return EDL_PREMIUM_SEQUENCE.filter(
+      (step) => step.phase === "arrivee" && step.kind !== "validation",
+    );
+  }, [type]);
+  const TOTAL = STEPS.length;
 
   // Reprise via localStorage
   const initialState = useMemo<StoredState | null>(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY(attributionId));
+      const raw = localStorage.getItem(STORAGE_KEY(attributionId, type));
       if (!raw) return null;
       const parsed = JSON.parse(raw) as StoredState;
-      return parsed.attributionId === attributionId ? parsed : null;
+      return parsed.attributionId === attributionId && parsed.type === type ? parsed : null;
     } catch { return null; }
-  }, [attributionId]);
+  }, [attributionId, type]);
 
   const [stepIndex, setStepIndex] = useState(() => initialState?.stepIndex ?? 0);
   const [states, setStates] = useState<Record<string, StepState>>(
     () => initialState?.states ?? {}
   );
-  const [inspectionDepartId, setInspectionDepartId] = useState<string | null>(
-    initialState?.inspectionDepartId ?? null
+  const [inspectionId, setInspectionId] = useState<string | null>(
+    initialState?.inspectionId ?? null
   );
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -224,11 +236,15 @@ export function EdlPremiumFlow({
         .map(([k, v]) => [k, { ...v, previewUrl: v.previewUrl?.startsWith("blob:") ? undefined : v.previewUrl }])
     );
     const data: StoredState = {
-      attributionId, stepIndex, states: safeStates as Record<string, StepState>,
-      inspectionDepartId, updatedAt: Date.now(),
+      attributionId,
+      type,
+      stepIndex,
+      states: safeStates as Record<string, StepState>,
+      inspectionId,
+      updatedAt: Date.now(),
     };
-    try { localStorage.setItem(STORAGE_KEY(attributionId), JSON.stringify(data)); } catch { /* ignore */ }
-  }, [attributionId, stepIndex, states, inspectionDepartId]);
+    try { localStorage.setItem(STORAGE_KEY(attributionId, type), JSON.stringify(data)); } catch { /* ignore */ }
+  }, [attributionId, inspectionId, states, stepIndex, type]);
 
   // === Préchargement image exemple suivante (perf)
   useEffect(() => {
@@ -246,27 +262,27 @@ export function EdlPremiumFlow({
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // === Inspection (départ) — créée à la première photo nécessaire
-  const ensureInspectionDepart = useCallback(async () => {
-    if (inspectionDepartId) return inspectionDepartId;
+  // === Inspection de la phase courante — créée à la première photo nécessaire
+  const ensureInspection = useCallback(async () => {
+    if (inspectionId) return inspectionId;
     const { data: existing } = await supabase
       .from("inspections")
       .select("id")
       .eq("attribution_id", attributionId)
-      .eq("type", "depart")
+      .eq("type", type)
       .maybeSingle();
     if (existing?.id) {
-      setInspectionDepartId(existing.id);
+      setInspectionId(existing.id);
       return existing.id;
     }
     const { data, error } = await supabase
       .from("inspections")
-      .insert({ attribution_id: attributionId, type: "depart", statut: "en_cours" })
+      .insert({ attribution_id: attributionId, type, statut: "en_cours" })
       .select("id").single();
     if (error) throw error;
-    setInspectionDepartId(data.id);
+    setInspectionId(data.id);
     return data.id;
-  }, [attributionId, inspectionDepartId]);
+  }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
   const triggerCapture = () => fileRef.current?.click();
@@ -287,7 +303,7 @@ export function EdlPremiumFlow({
       previewUrl = URL.createObjectURL(stableFile);
       setState(stepId, { status: "uploading", previewUrl });
 
-      const insId = await ensureInspectionDepart();
+      const insId = await ensureInspection();
       const compressed = await compressImage(stableFile);
       const path = `${userId}/${insId}/${stepId}.jpg`;
       await uploadWithRetry("inspection-photos", path, compressed);
@@ -522,6 +538,37 @@ export function EdlPremiumFlow({
     }
   };
 
+  const finalizeInspection = useCallback(async () => {
+    if (!inspectionId) {
+      throw new Error("Inspection introuvable.");
+    }
+
+    const { error: inspectionError } = await supabase
+      .from("inspections")
+      .update({ statut: "complete" })
+      .eq("id", inspectionId);
+
+    if (inspectionError) throw inspectionError;
+
+    if (type === "arrivee") {
+      const [{ error: attributionError }, { error: historyError }] = await Promise.all([
+        supabase.from("attributions")
+          .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
+          .eq("id", attributionId),
+        supabase.from("mission_etape_history").insert({
+          attribution_id: attributionId,
+          etape: "envoi_validation_admin",
+          notes: "EDL arrivée terminé, mission envoyée pour validation",
+          created_by: userId,
+        }),
+      ]);
+
+      if (attributionError || historyError) {
+        throw attributionError ?? historyError;
+      }
+    }
+  }, [attributionId, inspectionId, type, userId]);
+
   // ─────────────────────────── NAVIGATION ───────────────────────────
   /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
   const isStepBypassed = (step: EdlStepDef): boolean => {
@@ -550,9 +597,20 @@ export function EdlPremiumFlow({
     if (safeIndex < TOTAL - 1) {
       setStepIndex(safeIndex + 1);
     } else {
-      // Fin de parcours
-      try { localStorage.removeItem(STORAGE_KEY(attributionId)); } catch { /* ignore */ }
-      onComplete();
+      setCompleting(true);
+      void finalizeInspection()
+        .then(() => {
+          try { localStorage.removeItem(STORAGE_KEY(attributionId, type)); } catch { /* ignore */ }
+          onComplete();
+        })
+        .catch((error) => {
+          toast.error("Impossible de finaliser l'inspection", {
+            description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+          });
+        })
+        .finally(() => {
+          setCompleting(false);
+        });
     }
   };
 
