@@ -12,7 +12,9 @@ import {
   XCircle,
   ExternalLink,
   Save,
+  AlertTriangle,
 } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
@@ -126,6 +128,9 @@ function AdminParametres() {
           </TabsTrigger>
           <TabsTrigger value="roles" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
             <ShieldCheck size={14} className="mr-1.5" /> Rôles &amp; permissions
+          </TabsTrigger>
+          <TabsTrigger value="maintenance" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700 rounded-lg">
+            <AlertTriangle size={14} className="mr-1.5" /> Maintenance
           </TabsTrigger>
         </TabsList>
 
@@ -326,11 +331,96 @@ function AdminParametres() {
             </div>
           </Card>
         </TabsContent>
+
+        {/* === MAINTENANCE === */}
+        <TabsContent value="maintenance" className="mt-0">
+          <ResetOperationalCard />
+        </TabsContent>
       </Tabs>
 
       <p className="text-xs text-pro-muted mt-6 flex items-center gap-1.5">
         <SettingsIcon size={12} /> Les paramètres entreprise &amp; facturation sont stockés localement pour l'instant — branchés sur la DB lors d'un prochain incrément.
       </p>
     </div>
+  );
+}
+
+function ResetOperationalCard() {
+  const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState<Record<string, number> | null>(null);
+  const REQUIRED = "RESET";
+
+  const run = async () => {
+    if (confirmText !== REQUIRED) {
+      toast.error(`Tapez exactement "${REQUIRED}" pour confirmer.`);
+      return;
+    }
+    if (!confirm("Dernière confirmation : effacer toutes les missions, trajets, attributions et l'historique driver ?")) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reset_operational_data" as never);
+      if (error) throw error;
+      setReport(data as Record<string, number>);
+      setConfirmText("");
+      toast.success("Reset opérationnel effectué.");
+    } catch (e) {
+      toast.error("Échec du reset", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+          <AlertTriangle size={18} />
+        </div>
+        <div>
+          <h3 className="font-semibold text-pro-text">Reset opérationnel complet</h3>
+          <p className="text-sm text-pro-muted mt-1 max-w-2xl">
+            Supprime <strong>tous les trajets, missions, attributions, inspections, positions GPS, étapes,
+            selfies, signatures, incidents et documents</strong> liés aux missions. Les comptes (clients, convoyeurs),
+            les devis, les factures, les leads B2B et les paramètres ne sont <strong>pas touchés</strong>.
+          </p>
+          <p className="text-xs text-red-600 mt-2 font-medium">⚠️ Action irréversible.</p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-red-200 bg-red-50/40 p-4 space-y-3">
+        <FormField label={`Pour confirmer, tapez "${REQUIRED}" ci-dessous`}>
+          <TextInput
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
+            placeholder={REQUIRED}
+          />
+        </FormField>
+        <div className="flex justify-end">
+          <button
+            onClick={run}
+            disabled={loading || confirmText !== REQUIRED}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <AlertTriangle size={14} />
+            {loading ? "Suppression en cours…" : "Lancer le reset opérationnel"}
+          </button>
+        </div>
+      </div>
+
+      {report && (
+        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50/60 p-4">
+          <p className="text-sm font-semibold text-emerald-800 mb-2">Lignes supprimées :</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-emerald-900">
+            {Object.entries(report).map(([table, count]) => (
+              <div key={table} className="flex justify-between bg-white/60 rounded px-2 py-1">
+                <span className="truncate">{table}</span>
+                <span className="font-bold">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
