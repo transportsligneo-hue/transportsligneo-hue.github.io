@@ -433,29 +433,45 @@ function AdminAttributions() {
         <div className="space-y-3">
           {attributions.map((a) => (
             <Card key={a.id}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } }); }}
+                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-pro-accent/40"
+                title="Ouvrir le menu complet de la mission"
+              >
               <div className="flex items-start justify-between flex-wrap gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-pro-text font-medium">
-                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : a.trajet_id.slice(0, 8)}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-pro-text font-semibold">
+                      {a.numero_mission || `MIS-${a.id.slice(0, 8)}`}
+                    </p>
+                    <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
+                      {statutLabels[a.statut] ?? a.statut}
+                    </Badge>
+                    {a.trajet?.type_transport && (
+                      <span className="text-[10px] uppercase tracking-wider text-pro-muted">
+                        {a.trajet.type_transport}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-pro-text-soft text-sm mt-1">
+                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
-                  <p className="text-pro-muted text-xs mt-0.5">
-                    Convoyeur :{" "}
-                    <span className="text-pro-text-soft">
-                      {a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "—"}
-                    </span>
+                  <p className="text-pro-muted text-xs mt-1">
+                    Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
+                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
                     {a.trajet?.date_trajet && (
                       <> · {new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR")}</>
                     )}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
-                    {statutLabels[a.statut] ?? a.statut}
-                  </Badge>
+                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
                   <IconButton
                     onClick={() => setSelectedAttr(a)}
-                    title="Ouvrir la fiche mission"
+                    title="Aperçu rapide (panneau latéral)"
                     tone="primary"
                   >
                     <Eye size={15} />
@@ -484,8 +500,9 @@ function AdminAttributions() {
                   )}
                 </div>
               </div>
+              </div>
 
-              <div className="mt-3 pt-3 border-t border-pro-border">
+              <div className="mt-3 pt-3 border-t border-pro-border" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
                   className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-accent transition-colors"
