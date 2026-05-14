@@ -96,17 +96,22 @@ export function MissionCockpit({
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
-  const [selfieJustDone, setSelfieJustDone] = useState(false);
+  const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
   }, [currentEtape]);
 
+  // Re-check local marker if attribution changes
+  useEffect(() => {
+    if (hasLocalSelfieDone(attributionId)) setSelfieJustDone(true);
+  }, [attributionId]);
+
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
 
-  // Si la base confirme désormais le selfie, on peut relâcher l'optimiste.
+  // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
-    if (gates.hasSelfie && selfieJustDone) setSelfieJustDone(false);
+    if (gates.hasSelfie && !selfieJustDone) setSelfieJustDone(true);
   }, [gates.hasSelfie, selfieJustDone]);
 
   useEffect(() => {
