@@ -41,34 +41,34 @@ export function AdminDetailDrawer({
         className={cn(
           "w-full p-0 flex flex-col gap-0 border-l-0",
           widthClass,
-          "bg-gradient-to-b from-[#0b1026] via-[#0d1430] to-[#0b1026] text-white",
+          "bg-[color:var(--admin-drawer-bg)] text-[color:var(--admin-drawer-text)] shadow-[0_24px_64px_-24px_rgba(15,23,42,0.35)]",
         )}
       >
         {/* Header premium */}
-        <div className="relative px-6 pt-6 pb-5 border-b border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.25),transparent_60%)]">
+        <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.98))]">
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center text-white/80 hover:text-white"
+            className="absolute right-4 top-4 w-8 h-8 rounded-full border border-[color:var(--admin-drawer-border)] bg-white hover:bg-slate-50 transition flex items-center justify-center text-slate-500 hover:text-slate-900"
             aria-label="Fermer"
           >
             <X size={16} />
           </button>
           {badge ? <div className="mb-2">{badge}</div> : null}
-          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight pr-10">
+          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight pr-10 text-slate-950">
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-1 text-sm text-white/60">{subtitle}</p>
+            <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
           ) : null}
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 [scrollbar-color:rgba(255,255,255,0.2)_transparent]">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] [scrollbar-color:rgba(148,163,184,0.6)_transparent]">
           {children}
         </div>
 
         {footer ? (
-          <div className="px-6 py-4 border-t border-white/10 bg-white/[0.03]">
+          <div className="px-6 py-4 border-t border-[color:var(--admin-drawer-border)] bg-white/90 backdrop-blur">
             {footer}
           </div>
         ) : null}
@@ -89,9 +89,9 @@ export function DrawerSection({
   action?: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-sm">
-      <header className="flex items-center justify-between px-4 py-2.5 border-b border-white/10">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-blue-300/90 font-medium">
+    <section className="rounded-xl border border-[color:var(--admin-drawer-border)] bg-white shadow-sm">
+      <header className="flex items-center justify-between px-4 py-2.5 border-b border-[color:var(--admin-drawer-border)] bg-slate-50/80">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-500 font-medium">
           {icon}
           {title}
         </div>
@@ -113,14 +113,14 @@ export function DrawerField({
 }) {
   return (
     <div className="flex flex-col gap-0.5 py-1.5">
-      <span className="text-[10px] uppercase tracking-wider text-white/45">{label}</span>
+      <span className="text-[10px] uppercase tracking-wider text-slate-400">{label}</span>
       <span
         className={cn(
-          "text-sm text-white/95 break-words",
-          mono && "font-mono text-xs text-blue-200",
+          "text-sm text-slate-900 break-words",
+          mono && "font-mono text-xs text-slate-600",
         )}
       >
-        {value || <span className="text-white/30">—</span>}
+        {value || <span className="text-slate-300">—</span>}
       </span>
     </div>
   );
@@ -138,11 +138,11 @@ export function DrawerBadge({
   tone?: "blue" | "green" | "amber" | "red" | "slate";
 }) {
   const tones: Record<string, string> = {
-    blue: "bg-blue-500/15 text-blue-200 border-blue-400/30",
-    green: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
-    amber: "bg-amber-500/15 text-amber-200 border-amber-400/30",
-    red: "bg-red-500/15 text-red-200 border-red-400/30",
-    slate: "bg-white/10 text-white/70 border-white/20",
+    blue: "bg-blue-50 text-blue-700 border-blue-200",
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    red: "bg-red-50 text-red-700 border-red-200",
+    slate: "bg-slate-100 text-slate-600 border-slate-200",
   };
   return (
     <span
