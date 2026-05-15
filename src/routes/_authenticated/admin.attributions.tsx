@@ -251,11 +251,25 @@ function AdminAttributions() {
   };
 
   const fetchAttributions = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("attributions")
       .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, type_transport), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
-    if (data) setAttributions(data as unknown as Attribution[]);
+    if (error) {
+      console.error("[admin.attributions] fetch error", error);
+      // Fallback : recharger sans embed pour ne pas casser la page si un FK ou cache PostgREST pose problème
+      const { data: bare, error: bareErr } = await supabase
+        .from("attributions")
+        .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at")
+        .order("created_at", { ascending: false });
+      if (bareErr) {
+        toast.error("Impossible de charger les attributions", { description: bareErr.message });
+        return;
+      }
+      setAttributions((bare ?? []) as unknown as Attribution[]);
+      return;
+    }
+    setAttributions((data ?? []) as unknown as Attribution[]);
   }, []);
 
   const fetchOptions = useCallback(async () => {
