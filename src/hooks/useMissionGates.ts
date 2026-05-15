@@ -48,13 +48,17 @@ export function useMissionGates(attributionId: string | null) {
   // après upload réussi.
   useEffect(() => {
     if (!attributionId) return;
-    const channel = supabase
-      .channel(`mission-gates-${attributionId}`)
+    // Nom unique par montage pour éviter de réutiliser un channel déjà subscribe()
+    // (sinon Supabase throw "cannot add postgres_changes callbacks after subscribe()"
+    //  sur StrictMode / re-render mobile).
+    const topic = `mission-gates-${attributionId}-${Math.random().toString(36).slice(2, 8)}`;
+    const channel = supabase.channel(topic);
+    channel
       .on("postgres_changes", { event: "*", schema: "public", table: "mission_selfies", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "mission_signatures", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "mission_step_overrides", filter: `attribution_id=eq.${attributionId}` }, () => { void reload(); })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { try { supabase.removeChannel(channel); } catch { /* ignore */ } };
   }, [attributionId, reload]);
 
   const isOverridden = (key: StepKey, mode: OverrideMode = "skip") =>

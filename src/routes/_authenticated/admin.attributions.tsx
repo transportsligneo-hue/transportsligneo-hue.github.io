@@ -253,7 +253,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, type_transport), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
