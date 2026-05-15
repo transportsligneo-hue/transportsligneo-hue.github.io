@@ -132,8 +132,10 @@ function AdminDemandes() {
         client_email: d.email,
         client_telephone: d.telephone ?? "",
         prix: d.prix_estime ?? null,
+        prix_client: d.prix_estime ?? null,
+        commission_convoyeur_pct: 65,
         statut: "en_attente",
-        statut_publication: "brouillon",
+        statut_publication: "publie",
         pricing_mode: "fixe",
       });
       if (error) {
