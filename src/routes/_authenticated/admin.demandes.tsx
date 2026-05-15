@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/admin/demandes")({
 
 interface Demande {
   id: string;
+  user_id: string | null;
   nom: string;
   prenom: string;
   telephone: string | null;
@@ -34,6 +35,7 @@ interface Demande {
   options: string | null;
   message: string | null;
   statut: string;
+  prix_estime: number | null;
   created_at: string;
 }
 
@@ -71,6 +73,51 @@ function AdminDemandes() {
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
     try {
+      const { data: existingTrajet } = await supabase
+        .from("trajets")
+        .select("id")
+        .eq("demande_id", d.id)
+        .maybeSingle();
+
+      if (existingTrajet?.id) {
+        if (d.statut !== "convertie") {
+          await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
+        }
+        toast.info("Cette demande a déjà été convertie.");
+        fetchDemandes();
+        return;
+      }
+
+      let createdMissionId: string | null = null;
+
+      if (d.user_id) {
+        const { data: mission, error: missionError } = await supabase
+          .from("missions")
+          .insert({
+            user_id: d.user_id,
+            nom: d.nom,
+            prenom: d.prenom,
+            email: d.email,
+            telephone: d.telephone,
+            ville_depart: d.depart,
+            ville_arrivee: d.arrivee,
+            date_prise_en_charge: d.date_souhaitee ?? new Date().toISOString().slice(0, 10),
+            type_trajet: "aller_simple",
+            marque: d.marque || null,
+            modele: d.modele || null,
+            immatriculation: d.immatriculation || null,
+            carburant: d.carburant || null,
+            remarques: d.message || null,
+            prix_total: d.prix_estime ?? 0,
+            statut: "en_attente",
+          })
+          .select("id, numero")
+          .single();
+
+        if (missionError) throw missionError;
+        createdMissionId = mission?.id ?? null;
+      }
+
       const { error } = await supabase.from("trajets").insert({
         demande_id: d.id,
         depart: d.depart,
@@ -83,12 +130,29 @@ function AdminDemandes() {
         client_nom: `${d.prenom} ${d.nom}`,
         client_email: d.email,
         client_telephone: d.telephone ?? "",
+        prix: d.prix_estime ?? null,
         statut: "en_attente",
+        statut_publication: "brouillon",
+        pricing_mode: "fixe",
       });
-      if (!error) {
-        await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
-        fetchDemandes();
+      if (error) {
+        if (createdMissionId) {
+          await supabase.from("missions").delete().eq("id", createdMissionId);
+        }
+        throw error;
       }
+
+      await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
+      toast.success("Demande convertie", {
+        description: createdMissionId
+          ? "La mission et le trajet ont été créés pour attribution."
+          : "Le trajet a été créé pour attribution.",
+      });
+      fetchDemandes();
+    } catch (error) {
+      toast.error("Impossible de convertir la demande", {
+        description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+      });
     } finally {
       setConverting(null);
     }
