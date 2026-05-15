@@ -64,7 +64,7 @@ export function useMissionRealtime(attributionId: string | null) {
     };
 
     const channel = supabase
-      .channel(`mission-rt-${attributionId}`)
+      .channel(`mission-rt-${attributionId}-${Math.random().toString(36).slice(2, 8)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "attributions", filter: `id=eq.${attributionId}` }, (payload) => {
         const n = payload.new as { statut: string; etape_courante: string | null };
         setState((prev) => ({ ...prev, statut: n.statut, etape_courante: n.etape_courante, bumpKey: ++bumpRef.current }));
