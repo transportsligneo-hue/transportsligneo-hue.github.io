@@ -5,6 +5,7 @@
  */
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { hasLocalSelfieDone } from "@/components/mission/DriverSelfieCapture";
 
 export type SignatureKind = "driver_start" | "client_start" | "driver_end" | "client_end";
 export type StepKey = "selfie" | "driver_start" | "client_start" | "driver_end" | "client_end" | "edl_depart" | "edl_arrivee" | "pv_livraison" | "carte_grise" | string;
