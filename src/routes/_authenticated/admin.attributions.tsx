@@ -277,11 +277,26 @@ function AdminAttributions() {
   }, []);
 
   const fetchOptions = useCallback(async () => {
+    // Charge tous les trajets publiables/en attente qui n'ont PAS encore d'attribution active.
+    // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut")
-      .in("statut", ["en_attente", "attribue"]);
-    if (trajets) setTrajetsDisponibles(trajets as Trajet[]);
+      .select("id, depart, arrivee, date_trajet, statut, client_nom, marque, modele, prix_client")
+      .in("statut", ["en_attente", "attribue"])
+      .order("date_trajet", { ascending: true, nullsFirst: false });
+    if (!trajets) return;
+
+    // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
+    const ids = trajets.map((t) => t.id);
+    if (ids.length === 0) { setTrajetsDisponibles([]); return; }
+    const { data: existing } = await supabase
+      .from("attributions")
+      .select("trajet_id, statut")
+      .in("trajet_id", ids);
+    const busy = new Set((existing ?? [])
+      .filter((a) => !["annule", "refusee", "refuse"].includes(a.statut))
+      .map((a) => a.trajet_id));
+    setTrajetsDisponibles(trajets.filter((t) => !busy.has(t.id)) as Trajet[]);
   }, []);
 
   useEffect(() => {
