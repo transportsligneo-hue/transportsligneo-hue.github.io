@@ -47,6 +47,10 @@ interface Trajet {
   arrivee: string;
   date_trajet: string | null;
   statut: string;
+  client_nom?: string | null;
+  marque?: string | null;
+  modele?: string | null;
+  prix_client?: number | null;
 }
 
 interface GpsPoint {
@@ -273,11 +277,26 @@ function AdminAttributions() {
   }, []);
 
   const fetchOptions = useCallback(async () => {
+    // Charge tous les trajets publiables/en attente qui n'ont PAS encore d'attribution active.
+    // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut")
-      .in("statut", ["en_attente", "attribue"]);
-    if (trajets) setTrajetsDisponibles(trajets as Trajet[]);
+      .select("id, depart, arrivee, date_trajet, statut, client_nom, marque, modele, prix_client")
+      .in("statut", ["en_attente", "attribue"])
+      .order("date_trajet", { ascending: true, nullsFirst: false });
+    if (!trajets) return;
+
+    // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
+    const ids = trajets.map((t) => t.id);
+    if (ids.length === 0) { setTrajetsDisponibles([]); return; }
+    const { data: existing } = await supabase
+      .from("attributions")
+      .select("trajet_id, statut")
+      .in("trajet_id", ids);
+    const busy = new Set((existing ?? [])
+      .filter((a) => !["annule", "refusee", "refuse"].includes(a.statut))
+      .map((a) => a.trajet_id));
+    setTrajetsDisponibles(trajets.filter((t) => !busy.has(t.id)) as Trajet[]);
   }, []);
 
   useEffect(() => {
@@ -440,6 +459,38 @@ function AdminAttributions() {
           </>
         }
       />
+
+      {/* === Section "À attribuer" : trajets convertis sans convoyeur === */}
+      {trajetsDisponibles.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-bold text-amber-900">
+              À attribuer · {trajetsDisponibles.length} trajet{trajetsDisponibles.length > 1 ? "s" : ""} en attente
+            </p>
+            <span className="text-[10px] uppercase tracking-wider text-amber-700">Issus des devis convertis</span>
+          </div>
+          <div className="space-y-2">
+            {trajetsDisponibles.map((t) => (
+              <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-white border border-amber-100 px-3 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-pro-text truncate">
+                    {t.depart} → {t.arrivee}
+                  </p>
+                  <p className="text-xs text-pro-text-soft mt-0.5 truncate">
+                    {t.client_nom || "Client non renseigné"}
+                    {(t.marque || t.modele) && ` · ${[t.marque, t.modele].filter(Boolean).join(" ")}`}
+                    {t.date_trajet && ` · ${new Date(t.date_trajet).toLocaleDateString("fr-FR")}`}
+                    {t.prix_client != null && ` · ${Number(t.prix_client).toFixed(0)} €`}
+                  </p>
+                </div>
+                <Button size="sm" variant="success" icon={<Send size={12} />} onClick={() => setAssignTrajet(t)}>
+                  Attribuer
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {attributions.length === 0 ? (
         <EmptyState icon={Send} title="Aucune attribution" description="Attribuez un trajet à un convoyeur pour commencer." />
