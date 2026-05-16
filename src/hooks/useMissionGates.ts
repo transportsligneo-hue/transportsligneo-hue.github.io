@@ -66,7 +66,9 @@ export function useMissionGates(attributionId: string | null) {
     overrides.some(o => o.step_key === key && o.override_mode === mode);
   const isDisabled = (key: StepKey) => isOverridden(key, "disable") || isOverridden(key, "skip");
 
-  const hasSelfie = selfies.length > 0;
+  // hasSelfie : la base ET / OU le flag local (anti-blocage si la requête échoue
+  // ou si le realtime n'a pas encore propagé l'insert).
+  const hasSelfie = selfies.length > 0 || (attributionId ? hasLocalSelfieDone(attributionId) : false);
   const hasSignature = (k: SignatureKind) => signatures.some(s => s.kind === k);
 
   return { selfies, signatures, overrides, loading, reload, isOverridden, isDisabled, hasSelfie, hasSignature };
