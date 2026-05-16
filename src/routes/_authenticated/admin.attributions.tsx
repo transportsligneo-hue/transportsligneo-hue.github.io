@@ -47,6 +47,10 @@ interface Trajet {
   arrivee: string;
   date_trajet: string | null;
   statut: string;
+  client_nom?: string | null;
+  marque?: string | null;
+  modele?: string | null;
+  prix_client?: number | null;
 }
 
 interface GpsPoint {
