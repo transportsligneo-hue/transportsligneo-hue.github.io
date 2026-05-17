@@ -328,6 +328,21 @@ export function EdlPremiumFlow({
 
           for (const row of photoRows) {
             if (!row?.vue_type) continue;
+            if (row.vue_type.startsWith("photos_libres_degats_")) {
+              const signedUrl = photoPreviewMap.get(row.url_photo) ?? prev.photos_libres_degats?.previewUrl;
+              const extras = next.photos_libres_degats?.extras ?? prev.photos_libres_degats?.extras ?? [];
+              next.photos_libres_degats = {
+                ...(next.photos_libres_degats ?? prev.photos_libres_degats ?? { status: "success" }),
+                status: "success",
+                extras: [...extras, {
+                  id: row.vue_type,
+                  storagePath: row.url_photo,
+                  previewUrl: signedUrl ?? row.url_photo,
+                  status: "success",
+                }],
+              };
+              continue;
+            }
             next[row.vue_type] = {
               status: "success",
               storagePath: row.url_photo,
@@ -1000,6 +1015,14 @@ export function EdlPremiumFlow({
             />
           )}
 
+          {currentStep.kind === "extras" && (
+            <ExtraPhotosArea
+              state={currentState}
+              onCapture={triggerCapture}
+              onRemove={removeExtraPhoto}
+            />
+          )}
+
           {currentStep.kind === "signature" && (
             <SignatureArea
               step={currentStep}
@@ -1027,7 +1050,7 @@ export function EdlPremiumFlow({
           type="file"
           accept="image/*"
           capture={currentStep.kind === "selfie" ? "user" : "environment"}
-          onChange={currentStep.kind === "selfie" ? handleSelfieFile : handlePhotoFile}
+          onChange={currentStep.kind === "selfie" ? handleSelfieFile : currentStep.kind === "extras" ? handleExtraPhotoFile : handlePhotoFile}
           style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999 }}
           tabIndex={-1}
           aria-hidden="true"
@@ -1265,6 +1288,59 @@ function SelfieArea({
         <button onClick={onRetake} className="w-full h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
           <RefreshCw size={16}/> Reprendre le selfie
         </button>
+      )}
+    </div>
+  );
+}
+
+function ExtraPhotosArea({
+  state,
+  onCapture,
+  onRemove,
+}: {
+  state?: StepState;
+  onCapture: () => void;
+  onRemove: (photoId: string) => void;
+}) {
+  const extras = state?.extras ?? [];
+
+  return (
+    <div className="space-y-3">
+      <div className="edl-glass p-4">
+        <p className="text-sm font-semibold text-white">Photos libres / dégâts</p>
+        <p className="mt-1 text-xs text-[var(--edl-text-soft)]">
+          Étape optionnelle : ajoutez des photos complémentaires, dégâts, remarques ou accessoires. Vous pouvez continuer même sans photo.
+        </p>
+      </div>
+
+      <button
+        onClick={onCapture}
+        className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base"
+      >
+        <Camera size={22}/> Ajouter une photo libre
+      </button>
+
+      {extras.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          {extras.map((item, index) => (
+            <div key={item.id} className="edl-photo-frame">
+              <img src={item.previewUrl} alt={`Photo libre ${index + 1}`} className="w-full aspect-square object-cover" />
+              <div className="absolute top-3 right-3 z-10">
+                <span className="edl-chip">
+                  {item.status === "uploading" ? <Loader2 size={11} className="animate-spin"/> : item.status === "success" ? <Check size={11}/> : <X size={11}/>}
+                  {item.status === "uploading" ? " Envoi…" : item.status === "success" ? " Enregistrée" : " Erreur"}
+                </span>
+              </div>
+              <button
+                onClick={() => onRemove(item.id)}
+                className="absolute bottom-3 right-3 z-10 rounded-full bg-black/60 p-2 text-white"
+                aria-label="Supprimer la photo"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
