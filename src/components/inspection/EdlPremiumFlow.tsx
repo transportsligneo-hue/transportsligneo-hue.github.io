@@ -54,6 +54,13 @@ interface StepState {
   previewUrl?: string;
   storagePath?: string;
   error?: string;
+  extras?: Array<{
+    id: string;
+    previewUrl: string;
+    storagePath?: string;
+    status: "uploading" | "success" | "error";
+    error?: string;
+  }>;
   /** OCR uniquement pour kind="scan" */
   ocr?: {
     status: "pending" | "completed" | "failed";
@@ -530,6 +537,77 @@ export function EdlPremiumFlow({
     }
   };
 
+  const handleExtraPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.files?.[0];
+    e.target.value = "";
+    if (!raw) return;
+
+    const stepId = currentStep.id;
+    const extraId = crypto.randomUUID();
+    let previewUrl = "";
+
+    try {
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: [
+            ...((prev[stepId]?.extras ?? []).filter(Boolean)),
+            { id: extraId, previewUrl, status: "uploading" as const },
+          ],
+        },
+      }));
+
+      const insId = await ensureInspection();
+      const compressed = await compressImage(stableFile).catch(() => stableFile);
+      const path = `${userId}/${insId}/${stepId}_${Date.now()}.jpg`;
+      await uploadWithRetry("inspection-photos", path, compressed);
+
+      const { error } = await supabase.from("inspection_photos").insert({
+        inspection_id: insId,
+        vue_type: `${stepId}_${Date.now()}`,
+        url_photo: path,
+        file_size_bytes: compressed.size,
+      });
+      if (error) throw error;
+
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: (prev[stepId]?.extras ?? []).map((item) =>
+            item.id === extraId ? { ...item, storagePath: path, status: "success" as const } : item,
+          ),
+        },
+      }));
+    } catch (err) {
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: (prev[stepId]?.extras ?? []).map((item) =>
+            item.id === extraId
+              ? {
+                  ...item,
+                  previewUrl: item.previewUrl || previewUrl,
+                  status: "error" as const,
+                  error: err instanceof Error ? err.message : "Erreur d'envoi",
+                }
+              : item,
+          ),
+        },
+      }));
+      toast.error("Impossible d'ajouter la photo libre", {
+        description: err instanceof Error ? err.message : "Réessayez.",
+      });
+    }
+  };
+
   const handleSelfieFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     e.target.value = "";
@@ -717,6 +795,7 @@ export function EdlPremiumFlow({
 
   const canAdvance = () => {
     const s = currentState?.status;
+    if (currentStep.kind === "extras") return true;
     // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
     // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
@@ -752,6 +831,31 @@ export function EdlPremiumFlow({
   };
 
   const goPrev = () => { if (safeIndex > 0) setStepIndex(safeIndex - 1); };
+
+  const removeExtraPhoto = async (photoId: string) => {
+    const stepId = currentStep.id;
+    const target = currentState?.extras?.find((item) => item.id === photoId);
+    if (!target) return;
+
+    setStates((prev) => ({
+      ...prev,
+      [stepId]: {
+        ...(prev[stepId] ?? { status: "idle" as const }),
+        status: "success",
+        extras: (prev[stepId]?.extras ?? []).filter((item) => item.id !== photoId),
+      },
+    }));
+
+    revokeBlobUrl(target.previewUrl);
+
+    if (!inspectionId || !target.storagePath) return;
+    try {
+      await supabase.from("inspection_photos").delete().eq("inspection_id", inspectionId).eq("url_photo", target.storagePath);
+      await supabase.storage.from("inspection-photos").remove([target.storagePath]);
+    } catch {
+      // non bloquant
+    }
+  };
 
   const retake = () => {
     setStates(prev => {
