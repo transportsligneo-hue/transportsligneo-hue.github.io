@@ -35,6 +35,7 @@ export type EdlStepKind =
   | "signature"
   | "photo"
   | "scan"
+  | "extras"
   | "validation";
 
 export interface EdlStepDef {
@@ -147,32 +148,36 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Carte grise / documents", hint: "Cadrez la carte grise, OCR automatique",
     example: carte_grise },
 
+  { num: 21, id: "photos_libres_degats", kind: "extras", section: "documents", phase: "depart",
+    label: "Photos libres / dégâts",
+    hint: "Ajoutez si besoin des photos complémentaires : dégâts, remarques, accessoires ou détail utile. Étape optionnelle." },
+
   // ═══════ SIGNATURES DÉPART — APRÈS l'état des lieux départ ═══════
-  { num: 21, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 22, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "driver_start",
     label: "Signature départ — convoyeur",
     hint: "Signez pour attester de l'état du véhicule au départ" },
 
-  { num: 22, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 23, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "client_start",
     label: "Signature départ — client / parc",
     hint: "Faites signer le donneur d'ordre (concession, parc, client)" },
 
   // ═══════ SIGNATURES ARRIVÉE ═══════
-  { num: 23, id: "signature_driver_end", kind: "signature", section: "cloture", phase: "arrivee",
+  { num: 24, id: "signature_driver_end", kind: "signature", section: "cloture", phase: "arrivee",
     signatureKind: "driver_end",
     label: "Signature arrivée — convoyeur",
     hint: "Signez pour attester de la livraison" },
 
-  { num: 24, id: "signature_client_end", kind: "signature", section: "cloture", phase: "arrivee",
+  { num: 25, id: "signature_client_end", kind: "signature", section: "cloture", phase: "arrivee",
     signatureKind: "client_end",
     label: "Signature arrivée — client final",
     hint: "Faites signer le réceptionnaire" },
 
-  { num: 25, id: "send_admin", kind: "validation", section: "cloture", phase: "arrivee",
+  { num: 26, id: "send_admin", kind: "validation", section: "cloture", phase: "arrivee",
     label: "Envoi à l'admin", hint: "Transmission automatique pour validation finale" },
 
-  { num: 26, id: "admin_validated", kind: "validation", section: "cloture", phase: "arrivee",
+  { num: 27, id: "admin_validated", kind: "validation", section: "cloture", phase: "arrivee",
     label: "Validation admin", hint: "Mission terminée, notifications envoyées" },
 ];
 

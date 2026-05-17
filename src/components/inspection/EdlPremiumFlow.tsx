@@ -54,6 +54,13 @@ interface StepState {
   previewUrl?: string;
   storagePath?: string;
   error?: string;
+  extras?: Array<{
+    id: string;
+    previewUrl: string;
+    storagePath?: string;
+    status: "uploading" | "success" | "error";
+    error?: string;
+  }>;
   /** OCR uniquement pour kind="scan" */
   ocr?: {
     status: "pending" | "completed" | "failed";
@@ -321,6 +328,21 @@ export function EdlPremiumFlow({
 
           for (const row of photoRows) {
             if (!row?.vue_type) continue;
+            if (row.vue_type.startsWith("photos_libres_degats_")) {
+              const signedUrl = photoPreviewMap.get(row.url_photo) ?? prev.photos_libres_degats?.previewUrl;
+              const extras = next.photos_libres_degats?.extras ?? prev.photos_libres_degats?.extras ?? [];
+              next.photos_libres_degats = {
+                ...(next.photos_libres_degats ?? prev.photos_libres_degats ?? { status: "success" }),
+                status: "success",
+                extras: [...extras, {
+                  id: row.vue_type,
+                  storagePath: row.url_photo,
+                  previewUrl: signedUrl ?? row.url_photo,
+                  status: "success",
+                }],
+              };
+              continue;
+            }
             next[row.vue_type] = {
               status: "success",
               storagePath: row.url_photo,
@@ -530,6 +552,77 @@ export function EdlPremiumFlow({
     }
   };
 
+  const handleExtraPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.files?.[0];
+    e.target.value = "";
+    if (!raw) return;
+
+    const stepId = currentStep.id;
+    const extraId = crypto.randomUUID();
+    let previewUrl = "";
+
+    try {
+      const stableFile = await prepareCapturedImage(raw);
+      previewUrl = URL.createObjectURL(stableFile);
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: [
+            ...((prev[stepId]?.extras ?? []).filter(Boolean)),
+            { id: extraId, previewUrl, status: "uploading" as const },
+          ],
+        },
+      }));
+
+      const insId = await ensureInspection();
+      const compressed = await compressImage(stableFile).catch(() => stableFile);
+      const path = `${userId}/${insId}/${stepId}_${Date.now()}.jpg`;
+      await uploadWithRetry("inspection-photos", path, compressed);
+
+      const { error } = await supabase.from("inspection_photos").insert({
+        inspection_id: insId,
+        vue_type: `${stepId}_${Date.now()}`,
+        url_photo: path,
+        file_size_bytes: compressed.size,
+      });
+      if (error) throw error;
+
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: (prev[stepId]?.extras ?? []).map((item) =>
+            item.id === extraId ? { ...item, storagePath: path, status: "success" as const } : item,
+          ),
+        },
+      }));
+    } catch (err) {
+      setStates((prev) => ({
+        ...prev,
+        [stepId]: {
+          ...(prev[stepId] ?? { status: "idle" as const }),
+          status: "success",
+          extras: (prev[stepId]?.extras ?? []).map((item) =>
+            item.id === extraId
+              ? {
+                  ...item,
+                  previewUrl: item.previewUrl || previewUrl,
+                  status: "error" as const,
+                  error: err instanceof Error ? err.message : "Erreur d'envoi",
+                }
+              : item,
+          ),
+        },
+      }));
+      toast.error("Impossible d'ajouter la photo libre", {
+        description: err instanceof Error ? err.message : "Réessayez.",
+      });
+    }
+  };
+
   const handleSelfieFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     e.target.value = "";
@@ -717,6 +810,7 @@ export function EdlPremiumFlow({
 
   const canAdvance = () => {
     const s = currentState?.status;
+    if (currentStep.kind === "extras") return true;
     // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
     // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
@@ -752,6 +846,31 @@ export function EdlPremiumFlow({
   };
 
   const goPrev = () => { if (safeIndex > 0) setStepIndex(safeIndex - 1); };
+
+  const removeExtraPhoto = async (photoId: string) => {
+    const stepId = currentStep.id;
+    const target = currentState?.extras?.find((item) => item.id === photoId);
+    if (!target) return;
+
+    setStates((prev) => ({
+      ...prev,
+      [stepId]: {
+        ...(prev[stepId] ?? { status: "idle" as const }),
+        status: "success",
+        extras: (prev[stepId]?.extras ?? []).filter((item) => item.id !== photoId),
+      },
+    }));
+
+    revokeBlobUrl(target.previewUrl);
+
+    if (!inspectionId || !target.storagePath) return;
+    try {
+      await supabase.from("inspection_photos").delete().eq("inspection_id", inspectionId).eq("url_photo", target.storagePath);
+      await supabase.storage.from("inspection-photos").remove([target.storagePath]);
+    } catch {
+      // non bloquant
+    }
+  };
 
   const retake = () => {
     setStates(prev => {
@@ -896,6 +1015,14 @@ export function EdlPremiumFlow({
             />
           )}
 
+          {currentStep.kind === "extras" && (
+            <ExtraPhotosArea
+              state={currentState}
+              onCapture={triggerCapture}
+              onRemove={removeExtraPhoto}
+            />
+          )}
+
           {currentStep.kind === "signature" && (
             <SignatureArea
               step={currentStep}
@@ -923,7 +1050,7 @@ export function EdlPremiumFlow({
           type="file"
           accept="image/*"
           capture={currentStep.kind === "selfie" ? "user" : "environment"}
-          onChange={currentStep.kind === "selfie" ? handleSelfieFile : handlePhotoFile}
+          onChange={currentStep.kind === "selfie" ? handleSelfieFile : currentStep.kind === "extras" ? handleExtraPhotoFile : handlePhotoFile}
           style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999 }}
           tabIndex={-1}
           aria-hidden="true"
@@ -1161,6 +1288,59 @@ function SelfieArea({
         <button onClick={onRetake} className="w-full h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
           <RefreshCw size={16}/> Reprendre le selfie
         </button>
+      )}
+    </div>
+  );
+}
+
+function ExtraPhotosArea({
+  state,
+  onCapture,
+  onRemove,
+}: {
+  state?: StepState;
+  onCapture: () => void;
+  onRemove: (photoId: string) => void;
+}) {
+  const extras = state?.extras ?? [];
+
+  return (
+    <div className="space-y-3">
+      <div className="edl-glass p-4">
+        <p className="text-sm font-semibold text-white">Photos libres / dégâts</p>
+        <p className="mt-1 text-xs text-[var(--edl-text-soft)]">
+          Étape optionnelle : ajoutez des photos complémentaires, dégâts, remarques ou accessoires. Vous pouvez continuer même sans photo.
+        </p>
+      </div>
+
+      <button
+        onClick={onCapture}
+        className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base"
+      >
+        <Camera size={22}/> Ajouter une photo libre
+      </button>
+
+      {extras.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          {extras.map((item, index) => (
+            <div key={item.id} className="edl-photo-frame">
+              <img src={item.previewUrl} alt={`Photo libre ${index + 1}`} className="w-full aspect-square object-cover" />
+              <div className="absolute top-3 right-3 z-10">
+                <span className="edl-chip">
+                  {item.status === "uploading" ? <Loader2 size={11} className="animate-spin"/> : item.status === "success" ? <Check size={11}/> : <X size={11}/>}
+                  {item.status === "uploading" ? " Envoi…" : item.status === "success" ? " Enregistrée" : " Erreur"}
+                </span>
+              </div>
+              <button
+                onClick={() => onRemove(item.id)}
+                className="absolute bottom-3 right-3 z-10 rounded-full bg-black/60 p-2 text-white"
+                aria-label="Supprimer la photo"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
