@@ -493,6 +493,15 @@ export function EdlPremiumFlow({
         ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
       });
 
+      // Auto-avancement après upload réussi d'une photo (pas pour les scans
+      // qui ont OCR à valider). Améliore considérablement l'UX mobile :
+      // plus besoin de cliquer "Photo suivante" après chaque cliché.
+      if (currentStep.kind === "photo" && safeIndex < TOTAL - 1) {
+        setTimeout(() => {
+          setStepIndex((idx) => (idx === safeIndex ? idx + 1 : idx));
+        }, 700);
+      }
+
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
       if (currentStep.kind === "scan") {
         supabase.functions.invoke("edl-document-ocr", {
