@@ -879,6 +879,35 @@ export function EdlPremiumFlow({
       delete next[currentStep.id];
       return next;
     });
+    // Rouvre directement l'appareil photo pour les étapes capture
+    if (currentStep.kind === "photo" || currentStep.kind === "scan" || currentStep.kind === "selfie") {
+      // setTimeout pour laisser React re-render avant le clic sur input file
+      setTimeout(() => fileRef.current?.click(), 50);
+    }
+  };
+
+  const deleteCurrentPhoto = async () => {
+    const stepId = currentStep.id;
+    const target = currentState;
+    setStates(prev => {
+      const next = { ...prev };
+      revokeBlobUrl(next[stepId]?.previewUrl);
+      delete next[stepId];
+      return next;
+    });
+    if (!target?.storagePath) return;
+    try {
+      if (currentStep.kind === "selfie") {
+        await supabase.from("mission_selfies").delete().eq("attribution_id", attributionId).eq("storage_path", target.storagePath);
+        await supabase.storage.from("mission-selfies").remove([target.storagePath]);
+      } else if (inspectionId) {
+        await supabase.from("inspection_photos").delete().eq("inspection_id", inspectionId).eq("vue_type", stepId);
+        await supabase.storage.from("inspection-photos").remove([target.storagePath]);
+      }
+      toast.success("Photo supprimée");
+    } catch (err) {
+      console.warn("[EDL] delete failed", err);
+    }
   };
 
   // ─────────────────────────── RENDER ───────────────────────────
@@ -1004,6 +1033,7 @@ export function EdlPremiumFlow({
               state={currentState}
               onCapture={triggerCapture}
               onRetake={retake}
+              onDelete={deleteCurrentPhoto}
             />
           )}
 
@@ -1012,6 +1042,7 @@ export function EdlPremiumFlow({
               state={currentState}
               onCapture={triggerCapture}
               onRetake={retake}
+              onDelete={deleteCurrentPhoto}
             />
           )}
 
@@ -1156,9 +1187,9 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onRetake,
+  step, state, onCapture, onRetake, onDelete,
 }: {
-  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void;
+  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void;
 }) {
   const taken = Boolean(state?.previewUrl);
 
@@ -1232,12 +1263,20 @@ function PhotoOrScanArea({
           {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
         </button>
       ) : (
-        <button
-          onClick={onRetake}
-          className="w-full h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
-        >
-          <RefreshCw size={16}/> Reprendre la photo
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onRetake}
+            className="h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
+          >
+            <RefreshCw size={16}/> Reprendre
+          </button>
+          <button
+            onClick={onDelete}
+            className="h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2"
+          >
+            <X size={16}/> Supprimer
+          </button>
+        </div>
       )}
 
       {step.kind === "scan" && (
@@ -1251,8 +1290,8 @@ function PhotoOrScanArea({
 }
 
 function SelfieArea({
-  state, onCapture, onRetake,
-}: { state?: StepState; onCapture: () => void; onRetake: () => void }) {
+  state, onCapture, onRetake, onDelete,
+}: { state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void }) {
   return (
     <div className="space-y-3">
       <div className="edl-glass p-5 text-center">
@@ -1285,9 +1324,14 @@ function SelfieArea({
           <Loader2 size={22} className="animate-spin"/> Validation en cours…
         </button>
       ) : (
-        <button onClick={onRetake} className="w-full h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
-          <RefreshCw size={16}/> Reprendre le selfie
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={onRetake} className="h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
+            <RefreshCw size={16}/> Reprendre
+          </button>
+          <button onClick={onDelete} className="h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2">
+            <X size={16}/> Supprimer
+          </button>
+        </div>
       )}
     </div>
   );
