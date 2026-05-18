@@ -879,6 +879,35 @@ export function EdlPremiumFlow({
       delete next[currentStep.id];
       return next;
     });
+    // Rouvre directement l'appareil photo pour les étapes capture
+    if (currentStep.kind === "photo" || currentStep.kind === "scan" || currentStep.kind === "selfie") {
+      // setTimeout pour laisser React re-render avant le clic sur input file
+      setTimeout(() => fileRef.current?.click(), 50);
+    }
+  };
+
+  const deleteCurrentPhoto = async () => {
+    const stepId = currentStep.id;
+    const target = currentState;
+    setStates(prev => {
+      const next = { ...prev };
+      revokeBlobUrl(next[stepId]?.previewUrl);
+      delete next[stepId];
+      return next;
+    });
+    if (!target?.storagePath) return;
+    try {
+      if (currentStep.kind === "selfie") {
+        await supabase.from("mission_selfies").delete().eq("attribution_id", attributionId).eq("storage_path", target.storagePath);
+        await supabase.storage.from("mission-selfies").remove([target.storagePath]);
+      } else if (inspectionId) {
+        await supabase.from("inspection_photos").delete().eq("inspection_id", inspectionId).eq("vue_type", stepId);
+        await supabase.storage.from("inspection-photos").remove([target.storagePath]);
+      }
+      toast.success("Photo supprimée");
+    } catch (err) {
+      console.warn("[EDL] delete failed", err);
+    }
   };
 
   // ─────────────────────────── RENDER ───────────────────────────
