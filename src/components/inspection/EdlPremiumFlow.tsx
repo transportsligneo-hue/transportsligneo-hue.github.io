@@ -1187,9 +1187,9 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onRetake,
+  step, state, onCapture, onRetake, onDelete,
 }: {
-  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void;
+  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void;
 }) {
   const taken = Boolean(state?.previewUrl);
 
