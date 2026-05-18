@@ -1290,8 +1290,8 @@ function PhotoOrScanArea({
 }
 
 function SelfieArea({
-  state, onCapture, onRetake,
-}: { state?: StepState; onCapture: () => void; onRetake: () => void }) {
+  state, onCapture, onRetake, onDelete,
+}: { state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void }) {
   return (
     <div className="space-y-3">
       <div className="edl-glass p-5 text-center">
