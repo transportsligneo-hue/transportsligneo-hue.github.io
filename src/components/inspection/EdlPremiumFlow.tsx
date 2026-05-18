@@ -1324,9 +1324,14 @@ function SelfieArea({
           <Loader2 size={22} className="animate-spin"/> Validation en cours…
         </button>
       ) : (
-        <button onClick={onRetake} className="w-full h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
-          <RefreshCw size={16}/> Reprendre le selfie
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={onRetake} className="h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2">
+            <RefreshCw size={16}/> Reprendre
+          </button>
+          <button onClick={onDelete} className="h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2">
+            <X size={16}/> Supprimer
+          </button>
+        </div>
       )}
     </div>
   );
