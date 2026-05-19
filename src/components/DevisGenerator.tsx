@@ -380,6 +380,32 @@ export default function DevisGenerator() {
 
         <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
 
+          {/* Type de prestation */}
+          <div className="mb-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { v: "aller-simple", l: "Aller simple", s: "Livraison" },
+                { v: "aller-retour", l: "Aller-retour", s: "Livraison + restitution" },
+                { v: "express", l: "Express", s: "Urgent · +20%" },
+              ].map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setOption(o.v as typeof option)}
+                  className={`rounded-xl px-3 py-2.5 border text-left transition ${
+                    option === o.v
+                      ? "border-[#e7c76a] bg-[#e7c76a]/10 text-[#e7c76a] shadow-[0_0_0_1px_rgba(231,199,106,0.25)]"
+                      : "border-white/10 bg-white/[0.03] text-cream/75 hover:border-white/25"
+                  }`}
+                >
+                  <span className="block text-[11px] sm:text-xs font-heading tracking-wide">{o.l}</span>
+                  <span className="block text-[9px] sm:text-[10px] uppercase tracking-[0.18em] opacity-70 mt-0.5">{o.s}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Trajet : Départ ↔ Arrivée */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-5 items-stretch">
             {/* Bloc Départ */}
