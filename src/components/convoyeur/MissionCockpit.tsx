@@ -110,6 +110,8 @@ export function MissionCockpit({
   }, [attributionId]);
 
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
+  // Selfie final = 2e selfie pris (après EDL arrivée) — count BDD.
+  const finalSelfieOK = gates.selfies.length >= 2 || gates.isDisabled("selfie_final");
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
@@ -144,31 +146,36 @@ export function MissionCockpit({
 
     if (e === "en_attente_validation" || e === "termine") return "done";
 
-    // Selfie obligatoire sur TOUTES les étapes terrain tant qu'il n'est pas
-    // pris/validé/bypassé — empêche tout contournement entre départ et clôture.
-    const fieldSteps = ["assignee","acceptee","en_route","sur_place","vehicule_recupere","edl_depart_fait","en_livraison","arrive_destination","edl_arrivee_fait"];
-    if (!selfieOK && fieldSteps.includes(e)) return "selfie";
+    // 1. Démarrage : "En route pour récupérer le véhicule"
     if (e === "assignee" || e === "acceptee") return "demarrer";
+    // 2. Trajet vers enlèvement
     if (e === "en_route") return "arrive_depart";
+    // 3. Sur place enlèvement → selfie obligatoire avant EDL
     if (e === "sur_place" || e === "vehicule_recupere") {
+      if (!selfieOK) return "selfie";
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
     if (e === "edl_depart_fait") {
+      if (!selfieOK) return "selfie";
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
+    // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
+    // 5. Sur place livraison → EDL arrivée → selfie final → envoi admin
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
+  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
     if (!forceOpenSelfie || currentKey !== "selfie") return;
