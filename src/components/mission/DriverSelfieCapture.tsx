@@ -7,7 +7,7 @@
  *   3. Footer sticky : Reprendre / Valider et continuer
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,10 +122,39 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
   const [cameraOpening, setCameraOpening] = useState(false);
+  const [liveCamera, setLiveCamera] = useState(false);
+  const [cameraIssue, setCameraIssue] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const closingRef = useRef(false);
   const cameraTimeoutRef = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
+
+  const stopStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setLiveCamera(false);
+  }, []);
+
+  const applyCapturedFile = useCallback(async (raw: File) => {
+    const stableFile = await materializeCapturedFile(raw);
+    if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
+
+    stopStream();
+    setCapturedFile(stableFile);
+    setPreview(URL.createObjectURL(stableFile));
+    setStatus("idle");
+    setError(null);
+    setCameraIssue(null);
+
+    getPosition().then(p => { if (p) setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); });
+  }, [preview, stopStream]);
 
   useEffect(() => {
     setPendingDriverSelfie(attributionId, true);
@@ -136,18 +165,60 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       if (cameraTimeoutRef.current) {
         window.clearTimeout(cameraTimeoutRef.current);
       }
+      stopStream();
       if (preview) {
         try { URL.revokeObjectURL(preview); } catch { /* ignore */ }
       }
     };
-  }, [preview]);
+  }, [preview, stopStream]);
 
-  const openCamera = () => {
-    if (!fileRef.current || status === "uploading") return;
+  const openCamera = async () => {
+    if (status === "uploading") return;
     if (cameraTimeoutRef.current) {
       window.clearTimeout(cameraTimeoutRef.current);
     }
+    setError(null);
+    setCameraIssue(null);
     setCameraOpening(true);
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+        if (cameraTimeoutRef.current) {
+          window.clearTimeout(cameraTimeoutRef.current);
+          cameraTimeoutRef.current = null;
+        }
+
+        stopStream();
+        streamRef.current = stream;
+        setLiveCamera(true);
+        setCameraOpening(false);
+
+        requestAnimationFrame(() => {
+          if (!videoRef.current) return;
+          videoRef.current.srcObject = stream;
+          void videoRef.current.play().catch(() => undefined);
+        });
+        return;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "La caméra n’a pas pu être ouverte.";
+        setCameraIssue(msg);
+      }
+    }
+
+    if (!fileRef.current) {
+      setCameraOpening(false);
+      return;
+    }
+
     cameraTimeoutRef.current = window.setTimeout(() => {
       setCameraOpening(false);
       cameraTimeoutRef.current = null;
@@ -163,23 +234,50 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       cameraTimeoutRef.current = null;
     }
     setCameraOpening(false);
+    stopStream();
     if (!raw) return;
 
     try {
-      const stableFile = await materializeCapturedFile(raw);
-      if (preview) { try { URL.revokeObjectURL(preview); } catch { /* ignore */ } }
-
-      setCapturedFile(stableFile);
-      setPreview(URL.createObjectURL(stableFile));
-      setStatus("idle");
-      setError(null);
-
-      getPosition().then(p => { if (p) setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); });
+      await applyCapturedFile(raw);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Le selfie n’a pas pu être préparé.";
       setStatus("error");
       setError(msg);
       toast.error("Échec selfie", { description: "Le selfie n’a pas pu être enregistré. Réessayez." });
+    }
+  };
+
+  const captureFromLiveCamera = async () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      setStatus("error");
+      setError("Le flux caméra n'est pas prêt. Réessayez.");
+      return;
+    }
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponible");
+
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", 0.92);
+      });
+
+      if (!blob) throw new Error("Capture vide");
+
+      await applyCapturedFile(new File([blob], `selfie_${Date.now()}.jpg`, { type: "image/jpeg" }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Le selfie n’a pas pu être capturé.";
+      setStatus("error");
+      setError(msg);
+      toast.error("Échec selfie", { description: msg });
     }
   };
 
@@ -190,6 +288,8 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     setStatus("idle");
     setError(null);
     setCameraOpening(false);
+    setCameraIssue(null);
+    stopStream();
     closingRef.current = false;
     setTimeout(openCamera, 50);
   };
