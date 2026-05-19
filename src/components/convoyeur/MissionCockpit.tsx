@@ -447,7 +447,7 @@ export function MissionCockpitStickyCTA({
 
   let label = "Continuer";
   if (["en_attente_validation", "validee", "termine"].includes(statut)) label = "Mission envoyée";
-  else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "Démarrer le trajet";
+  else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "En route pour récupérer le véhicule";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
   else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
   else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
