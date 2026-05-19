@@ -669,6 +669,36 @@ export default function MobileDevisGenerator() {
               />
             </div>
             <div className="overflow-y-auto px-3 pb-6 flex-1">
+              {googleSuggestions.length > 0 && (
+                <>
+                  <p className="px-4 pt-1 pb-2 text-[10px] uppercase tracking-[0.2em] text-primary/70 font-heading">
+                    Suggestions Google
+                  </p>
+                  {googleSuggestions.map((s) => (
+                    <button
+                      key={s.placeId || s.label}
+                      type="button"
+                      onClick={() => { resetPlacesSession(); selectCity(s.label); }}
+                      className="w-full text-left px-4 py-3 rounded-xl text-cream hover:bg-primary/10 active:bg-primary/15 transition-colors flex items-start gap-3"
+                    >
+                      <MapPin size={16} className="text-primary mt-0.5 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm truncate">{s.label}</p>
+                        {s.secondary && (
+                          <p className="text-[11px] text-cream/50 truncate">{s.secondary}</p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                  <div className="h-px bg-primary/15 my-2 mx-4" />
+                </>
+              )}
+
+              {(googleSuggestions.length > 0 || filteredCities.length > 0) && (
+                <p className="px-4 pt-1 pb-2 text-[10px] uppercase tracking-[0.2em] text-cream/45 font-heading">
+                  Villes fréquentes
+                </p>
+              )}
               {filteredCities.map(city => (
                 <button
                   key={city}
@@ -683,8 +713,12 @@ export default function MobileDevisGenerator() {
                   )}
                 </button>
               ))}
-              {filteredCities.length === 0 && (
-                <p className="text-center text-cream/50 text-sm py-8">Aucune ville trouvée</p>
+              {filteredCities.length === 0 && googleSuggestions.length === 0 && (
+                <p className="text-center text-cream/50 text-sm py-8">
+                  {pickerFilter.length < 2
+                    ? "Tapez au moins 2 caractères pour rechercher une adresse"
+                    : "Aucun résultat"}
+                </p>
               )}
             </div>
           </div>
