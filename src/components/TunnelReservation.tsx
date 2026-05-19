@@ -414,8 +414,8 @@ function Step2({
   basePrice: number; priceLabel: string; optionsTotal: number; total: number;
 }) {
   const types: { value: TripType; label: string; desc: string }[] = [
-    { value: "aller_simple", label: "Aller simple", desc: "Convoyage A → B" },
-    { value: "aller_retour", label: "Aller-retour", desc: "Tarif avantageux" },
+    { value: "aller_simple", label: "Livraison simple", desc: "Convoyage A → B" },
+    { value: "aller_retour", label: "Livraison + restitution", desc: "Aller + retour véhicule" },
     { value: "express", label: "Express", desc: "+20% prioritaire" },
   ];
   return (
