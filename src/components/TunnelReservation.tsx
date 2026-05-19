@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Loader2, MapPin, Calendar, Car, User, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import {
   RESERVATION_OPTIONS,
   type TripType,
 } from "@/lib/reservation-pricing";
+import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 
 const STEPS = ["Trajet", "Options", "Véhicule", "Coordonnées", "Confirmation"];
 
