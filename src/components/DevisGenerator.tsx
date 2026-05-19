@@ -55,6 +55,7 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
   const cArr = extractCity(arrival) || arrival;
   const dDep = CITY_DEPARTMENTS[cDep]; const dArr = CITY_DEPARTMENTS[cArr];
   const dept = dDep && dArr ? dArr : null;
+  // 1) Tarif spécifique déjà configuré (ex. Tours) — priorité absolue
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
     const label = DEPARTMENT_LABELS[dept] || dept;
@@ -62,7 +63,10 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  // Trajet très court / même ville hors zone forfaitaire — applique le minimum existant (Tours intra 79€)
+  // 2) Tarif local par département (10 métropoles, basé sur code postal + distance)
+  const local = distance >= 0 ? resolveLocalDeptTariff(departure, arrival, distance, option) : null;
+  if (local) return local;
+  // 3) Trajet très court / même ville hors zone forfaitaire — minimum existant
   if (distance <= 0) {
     const [simple] = FIXED_TARIFFS["37-intra"];
     const label = "Forfait local (minimum)";
@@ -70,6 +74,7 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
+  // 4) Calcul kilométrique longue distance (inchangé)
   const rate = distance < 200 ? 1.20 : 0.85;
   const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
   const basePrice = Math.round(distance * rate);
