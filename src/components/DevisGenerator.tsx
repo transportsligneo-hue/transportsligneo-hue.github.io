@@ -303,7 +303,7 @@ export default function DevisGenerator() {
                 placeholder="Ville ou adresse complète"
                 className={inputBare}
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
             </div>
             {/* Arrivée */}
@@ -317,7 +317,7 @@ export default function DevisGenerator() {
                 placeholder="Ville ou adresse complète"
                 className={inputBare}
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
             </div>
             {/* Type véhicule */}
