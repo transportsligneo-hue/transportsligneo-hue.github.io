@@ -290,83 +290,106 @@ export default function DevisGenerator() {
     downloadDevisPdf(blob, savedDevis.numero);
   }
 
-  // --- ESTIMATEUR : barre flottante + détail prix ---
+  // --- ESTIMATEUR : carte premium "chauffeur" ---
   return (
     <div className="w-full">
-      {/* Barre estimateur premium */}
       <div className="relative z-30 max-w-5xl mx-auto">
-        <div aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-[#5fb6ff]/20 via-transparent to-[#e7c76a]/15 blur-md opacity-70" />
-        <div className="relative z-30 rounded-2xl border border-[#5fb6ff]/25 bg-white/[0.04] backdrop-blur-xl shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7)]">
-          <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1.3fr_1fr_0.9fr_0.7fr_auto] divide-y md:divide-y-0 md:divide-x divide-white/10">
-            {/* Départ */}
-            <div className="relative px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
-                <MapPin size={11} className="text-[#5fb6ff]" /> Départ
-              </label>
+        {/* Halo doré */}
+        <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
+
+        <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
+
+          {/* Trajet : Départ ↔ Arrivée */}
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-5 items-stretch">
+            {/* Bloc Départ */}
+            <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#5fb6ff]/40 transition-colors px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="h-7 w-7 rounded-full grid place-items-center bg-[#5fb6ff]/15 border border-[#5fb6ff]/30">
+                  <MapPin size={13} className="text-[#5fb6ff]" />
+                </span>
+                <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse de départ</label>
+              </div>
               <PlacesInput
                 value={departure}
                 onChange={setDeparture}
-                placeholder="Ville ou adresse complète"
-                className={inputBare}
+                placeholder="Ville, rue, code postal…"
+                className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
               />
             </div>
-            {/* Arrivée */}
-            <div className="relative px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
-                <MapPinned size={11} className="text-[#5fb6ff]" /> Arrivée
-              </label>
+
+            {/* Séparateur central doré */}
+            <div className="hidden md:flex flex-col items-center justify-center px-1">
+              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
+              <span className="my-2 h-9 w-9 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_8px_25px_-8px_rgba(231,199,106,0.7)]">
+                <ArrowRight size={16} strokeWidth={2.5} />
+              </span>
+              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
+            </div>
+            <div className="md:hidden flex items-center justify-center -my-1">
+              <span className="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
+                <ArrowRight size={14} strokeWidth={2.5} className="rotate-90" />
+              </span>
+            </div>
+
+            {/* Bloc Arrivée */}
+            <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="h-7 w-7 rounded-full grid place-items-center bg-[#e7c76a]/15 border border-[#e7c76a]/30">
+                  <MapPinned size={13} className="text-[#e7c76a]" />
+                </span>
+                <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
+              </div>
               <PlacesInput
                 value={arrival}
                 onChange={setArrival}
-                placeholder="Ville ou adresse complète"
-                className={inputBare}
+                placeholder="Ville, rue, code postal…"
+                className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
               />
             </div>
-            {/* Type véhicule */}
-            <div className="px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
-                <Car size={11} className="text-[#5fb6ff]" /> Véhicule
+          </div>
+
+          {/* Détails trajet + CTA */}
+          <div className="mt-5 grid grid-cols-2 md:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-3 md:gap-4 items-end">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
+              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <Car size={11} className="text-[#e7c76a]" /> Véhicule
               </label>
               <select value={vehicleType} onChange={e => setVehicleType(e.target.value)}
-                className={inputBare + " appearance-none pr-5 cursor-pointer"}>
+                className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
                 <option value="" className="bg-[#0b1026]">Sélectionner</option>
                 {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
               </select>
-              <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#5fb6ff]/60 pointer-events-none" />
+              <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
             </div>
-            {/* Date */}
-            <div className="px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
-                <Calendar size={11} className="text-[#5fb6ff]" /> Date
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <Calendar size={11} className="text-[#e7c76a]" /> Date
               </label>
               <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                className={inputBare + " [color-scheme:dark]"} />
+                className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
             </div>
-            {/* Heure */}
-            <div className="px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
-                <Clock size={11} className="text-[#5fb6ff]" /> Heure
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <Clock size={11} className="text-[#e7c76a]" /> Heure
               </label>
               <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
-                className={inputBare + " [color-scheme:dark]"} />
+                className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
             </div>
-            {/* CTA */}
-            <div className="p-2 flex items-stretch">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                disabled={!isComplete}
-                className="inline-flex items-center justify-center gap-2 px-5 md:px-6 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-[11px] tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(231,199,106,0.6)] hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                <Send size={13} /> Obtenir mon prix
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={!isComplete}
+              className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
+            >
+              <Send size={14} /> Obtenir mon prix
+            </button>
           </div>
         </div>
+
 
         {/* Détail prix EN LIVE — visible immédiatement, sans clic */}
         {isComplete && pricing && distance !== null && (
