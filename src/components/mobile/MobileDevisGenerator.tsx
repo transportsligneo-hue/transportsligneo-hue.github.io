@@ -271,7 +271,7 @@ export default function MobileDevisGenerator() {
         depart: departure, arrivee: arrival,
         date_souhaitee: date || null,
         heure_souhaitee: heure,
-        marque, modele, immatriculation: "",
+        marque, modele, immatriculation,
         carburant: energy,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
