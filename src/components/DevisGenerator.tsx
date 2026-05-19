@@ -613,6 +613,57 @@ export default function DevisGenerator() {
                       <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>
+
+                  {/* Bloc Restitution (Aller-retour uniquement) */}
+                  {option === "aller-retour" && (
+                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Restitution</p>
+                        <label className="inline-flex items-center gap-2 text-[11px] text-cream/70 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={sameDestination}
+                            onChange={e => setSameDestination(e.target.checked)}
+                            className="accent-[#e7c76a]"
+                          />
+                          Même destination que la livraison
+                        </label>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ restitution</label>
+                          <PlacesInput
+                            value={departRetour || arrival}
+                            onChange={setDepartRetour}
+                            className={inputCard}
+                            fallbackOptions={CITIES}
+                            placeholder="Adresse de prise en charge retour"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée restitution</label>
+                          {sameDestination ? (
+                            <input
+                              value={departure}
+                              disabled
+                              className={inputCard + " opacity-70 cursor-not-allowed"}
+                            />
+                          ) : (
+                            <PlacesInput
+                              value={arriveeRetour}
+                              onChange={setArriveeRetour}
+                              className={inputCard}
+                              fallbackOptions={CITIES}
+                              placeholder="Adresse de retour"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-cream/45">
+                        Les deux véhicules (livraison et restitution) peuvent être différents — vous saisirez la seconde plaque à l'étape suivante.
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Instructions particulières</label>
                     <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3}
