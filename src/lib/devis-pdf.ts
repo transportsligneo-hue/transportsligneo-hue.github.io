@@ -177,6 +177,7 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
+  const clientLogoData = d.logo_url ? await loadImageAsDataUrl(d.logo_url) : null;
 
   const validite = d.validite_jours ?? 15;
   drawHeader(doc, pageW, logoData, "DEVIS", d.numero, `Validite : ${validite} jours`);
@@ -188,17 +189,34 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.setFontSize(10);
   doc.text("DEVIS ETABLI POUR", 14, y);
 
+  // Client logo (top-right of client block, if provided)
+  if (clientLogoData) {
+    try { doc.addImage(clientLogoData, "PNG", 80, y - 4, 22, 22); } catch {}
+  }
+
   y += 8;
-  doc.setFontSize(13);
-  doc.text(`${d.prenom} ${d.nom}`, 14, y);
+  if (d.societe) {
+    doc.setFontSize(13);
+    doc.text(d.societe, 14, y);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...TEXT);
+    doc.text(`${d.prenom} ${d.nom}`, 14, y);
+  } else {
+    doc.setFontSize(13);
+    doc.text(`${d.prenom} ${d.nom}`, 14, y);
+  }
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
   y += 6;
   doc.text(d.email, 14, y);
   if (d.telephone) { y += 5; doc.text(d.telephone, 14, y); }
+  if (d.siret) { y += 5; doc.text(`SIRET : ${d.siret}`, 14, y); }
+  if (d.tva_intra) { y += 5; doc.text(`TVA intra. : ${d.tva_intra}`, 14, y); }
   if (d.adresse) {
-    y += 8;
+    y += 7;
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...NAVY);
     doc.text("Adresse de facturation :", 14, y);
