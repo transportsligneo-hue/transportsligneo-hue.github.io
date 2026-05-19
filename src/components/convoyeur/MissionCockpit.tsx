@@ -222,6 +222,10 @@ export function MissionCockpit({
         case "arrive_depart":
           await persistEtape("sur_place");
           await Promise.resolve(onUpdated());
+          // Enchaîne directement sur l'inspection départ si pas encore faite
+          if (!inspectionDepartDone) {
+            onStartInspection("depart");
+          }
           break;
         case "demarrer_livraison":
           await persistEtape("en_livraison");
@@ -230,8 +234,27 @@ export function MissionCockpit({
         case "arrive_livraison":
           await persistEtape("arrive_destination");
           await Promise.resolve(onUpdated());
+          // Ouvre AUTOMATIQUEMENT l'inspection d'arrivée — pas de clic intermédiaire
+          if (!inspectionArriveeDone) {
+            onStartInspection("arrivee");
+          }
           break;
         case "cloturer":
+          // Garde-fou final : selfie + EDL départ + EDL arrivée obligatoires
+          if (!selfieOK) {
+            toast.error("Selfie d'identité requis avant de clôturer");
+            break;
+          }
+          if (!inspectionDepartDone) {
+            toast.error("Inspection de départ incomplète");
+            onStartInspection("depart");
+            break;
+          }
+          if (!inspectionArriveeDone) {
+            toast.error("Inspection d'arrivée incomplète");
+            onStartInspection("arrivee");
+            break;
+          }
           await persistEtape("en_attente_validation", "Mission envoyée pour validation");
           if ((await onMacroStatusChange("en_attente_validation")) === false) {
             toast.warning("Mission envoyée, mais le statut général n'a pas pu être synchronisé.");
