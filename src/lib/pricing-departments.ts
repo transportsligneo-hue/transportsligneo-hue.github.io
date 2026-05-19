@@ -294,6 +294,132 @@ export const DEPT_AGGLO: Record<string, { city: string; cps: string[] }> = {
   },
 };
 
+// ============================================================
+// Reconnaissance par nom de commune (saisie sans code postal)
+// ============================================================
+
+/** Communes appartenant à la zone agglo de la ville principale. */
+const DEPT_AGGLO_COMMUNES: Record<string, string[]> = {
+  "37": [
+    "Tours", "La Riche", "Joué-lès-Tours", "Joué les Tours", "Chambray-lès-Tours", "Chambray les Tours",
+    "Saint-Cyr-sur-Loire", "St-Cyr-sur-Loire", "Saint-Pierre-des-Corps", "St-Pierre-des-Corps",
+    "Saint-Avertin", "St-Avertin", "Fondettes", "Ballan-Miré", "Rochecorbon", "Parçay-Meslay",
+    "Notre-Dame-d'Oé", "Notre Dame d'Oé", "Vouvray", "Veigné", "Montbazon", "Montlouis-sur-Loire",
+    "La Membrolle", "Mettray", "Charentilly", "Luynes",
+  ],
+  "75": ["Paris"],
+  "69": [
+    "Lyon", "Villeurbanne", "Vénissieux", "Caluire-et-Cuire", "Bron", "Vaulx-en-Velin",
+    "Décines-Charpieu", "Oullins", "Saint-Genis-Laval", "Tassin-la-Demi-Lune", "Écully", "Ecully",
+  ],
+  "13": ["Marseille", "Marignane", "Vitrolles"],
+  "31": [
+    "Toulouse", "Blagnac", "Tournefeuille", "Cugnaux", "Villeneuve-Tolosane", "L'Union",
+    "Saint-Jean", "Ramonville-Saint-Agne", "Balma", "Quint-Fonsegrives", "Castanet-Tolosan",
+  ],
+  "33": [
+    "Bordeaux", "Mérignac", "Pessac", "Talence", "Gradignan", "Cenon", "Floirac", "Lormont",
+    "Bègles", "Bruges", "Le Bouscat", "Eysines",
+  ],
+  "44": [
+    "Nantes", "Rezé", "Saint-Herblain", "St-Herblain", "Saint-Sébastien-sur-Loire",
+    "Vertou", "Bouguenais", "La Chapelle-sur-Erdre", "Orvault", "Carquefou", "Sainte-Luce-sur-Loire",
+  ],
+  "59": [
+    "Lille", "Roubaix", "Tourcoing", "Villeneuve-d'Ascq", "Lomme", "Hellemmes",
+    "Marcq-en-Barœul", "Marcq en Baroeul", "Lambersart", "Croix", "Haubourdin", "Mons-en-Barœul",
+  ],
+  "67": [
+    "Strasbourg", "Schiltigheim", "Illkirch-Graffenstaden", "Hoenheim", "Bischheim",
+    "Lingolsheim", "Ostwald", "Souffelweyersheim",
+  ],
+  "34": [
+    "Montpellier", "Castelnau-le-Lez", "Saint-Jean-de-Védas", "Lattes", "Mauguio",
+    "Pérols", "Le Crès", "Castries",
+  ],
+  "06": [
+    "Nice", "Saint-Laurent-du-Var", "St-Laurent-du-Var", "Cagnes-sur-Mer",
+    "Cannes", "Antibes", "Juan-les-Pins", "La Trinité", "Èze", "Cap-d'Ail",
+  ],
+  "35": [
+    "Rennes", "Chantepie", "Bruz", "Chartres-de-Bretagne", "Cesson-Sévigné",
+    "Pacé", "Le Rheu", "Saint-Grégoire", "Betton", "Saint-Jacques-de-la-Lande",
+  ],
+  "76": [
+    "Rouen", "Sotteville-lès-Rouen", "Saint-Étienne-du-Rouvray", "Mont-Saint-Aignan",
+    "Le Petit-Quevilly", "Bonsecours", "Déville-lès-Rouen", "Bois-Guillaume", "Darnétal",
+  ],
+  "38": [
+    "Grenoble", "Saint-Martin-d'Hères", "Échirolles", "Eybens", "Fontaine",
+    "Meylan", "La Tronche", "Gières", "Seyssinet-Pariset",
+  ],
+  "21": ["Dijon", "Chenôve", "Quetigny", "Talant", "Longvic", "Fontaine-lès-Dijon", "Saint-Apollinaire"],
+  "49": [
+    "Angers", "Les Ponts-de-Cé", "Avrillé", "Trélazé", "Beaucouzé",
+    "Saint-Barthélemy-d'Anjou",
+  ],
+  "51": ["Reims", "Saint-Brice-Courcelles", "Cormontreuil", "Tinqueux", "Bezannes", "Bétheny"],
+  "63": [
+    "Clermont-Ferrand", "Cournon-d'Auvergne", "Chamalières", "Aubière", "Beaumont",
+    "Pont-du-Château", "Romagnat",
+  ],
+  "64": ["Pau", "Lons", "Billère", "Bizanos", "Idron", "Jurançon", "Lescar"],
+  "83": [
+    "Toulon", "La Garde", "La Valette-du-Var", "Six-Fours-les-Plages", "La Seyne-sur-Mer",
+    "Ollioules", "Hyères", "Carqueiranne",
+  ],
+};
+
+/** Communes connues du département mais hors zone agglo → forfait 99 € si l'autre point est dans le même dept. */
+const DEPT_OUTSIDE_COMMUNES: Record<string, string[]> = {
+  "37": [
+    "Loches", "Amboise", "Chinon", "Bléré", "Azay-le-Rideau", "Sainte-Maure-de-Touraine",
+    "Langeais", "Château-Renault", "Descartes", "Preuilly-sur-Claise", "Richelieu",
+    "L'Île-Bouchard", "Montrésor", "Le Grand-Pressigny",
+  ],
+};
+
+function normalizeStr(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[''`]/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\bsainte\b/g, "ste")
+    .replace(/\bsaint\b/g, "st")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function addrContainsCommune(addrNorm: string, commune: string): boolean {
+  const c = normalizeStr(commune);
+  if (!c) return false;
+  const esc = c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${esc}([^a-z0-9]|$)`).test(addrNorm);
+}
+
+/** Cherche le département + zone (agglo|hors agglo) pour une adresse via nom de commune. */
+function findDeptByCommune(address: string): { dept: string; inAgglo: boolean; matchLen: number } | null {
+  const norm = normalizeStr(address);
+  if (!norm) return null;
+  let best: { dept: string; inAgglo: boolean; matchLen: number } | null = null;
+
+  const test = (dept: string, communes: string[], inAgglo: boolean) => {
+    for (const c of communes) {
+      if (addrContainsCommune(norm, c)) {
+        const len = normalizeStr(c).length;
+        if (!best || len > best.matchLen) best = { dept, inAgglo, matchLen: len };
+      }
+    }
+  };
+
+  for (const [dept, communes] of Object.entries(DEPT_AGGLO_COMMUNES)) test(dept, communes, true);
+  for (const [dept, communes] of Object.entries(DEPT_OUTSIDE_COMMUNES)) test(dept, communes, false);
+  return best;
+}
+
 // Compat : ancien export utilisé ailleurs
 export const DEPT_MAIN_CITIES: Record<string, string> = Object.fromEntries(
   Object.entries(DEPT_AGGLO).map(([k, v]) => [k, v.city]),
@@ -322,10 +448,22 @@ export interface LocalTariff {
   hasExtra: boolean;
 }
 
+/** Résout pour une adresse : dept + appartenance à la zone agglo. CP prioritaire, sinon nom de commune. */
+function resolveAddrZone(address: string): { dept: string; inAgglo: boolean } | null {
+  const cp = extractPostalCode(address);
+  if (cp && !cp.startsWith("20")) {
+    const dept = cp.slice(0, 2);
+    const entry = DEPT_AGGLO[dept];
+    if (entry) return { dept, inAgglo: entry.cps.includes(cp) };
+  }
+  const byCommune = findDeptByCommune(address);
+  if (byCommune) return { dept: byCommune.dept, inAgglo: byCommune.inAgglo };
+  return null;
+}
+
 /**
- * Renvoie le forfait local si départ et arrivée sont dans le même département
- * couvert. Distance ignorée — zone agglo = liste explicite de codes postaux.
- * Signature compatible avec les appelants existants.
+ * Renvoie le forfait local si départ et arrivée sont dans le même département couvert.
+ * Détection via code postal OU nom de commune (zone agglo + hors agglo connues).
  */
 export function resolveLocalDeptTariff(
   departure: string,
@@ -333,26 +471,20 @@ export function resolveLocalDeptTariff(
   _distanceKm: number,
   option: string,
 ): LocalTariff | null {
-  const cpDep = extractPostalCode(departure);
-  const cpArr = extractPostalCode(arrival);
-  if (!cpDep || !cpArr) return null;
+  const zDep = resolveAddrZone(departure);
+  const zArr = resolveAddrZone(arrival);
+  if (!zDep || !zArr) return null;
+  if (zDep.dept !== zArr.dept) return null;
 
-  const dDep = cpDep.slice(0, 2);
-  const dArr = cpArr.slice(0, 2);
-  if (dDep !== dArr) return null;
-
-  const entry = DEPT_AGGLO[dDep];
+  const entry = DEPT_AGGLO[zDep.dept];
   if (!entry) return null;
 
-  const inAggloDep = entry.cps.includes(cpDep);
-  const inAggloArr = entry.cps.includes(cpArr);
-  const bothAgglo = inAggloDep && inAggloArr;
-
+  const bothAgglo = zDep.inAgglo && zArr.inAgglo;
   const simple = bothAgglo ? 79 : 99;
   const retour = 129;
   const label = bothAgglo
     ? `Forfait ${entry.city} (agglomération)`
-    : `Forfait département ${dDep} — hors agglomération`;
+    : `Forfait département ${zDep.dept} — hors agglomération`;
 
   if (option === "aller-retour") {
     return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
