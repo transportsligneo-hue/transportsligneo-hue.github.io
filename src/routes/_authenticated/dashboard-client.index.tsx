@@ -115,10 +115,11 @@ function ClientDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
         <StatCard icon={Clock} label="En cours" value={stats.enCours} accent="text-primary" />
         <StatCard icon={Calendar} label="À venir" value={stats.aVenir} accent="text-blue-300" />
         <StatCard icon={CheckCircle} label="Terminées" value={stats.terminees} accent="text-green-300" />
+        <StatCard icon={FileText} label="Devis" value={stats.devis} accent="text-[#e7c76a]" />
       </div>
 
       {/* Last mission */}
