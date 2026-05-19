@@ -786,6 +786,51 @@ export default function DevisGenerator() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Véhicule de restitution (Aller-retour uniquement) */}
+                  {option === "aller-retour" && (
+                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
+                      <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Véhicule de restitution</p>
+                      <p className="text-[10px] text-cream/50 -mt-1">Laissez vide si c'est le même véhicule que la livraison.</p>
+                      <div>
+                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque restitution</label>
+                        <div className="flex gap-2">
+                          <input
+                            value={immatRetour}
+                            onChange={e => { setImmatRetour(e.target.value.toUpperCase()); setSivRetourMsg(null); }}
+                            placeholder="AA-123-AA"
+                            className={inputCard + " uppercase tracking-widest flex-1"}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSivRetourLookup}
+                            disabled={sivRetourLoading || !immatRetour}
+                            className="px-4 py-3 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:from-[#e7c76a]/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                          >
+                            {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                            {sivRetourLoading ? "..." : "Rechercher"}
+                          </button>
+                        </div>
+                        {sivRetourMsg && (
+                          <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>{sivRetourMsg.text}</p>
+                        )}
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                          <input value={marqueRetour} onChange={e => setMarqueRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                          <input value={modeleRetour} onChange={e => setModeleRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">VIN <span className="text-cream/40 normal-case">(optionnel)</span></label>
+                          <input value={vinRetour} onChange={e => setVinRetour(e.target.value.toUpperCase())} className={inputCard + " uppercase tracking-widest"} maxLength={17} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
