@@ -179,7 +179,7 @@ function AdminMissionDetail() {
     setLoading(true);
     const { data: attr, error: attrErr } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, created_at, updated_at")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at")
       .eq("id", missionId)
       .maybeSingle();
 
@@ -383,7 +383,7 @@ function AdminMissionDetail() {
     );
   }
 
-  const missionNumber = formatMissionNumber(attribution.id, attribution.created_at);
+  const missionNumber = missionNumberOf(attribution);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
     day: "2-digit",
