@@ -51,6 +51,16 @@ const statutLabels: Record<string, string> = {
   annulee: "Annulée",
 };
 
+function extractFromOptions(options: string | null): { prix: number | null; distance: number | null } {
+  if (!options) return { prix: null, distance: null };
+  const prixMatch = options.match(/Estimation:\s*(\d+(?:[.,]\d+)?)\s*€/i);
+  const distMatch = options.match(/Distance:\s*(\d+(?:[.,]\d+)?)\s*km/i);
+  return {
+    prix: prixMatch ? Number(prixMatch[1].replace(",", ".")) : null,
+    distance: distMatch ? Number(distMatch[1].replace(",", ".")) : null,
+  };
+}
+
 function AdminDemandes() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
