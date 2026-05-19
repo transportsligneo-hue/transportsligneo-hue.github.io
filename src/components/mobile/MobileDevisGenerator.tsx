@@ -415,7 +415,7 @@ export default function MobileDevisGenerator() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { value: "aller-simple", label: "Simple" },
-                  { value: "aller-retour", label: "A/R" },
+                  { value: "aller-retour", label: "Restitution" },
                   { value: "express", label: "Express" },
                 ].map(o => (
                   <button
