@@ -41,33 +41,33 @@ export function getDistance(from: string, to: string): number | null {
 
 export type TripType = "aller_simple" | "aller_retour" | "express";
 
-export function calculateBasePrice(depart: string, arrivee: string, type: TripType): { base: number; label: string } {
-  const cDep = extractCity(depart);
-  const cArr = extractCity(arrivee);
-  // Forfait 37 uniquement si départ ET arrivée sont dans le 37
-  const deptDep = CITY_DEPARTMENTS[cDep];
-  const deptArr = CITY_DEPARTMENTS[cArr];
-  const dept = deptDep && deptArr ? deptArr : null;
-  let base = 0;
-  let label = "Tarif au km";
+import { resolveLocalDeptTariff } from "./pricing-departments";
 
-  if (dept && FIXED_TARIFFS[dept]) {
-    const [simple, retour] = FIXED_TARIFFS[dept];
-    if (type === "aller_retour") { base = retour; label = `Forfait aller-retour ${dept}`; }
-    else if (type === "express") { base = Math.round(simple * 1.20); label = `Forfait express ${dept} (+20%)`; }
-    else { base = simple; label = `Forfait ${dept}`; }
-    return { base, label };
+export function calculateBasePrice(
+  depart: string,
+  arrivee: string,
+  type: TripType,
+  distOverride?: number | null,
+): { base: number; label: string; distance: number | null } {
+  // 1) Forfait départemental (CP / agglo) — prioritaire et tolérant aux adresses Google Places
+  const optionKey = type === "aller_retour" ? "aller-retour" : type === "express" ? "express" : "aller-simple";
+  const local = resolveLocalDeptTariff(depart, arrivee, 0, optionKey);
+  if (local) {
+    return { base: local.finalPrice, label: local.label, distance: null };
   }
 
-  const dist = getDistance(depart, arrivee);
-  if (dist == null || dist === 0) return { base: 0, label: "Distance inconnue" };
+  // 2) Distance : override (Google Distance Matrix) > table locale ville-à-ville
+  const dist = distOverride ?? getDistance(depart, arrivee);
+  if (dist == null || dist === 0) return { base: 0, label: "Distance non calculée", distance: dist };
+
   const rate = dist < 200 ? 1.20 : 0.85;
   const rateLabel = dist < 200 ? "1,20 €/km" : "0,85 €/km";
   const baseKm = Math.round(dist * rate);
-  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (aller-retour)`; }
+  let base = baseKm;
+  let label = `${dist} km × ${rateLabel}`;
+  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (livraison + restitution)`; }
   else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × ${rateLabel} (+20% express)`; }
-  else { base = baseKm; label = `${dist} km × ${rateLabel}`; }
-  return { base, label };
+  return { base, label, distance: dist };
 }
 
 export interface OptionItem {
