@@ -508,7 +508,7 @@ export default function DevisGenerator() {
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                <Clock size={11} className="text-[#e7c76a]" /> Heure
+                <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison
               </label>
               <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
                 className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
