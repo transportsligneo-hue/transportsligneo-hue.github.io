@@ -100,6 +100,7 @@ export function MissionCockpit({
   // l'UI sans attendre la propagation Supabase / fetch parent.
   const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
   const lastAutoOpenedKeyRef = useRef<ActionKind | null>(null);
+  const forceOpenConsumedRef = useRef(false);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
@@ -179,16 +180,25 @@ export function MissionCockpit({
   }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
+    if (!forceOpenSelfie) {
+      forceOpenConsumedRef.current = false;
+    }
+  }, [forceOpenSelfie]);
+
+  useEffect(() => {
     if (currentKey !== "selfie" && currentKey !== "selfie_final") {
       lastAutoOpenedKeyRef.current = null;
       return;
     }
 
-    const shouldForceOpen = forceOpenSelfie;
+    const shouldForceOpen = forceOpenSelfie && !forceOpenConsumedRef.current;
     const shouldAutoOpenForStep = lastAutoOpenedKeyRef.current !== currentKey;
 
     if ((shouldForceOpen || shouldAutoOpenForStep) && !openSelfie) {
       lastAutoOpenedKeyRef.current = currentKey;
+      if (shouldForceOpen) {
+        forceOpenConsumedRef.current = true;
+      }
       setOpenSelfie(true);
     }
   }, [currentKey, forceOpenSelfie, openSelfie]);
