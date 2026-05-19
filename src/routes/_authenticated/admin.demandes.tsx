@@ -268,6 +268,8 @@ function AdminDemandes() {
               <tbody>
                 {filtered.map((d) => {
                   const q = quoteFromDemande(d);
+                  const fromOpts = extractFromOptions(d.options);
+                  const ttc = d.prix_estime ?? fromOpts.prix ?? q?.priceTtc ?? null;
                   return (
                     <tr key={d.id} className="cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40" onClick={() => setSelected(d)}>
                       <td>
@@ -293,7 +295,7 @@ function AdminDemandes() {
                       </td>
                       <td>
                         <span className="font-semibold text-[color:var(--admin-text)] tabular-nums whitespace-nowrap">
-                          {q?.priceTtc != null ? `${Number(q.priceTtc).toFixed(0)} €` : "—"}
+                          {ttc != null ? `${Number(ttc).toFixed(0)} €` : "—"}
                         </span>
                       </td>
                       <td>
