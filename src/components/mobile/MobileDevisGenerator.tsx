@@ -551,6 +551,73 @@ export default function MobileDevisGenerator() {
               <p className="font-heading text-primary/80 text-[11px] tracking-[0.2em] uppercase">
                 Véhicule
               </p>
+
+              {/* 1. Plaque + recherche */}
+              <div>
+                <label className={labelCls}>Plaque d'immatriculation</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={immatriculation}
+                    onChange={e => { setImmatriculation(e.target.value.toUpperCase()); setSivMsg(null); }}
+                    placeholder="AA-123-AA"
+                    className={`${inputCls} uppercase tracking-widest flex-1`}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSivLookup}
+                    disabled={sivLoading || !immatriculation}
+                    className="px-4 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
+                  >
+                    {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    {sivLoading ? "..." : "Rechercher"}
+                  </button>
+                </div>
+                {sivMsg && (
+                  <p className={`mt-2 text-[11px] ${sivMsg.type === "ok" ? "text-emerald-500" : "text-red-500"}`}>
+                    {sivMsg.text}
+                  </p>
+                )}
+                <p className="mt-1.5 text-[10px] text-primary/50">
+                  Pré-remplit le véhicule automatiquement.
+                </p>
+              </div>
+
+              {/* 2. VIN optionnel */}
+              <div>
+                <label className={labelCls}>VIN <span className="opacity-60 normal-case">(optionnel)</span></label>
+                <input
+                  type="text"
+                  value={vin}
+                  onChange={e => setVin(e.target.value.toUpperCase())}
+                  placeholder="Auto-rempli via la plaque"
+                  className={`${inputCls} uppercase tracking-widest`}
+                  maxLength={17}
+                />
+              </div>
+
+              {/* 3. Infos auto-remplies */}
+              {(annee || puissance || finition) && (
+                <div className="p-3 rounded-xl border border-[#e7c76a]/30 bg-[#e7c76a]/[0.06] text-[11px] text-primary/75 grid grid-cols-2 gap-x-3 gap-y-1">
+                  {annee && <div><span className="opacity-60">Année :</span> {annee}</div>}
+                  {puissance && <div><span className="opacity-60">Puissance :</span> {puissance}</div>}
+                  {finition && <div className="col-span-2"><span className="opacity-60">Finition :</span> {finition}</div>}
+                </div>
+              )}
+
+              {/* 4. Marque / Modèle */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Marque</label>
+                  <input type="text" value={marque} onChange={e => setMarque(e.target.value)} placeholder="Peugeot" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Modèle</label>
+                  <input type="text" value={modele} onChange={e => setModele(e.target.value)} placeholder="308" className={inputCls} />
+                </div>
+              </div>
+
+              {/* 5 & 6. Type + Carburant */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}><Car size={11} className="inline mr-1" />Type</label>
@@ -571,16 +638,6 @@ export default function MobileDevisGenerator() {
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none" />
                   </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>Marque</label>
-                  <input type="text" value={marque} onChange={e => setMarque(e.target.value)} placeholder="Peugeot" className={inputCls} />
-                </div>
-                <div>
-                  <label className={labelCls}>Modèle</label>
-                  <input type="text" value={modele} onChange={e => setModele(e.target.value)} placeholder="308" className={inputCls} />
                 </div>
               </div>
             </div>
