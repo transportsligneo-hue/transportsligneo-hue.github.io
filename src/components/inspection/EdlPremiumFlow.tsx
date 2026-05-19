@@ -538,12 +538,16 @@ export function EdlPremiumFlow({
       });
 
       // Auto-avancement après upload réussi d'une photo (pas pour les scans
-      // qui ont OCR à valider). Améliore considérablement l'UX mobile :
-      // plus besoin de cliquer "Photo suivante" après chaque cliché.
-      if (currentStep.kind === "photo" && safeIndex < TOTAL - 1) {
+      // qui ont OCR à valider). On référence currentStep.id pour éviter une
+      // capture obsolète de safeIndex dans la closure du timer.
+      if (currentStep.kind === "photo") {
         setTimeout(() => {
-          setStepIndex((idx) => (idx === safeIndex ? idx + 1 : idx));
-        }, 700);
+          setStepIndex((idx) => {
+            const stepNow = STEPS[idx];
+            if (stepNow?.id === stepId && idx < TOTAL - 1) return idx + 1;
+            return idx;
+          });
+        }, 600);
       }
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
