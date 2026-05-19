@@ -293,7 +293,7 @@ export default function DevisGenerator() {
         message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: isExistingAccount ? "existing" : "created" },
+        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
       });
 
       const devisData: DevisData = {
