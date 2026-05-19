@@ -42,6 +42,11 @@ function AdminDevisDetailPage() {
     heure_souhaitee: row.heure_souhaitee, prix_estime: row.prix_estime,
     tarif_label: row.tarif_label, multiplier_label: row.multiplier_label,
     message: row.message, created_at: row.created_at,
+    societe: row._profile?.societe ?? null,
+    siret: row._profile?.siret ?? null,
+    tva_intra: row._profile?.tva_intra ?? null,
+    logo_url: row._profile?.logo_url ?? null,
+    adresse: row._profile?.adresse_facturation ?? row._profile?.adresse ?? null,
   });
 
   const load = async () => {
@@ -52,11 +57,29 @@ function AdminDevisDetailPage() {
       setLoading(false);
       return;
     }
-    setDevis(data);
+    // Enrich with company info from profile (by user_id or email)
+    let profile: any = null;
+    if (data.user_id) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .eq("user_id", data.user_id)
+        .maybeSingle();
+      profile = p;
+    }
+    if (!profile && data.email) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .eq("email", data.email)
+        .maybeSingle();
+      profile = p;
+    }
+    const enriched = { ...data, _profile: profile };
+    setDevis(enriched);
     setLoading(false);
-    // Preview PDF
     try {
-      const blob = await generateDevisPdf(buildDevisData(data));
+      const blob = await generateDevisPdf(buildDevisData(enriched));
       setPdfUrl(URL.createObjectURL(blob));
     } catch (e) {
       console.error("PDF preview error", e);
