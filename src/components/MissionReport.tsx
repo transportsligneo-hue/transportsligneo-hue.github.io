@@ -78,6 +78,26 @@ const docTypeLabels: Record<string, string> = {
   carte_grise: "Carte grise", contrat: "Contrat", autre: "Autre",
 };
 
+const etapeLabels: Record<string, string> = {
+  propose: "Mission attribuée",
+  accepte: "Mission acceptée",
+  refusee: "Mission refusée",
+  en_route_pickup: "En route vers prise en charge",
+  arrivee_pickup: "Arrivé au lieu de prise en charge",
+  etat_lieux: "État des lieux départ",
+  etat_lieux_depart: "État des lieux départ",
+  en_cours: "Trajet en cours",
+  arrivee_livraison: "Arrivé au lieu de livraison",
+  etat_lieux_arrivee: "État des lieux arrivée",
+  en_attente_validation: "En attente de validation",
+  validee: "Mission validée",
+  termine: "Mission terminée",
+  annule: "Mission annulée",
+  incident: "Incident signalé",
+};
+
+const etapeLabel = (key: string): string => etapeLabels[key] || key.replace(/_/g, " ");
+
 const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
 
 async function signedStorageUrl(bucket: string, path: string, expires = 3600) {
