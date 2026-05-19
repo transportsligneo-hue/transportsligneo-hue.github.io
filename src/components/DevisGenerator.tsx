@@ -205,43 +205,50 @@ export default function DevisGenerator() {
 
   async function handleSubmit() {
     if (!pricing || distance == null) return;
+    // CGU requise dans tous les cas
     if (!cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
-    if (password.length < 8) { setAccountError("Le mot de passe doit contenir au moins 8 caractères."); return; }
+    // Création de compte optionnelle : seulement si un mot de passe est saisi
+    const wantsAccount = password.length > 0;
+    if (wantsAccount && password.length < 8) {
+      setAccountError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
     setAccountError("");
     setSending(true);
     try {
-      // 1) Création du compte client (vérification email requise côté Supabase)
-      try {
-        const token = await getRecaptchaToken("signup_devis");
-        // reCAPTCHA token is optional; signup proceeds even if unavailable
-        void token;
-      } catch { /* ignore */ }
-
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-          data: {
-            role: "client",
-            nom, prenom, telephone,
-            societe: societe || "",
-          },
-        },
-      });
-
+      // 1) Création du compte client (optionnelle)
       let isExistingAccount = false;
-      if (signUpError) {
-        const msg = signUpError.message.toLowerCase();
-        if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("user already")) {
-          isExistingAccount = true;
-        } else {
-          setAccountError(signUpError.message);
-          setSending(false);
-          return;
+      if (wantsAccount) {
+        try {
+          const token = await getRecaptchaToken("signup_devis");
+          void token;
+        } catch { /* ignore */ }
+
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+            data: {
+              role: "client",
+              nom, prenom, telephone,
+              societe: societe || "",
+            },
+          },
+        });
+
+        if (signUpError) {
+          const msg = signUpError.message.toLowerCase();
+          if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("user already")) {
+            isExistingAccount = true;
+          } else {
+            setAccountError(signUpError.message);
+            setSending(false);
+            return;
+          }
         }
+        setAccountCreated(!isExistingAccount);
       }
-      setAccountCreated(!isExistingAccount);
 
       // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
