@@ -67,10 +67,27 @@ export default function TunnelReservation({ onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missionNumero, setMissionNumero] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Distance Google async (fallback quand la table locale ne reconnaît pas les adresses)
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!form.ville_depart || !form.ville_arrivee) return;
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(form.ville_depart, form.ville_arrivee)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [form.ville_depart, form.ville_arrivee]);
 
   const { base: basePrice, label: priceLabel } = useMemo(
-    () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet),
-    [form.ville_depart, form.ville_arrivee, form.type_trajet]
+    () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance),
+    [form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance]
   );
   const optionsTotal = useMemo(() => calculateOptionsTotal(form.options), [form.options]);
   const total = basePrice + optionsTotal;
