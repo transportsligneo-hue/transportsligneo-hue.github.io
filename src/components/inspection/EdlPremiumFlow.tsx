@@ -404,11 +404,55 @@ export function EdlPremiumFlow({
     }
   }, [safeIndex, STEPS]);
 
-  // === Lock body scroll
+  // === Libération mémoire : révoque les blob: des étapes non actives.
+  // Chaque blob retient le File compressé (jusqu'à plusieurs Mo). Sur 20+ photos,
+  // sans révocation, on dépasse facilement la limite mémoire mobile (OOM).
+  // L'aperçu n'est utile que pour l'étape courante — les autres ont déjà été uploadées.
+  useEffect(() => {
+    const currentId = STEPS[safeIndex]?.id;
+    setStates(prev => {
+      let changed = false;
+      const next: Record<string, StepState> = {};
+      for (const [id, st] of Object.entries(prev)) {
+        if (id !== currentId && st?.status === "success" && st.previewUrl?.startsWith("blob:")) {
+          revokeBlobUrl(st.previewUrl);
+          next[id] = { ...st, previewUrl: undefined };
+          changed = true;
+        } else {
+          next[id] = st;
+        }
+        // Révoque aussi les blob: des extras non-uploading
+        if (st?.extras?.length) {
+          const cleanedExtras = st.extras.map(ex => {
+            if (id !== currentId && ex.status === "success" && ex.previewUrl?.startsWith("blob:")) {
+              revokeBlobUrl(ex.previewUrl);
+              changed = true;
+              return { ...ex, previewUrl: ex.storagePath ?? "" };
+            }
+            return ex;
+          });
+          next[id] = { ...next[id], extras: cleanedExtras };
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [safeIndex, STEPS]);
+
+  // === Lock body scroll + cleanup blobs au démontage
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prev;
+      // Révoque TOUS les blobs restants pour éviter les fuites mémoire
+      setStates(current => {
+        for (const st of Object.values(current)) {
+          revokeBlobUrl(st?.previewUrl);
+          st?.extras?.forEach(ex => revokeBlobUrl(ex.previewUrl));
+        }
+        return current;
+      });
+    };
   }, []);
 
   // === Inspection de la phase courante — créée à la première photo nécessaire
