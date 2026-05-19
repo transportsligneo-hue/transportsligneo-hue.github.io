@@ -25,12 +25,27 @@ const CITIES = ["Tours","Paris","Lyon","Marseille","Bordeaux","Nantes","Lille","
 const VEHICLE_TYPES = [{value:"citadine",label:"Citadine"},{value:"berline",label:"Berline"},{value:"suv",label:"SUV"},{value:"utilitaire",label:"Utilitaire"},{value:"autre",label:"Autre"}];
 const ENERGY_TYPES = [{value:"diesel",label:"Diesel"},{value:"essence",label:"Essence"},{value:"electrique",label:"Électrique"},{value:"hybride",label:"Hybride"}];
 
+function extractCity(addr: string): string {
+  if (!addr) return "";
+  const all = new Set<string>([...CITIES, ...Object.keys(CITY_DEPARTMENTS)]);
+  const lower = addr.toLowerCase();
+  // priorité aux villes les plus longues pour éviter de matcher "Tours" dans "Tourcoing"
+  const sorted = [...all].sort((a, b) => b.length - a.length);
+  for (const c of sorted) {
+    const re = new RegExp(`(^|[^a-zà-ÿ])${c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}([^a-zà-ÿ]|$)`, "i");
+    if (re.test(lower)) return c;
+  }
+  return addr.trim() === c2 ? addr : (addr.trim().split(",")[0] || "");
+}
+
 function getDistance(from: string, to: string): number | null {
-  if (from === to) return 0;
-  if (CITY_DISTANCES[from]?.[to]) return CITY_DISTANCES[from][to];
-  if (CITY_DISTANCES[to]?.[from]) return CITY_DISTANCES[to][from];
-  const a = CITY_DISTANCES["Tours"]?.[from] ?? CITY_DISTANCES[from]?.["Tours"];
-  const b = CITY_DISTANCES["Tours"]?.[to] ?? CITY_DISTANCES[to]?.["Tours"];
+  const cFrom = extractCity(from) || from;
+  const cTo = extractCity(to) || to;
+  if (cFrom === cTo) return 0;
+  if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
+  if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
+  const a = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
+  const b = CITY_DISTANCES["Tours"]?.[cTo] ?? CITY_DISTANCES[cTo]?.["Tours"];
   if (a != null && b != null) return Math.round((a + b) * 0.85);
   return null;
 }
