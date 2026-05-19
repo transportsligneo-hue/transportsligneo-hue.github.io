@@ -97,18 +97,19 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
       // Fetch attribution
       const { data: attr } = await supabase
         .from("attributions")
-        .select("id, statut, created_at, trajet_id, convoyeur_id")
+        .select("id, statut, created_at, numero_mission, trajet_id, convoyeur_id")
         .eq("id", attributionId)
         .single();
       if (!attr) { setError("Attribution introuvable."); return; }
 
-      // Fetch trajet, convoyeur, inspections, GPS, documents in parallel
-      const [trajetRes, convoyeurRes, inspectionsRes, gpsRes, docsRes] = await Promise.all([
+      // Fetch trajet, convoyeur, inspections, GPS, documents, history in parallel
+      const [trajetRes, convoyeurRes, inspectionsRes, gpsRes, docsRes, histRes] = await Promise.all([
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).single(),
         supabase.from("convoyeurs").select("nom, prenom, email, telephone").eq("id", attr.convoyeur_id).single(),
         supabase.from("inspections").select("id, type, statut, notes, created_at").eq("attribution_id", attributionId),
         supabase.from("mission_locations").select("recorded_at").eq("attribution_id", attributionId).order("recorded_at", { ascending: true }),
         supabase.from("mission_documents").select("type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
+        supabase.from("mission_etape_history").select("etape, created_at, note").eq("attribution_id", attributionId).order("created_at", { ascending: true }),
       ]);
 
       // Fetch photos for each inspection
@@ -140,12 +141,13 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
       }
 
       setReport({
-        attribution: { id: attr.id, statut: attr.statut, created_at: attr.created_at },
+        attribution: { id: attr.id, statut: attr.statut, created_at: attr.created_at, numero_mission: (attr as { numero_mission?: string | null }).numero_mission ?? null },
         trajet: trajetRes.data as ReportData["trajet"],
         convoyeur: convoyeurRes.data as ReportData["convoyeur"],
         inspections,
         gps: { points: gpsData.length, startTime, endTime, durationMinutes },
         documents: signedDocs as ReportData["documents"],
+        history: (histRes.data || []) as ReportData["history"],
       });
     } catch {
       setError("Erreur lors de la génération du rapport.");
