@@ -46,7 +46,6 @@ function MissionDetail() {
       .from("missions")
       .select("*")
       .eq("id", missionId)
-      .eq("user_id", user.id)
       .maybeSingle()
       .then(async ({ data }) => {
         if (cancelled) return;
