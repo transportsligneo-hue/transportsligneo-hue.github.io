@@ -11,6 +11,7 @@ import {
   getAutocompleteSuggestions, getGoogleDistanceKm, isGoogleAvailable, loadGoogle,
   resetPlacesSession, type PlaceSuggestion,
 } from "@/lib/google-places";
+import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
