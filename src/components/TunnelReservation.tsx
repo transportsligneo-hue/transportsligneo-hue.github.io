@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Loader2, MapPin, Calendar, Car, User, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import {
   RESERVATION_OPTIONS,
   type TripType,
 } from "@/lib/reservation-pricing";
+import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 
 const STEPS = ["Trajet", "Options", "Véhicule", "Coordonnées", "Confirmation"];
 
@@ -66,10 +67,27 @@ export default function TunnelReservation({ onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missionNumero, setMissionNumero] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Distance Google async (fallback quand la table locale ne reconnaît pas les adresses)
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!form.ville_depart || !form.ville_arrivee) return;
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(form.ville_depart, form.ville_arrivee)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [form.ville_depart, form.ville_arrivee]);
 
   const { base: basePrice, label: priceLabel } = useMemo(
-    () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet),
-    [form.ville_depart, form.ville_arrivee, form.type_trajet]
+    () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance),
+    [form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance]
   );
   const optionsTotal = useMemo(() => calculateOptionsTotal(form.options), [form.options]);
   const total = basePrice + optionsTotal;
@@ -252,6 +270,22 @@ export default function TunnelReservation({ onClose }: Props) {
         </p>
       )}
 
+      {/* Live price strip — visible dès l'étape 1 quand un prix est calculé */}
+      {step < 5 && step > 0 && (form.ville_depart && form.ville_arrivee) && (
+        <div className="mt-6 flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-primary/30 bg-primary/5">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80">Estimation live</p>
+            <p className="text-cream/80 text-xs mt-0.5 truncate">{priceLabel}{distanceLoading ? " · calcul…" : ""}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="font-heading text-2xl text-primary leading-none">
+              {total > 0 ? `${total.toFixed(2)} €` : "—"}
+            </p>
+            <p className="text-[10px] text-cream/50 mt-1">TTC, péages & carburant inclus</p>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       {step < 5 && (
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-primary/15">
@@ -276,7 +310,7 @@ export default function TunnelReservation({ onClose }: Props) {
           ) : (
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={() => setConfirmOpen(true)}
               disabled={!canNext() || submitting}
               className="flex items-center gap-2 px-7 py-3 bg-primary text-navy font-medium text-sm uppercase tracking-wider hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
@@ -286,12 +320,51 @@ export default function TunnelReservation({ onClose }: Props) {
           )}
         </div>
       )}
+
+      {/* Modal de confirmation explicite — aucune demande envoyée tant que l'utilisateur n'a pas validé */}
+      {confirmOpen && step === 4 && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !submitting && setConfirmOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-navy border border-primary/40 rounded-lg p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-primary/80 mb-2">Dernière étape</p>
+            <h3 className="font-heading text-2xl text-cream mb-3">Valider et envoyer ?</h3>
+            <p className="text-cream/70 text-sm mb-5">
+              Votre demande sera envoyée à notre équipe et apparaîtra dans votre espace client.
+              Total : <span className="text-primary font-medium">{total.toFixed(2)} € TTC</span>.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                disabled={submitting}
+                className="flex-1 px-4 py-2.5 text-sm uppercase tracking-wider text-cream/70 hover:text-primary border border-cream/20 rounded transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={async () => { await handleSubmit(); setConfirmOpen(false); }}
+                disabled={submitting}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-navy font-medium text-sm uppercase tracking-wider hover:bg-primary/90 disabled:opacity-40 rounded transition-colors"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Envoyer la demande
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function tripTypeLabel(t: TripType): string {
-  return t === "aller_simple" ? "Aller simple" : t === "aller_retour" ? "Aller-retour" : "Express (+20%)";
+  return t === "aller_simple" ? "Livraison simple" : t === "aller_retour" ? "Livraison + restitution" : "Express (+20%)";
 }
 
 // ----- Steps -----
@@ -341,8 +414,8 @@ function Step2({
   basePrice: number; priceLabel: string; optionsTotal: number; total: number;
 }) {
   const types: { value: TripType; label: string; desc: string }[] = [
-    { value: "aller_simple", label: "Aller simple", desc: "Convoyage A → B" },
-    { value: "aller_retour", label: "Aller-retour", desc: "Tarif avantageux" },
+    { value: "aller_simple", label: "Livraison simple", desc: "Convoyage A → B" },
+    { value: "aller_retour", label: "Livraison + restitution", desc: "Aller + retour véhicule" },
     { value: "express", label: "Express", desc: "+20% prioritaire" },
   ];
   return (
