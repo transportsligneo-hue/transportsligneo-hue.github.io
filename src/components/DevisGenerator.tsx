@@ -462,11 +462,11 @@ export default function DevisGenerator() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ *</label>
-                      <input value={departure} onChange={e => setDeparture(e.target.value)} className={inputCard} required />
+                      <PlacesInput value={departure} onChange={setDeparture} className={inputCard} fallbackOptions={CITIES} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée *</label>
-                      <input value={arrival} onChange={e => setArrival(e.target.value)} className={inputCard} required />
+                      <PlacesInput value={arrival} onChange={setArrival} className={inputCard} fallbackOptions={CITIES} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée</label>
