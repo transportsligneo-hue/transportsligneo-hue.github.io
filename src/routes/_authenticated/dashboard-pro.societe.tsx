@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Save, Loader2, CheckCircle } from "lucide-react";
+import { LogoUploader } from "@/components/LogoUploader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/societe")({
   component: ProSociete,
@@ -13,28 +14,31 @@ function ProSociete() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
-    societe: "", siret: "", prenom: "", nom: "", telephone: "", email: "",
+    societe: "", siret: "", tva_intra: "", prenom: "", nom: "", telephone: "", email: "",
   });
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("societe, siret, prenom, nom, telephone, email" as never)
+      .select("societe, siret, tva_intra, prenom, nom, telephone, email, logo_url" as never)
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        const row = data as Partial<typeof form> | null;
+        const row = data as (Partial<typeof form> & { logo_url?: string | null }) | null;
         if (row) {
           setForm({
             societe: row.societe ?? "",
             siret: row.siret ?? "",
+            tva_intra: row.tva_intra ?? "",
             prenom: row.prenom ?? "",
             nom: row.nom ?? "",
             telephone: row.telephone ?? "",
             email: row.email ?? user.email ?? "",
           });
+          setLogoUrl(row.logo_url ?? null);
         }
         setLoading(false);
       });
@@ -42,6 +46,15 @@ function ProSociete() {
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [k]: e.target.value });
+
+  const handleLogoChange = async (url: string | null) => {
+    if (!user) return;
+    setLogoUrl(url);
+    await supabase
+      .from("profiles")
+      .update({ logo_url: url } as never)
+      .eq("user_id", user.id);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +66,7 @@ function ProSociete() {
       .update({
         societe: form.societe,
         siret: form.siret,
+        tva_intra: form.tva_intra,
         prenom: form.prenom,
         nom: form.nom,
         telephone: form.telephone,
@@ -81,17 +95,32 @@ function ProSociete() {
           </div>
           <div>
             <p className="font-semibold text-pro-text">Identité de l'entreprise</p>
-            <p className="text-pro-muted text-xs">Visible sur vos factures</p>
+            <p className="text-pro-muted text-xs">Visible sur vos factures et devis PDF</p>
           </div>
         </div>
+
+        {user && (
+          <LogoUploader
+            ownerUserId={user.id}
+            value={logoUrl}
+            onChange={handleLogoChange}
+            variant="light"
+            label="Logo de l'entreprise"
+          />
+        )}
 
         <Field label="Raison sociale" required>
           <input value={form.societe} onChange={update("societe")} required className={inputCls} />
         </Field>
 
-        <Field label="SIRET">
-          <input value={form.siret} onChange={update("siret")} placeholder="14 chiffres" className={inputCls} />
-        </Field>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="SIRET">
+            <input value={form.siret} onChange={update("siret")} placeholder="14 chiffres" className={inputCls} />
+          </Field>
+          <Field label="N° TVA intracommunautaire">
+            <input value={form.tva_intra} onChange={update("tva_intra")} placeholder="FR..." className={inputCls} />
+          </Field>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Prénom contact">
