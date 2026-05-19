@@ -325,6 +325,8 @@ export default function DevisGenerator() {
         marque, modele,
         immatriculation: plaqueInconnue ? "" : immatriculation,
         carburant: energy,
+        prix_estime: pricing.finalPrice,
+        distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
@@ -346,6 +348,7 @@ export default function DevisGenerator() {
         modele_retour: retourModele,
         vin_retour: retourVin,
       });
+
 
       await notifyAdmin({
         type: "estimation",
