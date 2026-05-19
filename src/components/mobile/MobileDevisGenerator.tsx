@@ -11,6 +11,7 @@ import {
   getAutocompleteSuggestions, getGoogleDistanceKm, isGoogleAvailable, loadGoogle,
   resetPlacesSession, type PlaceSuggestion,
 } from "@/lib/google-places";
+import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
@@ -91,6 +92,9 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
+  // Tarif local par département (10 métropoles)
+  const local = distance >= 0 ? resolveLocalDeptTariff(departure, arrival, distance, option) : null;
+  if (local) return local;
   if (distance <= 0) {
     const [simple, retour] = FIXED_TARIFFS["37-intra"];
     const label = "Forfait local (minimum)";
