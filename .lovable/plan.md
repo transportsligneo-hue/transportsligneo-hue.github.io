@@ -1,60 +1,29 @@
 ## Objectif
-Réorganiser l'étape "Informations véhicule" pour mettre la **plaque en premier** et ajouter un champ **VIN optionnel** visible, sans toucher au calcul des tarifs, à la logique du tunnel ni au design (couleurs, typographie, cartes).
+Remplacer l'API RapidAPI actuelle (`api-siv-systeme-d-immatriculation-des-vehicules`) par la nouvelle API `api-de-plaque-d-immatriculation-france.p.rapidapi.com` dans `src/lib/plate.functions.ts`, sans toucher au reste (UI, tunnel, validations).
 
-## Scope strict
-- Fichiers modifiés : `src/components/DevisGenerator.tsx` (Step 2 — desktop) et `src/components/mobile/MobileDevisGenerator.tsx` (étape véhicule — mobile).
-- Aucun changement de state, de validation `isComplete`, de payload Supabase, de pricing, de hooks ou d'imports métier.
-- Aucun changement de couleurs ni de classes design system (réutilisation de `inputCard`, `selectCard`, `inputCls`, tokens `cream`, `#e7c76a`, `#5fb6ff`).
+## Scope
+- Fichier modifié : `src/lib/plate.functions.ts` uniquement.
+- Aucune modification de `DevisGenerator.tsx`, `MobileDevisGenerator.tsx` ni du contrat de retour `PlateLookupResult` (mêmes champs : `vin`, `marque`, `modele`, `annee`, `carburant`, `puissance`, `finition`).
 
-## Desktop — `DevisGenerator.tsx` Step 2
+## Changements techniques
 
-Nouvel ordre du JSX (le state existant reste identique) :
+1. **Nouveau host & URL**
+   - `RAPIDAPI_HOST = "api-de-plaque-d-immatriculation-france.p.rapidapi.com"`
+   - URL : `https://${RAPIDAPI_HOST}/?plaque=${encodeURIComponent(plate)}` (query param `?plaque=...` au lieu du path).
+2. **Headers** inchangés (`x-rapidapi-key`, `x-rapidapi-host`) — la clé reste lue depuis `process.env.RAPIDAPI_KEY` (déjà configurée).
+3. **Parsing de la réponse**
+   - Conserver `pick()` avec des fallbacks larges : la nouvelle API peut renvoyer des champs avec des noms différents (ex. `immatriculation`, `marque`, `modele`, `date1erCir_fr`, `energie`, `puissance_fiscale`, `vin`, `version`, etc.).
+   - Étendre la liste des clés candidates pour couvrir les variantes connues de cette API tout en gardant l'ancienne liste comme fallback.
+   - Garder le déballage `json?.data ?? json?.result ?? json?.vehicule ?? json`.
+4. **Gestion d'erreurs** : inchangée (401/403 → clé invalide, 404 → introuvable, parse fail → réponse invalide, hasAny=false → "Aucune donnée").
+5. **Logs `[SIV]`** : conservés, utiles pour vérifier le format renvoyé après bascule.
 
-1. **Bloc Plaque** (en haut, pleine largeur)
-   - Champ plaque + bouton "Rechercher" — version actuelle déjà fonctionnelle, juste **déplacée en tête**.
-   - Bouton "Rechercher" rendu plus visible : padding accru, icône `Search`/`Sparkles` conservée, contraste gold renforcé sur le style déjà existant (pas de nouvelle couleur).
-   - États : `sivLoading` (spinner), `sivMsg` ok/err (déjà géré).
-   - Checkbox "Je ne connais pas encore la plaque" → reste en dessous.
-2. **Bloc VIN (optionnel)** — nouveau champ visible
-   - Label : "VIN (optionnel)".
-   - Input contrôlé par `vin` / `setVin` (state déjà présent).
-   - Auto-rempli par `handleSivLookup` (déjà câblé).
-   - Helper text discret : "Renseigné automatiquement si trouvé via la plaque."
-   - Jamais requis, ne bloque rien.
-3. **Bloc Infos auto-remplies** : carte récap actuelle (`annee`, `puissance`, `finition`) déplacée juste sous le VIN, retirée du bloc plaque.
-4. **Marque / Modèle** : champs existants conservés (auto-remplis par l'API).
-5. **Type de véhicule** (select).
-6. **Carburant** (select, auto-rempli si l'API renvoie `carburant`).
-7. **État du véhicule** (Roulant / Non roulant) — reste en dernier.
+## Clé API
+- Ne pas hardcoder la clé donnée dans le message (`20f8ea0d...`). On réutilise `RAPIDAPI_KEY` existante. Si la nouvelle API exige une clé différente, je le préciserai après le premier test et on passera par `update_secret`.
 
-Pas de modification de `handleSivLookup`, ni de `isComplete`, ni de la soumission.
+## Test post-implémentation
+- Plaque test : `GR698YE` et `FH-034-DD` via le tunnel desktop → vérifier auto-fill marque/modèle/année/VIN.
+- Inspecter les logs serveur (`[SIV] body keys`) pour ajuster les noms de champs si nécessaire.
 
-## Mobile — `MobileDevisGenerator.tsx` étape véhicule
-
-État actuel : pas de lookup plaque côté mobile. À ajouter pour parité.
-
-1. Ajouter les states locaux : `immatriculation`, `vin`, `annee`, `puissance`, `finition`, `sivLoading`, `sivMsg` (mêmes noms et types que desktop).
-2. Importer `lookupPlate` + `useServerFn` et reproduire `handleSivLookup` à l'identique (copie de la fonction desktop).
-3. Réordonner l'étape véhicule pour matcher le desktop :
-   1. Plaque + bouton "Rechercher" (full width, bouton visible)
-   2. VIN (optionnel)
-   3. Carte infos auto (année / puissance / finition) si remplie
-   4. Marque, Modèle
-   5. Type de véhicule
-   6. Carburant
-   7. État du véhicule (si présent ; sinon laisser inchangé)
-4. Mettre à jour le payload existant : `immatriculation: immatriculation` au lieu de `""` (ligne 228) pour propager la plaque saisie.
-5. Garder les classes `inputCls` et la grille responsive existantes (1 col mobile).
-
-## Garanties de non-régression
-- `isComplete`, validation `step === 2`, calculs `pricing`/`distance`, payloads Supabase et email : non touchés.
-- Pas de framer-motion (rappel mémoire projet) — uniquement CSS/Tailwind.
-- Pas de nouvelle couleur, pas de nouveau token. Réutilisation stricte du design system.
-- Le champ VIN optionnel n'apparaît dans aucune validation bloquante.
-
-## Tests manuels post-implémentation
-1. Desktop : saisir plaque test `GR698YE` → cliquer Rechercher → vérifier auto-fill VIN, marque, modèle, année, carburant, finition.
-2. Desktop : cocher "Je ne connais pas encore la plaque" → bouton Rechercher disabled, parcours continue.
-3. Desktop : aller jusqu'au paiement, vérifier prix inchangé sur un trajet de référence.
-4. Mobile (viewport 390) : même séquence ; vérifier que l'étape véhicule respecte le nouvel ordre et que le bouton Rechercher est tap-friendly.
-5. Vérifier que VIN saisi manuellement est bien envoyé dans le payload.
+## Non-régression
+- Pas de changement de signature côté front, pas de migration DB, pas de changement UI.
