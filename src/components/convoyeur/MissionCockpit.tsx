@@ -142,22 +142,29 @@ export function MissionCockpit({
 
     if (e === "en_attente_validation" || e === "termine") return "done";
 
-    // Selfie obligatoire dès le démarrage du trajet (et sur toutes les
-    // étapes terrain tant qu'il n'est pas pris/validé/bypassé).
-    if (!selfieOK && ["assignee","acceptee","en_route","sur_place","vehicule_recupere"].includes(e)) return "selfie";
+    // Selfie obligatoire sur TOUTES les étapes terrain tant qu'il n'est pas
+    // pris/validé/bypassé — empêche tout contournement entre départ et clôture.
+    const fieldSteps = ["assignee","acceptee","en_route","sur_place","vehicule_recupere","edl_depart_fait","en_livraison","arrive_destination","edl_arrivee_fait"];
+    if (!selfieOK && fieldSteps.includes(e)) return "selfie";
     if (e === "assignee" || e === "acceptee") return "demarrer";
     if (e === "en_route") return "arrive_depart";
     if (e === "sur_place" || e === "vehicule_recupere") {
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
-    if (e === "edl_depart_fait") return "demarrer_livraison";
+    if (e === "edl_depart_fait") {
+      if (!inspectionDepartDone) return "edl_depart";
+      return "demarrer_livraison";
+    }
     if (e === "en_livraison") return "arrive_livraison";
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
       return "cloturer";
     }
-    if (e === "edl_arrivee_fait") return "cloturer";
+    if (e === "edl_arrivee_fait") {
+      if (!inspectionArriveeDone) return "edl_arrivee";
+      return "cloturer";
+    }
     return "demarrer";
   }, [inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
