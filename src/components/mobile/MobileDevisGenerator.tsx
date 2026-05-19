@@ -121,6 +121,14 @@ export default function MobileDevisGenerator() {
   const [option, setOption] = useState("aller-simple");
   const [marque, setMarque] = useState("");
   const [modele, setModele] = useState("");
+  const [immatriculation, setImmatriculation] = useState("");
+  const [vin, setVin] = useState("");
+  const [annee, setAnnee] = useState("");
+  const [puissance, setPuissance] = useState("");
+  const [finition, setFinition] = useState("");
+  const [sivLoading, setSivLoading] = useState(false);
+  const [sivMsg, setSivMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const lookupPlateFn = useServerFn(lookupPlate);
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [comment, setComment] = useState("");
