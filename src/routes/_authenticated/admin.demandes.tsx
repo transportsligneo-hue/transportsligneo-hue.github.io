@@ -419,15 +419,22 @@ function DemandeDrawer({
       </DrawerSection>
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
-        <PriceBlock
-          quote={quote}
-          priceTtc={demande.prix_estime ?? undefined}
-          title="Estimation"
-          source={demande.prix_estime != null ? "Estimation de l'estimateur client" : undefined}
-        />
-        {demande.distance_km != null && demande.distance_km > 0 && (
-          <p className="mt-2 text-xs text-white/60">Distance estimée : {demande.distance_km} km</p>
-        )}
+        {(() => {
+          const fromOpts = extractFromOptions(demande.options);
+          const ttc = demande.prix_estime ?? fromOpts.prix ?? undefined;
+          const km = demande.distance_km ?? fromOpts.distance ?? null;
+          const src = demande.prix_estime != null
+            ? "Estimation de l'estimateur client"
+            : fromOpts.prix != null ? "Estimation reconstituée depuis le devis" : undefined;
+          return (
+            <>
+              <PriceBlock quote={quote} priceTtc={ttc} title="Estimation" source={src} />
+              {km != null && km > 0 && (
+                <p className="mt-2 text-xs text-white/60">Distance estimée : {km} km</p>
+              )}
+            </>
+          );
+        })()}
       </DrawerSection>
 
 
