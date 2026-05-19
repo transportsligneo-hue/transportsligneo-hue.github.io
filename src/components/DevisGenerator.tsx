@@ -161,7 +161,7 @@ export default function DevisGenerator() {
   const tva = Math.round(priceHT * 0.2);
   const priceTTC = priceHT + tva;
 
-  const inputBare = "w-full bg-transparent text-cream text-sm placeholder:text-cream/40 focus:outline-none";
+  // inputBare retiré : la barre principale utilise des styles inline premium
   const inputCard = "w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-cream text-sm placeholder:text-cream/40 focus:border-[#5fb6ff]/60 focus:outline-none focus:ring-1 focus:ring-[#5fb6ff]/30 transition-all";
   const selectCard = inputCard + " appearance-none";
 
