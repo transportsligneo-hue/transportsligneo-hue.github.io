@@ -375,6 +375,20 @@ function AdminClientDetail() {
             <AdminField label="Société">
               <input className={inp} value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} />
             </AdminField>
+            <AdminField label="Logo entreprise">
+              <LogoUploader
+                ownerUserId={clientId}
+                value={profile.logo_url}
+                onChange={async (url) => {
+                  await supabase.functions.invoke("admin-user-actions", {
+                    body: { action: "update_profile", user_id: clientId, profile: { logo_url: url } },
+                  });
+                  setProfile({ ...profile, logo_url: url });
+                }}
+                variant="light"
+                label="Logo de l'entreprise"
+              />
+            </AdminField>
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="SIRET">
                 <input className={inp} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} />
