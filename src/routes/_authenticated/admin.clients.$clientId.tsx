@@ -47,6 +47,7 @@ interface Profile {
   adresse_facturation: string | null;
   type_client: string | null;
   statut: string | null;
+  logo_url: string | null;
   created_at: string;
 }
 
