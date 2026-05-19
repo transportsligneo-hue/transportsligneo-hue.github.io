@@ -178,9 +178,13 @@ export function MissionCockpit({
   }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
-    if (!forceOpenSelfie || currentKey !== "selfie") return;
-    setOpenSelfie(true);
-  }, [currentKey, forceOpenSelfie]);
+    if (currentKey === "selfie" && (forceOpenSelfie || !openSelfie)) {
+      setOpenSelfie(true);
+    }
+    if (currentKey === "selfie_final" && !openSelfie) {
+      setOpenSelfie(true);
+    }
+  }, [currentKey, forceOpenSelfie, openSelfie]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
   const currentDef = STEPS[currentIdx] ?? STEPS[0];
