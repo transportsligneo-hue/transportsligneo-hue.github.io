@@ -23,6 +23,7 @@ import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPre
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { missionNumberOf } from "@/lib/mission-number";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
@@ -510,7 +511,7 @@ function AdminAttributions() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-pro-text font-semibold">
-                      {a.numero_mission || `MIS-${a.id.slice(0, 8)}`}
+                      {missionNumberOf(a)}
                     </p>
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                       {statutLabels[a.statut] ?? a.statut}
@@ -717,7 +718,7 @@ function AdminAttributions() {
         <AdminDetailDrawer
           open={!!selectedAttr}
           onClose={() => setSelectedAttr(null)}
-          title={attrDetail?.numero_mission || `Mission ${selectedAttr.id.slice(0, 8)}`}
+          title={missionNumberOf({ id: selectedAttr.id, created_at: selectedAttr.created_at, numero_mission: attrDetail?.numero_mission })}
           subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
           badge={
             <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
