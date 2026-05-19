@@ -6,7 +6,7 @@
  *   - démarrage / arrivée / inspection
  *   - signatures et PV désormais portés par l'inspection
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Camera,
@@ -99,6 +99,8 @@ export function MissionCockpit({
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
   const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
+  const lastAutoOpenedKeyRef = useRef<ActionKind | null>(null);
+  const forceOpenConsumedRef = useRef(false);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
@@ -178,10 +180,25 @@ export function MissionCockpit({
   }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
-    if (currentKey === "selfie" && (forceOpenSelfie || !openSelfie)) {
-      setOpenSelfie(true);
+    if (!forceOpenSelfie) {
+      forceOpenConsumedRef.current = false;
     }
-    if (currentKey === "selfie_final" && !openSelfie) {
+  }, [forceOpenSelfie]);
+
+  useEffect(() => {
+    if (currentKey !== "selfie" && currentKey !== "selfie_final") {
+      lastAutoOpenedKeyRef.current = null;
+      return;
+    }
+
+    const shouldForceOpen = forceOpenSelfie && !forceOpenConsumedRef.current;
+    const shouldAutoOpenForStep = lastAutoOpenedKeyRef.current !== currentKey;
+
+    if ((shouldForceOpen || shouldAutoOpenForStep) && !openSelfie) {
+      lastAutoOpenedKeyRef.current = currentKey;
+      if (shouldForceOpen) {
+        forceOpenConsumedRef.current = true;
+      }
       setOpenSelfie(true);
     }
   }, [currentKey, forceOpenSelfie, openSelfie]);
@@ -430,7 +447,7 @@ export function MissionCockpitStickyCTA({
 
   let label = "Continuer";
   if (["en_attente_validation", "validee", "termine"].includes(statut)) label = "Mission envoyée";
-  else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "Démarrer le trajet";
+  else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "En route pour récupérer le véhicule";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
   else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
   else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
