@@ -24,7 +24,7 @@ export type PlateLookupResult = {
   };
 };
 
-const RAPIDAPI_HOST = "api-siv-systeme-d-immatriculation-des-vehicules.p.rapidapi.com";
+const RAPIDAPI_HOST = "api-de-plaque-d-immatriculation-france.p.rapidapi.com";
 
 function pick(obj: any, keys: string[]): string | undefined {
   if (!obj || typeof obj !== "object") return undefined;
