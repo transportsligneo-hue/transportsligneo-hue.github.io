@@ -36,6 +36,7 @@ type ActionKind =
   | "demarrer_livraison"
   | "arrive_livraison"
   | "edl_arrivee"
+  | "selfie_final"
   | "cloturer"
   | "done";
 
@@ -49,14 +50,15 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { key: "selfie", short: "Selfie", label: "Selfie d'identité", icon: Camera, cta: "Prendre mon selfie", hint: "Photo obligatoire avant de commencer." },
-  { key: "demarrer", short: "Démarrer", label: "Démarrer le trajet", icon: Navigation, cta: "Démarrer le trajet", hint: "Valide le départ et ouvre automatiquement la suite." },
-  { key: "arrive_depart", short: "Arrivée enlèv.", label: "Arrivé sur le lieu d'enlèvement", icon: MapPin, cta: "Je suis arrivé sur place", hint: "Confirme ta présence au point d'enlèvement." },
-  { key: "edl_depart", short: "EDL départ", label: "Inspection de départ", icon: ClipboardCheck, cta: "Ouvrir l'inspection départ", hint: "Photos, signatures, PV et carte grise dans un seul flow." },
-  { key: "demarrer_livraison", short: "En route", label: "Démarrer la livraison", icon: Truck, cta: "Prendre la route", hint: "Direction le point de livraison." },
-  { key: "arrive_livraison", short: "Arrivée livr.", label: "Arrivé sur le lieu de livraison", icon: MapPin, cta: "Je suis arrivé à destination" },
-  { key: "edl_arrivee", short: "EDL arrivée", label: "Inspection d'arrivée", icon: ClipboardCheck, cta: "Ouvrir l'inspection arrivée", hint: "Clôture terrain complète directement dans l'inspection." },
-  { key: "cloturer", short: "Clôture", label: "Envoyer la mission à validation", icon: Send, cta: "Envoyer pour validation", hint: "L'équipe vérifie puis valide." },
+  { key: "demarrer", short: "En route", label: "En route vers l'enlèvement", icon: Navigation, cta: "En route pour récupérer le véhicule", hint: "Vous prenez la route pour rejoindre le véhicule à enlever." },
+  { key: "arrive_depart", short: "Arrivée enlèv.", label: "Arrivée au lieu d'enlèvement", icon: MapPin, cta: "Arrivé au lieu d'enlèvement", hint: "Confirme votre arrivée. Le selfie convoyeur s'ouvre ensuite automatiquement." },
+  { key: "selfie", short: "Selfie", label: "Selfie convoyeur (enlèvement)", icon: Camera, cta: "Prendre mon selfie convoyeur", hint: "Photo d'identité obligatoire avant l'état des lieux." },
+  { key: "edl_depart", short: "EDL départ", label: "État des lieux d'enlèvement", icon: ClipboardCheck, cta: "Commencer l'état des lieux d'enlèvement", hint: "Photos, scans documents et signatures côté enlèvement." },
+  { key: "demarrer_livraison", short: "Trajet", label: "Démarrer le trajet", icon: Truck, cta: "Démarrer le trajet", hint: "Activation du suivi GPS et départ vers la livraison." },
+  { key: "arrive_livraison", short: "Arrivée livr.", label: "Arrivée au lieu de livraison", icon: MapPin, cta: "Arrivé au lieu de livraison", hint: "Confirme votre arrivée à destination." },
+  { key: "edl_arrivee", short: "EDL arrivée", label: "État des lieux d'arrivée", icon: ClipboardCheck, cta: "Commencer l'état des lieux d'arrivée", hint: "Photos et signatures côté livraison." },
+  { key: "selfie_final", short: "Selfie final", label: "Selfie convoyeur final", icon: Camera, cta: "Prendre le selfie final", hint: "Dernière photo d'identité avant l'envoi à l'admin." },
+  { key: "cloturer", short: "Envoi admin", label: "Envoyer la mission à l'admin", icon: Send, cta: "Envoyer à l'admin", hint: "Dossier complet transmis pour validation." },
   { key: "done", short: "Validation", label: "En attente de validation admin", icon: Flag, cta: "Mission envoyée" },
 ];
 
@@ -108,6 +110,8 @@ export function MissionCockpit({
   }, [attributionId]);
 
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
+  // Selfie final = 2e selfie pris (après EDL arrivée) — count BDD.
+  const finalSelfieOK = gates.selfies.length >= 2 || gates.isDisabled("selfie_final");
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
@@ -142,36 +146,45 @@ export function MissionCockpit({
 
     if (e === "en_attente_validation" || e === "termine") return "done";
 
-    // Selfie obligatoire sur TOUTES les étapes terrain tant qu'il n'est pas
-    // pris/validé/bypassé — empêche tout contournement entre départ et clôture.
-    const fieldSteps = ["assignee","acceptee","en_route","sur_place","vehicule_recupere","edl_depart_fait","en_livraison","arrive_destination","edl_arrivee_fait"];
-    if (!selfieOK && fieldSteps.includes(e)) return "selfie";
+    // 1. Démarrage : "En route pour récupérer le véhicule"
     if (e === "assignee" || e === "acceptee") return "demarrer";
+    // 2. Trajet vers enlèvement
     if (e === "en_route") return "arrive_depart";
+    // 3. Sur place enlèvement → selfie obligatoire avant EDL
     if (e === "sur_place" || e === "vehicule_recupere") {
+      if (!selfieOK) return "selfie";
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
     if (e === "edl_depart_fait") {
+      if (!selfieOK) return "selfie";
       if (!inspectionDepartDone) return "edl_depart";
       return "demarrer_livraison";
     }
+    // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
+    // 5. Sur place livraison → EDL arrivée → selfie final → envoi admin
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
+  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
-    if (!forceOpenSelfie || currentKey !== "selfie") return;
-    setOpenSelfie(true);
-  }, [currentKey, forceOpenSelfie]);
+    if (currentKey === "selfie" && (forceOpenSelfie || !openSelfie)) {
+      setOpenSelfie(true);
+    }
+    if (currentKey === "selfie_final" && !openSelfie) {
+      setOpenSelfie(true);
+    }
+  }, [currentKey, forceOpenSelfie, openSelfie]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
   const currentDef = STEPS[currentIdx] ?? STEPS[0];
@@ -211,6 +224,7 @@ export function MissionCockpit({
     try {
       switch (currentKey) {
         case "selfie":
+        case "selfie_final":
           setOpenSelfie(true);
           break;
         case "edl_depart":
@@ -229,8 +243,10 @@ export function MissionCockpit({
         case "arrive_depart":
           await persistEtape("sur_place");
           await Promise.resolve(onUpdated());
-          // Enchaîne directement sur l'inspection départ si pas encore faite
-          if (!inspectionDepartDone) {
+          // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
+          if (!selfieOK) {
+            setOpenSelfie(true);
+          } else if (!inspectionDepartDone) {
             onStartInspection("depart");
           }
           break;
@@ -247,19 +263,25 @@ export function MissionCockpit({
           }
           break;
         case "cloturer":
-          // Garde-fou final : selfie + EDL départ + EDL arrivée obligatoires
+          // Garde-fou final : tous les jalons doivent être présents
           if (!selfieOK) {
-            toast.error("Selfie d'identité requis avant de clôturer");
+            toast.error("Selfie d'identité requis avant d'envoyer à l'admin");
+            setOpenSelfie(true);
             break;
           }
           if (!inspectionDepartDone) {
-            toast.error("Inspection de départ incomplète");
+            toast.error("Inspection d'enlèvement incomplète");
             onStartInspection("depart");
             break;
           }
           if (!inspectionArriveeDone) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
+            break;
+          }
+          if (!finalSelfieOK) {
+            toast.error("Selfie final requis avant d'envoyer à l'admin");
+            setOpenSelfie(true);
             break;
           }
           await persistEtape("en_attente_validation", "Mission envoyée pour validation");
@@ -296,7 +318,10 @@ export function MissionCockpit({
   const visualSteps = STEPS.filter((s) => s.key !== "done");
   const visualIdx = Math.max(0, Math.min(currentIdx, visualSteps.length - 1));
   const totalVisual = visualSteps.length;
-  const progressPct = isDone ? 100 : Math.round((visualIdx / (totalVisual - 1)) * 100);
+  // Progression réelle = nb d'étapes effectivement validées (jamais 100% avant la clôture admin).
+  const progressPct = isDone
+    ? 100
+    : Math.min(95, Math.round((visualIdx / totalVisual) * 100));
 
   return (
     <>

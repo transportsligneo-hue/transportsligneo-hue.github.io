@@ -834,14 +834,16 @@ export function EdlPremiumFlow({
     if (inspectionError) throw inspectionError;
 
     if (type === "arrivee") {
+      // On marque seulement l'EDL arrivée comme faite. Le selfie final et
+      // l'envoi à l'admin sont déclenchés depuis le cockpit mission — pas ici.
       const [{ error: attributionError }, { error: historyError }] = await Promise.all([
         supabase.from("attributions")
-          .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
+          .update({ etape_courante: "edl_arrivee_fait" })
           .eq("id", attributionId),
         supabase.from("mission_etape_history").insert({
           attribution_id: attributionId,
-          etape: "envoi_validation_admin",
-          notes: "EDL arrivée terminé, mission envoyée pour validation",
+          etape: "edl_arrivee_fait",
+          notes: "EDL arrivée terminé, en attente du selfie final puis envoi admin",
           created_by: userId,
         }),
       ]);

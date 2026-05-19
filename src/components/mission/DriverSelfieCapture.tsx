@@ -8,10 +8,22 @@
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw } from "lucide-react";
+import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
+
+const UPLOAD_TIMEOUT_MS = 20000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label = "Délai dépassé"): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(label)), ms);
+    promise.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
 
 interface Props {
   attributionId: string;
@@ -174,6 +186,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
   const validate = async () => {
     if (!capturedFile) return;
+    if (status === "uploading") return; // anti double-clic
     setStatus("uploading");
     setError(null);
     try {
@@ -188,25 +201,42 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.${ext}`;
 
-      const upload = async () => supabase.storage
+      // Upload avec timeout strict + 1 retry — empêche tout chargement infini.
+      const uploadOnce = () => supabase.storage
         .from("mission-selfies")
         .upload(path, file, { upsert: true, contentType });
-      let { error: upErr } = await upload();
+
+      let upErr: unknown = null;
+      try {
+        const { error } = await withTimeout(uploadOnce(), UPLOAD_TIMEOUT_MS, "Délai d'envoi dépassé");
+        upErr = error;
+      } catch (e) {
+        upErr = e;
+      }
       if (upErr) {
         await new Promise(r => setTimeout(r, 800));
-        ({ error: upErr } = await upload());
+        try {
+          const { error } = await withTimeout(uploadOnce(), UPLOAD_TIMEOUT_MS, "Délai d'envoi dépassé");
+          upErr = error;
+        } catch (e) {
+          upErr = e;
+        }
       }
-      if (upErr) throw upErr;
+      if (upErr) throw upErr instanceof Error ? upErr : new Error(String(upErr));
 
-      const { error: dbErr } = await supabase.from("mission_selfies" as never).insert({
-        attribution_id: attributionId,
-        convoyeur_user_id: userId,
-        storage_path: path,
-        latitude: pos?.coords.latitude ?? null,
-        longitude: pos?.coords.longitude ?? null,
-        accuracy: pos?.coords.accuracy ?? null,
-      } as never);
-      if (dbErr) throw dbErr;
+      const { error: dbErr } = await withTimeout(
+        supabase.from("mission_selfies" as never).insert({
+          attribution_id: attributionId,
+          convoyeur_user_id: userId,
+          storage_path: path,
+          latitude: pos?.coords.latitude ?? null,
+          longitude: pos?.coords.longitude ?? null,
+          accuracy: pos?.coords.accuracy ?? null,
+        } as never) as unknown as Promise<{ error: unknown }>,
+        UPLOAD_TIMEOUT_MS,
+        "Délai d'enregistrement dépassé",
+      );
+      if (dbErr) throw dbErr instanceof Error ? dbErr : new Error(String(dbErr));
 
       setStatus("success");
       markLocalSelfieDone(attributionId);
@@ -216,10 +246,18 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Échec";
       setStatus("error");
-      setError(msg);
+      setError("Erreur lors de l'envoi du selfie. Réessayez.");
       closingRef.current = false;
+      // On garde le fichier capturé en mémoire pour permettre le retry sans
+      // refaire la photo, et le flag "selfie en attente d'envoi" reste actif.
+      setPendingDriverSelfie(attributionId, true);
       toast.error("Échec selfie", { description: msg });
     }
+  };
+
+  const retryUpload = () => {
+    if (status === "uploading") return;
+    void validate();
   };
 
   return (
@@ -294,6 +332,23 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
           >
             <Camera size={20}/> Ouvrir l'appareil photo
           </button>
+        ) : status === "error" ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+            <button
+              onClick={retake}
+              className="driver-secondary-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <RotateCcw size={16}/>
+              <span className="leading-tight">Reprendre photo</span>
+            </button>
+            <button
+              onClick={retryUpload}
+              className="driver-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <RefreshCw size={16}/>
+              <span className="leading-tight">Réessayer l'envoi</span>
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
             <button
