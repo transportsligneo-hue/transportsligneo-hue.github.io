@@ -37,6 +37,7 @@ interface Demande {
   message: string | null;
   statut: string;
   prix_estime: number | null;
+  distance_km: number | null;
   created_at: string;
 }
 
