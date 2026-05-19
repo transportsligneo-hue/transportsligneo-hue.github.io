@@ -331,7 +331,7 @@ export default function DevisGenerator() {
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           societe && `Société: ${societe}`,
-          `Prestation: ${option === "aller-retour" ? "Aller-retour" : option === "express" ? "Express" : "Aller simple"}`,
+          `Prestation: ${option === "aller-retour" ? "Livraison + restitution" : option === "express" ? "Express" : "Livraison simple"}`,
           `Roulant: ${running}`,
           plaqueInconnue && "Plaque: à confirmer",
           isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
