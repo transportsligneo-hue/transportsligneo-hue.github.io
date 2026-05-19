@@ -9,6 +9,12 @@ export interface DevisData {
   email: string;
   telephone?: string | null;
   adresse?: string | null;
+  /** Optional client company info shown in the "DEVIS ÉTABLI POUR" block. */
+  societe?: string | null;
+  siret?: string | null;
+  tva_intra?: string | null;
+  /** Optional public URL of the client company logo. */
+  logo_url?: string | null;
   depart: string;
   arrivee: string;
   distance_km?: number | null;
