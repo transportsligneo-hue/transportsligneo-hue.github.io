@@ -141,8 +141,6 @@ export default function DevisGenerator() {
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
 
-  const filteredDep = CITIES.filter(c => c.toLowerCase().includes(depFilter.toLowerCase()));
-  const filteredArr = CITIES.filter(c => c.toLowerCase().includes(arrFilter.toLowerCase()));
 
   const isComplete = !!(departure && arrival && vehicleType);
   const priceHT = pricing?.finalPrice ?? 0;
@@ -291,48 +289,28 @@ export default function DevisGenerator() {
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
                 <MapPin size={11} className="text-[#5fb6ff]" /> Départ
               </label>
-              <input
-                type="text"
-                value={departure || depFilter}
-                onChange={(e) => { setDepFilter(e.target.value); setDeparture(""); setDepOpen(true); }}
-                onFocus={() => setDepOpen(true)}
-                onBlur={() => setTimeout(() => setDepOpen(false), 150)}
-                placeholder="Ville de départ"
+              <PlacesInput
+                value={departure}
+                onChange={setDeparture}
+                placeholder="Ville ou adresse complète"
                 className={inputBare}
+                fallbackOptions={CITIES}
+                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
-              {depOpen && depFilter && filteredDep.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl">
-                  {filteredDep.map(c => (
-                    <button key={c} type="button"
-                      className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff]"
-                      onClick={() => { setDeparture(c); setDepFilter(""); setDepOpen(false); }}>{c}</button>
-                  ))}
-                </div>
-              )}
             </div>
             {/* Arrivée */}
             <div className="relative px-4 py-3">
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
                 <MapPinned size={11} className="text-[#5fb6ff]" /> Arrivée
               </label>
-              <input
-                type="text"
-                value={arrival || arrFilter}
-                onChange={(e) => { setArrFilter(e.target.value); setArrival(""); setArrOpen(true); }}
-                onFocus={() => setArrOpen(true)}
-                onBlur={() => setTimeout(() => setArrOpen(false), 150)}
-                placeholder="Ville d'arrivée"
+              <PlacesInput
+                value={arrival}
+                onChange={setArrival}
+                placeholder="Ville ou adresse complète"
                 className={inputBare}
+                fallbackOptions={CITIES}
+                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
-              {arrOpen && arrFilter && filteredArr.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl">
-                  {filteredArr.map(c => (
-                    <button key={c} type="button"
-                      className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff]"
-                      onClick={() => { setArrival(c); setArrFilter(""); setArrOpen(false); }}>{c}</button>
-                  ))}
-                </div>
-              )}
             </div>
             {/* Type véhicule */}
             <div className="px-4 py-3 relative">
