@@ -816,6 +816,47 @@
     animation: edl-shimmer 1800ms linear infinite;
   }
 
+  /* === Brand loader (logo Ligneo pendant upload EDL) === */
+  @keyframes edl-ring-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes edl-logo-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(231,199,106,0.55)); }
+    50%      { transform: scale(1.08); filter: drop-shadow(0 0 18px rgba(231,199,106,0.95)); }
+  }
+  .edl-brand-loader {
+    position: absolute; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px;
+    background: radial-gradient(circle at center, rgba(5,10,31,0.78) 0%, rgba(5,10,31,0.94) 100%);
+    backdrop-filter: blur(6px);
+  }
+  .edl-brand-loader__ring {
+    position: relative;
+    width: 96px; height: 96px;
+    border-radius: 9999px;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(95,182,255,0.0) 60deg, rgba(95,182,255,0.85) 200deg, rgba(231,199,106,0.95) 340deg, transparent 360deg);
+    animation: edl-ring-spin 1400ms linear infinite;
+    padding: 3px;
+  }
+  .edl-brand-loader__ring::before {
+    content: ""; position: absolute; inset: 3px;
+    border-radius: 9999px;
+    background: linear-gradient(160deg, #0a1335 0%, #050a1f 100%);
+  }
+  .edl-brand-loader__logo {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    animation: edl-logo-pulse 1800ms ease-in-out infinite;
+  }
+  .edl-brand-loader__logo img {
+    width: 56px; height: 56px; object-fit: contain;
+  }
+  .edl-brand-loader__label {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--edl-cyan); font-weight: 700;
+  }
+
   /* ============================================================
      === HOME SHELL — bleu nuit moins foncé + glassmorphism global
      Utilisé par la page d'accueil (PC + mobile).

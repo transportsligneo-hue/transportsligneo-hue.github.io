@@ -537,18 +537,10 @@ export function EdlPremiumFlow({
         ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
       });
 
-      // Auto-avancement après upload réussi d'une photo (pas pour les scans
-      // qui ont OCR à valider). On référence currentStep.id pour éviter une
-      // capture obsolète de safeIndex dans la closure du timer.
-      if (currentStep.kind === "photo") {
-        setTimeout(() => {
-          setStepIndex((idx) => {
-            const stepNow = STEPS[idx];
-            if (stepNow?.id === stepId && idx < TOTAL - 1) return idx + 1;
-            return idx;
-          });
-        }, 600);
-      }
+      // Pas d'auto-advance : le convoyeur relit son cadrage et appuie sur
+      // « Photo suivante » lui-même. L'upload se termine en arrière-plan ;
+      // dès qu'il est success, le bouton footer devient actif.
+
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
       if (currentStep.kind === "scan") {
@@ -1267,7 +1259,7 @@ function PhotoOrScanArea({
           <img
             src={step.example}
             alt={`Exemple : ${step.label}`}
-            className="w-full aspect-[3/2] object-cover"
+            className="w-full aspect-[4/3] sm:aspect-[3/2] object-cover max-h-[36dvh] sm:max-h-none"
             loading="lazy"
             width={768}
             height={512}
@@ -1287,18 +1279,14 @@ function PhotoOrScanArea({
 
       {/* Aperçu après prise */}
       {state?.previewUrl && (
-        <div className="edl-photo-frame">
+        <div className="edl-photo-frame relative">
           <img
             src={state.previewUrl}
             alt="Votre prise"
-            className="w-full aspect-[3/2] object-cover"
+            className="w-full aspect-[4/3] sm:aspect-[3/2] object-cover max-h-[36dvh] sm:max-h-none"
           />
-          <div className="absolute top-3 right-3 z-10">
-            {state.status === "uploading" && (
-              <span className="edl-chip">
-                <Loader2 size={11} className="animate-spin"/> Envoi…
-              </span>
-            )}
+          {state.status === "uploading" && <BrandLoader label="Envoi sécurisé…" />}
+          <div className="absolute top-3 right-3 z-30">
             {state.status === "success" && (
               <span className="edl-chip edl-chip-success">
                 <Check size={11}/> Envoyée
@@ -1323,7 +1311,7 @@ function PhotoOrScanArea({
       {!state || state.status === "idle" || state.status === "error" ? (
         <button
           onClick={onCapture}
-          className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base"
+          className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
         >
           {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
           {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
@@ -1332,18 +1320,19 @@ function PhotoOrScanArea({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onRetake}
-            className="h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
+            className="h-11 sm:h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
           >
             <RefreshCw size={16}/> Reprendre
           </button>
           <button
             onClick={onDelete}
-            className="h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2"
+            className="h-11 sm:h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2"
           >
             <X size={16}/> Supprimer
           </button>
         </div>
       )}
+
 
       {step.kind === "scan" && (
         <div className="edl-glass p-3 text-xs text-[var(--edl-text-soft)] flex items-start gap-2">
@@ -1361,12 +1350,13 @@ function SelfieArea({
   return (
     <div className="space-y-3">
       <div className="edl-glass p-5 text-center">
-        <div className="mx-auto w-32 h-32 rounded-full edl-glass-strong flex items-center justify-center overflow-hidden">
+        <div className="relative mx-auto w-32 h-32 rounded-full edl-glass-strong flex items-center justify-center overflow-hidden">
           {state?.previewUrl ? (
             <img src={state.previewUrl} alt="Selfie" className="w-full h-full object-cover" />
           ) : (
             <UserCircle2 size={56} className="text-[var(--edl-cyan)]" />
           )}
+          {state?.status === "uploading" && <BrandLoader compact label="Envoi…" />}
         </div>
         <p className="mt-4 text-sm text-[var(--edl-text-soft)]">
           Identifiez-vous en début de mission. Photo géolocalisée et horodatée.
@@ -1561,3 +1551,20 @@ function ValidationArea({
     </div>
   );
 }
+
+function BrandLoader({ label = "Envoi sécurisé…", compact = false }: { label?: string; compact?: boolean }) {
+  return (
+    <div className="edl-brand-loader">
+      <div
+        className="edl-brand-loader__ring"
+        style={compact ? { width: 72, height: 72 } : undefined}
+      >
+        <div className="edl-brand-loader__logo">
+          <img src={logoLigneo} alt="Ligneo" style={compact ? { width: 40, height: 40 } : undefined} />
+        </div>
+      </div>
+      {!compact && <span className="edl-brand-loader__label">{label}</span>}
+    </div>
+  );
+}
+
