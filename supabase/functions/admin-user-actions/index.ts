@@ -12,14 +12,26 @@ type Action =
   | "reset_password"
   | "change_role"
   | "change_type_client"
-  | "delete";
+  | "delete"
+  | "update_profile"
+  | "change_email"
+  | "invite_account"
+  | "get_account_status";
 
 interface Payload {
   action: Action;
   user_id: string;
   role?: "admin" | "super_admin" | "manager" | "convoyeur" | "sous_traitant" | "client";
   type_client?: "particulier" | "b2b" | "flotte";
+  email?: string;
+  profile?: Record<string, unknown>;
+  redirect_to?: string;
 }
+
+const PROFILE_ALLOWED = new Set([
+  "prenom", "nom", "telephone", "societe", "siret",
+  "adresse", "adresse_facturation", "tva_intra", "type_client",
+]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -50,10 +62,11 @@ Deno.serve(async (req) => {
     const body = (await req.json()) as Payload;
     if (!body.action || !body.user_id) return json({ error: "Missing fields" }, 400);
 
-    // Empêche l'auto-action destructive
     if (body.user_id === userData.user.id && ["suspend", "delete"].includes(body.action)) {
       return json({ error: "Action interdite sur son propre compte" }, 400);
     }
+
+    let result: Record<string, unknown> = {};
 
     switch (body.action) {
       case "suspend": {
@@ -71,7 +84,9 @@ Deno.serve(async (req) => {
       case "reset_password": {
         const { data: u } = await admin.auth.admin.getUserById(body.user_id);
         if (!u.user?.email) return json({ error: "Email introuvable" }, 400);
-        const { error } = await admin.auth.resetPasswordForEmail(u.user.email);
+        const { error } = await admin.auth.resetPasswordForEmail(u.user.email, {
+          redirectTo: body.redirect_to,
+        });
         if (error) return json({ error: error.message }, 400);
         break;
       }
@@ -91,19 +106,86 @@ Deno.serve(async (req) => {
         if (error) return json({ error: error.message }, 400);
         break;
       }
+      case "update_profile": {
+        if (!body.profile || typeof body.profile !== "object") return json({ error: "Profil manquant" }, 400);
+        const clean: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(body.profile)) {
+          if (PROFILE_ALLOWED.has(k)) clean[k] = v === "" ? null : v;
+        }
+        if (Object.keys(clean).length === 0) return json({ error: "Aucun champ valide" }, 400);
+        const { error } = await admin.from("profiles").update(clean).eq("user_id", body.user_id);
+        if (error) return json({ error: error.message }, 400);
+        break;
+      }
+      case "change_email": {
+        if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+          return json({ error: "Email invalide" }, 400);
+        }
+        const newEmail = body.email.toLowerCase().trim();
+        // Check duplicate
+        const { data: dup } = await admin.from("profiles").select("user_id").ilike("email", newEmail).maybeSingle();
+        if (dup && dup.user_id !== body.user_id) return json({ error: "Email déjà utilisé" }, 409);
+
+        const { data: u } = await admin.auth.admin.getUserById(body.user_id);
+        const oldEmail = u.user?.email ?? null;
+
+        const { error: authErr } = await admin.auth.admin.updateUserById(body.user_id, {
+          email: newEmail,
+          email_confirm: true,
+        });
+        if (authErr) return json({ error: authErr.message }, 400);
+
+        await admin.from("profiles").update({ email: newEmail }).eq("user_id", body.user_id);
+        if (oldEmail) {
+          await admin.from("devis").update({ email: newEmail }).ilike("email", oldEmail);
+          await admin.from("demandes_convoyage").update({ email: newEmail }).ilike("email", oldEmail);
+        }
+        // Re-link any orphan records to user_id
+        await admin.from("devis").update({ user_id: body.user_id }).is("user_id", null).ilike("email", newEmail);
+        await admin.from("demandes_convoyage").update({ user_id: body.user_id }).is("user_id", null).ilike("email", newEmail);
+        break;
+      }
+      case "invite_account": {
+        const { data: u } = await admin.auth.admin.getUserById(body.user_id);
+        const email = body.email || u.user?.email;
+        if (!email) return json({ error: "Email introuvable" }, 400);
+        const { error } = await admin.auth.admin.inviteUserByEmail(email, {
+          redirectTo: body.redirect_to,
+        });
+        if (error) return json({ error: error.message }, 400);
+        break;
+      }
+      case "get_account_status": {
+        const { data: u } = await admin.auth.admin.getUserById(body.user_id);
+        result = {
+          email: u.user?.email ?? null,
+          email_confirmed_at: u.user?.email_confirmed_at ?? null,
+          invited_at: u.user?.invited_at ?? null,
+          last_sign_in_at: u.user?.last_sign_in_at ?? null,
+          banned_until: (u.user as { banned_until?: string } | null)?.banned_until ?? null,
+        };
+        break;
+      }
       default:
         return json({ error: "Action inconnue" }, 400);
     }
 
-    await admin.from("activity_logs").insert({
-      actor_user_id: userData.user.id,
-      action: `admin.${body.action}`,
-      entity_type: "user",
-      entity_id: body.user_id,
-      metadata: { role: body.role, type_client: body.type_client },
-    });
+    if (body.action !== "get_account_status") {
+      await admin.from("activity_logs").insert({
+        actor_user_id: userData.user.id,
+        action: `admin.${body.action}`,
+        entity_type: "user",
+        entity_id: body.user_id,
+        metadata: {
+          role: body.role,
+          type_client: body.type_client,
+          email: body.email,
+          fields: body.profile ? Object.keys(body.profile) : undefined,
+        },
+      });
+    }
 
-    return json({ ok: true });
+    return json({ ok: true, ...result });
   } catch (err) {
     console.error("[admin-user-actions] error", err);
     return json({ error: "Internal server error" }, 500);
