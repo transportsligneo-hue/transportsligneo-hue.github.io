@@ -30,7 +30,7 @@ interface Payload {
 
 const PROFILE_ALLOWED = new Set([
   "prenom", "nom", "telephone", "societe", "siret",
-  "adresse", "adresse_facturation", "tva_intra", "type_client",
+  "adresse", "adresse_facturation", "tva_intra", "type_client", "logo_url",
 ]);
 
 Deno.serve(async (req) => {
