@@ -1259,7 +1259,7 @@ function PhotoOrScanArea({
           <img
             src={step.example}
             alt={`Exemple : ${step.label}`}
-            className="w-full aspect-[3/2] object-cover"
+            className="w-full aspect-[4/3] sm:aspect-[3/2] object-cover max-h-[36dvh] sm:max-h-none"
             loading="lazy"
             width={768}
             height={512}
@@ -1279,18 +1279,14 @@ function PhotoOrScanArea({
 
       {/* Aperçu après prise */}
       {state?.previewUrl && (
-        <div className="edl-photo-frame">
+        <div className="edl-photo-frame relative">
           <img
             src={state.previewUrl}
             alt="Votre prise"
-            className="w-full aspect-[3/2] object-cover"
+            className="w-full aspect-[4/3] sm:aspect-[3/2] object-cover max-h-[36dvh] sm:max-h-none"
           />
-          <div className="absolute top-3 right-3 z-10">
-            {state.status === "uploading" && (
-              <span className="edl-chip">
-                <Loader2 size={11} className="animate-spin"/> Envoi…
-              </span>
-            )}
+          {state.status === "uploading" && <BrandLoader label="Envoi sécurisé…" />}
+          <div className="absolute top-3 right-3 z-30">
             {state.status === "success" && (
               <span className="edl-chip edl-chip-success">
                 <Check size={11}/> Envoyée
@@ -1315,7 +1311,7 @@ function PhotoOrScanArea({
       {!state || state.status === "idle" || state.status === "error" ? (
         <button
           onClick={onCapture}
-          className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base"
+          className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
         >
           {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
           {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
@@ -1324,18 +1320,19 @@ function PhotoOrScanArea({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onRetake}
-            className="h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
+            className="h-11 sm:h-12 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2"
           >
             <RefreshCw size={16}/> Reprendre
           </button>
           <button
             onClick={onDelete}
-            className="h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2"
+            className="h-11 sm:h-12 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-200 font-semibold flex items-center justify-center gap-2"
           >
             <X size={16}/> Supprimer
           </button>
         </div>
       )}
+
 
       {step.kind === "scan" && (
         <div className="edl-glass p-3 text-xs text-[var(--edl-text-soft)] flex items-start gap-2">
