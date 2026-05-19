@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 
 const UPLOAD_TIMEOUT_MS = 20000;
+const CAMERA_RETURN_GRACE_MS = 1200;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label = "Délai dépassé"): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -120,8 +121,10 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
   const [status, setStatus] = useState<"idle"|"uploading"|"success"|"error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{lat:number;lng:number}|null>(null);
+  const [cameraOpening, setCameraOpening] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const closingRef = useRef(false);
+  const cameraTimeoutRef = useRef<number | null>(null);
   const canValidate = !!capturedFile && status !== "uploading" && status !== "success";
 
   useEffect(() => {
@@ -130,17 +133,36 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
   useEffect(() => {
     return () => {
+      if (cameraTimeoutRef.current) {
+        window.clearTimeout(cameraTimeoutRef.current);
+      }
       if (preview) {
         try { URL.revokeObjectURL(preview); } catch { /* ignore */ }
       }
     };
   }, [preview]);
 
-  const openCamera = () => fileRef.current?.click();
+  const openCamera = () => {
+    if (!fileRef.current || status === "uploading") return;
+    if (cameraTimeoutRef.current) {
+      window.clearTimeout(cameraTimeoutRef.current);
+    }
+    setCameraOpening(true);
+    cameraTimeoutRef.current = window.setTimeout(() => {
+      setCameraOpening(false);
+      cameraTimeoutRef.current = null;
+    }, CAMERA_RETURN_GRACE_MS);
+    fileRef.current.click();
+  };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     if (fileRef.current) fileRef.current.value = "";
+    if (cameraTimeoutRef.current) {
+      window.clearTimeout(cameraTimeoutRef.current);
+      cameraTimeoutRef.current = null;
+    }
+    setCameraOpening(false);
     if (!raw) return;
 
     try {
@@ -167,6 +189,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
     setPreview(null);
     setStatus("idle");
     setError(null);
+    setCameraOpening(false);
     closingRef.current = false;
     setTimeout(openCamera, 50);
   };
@@ -328,9 +351,11 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
         {!preview ? (
           <button
             onClick={openCamera}
+            disabled={cameraOpening || status === "uploading"}
             className="driver-cta flex w-full items-center justify-center gap-2 py-4 text-base font-bold"
           >
-            <Camera size={20}/> Ouvrir l'appareil photo
+            {cameraOpening ? <Loader2 className="animate-spin" size={20}/> : <Camera size={20}/>}
+            {cameraOpening ? "Ouverture de l'appareil photo…" : "Ouvrir l'appareil photo"}
           </button>
         ) : status === "error" ? (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
