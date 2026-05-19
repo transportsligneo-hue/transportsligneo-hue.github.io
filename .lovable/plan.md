@@ -1,57 +1,42 @@
-# Corriger le bug “La Riche → Tours = 6 €”
+## Diagnostic du test
 
-## Objectif
-Faire en sorte que l’estimateur applique bien le forfait local même quand l’utilisateur saisit une commune de l’agglomération sans code postal, par exemple `La Riche → Tours`.
+Test effectué en direct sur `https://transportsligneo.fr/_serverFn/...` (server function `lookupPlate`) avec la plaque `GR698YE` :
 
-## Ce que je vais changer
+```
+HTTP 500
+{"message":"Seroval Error (step: 3)"}
+```
 
-### 1. Rendre la détection locale plus robuste
-Aujourd’hui, le forfait local dépend surtout du code postal présent dans l’adresse. Si l’utilisateur tape seulement `La Riche`, le système ne trouve pas le CP `37520` et tombe sur le calcul kilométrique.
+Même résultat avec une plaque invalide (`"X"`) → l'erreur est masquée par une erreur de sérialisation TanStack/seroval. La vraie cause ne remonte ni au client ni aux logs (`stack_modern--server-function-logs` n'affiche que le message générique).
 
-Je vais donc compléter la logique locale pour reconnaître aussi :
-- les **noms de communes**,
-- les **variantes courantes d’écriture**,
-- puis utiliser le **code postal si présent** en priorité.
+**Causes probables identifiées dans `src/lib/plate.functions.ts` :**
 
-Exemples à couvrir :
-- `La Riche → Tours` = 79 €
-- `Joué-lès-Tours → Tours` = 79 €
-- `Chambray-lès-Tours → Saint-Cyr-sur-Loire` = 79 €
-- `Tours → Loches` = 99 €
+1. **`ZodError` non sérialisable** : `inputValidator((data) => z.object({...}).parse(data))` lance une `ZodError` quand la plaque est invalide. TanStack tente de sérialiser cette erreur avec seroval qui ne supporte pas ses références internes → "Seroval Error (step: 3)".
+2. **Erreur fetch non encapsulée correctement** : si l'appel RapidAPI lève une erreur dont l'objet contient des références non sérialisables (Response, Request, etc., spécifiques au runtime Worker), même `console.error(e)` puis `return {ok:false}` ne suffit pas si l'erreur s'échappe avant le catch.
+3. **Endpoint OK** : tu m'as confirmé `GET /{plaque}` → la construction d'URL `https://${HOST}/${plate}` est correcte.
 
-### 2. Appliquer cette logique dans les deux estimateurs
-Je vais brancher la même résolution locale dans :
-- `src/components/DevisGenerator.tsx`
-- `src/components/mobile/MobileDevisGenerator.tsx`
+## Plan de correction
 
-But : éviter qu’un estimateur marche et l’autre non.
+### 1. Durcir `src/lib/plate.functions.ts`
 
-### 3. Supprimer le fallback qui laisse passer des mini-prix incohérents
-Quand la zone locale n’est pas reconnue, l’interface bascule aujourd’hui sur un petit calcul au km, d’où les prix aberrants comme `6 €`.
+- Remplacer `.inputValidator((data) => Schema.parse(data))` par une version qui **catche `ZodError`** et retourne `{ ok: false, error: "Plaque invalide" }` au lieu de throw. On ne laisse jamais TanStack sérialiser un objet d'erreur Zod.
+- Englober **tout** le `.handler` dans un `try/catch` racine qui retourne toujours un objet plain JSON `{ ok, error?, data? }`. Aucune throw n'échappe.
+- Logger explicitement à chaque étape (`console.log("[SIV] start", plate)`, `console.log("[SIV] status", res.status)`, `console.log("[SIV] body keys", Object.keys(root||{}))`) pour pouvoir diagnostiquer via `server-function-logs`.
+- S'assurer que `RAPIDAPI_KEY` est lu **dans** le handler (déjà le cas).
 
-Je vais ajuster la priorité de calcul pour que :
-1. le forfait agglo soit tenté d’abord,
-2. puis le forfait même département,
-3. puis seulement le calcul kilométrique.
+### 2. Vérifier le mapping de la réponse
 
-## Détails techniques
-- Étendre `src/lib/pricing-departments.ts` avec une table par département contenant :
-  - `city`
-  - `cps`
-  - `aliases` / `communes` reconnues textuellement
-- Ajouter une normalisation des libellés (`saint`/`st`, accents, tirets, casse)
-- Faire évoluer `resolveLocalDeptTariff(...)` pour détecter une zone agglo via :
-  - CP explicite si présent
-  - sinon correspondance commune/alias
-- Conserver le calcul km actuel pour les vrais trajets hors zone locale
+Une fois les logs activés, on saura quelle est la structure réelle renvoyée par cette API SIV pour `GR698YE`. Si les clés ne correspondent pas à la liste actuelle (`marque`, `modele`, `vin`, etc.), on étend `pick()` avec les vraies clés retournées.
 
-## Vérifications prévues
-Je validerai au minimum ces cas :
-- `La Riche → Tours` = 79 €
-- `La Riche 37520 → Tours 37000` = 79 €
-- `Tours → Loches` = 99 €
-- `Villeurbanne → Lyon` = 79 €
-- `Tours → Paris` = calcul km inchangé
+### 3. Tests de validation
 
-## Résultat attendu
-L’estimateur n’exigera plus que l’utilisateur tape un code postal complet pour obtenir le bon forfait local.
+Après déploiement :
+- Plaque valide `GR698YE` → réponse `{ ok:true, data:{ marque, modele, ... } }`
+- Plaque invalide `"X"` → réponse `{ ok:false, error:"Plaque invalide" }` (HTTP 200, pas 500)
+- Vérifier dans les logs serveur que les `console.log` apparaissent
+
+### Fichiers modifiés
+
+- `src/lib/plate.functions.ts` (uniquement)
+
+Aucun changement UI nécessaire — `DevisGenerator.tsx` consomme déjà `{ok, error, data}`.
