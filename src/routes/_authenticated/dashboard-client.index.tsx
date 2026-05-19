@@ -72,13 +72,14 @@ function ClientDashboard() {
         .or(`user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`)
         .order("created_at", { ascending: false });
 
-      // Devis liés par email (RLS autorise via politique "Clients can read own devis")
+      // Devis = demandes du client. OR (user_id, email) pour rattacher l'historique pré-compte.
+      const orFilter = `user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`;
       const { data: devisData } = await supabase
         .from("devis")
-        .select("id, numero, depart, arrivee, distance_km, prix_estime, statut, created_at")
-        .eq("email", clientEmail)
+        .select("id, numero, depart, arrivee, distance_km, prix_estime, statut, created_at, date_souhaitee, marque, modele, option_trajet, mission_id, paid_at")
+        .or(orFilter)
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(10);
 
       if (cancelled) return;
 
@@ -89,7 +90,7 @@ function ClientDashboard() {
         enCours: missions.filter(m => m.statut === "en_cours").length,
         terminees: missions.filter(m => m.statut === "livree" || m.statut === "terminee").length,
         aVenir: missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length,
-        devis: devisAll.filter(d => d.statut !== "convertit" && d.statut !== "refuse").length,
+        devis: devisAll.filter(d => d.statut !== "convertit" && d.statut !== "refuse" && !d.mission_id).length,
       });
       setLastMission(missions[0] ?? null);
       setDevisList(devisAll);
