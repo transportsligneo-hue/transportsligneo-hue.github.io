@@ -28,6 +28,7 @@ import {
   AdminStatCard,
   AdminEmpty,
 } from "@/components/admin/ui";
+import { LogoUploader } from "@/components/LogoUploader";
 
 export const Route = createFileRoute("/_authenticated/admin/clients/$clientId")({
   component: AdminClientDetail,
@@ -46,6 +47,7 @@ interface Profile {
   adresse_facturation: string | null;
   type_client: string | null;
   statut: string | null;
+  logo_url: string | null;
   created_at: string;
 }
 
@@ -372,6 +374,20 @@ function AdminClientDetail() {
             </AdminField>
             <AdminField label="Société">
               <input className={inp} value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} />
+            </AdminField>
+            <AdminField label="Logo entreprise">
+              <LogoUploader
+                ownerUserId={clientId}
+                value={profile.logo_url}
+                onChange={async (url) => {
+                  await supabase.functions.invoke("admin-user-actions", {
+                    body: { action: "update_profile", user_id: clientId, profile: { logo_url: url } },
+                  });
+                  setProfile({ ...profile, logo_url: url });
+                }}
+                variant="light"
+                label="Logo de l'entreprise"
+              />
             </AdminField>
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="SIRET">
