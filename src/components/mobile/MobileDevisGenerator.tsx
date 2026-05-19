@@ -144,19 +144,50 @@ export default function MobileDevisGenerator() {
   const [pickerType, setPickerType] = useState<"dep" | "arr" | null>(null);
   const [pickerFilter, setPickerFilter] = useState("");
 
-  const distance = useMemo(() => {
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+  const [googleSuggestions, setGoogleSuggestions] = useState<PlaceSuggestion[]>([]);
+
+  const localDistance = useMemo(() => {
     if (!departure || !arrival) return null;
     return getDistance(departure, arrival);
   }, [departure, arrival]);
 
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!departure || !arrival) return;
+    if (localDistance !== null) return;
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(departure, arrival)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [departure, arrival, localDistance]);
+
+  const distance = localDistance ?? googleDistance;
+
   const pricing = useMemo(() => {
-    if (distance === null || distance === 0) return null;
+    if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
-  }, [distance, arrival, option]);
+  }, [distance, departure, arrival, option]);
 
   const filteredCities = CITIES.filter(c =>
     c.toLowerCase().includes(pickerFilter.toLowerCase())
   );
+
+  // Précharge Google et alimente les suggestions du picker
+  useEffect(() => { if (isGoogleAvailable()) loadGoogle().catch(() => {}); }, []);
+  useEffect(() => {
+    if (!pickerType) { setGoogleSuggestions([]); return; }
+    if (!isGoogleAvailable() || pickerFilter.length < 2) { setGoogleSuggestions([]); return; }
+    const t = setTimeout(async () => {
+      const res = await getAutocompleteSuggestions(pickerFilter);
+      setGoogleSuggestions(res);
+    }, 220);
+    return () => clearTimeout(t);
+  }, [pickerFilter, pickerType]);
 
   const openPicker = (type: "dep" | "arr") => {
     setPickerType(type);
