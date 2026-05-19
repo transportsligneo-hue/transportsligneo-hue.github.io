@@ -3,6 +3,7 @@ import {
   MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
   Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -12,6 +13,7 @@ import {
   resetPlacesSession, type PlaceSuggestion,
 } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
+import { lookupPlate } from "@/lib/plate.functions";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
