@@ -80,20 +80,8 @@ function getDistance(from: string, to: string): number | null {
 }
 
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const cDep = extractCity(departure) || departure;
-  const cArr = extractCity(arrival) || arrival;
-  const deptDep = CITY_DEPARTMENTS[cDep];
-  const deptArr = CITY_DEPARTMENTS[cArr];
-  const dept = deptDep && deptArr ? deptArr : null;
-  if (dept && FIXED_TARIFFS[dept]) {
-    const [simple, retour] = FIXED_TARIFFS[dept];
-    const label = DEPARTMENT_LABELS[dept] || dept;
-    if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
-    if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
-    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
-  }
-  // Tarif local par département (10 métropoles)
-  const local = distance >= 0 ? resolveLocalDeptTariff(departure, arrival, distance, option) : null;
+  // 1) Tarif local par département (zone agglo basée sur les codes postaux)
+  const local = resolveLocalDeptTariff(departure, arrival, distance, option);
   if (local) return local;
   if (distance <= 0) {
     const [simple, retour] = FIXED_TARIFFS["37-intra"];

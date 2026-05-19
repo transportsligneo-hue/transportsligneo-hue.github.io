@@ -53,22 +53,10 @@ function getDistance(from: string, to: string): number | null {
   return null;
 }
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const cDep = extractCity(departure) || departure;
-  const cArr = extractCity(arrival) || arrival;
-  const dDep = CITY_DEPARTMENTS[cDep]; const dArr = CITY_DEPARTMENTS[cArr];
-  const dept = dDep && dArr ? dArr : null;
-  // 1) Tarif spécifique déjà configuré (ex. Tours) — priorité absolue
-  if (dept && FIXED_TARIFFS[dept]) {
-    const [simple, retour] = FIXED_TARIFFS[dept];
-    const label = DEPARTMENT_LABELS[dept] || dept;
-    if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
-    if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
-    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
-  }
-  // 2) Tarif local par département (10 métropoles, basé sur code postal + distance)
-  const local = distance >= 0 ? resolveLocalDeptTariff(departure, arrival, distance, option) : null;
+  // 1) Tarif local par département (zone agglo basée sur les codes postaux)
+  const local = resolveLocalDeptTariff(departure, arrival, distance, option);
   if (local) return local;
-  // 3) Trajet très court / même ville hors zone forfaitaire — minimum existant
+  // 2) Trajet très court / même ville hors zone forfaitaire — minimum existant
   if (distance <= 0) {
     const [simple] = FIXED_TARIFFS["37-intra"];
     const label = "Forfait local (minimum)";
@@ -76,7 +64,7 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  // 4) Calcul kilométrique longue distance (inchangé)
+  // 3) Calcul kilométrique longue distance (inchangé)
   const rate = distance < 200 ? 1.20 : 0.85;
   const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
   const basePrice = Math.round(distance * rate);

@@ -1,115 +1,53 @@
-## Plan d'amélioration de l'estimateur
+# Correction des tarifs locaux par département
 
-### 1. Refonte UX/UI premium (sans casser la logique)
+## Problème
+La règle actuelle « même département + distance ≤ 30 km = forfait intra 79 € » donne parfois de mauvais résultats parce que :
+1. Elle dépend de la distance Google (variable, parfois absente).
+2. Elle ne couvre que 10 départements alors qu'il en faut 20.
+3. Elle ne distingue pas vraiment « agglo de la ville principale » et « hors agglo » dans le même département (ex. Amboise 37 à 25 km de Tours serait considéré comme agglo alors qu'il ne l'est pas).
 
-**Desktop (`DevisGenerator.tsx`)**
-- Élargir le conteneur de l'estimateur (`max-w-3xl` → `max-w-5xl`) pour donner plus d'air.
-- Restructurer en deux blocs distincts **Départ** et **Arrivée** :
-  - chacun dans une carte interne (fond `#0b1026/40`, bord doré subtil, coins `rounded-2xl`)
-  - icône or (pin de départ / drapeau d'arrivée) + label sobre en majuscules dorées
-  - champ adresse pleine largeur à l'intérieur du bloc
-- Séparateur élégant entre les deux blocs : ligne verticale dorée + petit cercle central (icône flèche) façon Uber.
-- Champs plus hauts (`h-14`), padding généreux, focus ring doré.
-- Bouton « Obtenir mon prix » : plus large, ombre dorée plus prononcée, micro-animation `hover:scale-[1.02]` CSS pure.
-- Ombres premium : `shadow-[0_20px_60px_-20px_rgba(212,175,55,0.25)]` sur la carte principale.
+## Nouvelle règle (validée)
+Zone agglo = **liste explicite de codes postaux** autour de chaque ville principale.
 
-**Dropdown Google Places (correctif clé)**
-- Le dropdown passe en `position: absolute` + `w-full` calé sur le champ parent.
-- `z-index: 70` (au-dessus de tout le reste).
-- Le parent du champ reçoit `min-h` fixe pour qu'aucun rétrécissement ne se produise quand les suggestions apparaissent.
-- Les blocs Départ/Arrivée ne sont plus dans une grille à hauteur égale → le dropdown n'écrase plus l'autre bloc.
+- Départ ET arrivée dans la zone agglo de la même ville principale → **79 € HT / 129 € HT A/R**
+- Départ et arrivée dans le même département, mais l'un des deux hors zone agglo → **99 € HT / 129 € HT A/R**
+- Départements différents → on garde le calcul kilométrique existant (1,20 €/km < 200 km, 0,85 €/km au-delà).
+- Tarifs déjà configurés (option « express » +20 %, etc.) inchangés.
 
-**Mobile (`MobileDevisGenerator.tsx`)**
-- Conservation de la bottom-sheet existante.
-- Mêmes blocs Départ/Arrivée empilés verticalement avec séparateur doré.
-- Champs `h-14`, bouton CTA pleine largeur or.
+## Détails techniques
 
-**Garde-fous**
-- Aucun changement aux fonctions `calculatePrice`, `extractCity`, `getGoogleDistanceKm`.
-- Aucun changement aux IDs/handlers existants.
-- Couleurs : uniquement `#0b1026`, `#d4af37`, `#e7c76a` (chartes mémorisées).
+### 1. `src/lib/pricing-departments.ts` — refonte
+- Remplacer `DEPT_MAIN_CITIES` par une structure `DEPT_AGGLO_CP: Record<deptCode, { city: string, cps: Set<string> }>` couvrant les 20 départements demandés (37, 75, 69, 13, 31, 33, 44, 59, 67, 34, 06, 35, 76, 38, 21, 49, 51, 63, 64, 83).
+- Pour le 37, inclure les CP : 37000, 37100, 37200, 37300 (Joué), 37170 (Chambray), 37270, 37520 (La Riche), 37540 (St-Cyr), 37700 (St-Pierre-des-Corps), 37550 (St-Avertin), 37230 (Fondettes), 37510 (Ballan-Miré), 37210 (Rochecorbon / Parçay-Meslay / Notre-Dame-d'Oé), 37250.
+- Pour les autres grandes métropoles : CP de la ville principale + communes limitrophes (Paris 75001-75020 + petite couronne 92/93/94 traités séparément ou non — voir question ci-dessous), Lyon (69001-69009 + Villeurbanne 69100, Vénissieux 69200, etc.), Marseille (13001-13016 + Aubagne, La Ciotat ?), etc. Liste détaillée préparée sur la base des INSEE/CP officiels.
+- Refactorer `resolveLocalDeptTariff` pour ignorer la distance et se baser uniquement sur CP départ / CP arrivée :
+  - Extraire CP des deux adresses.
+  - Si même département présent dans la table → renvoyer 79 (les deux CP dans la liste agglo) ou 99 (sinon).
+  - Sinon `null` (fallback kilométrique).
 
----
+### 2. `src/components/DevisGenerator.tsx` (et `MobileDevisGenerator.tsx`)
+- Supprimer le shortcut `FIXED_TARIFFS[dept]` basé sur `CITY_DEPARTMENTS` (qui ne contient que Tours/Châteauroux et provoque des faux positifs).
+- `calculatePrice` :
+  1. Appeler `resolveLocalDeptTariff` en premier (CP-based, plus de paramètre distance).
+  2. Si null et `distance <= 0` → garder le minimum local actuel (79/129) uniquement si CP départ = CP arrivée et appartient à une zone agglo connue ; sinon fallback kilométrique avec distance estimée.
+  3. Sinon calcul kilométrique (inchangé).
+- Aucune modification UI/visuelle, aucune modification de la logique express / aller-retour, aucune modification de la SIV ou de l'envoi de devis.
 
-### 2. Tarifs locaux — extension aux 10 métropoles
+### 3. Tests manuels à valider après implémentation
+- La Riche (37520) → Tours (37000) = 79 €
+- La Riche → Chambray-lès-Tours (37170) = 79 €
+- La Riche → Loches (37600) = 99 €
+- Tours → Loches = 99 €
+- Chambray → Saint-Cyr (37540) = 79 €
+- Villeurbanne (69100) → Lyon (69003) = 79 €
+- Lyon → Givors (69700, hors agglo) = 99 €
+- Tours → Paris = calcul km inchangé
 
-Extension des tables existantes (sans toucher au reste de `calculatePrice`) :
+## Question avant implémentation
+Pour **Paris (75)** : faut-il inclure la petite couronne (92, 93, 94) dans la zone « agglo Paris » ou se limiter strictement aux CP 750xx ? (les 92/93/94 sont des départements distincts → si oui, je ferai une exception spéciale pour la métropole parisienne).
 
-```text
-Dept  Ville              Code intra   Code hors
-37    Tours              37-intra     37-hors
-69    Lyon               69-intra     69-hors
-13    Marseille          13-intra     13-hors
-33    Bordeaux           33-intra     33-hors
-31    Toulouse           31-intra     31-hors
-44    Nantes             44-intra     44-hors
-75    Paris              75-intra     75-hors
-59    Lille              59-intra     59-hors
-67    Strasbourg         67-intra     67-hors
-06    Nice               06-intra     06-hors
-```
-
-Tarifs (HT) :
-- `*-intra` (agglomération) : **79 € aller simple / 129 € A/R**
-- `*-hors` (même département, > 30 km de la ville principale) : **99 € / 129 €**
-
-**Détection « intra vs hors agglo »** dans le même département :
-- Si Google Places renvoie `lat/lng` → calcul Haversine depuis la grande ville (table de coordonnées des 10 villes). `≤ 30 km` = intra, sinon = hors.
-- Fallback (pas de coords) : on garde le mapping ville → code existant (Tours = intra, Châteauroux = hors, etc.), extensible.
-
-**Priorité conservée** :
-1. Si un tarif spécifique existe déjà dans `FIXED_TARIFFS` pour la paire → il gagne.
-2. Sinon, même département → règle locale ci-dessus.
-3. Sinon → calcul kilométrique existant **inchangé**.
-
----
-
-### 3. Google Places — amélioration légère
-
-Le composant `PlacesInput` existe déjà. Ajouts :
-- Retour de l'objet complet sélectionné : `{ address, city, postalCode, lat, lng }` via un nouveau callback `onPlaceSelect` (l'ancien `onChange(string)` reste pour compatibilité).
-- Stockage des coords dans l'état du `DevisGenerator` pour alimenter (a) Haversine intra/hors, (b) Distance Matrix.
-- États visuels : skeleton pendant la résolution de distance, message d'erreur sobre + fallback manuel (déjà en place).
-
----
-
-### 4. Plaque SIV — préparation, branchement en attente
-
-Vous avez choisi « Autre provider RapidAPI » sans préciser lequel. Je vais :
-1. Préparer la structure côté code :
-   - server function `lookupPlate` (`src/lib/plate.functions.ts`) qui lit `RAPIDAPI_KEY` + `RAPIDAPI_SIV_HOST` depuis `process.env`.
-   - champ « Plaque d'immatriculation » dans le formulaire véhicule avec bouton « Récupérer ».
-   - mapping de la réponse → champs marque/modèle/année/carburant/puissance/VIN.
-2. **Bloquer l'appel réel** tant que vous ne m'avez pas confirmé :
-   - le host RapidAPI exact (ex: `car-data.p.rapidapi.com`)
-   - le chemin d'endpoint
-   - le format de réponse
-3. Une fois confirmé, je demanderai les secrets `RAPIDAPI_KEY` + `RAPIDAPI_SIV_HOST` via le formulaire sécurisé (jamais en dur).
-
----
-
-### Détails techniques
-
-**Fichiers modifiés**
-- `src/components/DevisGenerator.tsx` — refonte visuelle + extension tables tarifs + coords
-- `src/components/mobile/MobileDevisGenerator.tsx` — refonte visuelle + mêmes règles tarifs
-- `src/components/PlacesInput.tsx` — callback `onPlaceSelect` + z-index dropdown
-- `src/lib/google-places.ts` — exposer `lat/lng/postalCode` depuis Places Details
-- `src/lib/pricing-departments.ts` *(nouveau)* — tables villes/coords/codes + helper `resolveLocalTariff(from, to)`
-- `src/lib/plate.functions.ts` *(nouveau, prêt mais inerte)* — server fn SIV
-
-**Non touché**
-- Toute la logique kilométrique longue distance existante
-- Tarifs `FIXED_TARIFFS` déjà configurés (Tours)
-- Composants hors estimateur
-
-**Risques & mitigations**
-- Hydration mismatch déjà présent (lien CSS) : non lié à ce chantier, sera ignoré.
-- Performance Places : debounce 250 ms déjà en place, conservé.
-- Quota Google : Distance Matrix appelée uniquement après sélection complète des deux adresses.
-
----
-
-### Question restée en suspens
-
-Pour activer réellement la plaque SIV, j'ai besoin **du nom du host RapidAPI et de l'endpoint** (ou un exemple de réponse JSON). Je peux livrer les points 1, 2, 3 immédiatement et brancher le SIV dès que vous me donnez ces infos.
+## Hors scope (non touché)
+- UI / identité visuelle (bleu foncé + or, Playfair) inchangée.
+- SIV / RapidAPI inchangé.
+- `FIXED_TARIFFS` express +20 %, aller-retour, multipliers inchangés.
+- Calcul kilométrique longue distance inchangé.
