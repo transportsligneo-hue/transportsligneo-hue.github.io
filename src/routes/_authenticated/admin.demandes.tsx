@@ -51,6 +51,16 @@ const statutLabels: Record<string, string> = {
   annulee: "Annulée",
 };
 
+function extractFromOptions(options: string | null): { prix: number | null; distance: number | null } {
+  if (!options) return { prix: null, distance: null };
+  const prixMatch = options.match(/Estimation:\s*(\d+(?:[.,]\d+)?)\s*€/i);
+  const distMatch = options.match(/Distance:\s*(\d+(?:[.,]\d+)?)\s*km/i);
+  return {
+    prix: prixMatch ? Number(prixMatch[1].replace(",", ".")) : null,
+    distance: distMatch ? Number(distMatch[1].replace(",", ".")) : null,
+  };
+}
+
 function AdminDemandes() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
@@ -258,6 +268,8 @@ function AdminDemandes() {
               <tbody>
                 {filtered.map((d) => {
                   const q = quoteFromDemande(d);
+                  const fromOpts = extractFromOptions(d.options);
+                  const ttc = d.prix_estime ?? fromOpts.prix ?? q?.priceTtc ?? null;
                   return (
                     <tr key={d.id} className="cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40" onClick={() => setSelected(d)}>
                       <td>
@@ -283,7 +295,7 @@ function AdminDemandes() {
                       </td>
                       <td>
                         <span className="font-semibold text-[color:var(--admin-text)] tabular-nums whitespace-nowrap">
-                          {q?.priceTtc != null ? `${Number(q.priceTtc).toFixed(0)} €` : "—"}
+                          {ttc != null ? `${Number(ttc).toFixed(0)} €` : "—"}
                         </span>
                       </td>
                       <td>
@@ -407,15 +419,22 @@ function DemandeDrawer({
       </DrawerSection>
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
-        <PriceBlock
-          quote={quote}
-          priceTtc={demande.prix_estime ?? undefined}
-          title="Estimation"
-          source={demande.prix_estime != null ? "Estimation de l'estimateur client" : undefined}
-        />
-        {demande.distance_km != null && demande.distance_km > 0 && (
-          <p className="mt-2 text-xs text-white/60">Distance estimée : {demande.distance_km} km</p>
-        )}
+        {(() => {
+          const fromOpts = extractFromOptions(demande.options);
+          const ttc = demande.prix_estime ?? fromOpts.prix ?? undefined;
+          const km = demande.distance_km ?? fromOpts.distance ?? null;
+          const src = demande.prix_estime != null
+            ? "Estimation de l'estimateur client"
+            : fromOpts.prix != null ? "Estimation reconstituée depuis le devis" : undefined;
+          return (
+            <>
+              <PriceBlock quote={quote} priceTtc={ttc} title="Estimation" source={src} />
+              {km != null && km > 0 && (
+                <p className="mt-2 text-xs text-white/60">Distance estimée : {km} km</p>
+              )}
+            </>
+          );
+        })()}
       </DrawerSection>
 
 

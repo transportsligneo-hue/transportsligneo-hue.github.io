@@ -331,7 +331,7 @@ export default function DevisGenerator() {
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           societe && `Société: ${societe}`,
-          `Prestation: ${option === "aller-retour" ? "Aller-retour" : option === "express" ? "Express" : "Aller simple"}`,
+          `Prestation: ${option === "aller-retour" ? "Livraison + restitution" : option === "express" ? "Express" : "Livraison simple"}`,
           `Roulant: ${running}`,
           plaqueInconnue && "Plaque: à confirmer",
           isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
@@ -412,8 +412,8 @@ export default function DevisGenerator() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { v: "aller-simple", l: "Aller simple", s: "Livraison" },
-                { v: "aller-retour", l: "Aller-retour", s: "Livraison + restitution" },
+                { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
+                { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
                 { v: "express", l: "Express", s: "Urgent · +20%" },
               ].map((o) => (
                 <button
@@ -508,7 +508,7 @@ export default function DevisGenerator() {
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                <Clock size={11} className="text-[#e7c76a]" /> Heure
+                <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison
               </label>
               <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
                 className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
@@ -636,7 +636,7 @@ export default function DevisGenerator() {
                       <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure souhaitée</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure de livraison souhaitée</label>
                       <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>

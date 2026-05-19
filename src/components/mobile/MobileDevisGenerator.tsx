@@ -415,7 +415,7 @@ export default function MobileDevisGenerator() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { value: "aller-simple", label: "Simple" },
-                  { value: "aller-retour", label: "A/R" },
+                  { value: "aller-retour", label: "Restitution" },
                   { value: "express", label: "Express" },
                 ].map(o => (
                   <button
@@ -666,7 +666,7 @@ export default function MobileDevisGenerator() {
                   <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={labelCls}>Heure</label>
+                  <label className={labelCls}>Heure de livraison</label>
                   <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCls} />
                 </div>
               </div>
