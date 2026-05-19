@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle, Building2 } from "lucide-react";
+import { LogoUploader } from "@/components/LogoUploader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/profil")({
   component: ClientProfil,
@@ -10,7 +11,11 @@ export const Route = createFileRoute("/_authenticated/dashboard-client/profil")(
 
 function ClientProfil() {
   const { user } = useAuth();
-  const [form, setForm] = useState({ prenom: "", nom: "", email: "", telephone: "" });
+  const [form, setForm] = useState({
+    prenom: "", nom: "", email: "", telephone: "",
+    societe: "", siret: "", tva_intra: "",
+  });
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
@@ -23,17 +28,22 @@ function ClientProfil() {
     let cancelled = false;
     supabase
       .from("profiles")
-      .select("prenom, nom, email, telephone")
+      .select("prenom, nom, email, telephone, societe, siret, tva_intra, logo_url" as never)
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (!cancelled && data) {
+        const row = data as (Partial<typeof form> & { logo_url?: string | null }) | null;
+        if (!cancelled && row) {
           setForm({
-            prenom: data.prenom ?? "",
-            nom: data.nom ?? "",
-            email: data.email ?? user.email ?? "",
-            telephone: data.telephone ?? "",
+            prenom: row.prenom ?? "",
+            nom: row.nom ?? "",
+            email: row.email ?? user.email ?? "",
+            telephone: row.telephone ?? "",
+            societe: row.societe ?? "",
+            siret: row.siret ?? "",
+            tva_intra: row.tva_intra ?? "",
           });
+          setLogoUrl(row.logo_url ?? null);
         }
         if (!cancelled) setLoading(false);
       });
@@ -53,10 +63,22 @@ function ClientProfil() {
         nom: form.nom,
         email: form.email,
         telephone: form.telephone,
-      }, { onConflict: "user_id" });
+        societe: form.societe || null,
+        siret: form.siret || null,
+        tva_intra: form.tva_intra || null,
+      } as never, { onConflict: "user_id" });
     setSaving(false);
     setSavedMsg(error ? `Erreur : ${error.message}` : "Profil mis à jour ✓");
     setTimeout(() => setSavedMsg(""), 3000);
+  };
+
+  const handleLogoChange = async (url: string | null) => {
+    if (!user) return;
+    setLogoUrl(url);
+    await supabase
+      .from("profiles")
+      .update({ logo_url: url } as never)
+      .eq("user_id", user.id);
   };
 
   const changePassword = async (e: FormEvent) => {
@@ -125,6 +147,46 @@ function ClientProfil() {
             <span className={`text-xs ${savedMsg.startsWith("Erreur") ? "text-destructive" : "text-green-400"}`}>{savedMsg}</span>
           )}
           <button type="submit" disabled={saving} className="ml-auto inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60">
+            {saving && <Loader2 size={12} className="animate-spin" />} Enregistrer
+          </button>
+        </div>
+      </form>
+
+      {/* Entreprise (optionnel) */}
+      <form onSubmit={saveProfile} className="card-premium p-6 rounded space-y-5">
+        <h2 className="font-heading text-base text-cream tracking-wider flex items-center gap-2">
+          <Building2 size={16} className="text-primary" /> Informations entreprise
+          <span className="text-cream/40 text-[10px] uppercase tracking-wider ml-1">(optionnel)</span>
+        </h2>
+        <p className="text-cream/40 text-xs -mt-3">Affichées sur vos devis et factures si renseignées.</p>
+
+        {user && (
+          <LogoUploader
+            ownerUserId={user.id}
+            value={logoUrl}
+            onChange={handleLogoChange}
+            variant="dark"
+            label="Logo de l'entreprise"
+          />
+        )}
+
+        <div>
+          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Raison sociale</label>
+          <input type="text" value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} className={inputClass} />
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">SIRET</label>
+            <input type="text" value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="14 chiffres" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">N° TVA intra.</label>
+            <input type="text" value={form.tva_intra} onChange={(e) => setForm({ ...form, tva_intra: e.target.value })} placeholder="FR..." className={inputClass} />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end pt-2 border-t border-primary/10">
+          <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60">
             {saving && <Loader2 size={12} className="animate-spin" />} Enregistrer
           </button>
         </div>
