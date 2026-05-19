@@ -109,13 +109,25 @@ export const lookupPlate = createServerFn({ method: "POST" })
       }
 
       const root: any = json?.data ?? json?.result ?? json?.vehicule ?? json;
-      console.log("[SIV] body keys", root && typeof root === "object" ? Object.keys(root).slice(0, 20) : typeof root);
+      console.log("[SIV] body keys", root && typeof root === "object" ? Object.keys(root).slice(0, 80) : typeof root);
 
       const result = {
-        vin: pick(root, ["vin", "VIN", "numero_serie", "numeroSerie", "numero_vin"]),
-        marque: pick(root, ["marque", "make", "brand", "marqueVehicule", "Marque"]),
-        modele: pick(root, ["modele", "model", "modeleVehicule", "Modele", "modele_commercial"]),
+        vin: pick(root, ["AWN_VIN", "vin", "VIN", "numero_serie", "numeroSerie", "numero_vin"]),
+        marque: pick(root, ["AWN_marque", "marque", "make", "brand", "marqueVehicule", "Marque"]),
+        modele: pick(root, [
+          "AWN_modele",
+          "AWN_modele_etendu",
+          "AWN_modele_commercial",
+          "modele",
+          "model",
+          "modeleVehicule",
+          "Modele",
+          "modele_commercial",
+        ]),
         annee: pick(root, [
+          "AWN_date_de_premiere_mise_en_circulation",
+          "AWN_annee_de_debut_modele",
+          "AWN_annee_modele",
           "annee",
           "year",
           "date_mise_en_circulation",
@@ -127,8 +139,21 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "premiere_immatriculation",
           "datePremiereMiseCirculation",
         ]),
-        carburant: pick(root, ["carburant", "energie", "fuel", "energy", "Energie", "energieNGC"]),
+        carburant: pick(root, [
+          "AWN_energie",
+          "AWN_energie_NGC",
+          "AWN_carburant",
+          "carburant",
+          "energie",
+          "fuel",
+          "energy",
+          "Energie",
+          "energieNGC",
+        ]),
         puissance: pick(root, [
+          "AWN_puissance_fiscale",
+          "AWN_puissance_din",
+          "AWN_puissance_kw",
           "puissance",
           "puissance_fiscale",
           "puissanceFiscale",
@@ -137,7 +162,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puisFisc",
           "puissance_din",
         ]),
-        finition: pick(root, ["finition", "version", "variant", "Version"]),
+        finition: pick(root, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
       };
 
       const hasAny = Object.values(result).some((v) => v);
