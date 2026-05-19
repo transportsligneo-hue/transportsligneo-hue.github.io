@@ -18,6 +18,12 @@ interface DevisRow {
   prix_estime: number;
   statut: string;
   created_at: string;
+  date_souhaitee: string | null;
+  marque: string | null;
+  modele: string | null;
+  option_trajet: string | null;
+  mission_id: string | null;
+  paid_at: string | null;
 }
 
 interface MissionRow {
