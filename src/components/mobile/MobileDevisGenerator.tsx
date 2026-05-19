@@ -392,12 +392,10 @@ export default function MobileDevisGenerator() {
         )}
 
         {/* Résultat */}
-        {!showForm && !submitted && distance !== null && distance > 0 && pricing && (
+        {!showForm && !submitted && distance !== null && pricing && (
           <div className="mobile-card p-5 mb-4 gold-border-strong">
             <div className="text-center mb-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1">
-                Estimation
-              </p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1">Estimation</p>
               <p className="font-heading gold-gradient-text text-5xl leading-none">
                 {pricing.finalPrice}<span className="text-2xl ml-1">€</span>
               </p>
@@ -415,14 +413,18 @@ export default function MobileDevisGenerator() {
               </div>
               <div className="bg-navy/40 rounded-lg p-3 text-center">
                 <Clock size={14} className="text-primary mx-auto mb-1" />
-                <p className="text-cream font-heading text-sm">{estimateDuration(distance)}</p>
+                <p className="text-cream font-heading text-sm">{distance > 0 ? estimateDuration(distance) : "—"}</p>
                 <p className="text-cream/45 text-[10px] mt-0.5">Durée</p>
               </div>
             </div>
             <p className="text-center text-primary/60 text-[10px] mt-3 tracking-wider uppercase">
               Péages & carburant inclus
             </p>
-
+            <p className="text-cream/70 text-[11px] mt-3 leading-relaxed text-center">
+              <Sparkles size={10} className="inline mr-1 text-primary" />
+              Vous pouvez commander votre convoyage directement depuis cet estimateur.
+              Après validation, confirmez votre demande en quelques clics.
+            </p>
             <button
               onClick={() => setShowForm(true)}
               className="mt-5 w-full h-13 py-4 rounded-xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2"
@@ -433,9 +435,18 @@ export default function MobileDevisGenerator() {
           </div>
         )}
 
-        {distance === 0 && departure && arrival && !showForm && !submitted && (
+        {!showForm && !submitted && departure && arrival && distance === null && distanceLoading && (
           <div className="mobile-card p-4 text-center">
-            <p className="text-cream/60 text-sm">Les villes sont identiques.</p>
+            <p className="text-cream/60 text-sm inline-flex items-center gap-2">
+              <Loader2 size={12} className="animate-spin" /> Calcul de la distance…
+            </p>
+          </div>
+        )}
+        {!showForm && !submitted && departure && arrival && distance === null && !distanceLoading && (
+          <div className="mobile-card p-4 text-center">
+            <p className="text-amber-300/80 text-xs">
+              Distance non calculable automatiquement. Continuez votre demande, nous confirmerons manuellement.
+            </p>
           </div>
         )}
 
