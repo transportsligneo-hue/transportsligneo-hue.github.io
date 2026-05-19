@@ -68,7 +68,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
       const plate = data.plate.toUpperCase().replace(/[\s-]+/g, "");
       console.log("[SIV] start", plate);
 
-      const url = `https://${RAPIDAPI_HOST}/${encodeURIComponent(plate)}`;
+      const url = `https://${RAPIDAPI_HOST}/?plaque=${encodeURIComponent(plate)}`;
 
       let res: Response;
       try {
