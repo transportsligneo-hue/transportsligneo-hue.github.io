@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Loader2, X, Download, MapPin, Clock, Car, ClipboardCheck, Camera } from "lucide-react";
+import { FileText, Loader2, X, Download, MapPin, Clock, Car, ClipboardCheck, Camera, Activity } from "lucide-react";
+import { missionNumberOf } from "@/lib/mission-number";
 
 interface MissionReportProps {
   attributionId: string;
@@ -12,6 +13,7 @@ interface ReportData {
     id: string;
     statut: string;
     created_at: string;
+    numero_mission: string | null;
   };
   trajet: {
     depart: string;
@@ -51,6 +53,11 @@ interface ReportData {
     url_fichier: string;
     created_at: string;
     signed_url?: string | null;
+  }>;
+  history: Array<{
+    etape: string;
+    created_at: string;
+    note: string | null;
   }>;
 }
 
