@@ -404,24 +404,24 @@ function ConvoyeurMissions() {
     const isPendingValidation = openMission.statut === "en_attente_validation";
 
     let currentIdx = 1;
-    if (etape === "acceptee" || openMission.statut === "accepte") currentIdx = 1;
-    else if (etape === "en_route") currentIdx = 1;
-    else if (etape === "sur_place") currentIdx = 1;
-    else if (etape === "vehicule_recupere") currentIdx = 2;
-    else if (etape === "edl_depart_fait" || (inspDepartOk && !inspArriveeOk && etape !== "arrive_destination" && etape !== "en_livraison" && etape !== "edl_arrivee_fait")) currentIdx = 3;
-    else if (etape === "en_livraison") currentIdx = 3;
-    else if (etape === "arrive_destination") currentIdx = 4;
-    else if (etape === "edl_arrivee_fait" || inspArriveeOk) currentIdx = 5;
-    if (isPendingValidation) currentIdx = 6;
-    if (isTermine) currentIdx = 6;
+    if (etape === "acceptee" || openMission.statut === "accepte" || etape === null) currentIdx = 1;
+    else if (etape === "en_route") currentIdx = 2;
+    else if (etape === "sur_place" || etape === "vehicule_recupere") currentIdx = 3;
+    else if (etape === "edl_depart_fait") currentIdx = 4;
+    else if (etape === "en_livraison") currentIdx = 5;
+    else if (etape === "arrive_destination") currentIdx = 6;
+    else if (etape === "edl_arrivee_fait" || inspArriveeOk) currentIdx = 7;
+    if (isPendingValidation) currentIdx = 7;
+    if (isTermine) currentIdx = 7;
 
     const stepLabels = [
+      { label: "En route pour récupérer le véhicule" },
       { label: "Arrivé au lieu d'enlèvement" },
       { label: "Inspection d'enlèvement" },
       { label: "Trajet" },
       { label: "Arrivé au lieu de livraison" },
-      { label: "Inspection de livraison" },
-      { label: "Validation admin" },
+      { label: "Inspection d'arrivée" },
+      { label: "Envoyer à l'admin" },
     ];
     const TOTAL = stepLabels.length;
     const timelineSteps: TimelineStep[] = stepLabels.map((s, i) => {

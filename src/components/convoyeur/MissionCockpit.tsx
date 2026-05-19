@@ -350,7 +350,8 @@ export function MissionCockpit({
         </div>
 
         <div className="px-4 sm:px-5 pb-4">
-          {!selfieOK && currentKey !== "selfie" && (
+          {/* Lock warning only when blocking — i.e., user is past arrival but no selfie yet */}
+          {!selfieOK && (currentKey === "edl_depart" || currentKey === "demarrer_livraison") && (
             <div className="mb-3 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
               <Lock size={14} className="mt-0.5 shrink-0" />
               <p className="text-xs leading-snug">Selfie d'identité requis avant de continuer.</p>
