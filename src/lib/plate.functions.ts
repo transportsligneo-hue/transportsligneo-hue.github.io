@@ -26,16 +26,33 @@ export type PlateLookupResult = {
 
 const RAPIDAPI_HOST = "api-de-plaque-d-immatriculation-france.p.rapidapi.com";
 
-function pick(obj: any, keys: string[]): string | undefined {
-  if (!obj || typeof obj !== "object") return undefined;
-  for (const k of keys) {
-    const parts = k.split(".");
-    let cur: any = obj;
-    for (const p of parts) {
-      if (cur == null) break;
-      cur = cur[p];
+/** Aplatit un objet imbriqué en index { clé → valeur primitive }, gère cas data.data.AWN_*. */
+function flatten(obj: any, out: Record<string, any> = {}, depth = 0): Record<string, any> {
+  if (!obj || typeof obj !== "object" || depth > 4) return out;
+  for (const [k, v] of Object.entries(obj)) {
+    if (v == null) continue;
+    if (typeof v === "object" && !Array.isArray(v)) {
+      flatten(v, out, depth + 1);
+    } else if (v !== "" && typeof v !== "object") {
+      // garde la première occurrence (priorité racine)
+      if (!(k in out)) out[k] = v;
     }
-    if (cur != null && cur !== "" && typeof cur !== "object") return String(cur);
+  }
+  return out;
+}
+
+function isMeaningful(v: any): boolean {
+  if (v == null) return false;
+  const s = String(v).trim();
+  if (!s) return false;
+  const up = s.toUpperCase();
+  return up !== "INCONNU" && up !== "N/A" && up !== "NULL" && up !== "0";
+}
+
+function pick(flat: Record<string, any>, keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = flat[k];
+    if (isMeaningful(v)) return String(v);
   }
   return undefined;
 }
