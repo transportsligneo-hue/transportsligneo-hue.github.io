@@ -6,7 +6,7 @@
  *   - démarrage / arrivée / inspection
  *   - signatures et PV désormais portés par l'inspection
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Camera,
@@ -99,6 +99,7 @@ export function MissionCockpit({
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
   const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
+  const lastAutoOpenedKeyRef = useRef<ActionKind | null>(null);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
@@ -178,10 +179,16 @@ export function MissionCockpit({
   }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
 
   useEffect(() => {
-    if (currentKey === "selfie" && (forceOpenSelfie || !openSelfie)) {
-      setOpenSelfie(true);
+    if (currentKey !== "selfie" && currentKey !== "selfie_final") {
+      lastAutoOpenedKeyRef.current = null;
+      return;
     }
-    if (currentKey === "selfie_final" && !openSelfie) {
+
+    const shouldForceOpen = forceOpenSelfie;
+    const shouldAutoOpenForStep = lastAutoOpenedKeyRef.current !== currentKey;
+
+    if ((shouldForceOpen || shouldAutoOpenForStep) && !openSelfie) {
+      lastAutoOpenedKeyRef.current = currentKey;
       setOpenSelfie(true);
     }
   }, [currentKey, forceOpenSelfie, openSelfie]);
