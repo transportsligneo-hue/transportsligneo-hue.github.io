@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Ban,
@@ -14,6 +15,10 @@ import {
   Truck,
   AlertTriangle,
   Loader2,
+  Save,
+  Send,
+  KeyRound,
+  AtSign,
 } from "lucide-react";
 import {
   AdminPageHeader,
@@ -36,6 +41,9 @@ interface Profile {
   telephone: string | null;
   societe: string | null;
   siret: string | null;
+  tva_intra: string | null;
+  adresse: string | null;
+  adresse_facturation: string | null;
   type_client: string | null;
   statut: string | null;
   created_at: string;
@@ -51,6 +59,36 @@ interface MissionItem {
   prix_total: number | null;
 }
 
+interface AccountStatus {
+  email_confirmed_at: string | null;
+  invited_at: string | null;
+  last_sign_in_at: string | null;
+}
+
+type Editable = {
+  prenom: string;
+  nom: string;
+  telephone: string;
+  societe: string;
+  siret: string;
+  tva_intra: string;
+  adresse: string;
+  adresse_facturation: string;
+  type_client: string;
+};
+
+const EMPTY: Editable = {
+  prenom: "",
+  nom: "",
+  telephone: "",
+  societe: "",
+  siret: "",
+  tva_intra: "",
+  adresse: "",
+  adresse_facturation: "",
+  type_client: "particulier",
+};
+
 function AdminClientDetail() {
   const { clientId } = Route.useParams();
   const navigate = useNavigate();
@@ -58,6 +96,11 @@ function AdminClientDetail() {
   const [actif, setActif] = useState(true);
   const [missions, setMissions] = useState<MissionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<Editable>(EMPTY);
+  const [original, setOriginal] = useState<Editable>(EMPTY);
+  const [status, setStatus] = useState<AccountStatus | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,9 +119,40 @@ function AdminClientDetail() {
         .order("date_prise_en_charge", { ascending: false })
         .limit(100),
     ]);
-    setProfile(p as Profile | null);
+    const prof = p as Profile | null;
+    setProfile(prof);
     setActif((role as { actif?: boolean } | null)?.actif ?? true);
     setMissions((m as MissionItem[]) ?? []);
+    if (prof) {
+      const init: Editable = {
+        prenom: prof.prenom ?? "",
+        nom: prof.nom ?? "",
+        telephone: prof.telephone ?? "",
+        societe: prof.societe ?? "",
+        siret: prof.siret ?? "",
+        tva_intra: prof.tva_intra ?? "",
+        adresse: prof.adresse ?? "",
+        adresse_facturation: prof.adresse_facturation ?? "",
+        type_client: prof.type_client ?? "particulier",
+      };
+      setForm(init);
+      setOriginal(init);
+    }
+
+    // Status auth
+    try {
+      const { data: s } = await supabase.functions.invoke("admin-user-actions", {
+        body: { action: "get_account_status", user_id: clientId },
+      });
+      if (s && !s.error) {
+        setStatus({
+          email_confirmed_at: s.email_confirmed_at ?? null,
+          invited_at: s.invited_at ?? null,
+          last_sign_in_at: s.last_sign_in_at ?? null,
+        });
+      }
+    } catch { /* ignore */ }
+
     setLoading(false);
   }, [clientId]);
 
@@ -95,6 +169,80 @@ function AdminClientDetail() {
       .eq("user_id", clientId)
       .eq("role", "client");
     setActif(next);
+  };
+
+  const dirty = JSON.stringify(form) !== JSON.stringify(original);
+
+  const saveProfile = async () => {
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: { action: "update_profile", user_id: clientId, profile: form },
+    });
+    setSaving(false);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Erreur lors de la sauvegarde");
+      return;
+    }
+    toast.success("Profil mis à jour");
+    setOriginal(form);
+    load();
+  };
+
+  const changeEmail = async () => {
+    const newEmail = window.prompt(
+      "Nouvel email du client (sera confirmé automatiquement) :",
+      profile?.email ?? "",
+    );
+    if (!newEmail || newEmail === profile?.email) return;
+    if (!window.confirm(`Changer l'email pour ${newEmail} ?\nLe client devra utiliser cet email pour se connecter.`)) return;
+    setBusy("email");
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: { action: "change_email", user_id: clientId, email: newEmail },
+    });
+    setBusy(null);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Erreur");
+      return;
+    }
+    toast.success("Email modifié");
+    load();
+  };
+
+  const sendInvite = async () => {
+    if (!profile?.email) return;
+    setBusy("invite");
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: {
+        action: "invite_account",
+        user_id: clientId,
+        email: profile.email,
+        redirect_to: `${window.location.origin}/dashboard-client`,
+      },
+    });
+    setBusy(null);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Erreur");
+      return;
+    }
+    toast.success("Invitation envoyée");
+    load();
+  };
+
+  const sendReset = async () => {
+    setBusy("reset");
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: {
+        action: "reset_password",
+        user_id: clientId,
+        redirect_to: `${window.location.origin}/reset-password`,
+      },
+    });
+    setBusy(null);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Erreur");
+      return;
+    }
+    toast.success("Email de réinitialisation envoyé");
   };
 
   if (loading) {
@@ -123,7 +271,16 @@ function AdminClientDetail() {
   const totalCA = missions.reduce((s, m) => s + (m.prix_total ?? 0), 0);
   const termineCount = missions.filter((m) => ["terminee", "livree"].includes(m.statut)).length;
   const enCoursCount = missions.filter((m) => ["en_cours", "confirmee", "en_attente"].includes(m.statut)).length;
-  const isB2B = profile.type_client === "b2b" || !!profile.societe;
+  const isB2B = (form.type_client === "b2b" || form.type_client === "flotte") || !!form.societe;
+
+  const accountState = (() => {
+    if (!status) return { label: "—", tone: "neutral" as const };
+    if (status.email_confirmed_at) return { label: "Email vérifié", tone: "success" as const };
+    if (status.invited_at) return { label: "Invité (en attente)", tone: "warning" as const };
+    return { label: "Compte non vérifié", tone: "warning" as const };
+  })();
+
+  const inp = "w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/30";
 
   return (
     <div className="space-y-6">
@@ -139,7 +296,8 @@ function AdminClientDetail() {
         status={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge label={actif ? "Actif" : "Suspendu"} tone={actif ? "success" : "danger"} />
-            {isB2B && profile.societe && <AdminBadge label={profile.societe} tone="accent" />}
+            <AdminBadge label={accountState.label} tone={accountState.tone} />
+            {isB2B && form.societe && <AdminBadge label={form.societe} tone="accent" />}
           </div>
         }
         actions={
@@ -174,32 +332,111 @@ function AdminClientDetail() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Coordonnées */}
-        <AdminSection title="Coordonnées">
+        {/* Coordonnées éditables */}
+        <AdminSection
+          title="Coordonnées"
+          description="Modifiez les champs puis enregistrez."
+        >
           <div className="space-y-4">
-            <AdminField label="Email">
-              {profile.email ? (
-                <a className="inline-flex items-center gap-1.5 text-[color:var(--admin-accent)] hover:underline" href={`mailto:${profile.email}`}>
-                  <Mail size={14} /> {profile.email}
-                </a>
-              ) : null}
+            <div className="grid grid-cols-2 gap-3">
+              <AdminField label="Prénom">
+                <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
+              </AdminField>
+              <AdminField label="Nom">
+                <input className={inp} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+              </AdminField>
+            </div>
+            <AdminField label="Email (connexion)">
+              <div className="flex items-center gap-2">
+                <input className={`${inp} bg-slate-50`} value={profile.email ?? ""} readOnly />
+                <button
+                  onClick={changeEmail}
+                  disabled={busy === "email"}
+                  className="admin-btn-ghost inline-flex items-center gap-1.5 whitespace-nowrap"
+                  title="Modifier l'email"
+                >
+                  {busy === "email" ? <Loader2 className="animate-spin" size={14} /> : <AtSign size={14} />}
+                  Modifier
+                </button>
+              </div>
             </AdminField>
             <AdminField label="Téléphone">
-              {profile.telephone ? (
-                <a className="inline-flex items-center gap-1.5 text-[color:var(--admin-accent)] hover:underline" href={`tel:${profile.telephone}`}>
-                  <Phone size={14} /> {profile.telephone}
-                </a>
-              ) : null}
+              <input className={inp} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
+            </AdminField>
+            <AdminField label="Type de client">
+              <select className={inp} value={form.type_client} onChange={(e) => setForm({ ...form, type_client: e.target.value })}>
+                <option value="particulier">Particulier</option>
+                <option value="b2b">B2B</option>
+                <option value="flotte">Flotte</option>
+              </select>
             </AdminField>
             <AdminField label="Société">
-              {profile.societe ? (
-                <span className="inline-flex items-center gap-1.5"><Building2 size={14} className="text-slate-400" /> {profile.societe}</span>
-              ) : null}
+              <input className={inp} value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} />
             </AdminField>
-            <AdminField label="SIRET">{profile.siret}</AdminField>
+            <div className="grid grid-cols-2 gap-3">
+              <AdminField label="SIRET">
+                <input className={inp} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} />
+              </AdminField>
+              <AdminField label="TVA intra.">
+                <input className={inp} value={form.tva_intra} onChange={(e) => setForm({ ...form, tva_intra: e.target.value })} />
+              </AdminField>
+            </div>
+            <AdminField label="Adresse">
+              <input className={inp} value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} />
+            </AdminField>
+            <AdminField label="Adresse de facturation">
+              <input className={inp} value={form.adresse_facturation} onChange={(e) => setForm({ ...form, adresse_facturation: e.target.value })} />
+            </AdminField>
             <AdminField label="Inscrit le">
-              <span className="inline-flex items-center gap-1.5"><Calendar size={14} className="text-slate-400" /> {new Date(profile.created_at).toLocaleDateString("fr-FR")}</span>
+              <span className="inline-flex items-center gap-1.5 text-sm">
+                <Calendar size={14} className="text-slate-400" />
+                {new Date(profile.created_at).toLocaleDateString("fr-FR")}
+              </span>
             </AdminField>
+
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={saveProfile}
+                disabled={!dirty || saving}
+                className="admin-btn-primary inline-flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+                Enregistrer
+              </button>
+              {dirty && (
+                <button onClick={() => setForm(original)} className="admin-btn-ghost">
+                  Annuler
+                </button>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 space-y-2">
+              <div className="text-xs uppercase tracking-wider text-[color:var(--admin-muted)] font-medium">
+                Accès compte
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={sendInvite} disabled={busy === "invite"} className="admin-btn-ghost inline-flex items-center gap-1.5">
+                  {busy === "invite" ? <Loader2 className="animate-spin" size={14} /> : <Send size={14} />}
+                  {status?.invited_at && !status?.email_confirmed_at ? "Renvoyer l'invitation" : "Envoyer une invitation"}
+                </button>
+                <button onClick={sendReset} disabled={busy === "reset"} className="admin-btn-ghost inline-flex items-center gap-1.5">
+                  {busy === "reset" ? <Loader2 className="animate-spin" size={14} /> : <KeyRound size={14} />}
+                  Réinit. mot de passe
+                </button>
+              </div>
+              {profile.email && (
+                <div className="text-xs text-[color:var(--admin-muted)] inline-flex items-center gap-3 flex-wrap">
+                  <a className="inline-flex items-center gap-1 hover:underline" href={`mailto:${profile.email}`}>
+                    <Mail size={12} /> {profile.email}
+                  </a>
+                  {profile.telephone && (
+                    <a className="inline-flex items-center gap-1 hover:underline" href={`tel:${profile.telephone}`}>
+                      <Phone size={12} /> {profile.telephone}
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </AdminSection>
 
