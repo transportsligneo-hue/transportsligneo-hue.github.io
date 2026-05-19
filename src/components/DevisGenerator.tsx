@@ -412,8 +412,8 @@ export default function DevisGenerator() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { v: "aller-simple", l: "Aller simple", s: "Livraison" },
-                { v: "aller-retour", l: "Aller-retour", s: "Livraison + restitution" },
+                { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
+                { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
                 { v: "express", l: "Express", s: "Urgent · +20%" },
               ].map((o) => (
                 <button
