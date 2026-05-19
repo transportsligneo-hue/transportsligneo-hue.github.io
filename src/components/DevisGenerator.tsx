@@ -145,7 +145,6 @@ export default function DevisGenerator() {
   const distance = localDistance ?? googleDistance;
 
   const pricing = useMemo(() => {
-  const pricing = useMemo(() => {
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
