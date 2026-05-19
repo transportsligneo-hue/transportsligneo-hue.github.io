@@ -54,23 +54,46 @@ const PRESTATION_TYPES = [
   { value: "mise-a-disposition", label: "Mise à disposition" }, { value: "autre", label: "Autre" },
 ];
 
+function extractCity(addr: string): string {
+  if (!addr) return "";
+  const all = new Set<string>([...CITIES, ...Object.keys(CITY_DEPARTMENTS)]);
+  const sorted = [...all].sort((a, b) => b.length - a.length);
+  const lower = addr.toLowerCase();
+  for (const c of sorted) {
+    const re = new RegExp(`(^|[^a-zà-ÿ])${c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}([^a-zà-ÿ]|$)`, "i");
+    if (re.test(lower)) return c;
+  }
+  return "";
+}
+
 function getDistance(from: string, to: string): number | null {
-  if (from === to) return 0;
-  if (CITY_DISTANCES[from]?.[to]) return CITY_DISTANCES[from][to];
-  if (CITY_DISTANCES[to]?.[from]) return CITY_DISTANCES[to][from];
-  const dFromTours = CITY_DISTANCES["Tours"]?.[from] ?? CITY_DISTANCES[from]?.["Tours"];
-  const dToTours = CITY_DISTANCES["Tours"]?.[to] ?? CITY_DISTANCES[to]?.["Tours"];
+  const cFrom = extractCity(from) || from;
+  const cTo = extractCity(to) || to;
+  if (cFrom === cTo) return 0;
+  if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
+  if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
+  const dFromTours = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
+  const dToTours = CITY_DISTANCES["Tours"]?.[cTo] ?? CITY_DISTANCES[cTo]?.["Tours"];
   if (dFromTours != null && dToTours != null) return Math.round((dFromTours + dToTours) * 0.85);
   return null;
 }
 
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const deptDep = CITY_DEPARTMENTS[departure];
-  const deptArr = CITY_DEPARTMENTS[arrival];
+  const cDep = extractCity(departure) || departure;
+  const cArr = extractCity(arrival) || arrival;
+  const deptDep = CITY_DEPARTMENTS[cDep];
+  const deptArr = CITY_DEPARTMENTS[cArr];
   const dept = deptDep && deptArr ? deptArr : null;
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
     const label = DEPARTMENT_LABELS[dept] || dept;
+    if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
+    if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
+    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
+  }
+  if (distance <= 0) {
+    const [simple, retour] = FIXED_TARIFFS["37-intra"];
+    const label = "Forfait local (minimum)";
     if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
