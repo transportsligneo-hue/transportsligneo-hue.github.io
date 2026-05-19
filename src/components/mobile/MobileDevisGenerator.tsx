@@ -206,6 +206,42 @@ export default function MobileDevisGenerator() {
     setPickerType(null);
   };
 
+  async function handleSivLookup() {
+    setSivMsg(null);
+    const plate = immatriculation.trim().toUpperCase();
+    if (!plate || plate.length < 4) {
+      setSivMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        if (d.marque) setMarque(d.marque);
+        if (d.modele) setModele(d.modele);
+        if (d.vin) setVin(d.vin);
+        if (d.annee) setAnnee(d.annee);
+        if (d.puissance) setPuissance(d.puissance);
+        if (d.finition) setFinition(d.finition);
+        if (d.carburant) {
+          const c = d.carburant.toLowerCase();
+          if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergy("diesel");
+          else if (c.includes("essence") || c.includes("sp") || c.includes("petrol")) setEnergy("essence");
+          else if (c.includes("élec") || c.includes("elec") || c.includes("ev")) setEnergy("electrique");
+          else if (c.includes("hybr")) setEnergy("hybride");
+        }
+        setSivMsg({ type: "ok", text: "Véhicule trouvé ✓" });
+      }
+    } catch {
+      setSivMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivLoading(false);
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pricing || distance == null) return;
