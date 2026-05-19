@@ -1861,6 +1861,7 @@ export type Database = {
         Row: {
           account_status: string
           adresse: string | null
+          adresse_facturation: string | null
           avatar_url: string | null
           created_at: string
           email: string | null
@@ -1872,6 +1873,7 @@ export type Database = {
           societe: string | null
           statut: string
           telephone: string | null
+          tva_intra: string | null
           type_client: string
           updated_at: string
           user_id: string
@@ -1879,6 +1881,7 @@ export type Database = {
         Insert: {
           account_status?: string
           adresse?: string | null
+          adresse_facturation?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
@@ -1890,6 +1893,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          tva_intra?: string | null
           type_client?: string
           updated_at?: string
           user_id: string
@@ -1897,6 +1901,7 @@ export type Database = {
         Update: {
           account_status?: string
           adresse?: string | null
+          adresse_facturation?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
@@ -1908,6 +1913,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          tva_intra?: string | null
           type_client?: string
           updated_at?: string
           user_id?: string

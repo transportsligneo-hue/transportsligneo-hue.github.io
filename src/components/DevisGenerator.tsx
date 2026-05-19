@@ -205,43 +205,50 @@ export default function DevisGenerator() {
 
   async function handleSubmit() {
     if (!pricing || distance == null) return;
+    // CGU requise dans tous les cas
     if (!cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
-    if (password.length < 8) { setAccountError("Le mot de passe doit contenir au moins 8 caractères."); return; }
+    // Création de compte optionnelle : seulement si un mot de passe est saisi
+    const wantsAccount = password.length > 0;
+    if (wantsAccount && password.length < 8) {
+      setAccountError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
     setAccountError("");
     setSending(true);
     try {
-      // 1) Création du compte client (vérification email requise côté Supabase)
-      try {
-        const token = await getRecaptchaToken("signup_devis");
-        // reCAPTCHA token is optional; signup proceeds even if unavailable
-        void token;
-      } catch { /* ignore */ }
-
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-          data: {
-            role: "client",
-            nom, prenom, telephone,
-            societe: societe || "",
-          },
-        },
-      });
-
+      // 1) Création du compte client (optionnelle)
       let isExistingAccount = false;
-      if (signUpError) {
-        const msg = signUpError.message.toLowerCase();
-        if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("user already")) {
-          isExistingAccount = true;
-        } else {
-          setAccountError(signUpError.message);
-          setSending(false);
-          return;
+      if (wantsAccount) {
+        try {
+          const token = await getRecaptchaToken("signup_devis");
+          void token;
+        } catch { /* ignore */ }
+
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+            data: {
+              role: "client",
+              nom, prenom, telephone,
+              societe: societe || "",
+            },
+          },
+        });
+
+        if (signUpError) {
+          const msg = signUpError.message.toLowerCase();
+          if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("user already")) {
+            isExistingAccount = true;
+          } else {
+            setAccountError(signUpError.message);
+            setSending(false);
+            return;
+          }
         }
+        setAccountCreated(!isExistingAccount);
       }
-      setAccountCreated(!isExistingAccount);
 
       // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
@@ -286,7 +293,7 @@ export default function DevisGenerator() {
         message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: isExistingAccount ? "existing" : "created" },
+        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
       });
 
       const devisData: DevisData = {
@@ -703,25 +710,24 @@ export default function DevisGenerator() {
                         <Lock size={14} className="text-[#5fb6ff]" />
                       </div>
                       <div>
-                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client</p>
+                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
                         <p className="text-cream/55 text-xs mt-1 leading-relaxed">
-                          Un compte est créé automatiquement pour suivre votre devis, votre mission et vos documents
-                          dans un espace sécurisé. Vous recevrez un email de vérification.
+                          Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
+                          dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
                         </p>
                       </div>
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
-                        <Lock size={11} className="inline mr-1" /> Mot de passe *
+                        <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
                       </label>
                       <input
                         type="password"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         className={inputCard}
-                        placeholder="Minimum 8 caractères"
+                        placeholder="Laisser vide ou minimum 8 caractères"
                         minLength={8}
-                        required
                       />
                     </div>
                     <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
@@ -793,7 +799,7 @@ export default function DevisGenerator() {
                   disabled={
                     (step === 1 && (!departure || !arrival)) ||
                     (step === 2 && !vehicleType) ||
-                    (step === 3 && (!nom || !prenom || !email || !telephone || password.length < 8 || !cguAccepted))
+                    (step === 3 && (!nom || !prenom || !email || !telephone || (password.length > 0 && password.length < 8) || !cguAccepted))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
