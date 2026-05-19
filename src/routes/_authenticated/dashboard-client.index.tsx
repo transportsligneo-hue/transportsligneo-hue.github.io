@@ -40,7 +40,7 @@ interface Stats {
 
 function ClientDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0 });
+  const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0, devis: 0 });
   const [lastMission, setLastMission] = useState<MissionRow | null>(null);
   const [devisList, setDevisList] = useState<DevisRow[]>([]);
   const [prenom, setPrenom] = useState<string>("");
