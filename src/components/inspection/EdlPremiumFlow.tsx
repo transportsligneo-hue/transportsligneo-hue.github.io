@@ -992,7 +992,8 @@ export function EdlPremiumFlow({
   }
 
   const overlay = (
-    <div className="edl-shell fixed inset-0 z-[100] flex flex-col">
+    <div className="edl-shell fixed inset-x-0 top-0 z-[100] flex flex-col" style={{ height: "100dvh", maxHeight: "100dvh" }}>
+
       {/* === HEADER GLASS === */}
       <header className="edl-glass-strong rounded-none border-x-0 border-t-0 px-4 py-3 flex items-center gap-3 shrink-0">
         <button
