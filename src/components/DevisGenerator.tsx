@@ -12,6 +12,7 @@ import { notifyAdmin } from "@/lib/admin-notifications";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
+import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
