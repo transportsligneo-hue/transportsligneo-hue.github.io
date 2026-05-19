@@ -595,13 +595,37 @@ export default function DevisGenerator() {
                     </div>
                     <div className="sm:col-span-2">
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque d'immatriculation</label>
-                      <input
-                        value={immatriculation}
-                        onChange={e => setImmatriculation(e.target.value.toUpperCase())}
-                        placeholder="AA-123-AA"
-                        disabled={plaqueInconnue}
-                        className={inputCard + " uppercase tracking-widest disabled:opacity-50"}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          value={immatriculation}
+                          onChange={e => { setImmatriculation(e.target.value.toUpperCase()); setSivMsg(null); }}
+                          placeholder="AA-123-AA"
+                          disabled={plaqueInconnue}
+                          className={inputCard + " uppercase tracking-widest disabled:opacity-50 flex-1"}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSivLookup}
+                          disabled={plaqueInconnue || sivLoading || !immatriculation}
+                          className="px-4 rounded-xl border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:bg-[#e7c76a]/20 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                        >
+                          {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                          {sivLoading ? "..." : "Rechercher"}
+                        </button>
+                      </div>
+                      {sivMsg && (
+                        <p className={`mt-2 text-[11px] ${sivMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>
+                          {sivMsg.text}
+                        </p>
+                      )}
+                      {(vin || annee || puissance || finition) && (
+                        <div className="mt-3 p-3 rounded-xl border border-[#e7c76a]/20 bg-[#e7c76a]/[0.04] text-[11px] text-cream/70 grid grid-cols-2 gap-x-3 gap-y-1">
+                          {annee && <div><span className="text-cream/45">Année :</span> {annee}</div>}
+                          {puissance && <div><span className="text-cream/45">Puissance :</span> {puissance}</div>}
+                          {finition && <div className="col-span-2"><span className="text-cream/45">Finition :</span> {finition}</div>}
+                          {vin && <div className="col-span-2 truncate"><span className="text-cream/45">VIN :</span> {vin}</div>}
+                        </div>
+                      )}
                       <label className="mt-2 inline-flex items-center gap-2 text-[11px] text-cream/65 cursor-pointer">
                         <input type="checkbox" checked={plaqueInconnue} onChange={e => setPlaqueInconnue(e.target.checked)}
                           className="accent-[#5fb6ff]" />
