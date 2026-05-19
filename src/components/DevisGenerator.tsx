@@ -288,9 +288,9 @@ export default function DevisGenerator() {
   return (
     <div className="w-full">
       {/* Barre estimateur premium */}
-      <div className="relative max-w-5xl mx-auto">
+      <div className="relative z-30 max-w-5xl mx-auto">
         <div aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-[#5fb6ff]/20 via-transparent to-[#e7c76a]/15 blur-md opacity-70" />
-        <div className="relative rounded-2xl border border-[#5fb6ff]/25 bg-white/[0.04] backdrop-blur-xl shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7)]">
+        <div className="relative z-30 rounded-2xl border border-[#5fb6ff]/25 bg-white/[0.04] backdrop-blur-xl shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7)]">
           <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1.3fr_1fr_0.9fr_0.7fr_auto] divide-y md:divide-y-0 md:divide-x divide-white/10">
             {/* Départ */}
             <div className="relative px-4 py-3">
@@ -303,7 +303,7 @@ export default function DevisGenerator() {
                 placeholder="Ville ou adresse complète"
                 className={inputBare}
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
             </div>
             {/* Arrivée */}
@@ -317,7 +317,7 @@ export default function DevisGenerator() {
                 placeholder="Ville ou adresse complète"
                 className={inputBare}
                 fallbackOptions={CITIES}
-                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
+                dropdownClassName="absolute z-[60] left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
             </div>
             {/* Type véhicule */}
