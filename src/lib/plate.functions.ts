@@ -126,12 +126,13 @@ export const lookupPlate = createServerFn({ method: "POST" })
       }
 
       const root: any = json?.data ?? json?.result ?? json?.vehicule ?? json;
-      console.log("[SIV] body keys", root && typeof root === "object" ? Object.keys(root).slice(0, 80) : typeof root);
+      const flat = flatten(root);
+      console.log("[SIV] flat keys", Object.keys(flat).slice(0, 80));
 
       const result = {
-        vin: pick(root, ["AWN_VIN", "vin", "VIN", "numero_serie", "numeroSerie", "numero_vin"]),
-        marque: pick(root, ["AWN_marque", "marque", "make", "brand", "marqueVehicule", "Marque"]),
-        modele: pick(root, [
+        vin: pick(flat, ["AWN_VIN", "vin", "VIN", "numero_serie", "numeroSerie", "numero_vin"]),
+        marque: pick(flat, ["AWN_marque", "marque", "make", "brand", "marqueVehicule", "Marque"]),
+        modele: pick(flat, [
           "AWN_modele",
           "AWN_modele_etendu",
           "AWN_modele_commercial",
@@ -141,7 +142,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "Modele",
           "modele_commercial",
         ]),
-        annee: pick(root, [
+        annee: pick(flat, [
           "AWN_date_de_premiere_mise_en_circulation",
           "AWN_annee_de_debut_modele",
           "AWN_annee_modele",
@@ -156,7 +157,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "premiere_immatriculation",
           "datePremiereMiseCirculation",
         ]),
-        carburant: pick(root, [
+        carburant: pick(flat, [
           "AWN_energie",
           "AWN_energie_NGC",
           "AWN_carburant",
@@ -167,7 +168,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "Energie",
           "energieNGC",
         ]),
-        puissance: pick(root, [
+        puissance: pick(flat, [
           "AWN_puissance_fiscale",
           "AWN_puissance_din",
           "AWN_puissance_kw",
@@ -179,12 +180,20 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puisFisc",
           "puissance_din",
         ]),
-        finition: pick(root, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
+        finition: pick(flat, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
       };
+
+      // Année : si on a une date complète, extraire l'année
+      if (result.annee && /\d{4}/.test(result.annee)) {
+        const m = result.annee.match(/(\d{4})/);
+        if (m) result.annee = m[1];
+      }
+
+      console.log("[SIV] mapped", result);
 
       const hasAny = Object.values(result).some((v) => v);
       if (!hasAny) {
-        console.warn("[SIV] no fields matched in response", JSON.stringify(root).slice(0, 500));
+        console.warn("[SIV] no fields matched", Object.keys(flat).slice(0, 50));
         return { ok: false, error: "Aucune donnée véhicule trouvée" };
       }
 
