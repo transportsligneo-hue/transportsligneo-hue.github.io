@@ -1,27 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
-  MapPin,
-  Navigation,
-  Clock,
-  Euro,
-  Car,
-  Fuel,
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  Send,
-  Loader2,
-  CheckCircle,
-  User,
-  Phone,
-  Mail,
-  Download,
-  ArrowLeft,
+  MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
+  Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import {
+  getAutocompleteSuggestions, getGoogleDistanceKm, isGoogleAvailable, loadGoogle,
+  resetPlacesSession, type PlaceSuggestion,
+} from "@/lib/google-places";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
@@ -65,23 +54,46 @@ const PRESTATION_TYPES = [
   { value: "mise-a-disposition", label: "Mise à disposition" }, { value: "autre", label: "Autre" },
 ];
 
+function extractCity(addr: string): string {
+  if (!addr) return "";
+  const all = new Set<string>([...CITIES, ...Object.keys(CITY_DEPARTMENTS)]);
+  const sorted = [...all].sort((a, b) => b.length - a.length);
+  const lower = addr.toLowerCase();
+  for (const c of sorted) {
+    const re = new RegExp(`(^|[^a-zà-ÿ])${c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}([^a-zà-ÿ]|$)`, "i");
+    if (re.test(lower)) return c;
+  }
+  return "";
+}
+
 function getDistance(from: string, to: string): number | null {
-  if (from === to) return 0;
-  if (CITY_DISTANCES[from]?.[to]) return CITY_DISTANCES[from][to];
-  if (CITY_DISTANCES[to]?.[from]) return CITY_DISTANCES[to][from];
-  const dFromTours = CITY_DISTANCES["Tours"]?.[from] ?? CITY_DISTANCES[from]?.["Tours"];
-  const dToTours = CITY_DISTANCES["Tours"]?.[to] ?? CITY_DISTANCES[to]?.["Tours"];
+  const cFrom = extractCity(from) || from;
+  const cTo = extractCity(to) || to;
+  if (cFrom === cTo) return 0;
+  if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
+  if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
+  const dFromTours = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
+  const dToTours = CITY_DISTANCES["Tours"]?.[cTo] ?? CITY_DISTANCES[cTo]?.["Tours"];
   if (dFromTours != null && dToTours != null) return Math.round((dFromTours + dToTours) * 0.85);
   return null;
 }
 
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const deptDep = CITY_DEPARTMENTS[departure];
-  const deptArr = CITY_DEPARTMENTS[arrival];
+  const cDep = extractCity(departure) || departure;
+  const cArr = extractCity(arrival) || arrival;
+  const deptDep = CITY_DEPARTMENTS[cDep];
+  const deptArr = CITY_DEPARTMENTS[cArr];
   const dept = deptDep && deptArr ? deptArr : null;
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
     const label = DEPARTMENT_LABELS[dept] || dept;
+    if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
+    if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
+    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
+  }
+  if (distance <= 0) {
+    const [simple, retour] = FIXED_TARIFFS["37-intra"];
+    const label = "Forfait local (minimum)";
     if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
@@ -132,19 +144,50 @@ export default function MobileDevisGenerator() {
   const [pickerType, setPickerType] = useState<"dep" | "arr" | null>(null);
   const [pickerFilter, setPickerFilter] = useState("");
 
-  const distance = useMemo(() => {
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+  const [googleSuggestions, setGoogleSuggestions] = useState<PlaceSuggestion[]>([]);
+
+  const localDistance = useMemo(() => {
     if (!departure || !arrival) return null;
     return getDistance(departure, arrival);
   }, [departure, arrival]);
 
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!departure || !arrival) return;
+    if (localDistance !== null) return;
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(departure, arrival)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [departure, arrival, localDistance]);
+
+  const distance = localDistance ?? googleDistance;
+
   const pricing = useMemo(() => {
-    if (distance === null || distance === 0) return null;
+    if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
-  }, [distance, arrival, option]);
+  }, [distance, departure, arrival, option]);
 
   const filteredCities = CITIES.filter(c =>
     c.toLowerCase().includes(pickerFilter.toLowerCase())
   );
+
+  // Précharge Google et alimente les suggestions du picker
+  useEffect(() => { if (isGoogleAvailable()) loadGoogle().catch(() => {}); }, []);
+  useEffect(() => {
+    if (!pickerType) { setGoogleSuggestions([]); return; }
+    if (!isGoogleAvailable() || pickerFilter.length < 2) { setGoogleSuggestions([]); return; }
+    const t = setTimeout(async () => {
+      const res = await getAutocompleteSuggestions(pickerFilter);
+      setGoogleSuggestions(res);
+    }, 220);
+    return () => clearTimeout(t);
+  }, [pickerFilter, pickerType]);
 
   const openPicker = (type: "dep" | "arr") => {
     setPickerType(type);
@@ -349,12 +392,10 @@ export default function MobileDevisGenerator() {
         )}
 
         {/* Résultat */}
-        {!showForm && !submitted && distance !== null && distance > 0 && pricing && (
+        {!showForm && !submitted && distance !== null && pricing && (
           <div className="mobile-card p-5 mb-4 gold-border-strong">
             <div className="text-center mb-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1">
-                Estimation
-              </p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1">Estimation</p>
               <p className="font-heading gold-gradient-text text-5xl leading-none">
                 {pricing.finalPrice}<span className="text-2xl ml-1">€</span>
               </p>
@@ -372,14 +413,18 @@ export default function MobileDevisGenerator() {
               </div>
               <div className="bg-navy/40 rounded-lg p-3 text-center">
                 <Clock size={14} className="text-primary mx-auto mb-1" />
-                <p className="text-cream font-heading text-sm">{estimateDuration(distance)}</p>
+                <p className="text-cream font-heading text-sm">{distance > 0 ? estimateDuration(distance) : "—"}</p>
                 <p className="text-cream/45 text-[10px] mt-0.5">Durée</p>
               </div>
             </div>
             <p className="text-center text-primary/60 text-[10px] mt-3 tracking-wider uppercase">
               Péages & carburant inclus
             </p>
-
+            <p className="text-cream/70 text-[11px] mt-3 leading-relaxed text-center">
+              <Sparkles size={10} className="inline mr-1 text-primary" />
+              Vous pouvez commander votre convoyage directement depuis cet estimateur.
+              Après validation, confirmez votre demande en quelques clics.
+            </p>
             <button
               onClick={() => setShowForm(true)}
               className="mt-5 w-full h-13 py-4 rounded-xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2"
@@ -390,9 +435,18 @@ export default function MobileDevisGenerator() {
           </div>
         )}
 
-        {distance === 0 && departure && arrival && !showForm && !submitted && (
+        {!showForm && !submitted && departure && arrival && distance === null && distanceLoading && (
           <div className="mobile-card p-4 text-center">
-            <p className="text-cream/60 text-sm">Les villes sont identiques.</p>
+            <p className="text-cream/60 text-sm inline-flex items-center gap-2">
+              <Loader2 size={12} className="animate-spin" /> Calcul de la distance…
+            </p>
+          </div>
+        )}
+        {!showForm && !submitted && departure && arrival && distance === null && !distanceLoading && (
+          <div className="mobile-card p-4 text-center">
+            <p className="text-amber-300/80 text-xs">
+              Distance non calculable automatiquement. Continuez votre demande, nous confirmerons manuellement.
+            </p>
           </div>
         )}
 

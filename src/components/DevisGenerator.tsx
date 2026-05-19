@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
   CheckCircle, User, Download, Shield, Route as RouteIcon,
@@ -10,6 +10,8 @@ import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { getRecaptchaToken } from "@/lib/recaptcha";
+import PlacesInput from "@/components/PlacesInput";
+import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
@@ -23,22 +25,47 @@ const CITIES = ["Tours","Paris","Lyon","Marseille","Bordeaux","Nantes","Lille","
 const VEHICLE_TYPES = [{value:"citadine",label:"Citadine"},{value:"berline",label:"Berline"},{value:"suv",label:"SUV"},{value:"utilitaire",label:"Utilitaire"},{value:"autre",label:"Autre"}];
 const ENERGY_TYPES = [{value:"diesel",label:"Diesel"},{value:"essence",label:"Essence"},{value:"electrique",label:"Électrique"},{value:"hybride",label:"Hybride"}];
 
+function extractCity(addr: string): string {
+  if (!addr) return "";
+  const all = new Set<string>([...CITIES, ...Object.keys(CITY_DEPARTMENTS)]);
+  const lower = addr.toLowerCase();
+  // priorité aux villes les plus longues pour éviter de matcher "Tours" dans "Tourcoing"
+  const sorted = [...all].sort((a, b) => b.length - a.length);
+  for (const c of sorted) {
+    const re = new RegExp(`(^|[^a-zà-ÿ])${c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}([^a-zà-ÿ]|$)`, "i");
+    if (re.test(lower)) return c;
+  }
+  return "";
+}
+
 function getDistance(from: string, to: string): number | null {
-  if (from === to) return 0;
-  if (CITY_DISTANCES[from]?.[to]) return CITY_DISTANCES[from][to];
-  if (CITY_DISTANCES[to]?.[from]) return CITY_DISTANCES[to][from];
-  const a = CITY_DISTANCES["Tours"]?.[from] ?? CITY_DISTANCES[from]?.["Tours"];
-  const b = CITY_DISTANCES["Tours"]?.[to] ?? CITY_DISTANCES[to]?.["Tours"];
+  const cFrom = extractCity(from) || from;
+  const cTo = extractCity(to) || to;
+  if (cFrom === cTo) return 0;
+  if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
+  if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
+  const a = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
+  const b = CITY_DISTANCES["Tours"]?.[cTo] ?? CITY_DISTANCES[cTo]?.["Tours"];
   if (a != null && b != null) return Math.round((a + b) * 0.85);
   return null;
 }
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const dDep = CITY_DEPARTMENTS[departure]; const dArr = CITY_DEPARTMENTS[arrival];
+  const cDep = extractCity(departure) || departure;
+  const cArr = extractCity(arrival) || arrival;
+  const dDep = CITY_DEPARTMENTS[cDep]; const dArr = CITY_DEPARTMENTS[cArr];
   const dept = dDep && dArr ? dArr : null;
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
     const label = DEPARTMENT_LABELS[dept] || dept;
     if (option === "aller-retour") return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
+    if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
+    return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
+  }
+  // Trajet très court / même ville hors zone forfaitaire — applique le minimum existant (Tours intra 79€)
+  if (distance <= 0) {
+    const [simple] = FIXED_TARIFFS["37-intra"];
+    const label = "Forfait local (minimum)";
+    if (option === "aller-retour") return { price: simple, label, finalPrice: FIXED_TARIFFS["37-intra"][1], multiplierLabel: "Aller-retour", hasExtra: true };
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
@@ -93,23 +120,35 @@ export default function DevisGenerator() {
   const [sending, setSending] = useState(false);
   const [savedDevis, setSavedDevis] = useState<DevisData | null>(null);
 
-  const [depFilter, setDepFilter] = useState("");
-  const [arrFilter, setArrFilter] = useState("");
-  const [depOpen, setDepOpen] = useState(false);
-  const [arrOpen, setArrOpen] = useState(false);
+  // Distance Google async (fallback quand pas de match local)
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
 
-  const distance = useMemo(() => {
+  const localDistance = useMemo(() => {
     if (!departure || !arrival) return null;
     return getDistance(departure, arrival);
   }, [departure, arrival]);
 
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!departure || !arrival) return;
+    if (localDistance !== null) return; // pas besoin de Google
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(departure, arrival)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [departure, arrival, localDistance]);
+
+  const distance = localDistance ?? googleDistance;
+
   const pricing = useMemo(() => {
-    if (distance === null || distance === 0) return null;
+    if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
 
-  const filteredDep = CITIES.filter(c => c.toLowerCase().includes(depFilter.toLowerCase()));
-  const filteredArr = CITIES.filter(c => c.toLowerCase().includes(arrFilter.toLowerCase()));
 
   const isComplete = !!(departure && arrival && vehicleType);
   const priceHT = pricing?.finalPrice ?? 0;
@@ -258,48 +297,28 @@ export default function DevisGenerator() {
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
                 <MapPin size={11} className="text-[#5fb6ff]" /> Départ
               </label>
-              <input
-                type="text"
-                value={departure || depFilter}
-                onChange={(e) => { setDepFilter(e.target.value); setDeparture(""); setDepOpen(true); }}
-                onFocus={() => setDepOpen(true)}
-                onBlur={() => setTimeout(() => setDepOpen(false), 150)}
-                placeholder="Ville de départ"
+              <PlacesInput
+                value={departure}
+                onChange={setDeparture}
+                placeholder="Ville ou adresse complète"
                 className={inputBare}
+                fallbackOptions={CITIES}
+                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
-              {depOpen && depFilter && filteredDep.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl">
-                  {filteredDep.map(c => (
-                    <button key={c} type="button"
-                      className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff]"
-                      onClick={() => { setDeparture(c); setDepFilter(""); setDepOpen(false); }}>{c}</button>
-                  ))}
-                </div>
-              )}
             </div>
             {/* Arrivée */}
             <div className="relative px-4 py-3">
               <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-1">
                 <MapPinned size={11} className="text-[#5fb6ff]" /> Arrivée
               </label>
-              <input
-                type="text"
-                value={arrival || arrFilter}
-                onChange={(e) => { setArrFilter(e.target.value); setArrival(""); setArrOpen(true); }}
-                onFocus={() => setArrOpen(true)}
-                onBlur={() => setTimeout(() => setArrOpen(false), 150)}
-                placeholder="Ville d'arrivée"
+              <PlacesInput
+                value={arrival}
+                onChange={setArrival}
+                placeholder="Ville ou adresse complète"
                 className={inputBare}
+                fallbackOptions={CITIES}
+                dropdownClassName="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl"
               />
-              {arrOpen && arrFilter && filteredArr.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 top-full mt-1 mx-2 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-56 overflow-y-auto shadow-2xl">
-                  {filteredArr.map(c => (
-                    <button key={c} type="button"
-                      className="w-full text-left px-4 py-2 text-sm text-cream/80 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff]"
-                      onClick={() => { setArrival(c); setArrFilter(""); setArrOpen(false); }}>{c}</button>
-                  ))}
-                </div>
-              )}
             </div>
             {/* Type véhicule */}
             <div className="px-4 py-3 relative">
@@ -344,7 +363,7 @@ export default function DevisGenerator() {
         </div>
 
         {/* Détail prix EN LIVE — visible immédiatement, sans clic */}
-        {isComplete && pricing && distance !== null && distance > 0 && (
+        {isComplete && pricing && distance !== null && (
           <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
@@ -366,7 +385,7 @@ export default function DevisGenerator() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Durée estimée</p>
-                <p className="font-heading text-base text-cream/85">{estimateDuration(distance)}</p>
+                <p className="font-heading text-base text-cream/85">{distance > 0 ? estimateDuration(distance) : "—"}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Tarif appliqué</p>
@@ -380,10 +399,22 @@ export default function DevisGenerator() {
               <span className="inline-flex items-center gap-1.5"><User size={11} className="text-[#5fb6ff]" /> Convoyeur professionnel</span>
               <span className="inline-flex items-center gap-1.5"><Sparkles size={11} className="text-[#e7c76a]" /> Suivi temps réel</span>
             </div>
+            <p className="mt-3 pt-3 border-t border-white/10 text-[12px] text-cream/75 leading-relaxed">
+              <Sparkles size={11} className="inline mr-1.5 text-[#e7c76a]" />
+              Vous pouvez commander votre convoyage directement depuis cet estimateur.
+              Après validation de votre estimation, vous pouvez confirmer votre demande en quelques clics.
+            </p>
           </div>
         )}
-        {isComplete && distance === 0 && (
-          <p className="mt-3 text-cream/60 text-xs text-center">Les villes de départ et d'arrivée sont identiques.</p>
+        {isComplete && distance === null && distanceLoading && (
+          <p className="mt-3 text-cream/60 text-xs text-center inline-flex items-center justify-center gap-2 w-full">
+            <Loader2 size={12} className="animate-spin" /> Calcul de la distance en cours…
+          </p>
+        )}
+        {isComplete && distance === null && !distanceLoading && departure && arrival && (
+          <p className="mt-3 text-amber-300/80 text-xs text-center">
+            Distance non calculable automatiquement. Vous pouvez continuer votre demande, nous confirmerons le tarif manuellement.
+          </p>
         )}
         {!isComplete && (
           <p className="mt-3 text-cream/45 text-xs text-center tracking-wide">
@@ -431,11 +462,11 @@ export default function DevisGenerator() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ *</label>
-                      <input value={departure} onChange={e => setDeparture(e.target.value)} className={inputCard} required />
+                      <PlacesInput value={departure} onChange={setDeparture} className={inputCard} fallbackOptions={CITIES} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée *</label>
-                      <input value={arrival} onChange={e => setArrival(e.target.value)} className={inputCard} required />
+                      <PlacesInput value={arrival} onChange={setArrival} className={inputCard} fallbackOptions={CITIES} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée</label>
