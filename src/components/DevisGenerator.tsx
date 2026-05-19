@@ -558,34 +558,7 @@ export default function DevisGenerator() {
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Informations véhicule</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
-                      <input value={marque} onChange={e => setMarque(e.target.value)} placeholder="Ex: Peugeot" className={inputCard} />
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
-                      <input value={modele} onChange={e => setModele(e.target.value)} placeholder="Ex: 308" className={inputCard} />
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Type de véhicule *</label>
-                      <div className="relative">
-                        <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={selectCard}>
-                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                          {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Carburant</label>
-                      <div className="relative">
-                        <select value={energy} onChange={e => setEnergy(e.target.value)} className={selectCard}>
-                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                          {ENERGY_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
-                      </div>
-                    </div>
+                    {/* 1. Plaque d'immatriculation — en premier */}
                     <div className="sm:col-span-2">
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque d'immatriculation</label>
                       <div className="flex gap-2">
@@ -600,10 +573,10 @@ export default function DevisGenerator() {
                           type="button"
                           onClick={handleSivLookup}
                           disabled={plaqueInconnue || sivLoading || !immatriculation}
-                          className="px-4 rounded-xl border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:bg-[#e7c76a]/20 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                          className="px-5 py-3 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:from-[#e7c76a]/35 hover:to-[#d4af37]/25 hover:border-[#e7c76a] disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(231,199,106,0.15)]"
                         >
                           {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                          {sivLoading ? "..." : "Rechercher"}
+                          {sivLoading ? "Recherche..." : "Rechercher"}
                         </button>
                       </div>
                       {sivMsg && (
@@ -611,20 +584,74 @@ export default function DevisGenerator() {
                           {sivMsg.text}
                         </p>
                       )}
-                      {(vin || annee || puissance || finition) && (
-                        <div className="mt-3 p-3 rounded-xl border border-[#e7c76a]/20 bg-[#e7c76a]/[0.04] text-[11px] text-cream/70 grid grid-cols-2 gap-x-3 gap-y-1">
-                          {annee && <div><span className="text-cream/45">Année :</span> {annee}</div>}
-                          {puissance && <div><span className="text-cream/45">Puissance :</span> {puissance}</div>}
-                          {finition && <div className="col-span-2"><span className="text-cream/45">Finition :</span> {finition}</div>}
-                          {vin && <div className="col-span-2 truncate"><span className="text-cream/45">VIN :</span> {vin}</div>}
-                        </div>
-                      )}
+                      <p className="mt-2 text-[10px] text-cream/45">
+                        La recherche pré-remplit automatiquement le véhicule (VIN, marque, modèle, carburant, année).
+                      </p>
                       <label className="mt-2 inline-flex items-center gap-2 text-[11px] text-cream/65 cursor-pointer">
                         <input type="checkbox" checked={plaqueInconnue} onChange={e => setPlaqueInconnue(e.target.checked)}
                           className="accent-[#5fb6ff]" />
                         Je ne connais pas encore la plaque
                       </label>
                     </div>
+
+                    {/* 2. VIN optionnel */}
+                    <div className="sm:col-span-2">
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
+                        VIN <span className="text-cream/40 normal-case tracking-normal">(optionnel)</span>
+                      </label>
+                      <input
+                        value={vin}
+                        onChange={e => setVin(e.target.value.toUpperCase())}
+                        placeholder="Renseigné automatiquement via la plaque"
+                        className={inputCard + " uppercase tracking-widest"}
+                        maxLength={17}
+                      />
+                    </div>
+
+                    {/* 3. Infos auto-remplies */}
+                    {(annee || puissance || finition) && (
+                      <div className="sm:col-span-2 p-3 rounded-xl border border-[#e7c76a]/20 bg-[#e7c76a]/[0.04] text-[11px] text-cream/70 grid grid-cols-2 gap-x-3 gap-y-1">
+                        {annee && <div><span className="text-cream/45">Année :</span> {annee}</div>}
+                        {puissance && <div><span className="text-cream/45">Puissance :</span> {puissance}</div>}
+                        {finition && <div className="col-span-2"><span className="text-cream/45">Finition :</span> {finition}</div>}
+                      </div>
+                    )}
+
+                    {/* 4. Marque / Modèle */}
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                      <input value={marque} onChange={e => setMarque(e.target.value)} placeholder="Ex: Peugeot" className={inputCard} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                      <input value={modele} onChange={e => setModele(e.target.value)} placeholder="Ex: 308" className={inputCard} />
+                    </div>
+
+                    {/* 5. Type véhicule */}
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Type de véhicule *</label>
+                      <div className="relative">
+                        <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={selectCard}>
+                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
+                          {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* 6. Carburant */}
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Carburant</label>
+                      <div className="relative">
+                        <select value={energy} onChange={e => setEnergy(e.target.value)} className={selectCard}>
+                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
+                          {ENERGY_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* 7. État du véhicule */}
                     <div className="sm:col-span-2">
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">État du véhicule</label>
                       <div className="grid grid-cols-2 gap-3">
