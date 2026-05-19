@@ -666,7 +666,7 @@ export default function MobileDevisGenerator() {
                   <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={labelCls}>Heure</label>
+                  <label className={labelCls}>Heure de livraison</label>
                   <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCls} />
                 </div>
               </div>
