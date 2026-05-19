@@ -13,6 +13,8 @@ import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
+import { useServerFn } from "@tanstack/react-start";
+import { lookupPlate } from "@/lib/plate.functions";
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
