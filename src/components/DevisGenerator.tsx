@@ -86,7 +86,43 @@ export default function DevisGenerator() {
   const [vehicleType, setVehicleType] = useState("");
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
-  const [option] = useState("aller-simple");
+  const [option, setOption] = useState<"aller-simple" | "aller-retour" | "express">("aller-simple");
+
+  // --- Restitution (uniquement pour Aller-retour) ---
+  const [sameDestination, setSameDestination] = useState(true);
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
+  const [immatRetour, setImmatRetour] = useState("");
+  const [marqueRetour, setMarqueRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [sivRetourLoading, setSivRetourLoading] = useState(false);
+  const [sivRetourMsg, setSivRetourMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  async function handleSivRetourLookup() {
+    setSivRetourMsg(null);
+    const plate = immatRetour.trim().toUpperCase();
+    if (!plate || plate.length < 4) {
+      setSivRetourMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivRetourLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivRetourMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        if (r.data.marque) setMarqueRetour(r.data.marque);
+        if (r.data.modele) setModeleRetour(r.data.modele);
+        if (r.data.vin) setVinRetour(r.data.vin);
+        setSivRetourMsg({ type: "ok", text: "Véhicule trouvé ✓" });
+      }
+    } catch {
+      setSivRetourMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivRetourLoading(false);
+    }
+  }
 
   // --- véhicule ---
   const [marque, setMarque] = useState("");
@@ -250,6 +286,15 @@ export default function DevisGenerator() {
         setAccountCreated(!isExistingAccount);
       }
 
+      // Préparation infos retour (uniquement pour aller-retour)
+      const isAR = option === "aller-retour";
+      const retourDepart = isAR ? (departRetour || arrival) : null;
+      const retourArrivee = isAR ? (sameDestination ? departure : arriveeRetour) : null;
+      const retourImmat = isAR ? (immatRetour || null) : null;
+      const retourMarque = isAR ? (marqueRetour || null) : null;
+      const retourModele = isAR ? (modeleRetour || null) : null;
+      const retourVin = isAR ? (vinRetour || null) : null;
+
       // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
         nom, prenom, telephone, email,
@@ -265,6 +310,12 @@ export default function DevisGenerator() {
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
         message: comment || null,
+        depart_retour: retourDepart,
+        arrivee_retour: retourArrivee,
+        immatriculation_retour: retourImmat,
+        marque_retour: retourMarque,
+        modele_retour: retourModele,
+        vin_retour: retourVin,
       }).select().single();
 
       await supabase.from("demandes_convoyage").insert({
@@ -278,13 +329,22 @@ export default function DevisGenerator() {
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           societe && `Société: ${societe}`,
+          `Prestation: ${option === "aller-retour" ? "Aller-retour" : option === "express" ? "Express" : "Aller simple"}`,
           `Roulant: ${running}`,
           plaqueInconnue && "Plaque: à confirmer",
+          isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
+          isAR && retourImmat && `Plaque retour: ${retourImmat}`,
           `Estimation: ${pricing.finalPrice}€`,
           `Distance: ${distance}km`,
           comment,
         ].filter(Boolean).join(" | "),
         message: comment,
+        depart_retour: retourDepart,
+        arrivee_retour: retourArrivee,
+        immatriculation_retour: retourImmat,
+        marque_retour: retourMarque,
+        modele_retour: retourModele,
+        vin_retour: retourVin,
       });
 
       await notifyAdmin({
@@ -343,6 +403,32 @@ export default function DevisGenerator() {
         <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
 
         <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
+
+          {/* Type de prestation */}
+          <div className="mb-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { v: "aller-simple", l: "Aller simple", s: "Livraison" },
+                { v: "aller-retour", l: "Aller-retour", s: "Livraison + restitution" },
+                { v: "express", l: "Express", s: "Urgent · +20%" },
+              ].map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setOption(o.v as typeof option)}
+                  className={`rounded-xl px-3 py-2.5 border text-left transition ${
+                    option === o.v
+                      ? "border-[#e7c76a] bg-[#e7c76a]/10 text-[#e7c76a] shadow-[0_0_0_1px_rgba(231,199,106,0.25)]"
+                      : "border-white/10 bg-white/[0.03] text-cream/75 hover:border-white/25"
+                  }`}
+                >
+                  <span className="block text-[11px] sm:text-xs font-heading tracking-wide">{o.l}</span>
+                  <span className="block text-[9px] sm:text-[10px] uppercase tracking-[0.18em] opacity-70 mt-0.5">{o.s}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Trajet : Départ ↔ Arrivée */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-5 items-stretch">
@@ -551,6 +637,57 @@ export default function DevisGenerator() {
                       <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>
+
+                  {/* Bloc Restitution (Aller-retour uniquement) */}
+                  {option === "aller-retour" && (
+                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Restitution</p>
+                        <label className="inline-flex items-center gap-2 text-[11px] text-cream/70 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={sameDestination}
+                            onChange={e => setSameDestination(e.target.checked)}
+                            className="accent-[#e7c76a]"
+                          />
+                          Même destination que la livraison
+                        </label>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ restitution</label>
+                          <PlacesInput
+                            value={departRetour || arrival}
+                            onChange={setDepartRetour}
+                            className={inputCard}
+                            fallbackOptions={CITIES}
+                            placeholder="Adresse de prise en charge retour"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée restitution</label>
+                          {sameDestination ? (
+                            <input
+                              value={departure}
+                              disabled
+                              className={inputCard + " opacity-70 cursor-not-allowed"}
+                            />
+                          ) : (
+                            <PlacesInput
+                              value={arriveeRetour}
+                              onChange={setArriveeRetour}
+                              className={inputCard}
+                              fallbackOptions={CITIES}
+                              placeholder="Adresse de retour"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-cream/45">
+                        Les deux véhicules (livraison et restitution) peuvent être différents — vous saisirez la seconde plaque à l'étape suivante.
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Instructions particulières</label>
                     <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3}
@@ -673,6 +810,51 @@ export default function DevisGenerator() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Véhicule de restitution (Aller-retour uniquement) */}
+                  {option === "aller-retour" && (
+                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
+                      <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Véhicule de restitution</p>
+                      <p className="text-[10px] text-cream/50 -mt-1">Laissez vide si c'est le même véhicule que la livraison.</p>
+                      <div>
+                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque restitution</label>
+                        <div className="flex gap-2">
+                          <input
+                            value={immatRetour}
+                            onChange={e => { setImmatRetour(e.target.value.toUpperCase()); setSivRetourMsg(null); }}
+                            placeholder="AA-123-AA"
+                            className={inputCard + " uppercase tracking-widest flex-1"}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSivRetourLookup}
+                            disabled={sivRetourLoading || !immatRetour}
+                            className="px-4 py-3 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:from-[#e7c76a]/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                          >
+                            {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                            {sivRetourLoading ? "..." : "Rechercher"}
+                          </button>
+                        </div>
+                        {sivRetourMsg && (
+                          <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>{sivRetourMsg.text}</p>
+                        )}
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                          <input value={marqueRetour} onChange={e => setMarqueRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                          <input value={modeleRetour} onChange={e => setModeleRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">VIN <span className="text-cream/40 normal-case">(optionnel)</span></label>
+                          <input value={vinRetour} onChange={e => setVinRetour(e.target.value.toUpperCase())} className={inputCard + " uppercase tracking-widest"} maxLength={17} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -608,18 +608,23 @@ export type Database = {
         Row: {
           amount_paid_cents: number | null
           arrivee: string
+          arrivee_retour: string | null
           carburant: string | null
           created_at: string
           date_souhaitee: string | null
           depart: string
+          depart_retour: string | null
           distance_km: number | null
           email: string
           heure_souhaitee: string | null
           id: string
           immatriculation: string | null
+          immatriculation_retour: string | null
           marque: string | null
+          marque_retour: string | null
           message: string | null
           modele: string | null
+          modele_retour: string | null
           nom: string
           options: string | null
           paid_at: string | null
@@ -632,22 +637,28 @@ export type Database = {
           telephone: string | null
           updated_at: string
           user_id: string | null
+          vin_retour: string | null
         }
         Insert: {
           amount_paid_cents?: number | null
           arrivee: string
+          arrivee_retour?: string | null
           carburant?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart: string
+          depart_retour?: string | null
           distance_km?: number | null
           email: string
           heure_souhaitee?: string | null
           id?: string
           immatriculation?: string | null
+          immatriculation_retour?: string | null
           marque?: string | null
+          marque_retour?: string | null
           message?: string | null
           modele?: string | null
+          modele_retour?: string | null
           nom: string
           options?: string | null
           paid_at?: string | null
@@ -660,22 +671,28 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           user_id?: string | null
+          vin_retour?: string | null
         }
         Update: {
           amount_paid_cents?: number | null
           arrivee?: string
+          arrivee_retour?: string | null
           carburant?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart?: string
+          depart_retour?: string | null
           distance_km?: number | null
           email?: string
           heure_souhaitee?: string | null
           id?: string
           immatriculation?: string | null
+          immatriculation_retour?: string | null
           marque?: string | null
+          marque_retour?: string | null
           message?: string | null
           modele?: string | null
+          modele_retour?: string | null
           nom?: string
           options?: string | null
           paid_at?: string | null
@@ -688,6 +705,7 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           user_id?: string | null
+          vin_retour?: string | null
         }
         Relationships: []
       }
@@ -695,6 +713,7 @@ export type Database = {
         Row: {
           amount_paid_cents: number | null
           arrivee: string
+          arrivee_retour: string | null
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
@@ -703,16 +722,20 @@ export type Database = {
           created_at: string
           date_souhaitee: string | null
           depart: string
+          depart_retour: string | null
           distance_km: number | null
           duree_estimee: string | null
           email: string
           email_envoye: boolean
           heure_souhaitee: string | null
           id: string
+          immatriculation_retour: string | null
           marque: string | null
+          marque_retour: string | null
           message: string | null
           mission_id: string | null
           modele: string | null
+          modele_retour: string | null
           multiplier_label: string | null
           nom: string
           numero: string
@@ -733,10 +756,12 @@ export type Database = {
           user_id: string | null
           vehicule_docs_completed: boolean
           vin: string | null
+          vin_retour: string | null
         }
         Insert: {
           amount_paid_cents?: number | null
           arrivee: string
+          arrivee_retour?: string | null
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -745,16 +770,20 @@ export type Database = {
           created_at?: string
           date_souhaitee?: string | null
           depart: string
+          depart_retour?: string | null
           distance_km?: number | null
           duree_estimee?: string | null
           email: string
           email_envoye?: boolean
           heure_souhaitee?: string | null
           id?: string
+          immatriculation_retour?: string | null
           marque?: string | null
+          marque_retour?: string | null
           message?: string | null
           mission_id?: string | null
           modele?: string | null
+          modele_retour?: string | null
           multiplier_label?: string | null
           nom: string
           numero?: string
@@ -775,10 +804,12 @@ export type Database = {
           user_id?: string | null
           vehicule_docs_completed?: boolean
           vin?: string | null
+          vin_retour?: string | null
         }
         Update: {
           amount_paid_cents?: number | null
           arrivee?: string
+          arrivee_retour?: string | null
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -787,16 +818,20 @@ export type Database = {
           created_at?: string
           date_souhaitee?: string | null
           depart?: string
+          depart_retour?: string | null
           distance_km?: number | null
           duree_estimee?: string | null
           email?: string
           email_envoye?: boolean
           heure_souhaitee?: string | null
           id?: string
+          immatriculation_retour?: string | null
           marque?: string | null
+          marque_retour?: string | null
           message?: string | null
           mission_id?: string | null
           modele?: string | null
+          modele_retour?: string | null
           multiplier_label?: string | null
           nom?: string
           numero?: string
@@ -817,6 +852,7 @@ export type Database = {
           user_id?: string | null
           vehicule_docs_completed?: boolean
           vin?: string | null
+          vin_retour?: string | null
         }
         Relationships: []
       }
