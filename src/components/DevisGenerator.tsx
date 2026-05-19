@@ -710,25 +710,24 @@ export default function DevisGenerator() {
                         <Lock size={14} className="text-[#5fb6ff]" />
                       </div>
                       <div>
-                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client</p>
+                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
                         <p className="text-cream/55 text-xs mt-1 leading-relaxed">
-                          Un compte est créé automatiquement pour suivre votre devis, votre mission et vos documents
-                          dans un espace sécurisé. Vous recevrez un email de vérification.
+                          Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
+                          dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
                         </p>
                       </div>
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
-                        <Lock size={11} className="inline mr-1" /> Mot de passe *
+                        <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
                       </label>
                       <input
                         type="password"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         className={inputCard}
-                        placeholder="Minimum 8 caractères"
+                        placeholder="Laisser vide ou minimum 8 caractères"
                         minLength={8}
-                        required
                       />
                     </div>
                     <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
