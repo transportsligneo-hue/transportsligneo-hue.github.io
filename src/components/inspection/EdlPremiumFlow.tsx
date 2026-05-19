@@ -1033,7 +1033,7 @@ export function EdlPremiumFlow({
       </div>
 
       {/* === CONTENU SCROLLABLE === */}
-      <main className="flex-1 overflow-y-auto px-4 pb-32 pt-2">
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 pb-6 pt-2">
         <div className="max-w-2xl mx-auto space-y-4">
 
           {/* Titre étape */}
