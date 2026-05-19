@@ -161,6 +161,10 @@ export default function MobileDevisGenerator() {
   const distance = localDistance ?? googleDistance;
 
   const pricing = useMemo(() => {
+    if (departure && arrival) {
+      const local = resolveLocalDeptTariff(departure, arrival, 0, option);
+      if (local) return local;
+    }
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
