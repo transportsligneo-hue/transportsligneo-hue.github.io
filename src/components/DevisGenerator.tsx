@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
   CheckCircle, User, Download, Shield, Route as RouteIcon,
@@ -10,6 +10,8 @@ import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { getRecaptchaToken } from "@/lib/recaptcha";
+import PlacesInput from "@/components/PlacesInput";
+import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
