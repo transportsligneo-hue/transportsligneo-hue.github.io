@@ -59,11 +59,11 @@ function ClientDashboard() {
       if (!cancelled && prof?.prenom) setPrenom(prof.prenom);
       const clientEmail = prof?.email ?? user.email ?? "";
 
-      // Missions
+      // Missions (par user_id OU email, pour rattacher l'historique pré-compte)
       const { data: missionData } = await supabase
         .from("missions")
         .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
-        .eq("user_id", user.id)
+        .or(`user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`)
         .order("created_at", { ascending: false });
 
       // Devis liés par email (RLS autorise via politique "Clients can read own devis")
@@ -77,14 +77,16 @@ function ClientDashboard() {
       if (cancelled) return;
 
       const missions = (missionData ?? []) as MissionRow[];
+      const devisAll = (devisData ?? []) as DevisRow[];
       const today = new Date().toISOString().slice(0, 10);
       setStats({
         enCours: missions.filter(m => m.statut === "en_cours").length,
         terminees: missions.filter(m => m.statut === "livree" || m.statut === "terminee").length,
         aVenir: missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length,
+        devis: devisAll.filter(d => d.statut !== "convertit" && d.statut !== "refuse").length,
       });
       setLastMission(missions[0] ?? null);
-      setDevisList((devisData ?? []) as DevisRow[]);
+      setDevisList(devisAll);
       setLoading(false);
     })();
     return () => { cancelled = true; };
