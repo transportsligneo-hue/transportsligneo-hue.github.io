@@ -537,18 +537,10 @@ export function EdlPremiumFlow({
         ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
       });
 
-      // Auto-avancement après upload réussi d'une photo (pas pour les scans
-      // qui ont OCR à valider). On référence currentStep.id pour éviter une
-      // capture obsolète de safeIndex dans la closure du timer.
-      if (currentStep.kind === "photo") {
-        setTimeout(() => {
-          setStepIndex((idx) => {
-            const stepNow = STEPS[idx];
-            if (stepNow?.id === stepId && idx < TOTAL - 1) return idx + 1;
-            return idx;
-          });
-        }, 600);
-      }
+      // Pas d'auto-advance : le convoyeur relit son cadrage et appuie sur
+      // « Photo suivante » lui-même. L'upload se termine en arrière-plan ;
+      // dès qu'il est success, le bouton footer devient actif.
+
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
       if (currentStep.kind === "scan") {
