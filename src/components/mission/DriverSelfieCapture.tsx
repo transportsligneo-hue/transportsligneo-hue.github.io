@@ -401,6 +401,18 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
         <div className="driver-selfie-stage relative flex h-full w-full max-w-md items-center justify-center overflow-hidden rounded-[24px] px-4 py-5">
         {preview ? (
           <img src={preview} alt="Selfie" className="max-h-full w-full rounded-[20px] object-contain"/>
+        ) : liveCamera ? (
+          <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-black/40">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="h-full w-full object-cover scale-x-[-1]"
+            />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 to-transparent" />
+          </div>
         ) : (
           <div className="text-center text-white/70 max-w-sm">
             <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border border-[var(--driver-border-strong)] bg-white/6 shadow-[0_0_36px_-12px_rgba(59,130,246,0.55)]">
@@ -408,6 +420,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
             </div>
             <p className="text-base font-semibold text-white mb-2">Prenez un selfie</p>
             <p className="text-sm opacity-80">Photo d'identité horodatée et géolocalisée. Visage net, bien éclairé.</p>
+            {cameraIssue && <p className="mt-3 text-xs text-amber-200">{cameraIssue}</p>}
           </div>
         )}
 
@@ -431,6 +444,11 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
             <MapPin size={11}/> {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </div>
         )}
+        {liveCamera && !preview && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/45 px-3 py-1 text-[10px] text-white/85">
+            Cadrez votre visage puis capturez
+          </div>
+        )}
         </div>
       </div>
 
@@ -448,7 +466,27 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
           tabIndex={-1}
           aria-hidden="true"
         />
-        {!preview ? (
+        {!preview && liveCamera ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+            <button
+              onClick={() => {
+                stopStream();
+                setCameraIssue(null);
+              }}
+              className="driver-secondary-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <X size={16}/>
+              <span className="leading-tight">Fermer caméra</span>
+            </button>
+            <button
+              onClick={captureFromLiveCamera}
+              className="driver-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <Camera size={16}/>
+              <span className="leading-tight">Capturer le selfie</span>
+            </button>
+          </div>
+        ) : !preview ? (
           <button
             onClick={openCamera}
             disabled={cameraOpening || status === "uploading"}
