@@ -363,7 +363,7 @@ export default function DevisGenerator() {
         </div>
 
         {/* Détail prix EN LIVE — visible immédiatement, sans clic */}
-        {isComplete && pricing && distance !== null && distance > 0 && (
+        {isComplete && pricing && distance !== null && (
           <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
@@ -385,7 +385,7 @@ export default function DevisGenerator() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Durée estimée</p>
-                <p className="font-heading text-base text-cream/85">{estimateDuration(distance)}</p>
+                <p className="font-heading text-base text-cream/85">{distance > 0 ? estimateDuration(distance) : "—"}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Tarif appliqué</p>
@@ -399,10 +399,22 @@ export default function DevisGenerator() {
               <span className="inline-flex items-center gap-1.5"><User size={11} className="text-[#5fb6ff]" /> Convoyeur professionnel</span>
               <span className="inline-flex items-center gap-1.5"><Sparkles size={11} className="text-[#e7c76a]" /> Suivi temps réel</span>
             </div>
+            <p className="mt-3 pt-3 border-t border-white/10 text-[12px] text-cream/75 leading-relaxed">
+              <Sparkles size={11} className="inline mr-1.5 text-[#e7c76a]" />
+              Vous pouvez commander votre convoyage directement depuis cet estimateur.
+              Après validation de votre estimation, vous pouvez confirmer votre demande en quelques clics.
+            </p>
           </div>
         )}
-        {isComplete && distance === 0 && (
-          <p className="mt-3 text-cream/60 text-xs text-center">Les villes de départ et d'arrivée sont identiques.</p>
+        {isComplete && distance === null && distanceLoading && (
+          <p className="mt-3 text-cream/60 text-xs text-center inline-flex items-center justify-center gap-2 w-full">
+            <Loader2 size={12} className="animate-spin" /> Calcul de la distance en cours…
+          </p>
+        )}
+        {isComplete && distance === null && !distanceLoading && departure && arrival && (
+          <p className="mt-3 text-amber-300/80 text-xs text-center">
+            Distance non calculable automatiquement. Vous pouvez continuer votre demande, nous confirmerons le tarif manuellement.
+          </p>
         )}
         {!isComplete && (
           <p className="mt-3 text-cream/45 text-xs text-center tracking-wide">
