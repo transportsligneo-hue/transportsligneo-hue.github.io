@@ -57,7 +57,7 @@ interface ReportData {
   history: Array<{
     etape: string;
     created_at: string;
-    note: string | null;
+    notes: string | null;
   }>;
 }
 
@@ -109,7 +109,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         supabase.from("inspections").select("id, type, statut, notes, created_at").eq("attribution_id", attributionId),
         supabase.from("mission_locations").select("recorded_at").eq("attribution_id", attributionId).order("recorded_at", { ascending: true }),
         supabase.from("mission_documents").select("type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
-        supabase.from("mission_etape_history").select("etape, created_at, note").eq("attribution_id", attributionId).order("created_at", { ascending: true }),
+        supabase.from("mission_etape_history").select("etape, created_at, notes").eq("attribution_id", attributionId).order("created_at", { ascending: true }),
       ]);
 
       // Fetch photos for each inspection
