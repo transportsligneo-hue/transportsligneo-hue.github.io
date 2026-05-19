@@ -184,6 +184,11 @@ export default function DevisGenerator() {
   const distance = localDistance ?? googleDistance;
 
   const pricing = useMemo(() => {
+    // Forfait local prioritaire : ne dépend pas de la distance
+    if (departure && arrival) {
+      const local = resolveLocalDeptTariff(departure, arrival, 0, option);
+      if (local) return local;
+    }
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
