@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
-  MapPin, Loader2, FileText, Navigation, Clock,
-  ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter, Phone,
+  MapPin, Loader2, FileText, Clock,
+  ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter,
   Check, X,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
