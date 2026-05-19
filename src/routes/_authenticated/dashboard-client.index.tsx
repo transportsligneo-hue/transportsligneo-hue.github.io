@@ -35,6 +35,7 @@ interface Stats {
   enCours: number;
   terminees: number;
   aVenir: number;
+  devis: number;
 }
 
 function ClientDashboard() {
