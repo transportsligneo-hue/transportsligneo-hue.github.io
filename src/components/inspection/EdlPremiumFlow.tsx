@@ -1130,8 +1130,14 @@ export function EdlPremiumFlow({
 
         </div>
 
-        {/* Input file caché — type adapté */}
+        {/* Input file caché — type adapté.
+            Le `key` change à chaque étape : on force React à remonter
+            l'élément <input>. Sans ça, iOS Safari (et certains Chrome
+            Android) refusent de réouvrir la caméra après la première
+            capture, ce qui obligeait le convoyeur à actualiser la page
+            pour passer à la photo suivante. */}
         <input
+          key={`edl-file-${currentStep.id}-${currentState?.status ?? "idle"}`}
           ref={fileRef}
           type="file"
           accept="image/*"
