@@ -407,8 +407,17 @@ function DemandeDrawer({
       </DrawerSection>
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
-        <PriceBlock quote={quote} title="Estimation" />
+        <PriceBlock
+          quote={quote}
+          priceTtc={demande.prix_estime ?? undefined}
+          title="Estimation"
+          source={demande.prix_estime != null ? "Estimation de l'estimateur client" : undefined}
+        />
+        {demande.distance_km != null && demande.distance_km > 0 && (
+          <p className="mt-2 text-xs text-white/60">Distance estimée : {demande.distance_km} km</p>
+        )}
       </DrawerSection>
+
 
       {demande.message && (
         <DrawerSection title="Message client" icon={<Mail size={12} />}>
