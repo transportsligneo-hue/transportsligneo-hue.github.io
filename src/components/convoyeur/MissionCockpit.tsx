@@ -318,7 +318,10 @@ export function MissionCockpit({
   const visualSteps = STEPS.filter((s) => s.key !== "done");
   const visualIdx = Math.max(0, Math.min(currentIdx, visualSteps.length - 1));
   const totalVisual = visualSteps.length;
-  const progressPct = isDone ? 100 : Math.round((visualIdx / (totalVisual - 1)) * 100);
+  // Progression réelle = nb d'étapes effectivement validées (jamais 100% avant la clôture admin).
+  const progressPct = isDone
+    ? 100
+    : Math.min(95, Math.round((visualIdx / totalVisual) * 100));
 
   return (
     <>
