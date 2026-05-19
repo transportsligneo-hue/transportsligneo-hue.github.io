@@ -270,6 +270,22 @@ export default function TunnelReservation({ onClose }: Props) {
         </p>
       )}
 
+      {/* Live price strip — visible dès l'étape 1 quand un prix est calculé */}
+      {step < 5 && step > 0 && (form.ville_depart && form.ville_arrivee) && (
+        <div className="mt-6 flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-primary/30 bg-primary/5">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80">Estimation live</p>
+            <p className="text-cream/80 text-xs mt-0.5 truncate">{priceLabel}{distanceLoading ? " · calcul…" : ""}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="font-heading text-2xl text-primary leading-none">
+              {total > 0 ? `${total.toFixed(2)} €` : "—"}
+            </p>
+            <p className="text-[10px] text-cream/50 mt-1">TTC, péages & carburant inclus</p>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       {step < 5 && (
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-primary/15">
@@ -294,7 +310,7 @@ export default function TunnelReservation({ onClose }: Props) {
           ) : (
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={() => setConfirmOpen(true)}
               disabled={!canNext() || submitting}
               className="flex items-center gap-2 px-7 py-3 bg-primary text-navy font-medium text-sm uppercase tracking-wider hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
@@ -304,12 +320,51 @@ export default function TunnelReservation({ onClose }: Props) {
           )}
         </div>
       )}
+
+      {/* Modal de confirmation explicite — aucune demande envoyée tant que l'utilisateur n'a pas validé */}
+      {confirmOpen && step === 4 && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !submitting && setConfirmOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-navy border border-primary/40 rounded-lg p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-primary/80 mb-2">Dernière étape</p>
+            <h3 className="font-heading text-2xl text-cream mb-3">Valider et envoyer ?</h3>
+            <p className="text-cream/70 text-sm mb-5">
+              Votre demande sera envoyée à notre équipe et apparaîtra dans votre espace client.
+              Total : <span className="text-primary font-medium">{total.toFixed(2)} € TTC</span>.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                disabled={submitting}
+                className="flex-1 px-4 py-2.5 text-sm uppercase tracking-wider text-cream/70 hover:text-primary border border-cream/20 rounded transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={async () => { await handleSubmit(); setConfirmOpen(false); }}
+                disabled={submitting}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-navy font-medium text-sm uppercase tracking-wider hover:bg-primary/90 disabled:opacity-40 rounded transition-colors"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Envoyer la demande
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function tripTypeLabel(t: TripType): string {
-  return t === "aller_simple" ? "Aller simple" : t === "aller_retour" ? "Aller-retour" : "Express (+20%)";
+  return t === "aller_simple" ? "Livraison simple" : t === "aller_retour" ? "Livraison + restitution" : "Express (+20%)";
 }
 
 // ----- Steps -----
