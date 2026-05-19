@@ -112,9 +112,9 @@ export const lookupPlate = createServerFn({ method: "POST" })
       console.log("[SIV] body keys", root && typeof root === "object" ? Object.keys(root).slice(0, 20) : typeof root);
 
       const result = {
-        vin: pick(root, ["vin", "VIN", "numero_serie", "numeroSerie"]),
-        marque: pick(root, ["marque", "make", "brand", "marqueVehicule"]),
-        modele: pick(root, ["modele", "model", "modeleVehicule", "type"]),
+        vin: pick(root, ["vin", "VIN", "numero_serie", "numeroSerie", "numero_vin"]),
+        marque: pick(root, ["marque", "make", "brand", "marqueVehicule", "Marque"]),
+        modele: pick(root, ["modele", "model", "modeleVehicule", "Modele", "modele_commercial"]),
         annee: pick(root, [
           "annee",
           "year",
@@ -122,16 +122,22 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "premiereMiseEnCirculation",
           "anneeModele",
           "dateMiseEnCirculation",
+          "date1erCir_fr",
+          "date1erCir_us",
+          "premiere_immatriculation",
+          "datePremiereMiseCirculation",
         ]),
-        carburant: pick(root, ["carburant", "energie", "fuel", "energy"]),
+        carburant: pick(root, ["carburant", "energie", "fuel", "energy", "Energie", "energieNGC"]),
         puissance: pick(root, [
           "puissance",
           "puissance_fiscale",
           "puissanceFiscale",
           "power",
           "puissanceCh",
+          "puisFisc",
+          "puissance_din",
         ]),
-        finition: pick(root, ["finition", "version", "variant"]),
+        finition: pick(root, ["finition", "version", "variant", "Version"]),
       };
 
       const hasAny = Object.values(result).some((v) => v);
