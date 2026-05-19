@@ -538,12 +538,16 @@ export function EdlPremiumFlow({
       });
 
       // Auto-avancement après upload réussi d'une photo (pas pour les scans
-      // qui ont OCR à valider). Améliore considérablement l'UX mobile :
-      // plus besoin de cliquer "Photo suivante" après chaque cliché.
-      if (currentStep.kind === "photo" && safeIndex < TOTAL - 1) {
+      // qui ont OCR à valider). On référence currentStep.id pour éviter une
+      // capture obsolète de safeIndex dans la closure du timer.
+      if (currentStep.kind === "photo") {
         setTimeout(() => {
-          setStepIndex((idx) => (idx === safeIndex ? idx + 1 : idx));
-        }, 700);
+          setStepIndex((idx) => {
+            const stepNow = STEPS[idx];
+            if (stepNow?.id === stepId && idx < TOTAL - 1) return idx + 1;
+            return idx;
+          });
+        }, 600);
       }
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
@@ -988,7 +992,8 @@ export function EdlPremiumFlow({
   }
 
   const overlay = (
-    <div className="edl-shell fixed inset-0 z-[100] flex flex-col">
+    <div className="edl-shell fixed inset-x-0 top-0 z-[100] flex flex-col" style={{ height: "100dvh", maxHeight: "100dvh" }}>
+
       {/* === HEADER GLASS === */}
       <header className="edl-glass-strong rounded-none border-x-0 border-t-0 px-4 py-3 flex items-center gap-3 shrink-0">
         <button
@@ -1028,7 +1033,7 @@ export function EdlPremiumFlow({
       </div>
 
       {/* === CONTENU SCROLLABLE === */}
-      <main className="flex-1 overflow-y-auto px-4 pb-32 pt-2">
+      <main className="flex-1 min-h-0 overflow-y-auto px-4 pb-6 pt-2">
         <div className="max-w-2xl mx-auto space-y-4">
 
           {/* Titre étape */}
