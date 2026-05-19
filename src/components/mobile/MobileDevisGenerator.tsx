@@ -273,6 +273,8 @@ export default function MobileDevisGenerator() {
         heure_souhaitee: heure,
         marque, modele, immatriculation,
         carburant: energy,
+        prix_estime: pricing.finalPrice,
+        distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
@@ -284,6 +286,7 @@ export default function MobileDevisGenerator() {
         ].filter(Boolean).join(" | "),
         message: comment,
       });
+
 
       await notifyAdmin({
         type: "estimation",
