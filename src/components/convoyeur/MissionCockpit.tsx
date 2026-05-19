@@ -224,6 +224,7 @@ export function MissionCockpit({
     try {
       switch (currentKey) {
         case "selfie":
+        case "selfie_final":
           setOpenSelfie(true);
           break;
         case "edl_depart":
@@ -242,8 +243,10 @@ export function MissionCockpit({
         case "arrive_depart":
           await persistEtape("sur_place");
           await Promise.resolve(onUpdated());
-          // Enchaîne directement sur l'inspection départ si pas encore faite
-          if (!inspectionDepartDone) {
+          // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
+          if (!selfieOK) {
+            setOpenSelfie(true);
+          } else if (!inspectionDepartDone) {
             onStartInspection("depart");
           }
           break;
@@ -260,19 +263,25 @@ export function MissionCockpit({
           }
           break;
         case "cloturer":
-          // Garde-fou final : selfie + EDL départ + EDL arrivée obligatoires
+          // Garde-fou final : tous les jalons doivent être présents
           if (!selfieOK) {
-            toast.error("Selfie d'identité requis avant de clôturer");
+            toast.error("Selfie d'identité requis avant d'envoyer à l'admin");
+            setOpenSelfie(true);
             break;
           }
           if (!inspectionDepartDone) {
-            toast.error("Inspection de départ incomplète");
+            toast.error("Inspection d'enlèvement incomplète");
             onStartInspection("depart");
             break;
           }
           if (!inspectionArriveeDone) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
+            break;
+          }
+          if (!finalSelfieOK) {
+            toast.error("Selfie final requis avant d'envoyer à l'admin");
+            setOpenSelfie(true);
             break;
           }
           await persistEtape("en_attente_validation", "Mission envoyée pour validation");
