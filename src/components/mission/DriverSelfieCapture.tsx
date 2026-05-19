@@ -332,6 +332,23 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
           >
             <Camera size={20}/> Ouvrir l'appareil photo
           </button>
+        ) : status === "error" ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+            <button
+              onClick={retake}
+              className="driver-secondary-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <RotateCcw size={16}/>
+              <span className="leading-tight">Reprendre photo</span>
+            </button>
+            <button
+              onClick={retryUpload}
+              className="driver-cta flex min-h-14 flex-col items-center justify-center gap-1 px-2 py-2 text-center text-[11px]"
+            >
+              <RefreshCw size={16}/>
+              <span className="leading-tight">Réessayer l'envoi</span>
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
             <button
