@@ -86,7 +86,43 @@ export default function DevisGenerator() {
   const [vehicleType, setVehicleType] = useState("");
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
-  const [option] = useState("aller-simple");
+  const [option, setOption] = useState<"aller-simple" | "aller-retour" | "express">("aller-simple");
+
+  // --- Restitution (uniquement pour Aller-retour) ---
+  const [sameDestination, setSameDestination] = useState(true);
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
+  const [immatRetour, setImmatRetour] = useState("");
+  const [marqueRetour, setMarqueRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [sivRetourLoading, setSivRetourLoading] = useState(false);
+  const [sivRetourMsg, setSivRetourMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  async function handleSivRetourLookup() {
+    setSivRetourMsg(null);
+    const plate = immatRetour.trim().toUpperCase();
+    if (!plate || plate.length < 4) {
+      setSivRetourMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivRetourLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivRetourMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        if (r.data.marque) setMarqueRetour(r.data.marque);
+        if (r.data.modele) setModeleRetour(r.data.modele);
+        if (r.data.vin) setVinRetour(r.data.vin);
+        setSivRetourMsg({ type: "ok", text: "Véhicule trouvé ✓" });
+      }
+    } catch {
+      setSivRetourMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivRetourLoading(false);
+    }
+  }
 
   // --- véhicule ---
   const [marque, setMarque] = useState("");
