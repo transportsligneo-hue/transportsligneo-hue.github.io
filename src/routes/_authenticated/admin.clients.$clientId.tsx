@@ -28,6 +28,7 @@ import {
   AdminStatCard,
   AdminEmpty,
 } from "@/components/admin/ui";
+import { LogoUploader } from "@/components/LogoUploader";
 
 export const Route = createFileRoute("/_authenticated/admin/clients/$clientId")({
   component: AdminClientDetail,
