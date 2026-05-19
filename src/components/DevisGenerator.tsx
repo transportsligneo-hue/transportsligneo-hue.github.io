@@ -112,15 +112,29 @@ export default function DevisGenerator() {
   const [sending, setSending] = useState(false);
   const [savedDevis, setSavedDevis] = useState<DevisData | null>(null);
 
-  const [depFilter, setDepFilter] = useState("");
-  const [arrFilter, setArrFilter] = useState("");
-  const [depOpen, setDepOpen] = useState(false);
-  const [arrOpen, setArrOpen] = useState(false);
+  // Distance Google async (fallback quand pas de match local)
+  const [googleDistance, setGoogleDistance] = useState<number | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
 
-  const distance = useMemo(() => {
+  const localDistance = useMemo(() => {
     if (!departure || !arrival) return null;
     return getDistance(departure, arrival);
   }, [departure, arrival]);
+
+  useEffect(() => {
+    setGoogleDistance(null);
+    if (!departure || !arrival) return;
+    if (localDistance !== null) return; // pas besoin de Google
+    if (!isGoogleAvailable()) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    getGoogleDistanceKm(departure, arrival)
+      .then((km) => { if (!cancelled) setGoogleDistance(km); })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    return () => { cancelled = true; };
+  }, [departure, arrival, localDistance]);
+
+  const distance = localDistance ?? googleDistance;
 
   const pricing = useMemo(() => {
     if (distance === null || distance === 0) return null;
