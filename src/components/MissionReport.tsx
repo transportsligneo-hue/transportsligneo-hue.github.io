@@ -220,10 +220,34 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
             <p className="text-sm text-gray-500 mt-1">Généré le {new Date().toLocaleString("fr-FR")}</p>
           </div>
 
+          {/* Avancement de la mission — en haut pour accès rapide */}
+          <Section title="Avancement de la mission" icon={<Activity size={16} />}>
+            {report.history.length === 0 ? (
+              <p className="text-cream/40 text-sm">Aucune étape enregistrée.</p>
+            ) : (
+              <ol className="space-y-2">
+                {report.history.map((h, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary/40 text-[10px] text-primary font-bold">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                        <span className="text-cream/90 font-medium">{etapeLabel(h.etape)}</span>
+                        <span className="text-cream/40 text-xs">{formatDateTime(h.created_at)}</span>
+                      </div>
+                      {h.notes && <p className="text-cream/50 text-xs mt-0.5">{h.notes}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Section>
+
           {/* Mission info */}
           <Section title="Informations de mission" icon={<FileText size={16} />}>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoRow label="Référence" value={report.attribution.id.slice(0, 8).toUpperCase()} />
+              <InfoRow label="Référence" value={missionNumberOf(report.attribution)} />
               <InfoRow label="Statut" value={report.attribution.statut} />
               <InfoRow label="Créée le" value={formatDateTime(report.attribution.created_at)} />
               {report.trajet.prix && <InfoRow label="Prix" value={`${report.trajet.prix} €`} />}
