@@ -8,10 +8,22 @@
  *   4. Validation = upload + insert + close (auto-advance côté parent)
  */
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw } from "lucide-react";
+import { Camera, Loader2, Check, X, AlertCircle, MapPin, RotateCcw, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
+
+const UPLOAD_TIMEOUT_MS = 20000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label = "Délai dépassé"): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(label)), ms);
+    promise.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
 
 interface Props {
   attributionId: string;
