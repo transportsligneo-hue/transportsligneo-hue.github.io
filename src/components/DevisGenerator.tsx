@@ -636,7 +636,7 @@ export default function DevisGenerator() {
                       <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure souhaitée</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure de livraison souhaitée</label>
                       <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>
