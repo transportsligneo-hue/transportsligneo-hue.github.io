@@ -1350,12 +1350,13 @@ function SelfieArea({
   return (
     <div className="space-y-3">
       <div className="edl-glass p-5 text-center">
-        <div className="mx-auto w-32 h-32 rounded-full edl-glass-strong flex items-center justify-center overflow-hidden">
+        <div className="relative mx-auto w-32 h-32 rounded-full edl-glass-strong flex items-center justify-center overflow-hidden">
           {state?.previewUrl ? (
             <img src={state.previewUrl} alt="Selfie" className="w-full h-full object-cover" />
           ) : (
             <UserCircle2 size={56} className="text-[var(--edl-cyan)]" />
           )}
+          {state?.status === "uploading" && <BrandLoader compact label="Envoi…" />}
         </div>
         <p className="mt-4 text-sm text-[var(--edl-text-soft)]">
           Identifiez-vous en début de mission. Photo géolocalisée et horodatée.
