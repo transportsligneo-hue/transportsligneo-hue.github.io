@@ -50,7 +50,9 @@ function getDistance(from: string, to: string): number | null {
   return null;
 }
 function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
-  const dDep = CITY_DEPARTMENTS[departure]; const dArr = CITY_DEPARTMENTS[arrival];
+  const cDep = extractCity(departure) || departure;
+  const cArr = extractCity(arrival) || arrival;
+  const dDep = CITY_DEPARTMENTS[cDep]; const dArr = CITY_DEPARTMENTS[cArr];
   const dept = dDep && dArr ? dArr : null;
   if (dept && FIXED_TARIFFS[dept]) {
     const [simple, retour] = FIXED_TARIFFS[dept];
