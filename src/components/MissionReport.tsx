@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Loader2, X, Download, MapPin, Clock, Car, ClipboardCheck, Camera } from "lucide-react";
+import { FileText, Loader2, X, Download, MapPin, Clock, Car, ClipboardCheck, Camera, Activity } from "lucide-react";
+import { missionNumberOf } from "@/lib/mission-number";
 
 interface MissionReportProps {
   attributionId: string;
@@ -12,6 +13,7 @@ interface ReportData {
     id: string;
     statut: string;
     created_at: string;
+    numero_mission: string | null;
   };
   trajet: {
     depart: string;
@@ -52,6 +54,11 @@ interface ReportData {
     created_at: string;
     signed_url?: string | null;
   }>;
+  history: Array<{
+    etape: string;
+    created_at: string;
+    notes: string | null;
+  }>;
 }
 
 const vueLabels: Record<string, string> = {
@@ -70,6 +77,26 @@ const docTypeLabels: Record<string, string> = {
   pv_livraison: "PV de livraison / restitution", pv_signature: "Signature PV",
   carte_grise: "Carte grise", contrat: "Contrat", autre: "Autre",
 };
+
+const etapeLabels: Record<string, string> = {
+  propose: "Mission attribuée",
+  accepte: "Mission acceptée",
+  refusee: "Mission refusée",
+  en_route_pickup: "En route vers prise en charge",
+  arrivee_pickup: "Arrivé au lieu de prise en charge",
+  etat_lieux: "État des lieux départ",
+  etat_lieux_depart: "État des lieux départ",
+  en_cours: "Trajet en cours",
+  arrivee_livraison: "Arrivé au lieu de livraison",
+  etat_lieux_arrivee: "État des lieux arrivée",
+  en_attente_validation: "En attente de validation",
+  validee: "Mission validée",
+  termine: "Mission terminée",
+  annule: "Mission annulée",
+  incident: "Incident signalé",
+};
+
+const etapeLabel = (key: string): string => etapeLabels[key] || key.replace(/_/g, " ");
 
 const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
 
@@ -90,18 +117,19 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
       // Fetch attribution
       const { data: attr } = await supabase
         .from("attributions")
-        .select("id, statut, created_at, trajet_id, convoyeur_id")
+        .select("id, statut, created_at, numero_mission, trajet_id, convoyeur_id")
         .eq("id", attributionId)
         .single();
       if (!attr) { setError("Attribution introuvable."); return; }
 
-      // Fetch trajet, convoyeur, inspections, GPS, documents in parallel
-      const [trajetRes, convoyeurRes, inspectionsRes, gpsRes, docsRes] = await Promise.all([
+      // Fetch trajet, convoyeur, inspections, GPS, documents, history in parallel
+      const [trajetRes, convoyeurRes, inspectionsRes, gpsRes, docsRes, histRes] = await Promise.all([
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).single(),
         supabase.from("convoyeurs").select("nom, prenom, email, telephone").eq("id", attr.convoyeur_id).single(),
         supabase.from("inspections").select("id, type, statut, notes, created_at").eq("attribution_id", attributionId),
         supabase.from("mission_locations").select("recorded_at").eq("attribution_id", attributionId).order("recorded_at", { ascending: true }),
         supabase.from("mission_documents").select("type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
+        supabase.from("mission_etape_history").select("etape, created_at, notes").eq("attribution_id", attributionId).order("created_at", { ascending: true }),
       ]);
 
       // Fetch photos for each inspection
@@ -133,12 +161,13 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
       }
 
       setReport({
-        attribution: { id: attr.id, statut: attr.statut, created_at: attr.created_at },
+        attribution: { id: attr.id, statut: attr.statut, created_at: attr.created_at, numero_mission: (attr as { numero_mission?: string | null }).numero_mission ?? null },
         trajet: trajetRes.data as ReportData["trajet"],
         convoyeur: convoyeurRes.data as ReportData["convoyeur"],
         inspections,
         gps: { points: gpsData.length, startTime, endTime, durationMinutes },
         documents: signedDocs as ReportData["documents"],
+        history: (histRes.data || []) as ReportData["history"],
       });
     } catch {
       setError("Erreur lors de la génération du rapport.");
@@ -211,10 +240,34 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
             <p className="text-sm text-gray-500 mt-1">Généré le {new Date().toLocaleString("fr-FR")}</p>
           </div>
 
+          {/* Avancement de la mission — en haut pour accès rapide */}
+          <Section title="Avancement de la mission" icon={<Activity size={16} />}>
+            {report.history.length === 0 ? (
+              <p className="text-cream/40 text-sm">Aucune étape enregistrée.</p>
+            ) : (
+              <ol className="space-y-2">
+                {report.history.map((h, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary/40 text-[10px] text-primary font-bold">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                        <span className="text-cream/90 font-medium">{etapeLabel(h.etape)}</span>
+                        <span className="text-cream/40 text-xs">{formatDateTime(h.created_at)}</span>
+                      </div>
+                      {h.notes && <p className="text-cream/50 text-xs mt-0.5">{h.notes}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Section>
+
           {/* Mission info */}
           <Section title="Informations de mission" icon={<FileText size={16} />}>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoRow label="Référence" value={report.attribution.id.slice(0, 8).toUpperCase()} />
+              <InfoRow label="Référence" value={missionNumberOf(report.attribution)} />
               <InfoRow label="Statut" value={report.attribution.statut} />
               <InfoRow label="Créée le" value={formatDateTime(report.attribution.created_at)} />
               {report.trajet.prix && <InfoRow label="Prix" value={`${report.trajet.prix} €`} />}

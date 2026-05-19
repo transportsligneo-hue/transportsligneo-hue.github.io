@@ -38,6 +38,7 @@ import { MissionReport } from "@/components/MissionReport";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
+import { missionNumberOf } from "@/lib/mission-number";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -49,6 +50,7 @@ interface AttributionFull {
   convoyeur_id: string;
   statut: string;
   etape_courante: string | null;
+  numero_mission: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -125,14 +127,7 @@ const TIMELINE_STEPS: { key: string; label: string; icon: typeof Truck }[] = [
   { key: "termine", label: "Terminée", icon: CheckCircle2 },
 ];
 
-/** Numéro mission MIS-YYYY-XXXX dérivé déterministe depuis created_at + id */
-function formatMissionNumber(id: string, createdAt: string): string {
-  const year = new Date(createdAt).getFullYear();
-  // Convertit les 6 derniers caractères hex de l'UUID en nombre 4 chiffres
-  const hex = id.replace(/-/g, "").slice(-6);
-  const num = (parseInt(hex, 16) % 9999) + 1;
-  return `MIS-${year}-${String(num).padStart(4, "0")}`;
-}
+// formatMissionNumber moved to src/lib/mission-number.ts (shared with Attributions)
 
 const vueLabels: Record<string, string> = {
   trois_quart_avant_gauche: "01. 3/4 avant gauche",
@@ -184,7 +179,7 @@ function AdminMissionDetail() {
     setLoading(true);
     const { data: attr, error: attrErr } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, created_at, updated_at")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at")
       .eq("id", missionId)
       .maybeSingle();
 
@@ -388,7 +383,7 @@ function AdminMissionDetail() {
     );
   }
 
-  const missionNumber = formatMissionNumber(attribution.id, attribution.created_at);
+  const missionNumber = missionNumberOf(attribution);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
     day: "2-digit",
