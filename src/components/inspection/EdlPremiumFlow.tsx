@@ -1551,3 +1551,20 @@ function ValidationArea({
     </div>
   );
 }
+
+function BrandLoader({ label = "Envoi sécurisé…", compact = false }: { label?: string; compact?: boolean }) {
+  return (
+    <div className="edl-brand-loader">
+      <div
+        className="edl-brand-loader__ring"
+        style={compact ? { width: 72, height: 72 } : undefined}
+      >
+        <div className="edl-brand-loader__logo">
+          <img src={logoLigneo} alt="Ligneo" style={compact ? { width: 40, height: 40 } : undefined} />
+        </div>
+      </div>
+      {!compact && <span className="edl-brand-loader__label">{label}</span>}
+    </div>
+  );
+}
+
