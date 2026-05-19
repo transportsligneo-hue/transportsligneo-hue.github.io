@@ -1,27 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
-  MapPin,
-  Navigation,
-  Clock,
-  Euro,
-  Car,
-  Fuel,
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  Send,
-  Loader2,
-  CheckCircle,
-  User,
-  Phone,
-  Mail,
-  Download,
-  ArrowLeft,
+  MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
+  Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import {
+  getAutocompleteSuggestions, getGoogleDistanceKm, isGoogleAvailable, loadGoogle,
+  resetPlacesSession, type PlaceSuggestion,
+} from "@/lib/google-places";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
