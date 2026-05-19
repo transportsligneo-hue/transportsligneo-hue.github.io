@@ -178,11 +178,11 @@ function ClientDashboard() {
         )}
       </div>
 
-      {/* Mes devis */}
+      {/* Mes demandes en cours */}
       {devisList.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-heading text-lg text-cream tracking-wider">Mes devis</h2>
+            <h2 className="font-heading text-lg text-cream tracking-wider">Mes demandes en cours</h2>
             <Link
               to="/dashboard-client/devis"
               className="text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
@@ -191,33 +191,71 @@ function ClientDashboard() {
             </Link>
           </div>
           <div className="space-y-3">
-            {devisList.map(d => (
-              <Link
-                key={d.id}
-                to="/dashboard-client/devis"
-                className="card-premium p-5 rounded flex items-center justify-between gap-4 hover:border-primary/40 transition-colors cursor-pointer"
-              >
-                <div className="min-w-0">
-                  <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-2">
-                    <FileText size={12} className="text-primary" /> {d.numero}
-                  </p>
-                  <p className="text-cream font-heading text-sm mt-1 truncate">{d.depart} → {d.arrivee}</p>
-                  <p className="text-cream/50 text-xs mt-1">
-                    {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                    {d.distance_km ? ` · ${d.distance_km} km` : ""}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-heading text-primary text-lg">{Number(d.prix_estime).toFixed(0)} €</p>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{d.statut}</p>
-                </div>
-              </Link>
-            ))}
+            {devisList.map(d => {
+              const info = demandeStatusInfo(d);
+              const vehicule = [d.marque, d.modele].filter(Boolean).join(" ").trim();
+              const trajetType = (d.option_trajet || "").toLowerCase().includes("retour")
+                ? "Aller-retour"
+                : "Aller simple";
+              return (
+                <Link
+                  key={d.id}
+                  to="/dashboard-client/devis"
+                  className="card-premium p-4 md:p-5 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-primary/40 transition-colors cursor-pointer"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <FileText size={12} className="text-primary" /> {d.numero}
+                      </p>
+                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${info.cls}`}>
+                        {info.label}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wider text-cream/40">· {trajetType}</span>
+                    </div>
+                    <p className="text-cream font-heading text-sm mt-1.5 truncate">{d.depart} → {d.arrivee}</p>
+                    <p className="text-cream/50 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                      <span>
+                        <Calendar size={11} className="inline mr-1" />
+                        {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      </span>
+                      {d.date_souhaitee && (
+                        <span>Prise en charge : {new Date(d.date_souhaitee).toLocaleDateString("fr-FR")}</span>
+                      )}
+                      {vehicule && <span>{vehicule}</span>}
+                      {d.distance_km ? <span>{d.distance_km} km</span> : null}
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
+                    <p className="font-heading text-primary text-xl">{Number(d.prix_estime).toFixed(0)} €</p>
+                    <ArrowRight size={14} className="text-cream/30 hidden sm:inline mt-1" />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function demandeStatusInfo(d: DevisRow): { label: string; cls: string } {
+  if (d.mission_id || d.statut === "convertit") {
+    return { label: "Mission créée", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+  }
+  if (d.paid_at) {
+    return { label: "Payé", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+  }
+  switch (d.statut) {
+    case "accepte":
+      return { label: "Validé — à payer", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+    case "refuse":
+      return { label: "Refusé", cls: "bg-red-500/15 text-red-300 border-red-500/30" };
+    case "envoye":
+    default:
+      return { label: "En attente", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+  }
 }
 
 function StatCard({ icon: Icon, label, value, accent }: { icon: typeof Truck; label: string; value: number; accent: string }) {
