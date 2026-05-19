@@ -286,6 +286,15 @@ export default function DevisGenerator() {
         setAccountCreated(!isExistingAccount);
       }
 
+      // Préparation infos retour (uniquement pour aller-retour)
+      const isAR = option === "aller-retour";
+      const retourDepart = isAR ? (departRetour || arrival) : null;
+      const retourArrivee = isAR ? (sameDestination ? departure : arriveeRetour) : null;
+      const retourImmat = isAR ? (immatRetour || null) : null;
+      const retourMarque = isAR ? (marqueRetour || null) : null;
+      const retourModele = isAR ? (modeleRetour || null) : null;
+      const retourVin = isAR ? (vinRetour || null) : null;
+
       // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
         nom, prenom, telephone, email,
@@ -301,6 +310,12 @@ export default function DevisGenerator() {
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
         message: comment || null,
+        depart_retour: retourDepart,
+        arrivee_retour: retourArrivee,
+        immatriculation_retour: retourImmat,
+        marque_retour: retourMarque,
+        modele_retour: retourModele,
+        vin_retour: retourVin,
       }).select().single();
 
       await supabase.from("demandes_convoyage").insert({
@@ -314,13 +329,22 @@ export default function DevisGenerator() {
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           societe && `Société: ${societe}`,
+          `Prestation: ${option === "aller-retour" ? "Aller-retour" : option === "express" ? "Express" : "Aller simple"}`,
           `Roulant: ${running}`,
           plaqueInconnue && "Plaque: à confirmer",
+          isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
+          isAR && retourImmat && `Plaque retour: ${retourImmat}`,
           `Estimation: ${pricing.finalPrice}€`,
           `Distance: ${distance}km`,
           comment,
         ].filter(Boolean).join(" | "),
         message: comment,
+        depart_retour: retourDepart,
+        arrivee_retour: retourArrivee,
+        immatriculation_retour: retourImmat,
+        marque_retour: retourMarque,
+        modele_retour: retourModele,
+        vin_retour: retourVin,
       });
 
       await notifyAdmin({
