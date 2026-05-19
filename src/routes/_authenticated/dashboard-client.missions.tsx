@@ -39,10 +39,11 @@ function ClientMissions() {
     if (!user) return;
     let cancelled = false;
     setLoading(true);
+    const email = user.email ?? "";
     let q = supabase
       .from("missions")
       .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, marque, modele")
-      .eq("user_id", user.id)
+      .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
       .order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("statut", filter);
     q.then(({ data }) => {
