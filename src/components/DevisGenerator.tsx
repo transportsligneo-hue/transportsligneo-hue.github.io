@@ -35,7 +35,7 @@ function extractCity(addr: string): string {
     const re = new RegExp(`(^|[^a-zà-ÿ])${c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}([^a-zà-ÿ]|$)`, "i");
     if (re.test(lower)) return c;
   }
-  return addr.trim() === c2 ? addr : (addr.trim().split(",")[0] || "");
+  return "";
 }
 
 function getDistance(from: string, to: string): number | null {
