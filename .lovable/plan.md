@@ -1,65 +1,95 @@
-## Problèmes constatés
+## Objectif
+Remettre le workflow convoyeur en cohérence avec le parcours demandé, corriger le blocage selfie en priorité, et faire en sorte que le bouton bleu principal reflète toujours la prochaine action réelle sans faux 100% ni blocage définitif.
 
-**1. Blocage à ~86% après "Arrivé au lieu de livraison"**
-Dans `src/components/convoyeur/MissionCockpit.tsx` (`handleAdvance`, case `arrive_livraison`), après avoir validé l'arrivée, l'étape passe à `arrive_destination` mais le CTA suivant attend un nouveau clic pour lancer `onStartInspection("arrivee")`. Côté `convoyeur.missions.tsx`, la timeline reste donc bloquée à l'étape 4/6 (validation admin = 6, donc ~83-86% de la barre) et l'overlay `EdlPremiumFlow` ne s'ouvre jamais tout seul.
+## Ce que je vais corriger
 
-Le même schéma existe pour le départ : après `arrive_depart` (passage à `sur_place`), l'inspection départ ne s'ouvre pas automatiquement non plus, ce qui est incohérent et créera le même blocage.
+### 1. Recalcul complet de l’étape courante dans le cockpit mission
+- Refaire la logique de `MissionCockpit.tsx` pour que le premier CTA soit exactement `En route pour récupérer le véhicule`.
+- Recaler ensuite les CTA dans cet ordre :
+  1. En route pour récupérer le véhicule
+  2. Arrivé au lieu d’enlèvement
+  3. Selfie convoyeur enlèvement
+  4. Commencer l’état des lieux d’enlèvement
+  5. Démarrer le trajet
+  6. Arrivé au lieu de livraison
+  7. Commencer l’état des lieux d’arrivée
+  8. Selfie convoyeur final
+  9. Envoyer à l’admin
+- Empêcher tout bypass des étapes obligatoires : selfie, EDL départ, signatures départ, EDL arrivée, signatures arrivée, selfie final.
+- Garder `Signaler un incident` disponible à tout moment sans casser l’avancement.
 
-**2. Inspection contournable**
-Aujourd'hui la clôture passe par `cloturer` (`en_attente_validation`) dès que `inspectionArriveeDone` est vrai. Mais le selfie n'est verrouillé que jusqu'à `vehicule_recupere` (`currentKey` ligne 147). Entre `en_livraison` et `arrive_destination`, si pour une raison X le selfie n'a pas été pris (override retiré, race condition), il n'y a plus de garde. Idem si `inspectionDepart` est manquant après `edl_depart_fait`.
+### 2. Corriger le composant selfie avec un vrai flow caméra
+- Remplacer le fonctionnement actuel basé uniquement sur `input capture` par un vrai composant de capture robuste dans `DriverSelfieCapture.tsx` :
+  - demande de permission caméra explicite
+  - message clair si permission refusée
+  - aperçu caméra temps réel via `getUserMedia`
+  - capture réelle vers canvas/blob/file
+  - aperçu de la photo capturée
+  - actions `Reprendre`, `Valider`, `Réessayer`
+- Conserver un fallback fichier si la caméra n’est pas disponible sur l’appareil.
+- Ajouter une machine d’état claire : `idle`, `requesting_permission`, `camera_ready`, `captured`, `uploading`, `success`, `error`, `timeout`, `pending_upload`.
 
-**3. Saturation mémoire pendant la séquence photos**
-`EdlPremiumFlow.handlePhotoFile` crée `URL.createObjectURL(stableFile)` puis stocke ce `blob:` dans `states[stepId].previewUrl` et l'y laisse jusqu'à la fin du flow. Sur 20+ photos compressées (3-8 Mo chacune avant compression), les blobs restent référencés → OOM sur mobile. Idem `handleExtraPhotoFile` et `handleSelfieFile`. Les `File`/`ArrayBuffer` intermédiaires (`materializeCapturedFile` lit `arrayBuffer()` puis recrée un `File`) sont aussi conservés tant que le blob l'est.
+### 3. Supprimer le blocage selfie infini
+- Encadrer l’upload selfie avec un timeout explicite.
+- Si l’upload échoue ou dépasse le timeout :
+  - sortir immédiatement du loader
+  - afficher exactement `Erreur lors de l’envoi du selfie. Réessayez.`
+  - proposer `Réessayer`
+- Sauvegarder temporairement le selfie en local pour reprise si réseau faible.
+- Réhydrater cet état au retour sur la mission pour reprendre l’envoi sans refaire la photo.
+- Désactiver les doubles clics pendant capture/validation/upload.
 
----
+### 4. Recaler l’avancement et la barre de progression sur l’état réel
+- Corriger le calcul du pourcentage dans `MissionCockpit.tsx` et la timeline de `convoyeur.missions.tsx` pour qu’aucune étape incomplète n’affiche 100%.
+- Baser la progression sur les jalons réellement validés, pas seulement sur l’index visuel courant.
+- Faire revenir automatiquement à la page mission après chaque succès : selfie, inspection, signatures, envoi final.
 
-## Correctifs
+### 5. Réorganiser l’EDL pour coller au workflow demandé
+- Adapter `EdlPremiumFlow.tsx` et `edl-premium-sequence.ts` pour séparer proprement :
+  - EDL enlèvement = photos + scans + signatures enlèvement
+  - EDL arrivée = photos + signatures arrivée uniquement
+- Inverser l’ordre des signatures si nécessaire pour respecter la demande : client puis convoyeur.
+- Retirer de l’EDL arrivée l’envoi automatique en validation admin actuellement présent.
+- Déplacer le selfie final hors de l’EDL pour qu’il s’ouvre automatiquement après signatures arrivée, puis retour mission, puis CTA `Envoyer à l’admin`.
 
-### A. Auto-ouverture de l'inspection (departure + arrival)
+### 6. Stabiliser les uploads photo EDL
+- Garder le flux `Blob/File` et la compression client, déjà présents, mais fiabiliser les transitions d’état.
+- Ajouter timeout/retry cohérents aux uploads photo comme au selfie.
+- Conserver la reprise locale des étapes déjà faites sans regonfler la mémoire.
+- Continuer à libérer les `blob:` inutiles pour éviter les erreurs mémoire sur mobile.
+- Vérifier qu’aucune promesse en cours ne laisse l’UI coincée en `uploading`.
 
-Fichier : `src/components/convoyeur/MissionCockpit.tsx`
+### 7. Corriger l’envoi final admin
+- Faire du CTA final `Envoyer à l’admin` la seule étape qui fait passer la mission en validation admin.
+- Vérifier avant l’envoi final que tout le dossier requis est présent : selfies, EDL, signatures, GPS, incidents éventuels.
+- Si une pièce manque, afficher une erreur claire et renvoyer vers l’étape manquante au lieu de bloquer silencieusement.
 
-1. Dans `handleAdvance`, après `case "arrive_livraison"` : enchaîner immédiatement `onStartInspection("arrivee")` une fois `persistEtape("arrive_destination")` résolu (et seulement si `!inspectionArriveeDone`).
-2. Faire le même chaînage dans `case "arrive_depart"` → `onStartInspection("depart")` si `!inspectionDepartDone`.
-3. Ajouter un `useEffect` qui ouvre automatiquement l'inspection si on arrive sur `arrive_destination` / `sur_place` sans inspection faite (cas du rafraîchissement page après validation). Garder un ref `autoOpenedRef` par phase pour éviter la boucle.
+### 8. Vérification navigateur après implémentation
+- Tester le flow complet dans le navigateur :
+  - En route pour récupérer le véhicule
+  - Arrivé au lieu d’enlèvement
+  - ouverture auto du selfie
+  - capture + upload + retour mission
+  - ouverture EDL enlèvement
+  - signatures enlèvement
+  - démarrer le trajet
+  - arrivé livraison
+  - EDL arrivée
+  - signatures arrivée
+  - selfie final auto
+  - envoi admin final
+- Vérifier aussi les cas erreur : permission refusée, upload selfie en échec, retry, reprise locale, absence de refresh manuel.
 
-### B. Verrou anti-bypass jusqu'à la validation admin
-
-Fichier : `src/components/convoyeur/MissionCockpit.tsx`
-
-1. Étendre la liste des étapes qui exigent `selfieOK` à TOUTES les étapes terrain jusqu'à `en_attente_validation` (ajouter `en_route`, `en_livraison`, `arrive_destination`, `edl_depart_fait`, `edl_arrivee_fait`).
-2. Bloquer `cloturer` tant que `inspectionArriveeDone && inspectionDepartDone && selfieOK` ne sont pas tous vrais. Si manquant, forcer le retour vers `edl_arrivee` (ou afficher un toast clair). Pas de bypass possible côté driver (les overrides admin via `useMissionGates` restent la seule porte de sortie).
-3. Dans `EdlPremiumFlow.finalizeInspection` (phase `arrivee`), refuser de marquer `en_attente_validation` si une étape obligatoire (selfie, signatures, photos non bypassées) est `status !== "success"`. Aujourd'hui le `goNext` final accepte tout si `currentStep.kind === "validation"`.
-
-### C. Libération mémoire après upload
-
-Fichier : `src/components/inspection/EdlPremiumFlow.tsx`
-
-1. Dans `handlePhotoFile` / `handleExtraPhotoFile` / `handleSelfieFile`, après `setState(... status: "success" ...)`, ré-évaluer une URL d'aperçu basse résolution :
-   - Pour les photos déjà uploadées : remplacer le blob par un thumbnail data URL (canvas downscale ~256px JPEG q=0.5) ou simplement par `undefined` (l'aperçu n'est utile que pour la photo en cours) ; révoquer le `blob:` original via `revokeBlobUrl`.
-   - Conserver le blob uniquement pour l'étape courante tant qu'on ne navigue pas.
-2. Ajouter un `useEffect` qui, quand `safeIndex` change, parcourt toutes les autres entrées `states` et révoque les `blob:` non actifs.
-3. Au démontage (`return cleanup`), révoquer toutes les `previewUrl` blob restantes.
-4. Dans `prepareCapturedImage`, ne plus matérialiser via `arrayBuffer()` si l'input est déjà un `File` stable avec `size > 0` et un type image — évite la copie binaire complète en mémoire (gain x2 sur chaque prise).
-5. Après `compressImage`, ne pas garder de référence locale au-delà du `await uploadWithRetry` (déjà le cas, mais s'assurer que `stableFile` sort du scope — pas de capture dans un closure long).
-
-### D. Vérification end-to-end via Browser Tool
-
-Après implémentation, scénario joué dans le sandbox :
-1. Login convoyeur fixture (si comptes de test dispos) — sinon dérouler depuis l'état courant.
-2. Avancer mission jusqu'à `arrive_destination` → confirmer ouverture auto de l'overlay `EdlPremiumFlow` avec barre bleue.
-3. Tenter de skipper le selfie / une photo obligatoire → CTA "Terminer" doit rester bloqué.
-4. Compléter toutes les étapes → vérifier passage à `en_attente_validation` sans refresh manuel et libération mémoire (via `performance.memory` si dispo dans le console).
-
----
+## Fichiers ciblés
+- `src/components/convoyeur/MissionCockpit.tsx`
+- `src/components/mission/DriverSelfieCapture.tsx`
+- `src/components/inspection/EdlPremiumFlow.tsx`
+- `src/components/inspection/edl-premium-sequence.ts`
+- `src/routes/_authenticated/convoyeur.missions.tsx`
+- possiblement `src/hooks/useMissionGates.ts` si un état selfie final distinct doit être exposé proprement
 
 ## Détails techniques
-
-Tables touchées : aucune. Pas de migration.
-
-Hooks/composants modifiés :
-- `src/components/convoyeur/MissionCockpit.tsx` — chaînage auto-ouverture, garde-fous selfie + EDL.
-- `src/components/inspection/EdlPremiumFlow.tsx` — révocation blobs, downsample thumbnail, garde finalize.
-- (Optionnel) `src/components/convoyeur/MissionWorkflow.tsx` — appliquer le même chaînage dans `advance()` pour rester cohérent si ce composant est encore monté ailleurs.
-
-Risque de régression : la reprise via `localStorage` continue de fonctionner (les paths storage restent persistés). L'aperçu après reprise sera ré-hydraté via `createSignedUrl` (déjà en place ligne 306-320).
+- Le blocage principal vient du fait que le selfie actuel ne gère pas un vrai cycle caméra/permission/timeout/retry et repose sur `input capture`, qui peut ne rien renvoyer ou ne pas reprendre correctement sur mobile.
+- Le workflow actuel mélange encore des responsabilités : l’EDL arrivée pousse déjà la mission vers la validation admin, ce qui contredit le besoin de selfie final puis envoi admin explicite.
+- La progression actuelle peut atteindre artificiellement 100% avant la fin car elle est dérivée de l’étape visuelle active au lieu d’un ensemble d’étapes réellement complétées.
+- Je resterai sur une correction ciblée, sans refaire l’application ni casser le design existant.
