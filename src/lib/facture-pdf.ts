@@ -180,6 +180,8 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
+  const signatureData = await loadImageAsDataUrl(signatureGo);
+
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
   const tvaTaux = f.tva_taux ?? 20;
