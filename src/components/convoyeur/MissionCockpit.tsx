@@ -37,6 +37,7 @@ type ActionKind =
   | "demarrer_livraison"
   | "arrive_livraison"
   | "edl_arrivee"
+  | "signature_arrivee"
   | "selfie_final"
   | "cloturer"
   | "done";
@@ -56,8 +57,9 @@ const STEPS: StepDef[] = [
   { key: "selfie", short: "Selfie", label: "Selfie convoyeur (enlèvement)", icon: Camera, cta: "Prendre mon selfie convoyeur", hint: "Photo d'identité obligatoire avant l'état des lieux." },
   { key: "edl_depart", short: "EDL départ", label: "État des lieux d'enlèvement", icon: ClipboardCheck, cta: "Commencer l'état des lieux d'enlèvement", hint: "Photos, scans documents et signatures côté enlèvement." },
   { key: "demarrer_livraison", short: "Trajet", label: "Démarrer le trajet", icon: Truck, cta: "Démarrer le trajet", hint: "Activation du suivi GPS et départ vers la livraison." },
-  { key: "arrive_livraison", short: "Arrivée livr.", label: "Arrivée au lieu de livraison", icon: MapPin, cta: "Arrivé au lieu de livraison", hint: "Confirme votre arrivée à destination." },
-  { key: "edl_arrivee", short: "EDL arrivée", label: "État des lieux d'arrivée", icon: ClipboardCheck, cta: "Commencer l'état des lieux d'arrivée", hint: "Photos et signatures côté livraison." },
+  { key: "arrive_livraison", short: "Arrivée livr.", label: "Arrivée au lieu de livraison", icon: MapPin, cta: "Arrivé au lieu de livraison", hint: "Confirmez votre arrivée à destination. Vous lancerez ensuite l'état des lieux." },
+  { key: "edl_arrivee", short: "EDL arrivée", label: "État des lieux d'arrivée", icon: ClipboardCheck, cta: "Commencer l'état des lieux d'arrivée", hint: "Photos d'arrivée. Les signatures se feront juste après." },
+  { key: "signature_arrivee", short: "Signatures", label: "Signatures d'arrivée", icon: ClipboardCheck, cta: "Signer la livraison", hint: "Signature convoyeur puis signature du client réceptionnaire." },
   { key: "selfie_final", short: "Selfie final", label: "Selfie convoyeur final", icon: Camera, cta: "Prendre le selfie final", hint: "Dernière photo d'identité avant l'envoi à l'admin." },
   { key: "cloturer", short: "Envoi admin", label: "Envoyer la mission à l'admin", icon: Send, cta: "Envoyer à l'admin", hint: "Dossier complet transmis pour validation." },
   { key: "done", short: "Validation", label: "En attente de validation admin", icon: Flag, cta: "Mission envoyée" },
