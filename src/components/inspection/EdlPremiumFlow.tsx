@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 import { useMissionGates } from "@/hooks/useMissionGates";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
