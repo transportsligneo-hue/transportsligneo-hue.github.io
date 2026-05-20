@@ -513,7 +513,13 @@ export function EdlPremiumFlow({
   }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
-  const triggerCapture = () => fileRef.current?.click();
+  const triggerCapture = () => {
+    if (currentStep.kind === "scan") {
+      setOpenScanner(true);
+    } else {
+      fileRef.current?.click();
+    }
+  };
 
   const setState = (id: string, s: StepState) =>
     setStates(prev => ({ ...prev, [id]: s }));
@@ -522,6 +528,10 @@ export function EdlPremiumFlow({
     const raw = e.target.files?.[0];
     e.target.value = "";
     if (!raw) return;
+    await processPhotoFile(raw);
+  };
+
+  const processPhotoFile = async (raw: File) => {
 
     const stepId = currentStep.id;
     let previewUrl: string | undefined;
