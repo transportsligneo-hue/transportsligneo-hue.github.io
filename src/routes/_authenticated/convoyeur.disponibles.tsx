@@ -55,11 +55,13 @@ const offreStatutLabel: Record<string, string> = {
 };
 
 function ConvoyeurDisponibles() {
-  const { user } = useAuth();
+  const { user, convoyeurStatut } = useAuth();
+  const isValidated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<TrajetDispo[]>([]);
   const [myOffres, setMyOffres] = useState<Record<string, MyOffre>>({});
   const [loading, setLoading] = useState(true);
+
   const [openTrajetId, setOpenTrajetId] = useState<string | null>(null);
   const [contrePrix, setContrePrix] = useState<string>("");
   const [contreMessage, setContreMessage] = useState<string>("");
