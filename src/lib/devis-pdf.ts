@@ -179,7 +179,9 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
+  const signatureData = await loadImageAsDataUrl(signatureGo);
   const clientLogoData = d.logo_url ? await loadImageAsDataUrl(d.logo_url) : null;
+
 
   const validite = d.validite_jours ?? 15;
   drawHeader(doc, pageW, logoData, "DEVIS", d.numero, `Validite : ${validite} jours`);
