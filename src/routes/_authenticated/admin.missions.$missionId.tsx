@@ -721,23 +721,47 @@ function AdminMissionDetail() {
                         {insp.photos
                           .filter((p) => !p.vue_type.startsWith("signature"))
                           .map((p, idx) => (
-                            <a
-                              key={`${p.vue_type}-${idx}`}
-                              href={p.url_photo}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block group"
-                            >
-                              <img
-                                src={p.url_photo}
-                                alt={vueLabelFor(p.vue_type)}
-                                loading="lazy"
-                                className="w-full aspect-[3/4] object-cover rounded-md border border-pro-border group-hover:border-pro-accent transition-colors"
-                              />
-                              <p className="text-pro-text-soft text-[10px] mt-1 truncate">
-                                {vueLabelFor(p.vue_type)}
-                              </p>
-                            </a>
+                            <div key={`${p.id}-${idx}`} className="relative group">
+                              <a
+                                href={p.url_photo}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <img
+                                  src={p.url_photo}
+                                  alt={vueLabelFor(p.vue_type)}
+                                  loading="lazy"
+                                  className="w-full aspect-[3/4] object-cover rounded-md border border-pro-border group-hover:border-pro-accent transition-colors"
+                                />
+                                <p className="text-pro-text-soft text-[10px] mt-1 truncate">
+                                  {vueLabelFor(p.vue_type)}
+                                </p>
+                              </a>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (!window.confirm(`Supprimer la photo "${vueLabelFor(p.vue_type)}" ? Le conducteur pourra la reprendre.`)) return;
+                                  try {
+                                    if (p.storage_path) {
+                                      await supabase.storage.from("inspection-photos").remove([p.storage_path]);
+                                    }
+                                    const { error } = await supabase.from("inspection_photos").delete().eq("id", p.id);
+                                    if (error) throw error;
+                                    setInspections((prev) => prev.map((row) => row.id === insp.id
+                                      ? { ...row, photos: row.photos.filter((q) => q.id !== p.id) }
+                                      : row));
+                                    toast.success("Photo supprimée");
+                                  } catch (err) {
+                                    toast.error("Suppression impossible", { description: err instanceof Error ? err.message : "" });
+                                  }
+                                }}
+                                title="Supprimer cette photo"
+                                className="absolute top-1 right-1 p-1.5 rounded-md bg-red-600/90 text-white opacity-0 group-hover:opacity-100 hover:bg-red-700 transition shadow-sm"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
                           ))}
                       </div>
                     )}
