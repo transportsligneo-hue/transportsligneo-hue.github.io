@@ -456,6 +456,20 @@ export function MissionCockpit({
           }}
         />
       )}
+
+      {openSignatureArrivee && (
+        <ArriveeSignatureSheet
+          attributionId={attributionId}
+          driverName={driverName}
+          defaultClientName={clientName}
+          onClose={() => setOpenSignatureArrivee(false)}
+          onComplete={async () => {
+            setSignaturesArriveeDone(true);
+            setOpenSignatureArrivee(false);
+            try { await Promise.resolve(onUpdated()); } catch { /* ignore */ }
+          }}
+        />
+      )}
     </>
   );
 }
