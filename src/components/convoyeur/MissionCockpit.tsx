@@ -84,6 +84,8 @@ interface Props {
 export function MissionCockpit({
   attributionId,
   userId,
+  driverName,
+  clientName,
   currentEtape,
   statut,
   inspectionDepartDone,
@@ -99,12 +101,30 @@ export function MissionCockpit({
   const [openSelfie, setOpenSelfie] = useState(false);
   const [openIncident, setOpenIncident] = useState(false);
   const [openSignatureArrivee, setOpenSignatureArrivee] = useState(false);
+  const [signaturesArriveeDone, setSignaturesArriveeDone] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
   const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
   const lastAutoOpenedKeyRef = useRef<ActionKind | null>(null);
   const forceOpenConsumedRef = useRef(false);
+
+  // Vérifie en BDD si les 2 signatures d'arrivée sont déjà présentes
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("mission_signatures" as never)
+        .select("kind")
+        .eq("attribution_id" as never, attributionId as never);
+      if (cancelled || !data) return;
+      const kinds = new Set((data as { kind: string }[]).map((r) => r.kind));
+      if (kinds.has("driver_end") && kinds.has("client_end")) {
+        setSignaturesArriveeDone(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
