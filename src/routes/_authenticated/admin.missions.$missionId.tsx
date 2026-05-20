@@ -23,6 +23,7 @@ import {
   Truck,
   ClipboardCheck,
   Receipt,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
