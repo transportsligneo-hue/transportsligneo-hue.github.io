@@ -422,8 +422,9 @@ function ConvoyeurDisponibles() {
                               {prixAcc != null && (
                                 <button
                                   onClick={() => accepterPrixSuggere(t)}
-                                  disabled={submitting}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
+                                  disabled={submitting || !isValidated}
+                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <CheckCircle2 size={15} />
                                   {isFixe ? `Accepter à ${prixAcc} €` : `Accepter à ${prixAcc} €`}
@@ -432,17 +433,21 @@ function ConvoyeurDisponibles() {
                               {!isFixe && (
                                 <button
                                   onClick={() => {
+                                    if (!isValidated) return;
                                     setOpenTrajetId(t.id);
                                     setContrePrix(prixAcc?.toString() ?? "");
                                     setContreMessage("");
                                   }}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
+                                  disabled={!isValidated}
+                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <Euro size={15} />
                                   {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
                                     ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
                                     : "Proposer un autre prix"}
                                 </button>
+
                               )}
                             </>
                           );
