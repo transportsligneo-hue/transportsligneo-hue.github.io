@@ -196,6 +196,11 @@ function ConvoyeurDisponibles() {
   };
 
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
+    if (!isValidated) {
+      alert("Vos documents doivent être validés avant d'accepter une mission.");
+      return;
+    }
+
     const prix = prixDriverEffectif(trajet);
     if (!convoyeurId || prix == null) return;
     setSubmitting(true);
@@ -234,6 +239,11 @@ function ConvoyeurDisponibles() {
   };
 
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
+    if (!isValidated) {
+      alert("Vos documents doivent être validés avant de proposer un prix.");
+      return;
+    }
+
     if (trajet.pricing_mode === "fixe") {
       alert("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
       return;
@@ -295,6 +305,17 @@ function ConvoyeurDisponibles() {
             : `${trajets.length} mission${trajets.length > 1 ? "s" : ""} ouverte${trajets.length > 1 ? "s" : ""} aux propositions.`}
         </p>
       </div>
+
+      {!isValidated && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-semibold">Validation des documents requise</p>
+          <p className="text-amber-800/90 mt-0.5">
+            Vous pourrez accepter des missions disponibles lorsque vos documents seront validés par notre équipe.
+          </p>
+        </div>
+      )}
+
+
 
       {trajets.length === 0 ? (
         <div className="bg-white border border-pro-border rounded-xl p-10 text-center">
