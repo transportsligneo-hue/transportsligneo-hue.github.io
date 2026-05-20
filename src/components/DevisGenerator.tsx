@@ -271,10 +271,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   async function handleSubmit() {
     if (!pricing || distance == null) return;
     // CGU requise dans tous les cas
-    if (!cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
-    // Création de compte optionnelle : seulement si un mot de passe est saisi
-    const wantsAccount = password.length > 0;
+    // CGU requise UNIQUEMENT pour les visiteurs non connectés (création de compte possible)
+    if (!hideAccountStep && !cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
+    // Création de compte optionnelle : seulement si le bloc compte est visible ET un mot de passe est saisi
+    const wantsAccount = !hideAccountStep && password.length > 0;
     if (wantsAccount && password.length < 8) {
+
       setAccountError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
