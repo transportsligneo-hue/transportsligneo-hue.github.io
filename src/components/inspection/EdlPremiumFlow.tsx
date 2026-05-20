@@ -1388,13 +1388,23 @@ function PhotoOrScanArea({
 
       {/* CTA prise / reprise */}
       {!state || state.status === "idle" || state.status === "error" ? (
-        <button
-          onClick={onCapture}
-          className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
-        >
-          {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
-          {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
-        </button>
+        <div className="space-y-2">
+          {state?.status === "error" && state.previewUrl && onRetryUpload && (
+            <button
+              onClick={onRetryUpload}
+              className="edl-cta w-full h-12 flex items-center justify-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-black"
+            >
+              <RefreshCw size={16}/> Réessayer l'envoi
+            </button>
+          )}
+          <button
+            onClick={onCapture}
+            className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
+          >
+            {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
+            {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button
