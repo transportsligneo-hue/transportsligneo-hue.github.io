@@ -128,7 +128,6 @@ export function ArriveeSignatureSheet({
           kind,
           signer_name: signerName,
           signature_data: dataUrl,
-          storage_path: path,
         },
         { onConflict: "attribution_id,kind" },
       );
