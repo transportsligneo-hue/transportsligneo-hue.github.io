@@ -972,6 +972,48 @@ export function EdlPremiumFlow({
     }
   };
 
+  /** Réessaie l'upload du blob déjà capturé (sans demander de reprendre la photo). */
+  const retryUpload = async () => {
+    const stepId = currentStep.id;
+    const target = states[stepId];
+    if (!target?.previewUrl) {
+      // Pas de blob local : on doit reprendre la photo
+      retake();
+      return;
+    }
+    setState(stepId, { ...target, status: "uploading", error: undefined });
+    try {
+      const resp = await fetch(target.previewUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], `${stepId}.jpg`, { type: blob.type || "image/jpeg" });
+      const insId = await ensureInspection();
+      const compressed = await compressImage(file).catch(() => file);
+      const path = `${userId}/${insId}/${stepId}.jpg`;
+      await uploadWithRetry("inspection-photos", path, compressed);
+      await supabase.from("inspection_photos")
+        .delete().eq("inspection_id", insId).eq("vue_type", stepId);
+      const { error: insertErr } = await supabase.from("inspection_photos").insert({
+        inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size,
+      });
+      if (insertErr) {
+        const { error: upsertErr } = await supabase.from("inspection_photos").upsert(
+          { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
+          { onConflict: "inspection_id,vue_type" },
+        );
+        if (upsertErr) throw upsertErr;
+      }
+      setState(stepId, { status: "success", previewUrl: target.previewUrl, storagePath: path });
+      toast.success("Envoi réussi");
+    } catch (err) {
+      setState(stepId, {
+        ...target,
+        status: "error",
+        error: err instanceof Error ? err.message : "Erreur réseau",
+      });
+      toast.error("Nouvel échec d'envoi", { description: "Vérifiez votre connexion." });
+    }
+  };
+
   const deleteCurrentPhoto = async () => {
     const stepId = currentStep.id;
     const target = currentState;
