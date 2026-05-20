@@ -2,12 +2,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, Truck, Loader2, PlusCircle } from "lucide-react";
+import { Calendar, MapPin, Truck, Loader2, PlusCircle, Clock, ArrowRight, FileText } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions")({
   component: ClientMissions,
 });
+
+interface PendingItem {
+  id: string;
+  numero: string;
+  depart: string;
+  arrivee: string;
+  date_souhaitee: string | null;
+  created_at: string;
+  source: "devis" | "demande";
+}
+
 
 interface Mission {
   id: string;
