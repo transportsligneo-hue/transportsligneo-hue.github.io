@@ -44,8 +44,8 @@ export const Route = createRootRoute({
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Transports Ligneo" },
       { name: "twitter:description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile, dédiée à la livraison de véhicules pour particuliers et professionnels." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/2dd818fd-0b97-4208-9f9c-1c7de17f4bb9" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/2dd818fd-0b97-4208-9f9c-1c7de17f4bb9" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/53a08c7a-21e8-42e2-803d-1f0891146ce4" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/53a08c7a-21e8-42e2-803d-1f0891146ce4" },
     ],
     links: [
       {
