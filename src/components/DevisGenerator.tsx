@@ -248,7 +248,61 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
   const distance = localDistance ?? googleDistance;
 
+  // --- Tarifs personnalisés client (lookup automatique si email connu) ---
+  type CustomRule = {
+    id: string;
+    ville_depart: string | null;
+    ville_arrivee: string | null;
+    trip_type: "aller" | "aller_retour" | "any";
+    prix_ttc: number;
+    active: boolean;
+  };
+  const [customRules, setCustomRules] = useState<CustomRule[]>([]);
+  useEffect(() => {
+    const lookupEmail = (email || prefill?.email || "").trim().toLowerCase();
+    if (!lookupEmail) { setCustomRules([]); return; }
+    let cancelled = false;
+    supabase
+      .from("client_pricing_rules" as never)
+      .select("id, ville_depart, ville_arrivee, trip_type, prix_ttc, active")
+      .eq("active", true)
+      .eq("client_email", lookupEmail)
+      .then(({ data }) => {
+        if (!cancelled) setCustomRules((data as unknown as CustomRule[]) ?? []);
+      });
+    return () => { cancelled = true; };
+  }, [email, prefill?.email]);
+
+  const customMatch = useMemo(() => {
+    if (!customRules.length || !departure || !arrival) return null;
+    const dCity = (extractCity(departure) || departure).toLowerCase();
+    const aCity = (extractCity(arrival) || arrival).toLowerCase();
+    const wantType: CustomRule["trip_type"] = option === "aller-retour" ? "aller_retour" : "aller";
+    const candidates = customRules.filter(r => r.trip_type === wantType || r.trip_type === "any");
+    // Priorité : match exact ville→ville > match départ seul > match arrivée seul > wildcard
+    const matchScore = (r: CustomRule) => {
+      const d = (r.ville_depart ?? "").toLowerCase();
+      const a = (r.ville_arrivee ?? "").toLowerCase();
+      let s = 0;
+      if (d && dCity.includes(d)) s += 2; else if (d) return -1;
+      if (a && aCity.includes(a)) s += 2; else if (a) return -1;
+      if (r.trip_type === wantType) s += 1;
+      return s;
+    };
+    const ranked = candidates
+      .map(r => ({ r, score: matchScore(r) }))
+      .filter(x => x.score >= 0)
+      .sort((a, b) => b.score - a.score);
+    return ranked[0]?.r ?? null;
+  }, [customRules, departure, arrival, option]);
+
   const pricing = useMemo(() => {
+    // 0) Tarif personnalisé client (priorité maximale)
+    if (customMatch) {
+      const ttc = Number(customMatch.prix_ttc);
+      const ht = Math.round((ttc / 1.2) * 100) / 100;
+      return { price: ht, label: "Tarif négocié", finalPrice: ht, multiplierLabel: "", hasExtra: false };
+    }
     // Forfait local prioritaire : ne dépend pas de la distance
     if (departure && arrival) {
       const local = resolveLocalDeptTariff(departure, arrival, 0, option);
@@ -256,7 +310,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     }
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
-  }, [distance, departure, arrival, option]);
+  }, [customMatch, distance, departure, arrival, option]);
+
 
 
   const isComplete = !!(departure && arrival && vehicleType);
