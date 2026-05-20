@@ -56,17 +56,17 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
     setSelected("");
     setSearch("");
 
-    // Charger convoyeurs validés
+    // Charger tous les convoyeurs sauf refusés/suspendus
     supabase
       .from("convoyeurs")
       .select("id, prenom, nom, ville, telephone, type_convoyeur, organization_id, statut")
-      .eq("statut", "valide")
+      .not("statut", "in", "(refuse,suspendu)")
       .then(({ data }) => {
         const list = (data ?? []) as Convoyeur[];
         setConvoyeurs(list);
-        // Calculer scoring (missions actives + dispo + ville)
         computeScores(list, trip);
       });
+
 
     // Charger organisations flottes (orgs avec rôle flotte_partenaire)
     supabase
@@ -154,8 +154,18 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
 
   async function handleAssign() {
     if (!selected) return;
+    if (tab === "convoyeur") {
+      const c = convoyeurs.find((x) => x.id === selected);
+      if (c && c.statut !== "valide" && c.statut !== "actif") {
+        const ok = window.confirm(
+          `Attention : ${c.prenom} ${c.nom} n'a pas encore tous ses documents validés (statut : ${c.statut}).\n\nVoulez-vous quand même lui assigner cette mission ?`
+        );
+        if (!ok) return;
+      }
+    }
     setSubmitting(true);
     try {
+
       if (tab === "convoyeur") {
         // 1. Update source table
         if (trip.source === "trajet") {
@@ -312,11 +322,19 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
                           ) : (
                             <Badge tone="neutral">Indépendant</Badge>
                           )}
+                          {c.statut === "valide" || c.statut === "actif" ? (
+                            <Badge tone="success">Validé</Badge>
+                          ) : c.statut === "en_attente" ? (
+                            <Badge tone="warning">Docs en attente</Badge>
+                          ) : (
+                            <Badge tone="neutral">{c.statut}</Badge>
+                          )}
                           {isHot && (
                             <Badge tone="primary" icon={<Star size={10} />}>
                               Recommandé
                             </Badge>
                           )}
+
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-pro-text-soft flex-wrap">
                           {c.ville && (
