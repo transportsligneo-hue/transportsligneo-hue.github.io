@@ -340,6 +340,57 @@ function AdminMissionDetail() {
     setSavingNote(false);
   };
 
+  const generateFacture = async () => {
+    if (!attribution || !trajet || generatingFacture) return;
+    setGeneratingFacture(true);
+    try {
+      const ttc = Number(trajet.prix ?? 0);
+      const tvaTaux = 20;
+      const ht = +(ttc / (1 + tvaTaux / 100)).toFixed(2);
+      const tva = +(ttc - ht).toFixed(2);
+      const today = new Date();
+      const yy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      const numero = `F-${yy}${mm}${dd}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+      const nameParts = (trajet.client_nom ?? "").trim().split(/\s+/);
+      const prenom = nameParts.length > 1 ? nameParts[0] : "";
+      const nom = nameParts.length > 1 ? nameParts.slice(1).join(" ") : (trajet.client_nom ?? "");
+
+      const { data: inserted, error } = await supabase
+        .from("factures")
+        .insert({
+          numero,
+          attribution_id: attribution.id,
+          client_email: trajet.client_email ?? "",
+          client_nom: nom || "Client",
+          client_prenom: prenom || null,
+          type_facture: "particulier",
+          date_facture: today.toISOString().slice(0, 10),
+          date_mission: trajet.date_trajet,
+          designation: "Convoyage véhicule",
+          depart: trajet.depart,
+          arrivee: trajet.arrivee,
+          prix_ht: ht,
+          tva_taux: tvaTaux,
+          prix_tva: tva,
+          prix_ttc: ttc,
+          statut: "emise",
+          mode_paiement: "Carte bancaire",
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      setLinkedFactureId(inserted.id);
+      toast.success("Facture créée", { description: `Numéro ${numero}` });
+    } catch (e) {
+      toast.error("Création impossible", { description: (e as Error).message });
+    } finally {
+      setGeneratingFacture(false);
+    }
+  };
+
   // Signature = dernière photo "signature"
   const signaturePhoto = useMemo(() => {
     for (const insp of inspections) {
@@ -479,6 +530,22 @@ function AdminMissionDetail() {
             >
               Rapport complet
             </Button>
+            {linkedFactureId ? (
+              <Link
+                to="/admin/factures"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+              >
+                <Receipt size={13} /> Facture émise
+              </Link>
+            ) : (
+              <Button
+                icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                onClick={generateFacture}
+                disabled={generatingFacture || !trajet?.prix}
+              >
+                Générer facture
+              </Button>
+            )}
           </div>
         </div>
       </Card>
