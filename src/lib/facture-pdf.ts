@@ -1,6 +1,8 @@
 import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import signatureGo from "@/assets/signature-go.png";
+
 
 export interface FactureData {
   numero: string;
@@ -178,6 +180,8 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
+  const signatureData = await loadImageAsDataUrl(signatureGo);
+
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
   const tvaTaux = f.tva_taux ?? 20;
@@ -400,10 +404,15 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text("Signature", pageW - 18, sigBaseY + 5, { align: "right" });
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(16);
-  doc.setTextColor(...NAVY);
-  doc.text("G.O", pageW - 18, sigBaseY + 14, { align: "right" });
+  if (signatureData) {
+    try { doc.addImage(signatureData, "PNG", pageW - 58, sigBaseY + 6, 40, 14); } catch {}
+  } else {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(16);
+    doc.setTextColor(...NAVY);
+    doc.text("G. Ortet", pageW - 18, sigBaseY + 14, { align: "right" });
+  }
+
 
   // Coordonnees bancaires B2B
   if (isB2B) {
