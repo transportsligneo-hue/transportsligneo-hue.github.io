@@ -55,11 +55,13 @@ const offreStatutLabel: Record<string, string> = {
 };
 
 function ConvoyeurDisponibles() {
-  const { user } = useAuth();
+  const { user, convoyeurStatut } = useAuth();
+  const isValidated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<TrajetDispo[]>([]);
   const [myOffres, setMyOffres] = useState<Record<string, MyOffre>>({});
   const [loading, setLoading] = useState(true);
+
   const [openTrajetId, setOpenTrajetId] = useState<string | null>(null);
   const [contrePrix, setContrePrix] = useState<string>("");
   const [contreMessage, setContreMessage] = useState<string>("");
@@ -194,6 +196,11 @@ function ConvoyeurDisponibles() {
   };
 
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
+    if (!isValidated) {
+      alert("Vos documents doivent être validés avant d'accepter une mission.");
+      return;
+    }
+
     const prix = prixDriverEffectif(trajet);
     if (!convoyeurId || prix == null) return;
     setSubmitting(true);
@@ -232,6 +239,11 @@ function ConvoyeurDisponibles() {
   };
 
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
+    if (!isValidated) {
+      alert("Vos documents doivent être validés avant de proposer un prix.");
+      return;
+    }
+
     if (trajet.pricing_mode === "fixe") {
       alert("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
       return;
@@ -293,6 +305,17 @@ function ConvoyeurDisponibles() {
             : `${trajets.length} mission${trajets.length > 1 ? "s" : ""} ouverte${trajets.length > 1 ? "s" : ""} aux propositions.`}
         </p>
       </div>
+
+      {!isValidated && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-semibold">Validation des documents requise</p>
+          <p className="text-amber-800/90 mt-0.5">
+            Vous pourrez accepter des missions disponibles lorsque vos documents seront validés par notre équipe.
+          </p>
+        </div>
+      )}
+
+
 
       {trajets.length === 0 ? (
         <div className="bg-white border border-pro-border rounded-xl p-10 text-center">
@@ -399,8 +422,9 @@ function ConvoyeurDisponibles() {
                               {prixAcc != null && (
                                 <button
                                   onClick={() => accepterPrixSuggere(t)}
-                                  disabled={submitting}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
+                                  disabled={submitting || !isValidated}
+                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <CheckCircle2 size={15} />
                                   {isFixe ? `Accepter à ${prixAcc} €` : `Accepter à ${prixAcc} €`}
@@ -409,17 +433,21 @@ function ConvoyeurDisponibles() {
                               {!isFixe && (
                                 <button
                                   onClick={() => {
+                                    if (!isValidated) return;
                                     setOpenTrajetId(t.id);
                                     setContrePrix(prixAcc?.toString() ?? "");
                                     setContreMessage("");
                                   }}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition"
+                                  disabled={!isValidated}
+                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <Euro size={15} />
                                   {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
                                     ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
                                     : "Proposer un autre prix"}
                                 </button>
+
                               )}
                             </>
                           );

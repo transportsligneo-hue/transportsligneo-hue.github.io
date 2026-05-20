@@ -417,6 +417,57 @@ export type Database = {
           },
         ]
       }
+      client_pricing_rules: {
+        Row: {
+          active: boolean
+          client_email: string
+          client_user_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          prix_ht: number | null
+          prix_ttc: number
+          trip_type: string
+          updated_at: string
+          ville_arrivee: string | null
+          ville_depart: string | null
+          zone_label: string | null
+        }
+        Insert: {
+          active?: boolean
+          client_email: string
+          client_user_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          prix_ht?: number | null
+          prix_ttc: number
+          trip_type?: string
+          updated_at?: string
+          ville_arrivee?: string | null
+          ville_depart?: string | null
+          zone_label?: string | null
+        }
+        Update: {
+          active?: boolean
+          client_email?: string
+          client_user_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          prix_ht?: number | null
+          prix_ttc?: number
+          trip_type?: string
+          updated_at?: string
+          ville_arrivee?: string | null
+          ville_depart?: string | null
+          zone_label?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           contact_email: string

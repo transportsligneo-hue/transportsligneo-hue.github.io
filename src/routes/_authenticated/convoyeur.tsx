@@ -59,28 +59,18 @@ function ConvoyeurLayout() {
     );
   }
 
-  // Convoyeur pas encore validé : affiche l'écran d'attente
-  if (role === "convoyeur" && convoyeurStatut !== "valide" && convoyeurStatut !== "actif") {
+  // Convoyeur refusé / suspendu : on bloque totalement
+  if (role === "convoyeur" && (convoyeurStatut === "refuse" || convoyeurStatut === "suspendu")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg px-4">
         <div className="text-center space-y-4 max-w-md bg-white rounded-xl border border-pro-border p-8 shadow-sm">
           <h1 className="font-semibold text-lg text-pro-text">
-            {convoyeurStatut === "en_attente"
-              ? "Compte en attente de validation"
-              : convoyeurStatut === "refuse"
-              ? "Compte refusé"
-              : convoyeurStatut === "suspendu"
-              ? "Compte suspendu"
-              : "Validation requise"}
+            {convoyeurStatut === "refuse" ? "Compte refusé" : "Compte suspendu"}
           </h1>
           <p className="text-pro-text-soft text-sm">
-            {convoyeurStatut === "en_attente"
-              ? "Votre inscription est en cours de validation par notre équipe. Vous recevrez un email dès qu'elle sera approuvée."
-              : convoyeurStatut === "refuse"
+            {convoyeurStatut === "refuse"
               ? "Votre candidature n'a pas été retenue. Contactez-nous pour plus d'informations."
-              : convoyeurStatut === "suspendu"
-              ? "Votre compte est temporairement suspendu. Contactez notre équipe."
-              : "Veuillez patienter pendant la finalisation de votre dossier."}
+              : "Votre compte est temporairement suspendu. Contactez notre équipe."}
           </p>
           <div className="flex flex-col gap-2 items-center pt-2">
             <button onClick={() => logout()} className="text-sm text-red-600 hover:underline">Se déconnecter</button>
@@ -91,9 +81,23 @@ function ConvoyeurLayout() {
     );
   }
 
+  const isPending = role === "convoyeur" && convoyeurStatut === "en_attente";
+
   return (
     <ConvoyeurSidebar items={navItems}>
+      {isPending && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex items-start gap-3">
+          <span className="text-amber-600 text-lg leading-none">⏳</span>
+          <div>
+            <p className="font-semibold">Votre compte est en attente de validation.</p>
+            <p className="text-amber-800/90 mt-0.5">
+              Vous pouvez déposer vos documents dès maintenant. Vous pourrez accepter des missions disponibles une fois vos documents validés par notre équipe.
+            </p>
+          </div>
+        </div>
+      )}
       <Outlet />
     </ConvoyeurSidebar>
   );
 }
+
