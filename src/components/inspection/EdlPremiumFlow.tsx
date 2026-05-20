@@ -1309,6 +1309,16 @@ export function EdlPremiumFlow({
           </div>
         </div>
       )}
+
+      {openScanner && (
+        <DocumentScanner
+          onCancel={() => setOpenScanner(false)}
+          onScanned={async (file) => {
+            setOpenScanner(false);
+            await processPhotoFile(file);
+          }}
+        />
+      )}
     </div>
   );
 
