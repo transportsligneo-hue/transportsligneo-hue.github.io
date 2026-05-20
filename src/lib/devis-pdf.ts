@@ -396,13 +396,17 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.setTextColor(...MUTED);
   doc.text("Signature", pageW - 18, sigBaseY + 5, { align: "right" });
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", pageW - 58, sigBaseY + 6, 40, 14); } catch {}
-  } else {
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(16);
-    doc.setTextColor(...NAVY);
-    doc.text("G. Ortet", pageW - 18, sigBaseY + 14, { align: "right" });
+    try { doc.addImage(signatureData, "PNG", pageW - 52, sigBaseY + 4, 34, 18); } catch {}
   }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...NAVY);
+  doc.text("Olivier G.", pageW - 18, sigBaseY + 24, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
+
 
 
   // Société block + footer (placé juste au-dessus du footer pour éviter tout chevauchement)
