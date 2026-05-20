@@ -1163,6 +1163,7 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
+              onRetryUpload={retryUpload}
             />
           )}
 
@@ -1172,6 +1173,7 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
+              onRetryUpload={retryUpload}
             />
           )}
 
