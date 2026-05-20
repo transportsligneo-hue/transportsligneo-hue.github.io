@@ -79,7 +79,24 @@ function estimateDuration(distance: number): string {
   return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`;
 }
 
-export default function DevisGenerator() {
+export interface DevisGeneratorPrefill {
+  nom?: string;
+  prenom?: string;
+  email?: string;
+  telephone?: string;
+  societe?: string;
+}
+
+export interface DevisGeneratorProps {
+  /** Prefill contact fields (used when user is logged in). */
+  prefill?: DevisGeneratorPrefill;
+  /** Skip the account creation block (used inside authenticated dashboards). */
+  hideAccountStep?: boolean;
+  /** Where the "Mon espace client" CTA points after submission. */
+  successRedirect?: string;
+}
+
+export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login" }: DevisGeneratorProps = {}) {
   // --- core trajet ---
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
@@ -87,6 +104,7 @@ export default function DevisGenerator() {
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [option, setOption] = useState<"aller-simple" | "aller-retour" | "express">("aller-simple");
+
 
   // --- Restitution (uniquement pour Aller-retour) ---
   const [sameDestination, setSameDestination] = useState(true);
@@ -175,13 +193,24 @@ export default function DevisGenerator() {
     }
   }
 
-  // --- coordonnées ---
-  const [nom, setNom] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [email, setEmail] = useState("");
-  const [societe, setSociete] = useState("");
+  // --- coordonnées (préremplies si l'utilisateur est connecté) ---
+  const [nom, setNom] = useState(prefill?.nom ?? "");
+  const [prenom, setPrenom] = useState(prefill?.prenom ?? "");
+  const [telephone, setTelephone] = useState(prefill?.telephone ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [societe, setSociete] = useState(prefill?.societe ?? "");
   const [comment, setComment] = useState("");
+
+  // Met à jour les champs quand le prefill arrive après le 1er render (chargement profil)
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.nom !== undefined) setNom((v) => v || prefill.nom!);
+    if (prefill.prenom !== undefined) setPrenom((v) => v || prefill.prenom!);
+    if (prefill.email !== undefined) setEmail((v) => v || prefill.email!);
+    if (prefill.telephone !== undefined) setTelephone((v) => v || prefill.telephone!);
+    if (prefill.societe !== undefined) setSociete((v) => v || prefill.societe!);
+  }, [prefill?.nom, prefill?.prenom, prefill?.email, prefill?.telephone, prefill?.societe]);
+
 
   // --- compte client ---
   const [password, setPassword] = useState("");
@@ -242,10 +271,12 @@ export default function DevisGenerator() {
   async function handleSubmit() {
     if (!pricing || distance == null) return;
     // CGU requise dans tous les cas
-    if (!cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
-    // Création de compte optionnelle : seulement si un mot de passe est saisi
-    const wantsAccount = password.length > 0;
+    // CGU requise UNIQUEMENT pour les visiteurs non connectés (création de compte possible)
+    if (!hideAccountStep && !cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
+    // Création de compte optionnelle : seulement si le bloc compte est visible ET un mot de passe est saisi
+    const wantsAccount = !hideAccountStep && password.length > 0;
     if (wantsAccount && password.length < 8) {
+
       setAccountError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
@@ -888,54 +919,57 @@ export default function DevisGenerator() {
                     </div>
                   </div>
 
-                  {/* Bloc compte client */}
-                  <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
-                        <Lock size={14} className="text-[#5fb6ff]" />
+                  {/* Bloc compte client — masqué dans les dashboards (utilisateur déjà connecté) */}
+                  {!hideAccountStep && (
+                    <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
+                          <Lock size={14} className="text-[#5fb6ff]" />
+                        </div>
+                        <div>
+                          <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
+                          <p className="text-cream/55 text-xs mt-1 leading-relaxed">
+                            Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
+                            dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
+                          </p>
+                        </div>
                       </div>
                       <div>
-                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
-                        <p className="text-cream/55 text-xs mt-1 leading-relaxed">
-                          Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
-                          dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
-                        </p>
+                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
+                          <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
+                        </label>
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          className={inputCard}
+                          placeholder="Laisser vide ou minimum 8 caractères"
+                          minLength={8}
+                        />
                       </div>
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
-                        <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
+                      <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
+                        <input
+                          type="checkbox"
+                          checked={cguAccepted}
+                          onChange={e => setCguAccepted(e.target.checked)}
+                          className="accent-[#5fb6ff] mt-0.5"
+                        />
+                        <span>
+                          J'accepte les{" "}
+                          <Link to="/cgv" target="_blank" className="text-[#5fb6ff] hover:underline">CGV</Link>
+                          {" "}et la{" "}
+                          <Link to="/confidentialite" target="_blank" className="text-[#5fb6ff] hover:underline">politique de confidentialité</Link>
+                          {" "}de Transports Ligneo, et la création d'un compte client à mon nom.
+                        </span>
                       </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className={inputCard}
-                        placeholder="Laisser vide ou minimum 8 caractères"
-                        minLength={8}
-                      />
+                      <p className="text-[10px] text-cream/40 leading-relaxed">
+                        Si vous avez déjà un compte avec cette adresse, votre devis y sera rattaché automatiquement.
+                      </p>
                     </div>
-                    <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
-                      <input
-                        type="checkbox"
-                        checked={cguAccepted}
-                        onChange={e => setCguAccepted(e.target.checked)}
-                        className="accent-[#5fb6ff] mt-0.5"
-                      />
-                      <span>
-                        J'accepte les{" "}
-                        <Link to="/cgv" target="_blank" className="text-[#5fb6ff] hover:underline">CGV</Link>
-                        {" "}et la{" "}
-                        <Link to="/confidentialite" target="_blank" className="text-[#5fb6ff] hover:underline">politique de confidentialité</Link>
-                        {" "}de Transports Ligneo, et la création d'un compte client à mon nom.
-                      </span>
-                    </label>
-                    <p className="text-[10px] text-cream/40 leading-relaxed">
-                      Si vous avez déjà un compte avec cette adresse, votre devis y sera rattaché automatiquement.
-                    </p>
-                  </div>
+                  )}
                 </div>
               )}
+
 
               {/* STEP 4 — Récap */}
               {step === 4 && (
@@ -984,7 +1018,7 @@ export default function DevisGenerator() {
                   disabled={
                     (step === 1 && (!departure || !arrival)) ||
                     (step === 2 && !vehicleType) ||
-                    (step === 3 && (!nom || !prenom || !email || !telephone || (password.length > 0 && password.length < 8) || !cguAccepted))
+                    (step === 3 && (!nom || !prenom || !email || !telephone || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted)))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
@@ -1042,11 +1076,13 @@ export default function DevisGenerator() {
             </div>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link
-                to="/login"
+              <a
+                href={successRedirect}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110">
-                <User size={13} /> Mon espace client
-              </Link>
+                <User size={13} /> {hideAccountStep ? "Retour à mon espace" : "Mon espace client"}
+              </a>
+
+
               {savedDevis && (
                 <button onClick={handleDownloadPdf}
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">

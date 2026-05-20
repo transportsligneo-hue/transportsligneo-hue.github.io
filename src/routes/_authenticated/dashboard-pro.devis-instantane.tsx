@@ -4,11 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import DevisGenerator, { type DevisGeneratorPrefill } from "@/components/DevisGenerator";
 
-export const Route = createFileRoute("/_authenticated/dashboard-client/nouvelle-reservation")({
-  component: NouvelleReservation,
+export const Route = createFileRoute("/_authenticated/dashboard-pro/devis-instantane")({
+  component: ProDevisInstantane,
 });
 
-function NouvelleReservation() {
+function ProDevisInstantane() {
   const { user } = useAuth();
   const [prefill, setPrefill] = useState<DevisGeneratorPrefill>({});
 
@@ -34,18 +34,18 @@ function NouvelleReservation() {
   }, [user]);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl space-y-6">
       <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Devis instantané</h1>
-        <p className="text-cream/50 text-sm mt-1">
-          Estimateur premium — vos coordonnées sont déjà renseignées.
+        <h1 className="text-2xl font-semibold text-pro-text">Devis instantané</h1>
+        <p className="text-pro-muted text-sm mt-0.5">
+          Estimateur premium — vos coordonnées société sont déjà renseignées.
         </p>
       </div>
-      <div className="card-premium rounded p-6 md:p-8">
+      <div className="bg-white rounded-xl border border-pro-border p-6 md:p-8">
         <DevisGenerator
           prefill={prefill}
           hideAccountStep
-          successRedirect="/dashboard-client/devis"
+          successRedirect="/dashboard-pro/missions"
         />
       </div>
     </div>

@@ -15,7 +15,8 @@ function ProNouvelleDemande() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
-          to="/reserver"
+          to="/dashboard-pro/devis-instantane"
+
           className="group bg-white rounded-xl border border-pro-border hover:border-pro-accent hover:shadow-md transition-all p-6"
         >
           <div className="w-11 h-11 rounded-lg bg-pro-accent/10 text-pro-accent flex items-center justify-center mb-4">

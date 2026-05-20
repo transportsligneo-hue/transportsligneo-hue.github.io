@@ -65,6 +65,7 @@ import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
+import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
 import { Route as AuthenticatedDashboardClientMissionsRouteImport } from './routes/_authenticated/dashboard-client.missions'
@@ -408,6 +409,12 @@ const AuthenticatedDashboardProDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
+const AuthenticatedDashboardProDevisInstantaneRoute =
+  AuthenticatedDashboardProDevisInstantaneRouteImport.update({
+    id: '/devis-instantane',
+    path: '/devis-instantane',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardClientProfilRoute =
   AuthenticatedDashboardClientProfilRouteImport.update({
     id: '/profil',
@@ -723,6 +730,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -817,6 +825,7 @@ export interface FileRoutesByTo {
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -919,6 +928,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
+  '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRoute
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1021,6 +1031,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
+    | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
@@ -1115,6 +1126,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
+    | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
@@ -1216,6 +1228,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/missions'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
+    | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
@@ -1687,6 +1700,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/dashboard-pro/documents'
       preLoaderRoute: typeof AuthenticatedDashboardProDocumentsRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/devis-instantane': {
+      id: '/_authenticated/dashboard-pro/devis-instantane'
+      path: '/devis-instantane'
+      fullPath: '/dashboard-pro/devis-instantane'
+      preLoaderRoute: typeof AuthenticatedDashboardProDevisInstantaneRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-client/profil': {
@@ -2177,6 +2197,7 @@ const AuthenticatedDashboardClientRouteWithChildren =
   )
 
 interface AuthenticatedDashboardProRouteChildren {
+  AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRoute
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -2186,6 +2207,8 @@ interface AuthenticatedDashboardProRouteChildren {
 
 const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChildren =
   {
+    AuthenticatedDashboardProDevisInstantaneRoute:
+      AuthenticatedDashboardProDevisInstantaneRoute,
     AuthenticatedDashboardProDocumentsRoute:
       AuthenticatedDashboardProDocumentsRoute,
     AuthenticatedDashboardProMissionsRoute:
