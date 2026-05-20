@@ -84,6 +84,8 @@ interface Props {
 export function MissionCockpit({
   attributionId,
   userId,
+  driverName,
+  clientName,
   currentEtape,
   statut,
   inspectionDepartDone,
@@ -99,12 +101,30 @@ export function MissionCockpit({
   const [openSelfie, setOpenSelfie] = useState(false);
   const [openIncident, setOpenIncident] = useState(false);
   const [openSignatureArrivee, setOpenSignatureArrivee] = useState(false);
+  const [signaturesArriveeDone, setSignaturesArriveeDone] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
   const [selfieJustDone, setSelfieJustDone] = useState(() => hasLocalSelfieDone(attributionId));
   const lastAutoOpenedKeyRef = useRef<ActionKind | null>(null);
   const forceOpenConsumedRef = useRef(false);
+
+  // Vérifie en BDD si les 2 signatures d'arrivée sont déjà présentes
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("mission_signatures" as never)
+        .select("kind")
+        .eq("attribution_id" as never, attributionId as never);
+      if (cancelled || !data) return;
+      const kinds = new Set((data as { kind: string }[]).map((r) => r.kind));
+      if (kinds.has("driver_end") && kinds.has("client_end")) {
+        setSignaturesArriveeDone(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
@@ -169,19 +189,21 @@ export function MissionCockpit({
     }
     // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
-    // 5. Sur place livraison → EDL arrivée → selfie final → envoi admin
+    // 5. Sur place livraison → EDL arrivée → signatures → selfie final → envoi admin
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!signaturesArriveeDone) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!signaturesArriveeDone) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
+  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, signaturesArriveeDone, statut]);
 
   useEffect(() => {
     if (!forceOpenSelfie) {
@@ -278,10 +300,12 @@ export function MissionCockpit({
         case "arrive_livraison":
           await persistEtape("arrive_destination");
           await Promise.resolve(onUpdated());
-          // Ouvre AUTOMATIQUEMENT l'inspection d'arrivée — pas de clic intermédiaire
-          if (!inspectionArriveeDone) {
-            onStartInspection("arrivee");
-          }
+          // Pas d'ouverture automatique : le conducteur déclenche l'EDL d'arrivée
+          // manuellement via le bouton dédié pour éviter les doublons / ouvertures
+          // intempestives.
+          break;
+        case "signature_arrivee":
+          setOpenSignatureArrivee(true);
           break;
         case "cloturer":
           // Garde-fou final : tous les jalons doivent être présents
@@ -298,6 +322,11 @@ export function MissionCockpit({
           if (!inspectionArriveeDone) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
+            break;
+          }
+          if (!signaturesArriveeDone) {
+            toast.error("Signatures d'arrivée manquantes");
+            setOpenSignatureArrivee(true);
             break;
           }
           if (!finalSelfieOK) {
@@ -424,6 +453,20 @@ export function MissionCockpit({
           onReported={async () => {
             await persistEtape("incident", "Incident signalé");
             onUpdated();
+          }}
+        />
+      )}
+
+      {openSignatureArrivee && (
+        <ArriveeSignatureSheet
+          attributionId={attributionId}
+          driverName={driverName}
+          defaultClientName={clientName}
+          onClose={() => setOpenSignatureArrivee(false)}
+          onComplete={async () => {
+            setSignaturesArriveeDone(true);
+            setOpenSignatureArrivee(false);
+            try { await Promise.resolve(onUpdated()); } catch { /* ignore */ }
           }}
         />
       )}
