@@ -103,7 +103,7 @@ function MissionDetail() {
       if (!full) throw new Error("Facture introuvable");
       const blob = await generateFacturePdf({
         numero: full.numero,
-        type_facture: full.type_facture,
+        type_facture: (full.type_facture as "particulier" | "b2b") ?? "particulier",
         date_facture: full.date_facture ?? undefined,
         date_paiement: full.date_paiement,
         statut: full.statut,
