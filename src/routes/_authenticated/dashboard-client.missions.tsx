@@ -43,6 +43,7 @@ const STATUS_FILTERS = [
 function ClientMissions() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
@@ -51,20 +52,60 @@ function ClientMissions() {
     let cancelled = false;
     setLoading(true);
     const email = user.email ?? "";
+    const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
+
     let q = supabase
       .from("missions")
       .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation")
-      .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
+      .or(orFilter)
       .order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("statut", filter);
-    q.then(({ data }) => {
-      if (!cancelled) {
-        setMissions((data ?? []) as Mission[]);
-        setLoading(false);
-      }
+
+    // Demandes non encore converties (devis + demandes_convoyage sans mission liée)
+    const devisPending = supabase
+      .from("devis")
+      .select("id, numero, depart, arrivee, date_souhaitee, created_at, statut, mission_id")
+      .or(orFilter)
+      .is("mission_id", null)
+      .not("statut", "in", "(refuse,convertit)")
+      .order("created_at", { ascending: false });
+
+    const demandePending = supabase
+      .from("demandes_convoyage")
+      .select("id, depart, arrivee, date_souhaitee, created_at, statut")
+      .or(orFilter)
+      .not("statut", "in", "(refusee,annulee,convertie)")
+      .order("created_at", { ascending: false });
+
+    Promise.all([q, devisPending, demandePending]).then(([mRes, dRes, demRes]) => {
+      if (cancelled) return;
+      setMissions((mRes.data ?? []) as Mission[]);
+      const pendingList: PendingItem[] = [
+        ...((dRes.data ?? []) as Array<{ id: string; numero: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string }>).map(d => ({
+          id: `devis-${d.id}`,
+          numero: d.numero,
+          depart: d.depart,
+          arrivee: d.arrivee,
+          date_souhaitee: d.date_souhaitee,
+          created_at: d.created_at,
+          source: "devis" as const,
+        })),
+        ...((demRes.data ?? []) as Array<{ id: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string }>).map(d => ({
+          id: `dem-${d.id}`,
+          numero: `DEM-${d.id.slice(0, 6).toUpperCase()}`,
+          depart: d.depart,
+          arrivee: d.arrivee,
+          date_souhaitee: d.date_souhaitee,
+          created_at: d.created_at,
+          source: "demande" as const,
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setPending(pendingList);
+      setLoading(false);
     });
     return () => { cancelled = true; };
   }, [user, filter]);
+
 
   return (
     <div className="space-y-6">
