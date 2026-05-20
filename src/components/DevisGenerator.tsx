@@ -193,13 +193,24 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     }
   }
 
-  // --- coordonnées ---
-  const [nom, setNom] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [email, setEmail] = useState("");
-  const [societe, setSociete] = useState("");
+  // --- coordonnées (préremplies si l'utilisateur est connecté) ---
+  const [nom, setNom] = useState(prefill?.nom ?? "");
+  const [prenom, setPrenom] = useState(prefill?.prenom ?? "");
+  const [telephone, setTelephone] = useState(prefill?.telephone ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [societe, setSociete] = useState(prefill?.societe ?? "");
   const [comment, setComment] = useState("");
+
+  // Met à jour les champs quand le prefill arrive après le 1er render (chargement profil)
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.nom !== undefined) setNom((v) => v || prefill.nom!);
+    if (prefill.prenom !== undefined) setPrenom((v) => v || prefill.prenom!);
+    if (prefill.email !== undefined) setEmail((v) => v || prefill.email!);
+    if (prefill.telephone !== undefined) setTelephone((v) => v || prefill.telephone!);
+    if (prefill.societe !== undefined) setSociete((v) => v || prefill.societe!);
+  }, [prefill?.nom, prefill?.prenom, prefill?.email, prefill?.telephone, prefill?.societe]);
+
 
   // --- compte client ---
   const [password, setPassword] = useState("");
