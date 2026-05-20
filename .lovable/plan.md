@@ -1,66 +1,93 @@
-
 ## Objectif
 
-Réparer l'estimateur (espace client / partenaire) et l'affichage des estimations dans le dashboard admin **sans rien casser** (devis, missions, comptes, dashboard actuel).
+Améliorer l'espace client (devis, factures, missions, suivi) et le PDF, sans casser l'estimateur, les dashboards, les devis/factures existants, ni les missions. Design conservé.
 
-## Diagnostic
+---
 
-J'ai vérifié les 5 dernières demandes en base :
+## 1. Estimateur unifié dans le dashboard client
 
-```
-depart       arrivee      prix_estime  distance_km
-Tours        Angers       (null)       (null)
-Strasbourg   Châteauroux  (null)       (null)
-...
-```
+Le bouton "Devis instantané" du dashboard client (`dashboard-client.nouvelle-reservation.tsx`) utilise déjà `TunnelReservation`, mais l'expérience diverge de l'estimateur principal (`DevisGenerator`) et redemande des infos déjà connues.
 
-→ Toutes les anciennes demandes ont `prix_estime` et `distance_km` **NULL**, même si le devis affiche 132 €. L'admin retombe alors sur le calcul auto (`quoteFromDemande`) qui échoue dès que l'adresse vient de Google Places (rue + CP + ville → la regex `extractCity` ne matche pas), d'où le message "Distance non calculable, devis manuel requis".
+- Remplacer `TunnelReservation` par `DevisGenerator` dans `dashboard-client/nouvelle-reservation` ET `dashboard-pro/nouvelle-demande` (mode "Devis instantané"), pour garantir : même UI, mêmes options (Livraison simple / Livraison + restitution / Express), Google Places, plaques, mêmes tarifs et règles.
+- Ajouter à `DevisGenerator` une prop `prefill?: { nom; prenom; email; telephone; societe? }` + `hideAccountStep?: boolean`.
+- Côté route dashboard : charger `profiles` + `organizations` du user connecté et passer les valeurs en `prefill`. Sauter l'étape "création de compte" et la double saisie email/tel.
+- Conserver tout le moteur de prix existant. Aucun changement à `reservation-pricing.ts` ni `pricing-engine.ts`.
 
-Le correctif appliqué dans le tour précédent insère bien `prix_estime`/`distance_km` pour les **nouvelles** demandes, mais :
-- aucun fallback pour les demandes historiques (le prix est seulement dans la string `options`),
-- libellé "Aller-retour" partout au lieu de "Livraison + restitution",
-- pas de label clair sur le champ "Heure" (heure de livraison souhaitée).
+## 2. Dashboard client — sections et lisibilité
 
-## Changements
+`dashboard-client.devis.tsx` mélange devis et factures. Cette page liste actuellement les `devis` uniquement, mais le libellé sidebar/menu est "Factures & devis".
 
-### 1. Admin — affichage robuste du prix (`src/routes/_authenticated/admin.demandes.tsx`)
+- Renommer la page en `dashboard-client.factures-devis.tsx` (route + lien sidebar) et y afficher **deux onglets** : "Mes devis" / "Mes factures".
+  - Devis : badge doré `DEVIS`, montant TTC, bouton "Télécharger PDF" (existant), bouton "Réserver" si statut accepté.
+  - Factures : badge `FACTURE` (couleur distincte), montant TTC, statut paiement, bouton "Télécharger PDF" (utilise `facture-pdf.ts` déjà présent ou `pdf_url`).
+- `dashboard-client.missions.tsx` : retirer la colonne prix, ne garder que `numero`, trajet, véhicule + plaque, date, statut, lien suivi.
+- `dashboard-client.index.tsx` : nettoyer la vue d'ensemble (sections "Mes demandes en cours", "Mes devis", "Mes missions", "Mes factures"), supprimer toute section morte.
 
-- Ajouter une fonction `extractFromOptions(options)` qui parse `"Estimation: 132€ | Distance: 110km"` pour récupérer prix et km en fallback quand `prix_estime`/`distance_km` sont `NULL`.
-- Ordre de priorité dans `PriceBlock` : `demande.prix_estime` → valeur extraite de `options` → `quoteFromDemande`.
-- Idem pour la colonne "TTC" du tableau et l'affichage de la distance dans le drawer.
+## 3. Page détail mission client (suivi premium)
 
-### 2. Backfill ponctuel des demandes existantes
+`dashboard-client.missions.$missionId.tsx` existe déjà mais reste basique.
 
-Exécuter une migration data unique qui parse `options` et remplit `prix_estime` / `distance_km` pour les lignes où ils sont `NULL` mais où la string contient `Estimation:` / `Distance:`. Aucun changement de schéma, aucun impact sur les nouvelles demandes.
+- Ajouter au-dessus du tracker : timeline d'étapes (Acceptée → Prise en charge → En cours → Livrée → Restitution si applicable) alimentée par `attributions` / `mission_gates` (déjà utilisés par `MissionLiveTracker`).
+- Bloc Véhicule : marque/modèle/plaque/VIN/carburant.
+- Bloc Restitution (si `type_trajet` contient retour) : 2ᵉ plaque + adresse retour.
+- Bloc Documents : devis lié, facture liée (si émise), documents mission (`MissionDocuments`).
+- Aucune info admin sensible (prix de revient, marges, contact chauffeur privé…). Conserver le prix TTC payé par le client.
+- Responsive mobile (grilles 1 col < 640px, déjà la base).
 
-### 3. Estimateur desktop (`src/components/DevisGenerator.tsx`)
+## 4. Facturation admin
 
-- Renommer le bouton et tous les libellés visibles :
-  - "Aller-retour" → **"Livraison + restitution"** (carte de choix, sous-titre, récap, options string)
-  - Garder la valeur interne `"aller-retour"` (côté DB / pricing) pour ne rien casser.
-- Champ heure : libellé "Heure" → **"Heure de livraison souhaitée"** dans la barre principale ET dans l'étape 1.
-- Forcer la saisie de l'heure avant le passage à l'étape suivante (validation soft : message d'aide, pas de blocage dur si vide pour rester tolérant).
-- Vérifier que `heure_souhaitee` est bien passé à l'insert (déjà OK) et inclus dans le mail/PDF.
+La table `factures` existe déjà (`pdf_url`, `mission_id`, totaux, statut). À ajouter :
 
-### 4. Estimateur mobile (`src/components/mobile/MobileDevisGenerator.tsx`)
+- Dans `admin.missions.$missionId.tsx` : bouton "Générer la facture" visible quand `statut = livree/terminee` et qu'aucune facture n'est rattachée.
+- Server function `generateInvoiceFromMission(missionId)` :
+  - lit mission + client + organisation,
+  - calcule HT/TVA/TTC depuis `prix_total`,
+  - insère ligne `factures` (numéro auto `F-YYYY-NNNN`),
+  - génère le PDF via `facture-pdf.ts`, l'upload dans le bucket `factures` (créer si absent), stocke `pdf_url`,
+  - envoie l'email "Votre facture" au client (template existant ou nouveau court template).
+- Lien depuis la mission admin vers la facture créée. RLS : client voit ses factures via `client_email = auth.email()` ou `mission.user_id = auth.uid()`.
 
-- Mêmes renommages visibles "Aller-retour" → "Livraison + restitution" (bouton "A/R" devient "Restitution").
-- Même libellé "Heure de livraison souhaitée".
+## 5. PDF Devis & Facture — finition premium
 
-### 5. Restitution (déjà en place, vérification)
+`devis-pdf.ts` est déjà très abouti. Améliorations ciblées :
 
-- Section "Restitution" (départ/arrivée retour + 2ᵉ plaque + VIN) déjà présente sur desktop. Vérifier qu'elle apparaît bien dès qu'on choisit "Livraison + restitution" et que la 2ᵉ plaque arrive dans `immatriculation_retour` en base + dans le devis admin.
+- **Signature "GO"** : remplacer le texte italique `G.O` par une vraie signature manuscrite SVG/PNG embarquée (asset `src/assets/signature-go.png`), gardée petite et nette.
+- **Icônes contact** : remplacer les lettres `@ T W` du header par des petits glyphes vectoriels propres (dessinés en jsPDF : enveloppe, téléphone, globe, pin).
+- **Logo client** : déjà géré (`logo_url`). S'assurer que `facture-pdf.ts` accepte la même propriété et l'affiche à côté de la société.
+- **Conditions de validité** : encadré doré dédié sous les totaux.
+- **Détails prestation** : ajouter plaque + VIN si présent, prestation (Livraison simple / + restitution / Express), heure de livraison souhaitée.
+- Appliquer la même refonte à `facture-pdf.ts` (mêmes header/footer/blocs) pour cohérence visuelle.
 
-## Hors scope (pour ne rien casser)
+## 6. Garde-fous (ne rien casser)
 
-- Pas de refonte de l'estimateur, des cartes prix ou du tunnel.
-- Pas de modif des règles tarifaires (`reservation-pricing.ts`, `pricing-departments.ts`).
-- Pas de modif du système de devis PDF, des missions, des comptes ni des RLS.
-- Pas de modif de `TunnelReservation` (chemin séparé non concerné par la plainte).
+- Aucun changement à `pricing-engine.ts`, `reservation-pricing.ts`, `pricing-departments.ts`, `pricing-resolver.ts`.
+- `TunnelReservation` reste en place pour la route publique `/reserver` (non touchée).
+- Aucune migration destructive : seulement `CREATE BUCKET IF NOT EXISTS factures` + politiques RLS de lecture client.
+- Les anciens devis/factures déjà émis restent lisibles (pdf_url conservé).
 
-## Vérifications post-changement
+---
 
-- Créer une nouvelle estimation (adresse Google Places type "12 rue X, 37000 Tours") → prix visible immédiatement dans le bandeau live.
-- Vérifier en base : `prix_estime`, `distance_km`, `heure_souhaitee`, `immatriculation_retour` remplis.
-- Dans `/admin/demandes` : prix TTC affiché dans la colonne et dans le drawer pour les nouvelles ET les anciennes demandes (via backfill).
-- Choisir "Livraison + restitution" → bloc restitution s'affiche, 2 plaques séparées, infos retour visibles dans le drawer admin.
+## Détails techniques
+
+**Fichiers modifiés**
+- `src/components/DevisGenerator.tsx` — props `prefill`, `hideAccountStep`
+- `src/routes/_authenticated/dashboard-client.nouvelle-reservation.tsx` — utilise `DevisGenerator` préfillé
+- `src/routes/_authenticated/dashboard-pro.nouvelle-demande.tsx` — idem en mode instantané
+- `src/routes/_authenticated/dashboard-client.devis.tsx` → renommer en `dashboard-client.factures-devis.tsx`, onglets devis/factures
+- `src/routes/_authenticated/dashboard-client.missions.tsx` — retirer prix
+- `src/routes/_authenticated/dashboard-client.missions.$missionId.tsx` — timeline, restitution, documents, facture
+- `src/routes/_authenticated/admin.missions.$missionId.tsx` — bouton "Générer facture"
+- `src/lib/facture-pdf.ts` — refonte cohérente avec `devis-pdf.ts`, support logo client
+- `src/lib/devis-pdf.ts` — signature image, icônes vectorielles, encadré validité, détails étendus
+- `src/lib/invoice.functions.ts` (nouveau) — `generateInvoiceFromMission`
+- `src/components/dashboard/DashboardSidebar.tsx` — libellé "Factures & devis"
+- `src/assets/signature-go.png` (nouveau)
+
+**Migration**
+- `storage.buckets` : `factures` (privé) + policies (admin write, client read si email/mission match)
+- `factures` table : déjà ok, juste s'assurer que RLS SELECT autorise le client propriétaire
+
+**QA**
+- Créer une demande depuis dashboard client → estimateur identique au site, profil préfillé, devis en base avec `prix_estime` et `distance_km`.
+- Générer facture depuis mission terminée → PDF téléchargeable côté client, email reçu.
+- Anciennes missions/devis : toujours ouvrables.
