@@ -1,46 +1,74 @@
-# Finalisation workflow conducteur
+# Dashboard Client — corrections d'affichage et suivi
 
-Suite des travaux déjà entamés (séquence EDL réordonnée, `ArriveeSignatureSheet` créé, logique EV branchée). Reste à finaliser l'intégration côté cockpit et l'outil admin.
+Périmètre strictement limité aux fichiers du Dashboard Client. Aucune modification du DevisGenerator partagé, du moteur de prix, des paiements, des tables ou des triggers Cloud. Pas de migration SQL.
 
-## 1. Cockpit conducteur (`MissionCockpit.tsx`)
+## 1. Lisibilité de l'estimateur (Nouvelle réservation)
 
-- Ajouter l'étape `signature_arrivee` **entre** "Arrivé livraison" et la fin de mission, distincte de l'inspection.
-- Empêcher l'ouverture automatique de `EdlPremiumFlow` au moment du tap "Arrivé au lieu de livraison" : l'inspection devient un bouton manuel ("Démarrer état des lieux livraison").
-- Nouvelle séquence d'actions livraison :
-  1. Arrivé au lieu de livraison
-  2. État des lieux livraison (photos seulement, pas de signature)
-  3. Signatures arrivée (driver + client) via `ArriveeSignatureSheet`
-  4. Envoi admin / clôture mission
-- Anti double-clic : `disabled` + flag local `isSubmitting` sur chaque bouton d'action workflow.
+**Cause identifiée** : `src/routes/_authenticated/dashboard-client.nouvelle-reservation.tsx` enveloppe `DevisGenerator` dans `<div class="card-premium">`. Or dans `.client-shell`, `card-premium` est repeint en surface très claire (`rgba(255,255,255,0.10)`). Les blocs internes du générateur (récap prix, récap final) utilisent `bg-white/[0.03]` + `text-cream/45` qui deviennent illisibles sur ce fond clarifié — c'est le "blanc sur fond clair" signalé.
 
-## 2. Fiabilité photos EDL
+**Action** :
+- Retirer le wrapper `card-premium` dans `dashboard-client.nouvelle-reservation.tsx` et laisser le composant gérer son propre fond navy (`#0b1026/85`), comme sur le landing. Le titre `text-primary` reste au-dessus, sur le fond client-shell.
+- Ajouter une règle CSS ciblée dans `src/styles.css` (section `.client-shell`) pour forcer les sous-blocs translucides du générateur à un fond navy minimal — uniquement quand le générateur apparaît dans le shell client. Sélecteur ciblé sur l'attribut `data-devis-summary` ajouté côté route (voir étape suivante) pour ne pas toucher la version landing.
 
-- Dans `EdlPremiumFlow.tsx` : badge statut par photo (`pending` / `sent` / `error`) lu depuis l'état d'upload.
-- Bouton "Réessayer" par photo en erreur (ré-appelle l'upload sans reprendre la photo).
-- File d'attente offline simple via `localStorage` (clé `edl-queue-{missionId}`) rejouée au retour online (`window.addEventListener('online')`).
+Pas de refonte du `DevisGenerator` — uniquement le container du dashboard.
 
-## 3. Scanner documents (étape 17)
+## 2. Suivi de mission lisible et étapes détaillées
 
-- Nouveau composant `DocumentScanner.tsx` (canvas natif, détection 4 coins + recadrage manuel + correction perspective basique).
-- Branché uniquement sur les 2 derniers steps (PV livraison + Carte grise), le reste reste en capture photo standard.
+**Fichier** : `src/components/mission/MissionLiveTracker.tsx`
 
-## 4. Admin — suppression photo
+Le composant utilise un thème clair (`bg-white`, `text-slate-700/900`) qui jure visuellement avec le shell client (bleu nuit) et ne reprend pas l'identité Ligneo.
 
-- Dans `admin.missions.$missionId.tsx`, sur chaque vignette `inspection_photos` : bouton corbeille (admin/super_admin only).
-- Action : `DELETE` storage `inspection-photos` + `DELETE` ligne `inspection_photos`.
-- Confirmation modale avant suppression.
-- Le conducteur pourra ainsi reprendre une photo manquante via le flow EDL existant (slot redevient vide).
+**Action — re-skinner sans casser la logique** :
+- Conserver intacts : `useMissionRealtime`, `GpsMapView`, les états `allPoints`, `rt.statut`, `rt.etape_courante`, `rt.lastEtape`, `rt.lastGps`. Aucun changement aux requêtes Supabase.
+- Remplacer `bg-white` → `card-premium`, `text-slate-*` → `text-cream/text-cream/80`, `bg-slate-50` → `bg-navy/40`, `bg-emerald-100 text-emerald-700` → variantes `bg-emerald-500/15 text-emerald-300 border-emerald-500/30` (mêmes tokens que `StatusBadge` ailleurs).
+- **Enrichir `ETAPE_LABELS`** avec les étapes manquantes pour couvrir les libellés demandés par l'utilisateur :
+  - `prise_en_charge` → "Véhicule récupéré"
+  - `edl_depart` → "Inspection de départ"
+  - `en_route` → "Trajet en cours"
+  - `edl_arrivee` → "Inspection d'arrivée"
+  - `signature_arrivee` → "En attente de signature"
+  - `livraison` → "Arrivé au lieu de livraison"
+  - `termine` → "Mission terminée"
+- Ajouter une **mini-timeline verticale** (CSS pur, pas de framer-motion) listant les étapes du flow et marquant celles validées (basé sur l'index de l'étape courante dans `ETAPE_LABELS`). L'étape active pulse en bleu électrique.
 
-## Détails techniques
+## 3. Demandes visibles avant conversion en mission
 
-- **Fichiers modifiés** : `src/components/convoyeur/MissionCockpit.tsx`, `src/components/inspection/EdlPremiumFlow.tsx`, `src/routes/_authenticated/admin.missions.$missionId.tsx`.
-- **Fichiers créés** : `src/components/inspection/DocumentScanner.tsx`.
-- **Pas de migration DB** nécessaire (les tables `mission_signatures`, `inspection_photos` existent déjà avec les bonnes RLS).
-- **Aucune suppression** de code existant : les anciennes étapes `cote_droit`/`cote_gauche` restent en base, simplement masquées du flow actif.
+**Fichier** : `src/routes/_authenticated/dashboard-client.index.tsx`
 
-## Garanties
+Aujourd'hui la section "Mes demandes en cours" lit déjà `devis` (les demandes de devis sont bien affichées). En revanche :
+- Le bandeau « Dernière mission » disparaît si l'admin n'a pas encore créé de mission, sans message rassurant.
+- Les demandes qui passent dans `demandes_convoyage` (formulaire de contact convoyage) ne sont pas listées.
 
-- Aucune fonctionnalité existante supprimée.
-- Étape câble électrique conditionnée à `demandes_convoyage.carburant ∈ {electrique, hybride_rechargeable}`.
-- Signatures jamais déclenchées avant la fin des photos livraison.
-- Admin peut nettoyer les photos ratées sans intervention dev.
+**Action** :
+- Ajouter une requête parallèle sur `public.demandes_convoyage` filtrée par `user_id` ou `email` (RLS déjà OK : policy "Clients can read own demandes"), et fusionner ces lignes dans la section "Mes demandes" avec un badge dédié ("Demande envoyée" / "En cours de validation").
+- Mettre à jour la fonction `demandeStatusInfo` pour inclure les statuts `nouvelle`, `en_traitement` issus de `demandes_convoyage`.
+- Quand `lastMission` est `null` mais qu'au moins une demande existe, afficher un bloc rassurant : titre "Votre demande est en cours de validation" + texte "Une fois validée par notre équipe, elle apparaîtra ici comme mission en cours."
+- Ajouter une 5ᵉ carte de stats "Demandes" si non-zéro, ou enrichir la stat existante "Devis" en "Demandes & devis".
+
+## 4. Page « Mes missions » — couvrir le cas "pas encore convertie"
+
+**Fichier** : `src/routes/_authenticated/dashboard-client.missions.tsx`
+
+Ajouter sous la liste des missions un bloc **discret** listant les demandes/devis non encore convertis (mêmes données que l'index, requête sur `devis` + `demandes_convoyage` avec `mission_id IS NULL`). Chaque entrée renvoie vers `/dashboard-client/devis` (déjà la cible naturelle pour suivre les devis).
+
+Pas de modification de la table missions ni de la requête principale.
+
+## 5. Préservation
+
+- Aucune migration SQL.
+- Aucun changement aux RLS, triggers, ou edge functions.
+- Aucune modification de `DevisGenerator.tsx`, `MissionCockpit.tsx`, `EdlPremiumFlow.tsx`, du flux conducteur, des paiements Stripe ou de la génération PDF.
+- Les statuts existants restent gérés tels quels — on ajoute uniquement des libellés humains côté affichage.
+- Composants ré-utilisés : `StatusBadge`, `missionStatusKind`, `missionStatusLabel`.
+
+## Fichiers touchés
+
+```
+src/routes/_authenticated/dashboard-client.nouvelle-reservation.tsx   (wrapper + attribut data-)
+src/routes/_authenticated/dashboard-client.index.tsx                  (requête demandes_convoyage + bloc rassurant)
+src/routes/_authenticated/dashboard-client.missions.tsx               (bloc demandes en attente)
+src/components/mission/MissionLiveTracker.tsx                         (re-skin + timeline + libellés)
+src/styles.css                                                        (override ciblé .client-shell sur bloc estimateur)
+```
+
+Aucun autre fichier n'est touché.

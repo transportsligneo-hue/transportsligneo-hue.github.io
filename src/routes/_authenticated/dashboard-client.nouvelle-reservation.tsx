@@ -41,13 +41,13 @@ function NouvelleReservation() {
           Estimateur premium — vos coordonnées sont déjà renseignées.
         </p>
       </div>
-      <div className="card-premium rounded p-6 md:p-8">
-        <DevisGenerator
-          prefill={prefill}
-          hideAccountStep
-          successRedirect="/dashboard-client/devis"
-        />
-      </div>
+      {/* Pas de wrapper card-premium : le DevisGenerator a son propre fond navy
+          et le wrapping écrasait le contraste sur le shell client lumineux. */}
+      <DevisGenerator
+        prefill={prefill}
+        hideAccountStep
+        successRedirect="/dashboard-client/devis"
+      />
     </div>
   );
 }
