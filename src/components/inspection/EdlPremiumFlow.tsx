@@ -224,6 +224,7 @@ export function EdlPremiumFlow({
   );
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [openScanner, setOpenScanner] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const [online, setOnline] = useState<boolean>(
     typeof navigator === "undefined" ? true : navigator.onLine !== false
