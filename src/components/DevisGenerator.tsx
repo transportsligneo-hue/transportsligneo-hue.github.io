@@ -1076,11 +1076,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link
-                to={successRedirect}
+              <a
+                href={successRedirect}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110">
                 <User size={13} /> {hideAccountStep ? "Retour à mon espace" : "Mon espace client"}
-              </Link>
+              </a>
+
 
               {savedDevis && (
                 <button onClick={handleDownloadPdf}
