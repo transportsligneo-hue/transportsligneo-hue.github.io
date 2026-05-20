@@ -22,7 +22,9 @@ import {
   Send,
   Truck,
   ClipboardCheck,
+  Receipt,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   Card,
   Badge,
@@ -174,6 +176,8 @@ function AdminMissionDetail() {
   const [reportOpen, setReportOpen] = useState(false);
   const [adminNote, setAdminNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+  const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
+  const [generatingFacture, setGeneratingFacture] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -274,6 +278,14 @@ function AdminMissionDetail() {
       );
       setSelfies(enriched);
     }
+
+    // Check existing facture
+    const { data: existingFact } = await supabase
+      .from("factures")
+      .select("id")
+      .eq("attribution_id", missionId)
+      .maybeSingle();
+    setLinkedFactureId(existingFact?.id ?? null);
 
     setLoading(false);
   }, [missionId]);
