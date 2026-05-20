@@ -972,6 +972,48 @@ export function EdlPremiumFlow({
     }
   };
 
+  /** Réessaie l'upload du blob déjà capturé (sans demander de reprendre la photo). */
+  const retryUpload = async () => {
+    const stepId = currentStep.id;
+    const target = states[stepId];
+    if (!target?.previewUrl) {
+      // Pas de blob local : on doit reprendre la photo
+      retake();
+      return;
+    }
+    setState(stepId, { ...target, status: "uploading", error: undefined });
+    try {
+      const resp = await fetch(target.previewUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], `${stepId}.jpg`, { type: blob.type || "image/jpeg" });
+      const insId = await ensureInspection();
+      const compressed = await compressImage(file).catch(() => file);
+      const path = `${userId}/${insId}/${stepId}.jpg`;
+      await uploadWithRetry("inspection-photos", path, compressed);
+      await supabase.from("inspection_photos")
+        .delete().eq("inspection_id", insId).eq("vue_type", stepId);
+      const { error: insertErr } = await supabase.from("inspection_photos").insert({
+        inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size,
+      });
+      if (insertErr) {
+        const { error: upsertErr } = await supabase.from("inspection_photos").upsert(
+          { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
+          { onConflict: "inspection_id,vue_type" },
+        );
+        if (upsertErr) throw upsertErr;
+      }
+      setState(stepId, { status: "success", previewUrl: target.previewUrl, storagePath: path });
+      toast.success("Envoi réussi");
+    } catch (err) {
+      setState(stepId, {
+        ...target,
+        status: "error",
+        error: err instanceof Error ? err.message : "Erreur réseau",
+      });
+      toast.error("Nouvel échec d'envoi", { description: "Vérifiez votre connexion." });
+    }
+  };
+
   const deleteCurrentPhoto = async () => {
     const stepId = currentStep.id;
     const target = currentState;
@@ -1121,6 +1163,7 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
+              onRetryUpload={retryUpload}
             />
           )}
 
@@ -1130,6 +1173,7 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
+              onRetryUpload={retryUpload}
             />
           )}
 
@@ -1280,9 +1324,9 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onRetake, onDelete,
+  step, state, onCapture, onRetake, onDelete, onRetryUpload,
 }: {
-  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void;
+  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
 }) {
   const taken = Boolean(state?.previewUrl);
 
@@ -1344,13 +1388,23 @@ function PhotoOrScanArea({
 
       {/* CTA prise / reprise */}
       {!state || state.status === "idle" || state.status === "error" ? (
-        <button
-          onClick={onCapture}
-          className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
-        >
-          {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
-          {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
-        </button>
+        <div className="space-y-2">
+          {state?.status === "error" && state.previewUrl && onRetryUpload && (
+            <button
+              onClick={onRetryUpload}
+              className="edl-cta w-full h-12 flex items-center justify-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-black"
+            >
+              <RefreshCw size={16}/> Réessayer l'envoi
+            </button>
+          )}
+          <button
+            onClick={onCapture}
+            className="edl-cta w-full h-14 sm:h-16 flex items-center justify-center gap-3 text-base"
+          >
+            {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
+            {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -1380,8 +1434,8 @@ function PhotoOrScanArea({
 }
 
 function SelfieArea({
-  state, onCapture, onRetake, onDelete,
-}: { state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void }) {
+  state, onCapture, onRetake, onDelete, onRetryUpload,
+}: { state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void }) {
   return (
     <div className="space-y-3">
       <div className="edl-glass p-5 text-center">
@@ -1407,9 +1461,16 @@ function SelfieArea({
       </div>
 
       {!state || state.status === "idle" || state.status === "error" ? (
-        <button onClick={onCapture} className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base">
-          <Camera size={22}/> Prendre le selfie
-        </button>
+        <div className="space-y-2">
+          {state?.status === "error" && state.previewUrl && onRetryUpload && (
+            <button onClick={onRetryUpload} className="edl-cta w-full h-12 flex items-center justify-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-black">
+              <RefreshCw size={16}/> Réessayer l'envoi
+            </button>
+          )}
+          <button onClick={onCapture} className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base">
+            <Camera size={22}/> Prendre le selfie
+          </button>
+        </div>
       ) : state.status === "uploading" ? (
         <button disabled className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base opacity-70">
           <Loader2 size={22} className="animate-spin"/> Validation en cours…
