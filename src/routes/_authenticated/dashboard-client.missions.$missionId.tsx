@@ -2,9 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
+import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
+import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
