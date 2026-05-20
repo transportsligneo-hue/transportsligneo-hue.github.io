@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText } from "lucide-react";
+import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText, Inbox } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
@@ -26,6 +26,36 @@ interface DevisRow {
   paid_at: string | null;
 }
 
+interface DemandeRow {
+  id: string;
+  depart: string;
+  arrivee: string;
+  date_souhaitee: string | null;
+  marque: string | null;
+  modele: string | null;
+  statut: string;
+  created_at: string;
+  prix_estime: number | null;
+  distance_km: number | null;
+}
+
+// Item unifié pour la section "Mes demandes"
+interface DemandeItem {
+  id: string;
+  source: "devis" | "demande";
+  numero: string;
+  depart: string;
+  arrivee: string;
+  created_at: string;
+  date_souhaitee: string | null;
+  vehicule: string;
+  trajetType: string;
+  distance_km: number | null;
+  prix: number | null;
+  status: { label: string; cls: string };
+  linkTo: string;
+}
+
 interface MissionRow {
   id: string;
   numero: string;
@@ -41,14 +71,14 @@ interface Stats {
   enCours: number;
   terminees: number;
   aVenir: number;
-  devis: number;
+  demandes: number;
 }
 
 function ClientDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0, devis: 0 });
+  const [stats, setStats] = useState<Stats>({ enCours: 0, terminees: 0, aVenir: 0, demandes: 0 });
   const [lastMission, setLastMission] = useState<MissionRow | null>(null);
-  const [devisList, setDevisList] = useState<DevisRow[]>([]);
+  const [items, setItems] = useState<DemandeItem[]>([]);
   const [prenom, setPrenom] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -65,41 +95,101 @@ function ClientDashboard() {
       if (!cancelled && prof?.prenom) setPrenom(prof.prenom);
       const clientEmail = prof?.email ?? user.email ?? "";
 
-      // Missions (par user_id OU email, pour rattacher l'historique pré-compte)
-      const { data: missionData } = await supabase
+      const orFilter = `user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`;
+
+      // Missions (par user_id OU email)
+      const missionsPromise = supabase
         .from("missions")
         .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
-        .or(`user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`)
+        .or(orFilter)
         .order("created_at", { ascending: false });
 
-      // Devis = demandes du client. OR (user_id, email) pour rattacher l'historique pré-compte.
-      const orFilter = `user_id.eq.${user.id}${clientEmail ? `,email.eq.${clientEmail}` : ""}`;
-      const { data: devisData } = await supabase
+      // Devis = demandes de devis du client
+      const devisPromise = supabase
         .from("devis")
         .select("id, numero, depart, arrivee, distance_km, prix_estime, statut, created_at, date_souhaitee, marque, modele, option_trajet, mission_id, paid_at")
         .or(orFilter)
         .order("created_at", { ascending: false })
         .limit(10);
 
+      // Demandes de convoyage (formulaire de contact direct)
+      const demandesPromise = supabase
+        .from("demandes_convoyage")
+        .select("id, depart, arrivee, date_souhaitee, marque, modele, statut, created_at, prix_estime, distance_km")
+        .or(orFilter)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      const [{ data: missionData }, { data: devisData }, { data: demandeData }] = await Promise.all([
+        missionsPromise,
+        devisPromise,
+        demandesPromise,
+      ]);
+
       if (cancelled) return;
 
       const missions = (missionData ?? []) as MissionRow[];
       const devisAll = (devisData ?? []) as DevisRow[];
+      const demandesAll = (demandeData ?? []) as DemandeRow[];
       const today = new Date().toISOString().slice(0, 10);
+
+      const devisItems: DemandeItem[] = devisAll.map(d => ({
+        id: `devis-${d.id}`,
+        source: "devis",
+        numero: d.numero,
+        depart: d.depart,
+        arrivee: d.arrivee,
+        created_at: d.created_at,
+        date_souhaitee: d.date_souhaitee,
+        vehicule: [d.marque, d.modele].filter(Boolean).join(" ").trim(),
+        trajetType: (d.option_trajet || "").toLowerCase().includes("retour") ? "Aller-retour" : "Aller simple",
+        distance_km: d.distance_km,
+        prix: d.prix_estime != null ? Number(d.prix_estime) : null,
+        status: devisStatusInfo(d),
+        linkTo: "/dashboard-client/devis",
+      }));
+
+      const demandeItems: DemandeItem[] = demandesAll.map(d => ({
+        id: `demande-${d.id}`,
+        source: "demande",
+        numero: `DEM-${d.id.slice(0, 6).toUpperCase()}`,
+        depart: d.depart,
+        arrivee: d.arrivee,
+        created_at: d.created_at,
+        date_souhaitee: d.date_souhaitee,
+        vehicule: [d.marque, d.modele].filter(Boolean).join(" ").trim(),
+        trajetType: "Demande",
+        distance_km: d.distance_km,
+        prix: d.prix_estime != null ? Number(d.prix_estime) : null,
+        status: demandeStatusInfo(d.statut),
+        linkTo: "/dashboard-client/devis",
+      }));
+
+      const allItems = [...devisItems, ...demandeItems].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      // Compte des demandes "en attente de traitement admin"
+      const demandesEnAttente =
+        devisAll.filter(d => d.statut !== "convertit" && d.statut !== "refuse" && !d.mission_id).length +
+        demandesAll.filter(d => d.statut !== "convertie" && d.statut !== "refusee" && d.statut !== "annulee").length;
+
       setStats({
         enCours: missions.filter(m => m.statut === "en_cours").length,
         terminees: missions.filter(m => m.statut === "livree" || m.statut === "terminee").length,
         aVenir: missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length,
-        devis: devisAll.filter(d => d.statut !== "convertit" && d.statut !== "refuse" && !d.mission_id).length,
+        demandes: demandesEnAttente,
       });
       setLastMission(missions[0] ?? null);
-      setDevisList(devisAll);
+      setItems(allItems);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [user]);
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
+
+  const hasPendingButNoMission = !lastMission && items.length > 0;
 
   return (
     <div className="space-y-8">
@@ -126,13 +216,15 @@ function ClientDashboard() {
         <StatCard icon={Clock} label="En cours" value={stats.enCours} accent="text-primary" />
         <StatCard icon={Calendar} label="À venir" value={stats.aVenir} accent="text-blue-300" />
         <StatCard icon={CheckCircle} label="Terminées" value={stats.terminees} accent="text-green-300" />
-        <StatCard icon={FileText} label="Devis" value={stats.devis} accent="text-[#e7c76a]" />
+        <StatCard icon={Inbox} label="Demandes" value={stats.demandes} accent="text-[#e7c76a]" />
       </div>
 
-      {/* Last mission */}
+      {/* Last mission OU bloc rassurant */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-heading text-lg text-cream tracking-wider">Dernière mission</h2>
+          <h2 className="font-heading text-lg text-cream tracking-wider">
+            {lastMission ? "Dernière mission" : "Vos missions"}
+          </h2>
           <Link to="/dashboard-client/missions" className="text-xs text-primary hover:text-gold-light transition-colors uppercase tracking-wider">
             Voir tout →
           </Link>
@@ -164,6 +256,23 @@ function ClientDashboard() {
               <ArrowRight size={14} className="text-cream/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </Link>
+        ) : hasPendingButNoMission ? (
+          <div className="card-premium p-6 rounded">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-amber-500/15 border border-amber-500/30 p-2 mt-0.5">
+                <Clock size={16} className="text-amber-300" />
+              </div>
+              <div className="flex-1">
+                <p className="font-heading text-base text-cream tracking-wide">
+                  Votre demande est en cours de validation
+                </p>
+                <p className="text-cream/60 text-sm mt-1 leading-relaxed">
+                  Une fois validée par notre équipe, elle apparaîtra ici comme mission en cours
+                  et vous pourrez suivre son avancement en temps réel.
+                </p>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="card-premium p-8 rounded text-center">
             <Truck className="text-cream/20 mx-auto mb-3" size={32} />
@@ -179,10 +288,10 @@ function ClientDashboard() {
       </div>
 
       {/* Mes demandes en cours */}
-      {devisList.length > 0 && (
+      {items.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-heading text-lg text-cream tracking-wider">Mes demandes en cours</h2>
+            <h2 className="font-heading text-lg text-cream tracking-wider">Mes demandes</h2>
             <Link
               to="/dashboard-client/devis"
               className="text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
@@ -191,48 +300,45 @@ function ClientDashboard() {
             </Link>
           </div>
           <div className="space-y-3">
-            {devisList.map(d => {
-              const info = demandeStatusInfo(d);
-              const vehicule = [d.marque, d.modele].filter(Boolean).join(" ").trim();
-              const trajetType = (d.option_trajet || "").toLowerCase().includes("retour")
-                ? "Aller-retour"
-                : "Aller simple";
-              return (
-                <Link
-                  key={d.id}
-                  to="/dashboard-client/devis"
-                  className="card-premium p-4 md:p-5 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-primary/40 transition-colors cursor-pointer"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <FileText size={12} className="text-primary" /> {d.numero}
-                      </p>
-                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${info.cls}`}>
-                        {info.label}
-                      </span>
-                      <span className="text-[10px] uppercase tracking-wider text-cream/40">· {trajetType}</span>
-                    </div>
-                    <p className="text-cream font-heading text-sm mt-1.5 truncate">{d.depart} → {d.arrivee}</p>
-                    <p className="text-cream/50 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                      <span>
-                        <Calendar size={11} className="inline mr-1" />
-                        {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                      </span>
-                      {d.date_souhaitee && (
-                        <span>Prise en charge : {new Date(d.date_souhaitee).toLocaleDateString("fr-FR")}</span>
-                      )}
-                      {vehicule && <span>{vehicule}</span>}
-                      {d.distance_km ? <span>{d.distance_km} km</span> : null}
+            {items.map(it => (
+              <Link
+                key={it.id}
+                to={it.linkTo}
+                className="card-premium p-4 md:p-5 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-primary/40 transition-colors cursor-pointer"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      <FileText size={12} className="text-primary" /> {it.numero}
                     </p>
+                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${it.status.cls}`}>
+                      {it.status.label}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-cream/40">· {it.trajetType}</span>
                   </div>
-                  <div className="text-left sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
-                    <p className="font-heading text-primary text-xl">{Number(d.prix_estime).toFixed(0)} €</p>
-                    <ArrowRight size={14} className="text-cream/30 hidden sm:inline mt-1" />
-                  </div>
-                </Link>
-              );
-            })}
+                  <p className="text-cream font-heading text-sm mt-1.5 truncate">{it.depart} → {it.arrivee}</p>
+                  <p className="text-cream/50 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                    <span>
+                      <Calendar size={11} className="inline mr-1" />
+                      {new Date(it.created_at).toLocaleDateString("fr-FR")}
+                    </span>
+                    {it.date_souhaitee && (
+                      <span>Prise en charge : {new Date(it.date_souhaitee).toLocaleDateString("fr-FR")}</span>
+                    )}
+                    {it.vehicule && <span>{it.vehicule}</span>}
+                    {it.distance_km ? <span>{it.distance_km} km</span> : null}
+                  </p>
+                </div>
+                <div className="text-left sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
+                  {it.prix != null ? (
+                    <p className="font-heading text-primary text-xl">{it.prix.toFixed(0)} €</p>
+                  ) : (
+                    <p className="text-cream/40 text-[11px] uppercase tracking-wider">Prix à venir</p>
+                  )}
+                  <ArrowRight size={14} className="text-cream/30 hidden sm:inline mt-1" />
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       )}
@@ -240,7 +346,7 @@ function ClientDashboard() {
   );
 }
 
-function demandeStatusInfo(d: DevisRow): { label: string; cls: string } {
+function devisStatusInfo(d: DevisRow): { label: string; cls: string } {
   if (d.mission_id || d.statut === "convertit") {
     return { label: "Mission créée", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
   }
@@ -255,6 +361,23 @@ function demandeStatusInfo(d: DevisRow): { label: string; cls: string } {
     case "envoye":
     default:
       return { label: "En attente", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+  }
+}
+
+function demandeStatusInfo(statut: string): { label: string; cls: string } {
+  switch (statut) {
+    case "convertie":
+    case "convertit":
+      return { label: "Mission créée", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+    case "en_traitement":
+    case "en_cours":
+      return { label: "En cours de traitement", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+    case "refusee":
+    case "annulee":
+      return { label: "Refusée", cls: "bg-red-500/15 text-red-300 border-red-500/30" };
+    case "nouvelle":
+    default:
+      return { label: "Demande envoyée", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
   }
 }
 
