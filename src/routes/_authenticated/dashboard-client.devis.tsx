@@ -80,23 +80,32 @@ function MesFacturesEtDevis() {
 
   const refresh = async () => {
     if (!user) return;
-    const email = user.email ?? "";
+    const authEmail = (user.email ?? "").toLowerCase();
+    // On regarde aussi l'email du profil (parfois différent de l'auth)
+    const { data: prof } = await supabase
+      .from("profiles").select("email").eq("user_id", user.id).maybeSingle();
+    const profEmail = (prof?.email ?? "").toLowerCase();
+    const emails = Array.from(new Set([authEmail, profEmail].filter(Boolean)));
+
     const [dRes, fRes] = await Promise.all([
       supabase
         .from("devis")
         .select("id, numero, depart, arrivee, prix_estime, statut, paid_at, created_at, date_souhaitee, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_docs_completed")
-        .or(`user_id.eq.${user.id},email.eq.${email}`)
+        .or(`user_id.eq.${user.id}${emails.length ? `,${emails.map(e => `email.eq.${e}`).join(",")}` : ""}`)
         .order("created_at", { ascending: false }),
-      supabase
-        .from("factures")
-        .select("*")
-        .eq("client_email", email)
-        .order("created_at", { ascending: false }),
+      emails.length > 0
+        ? supabase
+            .from("factures")
+            .select("*")
+            .in("client_email", emails)
+            .order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] as FactureRow[] }),
     ]);
     setDevis((dRes.data ?? []) as DevisRow[]);
     setFactures((fRes.data ?? []) as FactureRow[]);
     setLoading(false);
   };
+
 
   useEffect(() => {
     refresh();
