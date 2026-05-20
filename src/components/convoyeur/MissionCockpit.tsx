@@ -300,10 +300,12 @@ export function MissionCockpit({
         case "arrive_livraison":
           await persistEtape("arrive_destination");
           await Promise.resolve(onUpdated());
-          // Ouvre AUTOMATIQUEMENT l'inspection d'arrivée — pas de clic intermédiaire
-          if (!inspectionArriveeDone) {
-            onStartInspection("arrivee");
-          }
+          // Pas d'ouverture automatique : le conducteur déclenche l'EDL d'arrivée
+          // manuellement via le bouton dédié pour éviter les doublons / ouvertures
+          // intempestives.
+          break;
+        case "signature_arrivee":
+          setOpenSignatureArrivee(true);
           break;
         case "cloturer":
           // Garde-fou final : tous les jalons doivent être présents
@@ -320,6 +322,11 @@ export function MissionCockpit({
           if (!inspectionArriveeDone) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
+            break;
+          }
+          if (!signaturesArriveeDone) {
+            toast.error("Signatures d'arrivée manquantes");
+            setOpenSignatureArrivee(true);
             break;
           }
           if (!finalSelfieOK) {
