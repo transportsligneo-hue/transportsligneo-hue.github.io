@@ -2,9 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
+import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
+import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
@@ -38,6 +40,8 @@ function MissionDetail() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
+  const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
+  const [downloadingFact, setDownloadingFact] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -74,9 +78,59 @@ function MissionDetail() {
             if (!cancelled && attr) setAttributionId(attr.id);
           }
         }
+
+        // Facture liée
+        const { data: fact } = await supabase
+          .from("factures")
+          .select("id, numero, prix_ttc, statut, pdf_url, date_facture")
+          .eq("mission_id", missionId)
+          .order("created_at", { ascending: false })
+          .maybeSingle();
+        if (!cancelled && fact) setFacture(fact);
       });
     return () => { cancelled = true; };
   }, [missionId, user]);
+
+  const handleDownloadFacture = async () => {
+    if (!mission || !facture) return;
+    setDownloadingFact(true);
+    try {
+      if (facture.pdf_url) {
+        window.open(facture.pdf_url, "_blank");
+        return;
+      }
+      const { data: full } = await supabase.from("factures").select("*").eq("id", facture.id).maybeSingle();
+      if (!full) throw new Error("Facture introuvable");
+      const blob = await generateFacturePdf({
+        numero: full.numero,
+        type_facture: (full.type_facture as "particulier" | "b2b") ?? "particulier",
+        date_facture: full.date_facture ?? undefined,
+        date_paiement: full.date_paiement,
+        statut: full.statut,
+        client_nom: full.client_nom,
+        client_prenom: full.client_prenom,
+        client_societe: full.client_societe,
+        client_email: full.client_email,
+        client_adresse: full.client_adresse,
+        client_siret: full.client_siret,
+        client_tva: full.client_tva,
+        designation: full.designation,
+        depart: full.depart,
+        arrivee: full.arrivee,
+        distance_km: full.distance_km,
+        prix_ht: Number(full.prix_ht),
+        tva_taux: Number(full.tva_taux),
+        prix_tva: Number(full.prix_tva),
+        prix_ttc: Number(full.prix_ttc),
+        mode_paiement: full.mode_paiement,
+      });
+      downloadFacturePdf(blob, full.numero);
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    } finally {
+      setDownloadingFact(false);
+    }
+  };
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
   if (!mission) {
@@ -161,6 +215,37 @@ function MissionDetail() {
         <Field label="Email" value={mission.email} icon={<Mail size={11} />} />
         <Field label="Téléphone" value={mission.telephone} icon={<Phone size={11} />} />
       </Section>
+
+      {/* Facture liée */}
+      {facture && (
+        <div className="card-premium p-5 rounded">
+          <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+            <Receipt size={16} /> Facture
+          </h2>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-cream/40 text-[10px] uppercase tracking-wider">{facture.numero}</p>
+              <p className="text-cream/80 text-sm mt-0.5">
+                {facture.date_facture ? new Date(facture.date_facture).toLocaleDateString("fr-FR") : "—"}
+                {" · "}
+                <span className={facture.statut === "payee" ? "text-emerald-300" : "text-amber-300"}>
+                  {facture.statut === "payee" ? "Payée" : "À régler"}
+                </span>
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="font-heading text-primary text-lg">{Number(facture.prix_ttc).toFixed(2)} €</span>
+              <button
+                onClick={handleDownloadFacture}
+                disabled={downloadingFact}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded disabled:opacity-50"
+              >
+                {downloadingFact ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <p className="text-cream/30 text-xs text-center">
         Vous serez notifié par email à chaque évolution du statut de votre mission.

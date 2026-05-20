@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/dashboard-client")({
 const navItems: SidebarItem[] = [
   { to: "/dashboard-client", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { to: "/dashboard-client/missions", label: "Mes missions", icon: Truck },
-  { to: "/dashboard-client/devis", label: "Mes devis", icon: FileText },
+  { to: "/dashboard-client/devis", label: "Factures & devis", icon: FileText },
   { to: "/dashboard-client/nouvelle-reservation", label: "Nouvelle réservation", icon: PlusCircle },
   { to: "/dashboard-client/documents", label: "Mes documents", icon: FolderOpen },
   { to: "/dashboard-client/profil", label: "Mon profil", icon: UserCog },

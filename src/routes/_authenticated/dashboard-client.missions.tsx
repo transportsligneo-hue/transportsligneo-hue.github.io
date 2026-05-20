@@ -16,9 +16,9 @@ interface Mission {
   ville_arrivee: string;
   date_prise_en_charge: string;
   statut: string;
-  prix_total: number;
   marque: string | null;
   modele: string | null;
+  immatriculation: string | null;
 }
 
 const STATUS_FILTERS = [
@@ -42,7 +42,7 @@ function ClientMissions() {
     const email = user.email ?? "";
     let q = supabase
       .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, marque, modele")
+      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation")
       .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
       .order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("statut", filter);
@@ -117,14 +117,14 @@ function ClientMissions() {
                     <span className="text-cream/30">→</span>
                     <span className="truncate">{m.ville_arrivee}</span>
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-cream/50 mt-2">
+                  <div className="flex items-center gap-4 text-xs text-cream/50 mt-2 flex-wrap">
                     <span className="flex items-center gap-1"><Calendar size={11} />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
                     {(m.marque || m.modele) && (
-                      <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}</span>
+                      <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}{m.immatriculation ? ` · ${m.immatriculation}` : ""}</span>
                     )}
                   </div>
                 </div>
-                <span className="font-heading text-primary text-xl">{Number(m.prix_total).toFixed(2)} €</span>
+                <span className="text-primary text-[10px] uppercase tracking-wider opacity-60 group-hover:opacity-100">Voir le suivi →</span>
               </div>
             </Link>
           ))}
