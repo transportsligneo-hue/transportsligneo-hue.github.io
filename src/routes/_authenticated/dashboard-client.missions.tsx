@@ -182,6 +182,52 @@ function ClientMissions() {
           ))}
         </div>
       )}
+
+      {/* Demandes en attente de traitement admin */}
+      {!loading && filter === "all" && pending.length > 0 && (
+        <div className="pt-2">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-heading text-sm text-cream/80 tracking-wider uppercase flex items-center gap-2">
+              <Clock size={14} className="text-amber-300" />
+              Demandes en cours de validation
+            </h2>
+            <Link to="/dashboard-client/devis" className="text-primary text-[10px] uppercase tracking-wider hover:text-gold-light transition-colors">
+              Détails →
+            </Link>
+          </div>
+          <p className="text-cream/50 text-xs mb-3">
+            Ces demandes ne sont pas encore converties en mission. Notre équipe les traite et elles apparaîtront ci-dessus dès validation.
+          </p>
+          <div className="grid gap-2">
+            {pending.map((p) => (
+              <Link
+                key={p.id}
+                to="/dashboard-client/devis"
+                className="card-premium p-4 rounded flex flex-col sm:flex-row sm:items-center gap-3 hover:border-primary/40 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <FileText size={11} className="text-primary" />
+                    <span className="text-cream/40 text-[10px] uppercase tracking-wider">{p.numero}</span>
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/15 text-amber-300 border-amber-500/30">
+                      En cours de validation
+                    </span>
+                  </div>
+                  <p className="text-cream/85 text-sm truncate">{p.depart} → {p.arrivee}</p>
+                  <p className="text-cream/50 text-xs mt-0.5 flex flex-wrap gap-x-3">
+                    <span><Calendar size={10} className="inline mr-1" />{new Date(p.created_at).toLocaleDateString("fr-FR")}</span>
+                    {p.date_souhaitee && (
+                      <span>Souhaité : {new Date(p.date_souhaitee).toLocaleDateString("fr-FR")}</span>
+                    )}
+                  </p>
+                </div>
+                <ArrowRight size={14} className="text-cream/30 shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
