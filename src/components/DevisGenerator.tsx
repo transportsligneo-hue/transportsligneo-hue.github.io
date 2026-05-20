@@ -919,54 +919,57 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     </div>
                   </div>
 
-                  {/* Bloc compte client */}
-                  <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
-                        <Lock size={14} className="text-[#5fb6ff]" />
+                  {/* Bloc compte client — masqué dans les dashboards (utilisateur déjà connecté) */}
+                  {!hideAccountStep && (
+                    <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
+                          <Lock size={14} className="text-[#5fb6ff]" />
+                        </div>
+                        <div>
+                          <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
+                          <p className="text-cream/55 text-xs mt-1 leading-relaxed">
+                            Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
+                            dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
+                          </p>
+                        </div>
                       </div>
                       <div>
-                        <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
-                        <p className="text-cream/55 text-xs mt-1 leading-relaxed">
-                          Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
-                          dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
-                        </p>
+                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
+                          <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
+                        </label>
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          className={inputCard}
+                          placeholder="Laisser vide ou minimum 8 caractères"
+                          minLength={8}
+                        />
                       </div>
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
-                        <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
+                      <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
+                        <input
+                          type="checkbox"
+                          checked={cguAccepted}
+                          onChange={e => setCguAccepted(e.target.checked)}
+                          className="accent-[#5fb6ff] mt-0.5"
+                        />
+                        <span>
+                          J'accepte les{" "}
+                          <Link to="/cgv" target="_blank" className="text-[#5fb6ff] hover:underline">CGV</Link>
+                          {" "}et la{" "}
+                          <Link to="/confidentialite" target="_blank" className="text-[#5fb6ff] hover:underline">politique de confidentialité</Link>
+                          {" "}de Transports Ligneo, et la création d'un compte client à mon nom.
+                        </span>
                       </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className={inputCard}
-                        placeholder="Laisser vide ou minimum 8 caractères"
-                        minLength={8}
-                      />
+                      <p className="text-[10px] text-cream/40 leading-relaxed">
+                        Si vous avez déjà un compte avec cette adresse, votre devis y sera rattaché automatiquement.
+                      </p>
                     </div>
-                    <label className="flex items-start gap-2.5 text-[11px] text-cream/70 cursor-pointer leading-relaxed">
-                      <input
-                        type="checkbox"
-                        checked={cguAccepted}
-                        onChange={e => setCguAccepted(e.target.checked)}
-                        className="accent-[#5fb6ff] mt-0.5"
-                      />
-                      <span>
-                        J'accepte les{" "}
-                        <Link to="/cgv" target="_blank" className="text-[#5fb6ff] hover:underline">CGV</Link>
-                        {" "}et la{" "}
-                        <Link to="/confidentialite" target="_blank" className="text-[#5fb6ff] hover:underline">politique de confidentialité</Link>
-                        {" "}de Transports Ligneo, et la création d'un compte client à mon nom.
-                      </span>
-                    </label>
-                    <p className="text-[10px] text-cream/40 leading-relaxed">
-                      Si vous avez déjà un compte avec cette adresse, votre devis y sera rattaché automatiquement.
-                    </p>
-                  </div>
+                  )}
                 </div>
               )}
+
 
               {/* STEP 4 — Récap */}
               {step === 4 && (
