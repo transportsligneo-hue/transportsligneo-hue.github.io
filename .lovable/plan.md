@@ -1,93 +1,133 @@
 ## Objectif
 
-Améliorer l'espace client (devis, factures, missions, suivi) et le PDF, sans casser l'estimateur, les dashboards, les devis/factures existants, ni les missions. Design conservé.
+Corriger le parcours conducteur sans casser ce qui marche : ordre des étapes, signature au bon moment, photos plus fiables, scan documents réel, ordre des photos demandé, et suppression de photos depuis l'admin.
+
+## Ce qui va changer (vue conducteur)
+
+### 1. Workflow mission — signature au bon moment
+
+Aujourd'hui, en finissant l'EDL d'arrivée, les 2 signatures s'enchaînent dans le même écran et donnent l'impression que la signature s'ouvre "trop tôt". On sépare proprement :
+
+Nouveau parcours :
+
+1. En route pour récupérer le véhicule
+2. Arrivé au lieu d'enlèvement → selfie
+3. État des lieux d'enlèvement (photos + signatures départ)
+4. Démarrer le trajet
+5. **Arrivé au lieu de livraison** → on enregistre uniquement l'arrivée, **aucune signature ne s'affiche**
+6. **État des lieux d'arrivée — photos uniquement** (plus de signature dans cet écran)
+7. **Signatures d'arrivée** (convoyeur + client) — nouvelle étape déclenchée seulement après que l'EDL d'arrivée est cochée complète
+8. Selfie final
+9. Envoi à l'admin
+10. Mission terminée (après réception côté admin)
+
+Sécurités ajoutées :
+
+- bouton "Avancer" verrouillé pendant l'enregistrement (anti double-clic)
+- chaque étape vérifie que la précédente est validée
+- en cas d'échec, message clair + bouton "Réessayer" sans repartir de zéro
+- reprise de l'étape exacte si l'utilisateur ferme/recharge l'app (déjà en place, on consolide)
+
+### 2. Photos d'état des lieux — ordre demandé
+
+Nouvel ordre **identique au cahier des charges** :
+
+1. Avant
+2. Trois quarts avant droit
+3. Jante avant droite
+4. Jante arrière droite
+5. Trois quarts arrière droit
+6. Arrière
+7. Coffre ouvert
+8. **Câble électrique** *(uniquement si véhicule électrique — sinon l'étape est sautée automatiquement)*
+9. Trois quarts arrière gauche
+10. Jante arrière gauche
+11. Jante avant gauche
+12. Trois quarts avant gauche
+13. Siège avant
+14. Siège arrière
+15. Photos libres optionnel si dégats uniquement
+16. Compteur + petit cadran avec cochage oui/non pour Kit sécu, tapis de sol, cable(s) recharge si vh électrique, extincteur, roue de secours ou kit crevaison
+17. Kit de sécurité
+18. Documents (PV livraison + carte grise) 
+19. &nbsp;
+
+Les anciennes étapes "Côté droit" et "Côté gauche" sont retirées du nouveau parcours mais **les photos déjà prises restent visibles** côté admin (rien n'est supprimé en base).
+
+### 3. Photos — fiabilité
+
+- aperçu local immédiat (déjà fait, on garde)
+- badges visibles par photo : **en attente / envoyée / erreur**
+- bouton "Réessayer" par photo en erreur, sans perdre les autres
+- file d'attente locale : si la photo n'arrive pas à partir, on la garde sur l'appareil et on retente automatiquement quand la connexion revient
+- protection anti-doublon (une seule photo par zone, on remplace proprement)
+- plus besoin d'actualiser la page pour voir une photo apparaître
+
+### 4. Scan documents — vrai mode scan
+
+À la place d'une photo brute, on met un **vrai scanner manuel** :
+
+- cadre guide à l'écran pendant la prise
+- détection des 4 coins avec **possibilité d'ajuster** par glisser (poignées)
+- redressement automatique (perspective corrigée) → document droit
+- filtre lisibilité (contraste + N&B optionnel)
+- aperçu avant validation, reprise facile
+- badges **scan en attente / scan envoyé / erreur** + bouton réessayer
+- les documents déjà scannés restent si un nouveau scan échoue
+
+(Pas de bibliothèque lourde type OpenCV : implémentation légère en canvas natif, pas d'impact perf.)
+
+### 5. Signature
+
+- ne s'ouvre **jamais** automatiquement après "Arrivé au lieu de livraison"
+- ne s'ouvre qu'après EDL d'arrivée 100% complète
+- confirmation visible dès que la signature est sauvegardée
+- une signature déjà enregistrée n'est jamais écrasée silencieusement
+- bouton "Refaire la signature" disponible
+- en cas d'erreur, on peut réessayer sans bloquer le reste
+
+### 6. Côté admin — suppression de photos
+
+Sur la fiche mission admin : chaque photo d'état des lieux reçoit un petit bouton **🗑 Supprimer** (admin uniquement, avec confirmation). Utile quand le conducteur a mal cadré. La photo est retirée du dossier et de l'espace de stockage, le conducteur peut alors la reprendre.
+
+## Ce qui ne change pas
+
+- design (couleurs, cartes, timeline, navigation) — inchangé
+- toutes les missions, statuts, signatures, photos, documents et historiques **existants sont conservés**
+- les règles tarifaires, devis, factures, PDF — pas touchés
+- les flux côté client, admin, et entreprise — pas touchés en dehors du bouton "supprimer photo" ajouté
+
+## Tests effectués après livraison
+
+Le parcours complet décrit dans le cahier des charges (1→16), plus :
+
+- double-clic boutons / connexion faible / retour arrière / fermeture-réouverture
+- véhicule électrique vs thermique (présence/absence de l'étape câble)
+- photo en erreur, scan en erreur, signature en erreur
 
 ---
 
-## 1. Estimateur unifié dans le dashboard client
-
-Le bouton "Devis instantané" du dashboard client (`dashboard-client.nouvelle-reservation.tsx`) utilise déjà `TunnelReservation`, mais l'expérience diverge de l'estimateur principal (`DevisGenerator`) et redemande des infos déjà connues.
-
-- Remplacer `TunnelReservation` par `DevisGenerator` dans `dashboard-client/nouvelle-reservation` ET `dashboard-pro/nouvelle-demande` (mode "Devis instantané"), pour garantir : même UI, mêmes options (Livraison simple / Livraison + restitution / Express), Google Places, plaques, mêmes tarifs et règles.
-- Ajouter à `DevisGenerator` une prop `prefill?: { nom; prenom; email; telephone; societe? }` + `hideAccountStep?: boolean`.
-- Côté route dashboard : charger `profiles` + `organizations` du user connecté et passer les valeurs en `prefill`. Sauter l'étape "création de compte" et la double saisie email/tel.
-- Conserver tout le moteur de prix existant. Aucun changement à `reservation-pricing.ts` ni `pricing-engine.ts`.
-
-## 2. Dashboard client — sections et lisibilité
-
-`dashboard-client.devis.tsx` mélange devis et factures. Cette page liste actuellement les `devis` uniquement, mais le libellé sidebar/menu est "Factures & devis".
-
-- Renommer la page en `dashboard-client.factures-devis.tsx` (route + lien sidebar) et y afficher **deux onglets** : "Mes devis" / "Mes factures".
-  - Devis : badge doré `DEVIS`, montant TTC, bouton "Télécharger PDF" (existant), bouton "Réserver" si statut accepté.
-  - Factures : badge `FACTURE` (couleur distincte), montant TTC, statut paiement, bouton "Télécharger PDF" (utilise `facture-pdf.ts` déjà présent ou `pdf_url`).
-- `dashboard-client.missions.tsx` : retirer la colonne prix, ne garder que `numero`, trajet, véhicule + plaque, date, statut, lien suivi.
-- `dashboard-client.index.tsx` : nettoyer la vue d'ensemble (sections "Mes demandes en cours", "Mes devis", "Mes missions", "Mes factures"), supprimer toute section morte.
-
-## 3. Page détail mission client (suivi premium)
-
-`dashboard-client.missions.$missionId.tsx` existe déjà mais reste basique.
-
-- Ajouter au-dessus du tracker : timeline d'étapes (Acceptée → Prise en charge → En cours → Livrée → Restitution si applicable) alimentée par `attributions` / `mission_gates` (déjà utilisés par `MissionLiveTracker`).
-- Bloc Véhicule : marque/modèle/plaque/VIN/carburant.
-- Bloc Restitution (si `type_trajet` contient retour) : 2ᵉ plaque + adresse retour.
-- Bloc Documents : devis lié, facture liée (si émise), documents mission (`MissionDocuments`).
-- Aucune info admin sensible (prix de revient, marges, contact chauffeur privé…). Conserver le prix TTC payé par le client.
-- Responsive mobile (grilles 1 col < 640px, déjà la base).
-
-## 4. Facturation admin
-
-La table `factures` existe déjà (`pdf_url`, `mission_id`, totaux, statut). À ajouter :
-
-- Dans `admin.missions.$missionId.tsx` : bouton "Générer la facture" visible quand `statut = livree/terminee` et qu'aucune facture n'est rattachée.
-- Server function `generateInvoiceFromMission(missionId)` :
-  - lit mission + client + organisation,
-  - calcule HT/TVA/TTC depuis `prix_total`,
-  - insère ligne `factures` (numéro auto `F-YYYY-NNNN`),
-  - génère le PDF via `facture-pdf.ts`, l'upload dans le bucket `factures` (créer si absent), stocke `pdf_url`,
-  - envoie l'email "Votre facture" au client (template existant ou nouveau court template).
-- Lien depuis la mission admin vers la facture créée. RLS : client voit ses factures via `client_email = auth.email()` ou `mission.user_id = auth.uid()`.
-
-## 5. PDF Devis & Facture — finition premium
-
-`devis-pdf.ts` est déjà très abouti. Améliorations ciblées :
-
-- **Signature "GO"** : remplacer le texte italique `G.O` par une vraie signature manuscrite SVG/PNG embarquée (asset `src/assets/signature-go.png`), gardée petite et nette.
-- **Icônes contact** : remplacer les lettres `@ T W` du header par des petits glyphes vectoriels propres (dessinés en jsPDF : enveloppe, téléphone, globe, pin).
-- **Logo client** : déjà géré (`logo_url`). S'assurer que `facture-pdf.ts` accepte la même propriété et l'affiche à côté de la société.
-- **Conditions de validité** : encadré doré dédié sous les totaux.
-- **Détails prestation** : ajouter plaque + VIN si présent, prestation (Livraison simple / + restitution / Express), heure de livraison souhaitée.
-- Appliquer la même refonte à `facture-pdf.ts` (mêmes header/footer/blocs) pour cohérence visuelle.
-
-## 6. Garde-fous (ne rien casser)
-
-- Aucun changement à `pricing-engine.ts`, `reservation-pricing.ts`, `pricing-departments.ts`, `pricing-resolver.ts`.
-- `TunnelReservation` reste en place pour la route publique `/reserver` (non touchée).
-- Aucune migration destructive : seulement `CREATE BUCKET IF NOT EXISTS factures` + politiques RLS de lecture client.
-- Les anciens devis/factures déjà émis restent lisibles (pdf_url conservé).
-
----
-
-## Détails techniques
+## Section technique (pour référence)
 
 **Fichiers modifiés**
-- `src/components/DevisGenerator.tsx` — props `prefill`, `hideAccountStep`
-- `src/routes/_authenticated/dashboard-client.nouvelle-reservation.tsx` — utilise `DevisGenerator` préfillé
-- `src/routes/_authenticated/dashboard-pro.nouvelle-demande.tsx` — idem en mode instantané
-- `src/routes/_authenticated/dashboard-client.devis.tsx` → renommer en `dashboard-client.factures-devis.tsx`, onglets devis/factures
-- `src/routes/_authenticated/dashboard-client.missions.tsx` — retirer prix
-- `src/routes/_authenticated/dashboard-client.missions.$missionId.tsx` — timeline, restitution, documents, facture
-- `src/routes/_authenticated/admin.missions.$missionId.tsx` — bouton "Générer facture"
-- `src/lib/facture-pdf.ts` — refonte cohérente avec `devis-pdf.ts`, support logo client
-- `src/lib/devis-pdf.ts` — signature image, icônes vectorielles, encadré validité, détails étendus
-- `src/lib/invoice.functions.ts` (nouveau) — `generateInvoiceFromMission`
-- `src/components/dashboard/DashboardSidebar.tsx` — libellé "Factures & devis"
-- `src/assets/signature-go.png` (nouveau)
 
-**Migration**
-- `storage.buckets` : `factures` (privé) + policies (admin write, client read si email/mission match)
-- `factures` table : déjà ok, juste s'assurer que RLS SELECT autorise le client propriétaire
+- `src/components/inspection/edl-premium-sequence.ts` — réordonner, retirer `cote_droit`/`cote_gauche`, ajouter `cable_electrique` (kind `photo`, conditional), retirer les 2 steps `signature_*_end` du flow arrivée.
+- `src/components/inspection/EdlPremiumFlow.tsx` — filtrer `cable_electrique` si type véhicule ≠ électrique (lecture `demandes_convoyage.carburant` ou champ équivalent via le parent), retirer les signatures du filter `phase === "arrivee"`, finaliser sur `edl_arrivee_fait` (déjà le cas) sans déclencher signature.
+- `src/components/convoyeur/MissionCockpit.tsx` — insérer une nouvelle action `signature_arrivee` entre `edl_arrivee` et `selfie_final`. Retirer l'auto-open de l'inspection arrivée immédiatement après `arrive_livraison` (ou laisser, mais l'EDL n'embarque plus les signatures donc plus d'effet "signature trop tôt"). Ajouter idempotence `busy` déjà présente, renforcer.
+- **Nouveau** `src/components/inspection/ArriveeSignatureSheet.tsx` — modale dédiée qui enchaîne signature convoyeur + client en réutilisant `SignatureCanvas` et écrit dans `mission_signatures` (kinds `driver_end`, `client_end`).
+- `src/components/inspection/QuickCameraCapture.tsx` (et le handler photo de `EdlPremiumFlow`) — ajouter file d'attente offline simple en `localStorage` (clé par `attributionId|zoneId`) flushée sur event `online`. Badges déjà présents, on les expose plus clairement.
+- **Nouveau** `src/components/inspection/DocumentScanner.tsx` — overlay caméra avec 4 poignées de coins, transform perspective via canvas natif, filtre contraste. Remplace l'input file simple pour les steps `kind === "scan"`.
+- `src/routes/_authenticated/admin.missions.$missionId.tsx` — sur chaque vignette photo (bloc inspections, lignes 717-739) ajouter bouton suppression : `supabase.from("inspection_photos").delete().eq(...)` + `supabase.storage.from("inspection-photos").remove([path])` + refetch.
 
-**QA**
-- Créer une demande depuis dashboard client → estimateur identique au site, profil préfillé, devis en base avec `prix_estime` et `distance_km`.
-- Générer facture depuis mission terminée → PDF téléchargeable côté client, email reçu.
-- Anciennes missions/devis : toujours ouvrables.
+**Aucune migration DB requise.** Les colonnes/tables existantes suffisent. Les nouveaux `vue_type` (`cable_electrique`) sont du texte libre déjà accepté.
+
+**Gardes-fous**
+
+- pas de suppression silencieuse de données existantes
+- ID stables conservés (`face_avant`, `coffre_ouvert`, etc.)
+- legacy `cote_droit`/`cote_gauche` toujours lisibles côté admin pour les anciennes missions
+
+## Points à confirmer
+
+1. Étape "Documents" (#17) = 2 scans séparés (PV livraison + carte grise) comme aujourd'hui, ou 1 seule entrée "Documents" multi-photos ? *Par défaut je garde les 2 scans pour ne rien casser.*
+2. Le champ "véhicule électrique" : utiliser `demandes_convoyage.carburant` (`electrique`/`hybride`) ? S'il est vide, je n'affiche pas l'étape câble (sécurisé).
