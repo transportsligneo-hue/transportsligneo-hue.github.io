@@ -492,6 +492,21 @@ export function EdlPremiumFlow({
     };
   }, []);
 
+  // === Notification reconnexion : prévient l'utilisateur quand des photos sont en erreur
+  // et que le réseau revient. L'utilisateur peut alors cliquer "Réessayer l'envoi".
+  useEffect(() => {
+    const onOnline = () => {
+      const errored = Object.values(states).filter(s => s?.status === "error").length;
+      if (errored > 0) {
+        toast.success("Connexion rétablie", {
+          description: `${errored} photo(s) en attente — cliquez "Réessayer l'envoi".`,
+        });
+      }
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [states]);
+
   // === Inspection de la phase courante — créée à la première photo nécessaire
   const ensureInspection = useCallback(async () => {
     if (inspectionId) return inspectionId;
