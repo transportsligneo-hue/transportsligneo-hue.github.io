@@ -245,16 +245,18 @@ function AdminMissionDetail() {
     for (const insp of inspRes.data ?? []) {
       const { data: photos } = await supabase
         .from("inspection_photos")
-        .select("vue_type, url_photo, created_at")
+        .select("id, vue_type, url_photo, created_at")
         .eq("inspection_id", insp.id)
         .order("created_at", { ascending: true });
       const enriched = await Promise.all(
         (photos ?? []).map(async (p) => {
-          if (/^https?:\/\//i.test(p.url_photo)) return p;
+          const isUrl = /^https?:\/\//i.test(p.url_photo);
+          const storage_path = isUrl ? "" : p.url_photo;
+          if (isUrl) return { ...p, storage_path };
           const { data: signed } = await supabase.storage
             .from("inspection-photos")
             .createSignedUrl(p.url_photo, 3600);
-          return { ...p, url_photo: signed?.signedUrl ?? p.url_photo };
+          return { ...p, storage_path, url_photo: signed?.signedUrl ?? p.url_photo };
         }),
       );
       inspWithPhotos.push({ ...(insp as Omit<InspectionRow, "photos">), photos: enriched });
