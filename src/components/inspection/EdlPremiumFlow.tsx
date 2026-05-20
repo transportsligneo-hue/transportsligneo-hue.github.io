@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 import { useMissionGates } from "@/hooks/useMissionGates";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
@@ -224,6 +225,7 @@ export function EdlPremiumFlow({
   );
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [openScanner, setOpenScanner] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const [online, setOnline] = useState<boolean>(
     typeof navigator === "undefined" ? true : navigator.onLine !== false
@@ -513,7 +515,13 @@ export function EdlPremiumFlow({
   }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
-  const triggerCapture = () => fileRef.current?.click();
+  const triggerCapture = () => {
+    if (currentStep.kind === "scan") {
+      setOpenScanner(true);
+    } else {
+      fileRef.current?.click();
+    }
+  };
 
   const setState = (id: string, s: StepState) =>
     setStates(prev => ({ ...prev, [id]: s }));
@@ -522,6 +530,10 @@ export function EdlPremiumFlow({
     const raw = e.target.files?.[0];
     e.target.value = "";
     if (!raw) return;
+    await processPhotoFile(raw);
+  };
+
+  const processPhotoFile = async (raw: File) => {
 
     const stepId = currentStep.id;
     let previewUrl: string | undefined;
@@ -1296,6 +1308,16 @@ export function EdlPremiumFlow({
             </div>
           </div>
         </div>
+      )}
+
+      {openScanner && (
+        <DocumentScanner
+          onCancel={() => setOpenScanner(false)}
+          onScanned={async (file) => {
+            setOpenScanner(false);
+            await processPhotoFile(file);
+          }}
+        />
       )}
     </div>
   );
