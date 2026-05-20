@@ -1461,9 +1461,16 @@ function SelfieArea({
       </div>
 
       {!state || state.status === "idle" || state.status === "error" ? (
-        <button onClick={onCapture} className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base">
-          <Camera size={22}/> Prendre le selfie
-        </button>
+        <div className="space-y-2">
+          {state?.status === "error" && state.previewUrl && onRetryUpload && (
+            <button onClick={onRetryUpload} className="edl-cta w-full h-12 flex items-center justify-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-black">
+              <RefreshCw size={16}/> Réessayer l'envoi
+            </button>
+          )}
+          <button onClick={onCapture} className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base">
+            <Camera size={22}/> Prendre le selfie
+          </button>
+        </div>
       ) : state.status === "uploading" ? (
         <button disabled className="edl-cta w-full h-16 flex items-center justify-center gap-3 text-base opacity-70">
           <Loader2 size={22} className="animate-spin"/> Validation en cours…
