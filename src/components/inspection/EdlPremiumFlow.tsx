@@ -156,17 +156,52 @@ export function EdlPremiumFlow({
   attributionId, type, userId, driverName, defaultClientName,
   onComplete, onClose,
 }: Props) {
-  const STEPS = useMemo(() => {
-    if (type === "depart") {
-      return EDL_PREMIUM_SEQUENCE.filter(
-        (step) => step.phase === "depart" && step.kind !== "selfie",
-      );
-    }
+  // Carburant véhicule (depuis attribution → trajet → demande). Sert à filtrer
+  // l'étape "câble électrique" (electricOnly). Si inconnu → étape masquée par sécurité.
+  const [vehicleCarburant, setVehicleCarburant] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: attr } = await supabase
+          .from("attributions")
+          .select("trajet_id")
+          .eq("id", attributionId)
+          .maybeSingle();
+        if (!attr?.trajet_id || cancelled) return;
+        const { data: traj } = await supabase
+          .from("trajets")
+          .select("demande_id")
+          .eq("id", attr.trajet_id)
+          .maybeSingle();
+        if (!traj?.demande_id || cancelled) return;
+        const { data: dem } = await supabase
+          .from("demandes_convoyage")
+          .select("carburant")
+          .eq("id", traj.demande_id)
+          .maybeSingle();
+        if (cancelled) return;
+        setVehicleCarburant((dem?.carburant ?? "").toLowerCase());
+      } catch { /* silencieux */ }
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
 
-    return EDL_PREMIUM_SEQUENCE.filter(
-      (step) => step.phase === "arrivee" && step.kind !== "validation",
-    );
-  }, [type]);
+  const isElectric = /electr|hybr/.test(vehicleCarburant ?? "");
+
+  const STEPS = useMemo(() => {
+    // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).
+    // ARRIVÉE : photos + scans uniquement — signatures gérées par ArriveeSignatureSheet
+    //           déclenchée par le cockpit après finalisation de l'EDL arrivée.
+    // Étape électrique masquée si véhicule non électrique.
+    const base = EDL_PREMIUM_SEQUENCE.filter((step) => {
+      if (step.kind === "selfie") return false;
+      if (type === "arrivee" && step.kind === "signature") return false;
+      if (step.electricOnly && !isElectric) return false;
+      return true;
+    });
+    return base;
+  }, [type, isElectric]);
   const TOTAL = STEPS.length;
 
   // Reprise via localStorage
