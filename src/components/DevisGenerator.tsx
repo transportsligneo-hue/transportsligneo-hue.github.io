@@ -79,7 +79,24 @@ function estimateDuration(distance: number): string {
   return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`;
 }
 
-export default function DevisGenerator() {
+export interface DevisGeneratorPrefill {
+  nom?: string;
+  prenom?: string;
+  email?: string;
+  telephone?: string;
+  societe?: string;
+}
+
+export interface DevisGeneratorProps {
+  /** Prefill contact fields (used when user is logged in). */
+  prefill?: DevisGeneratorPrefill;
+  /** Skip the account creation block (used inside authenticated dashboards). */
+  hideAccountStep?: boolean;
+  /** Where the "Mon espace client" CTA points after submission. */
+  successRedirect?: string;
+}
+
+export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login" }: DevisGeneratorProps = {}) {
   // --- core trajet ---
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
@@ -87,6 +104,7 @@ export default function DevisGenerator() {
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [option, setOption] = useState<"aller-simple" | "aller-retour" | "express">("aller-simple");
+
 
   // --- Restitution (uniquement pour Aller-retour) ---
   const [sameDestination, setSameDestination] = useState(true);
