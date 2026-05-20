@@ -189,19 +189,21 @@ export function MissionCockpit({
     }
     // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
-    // 5. Sur place livraison → EDL arrivée → selfie final → envoi admin
+    // 5. Sur place livraison → EDL arrivée → signatures → selfie final → envoi admin
     if (e === "arrive_destination") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!signaturesArriveeDone) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
       if (!inspectionArriveeDone) return "edl_arrivee";
+      if (!signaturesArriveeDone) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, statut]);
+  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, signaturesArriveeDone, statut]);
 
   useEffect(() => {
     if (!forceOpenSelfie) {
