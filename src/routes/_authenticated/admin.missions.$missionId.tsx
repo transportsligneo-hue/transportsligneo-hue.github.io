@@ -87,7 +87,7 @@ interface InspectionRow {
   statut: string;
   notes: string | null;
   created_at: string;
-  photos: { vue_type: string; url_photo: string; created_at: string }[];
+  photos: { id: string; vue_type: string; url_photo: string; storage_path: string; created_at: string }[];
 }
 
 interface GpsPoint {
