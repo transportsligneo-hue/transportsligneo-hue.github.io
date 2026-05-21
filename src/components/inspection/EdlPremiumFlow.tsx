@@ -1320,6 +1320,16 @@ export function EdlPremiumFlow({
             />
           )}
 
+          {currentStep.kind === "checklist" && (
+            <ChecklistArea state={currentState} onValidate={validateChecklist} />
+          )}
+
+          {currentStep.kind === "kilometrage" && (
+            <KilometrageArea step={currentStep} state={currentState} onValidate={validateKilometrage} />
+          )}
+
+
+
         </div>
 
         {/* Input file caché — type adapté.
