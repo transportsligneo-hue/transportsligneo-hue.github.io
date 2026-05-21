@@ -368,11 +368,13 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFillColor(...NAVY);
   doc.rect(tx, ty, 50, 10, "F");
   doc.setTextColor(...GOLD_SOFT);
-  doc.text(`TVA (${tvaTaux}%)`, tx + 25, ty + 6.5, { align: "center" });
+  doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux}%)`, tx + 25, ty + 6.5, { align: "center" });
   doc.setDrawColor(...LINE);
   doc.rect(tx + 50, ty, 26, 10, "S");
   doc.setTextColor(...NAVY);
-  doc.text(eur(tva), tx + 50 + 23, ty + 6.5, { align: "right" });
+  doc.setFontSize(tvaExempt ? 7 : 9);
+  doc.text(tvaExempt ? "Exonérée" : eur(tva), tx + 50 + 23, ty + 6.5, { align: "right" });
+  doc.setFontSize(9);
 
   ty += 10;
   doc.setFillColor(...NAVY);
