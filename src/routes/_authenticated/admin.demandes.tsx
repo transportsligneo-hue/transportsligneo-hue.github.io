@@ -48,6 +48,7 @@ interface Demande {
   vehicule_type?: string | null;
   vehicule_couleur?: string | null;
   vehicule_km?: number | null;
+  vehicule_notes?: string | null;
   options_meta?: Record<string, unknown> | null;
 }
 
@@ -161,9 +162,9 @@ function AdminDemandes() {
         arrivee: d.arrivee,
         date_trajet: d.date_souhaitee,
         heure_trajet: d.heure_souhaitee ?? "",
-        marque: d.marque ?? "",
-        modele: d.modele ?? "",
-        immatriculation: d.immatriculation ?? "",
+        marque: d.vehicule_marque ?? d.marque ?? "",
+        modele: d.vehicule_modele ?? d.modele ?? "",
+        immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? "",
         client_nom: `${d.prenom} ${d.nom}`,
         client_email: d.email,
         client_telephone: d.telephone ?? "",
@@ -173,6 +174,15 @@ function AdminDemandes() {
         statut: "en_attente",
         statut_publication: "publie",
         pricing_mode: "fixe",
+        // Phase 6 — propagation véhicule détaillé + options
+        vehicule_immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? null,
+        vehicule_vin: d.vehicule_vin ?? null,
+        vehicule_energie: d.vehicule_energie ?? d.carburant ?? null,
+        vehicule_type: d.vehicule_type ?? null,
+        vehicule_couleur: d.vehicule_couleur ?? null,
+        vehicule_km: d.vehicule_km ?? null,
+        vehicule_notes: d.vehicule_notes ?? null,
+        options_meta: (d.options_meta ?? {}) as never,
       });
       if (error) {
         if (createdMissionId) {
@@ -307,7 +317,24 @@ function AdminDemandes() {
                         <p className="text-[color:var(--admin-muted)] text-xs sm:hidden truncate max-w-[180px]">
                           {d.depart} → {d.arrivee}
                         </p>
+                        {(() => {
+                          const tags = renderOptionsMeta(d.options_meta);
+                          if (tags.length === 0) return null;
+                          return (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {tags.slice(0, 3).map((t) => (
+                                <span key={t} className="text-[10px] bg-[#d4af37]/15 text-[#8a6a10] border border-[#d4af37]/30 rounded-full px-1.5 py-0.5">
+                                  {t}
+                                </span>
+                              ))}
+                              {tags.length > 3 && (
+                                <span className="text-[10px] text-[color:var(--admin-muted)]">+{tags.length - 3}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
+
                       <td className="hidden sm:table-cell">
                         <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
                           {d.depart}
