@@ -317,7 +317,24 @@ function AdminDemandes() {
                         <p className="text-[color:var(--admin-muted)] text-xs sm:hidden truncate max-w-[180px]">
                           {d.depart} → {d.arrivee}
                         </p>
+                        {(() => {
+                          const tags = renderOptionsMeta(d.options_meta);
+                          if (tags.length === 0) return null;
+                          return (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {tags.slice(0, 3).map((t) => (
+                                <span key={t} className="text-[10px] bg-[#d4af37]/15 text-[#8a6a10] border border-[#d4af37]/30 rounded-full px-1.5 py-0.5">
+                                  {t}
+                                </span>
+                              ))}
+                              {tags.length > 3 && (
+                                <span className="text-[10px] text-[color:var(--admin-muted)]">+{tags.length - 3}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
+
                       <td className="hidden sm:table-cell">
                         <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
                           {d.depart}
