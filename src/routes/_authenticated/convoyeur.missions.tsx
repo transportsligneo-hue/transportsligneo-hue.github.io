@@ -157,7 +157,7 @@ function ConvoyeurMissions() {
         const [{ data: trajet }, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets")
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -515,6 +515,59 @@ function ConvoyeurMissions() {
             versoPath={t?.carte_grise_verso_url ?? null}
           />
         )}
+
+        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) */}
+        {(() => {
+          const te = t as (typeof t & {
+            vehicule_energie?: string | null;
+            vehicule_type?: string | null;
+            vehicule_couleur?: string | null;
+            vehicule_km?: number | null;
+            vehicule_notes?: string | null;
+            options_meta?: Record<string, unknown> | null;
+          }) | null;
+          const meta = te?.options_meta ?? null;
+          const energie = (te?.vehicule_energie ?? "").toLowerCase();
+          const isElec = energie.includes("élec") || energie.includes("elec") || energie === "ev";
+          const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald" }[] = [];
+          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher la recharge à l'arrivée", tone: "blue" });
+          if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold" });
+          if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald" });
+          if (meta?.express) tasks.push({ key: "express", label: "⚡ Mission express — priorité", tone: "gold" });
+          if (meta?.aller_retour) tasks.push({ key: "ar", label: "↔ Aller-retour prévu", tone: "blue" });
+          const hasExtra = te?.vehicule_type || te?.vehicule_couleur || te?.vehicule_km || te?.vehicule_notes;
+          if (tasks.length === 0 && !hasExtra) return null;
+          const toneClass = (tone: string) =>
+            tone === "gold" ? "bg-[#d4af37]/15 text-[#8a6a10] border-[#d4af37]/40"
+            : tone === "emerald" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : "bg-blue-50 text-blue-700 border-blue-200";
+          return (
+            <div className="bg-white rounded-2xl border border-pro-border p-4 space-y-3">
+              <div className="text-xs font-semibold text-pro-text-soft uppercase tracking-wide">À faire sur cette mission</div>
+              {tasks.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {tasks.map((t) => (
+                    <span key={t.key} className={`text-xs font-medium rounded-full px-2.5 py-1 border ${toneClass(t.tone)}`}>
+                      {t.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {hasExtra && (
+                <div className="grid grid-cols-2 gap-2 text-xs text-pro-text-soft">
+                  {te?.vehicule_type && <div><span className="text-pro-muted">Type:</span> {te.vehicule_type}</div>}
+                  {te?.vehicule_couleur && <div><span className="text-pro-muted">Couleur:</span> {te.vehicule_couleur}</div>}
+                  {te?.vehicule_km != null && <div><span className="text-pro-muted">Km:</span> {te.vehicule_km}</div>}
+                  {te?.vehicule_energie && <div><span className="text-pro-muted">Énergie:</span> {te.vehicule_energie}</div>}
+                </div>
+              )}
+              {te?.vehicule_notes && (
+                <p className="text-xs italic text-pro-text-soft whitespace-pre-wrap">"{te.vehicule_notes}"</p>
+              )}
+            </div>
+          );
+        })()}
+
 
         {/* Live GPS */}
         {isActive && (
