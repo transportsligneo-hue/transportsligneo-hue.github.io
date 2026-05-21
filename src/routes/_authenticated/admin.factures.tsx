@@ -48,7 +48,17 @@ interface FactureRow {
   prix_tva: number;
   prix_ttc: number;
   created_at: string;
+  reference_client: string | null;
+  reference_label: string | null;
 }
+
+const REFERENCE_LABEL_PRESETS = [
+  "Référence client",
+  "N° de commande",
+  "N° BC",
+  "N° dossier",
+  "N° de marché",
+];
 
 const STATUTS = [
   { value: "emise", label: "Émise" },
