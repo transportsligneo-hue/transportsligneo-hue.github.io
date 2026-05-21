@@ -438,6 +438,27 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
         await supabase.from("attributions")
           .update({ statut: "en_attente_validation", etape_courante: "en_attente_validation" })
           .eq("id", attributionId);
+
+        // Récupère le numéro de mission pour enrichir la notification
+        const { data: attr } = await supabase
+          .from("attributions")
+          .select("numero_mission")
+          .eq("id", attributionId)
+          .maybeSingle();
+        const numero = (attr as { numero_mission?: string } | null)?.numero_mission ?? attributionId.slice(0, 8);
+
+        // Notification in-app admin (panneau /admin/notifications)
+        notifyAdmin({
+          type: "driver_action",
+          titre: `Mission ${numero} en attente de validation`,
+          message: "Le convoyeur a terminé l'EDL d'arrivée et envoyé le dossier complet.",
+          link: `/admin/missions/${attributionId}`,
+          entityType: "attribution",
+          entityId: attributionId,
+          metadata: { numero },
+        }).catch(() => { /* best-effort */ });
+
+        // Email transactionnel admin
         sendTransactionalEmail({
           templateName: "document-mission-admin",
           recipientEmail: "contact@transportsligneo.fr",
