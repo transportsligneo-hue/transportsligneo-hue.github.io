@@ -1215,6 +1215,8 @@ export function EdlPremiumFlow({
               step={currentStep}
               state={currentState}
               onCapture={triggerCapture}
+              onSimpleCapture={triggerSimpleCapture}
+              onSkipScan={skipCurrentScan}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
               onRetryUpload={retryUpload}
