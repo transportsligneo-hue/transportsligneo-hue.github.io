@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X } from "lucide-react";
 import { AdminSection, AdminField, AdminEmpty } from "@/components/admin/ui";
+
 
 interface Rule {
   id: string;
@@ -46,6 +47,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
@@ -68,16 +70,36 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     return isFinite(v) && v >= 0 ? v : null;
   };
 
+  const resetForm = () => {
+    setForm(EMPTY_FORM);
+    setCreating(false);
+    setEditingId(null);
+  };
+
+  const startEdit = (r: Rule) => {
+    setEditingId(r.id);
+    setCreating(true);
+    setForm({
+      zone_label: r.zone_label ?? "",
+      ville_depart: r.ville_depart ?? "",
+      ville_arrivee: r.ville_arrivee ?? "",
+      prix_aller_simple: r.prix_aller_simple != null ? String(r.prix_aller_simple) : "",
+      prix_aller_retour: r.prix_aller_retour != null ? String(r.prix_aller_retour) : "",
+      prix_express: r.prix_express != null ? String(r.prix_express) : "",
+      sup_recharge: r.supplements?.recharge_electrique != null ? String(r.supplements.recharge_electrique) : "",
+      sup_plein: r.supplements?.plein_essence != null ? String(r.supplements.plein_essence) : "",
+      sup_nettoyage: r.supplements?.nettoyage != null ? String(r.supplements.nettoyage) : "",
+      sup_express: r.supplements?.express != null ? String(r.supplements.express) : "",
+      notes: r.notes ?? "",
+    });
+  };
+
   const submit = async () => {
     const pas = parseNum(form.prix_aller_simple);
     const par = parseNum(form.prix_aller_retour);
     const pex = parseNum(form.prix_express);
     if (pas == null && par == null && pex == null) {
       toast.error("Renseignez au moins un prix (aller simple, retour ou express)");
-      return;
-    }
-    if (!form.zone_label.trim() && !form.ville_depart.trim() && !form.ville_arrivee.trim()) {
-      toast.error("Renseignez au moins un libellé de zone ou une ville");
       return;
     }
     setSaving(true);
@@ -88,16 +110,15 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     const sn = parseNum(form.sup_nettoyage); if (sn != null && sn > 0) supplements.nettoyage = sn;
     const se = parseNum(form.sup_express); if (se != null && se > 0) supplements.express = se;
 
-    // Fallback prix_ttc historique pour la rétro-compat
     const basePrice = pas ?? par ?? pex ?? 0;
 
-    const { error } = await supabase.from("client_pricing_rules" as never).insert({
+    const payload = {
       client_user_id: clientUserId,
       client_email: clientEmail.toLowerCase(),
       zone_label: form.zone_label.trim() || null,
       ville_depart: form.ville_depart.trim() || null,
       ville_arrivee: form.ville_arrivee.trim() || null,
-      trip_type: "any",
+      trip_type: "any" as const,
       prix_aller_simple: pas,
       prix_aller_retour: par,
       prix_express: pex,
@@ -106,14 +127,22 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
       prix_ht: Math.round((basePrice / 1.2) * 100) / 100,
       notes: form.notes.trim() || null,
       active: true,
-    } as never);
+    };
+
+    let error;
+    if (editingId) {
+      ({ error } = await supabase.from("client_pricing_rules" as never)
+        .update(payload as never).eq("id", editingId));
+    } else {
+      ({ error } = await supabase.from("client_pricing_rules" as never).insert(payload as never));
+    }
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Tarif personnalisé créé");
-    setForm(EMPTY_FORM);
-    setCreating(false);
+    toast.success(editingId ? "Tarif mis à jour" : "Tarif personnalisé créé");
+    resetForm();
     load();
   };
+
 
   const toggleActive = async (r: Rule) => {
     await supabase.from("client_pricing_rules" as never)
@@ -174,6 +203,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                     {r.notes && <p className="text-xs text-slate-500 italic mt-1">{r.notes}</p>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => startEdit(r)} className="admin-btn-ghost" title="Modifier">
+                      <Pencil size={14} />
+                    </button>
                     <button onClick={() => toggleActive(r)} className="admin-btn-ghost" title={r.active ? "Désactiver" : "Activer"}>
                       {r.active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                     </button>
@@ -181,6 +213,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                       <Trash2 size={14} />
                     </button>
                   </div>
+
                 </div>
               </div>
             ))}
@@ -188,14 +221,19 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
         )}
 
         {!creating ? (
-          <button onClick={() => setCreating(true)} className="admin-btn-primary inline-flex items-center gap-1.5 mt-2">
+          <button onClick={() => { setCreating(true); setEditingId(null); setForm(EMPTY_FORM); }} className="admin-btn-primary inline-flex items-center gap-1.5 mt-2">
             <Plus size={14} /> Ajouter un tarif
           </button>
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-800">{editingId ? "Modifier le tarif" : "Nouveau tarif"}</p>
+              <button onClick={resetForm} className="admin-btn-ghost" title="Fermer"><X size={14} /></button>
+            </div>
             <AdminField label="Libellé zone (ex: Tours, Le Mans)">
               <input className={inp} value={form.zone_label} onChange={(e) => setForm({ ...form, zone_label: e.target.value })} placeholder="Tours" />
             </AdminField>
+
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Ville départ (filtre, optionnel)">
                 <input className={inp} value={form.ville_depart} onChange={(e) => setForm({ ...form, ville_depart: e.target.value })} placeholder="ex: Tours" />
@@ -240,10 +278,11 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
             <div className="flex gap-2">
               <button onClick={submit} disabled={saving} className="admin-btn-primary inline-flex items-center gap-1.5">
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                Enregistrer
+                {editingId ? "Mettre à jour" : "Enregistrer"}
               </button>
-              <button onClick={() => { setCreating(false); setForm(EMPTY_FORM); }} className="admin-btn-ghost">Annuler</button>
+              <button onClick={resetForm} className="admin-btn-ghost">Annuler</button>
             </div>
+
           </div>
         )}
       </div>

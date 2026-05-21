@@ -1,112 +1,105 @@
+# Plan — Tarifs personnalisés & adresses par défaut (consolidation)
 
-# Refonte "Nouvelle mission" Dashboard Pro
+## État actuel (déjà en place — ne pas casser)
 
-Périmètre : `QuickMissionForm` (Pro), fiche client admin, moteur de tarifs personnalisés, propagation vers mission + driver. Aucune autre zone du produit n'est touchée. Estimateur reste exclusivement dans `/dashboard-pro/nouvelle-demande` (l'accueil reste un récap).
+- Table `client_pricing_rules` + bloc admin (création, toggle, suppression, prix aller / A-R / express, suppléments par option).
+- Table `client_default_addresses` + bloc admin (création, toggle, défaut, suppression).
+- `src/lib/client-pricing.ts` — resolver avec scoring (ville_depart/ville_arrivee/trip_type) et fallback `prix_ttc`.
+- `QuickMissionForm` applique automatiquement le tarif personnalisé puis fallback `calculateBasePrice`.
+- Favoris chargés + bouton « Utiliser cette adresse » qui préremplit départ + contact + notes.
+- Bloc contacts driver (`MissionContactsBlock`) déjà affiché dans le cockpit.
 
-## 1. Schéma de données (1 migration)
+## Ce qui manque vs. la demande
 
-**Table `client_default_addresses`** (adresses favorites de départ par client)
-- `client_user_id` (uuid), `client_email` (text, lower)
-- `label` (ex: "Agence Tours"), `address`, `contact_nom`, `contact_tel`, `notes_acces`
-- `is_default` (bool), `active` (bool)
-- RLS : admin gère ; client lit ses propres entrées (matching `user_id` OU `email`)
+1. Pas d'édition inline des tarifs ni des adresses (uniquement créer/supprimer).
+2. Adresses traitées comme « départ uniquement » — pas de notion `address_type` (départ / arrivée / les deux).
+3. Pas de défaut séparé pour l'arrivée.
+4. Pas de page « Mes adresses » côté Dashboard Client Partner (admin only aujourd'hui).
+5. Pas de toggle « Utiliser mon adresse par défaut » avec préremplissage automatique au montage.
+6. Champs adresse limités : pas de ville/CP/pays/email contact en colonne dédiée.
+7. Priorité des tarifs — le scoring existant mélange `ville_depart` et `ville_arrivee` mais ne distingue pas clairement « trajet exact » > « ville/zone » > « tarif général ».
 
-**Table `demandes_convoyage`** — colonnes ajoutées :
-- `options_meta jsonb default '{}'` (clé/bool : `recharge_electrique`, `plein_essence`, `nettoyage`, `express`, `autre_note`)
-- `vehicule_immatriculation`, `vehicule_vin`, `vehicule_marque`, `vehicule_modele`,
-  `vehicule_energie`, `vehicule_type`, `vehicule_couleur`, `vehicule_km`, `vehicule_notes`
-- `default_address_id` (uuid, nullable) — adresse favorite utilisée
-- `pricing_display_mode` (text — `ttc|ht|exempt`) snapshot au moment de la demande
+## Travail à faire
 
-**Table `client_pricing_rules`** — colonnes ajoutées :
-- `prix_aller_simple numeric`, `prix_aller_retour numeric`, `prix_express numeric` (optionnels, en plus de `prix_ttc` existant pour rétro-compat)
-- `supplements jsonb default '{}'` (ex: `{recharge_electrique:15, plein_essence:10, nettoyage:25, express:50}`)
+### 1. Migration BDD (additive, non-cassante)
 
-**Trigger** : `auto_create_trajet_from_devis`-like : copier `options_meta` + champs véhicule dans `trajets` lors de la conversion (ajout colonnes équivalentes sur `trajets` si manquantes).
+- `client_default_addresses` :
+  - Ajouter `address_type text NOT NULL DEFAULT 'depart'` avec check `IN ('depart','arrivee','both')`.
+  - Ajouter `ville text`, `code_postal text`, `pays text DEFAULT 'France'`, `contact_email text`.
+  - Backfill : `address_type = 'depart'` pour les lignes existantes.
+  - Autoriser le client connecté à gérer (INSERT/UPDATE/DELETE) ses propres adresses (policies `client_user_id = auth.uid()` ou `client_email = email JWT`).
+- `client_pricing_rules` : ajouter colonne `priority integer DEFAULT 0` pour permettre à l'admin de forcer un ordre si besoin (laissé à 0 par défaut, n'impacte rien sinon).
+- Aucune modification de `demandes_convoyage`, `trajets`, `missions`, `factures` — leurs colonnes contact_*/options_meta sont déjà en place et suffisantes.
 
-## 2. Admin — fiche client (`admin.clients.$clientId.tsx`)
+### 2. Resolver de prix (`src/lib/client-pricing.ts`)
 
-Trois nouveaux blocs sous "Facturation" :
+- Refactor du scoring pour appliquer explicitement les 4 niveaux de priorité :
+  - **P1** : `ville_depart` ET `ville_arrivee` matchent (trajet exact).
+  - **P2** : `ville_depart` OU `ville_arrivee` match, ou `zone_label` non vide.
+  - **P3** : règle générale du client (toutes colonnes ville vides).
+  - **P4** : retour `null` → caller fait le fallback `calculateBasePrice`.
+- Bonus mineur pour `trip_type` exact vs `any`, et pour `priority` admin.
+- Pas de changement d'API publique → aucun appelant à toucher.
 
-**a) Mode d'affichage des prix**
-- Radio : TTC / HT / Non soumis TVA → écrit `profiles.pricing_display_mode` (déjà existant)
-- Champ `tva_exemption_note` si exempt
+### 3. Composants admin (édition inline + types d'adresse)
 
-**b) Adresses de départ favorites** (nouveau composant `ClientDefaultAddressesBlock`)
-- Table CRUD (label, adresse, contact, tel, notes, défaut, actif)
-- Bouton "Définir par défaut" radio exclusif
+- `ClientPricingRulesBlock` : mode édition d'une règle existante (mêmes champs que la création, bouton « Modifier » sur chaque carte).
+- `ClientDefaultAddressesBlock` :
+  - Sélecteur `address_type` (Départ / Arrivée / Les deux) à la création et à l'édition.
+  - Champs supplémentaires : ville, code postal, pays, email contact.
+  - Édition inline.
+  - Filtre visuel des adresses par type (départ / arrivée).
+  - Renommer le titre du bloc en « Adresses favorites » (départ + arrivée).
 
-**c) Tarifs personnalisés v2** (refonte de `ClientPricingRulesBlock`)
-- Pour chaque règle : ville/zone + prix aller simple / aller-retour / express (3 champs)
-- Sous-section "Suppléments options" : 4 inputs numériques mappés sur les checkboxes
-- Activation par règle (toggle existant conservé)
-- Conserver ancien champ `prix_ttc` comme fallback affiché si nouveaux vides
+### 4. Côté Dashboard Client Partner
 
-## 3. Formulaire "Nouvelle mission" (`QuickMissionForm.tsx`)
+- Nouvelle route `dashboard-pro/adresses.tsx` (« Mes adresses ») : même composant que l'admin mais auto-scopé au client connecté (RLS le permettra grâce à la nouvelle policy). Ajouter une entrée dans la nav du dashboard pro.
+- Préremplissage dans `QuickMissionForm` :
+  - Au montage, identifier les `is_default` de type `depart` et `arrivee`.
+  - Stocker deux toggles `useDefaultDepart` / `useDefaultArrivee` (par défaut **activés** si une adresse par défaut existe pour ce type).
+  - Quand le toggle est activé : prérempli `depart` ou `arrivee` + contact + tel + notes correspondants.
+  - Quand l'utilisateur désactive le toggle ou édite le champ manuellement : on n'écrase plus.
+  - Liste compacte des autres favoris (par type) sous chaque champ adresse, comme aujourd'hui mais filtrée par `address_type`.
 
-Réorganisé en 6 sections, design existant conservé (cartes `bg-white rounded-xl border-pro-border`). Mobile : sticky CTA déjà en place.
+### 5. Driver — vérification (pas de code à écrire)
 
-**Section 1 — Type de prestation** : conservé (aller-simple / aller-retour / express)
+`MissionContactsBlock` affiche déjà nom + tel + bouton appel pour départ/arrivée. Les `contact_depart_note` / `contact_arrivee_note` (= notes d'accès) sont déjà propagés via `copy_demande_to_trajet` (trigger en place). On confirme juste l'affichage des notes dans le bloc contact, sinon micro-ajustement.
 
-**Section 2 — Lieu d'enlèvement** :
-- Bandeau "Mes adresses favorites" (chips cliquables) listant `client_default_addresses` du client
-- Bouton "Utiliser mon adresse par défaut" si une est marquée `is_default`
-- Champs adresse + contact + tel + notes (existant) restent éditables
+## Détails techniques
 
-**Section 3 — Lieu de livraison** : inchangé
+```text
+client_default_addresses (modifié)
+├── address_type  text  CHECK IN ('depart','arrivee','both')  DEFAULT 'depart'
+├── ville         text
+├── code_postal   text
+├── pays          text  DEFAULT 'France'
+└── contact_email text
 
-**Section 4 — Véhicule** (élargi) :
-- Input plaque + bouton "Récupérer les infos" → appelle `lookupPlate` (server fn existante via `src/lib/plate.functions.ts`)
-- Spinner pendant lookup, message d'erreur non bloquant si KO
-- Préremplit : marque, modèle, énergie, type, VIN si dispo
-- Champs : Immatriculation, VIN, Marque, Modèle, Énergie (select : essence/diesel/hybride/hybride-rechargeable/electrique/gpl/autre), Type véhicule, Couleur (optionnel), Km (optionnel), Notes véhicule
-- Tous éditables manuellement
-
-**Section 5 — Options & planning** (nouvelle) :
-- 4 checkboxes (Recharge électrique, Plein essence, Nettoyage, Express) avec libellé + tarif si supplément configuré ("+15 €")
-- Champ texte "Autre / commentaire libre"
-- Date / heure (déplacés ici)
-
-**Section 6 — Récap & prix** :
-- `priceView` recalculé : prix base via règle perso (`prix_aller_simple|aller_retour|express`) sinon fallback standard
-- Ajoute la somme des suppléments des options cochées (`supplements`)
-- Affichage détaillé : ligne base + lignes options cochées avec montants, puis total selon mode TTC/HT/exempt
-- **Fix contraste** : forcer `text-pro-text` / `text-slate-700` partout sur fond clair (audit visuel du composant `PriceRecap`)
-
-## 4. Resolver de prix (`src/lib/client-pricing.ts`)
-
-Étendre `ResolvedClientPrice` :
-```ts
-{ prix_base_ttc, prix_base_ht, supplements: Record<string, number>, ruleId, zone_label, ... }
+client_pricing_rules (modifié)
+└── priority      int   DEFAULT 0
 ```
-- `resolveClientPrice` : lit nouveaux champs `prix_aller_simple|aller_retour|express` selon `tripType` ; tombe sur `prix_ttc` historique si non défini
-- Nouvelle fonction `applyOptionSupplements(base, supplements, optionsChecked) → { totalTtc, lines[] }`
 
-## 5. Propagation vers mission + driver
+```text
+Priorité resolver (nouveau)
+P1  ville_depart + ville_arrivee tous deux matchent  → score 100 + priority
+P2  ville_depart OU ville_arrivee match, ou zone_label défini → score 50 + priority
+P3  règle générale (toutes villes vides)              → score 10 + priority
+P4  rien → fallback calculateBasePrice (logique inchangée)
++5 si trip_type exact (vs 'any')
+```
 
-- `demandes_convoyage.options_meta` + champs véhicule copiés dans `trajets` (via trigger ou à la conversion manuelle dans `admin.demandes.tsx`)
-- `MissionCockpit` / `MissionContactsBlock` (driver) : afficher un panneau "Prestations demandées" listant les options cochées (chips lisibles : ⚡ Recharge, ⛽ Plein, 🧽 Nettoyage…) et un bloc "Véhicule" complet (plaque, VIN, énergie, etc.)
-- Boutons "Appeler" déjà présents sur contacts (vérifier `tel:` href)
-- Étape "câble électrique" conditionnelle : afficher uniquement si `vehicule_energie ∈ {electrique, hybride_rechargeable}`
+## Hors scope (explicitement)
 
-## 6. Vue admin demande (`admin.demandes.tsx` + drawer)
+- Workflow demande → mission → facture : inchangé.
+- Design global du formulaire « Nouvelle mission » : pas de refonte visuelle, juste l'ajout de 2 toggles discrets.
+- Aucune modification de la logique de paiement, de génération PDF, ou de la facturation.
+- Pas de migration de données existantes hors backfill `address_type = 'depart'`.
 
-Ajouter blocs "Véhicule détaillé" et "Options demandées" — lecture seule, basés sur les nouveaux champs.
+## Tests à valider après implémentation
 
-## 7. Détails techniques
-
-- Le composant `QuickMissionForm` passe de ~470 → ~700 lignes, restant maintenable (extraire `VehicleBlock`, `OptionsBlock`, `DefaultAddressPicker` dans `src/components/dashboard-pro/`)
-- Lookup plaque : réutilise `lookupPlate` server function existante (pas de nouvelle intégration)
-- Validation Zod côté insert (longueurs, format plaque/VIN)
-- Aucune modification du parcours B2C ni de l'estimateur public
-- Migration backfill : `options_meta = '{}'`, `pricing_display_mode` déjà présent
-
-## 8. Plan de test
-
-Couvre les 37 points listés par l'utilisateur — checklist exécutée manuellement avant livraison (focus : tarifs Tours/Le Mans CAT France, fallback API plaque KO, options propagées au driver, switch TTC/HT/exempt cohérent estimateur→facture).
-
-## 9. Hors scope (à confirmer)
-
-- Pas de Stripe/paiement modifié
-- Pas de refonte mobile MissionCockpit additionnelle (déjà faite tour précédent)
-- Pas de modification des flux B2B `b2b_transport_requests` (canal distinct)
+- Client A et Client B avec tarifs Tours différents → chacun voit son prix.
+- Tarif personnalisé ville_depart seule (P2) vs trajet exact (P1) → P1 gagne.
+- Adresse défaut départ activée → préremplie. Toggle off → champ libre. Édition manuelle → conservée.
+- Adresse défaut arrivée séparée de celle de départ → bien indépendantes.
+- Création/édition/suppression d'une adresse depuis « Mes adresses » côté client → visible côté admin.
+- Driver voit nom/tel/notes des deux contacts.

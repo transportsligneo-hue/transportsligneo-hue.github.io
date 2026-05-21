@@ -448,8 +448,11 @@ export type Database = {
         Row: {
           active: boolean
           address: string
+          address_type: string
           client_email: string
           client_user_id: string | null
+          code_postal: string | null
+          contact_email: string | null
           contact_nom: string | null
           contact_tel: string | null
           created_at: string
@@ -458,13 +461,18 @@ export type Database = {
           is_default: boolean
           label: string
           notes_acces: string | null
+          pays: string | null
           updated_at: string
+          ville: string | null
         }
         Insert: {
           active?: boolean
           address: string
+          address_type?: string
           client_email: string
           client_user_id?: string | null
+          code_postal?: string | null
+          contact_email?: string | null
           contact_nom?: string | null
           contact_tel?: string | null
           created_at?: string
@@ -473,13 +481,18 @@ export type Database = {
           is_default?: boolean
           label: string
           notes_acces?: string | null
+          pays?: string | null
           updated_at?: string
+          ville?: string | null
         }
         Update: {
           active?: boolean
           address?: string
+          address_type?: string
           client_email?: string
           client_user_id?: string | null
+          code_postal?: string | null
+          contact_email?: string | null
           contact_nom?: string | null
           contact_tel?: string | null
           created_at?: string
@@ -488,7 +501,9 @@ export type Database = {
           is_default?: boolean
           label?: string
           notes_acces?: string | null
+          pays?: string | null
           updated_at?: string
+          ville?: string | null
         }
         Relationships: []
       }
@@ -501,6 +516,7 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          priority: number
           prix_aller_retour: number | null
           prix_aller_simple: number | null
           prix_express: number | null
@@ -521,6 +537,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          priority?: number
           prix_aller_retour?: number | null
           prix_aller_simple?: number | null
           prix_express?: number | null
@@ -541,6 +558,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          priority?: number
           prix_aller_retour?: number | null
           prix_aller_simple?: number | null
           prix_express?: number | null

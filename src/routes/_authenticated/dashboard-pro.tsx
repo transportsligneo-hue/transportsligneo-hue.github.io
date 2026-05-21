@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2 } from "lucide-react";
+import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,9 +17,11 @@ const navItems: ProSidebarItem[] = [
   { to: "/dashboard-pro", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
   { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
   { to: "/dashboard-pro/nouvelle-demande", label: "Nouvelle mission", icon: PlusCircle },
+  { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
   { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
   { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
 ];
+
 
 function ProLayout() {
   const { isAuthenticated, role, typeClient, isLoading, homeRoute } = useAuth();
