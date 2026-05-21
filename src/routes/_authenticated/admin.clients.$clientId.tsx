@@ -528,6 +528,24 @@ function AdminClientDetail() {
               Si désactivé ou vide, la mention globale (Paramètres → Facturation) sera utilisée.
               N'oubliez pas d'enregistrer le profil après modification.
             </p>
+
+            <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={form.relances_disabled}
+                  onChange={(e) => setForm({ ...form, relances_disabled: e.target.checked })}
+                />
+                <span>
+                  <span className="font-medium">Désactiver les relances automatiques</span>
+                  <span className="block text-xs text-[color:var(--admin-muted)]">
+                    Aucun email de relance ni passage automatique en « En retard » pour ce client.
+                    Utile pour les comptes B2B qui paient à échéance fixe (ex&nbsp;: 30 jours).
+                  </span>
+                </span>
+              </label>
+            </div>
           </div>
         </AdminSection>
 
