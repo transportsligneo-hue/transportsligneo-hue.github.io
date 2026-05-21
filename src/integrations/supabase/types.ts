@@ -441,6 +441,54 @@ export type Database = {
           },
         ]
       }
+      client_default_addresses: {
+        Row: {
+          active: boolean
+          address: string
+          client_email: string
+          client_user_id: string | null
+          contact_nom: string | null
+          contact_tel: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_default: boolean
+          label: string
+          notes_acces: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address: string
+          client_email: string
+          client_user_id?: string | null
+          contact_nom?: string | null
+          contact_tel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          label: string
+          notes_acces?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string
+          client_email?: string
+          client_user_id?: string | null
+          contact_nom?: string | null
+          contact_tel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          notes_acces?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_pricing_rules: {
         Row: {
           active: boolean
@@ -450,8 +498,12 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          prix_aller_retour: number | null
+          prix_aller_simple: number | null
+          prix_express: number | null
           prix_ht: number | null
           prix_ttc: number
+          supplements: Json
           trip_type: string
           updated_at: string
           ville_arrivee: string | null
@@ -466,8 +518,12 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          prix_aller_retour?: number | null
+          prix_aller_simple?: number | null
+          prix_express?: number | null
           prix_ht?: number | null
           prix_ttc: number
+          supplements?: Json
           trip_type?: string
           updated_at?: string
           ville_arrivee?: string | null
@@ -482,8 +538,12 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          prix_aller_retour?: number | null
+          prix_aller_simple?: number | null
+          prix_express?: number | null
           prix_ht?: number | null
           prix_ttc?: number
+          supplements?: Json
           trip_type?: string
           updated_at?: string
           ville_arrivee?: string | null
@@ -693,6 +753,7 @@ export type Database = {
           contact_depart_tel: string | null
           created_at: string
           date_souhaitee: string | null
+          default_address_id: string | null
           depart: string
           depart_retour: string | null
           distance_km: number | null
@@ -708,9 +769,11 @@ export type Database = {
           modele_retour: string | null
           nom: string
           options: string | null
+          options_meta: Json
           paid_at: string | null
           payment_status: string
           prenom: string
+          pricing_display_mode: string | null
           prix_estime: number | null
           statut: string
           stripe_payment_intent_id: string | null
@@ -718,6 +781,15 @@ export type Database = {
           telephone: string | null
           updated_at: string
           user_id: string | null
+          vehicule_couleur: string | null
+          vehicule_energie: string | null
+          vehicule_immatriculation: string | null
+          vehicule_km: number | null
+          vehicule_marque: string | null
+          vehicule_modele: string | null
+          vehicule_notes: string | null
+          vehicule_type: string | null
+          vehicule_vin: string | null
           vin_retour: string | null
         }
         Insert: {
@@ -733,6 +805,7 @@ export type Database = {
           contact_depart_tel?: string | null
           created_at?: string
           date_souhaitee?: string | null
+          default_address_id?: string | null
           depart: string
           depart_retour?: string | null
           distance_km?: number | null
@@ -748,9 +821,11 @@ export type Database = {
           modele_retour?: string | null
           nom: string
           options?: string | null
+          options_meta?: Json
           paid_at?: string | null
           payment_status?: string
           prenom: string
+          pricing_display_mode?: string | null
           prix_estime?: number | null
           statut?: string
           stripe_payment_intent_id?: string | null
@@ -758,6 +833,15 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_marque?: string | null
+          vehicule_modele?: string | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
           vin_retour?: string | null
         }
         Update: {
@@ -773,6 +857,7 @@ export type Database = {
           contact_depart_tel?: string | null
           created_at?: string
           date_souhaitee?: string | null
+          default_address_id?: string | null
           depart?: string
           depart_retour?: string | null
           distance_km?: number | null
@@ -788,9 +873,11 @@ export type Database = {
           modele_retour?: string | null
           nom?: string
           options?: string | null
+          options_meta?: Json
           paid_at?: string | null
           payment_status?: string
           prenom?: string
+          pricing_display_mode?: string | null
           prix_estime?: number | null
           statut?: string
           stripe_payment_intent_id?: string | null
@@ -798,6 +885,15 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_marque?: string | null
+          vehicule_modele?: string | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
           vin_retour?: string | null
         }
         Relationships: []
@@ -2256,6 +2352,7 @@ export type Database = {
           immatriculation: string | null
           marque: string | null
           modele: string | null
+          options_meta: Json
           pricing_mode: string
           prix: number | null
           prix_client: number | null
@@ -2270,6 +2367,13 @@ export type Database = {
           statut_publication: string
           tarif_convoyeur: number | null
           updated_at: string
+          vehicule_couleur: string | null
+          vehicule_energie: string | null
+          vehicule_immatriculation: string | null
+          vehicule_km: number | null
+          vehicule_notes: string | null
+          vehicule_type: string | null
+          vehicule_vin: string | null
           vin: string | null
         }
         Insert: {
@@ -2300,6 +2404,7 @@ export type Database = {
           immatriculation?: string | null
           marque?: string | null
           modele?: string | null
+          options_meta?: Json
           pricing_mode?: string
           prix?: number | null
           prix_client?: number | null
@@ -2314,6 +2419,13 @@ export type Database = {
           statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
           vin?: string | null
         }
         Update: {
@@ -2344,6 +2456,7 @@ export type Database = {
           immatriculation?: string | null
           marque?: string | null
           modele?: string | null
+          options_meta?: Json
           pricing_mode?: string
           prix?: number | null
           prix_client?: number | null
@@ -2358,6 +2471,13 @@ export type Database = {
           statut_publication?: string
           tarif_convoyeur?: number | null
           updated_at?: string
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
           vin?: string | null
         }
         Relationships: [

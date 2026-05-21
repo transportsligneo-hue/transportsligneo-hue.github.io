@@ -30,6 +30,7 @@ import {
 } from "@/components/admin/ui";
 import { LogoUploader } from "@/components/LogoUploader";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
+import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 
 
 export const Route = createFileRoute("/_authenticated/admin/clients/$clientId")({
@@ -598,7 +599,8 @@ function AdminClientDetail() {
           </AdminSection>
 
           {profile.email && (
-            <div className="mt-6">
+            <div className="mt-6 space-y-6">
+              <ClientDefaultAddressesBlock clientUserId={clientId} clientEmail={profile.email} />
               <ClientPricingRulesBlock clientUserId={clientId} clientEmail={profile.email} />
             </div>
           )}
