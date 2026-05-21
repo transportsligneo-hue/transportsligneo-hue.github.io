@@ -101,7 +101,39 @@ function AdminFacturesPage() {
     }
   };
 
+  const saveReference = async (id: string, ref: string | null, label: string | null) => {
+    const { error } = await supabase
+      .from("factures")
+      .update({ reference_client: ref, reference_label: label })
+      .eq("id", id);
+    if (error) {
+      toast.error("Sauvegarde référence impossible", { description: error.message });
+      return false;
+    }
+    setFactures(prev => prev.map(f => f.id === id ? { ...f, reference_client: ref, reference_label: label } : f));
+    if (selected?.id === id) setSelected(s => s ? { ...s, reference_client: ref, reference_label: label } : s);
+    return true;
+  };
+
   const handleDownload = async (row: FactureRow) => {
+    let refClient = row.reference_client ?? null;
+    let refLabel = row.reference_label ?? null;
+
+    // Prompt si B2B sans réf : éviter les dépôts plateforme sans code
+    if (row.type_facture === "b2b" && !refClient) {
+      const input = window.prompt(
+        `Référence client à reporter sur la facture ${row.numero} ?\n(ex. n° de commande, n° de dossier — laisser vide pour ignorer)`,
+        ""
+      );
+      if (input === null) return; // cancel
+      const trimmed = input.trim();
+      if (trimmed.length > 0) {
+        refClient = trimmed;
+        if (!refLabel) refLabel = "Référence client";
+        await saveReference(row.id, refClient, refLabel);
+      }
+    }
+
     setGeneratingId(row.id);
     try {
       const data: FactureData = {
@@ -127,6 +159,8 @@ function AdminFacturesPage() {
         tva_taux: Number(row.tva_taux),
         prix_tva: Number(row.prix_tva),
         prix_ttc: Number(row.prix_ttc),
+        reference_client: refClient,
+        reference_label: refLabel,
       };
       const blob = await generateFacturePdf(data);
       downloadFacturePdf(blob, row.numero);
