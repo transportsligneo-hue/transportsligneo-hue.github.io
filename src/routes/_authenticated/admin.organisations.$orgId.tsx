@@ -292,3 +292,15 @@ function Empty({ icon: Icon, text }: { icon: typeof StickyNote; text: string }) 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="text-xs uppercase tracking-wider text-pro-muted">{children}</p>;
 }
+
+function NoOwnerNotice() {
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-sm text-amber-900">
+      <p className="font-medium">Aucun utilisateur rattaché à cette organisation.</p>
+      <p className="mt-1 text-amber-800">
+        Pour configurer les prix personnalisés ou les adresses favorites, ajoutez d'abord un membre (owner) à l'organisation.
+      </p>
+    </div>
+  );
+}
+
