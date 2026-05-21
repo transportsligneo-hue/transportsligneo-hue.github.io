@@ -69,6 +69,15 @@ interface StepState {
     fieldsCount?: number;
     error?: string;
   };
+  /** Checklist équipements véhicule */
+  equipements?: {
+    extincteur: boolean;
+    kit_securite: boolean;
+    cable_charge: boolean;
+    roue: "secours" | "kit" | "aucun" | null;
+  };
+  /** Kilométrage saisi */
+  kilometrage?: number;
 }
 
 interface StoredState {
