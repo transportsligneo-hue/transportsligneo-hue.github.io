@@ -671,6 +671,14 @@ function AdminMissionDetail() {
             >
               Rapport complet
             </Button>
+            <Button
+              variant="secondary"
+              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+              onClick={downloadEdlPdf}
+              disabled={generatingEdlPdf}
+            >
+              PDF état des lieux
+            </Button>
             {linkedFactureId ? (
               <Link
                 to="/admin/factures"
