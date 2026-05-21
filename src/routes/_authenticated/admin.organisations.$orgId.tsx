@@ -214,6 +214,23 @@ function OrgDetail() {
           )}
         </TabsContent>
 
+        <TabsContent value="pricing" className="space-y-3">
+          {owner ? (
+            <ClientPricingRulesBlock clientUserId={owner.user_id} />
+          ) : (
+            <NoOwnerNotice />
+          )}
+        </TabsContent>
+
+        <TabsContent value="addresses" className="space-y-3">
+          {owner ? (
+            <ClientDefaultAddressesBlock clientUserId={owner.user_id} clientEmail={owner.email ?? ""} />
+          ) : (
+            <NoOwnerNotice />
+          )}
+        </TabsContent>
+
+
         <TabsContent value="activity" className="bg-white border border-pro-border rounded-xl p-4">
           {activity.length === 0 ? <Empty icon={HistoryIcon} text="Aucune activité" /> : (
             <div className="divide-y">
