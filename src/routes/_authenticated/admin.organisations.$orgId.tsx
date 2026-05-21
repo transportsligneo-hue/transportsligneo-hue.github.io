@@ -28,6 +28,7 @@ function OrgDetail() {
   const [missions, setMissions] = useState<any[]>([]);
   const [b2bRequests, setB2bRequests] = useState<any[]>([]);
   const [activity, setActivity] = useState<any[]>([]);
+  const [owner, setOwner] = useState<{ user_id: string; email: string | null } | null>(null);
 
   useEffect(() => {
     void load();
