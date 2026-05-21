@@ -2,6 +2,8 @@ import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
+import { resolveInvoiceMention } from "@/lib/invoice-settings";
+
 
 
 export interface FactureData {
