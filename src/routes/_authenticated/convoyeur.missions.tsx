@@ -492,7 +492,10 @@ function ConvoyeurMissions() {
               immatriculation: t?.immatriculation ?? undefined,
             },
             contactDepartTel: t?.client_telephone ?? null,
-            contactArriveeTel: t?.client_telephone ?? null,
+            contactArriveeTel: (t as { arrivee_contact_telephone?: string | null } | null)?.arrivee_contact_telephone ?? t?.client_telephone ?? null,
+            contactArriveeNom: (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null,
+            contactArriveeTel2: (t as { arrivee_contact_telephone2?: string | null } | null)?.arrivee_contact_telephone2 ?? null,
+            contactArriveeInstructions: (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null,
             gpsTarget: t?.depart ?? null,
           }}
           steps={timelineSteps}
