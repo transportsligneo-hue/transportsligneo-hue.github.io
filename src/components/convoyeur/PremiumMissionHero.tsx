@@ -113,8 +113,8 @@ export function PremiumMissionHero({
               <button className="relative w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-cream/80 hover:bg-white/10">
                 <Bell size={15} />
               </button>
-              <div className="relative w-[88px] h-[88px]">
-                <svg width="88" height="88" viewBox="0 0 88 88" className="rotate-[-90deg]">
+              <div className="relative w-[72px] h-[72px] sm:w-[88px] sm:h-[88px]">
+                <svg viewBox="0 0 88 88" className="w-full h-full rotate-[-90deg]">
                   <circle cx="44" cy="44" r={radius} stroke="rgba(255,255,255,0.12)" strokeWidth="6" fill="none" />
                   <circle
                     cx="44" cy="44" r={radius}
@@ -125,8 +125,8 @@ export function PremiumMissionHero({
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-serif text-xl text-white leading-none">
-                    {currentStepIndex}<span className="text-cream/60 text-base">/{totalSteps}</span>
+                  <span className="font-serif text-lg sm:text-xl text-white leading-none">
+                    {currentStepIndex}<span className="text-cream/60 text-sm sm:text-base">/{totalSteps}</span>
                   </span>
                   <span className="text-[9px] uppercase tracking-wider text-cream/60 mt-0.5">Étape</span>
                 </div>
