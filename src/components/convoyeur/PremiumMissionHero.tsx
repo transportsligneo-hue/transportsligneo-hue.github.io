@@ -14,6 +14,10 @@ export interface PremiumMissionHeroData {
   vehicule?: { marque?: string; modele?: string; immatriculation?: string; vin?: string } | null;
   contactDepartTel?: string | null;
   contactArriveeTel?: string | null;
+  /** Contact livraison enrichi (réceptionnaire), édité par l'admin. */
+  contactArriveeNom?: string | null;
+  contactArriveeTel2?: string | null;
+  contactArriveeInstructions?: string | null;
   gpsTarget?: string | null;
 }
 
@@ -186,6 +190,60 @@ export function PremiumMissionHero({
               <ShortcutTile label="Documents" icon={<FileText size={20} />} onClick={onOpenDocuments} />
               <ShortcutTile label="Aide / Incident" icon={<HeadphonesIcon size={20} />} onClick={onOpenIncident} />
             </div>
+
+            {/* Contact livraison (réceptionnaire) — visible seulement si admin a renseigné un contact */}
+            {(data.contactArriveeNom || data.contactArriveeTel || data.contactArriveeInstructions) && (
+              <div
+                className="rounded-2xl border p-4 shadow-sm"
+                style={{
+                  background: "linear-gradient(135deg, #0b1026 0%, #131a3d 100%)",
+                  borderColor: "color-mix(in oklab, var(--electric-blue) 35%, transparent)",
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: "var(--electric-blue)" }}
+                  >
+                    <Phone size={18} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cream/60">
+                      Contact livraison
+                    </p>
+                    <p className="mt-0.5 font-serif text-cream text-base truncate">
+                      {data.contactArriveeNom || "Réceptionnaire"}
+                    </p>
+                    {data.contactArriveeInstructions && (
+                      <p className="mt-1 text-cream/80 text-xs leading-snug">
+                        {data.contactArriveeInstructions}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {(data.contactArriveeTel || data.contactArriveeTel2) && (
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {data.contactArriveeTel && (
+                      <a
+                        href={`tel:${data.contactArriveeTel}`}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition active:scale-95"
+                        style={{ background: "var(--electric-blue)" }}
+                      >
+                        <Phone size={15} /> Appeler la réception
+                      </a>
+                    )}
+                    {data.contactArriveeTel2 && (
+                      <a
+                        href={`tel:${data.contactArriveeTel2}`}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-cream text-sm border border-cream/20 hover:bg-white/5 transition active:scale-95"
+                      >
+                        <Phone size={14} /> N° secondaire
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* === COLONNE DROITE : TIMELINE VERTICALE STICKY === */}

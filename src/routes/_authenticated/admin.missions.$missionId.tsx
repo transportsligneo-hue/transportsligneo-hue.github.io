@@ -42,6 +42,7 @@ import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf } from "@/lib/mission-number";
+import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -72,6 +73,10 @@ interface TrajetFull {
   client_email: string | null;
   client_telephone: string | null;
   prix: number | null;
+  arrivee_contact_nom: string | null;
+  arrivee_contact_telephone: string | null;
+  arrivee_contact_telephone2: string | null;
+  arrivee_contact_instructions: string | null;
 }
 
 interface ConvoyeurFull {
@@ -179,6 +184,20 @@ function AdminMissionDetail() {
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
   const [generatingFacture, setGeneratingFacture] = useState(false);
+  const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
+  const [savingContact, setSavingContact] = useState(false);
+  const [contactNom, setContactNom] = useState("");
+  const [contactTel, setContactTel] = useState("");
+  const [contactTel2, setContactTel2] = useState("");
+  const [contactInstr, setContactInstr] = useState("");
+
+  useEffect(() => {
+    if (!trajet) return;
+    setContactNom(trajet.arrivee_contact_nom ?? "");
+    setContactTel(trajet.arrivee_contact_telephone ?? "");
+    setContactTel2(trajet.arrivee_contact_telephone2 ?? "");
+    setContactInstr(trajet.arrivee_contact_instructions ?? "");
+  }, [trajet]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);

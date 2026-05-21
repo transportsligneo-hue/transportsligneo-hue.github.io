@@ -62,6 +62,8 @@
   --navy: #111a3d;
   --navy-light: #15214a;
   --cream: #f5f1e8;
+  --electric-blue: oklch(0.62 0.22 250);
+  --electric-blue-soft: oklch(0.72 0.18 250);
 }
 
 @layer base {
