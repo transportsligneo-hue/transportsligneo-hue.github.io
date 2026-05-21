@@ -250,6 +250,9 @@ function AdminFacturesPage() {
                       {f.distance_km != null && <> · {f.distance_km} km</>}
                     </p>
                   )}
+                  <div className="mt-1.5">
+                    <ReferenceInline row={f} onSave={saveReference} />
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="text-right">
