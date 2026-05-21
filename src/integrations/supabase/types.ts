@@ -134,6 +134,7 @@ export type Database = {
           etape_courante: string | null
           id: string
           numero_mission: string | null
+          options_completion: Json
           pdf_share_client: boolean
           statut: string
           trajet_id: string
@@ -145,6 +146,7 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           numero_mission?: string | null
+          options_completion?: Json
           pdf_share_client?: boolean
           statut?: string
           trajet_id: string
@@ -156,6 +158,7 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           numero_mission?: string | null
+          options_completion?: Json
           pdf_share_client?: boolean
           statut?: string
           trajet_id?: string
