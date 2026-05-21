@@ -106,6 +106,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       attributions: {
         Row: {
           convoyeur_id: string
@@ -664,6 +685,12 @@ export type Database = {
           arrivee: string
           arrivee_retour: string | null
           carburant: string | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
           created_at: string
           date_souhaitee: string | null
           depart: string
@@ -698,6 +725,12 @@ export type Database = {
           arrivee: string
           arrivee_retour?: string | null
           carburant?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart: string
@@ -732,6 +765,12 @@ export type Database = {
           arrivee?: string
           arrivee_retour?: string | null
           carburant?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_souhaitee?: string | null
           depart?: string
@@ -771,6 +810,12 @@ export type Database = {
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
           converted_at: string | null
           converted_by: string | null
           created_at: string
@@ -819,6 +864,12 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
@@ -867,6 +918,12 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
@@ -1700,6 +1757,12 @@ export type Database = {
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
           created_at: string
           date_prise_en_charge: string
           email: string
@@ -1728,6 +1791,12 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_prise_en_charge: string
           email: string
@@ -1756,6 +1825,12 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_prise_en_charge?: string
           email?: string
@@ -1964,15 +2039,19 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          facture_mention_active: boolean
+          facture_mention_legale: string | null
           id: string
           logo_url: string | null
           nom: string
           organization_id: string | null
           prenom: string
+          pricing_display_mode: string
           siret: string | null
           societe: string | null
           statut: string
           telephone: string | null
+          tva_exemption_note: string | null
           tva_intra: string | null
           type_client: string
           updated_at: string
@@ -1985,15 +2064,19 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          facture_mention_active?: boolean
+          facture_mention_legale?: string | null
           id?: string
           logo_url?: string | null
           nom?: string
           organization_id?: string | null
           prenom?: string
+          pricing_display_mode?: string
           siret?: string | null
           societe?: string | null
           statut?: string
           telephone?: string | null
+          tva_exemption_note?: string | null
           tva_intra?: string | null
           type_client?: string
           updated_at?: string
@@ -2006,15 +2089,19 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          facture_mention_active?: boolean
+          facture_mention_legale?: string | null
           id?: string
           logo_url?: string | null
           nom?: string
           organization_id?: string | null
           prenom?: string
+          pricing_display_mode?: string
           siret?: string | null
           societe?: string | null
           statut?: string
           telephone?: string | null
+          tva_exemption_note?: string | null
           tva_intra?: string | null
           type_client?: string
           updated_at?: string
@@ -2132,6 +2219,12 @@ export type Database = {
           client_nom: string | null
           client_telephone: string | null
           commission_convoyeur_pct: number | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
           created_at: string
           date_trajet: string | null
           demande_id: string | null
@@ -2170,6 +2263,12 @@ export type Database = {
           client_nom?: string | null
           client_telephone?: string | null
           commission_convoyeur_pct?: number | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_trajet?: string | null
           demande_id?: string | null
@@ -2208,6 +2307,12 @@ export type Database = {
           client_nom?: string | null
           client_telephone?: string | null
           commission_convoyeur_pct?: number | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
           created_at?: string
           date_trajet?: string | null
           demande_id?: string | null
