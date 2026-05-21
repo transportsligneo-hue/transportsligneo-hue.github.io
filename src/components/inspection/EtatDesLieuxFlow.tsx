@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyAdmin } from "@/lib/admin-notifications";
 
 interface Props {
   attributionId: string;
