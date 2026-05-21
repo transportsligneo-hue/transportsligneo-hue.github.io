@@ -170,7 +170,7 @@ function ClientMissions() {
                   <div className="flex items-center gap-3 flex-wrap mb-2">
                     <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
                     <StatusBadge kind={missionStatusKind(m.statut)}>
-                      {missionStatusLabel(m.statut)}
+                      {friendlyStatusLabel(m.statut)}
                     </StatusBadge>
                   </div>
                   <p className="text-cream font-heading text-base flex items-center gap-2">
