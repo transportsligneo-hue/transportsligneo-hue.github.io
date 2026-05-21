@@ -328,6 +328,21 @@ function ConvoyeurMissions() {
     return true;
   };
 
+  const toggleOptionCompletion = async (mission: Mission, key: string, done: boolean) => {
+    const current = (mission.options_completion ?? {}) as Record<string, { done: boolean; at?: string }>;
+    const next = { ...current, [key]: { ...(current[key] ?? {}), done, at: done ? new Date().toISOString() : undefined } };
+    const { error } = await supabase
+      .from("attributions")
+      .update({ options_completion: next } as never)
+      .eq("id", mission.id);
+    if (error) {
+      toast.error("Mise à jour impossible", { description: error.message });
+      return;
+    }
+    toast.success(done ? "Tâche validée" : "Tâche annulée");
+    await fetchMissions();
+  };
+
   const handleInspectionComplete = () => {
     if (!inspection) return;
     // Le workflow détecte la complétion via inspectionDepart/Arrivee + auto-avance
