@@ -157,7 +157,7 @@ function ConvoyeurMissions() {
         const [{ data: trajet }, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets")
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
