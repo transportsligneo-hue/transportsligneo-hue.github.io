@@ -150,6 +150,10 @@ function AdminClientDetail() {
         adresse: prof.adresse ?? "",
         adresse_facturation: prof.adresse_facturation ?? "",
         type_client: prof.type_client ?? "particulier",
+        pricing_display_mode: prof.pricing_display_mode ?? (prof.type_client === "b2b" || prof.type_client === "flotte" ? "ht" : "ttc"),
+        tva_exemption_note: prof.tva_exemption_note ?? "",
+        facture_mention_legale: prof.facture_mention_legale ?? "",
+        facture_mention_active: !!prof.facture_mention_active,
       };
       setForm(init);
       setOriginal(init);
