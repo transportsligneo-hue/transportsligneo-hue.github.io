@@ -555,8 +555,7 @@ export function EdlPremiumFlow({
   const skipCurrentScan = () => {
     const stepId = currentStep.id;
     setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
-    toast.info("Scan ignoré — vous pouvez continuer");
-    setTimeout(() => autoAdvance(), 250);
+    toast.info("Scan ignoré — appuyez sur \"Photo suivante\" pour continuer");
   };
 
   const setState = (id: string, s: StepState) =>
@@ -620,11 +619,12 @@ export function EdlPremiumFlow({
         ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
       });
 
-      // Auto-avance vers la photo suivante après validation réussie.
-      // Petit délai pour laisser voir le check vert et le toast.
-      if (currentStep.kind === "photo" || currentStep.kind === "scan") {
-        setTimeout(() => autoAdvance(), 700);
-      }
+      // PAS d'auto-avance : on laisse l'utilisateur voir la photo et appuyer
+      // manuellement sur "Photo suivante" pour passer à l'étape suivante.
+
+
+
+
 
 
 
@@ -802,7 +802,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", previewUrl, storagePath: path });
       toast.success("Selfie validé");
-      setTimeout(() => autoAdvance(), 700);
+      // Pas d'auto-avance — utilisateur appuie sur "Photo suivante".
     } catch (err) {
       console.error("[EDL Premium] selfie failed", err);
       setState(stepId, {
@@ -864,7 +864,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
-      setTimeout(() => autoAdvance(), 700);
+      // Pas d'auto-avance — utilisateur appuie sur "Étape suivante".
     } catch (err) {
       console.error("[EDL Premium] signature failed", err);
       setState(stepId, {

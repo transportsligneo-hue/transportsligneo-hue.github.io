@@ -1289,7 +1289,10 @@ export type Database = {
         Row: {
           attribution_id: string
           created_at: string
+          equipements: Json | null
           id: string
+          kilometrage_arrivee: number | null
+          kilometrage_depart: number | null
           notes: string | null
           statut: string
           type: string
@@ -1298,7 +1301,10 @@ export type Database = {
         Insert: {
           attribution_id: string
           created_at?: string
+          equipements?: Json | null
           id?: string
+          kilometrage_arrivee?: number | null
+          kilometrage_depart?: number | null
           notes?: string | null
           statut?: string
           type: string
@@ -1307,7 +1313,10 @@ export type Database = {
         Update: {
           attribution_id?: string
           created_at?: string
+          equipements?: Json | null
           id?: string
+          kilometrage_arrivee?: number | null
+          kilometrage_depart?: number | null
           notes?: string | null
           statut?: string
           type?: string
@@ -2110,6 +2119,10 @@ export type Database = {
       trajets: {
         Row: {
           arrivee: string
+          arrivee_contact_instructions: string | null
+          arrivee_contact_nom: string | null
+          arrivee_contact_telephone: string | null
+          arrivee_contact_telephone2: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
           client_email: string | null
@@ -2144,6 +2157,10 @@ export type Database = {
         }
         Insert: {
           arrivee: string
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_email?: string | null
@@ -2178,6 +2195,10 @@ export type Database = {
         }
         Update: {
           arrivee?: string
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_email?: string | null
