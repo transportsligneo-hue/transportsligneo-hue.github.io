@@ -105,6 +105,7 @@ const EMPTY: Editable = {
   tva_exemption_note: "",
   facture_mention_legale: "",
   facture_mention_active: false,
+  relances_disabled: false,
 };
 
 function AdminClientDetail() {
