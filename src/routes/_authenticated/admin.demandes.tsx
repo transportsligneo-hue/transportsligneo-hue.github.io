@@ -182,7 +182,7 @@ function AdminDemandes() {
         vehicule_couleur: d.vehicule_couleur ?? null,
         vehicule_km: d.vehicule_km ?? null,
         vehicule_notes: d.vehicule_notes ?? null,
-        options_meta: d.options_meta ?? {},
+        options_meta: (d.options_meta ?? {}) as never,
       });
       if (error) {
         if (createdMissionId) {
