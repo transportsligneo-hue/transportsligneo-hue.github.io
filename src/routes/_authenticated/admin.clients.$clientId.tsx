@@ -474,6 +474,60 @@ function AdminClientDetail() {
           </div>
         </AdminSection>
 
+        {/* Configuration tarifaire & fiscale */}
+        <AdminSection
+          title="Configuration tarifaire & fiscale"
+          description="Mode d'affichage des prix, exonération TVA et mention légale propre à ce client."
+        >
+          <div className="space-y-4">
+            <AdminField label="Mode d'affichage des prix">
+              <select
+                className={inp}
+                value={form.pricing_display_mode}
+                onChange={(e) => setForm({ ...form, pricing_display_mode: e.target.value })}
+              >
+                <option value="ttc">TTC (particulier — défaut)</option>
+                <option value="ht">HT (pro — TVA ajoutée)</option>
+                <option value="exempt">Exonéré de TVA</option>
+              </select>
+            </AdminField>
+
+            {form.pricing_display_mode === "exempt" && (
+              <AdminField label="Mention d'exonération TVA">
+                <textarea
+                  className={`${inp} min-h-[60px]`}
+                  placeholder="TVA non applicable, art. 293 B du CGI"
+                  value={form.tva_exemption_note}
+                  onChange={(e) => setForm({ ...form, tva_exemption_note: e.target.value })}
+                />
+              </AdminField>
+            )}
+
+            <AdminField label="Mention légale facture (override client)">
+              <textarea
+                className={`${inp} min-h-[80px]`}
+                placeholder="Laisser vide pour utiliser la mention globale définie dans Paramètres."
+                value={form.facture_mention_legale}
+                onChange={(e) => setForm({ ...form, facture_mention_legale: e.target.value })}
+              />
+            </AdminField>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.facture_mention_active}
+                onChange={(e) => setForm({ ...form, facture_mention_active: e.target.checked })}
+              />
+              Activer cette mention spécifique au client
+            </label>
+            <p className="text-xs text-[color:var(--admin-muted)]">
+              Si désactivé ou vide, la mention globale (Paramètres → Facturation) sera utilisée.
+              N'oubliez pas d'enregistrer le profil après modification.
+            </p>
+          </div>
+        </AdminSection>
+
+
         {/* Historique missions */}
         <div className="lg:col-span-2">
           <AdminSection
