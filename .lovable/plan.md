@@ -1,164 +1,125 @@
 
-# Corrections Transports Ligneo — plan par phase
+# Plan — Améliorations EDL, Mission, PDF & UI mobile
 
-Périmètre cadré, modifications chirurgicales, aucune refonte. Aucune donnée existante supprimée. Pas de touche au cœur (DevisGenerator logique de prix, MissionCockpit, EdlPremiumFlow, Stripe, PDF, RLS existants).
-
----
-
-## Phase 1 — Dashboard Client : nettoyage et lisibilité
-
-### 1.1 Supprimer “CA réalisé” côté client
-Aucun bloc nommé "CA réalisé" n'apparaît dans `dashboard-client.index.tsx` actuel (stats : En cours / À venir / Terminées / Demandes). Action :
-- Recherche exhaustive (`rg "CA |Chiffre|réalisé|revenu"`) sur tous les fichiers `dashboard-client.*` + composants importés.
-- Si trouvé : retrait visuel uniquement (pas de suppression en base). Si non trouvé : noter dans `.lovable/plan.md` comme déjà OK.
-
-### 1.2 Lisibilité de l'estimateur (suite)
-Le wrapper `card-premium` a déjà été retiré. Vérifier en preview que les blocs internes `bg-white/[0.03]` (récap prix, TTC, détails) sont lisibles sur le shell client. Si besoin : ajouter une règle CSS scoped `.client-shell [data-devis-summary] { background: rgba(11,16,38,0.85); }` pour forcer un fond navy sous le générateur sans toucher la version landing.
-
-### 1.3 Demandes non converties + suivi missions
-Déjà en place (`dashboard-client.index.tsx` + `dashboard-client.missions.tsx` lisent `devis` + `demandes_convoyage`). À vérifier seulement : badges de statut couvrent bien `nouvelle`, `en_traitement`, `en_cours`, etc.
+Objectif : améliorer l'expérience mobile de l'état des lieux, ajouter de nouvelles étapes (équipements, kilométrages, contact livraison), corriger l'OCR, générer le PDF final admin sans prix, et moderniser l'UI — **sans casser** la logique métier existante (missions, signatures, rôles, paiements).
 
 ---
 
-## Phase 2 — Convoyeur : accès avant validation des documents
+## 1. Photos EDL — affichage immédiat & navigation manuelle
 
-### 2.1 Lever le blocage du layout convoyeur
-`src/routes/_authenticated/convoyeur.tsx` affiche aujourd'hui un écran "Compte en attente" qui bloque tout accès si `convoyeurStatut !== "valide" | "actif"`.
+**Fichier :** `src/components/inspection/EdlPremiumFlow.tsx`
 
-Action :
-- Garder l'écran de blocage uniquement pour `refuse` et `suspendu`.
-- Pour `en_attente` : laisser passer vers le layout normal et afficher un **bandeau persistant** en haut du dashboard convoyeur :
-  > "Votre compte est en attente de validation. Vous pouvez déposer vos documents. Vous pourrez accepter des missions disponibles une fois vos documents validés."
+- Retirer **tous** les `setTimeout(() => autoAdvance(), 700)` ajoutés précédemment après upload photo/scan/selfie/signature. L'utilisateur reste sur l'étape.
+- Afficher la preview locale (`URL.createObjectURL`) **immédiatement** dans le state, avant la fin de l'upload (l'upload continue en arrière-plan avec indicateur).
+- Garder le bouton **« Photo suivante »** comme seule action d'avancement.
+- Rendre le footer d'action **sticky bas** (`fixed bottom-0` + `safe-bottom`) sur mobile, avec backdrop blur navy, hauteur min 64px, padding safe-area.
+- Ajouter un padding-bottom au scroll container pour que le footer ne masque pas le contenu.
 
-Bandeau implémenté dans `ConvoyeurSidebar` ou directement dans `convoyeur.tsx` au-dessus de `<Outlet />`, conditionné sur `convoyeurStatut === "en_attente"`.
+## 2. Étape « Équipements du véhicule » (avant photos)
 
-### 2.2 Bloquer l'acceptation autonome si non validé
-Dans `convoyeur.disponibles.tsx` :
-- Si `convoyeurStatut !== "valide" | "actif"` : désactiver les boutons "Accepter" et "Proposer", afficher une note dorée :
-  > "Vous pourrez accepter des missions disponibles une fois vos documents validés."
-- Côté serveur la RPC `accept_mission_fixe` filtre déjà sur convoyeurs validés (statut = 'valide'), donc la sécurité est conservée. La désactivation UI est cosmétique mais évite confusion.
+**Fichiers :**
+- `src/components/inspection/edl-premium-sequence.ts` — insérer une nouvelle étape `equipements` en tout début (type `checklist`).
+- `src/components/inspection/EdlPremiumFlow.tsx` — nouveau renderer `ChecklistArea` (cases à cocher mobile-friendly).
 
-### 2.3 Side-effect : page documents / profil convoyeur
-Vérifier que `convoyeur.documents.tsx` et `convoyeur.profil.tsx` fonctionnent avec un convoyeur `en_attente` (RLS déjà OK : "Convoyeurs can manage own documents" filtre par `user_id`).
+**Champs :**
+- Extincteur (oui/non)
+- Kit de sécurité (oui/non)
+- Câble de recharge (oui/non/N.A. si non-électrique)
+- Roue de secours / Kit crevaison : sélecteur radio à 3 choix (`roue_secours` | `kit_crevaison` | `aucun`)
 
----
+**Stockage :** colonne `equipements jsonb` sur la table `inspections` (migration).
 
-## Phase 3 — Admin : assignation à un convoyeur non validé
+## 3. Kilométrages départ & arrivée
 
-### 3.1 Élargir la liste des convoyeurs dans AssignDriverDialog
-`src/components/admin/AssignDriverDialog.tsx` filtre actuellement `.eq("statut", "valide")`. Action :
-- Charger tous les convoyeurs `not in ('refuse', 'suspendu')`.
-- Ajouter dans chaque ligne un badge de statut : "Validé" (vert) / "En attente" (orange) / "Documents incomplets" (rouge).
-- Avant assignation d'un convoyeur non `valide` : confirm dialog avec
-  > "Attention : ce convoyeur n'a pas encore tous ses documents validés. Voulez-vous quand même lui assigner cette mission ?"
+**Étapes :** ajouter `kilometrage_depart` juste avant la signature client départ, et `kilometrage_arrivee` juste avant signature client arrivée.
 
-Aucun changement RLS. L'attribution se crée déjà via `UPDATE` sur `attributions` côté admin (policy "Admins can manage attributions").
+**UI :** champ `<input type="number" inputMode="numeric" />` plein écran mobile, validation > 0, sauvegarde dans `inspections.kilometrage_depart` / `kilometrage_arrivee` (colonnes `integer`).
 
----
+**Migration :** ajouter les 3 colonnes (`equipements jsonb`, `kilometrage_depart int`, `kilometrage_arrivee int`).
 
-## Phase 4 — Tarifs personnalisés par client
+## 4. Signatures d'arrivée
 
-### 4.1 Migration SQL (nouvelle table)
+Auditer le code des signatures d'arrivée (`ArriveeSignatureSheet.tsx`) et aligner exactement sur la logique départ (validation, save, transition, affichage post-sign). Réutiliser le même composant `SignatureCanvas` et les mêmes handlers.
+
+## 5. OCR / scan documents
+
+**Fichiers :**
+- `supabase/functions/edl-document-ocr/index.ts` — vérifier l'appel Lovable AI (modèle vision : `google/gemini-2.5-flash`), logs, gestion erreur claire.
+- `src/components/inspection/DocumentScanner.tsx` — afficher message d'erreur visible si OCR échoue + bouton « Continuer sans OCR » déjà en place.
+
+Diagnostiquer via logs edge function après tentative réelle. Vérifier que l'image est bien envoyée en base64 et que le modèle vision répond.
+
+## 6. PDF final admin (sans prix)
+
+**Nouveau fichier :** `src/lib/edl-final-pdf.ts` — génère un PDF récapitulatif mission + EDL.
+
+**Contenu :**
+- En-tête : logo, n° mission, date, départ/arrivée, véhicule (marque/modèle/immat)
+- Convoyeur assigné
+- Équipements cochés
+- Kilométrage départ + arrivée + différence
+- Toutes les photos EDL (grille 2 colonnes, légendées par zone)
+- Signatures départ (client + convoyeur)
+- Signatures arrivée (client + convoyeur)
+- Incidents éventuels
+- **Aucun prix, aucune mention tarifaire**
+
+**Intégration :** bouton « Télécharger PDF mission complet » dans `admin.missions.$missionId.tsx` (visible quand mission terminée).
+
+## 7. Contact livraison (réception)
+
+**Migration :** ajouter sur `trajets` (et/ou `missions`) :
+- `arrivee_contact_nom text`
+- `arrivee_contact_telephone text`
+- `arrivee_contact_telephone2 text`
+- `arrivee_contact_instructions text`
+
+**Admin :** champs éditables dans la fiche mission admin.
+
+**Convoyeur :** dans `PremiumMissionHero.tsx` / `MissionCockpit.tsx`, ajouter une carte « Contact livraison » avec nom, téléphone, bouton `tel:` (« Appeler la réception »), distincte de la carte client commanditaire.
+
+## 8. UI mobile premium
+
+**Cibles :**
+- `MissionCockpit.tsx` / `PremiumMissionHero.tsx` : corriger le chevauchement du badge jaune « Envoyer à l'admin » avec le cadran départ — ajouter `mt-` et utiliser un layout flex column avec gap.
+- Remplacer les boutons/textes noirs purs par un bleu électrique premium cohérent avec la charte navy/or.
+- Ajouter un token `--electric-blue: oklch(0.62 0.22 250)` dans `src/styles.css` + variante `Button` `electric`.
+- Améliorer contraste textes (passer noirs purs en `text-foreground` sur surfaces claires, et `text-primary-foreground` sur navy).
+
+## Détails techniques
+
+**Migration SQL** (un seul fichier) :
 
 ```sql
-CREATE TABLE public.client_pricing_rules (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  client_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
-  client_email text NOT NULL,
-  ville_depart text,           -- nullable = wildcard
-  ville_arrivee text,          -- nullable = wildcard
-  zone_label text,             -- ex: "Tours intra"
-  trip_type text NOT NULL CHECK (trip_type IN ('aller','aller_retour','any')),
-  prix_ttc numeric NOT NULL CHECK (prix_ttc > 0),
-  prix_ht numeric,
-  active boolean NOT NULL DEFAULT true,
-  notes text,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  created_by uuid
-);
+ALTER TABLE public.inspections
+  ADD COLUMN IF NOT EXISTS equipements jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS kilometrage_depart integer,
+  ADD COLUMN IF NOT EXISTS kilometrage_arrivee integer;
 
-ALTER TABLE public.client_pricing_rules ENABLE ROW LEVEL SECURITY;
-
--- Admins : full
-CREATE POLICY "Admins manage client pricing"
-  ON public.client_pricing_rules FOR ALL TO authenticated
-  USING (has_role(auth.uid(),'admin') OR has_role(auth.uid(),'super_admin'))
-  WITH CHECK (has_role(auth.uid(),'admin') OR has_role(auth.uid(),'super_admin'));
-
--- Clients : lecture de leurs propres règles (pour application transparente côté front)
-CREATE POLICY "Clients read own pricing"
-  ON public.client_pricing_rules FOR SELECT TO authenticated
-  USING (
-    client_user_id = auth.uid()
-    OR lower(client_email) = lower(coalesce(auth.jwt()->>'email',''))
-  );
-
-CREATE INDEX ON public.client_pricing_rules (client_email);
-CREATE INDEX ON public.client_pricing_rules (client_user_id);
+ALTER TABLE public.trajets
+  ADD COLUMN IF NOT EXISTS arrivee_contact_nom text,
+  ADD COLUMN IF NOT EXISTS arrivee_contact_telephone text,
+  ADD COLUMN IF NOT EXISTS arrivee_contact_telephone2 text,
+  ADD COLUMN IF NOT EXISTS arrivee_contact_instructions text;
 ```
 
-### 4.2 UI Admin
-Nouveau bloc "Tarifs personnalisés" dans `admin.clients.$clientId.tsx` :
-- Liste des règles existantes (ville départ → arrivée, type, prix TTC, actif).
-- Formulaire d'ajout : ville départ (autocomplete), ville arrivée, type (Aller / Aller-retour / Tous), prix TTC, notes.
-- Actions : éditer / désactiver / supprimer.
+**Fichiers modifiés :**
+- `src/components/inspection/EdlPremiumFlow.tsx` (retire auto-advance, sticky footer, nouveaux renderers)
+- `src/components/inspection/edl-premium-sequence.ts` (nouvelles étapes)
+- `src/components/inspection/DocumentScanner.tsx` (UX erreur OCR)
+- `supabase/functions/edl-document-ocr/index.ts` (fix OCR si besoin)
+- `src/components/convoyeur/PremiumMissionHero.tsx` + `MissionCockpit.tsx` (contact livraison, fix chevauchement)
+- `src/routes/_authenticated/admin.missions.$missionId.tsx` (bouton PDF + champs contact livraison)
+- `src/styles.css` (token bleu électrique)
+- `src/components/ui/button.tsx` (variante `electric`)
 
-### 4.3 Application automatique dans l'estimateur
-Dans `DevisGenerator.tsx`, **avant** `calculatePrice`, si user authentifié :
-- Lookup `client_pricing_rules` filtré par email/user_id + extractCity(départ)/(arrivée) + option_trajet.
-- Match prioritaire : règle exacte ville→ville > règle wildcard.
-- Si match : remplacer `finalPrice` par `rule.prix_ttc`, label = `Tarif personnalisé`. Sinon : logique actuelle inchangée.
-- Le client voit simplement le prix appliqué (pas de mention "tarif admin").
+**Fichiers créés :**
+- `src/lib/edl-final-pdf.ts`
+- Migration SQL
 
-Impact minimal : un seul ajout dans le `useMemo` qui calcule le prix, fallback identique au comportement actuel si aucune règle n'existe.
+**Ce qui ne change pas :**
+- Logique paiements, rôles, RLS, flux mission, signatures déjà fonctionnelles (juste alignement arrivée sur départ), génération facture/devis PDF existants.
 
 ---
 
-## Phase 5 — Factures côté client
-
-### 5.1 Diagnostic
-`dashboard-client.devis.tsx` lit déjà `factures` filtré par `client_email = user.email`. Cas non couverts :
-- Si l'admin émet une facture avec un email différent (casse, alias) → invisible.
-- Lien explicite vers la mission/devis associé absent.
-
-### 5.2 Correctifs
-- Étendre la requête : `.or("client_email.ilike." + email + ",client_email.eq." + altEmail)` en utilisant l'email du profil ET l'email auth.
-- S'appuyer sur la policy RLS existante "Clients read own factures" (déjà tolérante à la casse via `lower()`).
-- Ajouter colonne "Mission / Devis" dans le tableau factures avec lien.
-- Ajouter une carte "Mes factures" sur `dashboard-client.index.tsx` (count + lien direct vers l'onglet factures).
-
-### 5.3 Côté admin
-Vérifier dans `admin.factures.tsx` / création de facture que `client_email` est bien renseigné en lowercase avec l'email du devis/mission source. Si bug détecté : forcer `lower(trim(email))` à l'insertion.
-
----
-
-## Fichiers touchés (récapitulatif)
-
-```
-src/routes/_authenticated/convoyeur.tsx                       (lever blocage en_attente + bandeau)
-src/routes/_authenticated/convoyeur.disponibles.tsx           (désactiver actions si non validé)
-src/components/admin/AssignDriverDialog.tsx                   (élargir liste + warning)
-src/components/admin/.../ClientPricingRulesBlock.tsx          (nouveau composant)
-src/routes/_authenticated/admin.clients.$clientId.tsx         (intégrer le bloc)
-src/components/DevisGenerator.tsx                             (lookup tarif perso, ~15 lignes)
-src/routes/_authenticated/dashboard-client.devis.tsx          (requête factures élargie + lien mission)
-src/routes/_authenticated/dashboard-client.index.tsx          (carte "Mes factures", retrait CA si présent)
-src/styles.css                                                (override estimateur si besoin)
-+ 1 migration SQL : client_pricing_rules
-```
-
-## Hors scope (conservé tel quel)
-- Logique de calcul kilométrique / forfaits département (`pricing-engine.ts`, `pricing-departments.ts`).
-- Flux EDL, Stripe, génération PDF, emails transactionnels.
-- RLS et triggers existants.
-- Comportement convoyeurs validés (aucune régression).
-
-## Ordre d'exécution recommandé
-1. Phase 1 (UI cleanup) — 0 risque
-2. Phase 2 (convoyeur access) — risque faible
-3. Phase 5 (factures) — risque faible
-4. Phase 3 (assign non validé) — risque moyen, prévoir test manuel
-5. Phase 4 (tarifs perso, migration SQL en premier) — risque le plus élevé, à valider seul
-
-Chaque phase peut être livrée et testée indépendamment.
+Confirmes-tu ce plan ? Je l'implémente d'un coup ensuite.
