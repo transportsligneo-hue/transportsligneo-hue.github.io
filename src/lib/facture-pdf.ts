@@ -193,12 +193,19 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
 
+  // Résolution mention légale + mode fiscal depuis profil/app_settings
+  const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
+  const tvaExempt = f.tva_exempt ?? resolved.pricingDisplayMode === "exempt";
+  const exemptionNote = f.tva_exemption_note ?? resolved.tvaExemptionNote ?? "TVA non applicable, art. 293 B du CGI";
+  const legalMention = (f.legal_mention ?? (resolved.active ? resolved.mention : null))?.trim() || null;
+
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
-  const tvaTaux = f.tva_taux ?? 20;
+  const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
   const ht = Number(f.prix_ht);
-  const tva = Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
-  const ttc = Number(f.prix_ttc);
+  const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
+  const ttc = tvaExempt ? ht : Number(f.prix_ttc);
+
 
   const badge = isB2B
     ? { kind: "echeance" as const, text: "Echeance de paiement", sub: f.date_echeance ? fmtDate(f.date_echeance) : "30 jours" }
