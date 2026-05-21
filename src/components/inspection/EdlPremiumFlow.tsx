@@ -555,8 +555,7 @@ export function EdlPremiumFlow({
   const skipCurrentScan = () => {
     const stepId = currentStep.id;
     setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
-    toast.info("Scan ignoré — vous pouvez continuer");
-    setTimeout(() => autoAdvance(), 250);
+    toast.info("Scan ignoré — appuyez sur \"Photo suivante\" pour continuer");
   };
 
   const setState = (id: string, s: StepState) =>
