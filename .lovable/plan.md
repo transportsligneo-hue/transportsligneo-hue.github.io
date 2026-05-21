@@ -1,38 +1,36 @@
-## Phase 3 — Finitions Espace Pro/Client
+## Phase 4 — Factures côté Pro & Client
 
-Suite de la phase 2. Trois chantiers ciblés, sans toucher au reste.
+Les pros n'ont aucune vue sur leurs factures dans leur espace. Cette phase comble ce manque et harmonise l'affichage devis/factures côté client.
 
-### 1. Page "Mes demandes" côté Pro avec statut visible
-**Fichier :** `src/routes/_authenticated/dashboard-pro.missions.tsx` (audit + ajout d'un onglet "Demandes")
+### 1. Page Factures côté Pro (nouveau)
+**Fichier :** `src/routes/_authenticated/dashboard-pro.factures.tsx` (création)
 
-- Ajouter une vue unifiée listant `demandes_convoyage` + `devis` + `missions` du user connecté
-- Colonnes : N°, date, trajet (départ → arrivée), véhicule, prix, **statut clair** (En attente / Devis envoyé / Payé / En cours / Terminé / Annulé)
-- Badges colorés cohérents avec le design system (midnight + gold)
-- Filtres : statut + période
-- Lien vers le détail mission existant quand applicable
+- Liste des `factures` du user connecté (matching `user_id` ou `email`)
+- Colonnes : N°, date, mission liée (n° + trajet), montant (HT/TTC/Exonéré selon `pricing_display_mode`), statut paiement
+- Badge statut : Brouillon / Émise / Payée / En retard
+- Bouton "Télécharger PDF" par ligne (appelle `facture-pdf.ts` existant)
+- Filtre par année + statut
+- Lien depuis le menu sidebar Pro
 
-### 2. Audit visuel du recap mission (QuickMissionForm)
-**Fichier :** `src/components/dashboard-pro/QuickMissionForm.tsx`
+### 2. Sidebar Pro — entrée Factures
+**Fichier :** sidebar pro existante (à localiser dans `src/components/dashboard-pro/` ou `dashboard-pro.tsx`)
 
-- Améliorer le bloc "Récapitulatif & prix" : hiérarchie claire (prix dominant, détails secondaires)
-- Mode HT/TTC/Exempt affiché de manière explicite (badge + libellé)
-- Contacts opérationnels regroupés dans une carte dédiée
-- Bouton de soumission collant en bas sur mobile
+- Ajouter l'entrée "Factures" entre "Missions" et "Documents"
+- Icône `Receipt` (lucide)
 
-### 3. Page "Mes demandes" côté Client particulier
-**Fichier :** `src/routes/_authenticated/dashboard-client.missions.tsx`
+### 3. Audit page Devis côté Client
+**Fichier :** `src/routes/_authenticated/dashboard-client.devis.tsx`
 
-- Même logique que pour le Pro mais adaptée au particulier
-- Affichage simplifié (pas de notion HT/TTC, juste TTC)
-- Statuts en langage naturel ("Votre devis est prêt", "Convoyeur en route", etc.)
+- Vérifier lisibilité : statut clair, montant en évidence, action principale (payer / télécharger) bien visible
+- Pas de refonte structurelle, juste polish visuel sur la liste
 
 ### Hors scope
-- Pas de nouvelle migration SQL
-- Pas de refonte du flow paiement
-- Pas de changement sur l'admin
+- Pas de modification du PDF lui-même (déjà fait phase 2)
+- Pas de gestion paiement Stripe côté pro (sera phase 5 si besoin)
+- Pas de relances automatiques
 
 ### Tests
-- Pro voit toutes ses demandes, peu importe leur état (brouillon → terminée)
-- Statuts cohérents et lisibles
-- Récap mission lisible sur mobile et desktop
-- Client particulier voit ses demandes avec wording adapté
+- Pro voit ses factures avec HT/TTC selon son mode fiscal
+- Téléchargement PDF fonctionne
+- Filtre année/statut OK
+- Client voit ses devis avec actions claires
