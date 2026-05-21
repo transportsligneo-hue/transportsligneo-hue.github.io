@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, Building2, Plus } from "lucide-react";
+import { Loader2, Search, Building2, Plus, Trash2, UserCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -34,13 +35,13 @@ export const Route = createFileRoute("/_authenticated/admin/organisations")({
   component: AdminOrganisations,
 });
 
-type Org = {
-  id: string;
+type Row = {
+  // Common
+  kind: "org" | "profile";
+  id: string; // organization id OR `profile-${user_id}`
   legal_name: string;
   commercial_name: string | null;
   siret: string | null;
-  sector: string | null;
-  size: string | null;
   status: string;
   score: number;
   score_category: string;
@@ -48,6 +49,8 @@ type Org = {
   primary_contact_phone: string | null;
   created_at: string;
   roles: string[];
+  // For profile rows
+  profileUserId?: string;
 };
 
 const roleStyles: Record<string, string> = {
@@ -67,12 +70,14 @@ const roleLabels: Record<string, string> = {
 };
 
 function AdminOrganisations() {
-  const [orgs, setOrgs] = useState<Org[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     void load();
@@ -81,12 +86,17 @@ function AdminOrganisations() {
   async function load() {
     setLoading(true);
     try {
-      const [{ data: rows }, { data: rolesRows }] = await Promise.all([
+      const [{ data: orgs }, { data: rolesRows }, { data: profiles }] = await Promise.all([
         supabase
           .from("organizations")
           .select("id, legal_name, commercial_name, siret, sector, size, status, score, score_category, primary_contact_email, primary_contact_phone, created_at")
           .order("created_at", { ascending: false }),
         supabase.from("organization_roles").select("organization_id, role, active"),
+        supabase
+          .from("profiles")
+          .select("user_id, email, nom, prenom, telephone, societe, siret, type_client, statut, organization_id, created_at")
+          .in("type_client", ["b2b", "flotte"])
+          .order("created_at", { ascending: false }),
       ]);
 
       const rolesByOrg = new Map<string, string[]>();
@@ -97,12 +107,51 @@ function AdminOrganisations() {
         rolesByOrg.set(r.organization_id, arr);
       });
 
-      setOrgs(
-        (rows ?? []).map((o) => ({
-          ...o,
-          roles: rolesByOrg.get(o.id) ?? [],
-        })),
-      );
+      const orgRows: Row[] = (orgs ?? []).map((o) => ({
+        kind: "org",
+        id: o.id,
+        legal_name: o.legal_name,
+        commercial_name: o.commercial_name,
+        siret: o.siret,
+        status: o.status,
+        score: o.score,
+        score_category: o.score_category,
+        primary_contact_email: o.primary_contact_email,
+        primary_contact_phone: o.primary_contact_phone,
+        created_at: o.created_at,
+        roles: rolesByOrg.get(o.id) ?? [],
+      }));
+
+      // Profiles B2B/flotte not yet attached to a real organization
+      const linkedUserIds = new Set<string>();
+      // (We can't know directly which profiles correspond to which org owner without org_members,
+      // so just skip those that have organization_id set.)
+      const profileRows: Row[] = (profiles ?? [])
+        .filter((p) => !p.organization_id && !linkedUserIds.has(p.user_id))
+        .map((p) => {
+          const legal =
+            (p.societe && p.societe.trim()) ||
+            [p.prenom, p.nom].filter(Boolean).join(" ").trim() ||
+            p.email ||
+            "—";
+          return {
+            kind: "profile" as const,
+            id: `profile-${p.user_id}`,
+            legal_name: legal,
+            commercial_name: null,
+            siret: p.siret,
+            status: p.statut ?? "active",
+            score: 0,
+            score_category: "cold",
+            primary_contact_email: p.email,
+            primary_contact_phone: p.telephone,
+            created_at: p.created_at,
+            roles: [p.type_client === "flotte" ? "flotte_partenaire" : "client_b2b"],
+            profileUserId: p.user_id,
+          };
+        });
+
+      setRows([...orgRows, ...profileRows]);
     } finally {
       setLoading(false);
     }
@@ -110,7 +159,7 @@ function AdminOrganisations() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return orgs.filter((o) => {
+    return rows.filter((o) => {
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
       if (roleFilter !== "all" && !o.roles.includes(roleFilter)) return false;
       if (!q) return true;
@@ -121,7 +170,36 @@ function AdminOrganisations() {
         (o.primary_contact_email ?? "").toLowerCase().includes(q)
       );
     });
-  }, [orgs, search, roleFilter, statusFilter]);
+  }, [rows, search, roleFilter, statusFilter]);
+
+  async function handleDelete() {
+    if (!toDelete) return;
+    setDeleting(true);
+    try {
+      if (toDelete.kind === "org") {
+        // Best-effort cleanup of dependent tables (those without ON DELETE CASCADE)
+        await supabase.from("organization_roles").delete().eq("organization_id", toDelete.id);
+        await supabase.from("organization_members").delete().eq("organization_id", toDelete.id);
+        const { error } = await supabase.from("organizations").delete().eq("id", toDelete.id);
+        if (error) throw error;
+        toast.success("Organisation supprimée");
+      } else if (toDelete.kind === "profile" && toDelete.profileUserId) {
+        // Don't hard-delete the auth user — just archive the profile so it disappears from the list.
+        const { error } = await supabase
+          .from("profiles")
+          .update({ statut: "archive", type_client: "particulier" })
+          .eq("user_id", toDelete.profileUserId);
+        if (error) throw error;
+        toast.success("Client archivé");
+      }
+      setToDelete(null);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Suppression impossible");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -131,8 +209,10 @@ function AdminOrganisations() {
             <Building2 className="text-pro-accent" size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Organisations</h1>
-            <p className="text-sm text-pro-muted">Entreprises B2B, flottes partenaires et sous-traitants.</p>
+            <h1 className="text-2xl font-semibold text-pro-text">Organisations & clients</h1>
+            <p className="text-sm text-pro-muted">
+              Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro.
+            </p>
           </div>
         </div>
         <Button onClick={() => setCreateOpen(true)} className="gap-2">
@@ -183,22 +263,31 @@ function AdminOrganisations() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Organisation</TableHead>
+                <TableHead>Organisation / Client</TableHead>
                 <TableHead>Rôles</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Score</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell>
-                    <div className="font-medium text-pro-text">{o.legal_name}</div>
-                    <div className="text-xs text-pro-muted">
-                      {o.commercial_name ? `${o.commercial_name} · ` : ""}
-                      {o.siret ?? "Sans SIRET"}
+                    <div className="flex items-center gap-2">
+                      {o.kind === "profile" ? (
+                        <UserCircle2 size={16} className="text-pro-muted shrink-0" />
+                      ) : (
+                        <Building2 size={16} className="text-pro-accent shrink-0" />
+                      )}
+                      <div>
+                        <div className="font-medium text-pro-text">{o.legal_name}</div>
+                        <div className="text-xs text-pro-muted">
+                          {o.commercial_name ? `${o.commercial_name} · ` : ""}
+                          {o.siret ?? (o.kind === "profile" ? "Compte client" : "Sans SIRET")}
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -219,21 +308,50 @@ function AdminOrganisations() {
                     <div className="text-xs text-pro-muted">{o.primary_contact_phone ?? ""}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={
-                      o.score_category === "hot" ? "bg-red-100 text-red-700 border-red-200"
-                      : o.score_category === "warm" ? "bg-amber-100 text-amber-700 border-amber-200"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
-                    }>
-                      {o.score} · {o.score_category}
-                    </Badge>
+                    {o.kind === "org" ? (
+                      <Badge variant="outline" className={
+                        o.score_category === "hot" ? "bg-red-100 text-red-700 border-red-200"
+                        : o.score_category === "warm" ? "bg-amber-100 text-amber-700 border-amber-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                      }>
+                        {o.score} · {o.score_category}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-pro-muted">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{o.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link to="/admin/organisations/$orgId" params={{ orgId: o.id }} className="text-xs text-pro-accent hover:underline">
-                      Voir →
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      {o.kind === "org" ? (
+                        <Link
+                          to="/admin/organisations/$orgId"
+                          params={{ orgId: o.id }}
+                          className="text-xs text-pro-accent hover:underline"
+                        >
+                          Voir →
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/admin/clients/$clientId"
+                          params={{ clientId: o.profileUserId! }}
+                          className="text-xs text-pro-accent hover:underline"
+                        >
+                          Voir →
+                        </Link>
+                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => setToDelete(o)}
+                        title={o.kind === "org" ? "Supprimer l'organisation" : "Archiver le client"}
+                      >
+                        <Trash2 size={15} />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -243,6 +361,38 @@ function AdminOrganisations() {
       </div>
 
       <CreateOrgDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={load} />
+
+      <Dialog open={!!toDelete} onOpenChange={(v) => !v && setToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {toDelete?.kind === "org" ? "Supprimer cette organisation ?" : "Archiver ce client ?"}
+            </DialogTitle>
+            <DialogDescription>
+              {toDelete?.kind === "org" ? (
+                <>
+                  L'organisation <strong>{toDelete?.legal_name}</strong> sera définitivement
+                  supprimée, ainsi que ses rôles et liens membres. Cette action est irréversible.
+                </>
+              ) : (
+                <>
+                  Le compte client <strong>{toDelete?.legal_name}</strong> sera archivé et
+                  n'apparaîtra plus dans cette liste. L'utilisateur et ses données restent en base.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setToDelete(null)} disabled={deleting}>
+              Annuler
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting && <Loader2 className="animate-spin mr-2" size={14} />}
+              {toDelete?.kind === "org" ? "Supprimer" : "Archiver"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
