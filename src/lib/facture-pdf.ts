@@ -44,6 +44,10 @@ export interface FactureData {
   tva_exemption_note?: string | null;
   /** Mention légale brute à imprimer en pied (overrides resolver si défini). */
   legal_mention?: string | null;
+  /** Référence externe imposée par le client (n° BC, n° dossier, n° commande…). Imprimée dans le bloc infos. */
+  reference_client?: string | null;
+  /** Libellé personnalisé pour la référence externe (défaut : "Référence client"). */
+  reference_label?: string | null;
 }
 
 
@@ -260,6 +264,10 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   drawInfoRow(doc, rx, ry, rw, "Date de facture", fmtDate(f.date_facture || new Date().toISOString()));
   ry += 11; drawInfoRow(doc, rx, ry, rw, "Date de mission", fmtDate(f.date_mission));
   ry += 11; drawInfoRow(doc, rx, ry, rw, "Reference facture", f.numero);
+  if (f.reference_client && f.reference_client.trim().length > 0) {
+    ry += 11;
+    drawInfoRow(doc, rx, ry, rw, (f.reference_label?.trim() || "Reference client"), f.reference_client.trim(), GOLD);
+  }
   ry += 11; drawInfoRow(doc, rx, ry, rw, "Mode de paiement", f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire"));
   if (isB2B) {
     ry += 11; drawInfoRow(doc, rx, ry, rw, "Conditions de paiement", f.conditions_paiement || "A 30 jours fin de mois");
