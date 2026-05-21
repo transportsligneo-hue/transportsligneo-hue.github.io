@@ -402,14 +402,24 @@ function ProDocuments() {
                             <div className="text-[10px] text-pro-muted">{amt.sub}</div>
                           </td>
                           <td className="px-5 py-3 text-right">
-                            <button
-                              onClick={() => handleDownloadFacture(f)}
-                              disabled={downloadingId === f.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity disabled:opacity-50"
-                            >
-                              {downloadingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-                              PDF
-                            </button>
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {(f.statut === "emise" || f.statut === "en_retard") && (
+                                <button
+                                  onClick={() => setPayingFactureId(f.id)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                                >
+                                  <CreditCard size={13} /> Payer
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDownloadFacture(f)}
+                                disabled={downloadingId === f.id}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-pro-border text-pro-text text-xs font-medium rounded hover:bg-pro-bg-soft transition-colors disabled:opacity-50"
+                              >
+                                {downloadingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                                PDF
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
