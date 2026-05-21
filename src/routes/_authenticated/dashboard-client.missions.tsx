@@ -3,7 +3,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Truck, Loader2, PlusCircle, Clock, ArrowRight, FileText } from "lucide-react";
-import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { StatusBadge, missionStatusKind } from "@/components/dashboard/StatusBadge";
+
+const friendlyStatusLabel = (statut: string): string => ({
+  en_attente: "En attente de validation",
+  confirmee: "Devis prêt",
+  en_cours: "Convoyeur en route",
+  livree: "Véhicule livré",
+  terminee: "Terminée",
+  annulee: "Annulée",
+  refuse: "Refusée",
+}[statut] ?? statut);
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions")({
   component: ClientMissions,
