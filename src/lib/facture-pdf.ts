@@ -473,8 +473,27 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
     doc.text(f.bic || "CMCIFR2A", pageW - 30, y + 8.5);
   }
 
+  // ===== Mention légale (exonération TVA + mention configurée) =====
+  // Empilage juste au-dessus du bandeau émetteur (qui est à pageH - 40).
+  const mentionLines: string[] = [];
+  if (tvaExempt && exemptionNote) mentionLines.push(exemptionNote);
+  if (legalMention) mentionLines.push(legalMention);
+  if (mentionLines.length > 0) {
+    const blockTop = pageH - 52;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...MUTED);
+    let my = blockTop;
+    mentionLines.forEach((m) => {
+      const wrapped = doc.splitTextToSize(m, pageW - 28);
+      doc.text(wrapped, 14, my);
+      my += wrapped.length * 3.2 + 1;
+    });
+  }
+
   drawSocietyBlock(doc, pageW, pageH - 40);
   drawFooter(doc, pageW, pageH);
+
 
   return doc.output("blob");
 }
