@@ -113,6 +113,7 @@ export type Database = {
           etape_courante: string | null
           id: string
           numero_mission: string | null
+          pdf_share_client: boolean
           statut: string
           trajet_id: string
           updated_at: string
@@ -123,6 +124,7 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           numero_mission?: string | null
+          pdf_share_client?: boolean
           statut?: string
           trajet_id: string
           updated_at?: string
@@ -133,6 +135,7 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           numero_mission?: string | null
+          pdf_share_client?: boolean
           statut?: string
           trajet_id?: string
           updated_at?: string
