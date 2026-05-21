@@ -323,6 +323,10 @@ function AdminFacturesPage() {
             </DrawerGrid>
           </DrawerSection>
 
+          <DrawerSection title="Référence externe (plateforme client)" icon={<Receipt size={12} />}>
+            <ReferenceDrawerEditor row={selected} onSave={saveReference} />
+          </DrawerSection>
+
           <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
             <DrawerGrid>
               <DrawerField label="Départ" value={selected.depart} />
@@ -354,6 +358,127 @@ function AdminFacturesPage() {
           </DrawerSection>
         </AdminDetailDrawer>
       )}
+    </div>
+  );
+}
+
+function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string, ref: string | null, label: string | null) => Promise<boolean> }) {
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(row.reference_client ?? "");
+  const [saving, setSaving] = useState(false);
+
+  if (!editing) {
+    const hasRef = !!row.reference_client;
+    return (
+      <button
+        type="button"
+        onClick={() => { setVal(row.reference_client ?? ""); setEditing(true); }}
+        className={`inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full border transition ${
+          hasRef
+            ? "border-amber-400/60 bg-amber-50 text-amber-800 hover:bg-amber-100"
+            : "border-dashed border-pro-border text-pro-muted hover:border-pro-accent hover:text-pro-accent"
+        }`}
+        title={hasRef ? "Modifier la référence client" : "Ajouter une référence client (n° BC, n° dossier…)"}
+      >
+        <span className="font-medium">{row.reference_label || "Réf. client"}</span>
+        <span className="font-mono">{hasRef ? row.reference_client : "+ ajouter"}</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <input
+        autoFocus
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") { setEditing(false); }
+          if (e.key === "Enter") {
+            e.preventDefault();
+            (async () => {
+              setSaving(true);
+              const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "Référence client" : null));
+              setSaving(false);
+              if (ok) setEditing(false);
+            })();
+          }
+        }}
+        placeholder="Ex. CMD-2024-1234"
+        className="text-[11px] px-2 py-0.5 rounded-full border border-pro-accent bg-white font-mono w-44"
+      />
+      <button
+        type="button"
+        disabled={saving}
+        onClick={async () => {
+          setSaving(true);
+          const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "Référence client" : null));
+          setSaving(false);
+          if (ok) setEditing(false);
+        }}
+        className="text-[11px] text-emerald-600 hover:text-emerald-700 font-medium"
+      >
+        {saving ? "…" : "✓"}
+      </button>
+      <button
+        type="button"
+        onClick={() => setEditing(false)}
+        className="text-[11px] text-pro-muted hover:text-pro-text"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
+function ReferenceDrawerEditor({ row, onSave }: { row: FactureRow; onSave: (id: string, ref: string | null, label: string | null) => Promise<boolean> }) {
+  const [ref, setRef] = useState(row.reference_client ?? "");
+  const [label, setLabel] = useState(row.reference_label ?? "Référence client");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    await onSave(row.id, ref.trim() || null, ref.trim() ? label : null);
+    setSaving(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] text-white/60 leading-snug">
+        Ce code apparaîtra sur le PDF dans le bloc info, en or, à reporter sur les plateformes type CCAT, Hiflow, etc.
+      </p>
+      <div className="flex flex-col gap-2">
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-white/50 block mb-1">Libellé</label>
+          <select
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            className="w-full text-xs px-2 py-1.5 rounded-md bg-white/5 border border-white/15 text-white"
+          >
+            {REFERENCE_LABEL_PRESETS.map((p) => <option key={p} value={p} className="bg-slate-900">{p}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-white/50 block mb-1">Valeur</label>
+          <input
+            value={ref}
+            onChange={(e) => setRef(e.target.value)}
+            onBlur={save}
+            placeholder="Ex. CMD-2024-1234"
+            className="w-full text-xs px-2 py-1.5 rounded-md bg-white/5 border border-white/15 text-white font-mono"
+          />
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="text-[11px] px-3 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium disabled:opacity-50"
+          >
+            {saving ? "Sauvegarde…" : "Enregistrer"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
