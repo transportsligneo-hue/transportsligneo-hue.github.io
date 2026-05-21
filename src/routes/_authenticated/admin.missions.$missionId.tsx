@@ -72,6 +72,10 @@ interface TrajetFull {
   client_email: string | null;
   client_telephone: string | null;
   prix: number | null;
+  arrivee_contact_nom: string | null;
+  arrivee_contact_telephone: string | null;
+  arrivee_contact_telephone2: string | null;
+  arrivee_contact_instructions: string | null;
 }
 
 interface ConvoyeurFull {
