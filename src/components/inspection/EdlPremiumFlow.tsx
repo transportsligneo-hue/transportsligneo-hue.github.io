@@ -802,6 +802,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", previewUrl, storagePath: path });
       toast.success("Selfie validé");
+      setTimeout(() => autoAdvance(), 700);
     } catch (err) {
       console.error("[EDL Premium] selfie failed", err);
       setState(stepId, {
