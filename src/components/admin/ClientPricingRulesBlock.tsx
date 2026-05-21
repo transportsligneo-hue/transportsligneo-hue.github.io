@@ -221,14 +221,19 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
         )}
 
         {!creating ? (
-          <button onClick={() => setCreating(true)} className="admin-btn-primary inline-flex items-center gap-1.5 mt-2">
+          <button onClick={() => { setCreating(true); setEditingId(null); setForm(EMPTY_FORM); }} className="admin-btn-primary inline-flex items-center gap-1.5 mt-2">
             <Plus size={14} /> Ajouter un tarif
           </button>
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-800">{editingId ? "Modifier le tarif" : "Nouveau tarif"}</p>
+              <button onClick={resetForm} className="admin-btn-ghost" title="Fermer"><X size={14} /></button>
+            </div>
             <AdminField label="Libellé zone (ex: Tours, Le Mans)">
               <input className={inp} value={form.zone_label} onChange={(e) => setForm({ ...form, zone_label: e.target.value })} placeholder="Tours" />
             </AdminField>
+
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Ville départ (filtre, optionnel)">
                 <input className={inp} value={form.ville_depart} onChange={(e) => setForm({ ...form, ville_depart: e.target.value })} placeholder="ex: Tours" />
