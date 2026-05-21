@@ -51,6 +51,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
 import { Route as AuthenticatedFlotteSocieteRouteImport } from './routes/_authenticated/flotte.societe'
@@ -99,6 +100,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
@@ -327,6 +329,11 @@ const B2bTransportPonctuelRetourRoute =
     path: '/retour',
     getParentRoute: () => B2bTransportPonctuelRoute,
   } as any)
+const ApiFactureCheckoutRoute = ApiFactureCheckoutRouteImport.update({
+  id: '/api/facture/checkout',
+  path: '/api/facture/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDevisCheckoutRoute = ApiDevisCheckoutRouteImport.update({
   id: '/api/devis/checkout',
   path: '/api/devis/checkout',
@@ -610,6 +617,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
+  id: '/api/public/facture/webhook',
+  path: '/api/public/facture/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDevisWebhookRoute = ApiPublicDevisWebhookRouteImport.update({
   id: '/api/public/devis/webhook',
   path: '/api/public/devis/webhook',
@@ -745,6 +757,7 @@ export interface FileRoutesByFullPath {
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
+  '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -763,6 +776,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -840,6 +854,7 @@ export interface FileRoutesByTo {
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
+  '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -858,6 +873,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -943,6 +959,7 @@ export interface FileRoutesById {
   '/_authenticated/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
+  '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -961,6 +978,7 @@ export interface FileRoutesById {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1046,6 +1064,7 @@ export interface FileRouteTypes {
     | '/flotte/societe'
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
+    | '/api/facture/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -1064,6 +1083,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1141,6 +1161,7 @@ export interface FileRouteTypes {
     | '/flotte/societe'
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
+    | '/api/facture/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
@@ -1159,6 +1180,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1243,6 +1265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/flotte/societe'
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
+    | '/api/facture/checkout'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1261,6 +1284,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1296,11 +1320,13 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
+  ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
+  ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1603,6 +1629,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/transport-ponctuel/retour'
       preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
       parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/facture/checkout': {
+      id: '/api/facture/checkout'
+      path: '/api/facture/checkout'
+      fullPath: '/api/facture/checkout'
+      preLoaderRoute: typeof ApiFactureCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/devis/checkout': {
       id: '/api/devis/checkout'
@@ -1938,6 +1971,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/facture/webhook': {
+      id: '/api/public/facture/webhook'
+      path: '/api/public/facture/webhook'
+      fullPath: '/api/public/facture/webhook'
+      preLoaderRoute: typeof ApiPublicFactureWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/devis/webhook': {
@@ -2351,11 +2391,13 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
+  ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
+  ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

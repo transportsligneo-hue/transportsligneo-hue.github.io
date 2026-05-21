@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Download, Loader2, Receipt, CreditCard, X } from "lucide-react";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { FactureEmbeddedCheckout } from "@/components/facture/FactureEmbeddedCheckout";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/documents")({
@@ -75,6 +76,7 @@ function ProDocuments() {
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [payingFactureId, setPayingFactureId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("ht");
   const [yearFilter, setYearFilter] = useState<string>("all");
@@ -144,6 +146,7 @@ function ProDocuments() {
   }, [factures, statutFilter, yearFilter]);
 
   const payingDevis = devis.find(d => d.id === payingId);
+  const payingFacture = factures.find(f => f.id === payingFactureId);
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/dashboard-pro/documents?paye=1`
     : "/";
@@ -399,14 +402,24 @@ function ProDocuments() {
                             <div className="text-[10px] text-pro-muted">{amt.sub}</div>
                           </td>
                           <td className="px-5 py-3 text-right">
-                            <button
-                              onClick={() => handleDownloadFacture(f)}
-                              disabled={downloadingId === f.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity disabled:opacity-50"
-                            >
-                              {downloadingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-                              PDF
-                            </button>
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {(f.statut === "emise" || f.statut === "en_retard") && (
+                                <button
+                                  onClick={() => setPayingFactureId(f.id)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                                >
+                                  <CreditCard size={13} /> Payer
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDownloadFacture(f)}
+                                disabled={downloadingId === f.id}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-pro-border text-pro-text text-xs font-medium rounded hover:bg-pro-bg-soft transition-colors disabled:opacity-50"
+                              >
+                                {downloadingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                                PDF
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -434,6 +447,37 @@ function ProDocuments() {
               <p className="text-pro-muted text-sm mt-1">{payingDevis.depart} → {payingDevis.arrivee} · {Number(payingDevis.prix_estime).toFixed(2)} €</p>
             </div>
             <DevisEmbeddedCheckout devisId={payingDevis.id} returnUrl={returnUrl} />
+          </div>
+        </div>
+      )}
+
+      {payingFacture && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => setPayingFactureId(null)}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-semibold text-lg text-pro-text">Paiement facture — {payingFacture.numero}</h2>
+              <p className="text-pro-muted text-sm mt-1">
+                {payingFacture.depart && payingFacture.arrivee
+                  ? `${payingFacture.depart} → ${payingFacture.arrivee}`
+                  : (payingFacture.designation ?? "Prestation")}
+                {" · "}
+                <span className="font-semibold text-pro-text">{Number(payingFacture.prix_ttc).toFixed(2)} € TTC</span>
+              </p>
+              {payingFacture.client_societe && (
+                <p className="text-pro-muted text-xs mt-1">{payingFacture.client_societe}</p>
+              )}
+            </div>
+            <FactureEmbeddedCheckout
+              factureId={payingFacture.id}
+              returnUrl={returnUrl.replace("paye=1", "paye_facture=1")}
+            />
           </div>
         </div>
       )}

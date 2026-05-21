@@ -1141,6 +1141,7 @@ export type Database = {
       }
       factures: {
         Row: {
+          amount_paid_cents: number | null
           arrivee: string | null
           attribution_id: string | null
           client_adresse: string | null
@@ -1164,6 +1165,7 @@ export type Database = {
           mission_id: string | null
           mode_paiement: string | null
           numero: string
+          paid_at: string | null
           pdf_url: string | null
           prix_ht: number
           prix_ttc: number
@@ -1171,11 +1173,14 @@ export type Database = {
           reference_client: string | null
           reference_label: string | null
           statut: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           tva_taux: number
           type_facture: string
           updated_at: string
         }
         Insert: {
+          amount_paid_cents?: number | null
           arrivee?: string | null
           attribution_id?: string | null
           client_adresse?: string | null
@@ -1199,6 +1204,7 @@ export type Database = {
           mission_id?: string | null
           mode_paiement?: string | null
           numero: string
+          paid_at?: string | null
           pdf_url?: string | null
           prix_ht?: number
           prix_ttc?: number
@@ -1206,11 +1212,14 @@ export type Database = {
           reference_client?: string | null
           reference_label?: string | null
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
         }
         Update: {
+          amount_paid_cents?: number | null
           arrivee?: string | null
           attribution_id?: string | null
           client_adresse?: string | null
@@ -1234,6 +1243,7 @@ export type Database = {
           mission_id?: string | null
           mode_paiement?: string | null
           numero?: string
+          paid_at?: string | null
           pdf_url?: string | null
           prix_ht?: number
           prix_ttc?: number
@@ -1241,6 +1251,8 @@ export type Database = {
           reference_client?: string | null
           reference_label?: string | null
           statut?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
