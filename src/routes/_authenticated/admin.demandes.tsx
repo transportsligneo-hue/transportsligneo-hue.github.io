@@ -39,6 +39,31 @@ interface Demande {
   prix_estime: number | null;
   distance_km: number | null;
   created_at: string;
+  // Phase 6 — extended vehicle + options
+  vehicule_immatriculation?: string | null;
+  vehicule_vin?: string | null;
+  vehicule_marque?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_energie?: string | null;
+  vehicule_type?: string | null;
+  vehicule_couleur?: string | null;
+  vehicule_km?: number | null;
+  options_meta?: Record<string, unknown> | null;
+}
+
+const OPTION_LABELS: Record<string, string> = {
+  recharge_electrique: "⚡ Recharge électrique",
+  plein_essence: "⛽ Plein de carburant",
+  lavage: "🧽 Lavage",
+  express: "⚡ Express",
+  aller_retour: "↔ Aller-retour",
+};
+
+function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): string[] {
+  if (!meta) return [];
+  return Object.entries(meta)
+    .filter(([, v]) => v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0))
+    .map(([k, v]) => OPTION_LABELS[k] ?? `${k}: ${String(v)}`);
 }
 
 const statuts = ["nouvelle", "a_traiter", "convertie", "attribuee", "terminee", "annulee"];
