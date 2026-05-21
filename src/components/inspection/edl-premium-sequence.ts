@@ -151,16 +151,26 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Photos libres / dégâts",
     hint: "Ajoutez si besoin des photos complémentaires : dégâts, remarques, accessoires ou détail utile. Étape optionnelle." },
 
+  // ─── Kilométrage départ ───
+  { num: 21, id: "kilometrage_depart", kind: "kilometrage", section: "cloture", phase: "depart",
+    label: "Kilométrage de départ",
+    hint: "Saisissez le kilométrage exact affiché au compteur avant le départ" },
+
   // ─── Signatures départ (toujours dans le flow EDL départ) ───
-  { num: 21, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 22, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "driver_start",
     label: "Signature départ — convoyeur",
     hint: "Signez pour attester de l'état du véhicule au départ" },
 
-  { num: 22, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 23, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "client_start",
     label: "Signature départ — client / parc",
     hint: "Faites signer le donneur d'ordre (concession, parc, client)" },
+
+  // ─── Kilométrage arrivée (filtré sur phase=arrivee) ───
+  { num: 24, id: "kilometrage_arrivee", kind: "kilometrage", section: "cloture", phase: "arrivee",
+    label: "Kilométrage d'arrivée",
+    hint: "Saisissez le kilométrage exact affiché au compteur à l'arrivée" },
 ];
 
 /**
