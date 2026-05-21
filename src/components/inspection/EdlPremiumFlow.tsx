@@ -864,6 +864,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
+      setTimeout(() => autoAdvance(), 700);
     } catch (err) {
       console.error("[EDL Premium] signature failed", err);
       setState(stepId, {
