@@ -436,12 +436,31 @@ function DemandeDrawer({
 
       <DrawerSection title="Véhicule" icon={<Car size={12} />}>
         <DrawerGrid>
-          <DrawerField label="Marque / Modèle" value={[demande.marque, demande.modele].filter(Boolean).join(" ")} />
-          <DrawerField label="Immatriculation" value={demande.immatriculation} mono />
-          <DrawerField label="Carburant" value={demande.carburant} />
-          <DrawerField label="Options" value={demande.options} />
+          <DrawerField
+            label="Marque / Modèle"
+            value={[demande.vehicule_marque ?? demande.marque, demande.vehicule_modele ?? demande.modele].filter(Boolean).join(" ") || null}
+          />
+          <DrawerField label="Immatriculation" value={demande.vehicule_immatriculation ?? demande.immatriculation} mono />
+          <DrawerField label="VIN" value={demande.vehicule_vin ?? null} mono />
+          <DrawerField label="Énergie" value={demande.vehicule_energie ?? demande.carburant} />
+          <DrawerField label="Type" value={demande.vehicule_type ?? null} />
+          <DrawerField label="Couleur" value={demande.vehicule_couleur ?? null} />
+          <DrawerField label="Kilométrage" value={demande.vehicule_km != null ? `${demande.vehicule_km} km` : null} />
         </DrawerGrid>
+        {renderOptionsMeta(demande.options_meta).length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {renderOptionsMeta(demande.options_meta).map((label) => (
+              <span key={label} className="text-[11px] bg-[#d4af37]/15 text-[#e7c76a] border border-[#d4af37]/30 rounded-full px-2 py-0.5">
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+        {demande.options && (
+          <p className="mt-2 text-xs text-white/60 whitespace-pre-wrap">{demande.options}</p>
+        )}
       </DrawerSection>
+
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
         {(() => {
