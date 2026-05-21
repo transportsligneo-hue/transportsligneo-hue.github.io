@@ -37,6 +37,8 @@ export type EdlStepKind =
   | "photo"
   | "scan"
   | "extras"
+  | "checklist"
+  | "kilometrage"
   | "validation";
 
 export interface EdlStepDef {
