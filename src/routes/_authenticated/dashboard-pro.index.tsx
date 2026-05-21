@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Truck, Clock, CheckCircle, Calendar, Euro, ArrowUpRight, PlusCircle,
+  Truck, Clock, CheckCircle, Calendar, ArrowUpRight, PlusCircle,
   Loader2, MapPin, Building2, FolderOpen, ChevronRight, Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -68,9 +68,6 @@ function ProDashboard() {
   const enCours = missions.filter(m => m.statut === "en_cours").length;
   const aVenir = missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length;
   const terminees = missions.filter(m => m.statut === "livree" || m.statut === "terminee").length;
-  const ca = missions
-    .filter(m => m.statut === "livree" || m.statut === "terminee")
-    .reduce((sum, m) => sum + Number(m.prix_total ?? 0), 0);
 
   return (
     <div className="space-y-6">
@@ -89,11 +86,10 @@ function ProDashboard() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
         <KpiCard icon={Clock} label="En cours" value={enCours} tone="amber" />
         <KpiCard icon={Calendar} label="À venir" value={aVenir} tone="blue" />
         <KpiCard icon={CheckCircle} label="Livrées" value={terminees} tone="emerald" />
-        <KpiCard icon={Euro} label="CA réalisé" value={`${ca.toFixed(0)} €`} tone="violet" />
       </div>
 
       {/* Hub navigation cards */}
