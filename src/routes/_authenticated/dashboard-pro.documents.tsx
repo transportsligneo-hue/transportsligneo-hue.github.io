@@ -450,6 +450,37 @@ function ProDocuments() {
           </div>
         </div>
       )}
+
+      {payingFacture && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => setPayingFactureId(null)}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-semibold text-lg text-pro-text">Paiement facture — {payingFacture.numero}</h2>
+              <p className="text-pro-muted text-sm mt-1">
+                {payingFacture.depart && payingFacture.arrivee
+                  ? `${payingFacture.depart} → ${payingFacture.arrivee}`
+                  : (payingFacture.designation ?? "Prestation")}
+                {" · "}
+                <span className="font-semibold text-pro-text">{Number(payingFacture.prix_ttc).toFixed(2)} € TTC</span>
+              </p>
+              {payingFacture.client_societe && (
+                <p className="text-pro-muted text-xs mt-1">{payingFacture.client_societe}</p>
+              )}
+            </div>
+            <FactureEmbeddedCheckout
+              factureId={payingFacture.id}
+              returnUrl={returnUrl.replace("paye=1", "paye_facture=1")}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
