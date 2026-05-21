@@ -530,12 +530,33 @@ export function EdlPremiumFlow({
   }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
+  /** Avance vers l'étape suivante (utilisé après succès photo / scan / signature). */
+  const autoAdvance = useCallback(() => {
+    setStepIndex((current) => {
+      const next = current + 1;
+      return next < TOTAL ? next : current;
+    });
+  }, [TOTAL]);
+
   const triggerCapture = () => {
     if (currentStep.kind === "scan") {
       setOpenScanner(true);
     } else {
       fileRef.current?.click();
     }
+  };
+
+  /** Pour les étapes scan : prendre une simple photo sans recadrage/OCR. */
+  const triggerSimpleCapture = () => {
+    fileRef.current?.click();
+  };
+
+  /** Ignorer une étape scan : marquée comme validée sans document. Non destructif. */
+  const skipCurrentScan = () => {
+    const stepId = currentStep.id;
+    setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
+    toast.info("Scan ignoré — vous pouvez continuer");
+    setTimeout(() => autoAdvance(), 250);
   };
 
   const setState = (id: string, s: StepState) =>
@@ -599,9 +620,13 @@ export function EdlPremiumFlow({
         ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
       });
 
-      // Pas d'auto-advance : le convoyeur relit son cadrage et appuie sur
-      // « Photo suivante » lui-même. L'upload se termine en arrière-plan ;
-      // dès qu'il est success, le bouton footer devient actif.
+      // Auto-avance vers la photo suivante après validation réussie.
+      // Petit délai pour laisser voir le check vert et le toast.
+      if (currentStep.kind === "photo" || currentStep.kind === "scan") {
+        setTimeout(() => autoAdvance(), 700);
+      }
+
+
 
 
       // OCR auto pour scans (PV livraison + carte grise) — non bloquant
@@ -777,6 +802,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", previewUrl, storagePath: path });
       toast.success("Selfie validé");
+      setTimeout(() => autoAdvance(), 700);
     } catch (err) {
       console.error("[EDL Premium] selfie failed", err);
       setState(stepId, {
@@ -838,6 +864,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
+      setTimeout(() => autoAdvance(), 700);
     } catch (err) {
       console.error("[EDL Premium] signature failed", err);
       setState(stepId, {
@@ -1188,6 +1215,8 @@ export function EdlPremiumFlow({
               step={currentStep}
               state={currentState}
               onCapture={triggerCapture}
+              onSimpleCapture={triggerSimpleCapture}
+              onSkipScan={skipCurrentScan}
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
               onRetryUpload={retryUpload}
@@ -1361,9 +1390,11 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onRetake, onDelete, onRetryUpload,
+  step, state, onCapture, onSimpleCapture, onSkipScan, onRetake, onDelete, onRetryUpload,
 }: {
-  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
+  step: EdlStepDef; state?: StepState; onCapture: () => void;
+  onSimpleCapture?: () => void; onSkipScan?: () => void;
+  onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
 }) {
   const taken = Boolean(state?.previewUrl);
 
@@ -1441,6 +1472,28 @@ function PhotoOrScanArea({
             {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
             {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
           </button>
+
+          {/* Pour les étapes scan : alternatives pour ne pas bloquer */}
+          {step.kind === "scan" && (
+            <div className="grid grid-cols-2 gap-2">
+              {onSimpleCapture && (
+                <button
+                  onClick={onSimpleCapture}
+                  className="h-11 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2 text-sm"
+                >
+                  <Camera size={15}/> Photo simple
+                </button>
+              )}
+              {onSkipScan && (
+                <button
+                  onClick={onSkipScan}
+                  className="h-11 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-amber-100 font-semibold flex items-center justify-center gap-2 text-sm"
+                >
+                  Ignorer le scan
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
@@ -1463,7 +1516,7 @@ function PhotoOrScanArea({
       {step.kind === "scan" && (
         <div className="edl-glass p-3 text-xs text-[var(--edl-text-soft)] flex items-start gap-2">
           <ScanLine size={14} className="text-[var(--edl-gold)] shrink-0 mt-0.5"/>
-          <span>OCR + détection automatique des contours. Le document sera classé et transmis à l'admin.</span>
+          <span>OCR optionnel : si le scan ne fonctionne pas, utilisez "Photo simple" ou "Ignorer le scan" pour continuer.</span>
         </div>
       )}
     </div>
