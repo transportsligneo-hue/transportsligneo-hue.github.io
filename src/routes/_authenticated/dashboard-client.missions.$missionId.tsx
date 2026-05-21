@@ -159,7 +159,7 @@ function MissionDetail() {
       ]);
       const photosDepart: { vue_type: string; url: string }[] = [];
       const photosArrivee: { vue_type: string; url: string }[] = [];
-      for (const ins of (insps as { id: string; type_inspection: string; equipements?: unknown; kilometrage_depart?: number; kilometrage_arrivee?: number }[]) ?? []) {
+      for (const ins of (insps as { id: string; type: string; equipements?: unknown; kilometrage_depart?: number; kilometrage_arrivee?: number }[]) ?? []) {
         const { data: photos } = await supabase.from("inspection_photos").select("vue_type, url_photo").eq("inspection_id", ins.id);
         for (const p of (photos as { vue_type: string; url_photo: string }[]) ?? []) {
           const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(p.url_photo, 600);
