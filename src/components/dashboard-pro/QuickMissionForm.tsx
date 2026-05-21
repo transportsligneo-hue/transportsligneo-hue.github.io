@@ -362,8 +362,21 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       </section>
 
       {/* Récap prix */}
-      <section className="bg-pro-bg rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3">Estimation</h2>
+      <section className="bg-gradient-to-br from-pro-bg to-white rounded-xl border border-pro-border p-5 md:p-6 shadow-sm">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h2 className="text-sm font-semibold text-pro-text">Récapitulatif & estimation</h2>
+          {priceView && (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+              priceView.mode === "exempt"
+                ? "bg-slate-100 text-slate-700"
+                : priceView.mode === "ht"
+                  ? "bg-blue-50 text-blue-700"
+                  : "bg-emerald-50 text-emerald-700"
+            }`}>
+              {priceView.mode === "exempt" ? "Non soumis TVA" : priceView.mode === "ht" ? "Affichage HT" : "Affichage TTC"}
+            </span>
+          )}
+        </div>
         {resolving ? (
           <div className="flex items-center gap-2 text-pro-text-soft text-sm">
             <Loader2 size={14} className="animate-spin" /> Calcul en cours...
@@ -383,7 +396,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+      {/* CTA — sticky en bas sur mobile */}
+      <div className="sticky bottom-0 -mx-3 sm:mx-0 sm:static z-10 bg-white/95 sm:bg-transparent backdrop-blur sm:backdrop-blur-0 border-t border-pro-border sm:border-0 px-3 sm:px-0 py-3 sm:py-0 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <p className="text-xs text-pro-text-soft flex items-center gap-1.5">
           <Info size={12} /> Votre demande sera traitée sous 24h par notre équipe.
         </p>
