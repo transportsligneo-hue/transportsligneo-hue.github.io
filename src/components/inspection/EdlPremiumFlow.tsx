@@ -1824,3 +1824,191 @@ function BrandLoader({ label = "Envoi sécurisé…", compact = false }: { label
   );
 }
 
+// ─────────────────────────── ÉQUIPEMENTS VÉHICULE ───────────────────────────
+function ChecklistArea({
+  state,
+  onValidate,
+}: {
+  state?: StepState;
+  onValidate: (equip: NonNullable<StepState["equipements"]>) => void;
+}) {
+  const initial = state?.equipements ?? {
+    extincteur: false,
+    kit_securite: false,
+    cable_charge: false,
+    roue: null,
+  };
+  const [extincteur, setExtincteur] = useState<boolean>(initial.extincteur);
+  const [kitSec, setKitSec] = useState<boolean>(initial.kit_securite);
+  const [cable, setCable] = useState<boolean>(initial.cable_charge);
+  const [roue, setRoue] = useState<NonNullable<StepState["equipements"]>["roue"]>(initial.roue);
+
+  const isSaved = state?.status === "success";
+  const isSaving = state?.status === "uploading";
+  const canValidate = roue !== null;
+
+  const itemStyle = (active: boolean): React.CSSProperties => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "14px 16px",
+    borderRadius: 12,
+    border: `1px solid ${active ? "rgba(212,175,55,0.55)" : "rgba(255,255,255,0.12)"}`,
+    background: active ? "rgba(212,175,55,0.10)" : "rgba(255,255,255,0.03)",
+    color: "white",
+    cursor: "pointer",
+    fontSize: 15,
+    fontWeight: 500,
+    transition: "all 0.15s",
+    width: "100%",
+    textAlign: "left",
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "8px 4px 12px" }}>
+      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, margin: 0 }}>
+        Cochez la présence de chaque équipement avant de continuer.
+      </p>
+
+      <button type="button" onClick={() => setExtincteur(v => !v)} style={itemStyle(extincteur)}>
+        <span style={{ fontSize: 22 }}>{extincteur ? "✅" : "⬜"}</span>
+        <span>Extincteur</span>
+      </button>
+      <button type="button" onClick={() => setKitSec(v => !v)} style={itemStyle(kitSec)}>
+        <span style={{ fontSize: 22 }}>{kitSec ? "✅" : "⬜"}</span>
+        <span>Kit de sécurité (gilet + triangle)</span>
+      </button>
+      <button type="button" onClick={() => setCable(v => !v)} style={itemStyle(cable)}>
+        <span style={{ fontSize: 22 }}>{cable ? "✅" : "⬜"}</span>
+        <span>Câble de recharge (si électrique)</span>
+      </button>
+
+      <div style={{ marginTop: 4 }}>
+        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>
+          Roue de secours
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          {([
+            { v: "secours", l: "Roue secours" },
+            { v: "kit", l: "Kit anti-crev." },
+            { v: "aucun", l: "Aucun" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.v}
+              type="button"
+              onClick={() => setRoue(opt.v)}
+              style={{
+                padding: "12px 8px",
+                borderRadius: 10,
+                border: `1px solid ${roue === opt.v ? "rgba(212,175,55,0.6)" : "rgba(255,255,255,0.15)"}`,
+                background: roue === opt.v ? "rgba(212,175,55,0.18)" : "rgba(255,255,255,0.04)",
+                color: "white",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              {opt.l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        disabled={!canValidate || isSaving}
+        onClick={() =>
+          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, roue })
+        }
+        style={{
+          marginTop: 8,
+          padding: "14px 16px",
+          borderRadius: 12,
+          border: "none",
+          background: canValidate
+            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#d4af37,#e7c76a)")
+            : "rgba(255,255,255,0.10)",
+          color: canValidate ? "#0b1026" : "rgba(255,255,255,0.5)",
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: canValidate && !isSaving ? "pointer" : "not-allowed",
+          opacity: isSaving ? 0.7 : 1,
+        }}
+      >
+        {isSaving ? "Enregistrement…" : isSaved ? "✓ Équipements enregistrés" : "Valider les équipements"}
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────── KILOMÉTRAGE ───────────────────────────
+function KilometrageArea({
+  step,
+  state,
+  onValidate,
+}: {
+  step: EdlStepDef;
+  state?: StepState;
+  onValidate: (value: number) => void;
+}) {
+  const [raw, setRaw] = useState<string>(state?.kilometrage ? String(state.kilometrage) : "");
+  const value = Number(raw);
+  const valid = Number.isFinite(value) && value > 0 && value < 9999999;
+  const isSaved = state?.status === "success";
+  const isSaving = state?.status === "uploading";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "8px 4px 12px" }}>
+      <label style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600 }}>
+        {step.id === "kilometrage_arrivee" ? "Kilométrage affiché à l'arrivée" : "Kilométrage affiché au départ"}
+      </label>
+      <input
+        type="number"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={raw}
+        onChange={(e) => setRaw(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="Ex : 124583"
+        style={{
+          width: "100%",
+          padding: "20px 18px",
+          borderRadius: 14,
+          border: "1px solid rgba(255,255,255,0.18)",
+          background: "rgba(255,255,255,0.05)",
+          color: "white",
+          fontSize: 28,
+          fontWeight: 700,
+          textAlign: "center",
+          letterSpacing: "0.05em",
+          outline: "none",
+        }}
+        autoFocus
+      />
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, margin: 0, textAlign: "center" }}>
+        Lisez la valeur exacte sur le compteur, sans virgule ni unité.
+      </p>
+      <button
+        type="button"
+        disabled={!valid || isSaving}
+        onClick={() => onValidate(value)}
+        style={{
+          padding: "14px 16px",
+          borderRadius: 12,
+          border: "none",
+          background: valid
+            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#d4af37,#e7c76a)")
+            : "rgba(255,255,255,0.10)",
+          color: valid ? "#0b1026" : "rgba(255,255,255,0.5)",
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: valid && !isSaving ? "pointer" : "not-allowed",
+          opacity: isSaving ? 0.7 : 1,
+        }}
+      >
+        {isSaving ? "Enregistrement…" : isSaved ? `✓ ${value.toLocaleString("fr-FR")} km enregistrés` : "Valider le kilométrage"}
+      </button>
+    </div>
+  );
+}
+
+
