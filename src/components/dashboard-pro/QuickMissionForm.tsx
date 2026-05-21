@@ -30,11 +30,16 @@ interface FavoriteAddress {
   id: string;
   label: string;
   address: string;
+  ville: string | null;
+  code_postal: string | null;
+  address_type: "depart" | "arrivee" | "both";
   contact_nom: string | null;
   contact_tel: string | null;
+  contact_email: string | null;
   notes_acces: string | null;
   is_default: boolean;
 }
+
 
 const VEHICLE_TYPES = [
   { value: "citadine", label: "Citadine" },
