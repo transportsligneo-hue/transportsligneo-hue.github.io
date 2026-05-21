@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
+import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
