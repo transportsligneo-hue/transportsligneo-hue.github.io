@@ -161,9 +161,9 @@ function AdminDemandes() {
         arrivee: d.arrivee,
         date_trajet: d.date_souhaitee,
         heure_trajet: d.heure_souhaitee ?? "",
-        marque: d.marque ?? "",
-        modele: d.modele ?? "",
-        immatriculation: d.immatriculation ?? "",
+        marque: d.vehicule_marque ?? d.marque ?? "",
+        modele: d.vehicule_modele ?? d.modele ?? "",
+        immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? "",
         client_nom: `${d.prenom} ${d.nom}`,
         client_email: d.email,
         client_telephone: d.telephone ?? "",
@@ -173,6 +173,15 @@ function AdminDemandes() {
         statut: "en_attente",
         statut_publication: "publie",
         pricing_mode: "fixe",
+        // Phase 6 — propagation véhicule détaillé + options
+        vehicule_immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? null,
+        vehicule_vin: d.vehicule_vin ?? null,
+        vehicule_energie: d.vehicule_energie ?? d.carburant ?? null,
+        vehicule_type: d.vehicule_type ?? null,
+        vehicule_couleur: d.vehicule_couleur ?? null,
+        vehicule_km: d.vehicule_km ?? null,
+        vehicule_notes: d.vehicule_notes ?? null,
+        options_meta: d.options_meta ?? {},
       });
       if (error) {
         if (createdMissionId) {
