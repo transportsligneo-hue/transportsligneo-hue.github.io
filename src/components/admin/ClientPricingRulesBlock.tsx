@@ -278,10 +278,11 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
             <div className="flex gap-2">
               <button onClick={submit} disabled={saving} className="admin-btn-primary inline-flex items-center gap-1.5">
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                Enregistrer
+                {editingId ? "Mettre à jour" : "Enregistrer"}
               </button>
-              <button onClick={() => { setCreating(false); setForm(EMPTY_FORM); }} className="admin-btn-ghost">Annuler</button>
+              <button onClick={resetForm} className="admin-btn-ghost">Annuler</button>
             </div>
+
           </div>
         )}
       </div>
