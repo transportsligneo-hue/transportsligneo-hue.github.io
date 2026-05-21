@@ -575,6 +575,50 @@ export function EdlPremiumFlow({
   const setState = (id: string, s: StepState) =>
     setStates(prev => ({ ...prev, [id]: s }));
 
+  /** Valide l'étape "Équipements véhicule" et persiste la sélection. */
+  const validateChecklist = async (equip: NonNullable<StepState["equipements"]>) => {
+    const stepId = currentStep.id;
+    setState(stepId, { status: "uploading", equipements: equip });
+    try {
+      const insId = await ensureInspection();
+      const { error } = await supabase
+        .from("inspections")
+        .update({ equipements: equip })
+        .eq("id", insId);
+      if (error) throw error;
+      setState(stepId, { status: "success", equipements: equip });
+      toast.success("Équipements enregistrés");
+    } catch (err) {
+      setState(stepId, { status: "error", equipements: equip, error: err instanceof Error ? err.message : "Erreur" });
+      toast.error("Enregistrement impossible", { description: "Réessayez dans quelques secondes." });
+    }
+  };
+
+  /** Valide une étape kilométrage (depart ou arrivée) et persiste la valeur. */
+  const validateKilometrage = async (value: number) => {
+    const stepId = currentStep.id;
+    if (!Number.isFinite(value) || value <= 0) {
+      toast.error("Saisissez un kilométrage valide");
+      return;
+    }
+    setState(stepId, { status: "uploading", kilometrage: value });
+    try {
+      const insId = await ensureInspection();
+      const column = stepId === "kilometrage_arrivee" ? "kilometrage_arrivee" : "kilometrage_depart";
+      const { error } = await supabase
+        .from("inspections")
+        .update({ [column]: value })
+        .eq("id", insId);
+      if (error) throw error;
+      setState(stepId, { status: "success", kilometrage: value });
+      toast.success("Kilométrage enregistré");
+    } catch (err) {
+      setState(stepId, { status: "error", kilometrage: value, error: err instanceof Error ? err.message : "Erreur" });
+      toast.error("Enregistrement impossible", { description: "Réessayez dans quelques secondes." });
+    }
+  };
+
+
   const handlePhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     e.target.value = "";
