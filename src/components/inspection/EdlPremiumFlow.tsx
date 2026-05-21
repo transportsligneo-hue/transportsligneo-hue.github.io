@@ -530,12 +530,33 @@ export function EdlPremiumFlow({
   }, [attributionId, inspectionId, type]);
 
   // ─────────────────────────── HANDLERS ───────────────────────────
+  /** Avance vers l'étape suivante (utilisé après succès photo / scan / signature). */
+  const autoAdvance = useCallback(() => {
+    setStepIndex((current) => {
+      const next = current + 1;
+      return next < TOTAL ? next : current;
+    });
+  }, [TOTAL]);
+
   const triggerCapture = () => {
     if (currentStep.kind === "scan") {
       setOpenScanner(true);
     } else {
       fileRef.current?.click();
     }
+  };
+
+  /** Pour les étapes scan : prendre une simple photo sans recadrage/OCR. */
+  const triggerSimpleCapture = () => {
+    fileRef.current?.click();
+  };
+
+  /** Ignorer une étape scan : marquée comme validée sans document. Non destructif. */
+  const skipCurrentScan = () => {
+    const stepId = currentStep.id;
+    setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
+    toast.info("Scan ignoré — vous pouvez continuer");
+    setTimeout(() => autoAdvance(), 250);
   };
 
   const setState = (id: string, s: StepState) =>
