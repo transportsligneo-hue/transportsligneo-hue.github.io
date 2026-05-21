@@ -138,6 +138,66 @@ function MissionDetail() {
     }
   };
 
+  const handleDownloadEdl = async () => {
+    if (!attributionId || !mission || downloadingEdl) return;
+    setDownloadingEdl(true);
+    try {
+      const { data: attr } = await supabase
+        .from("attributions")
+        .select("numero_mission, trajet_id, convoyeur_id, pdf_share_client")
+        .eq("id", attributionId)
+        .maybeSingle();
+      if (!attr || !(attr as { pdf_share_client?: boolean }).pdf_share_client) {
+        toast.error("PDF non disponible", { description: "L'admin n'a pas encore partagé ce document." });
+        return;
+      }
+      const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
+        supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
+        supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
+        supabase.from("inspections").select("id, type_inspection, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
+        supabase.from("mission_signatures" as never).select("kind, url_signature").eq("attribution_id" as never, attributionId as never),
+      ]);
+      const photosDepart: { vue_type: string; url: string }[] = [];
+      const photosArrivee: { vue_type: string; url: string }[] = [];
+      for (const ins of (insps as { id: string; type_inspection: string; equipements?: unknown; kilometrage_depart?: number; kilometrage_arrivee?: number }[]) ?? []) {
+        const { data: photos } = await supabase.from("inspection_photos").select("vue_type, url_photo").eq("inspection_id", ins.id);
+        for (const p of (photos as { vue_type: string; url_photo: string }[]) ?? []) {
+          const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(p.url_photo, 600);
+          if (signed?.signedUrl) {
+            (ins.type_inspection === "arrivee" ? photosArrivee : photosDepart).push({ vue_type: p.vue_type, url: signed.signedUrl });
+          }
+        }
+      }
+      const signatures: { kind: string; url?: string | null }[] = [];
+      for (const s of (sigs as { kind: string; url_signature: string }[]) ?? []) {
+        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(s.url_signature, 600);
+        signatures.push({ kind: s.kind, url: signed?.signedUrl ?? null });
+      }
+      const lastIns = (insps as { equipements?: Record<string, unknown>; kilometrage_depart?: number; kilometrage_arrivee?: number }[])?.[0];
+      const blob = await generateEdlFinalPdf({
+        numero: attr.numero_mission ?? mission.numero,
+        date_mission: mission.date_prise_en_charge,
+        depart: trajet?.depart ?? mission.ville_depart,
+        arrivee: trajet?.arrivee ?? mission.ville_arrivee,
+        vehicule: { marque: mission.marque, modele: mission.modele, immatriculation: mission.immatriculation, vin: (trajet as { vin?: string } | null)?.vin ?? null },
+        convoyeur: conv ?? null,
+        equipements: lastIns?.equipements ?? null,
+        kilometrage_depart: lastIns?.kilometrage_depart ?? null,
+        kilometrage_arrivee: lastIns?.kilometrage_arrivee ?? null,
+        photosDepart, photosArrivee, signatures,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `EDL-${attr.numero_mission ?? mission.numero}.pdf`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    } finally {
+      setDownloadingEdl(false);
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
   if (!mission) {
     return (
