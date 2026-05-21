@@ -370,9 +370,20 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
-  doc.text("Date : ___ / ___ / _____   Heure : ______", 17, yy + 11);
-  doc.text("Nom du signataire : _____________________", 17, yy + 16);
-  doc.text("Signature :", 17, yy + 21);
+  if (m.signature_depart_url) {
+    const sigDep = await loadImageAsDataUrl(m.signature_depart_url);
+    if (sigDep) {
+      try {
+        const fmt = sigDep.includes("image/png") ? "PNG" : "JPEG";
+        doc.addImage(sigDep, fmt, 17, yy + 8, 56, 14);
+      } catch { /* ignore */ }
+    }
+    doc.text(`Signe par ${m.signature_depart_nom || "client"}`, 17, yy + 22.5);
+  } else {
+    doc.text("Date : ___ / ___ / _____   Heure : ______", 17, yy + 11);
+    doc.text("Nom du signataire : _____________________", 17, yy + 16);
+    doc.text("Signature :", 17, yy + 21);
+  }
 
   // Emergency
   const ex = pageW / 2 - 22;
@@ -403,9 +414,20 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
-  doc.text("Date : ___ / ___ / _____   Heure : ______", pageW - 73, yy + 11);
-  doc.text("Nom du signataire : _____________________", pageW - 73, yy + 16);
-  doc.text("Signature :", pageW - 73, yy + 21);
+  if (m.signature_arrivee_url) {
+    const sigArr = await loadImageAsDataUrl(m.signature_arrivee_url);
+    if (sigArr) {
+      try {
+        const fmt = sigArr.includes("image/png") ? "PNG" : "JPEG";
+        doc.addImage(sigArr, fmt, pageW - 73, yy + 8, 56, 14);
+      } catch { /* ignore */ }
+    }
+    doc.text(`Signe par ${m.signature_arrivee_nom || "client"}`, pageW - 73, yy + 22.5);
+  } else {
+    doc.text("Date : ___ / ___ / _____   Heure : ______", pageW - 73, yy + 11);
+    doc.text("Nom du signataire : _____________________", pageW - 73, yy + 16);
+    doc.text("Signature :", pageW - 73, yy + 21);
+  }
 
   drawFooter(doc, pageW, pageH);
   return doc.output("blob");
