@@ -139,10 +139,11 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           .maybeSingle(),
         supabase
           .from("client_default_addresses" as never)
-          .select("id, label, address, contact_nom, contact_tel, notes_acces, is_default")
+          .select("id, label, address, ville, code_postal, address_type, contact_nom, contact_tel, contact_email, notes_acces, is_default")
           .eq("active", true)
           .order("is_default", { ascending: false })
           .order("created_at", { ascending: false }),
+
       ]);
       if (cancelled) return;
       const pp = p as Partial<ProfileInfo> | null;
