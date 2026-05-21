@@ -146,6 +146,7 @@ function ProDocuments() {
   }, [factures, statutFilter, yearFilter]);
 
   const payingDevis = devis.find(d => d.id === payingId);
+  const payingFacture = factures.find(f => f.id === payingFactureId);
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/dashboard-pro/documents?paye=1`
     : "/";
