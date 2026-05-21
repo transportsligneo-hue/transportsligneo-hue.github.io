@@ -216,7 +216,7 @@ function OrgDetail() {
 
         <TabsContent value="pricing" className="space-y-3">
           {owner ? (
-            <ClientPricingRulesBlock clientUserId={owner.user_id} />
+            <ClientPricingRulesBlock clientUserId={owner.user_id} clientEmail={owner.email ?? ""} />
           ) : (
             <NoOwnerNotice />
           )}
@@ -229,6 +229,7 @@ function OrgDetail() {
             <NoOwnerNotice />
           )}
         </TabsContent>
+
 
 
         <TabsContent value="activity" className="bg-white border border-pro-border rounded-xl p-4">
