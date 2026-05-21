@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, Loader2, Truck, PlusCircle } from "lucide-react";
+import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions")({
   component: ProMissions,
@@ -17,6 +17,18 @@ interface MissionRow {
   statut: string;
   prix_total: number;
   created_at: string;
+}
+
+interface PendingItem {
+  id: string;
+  numero: string;
+  depart: string;
+  arrivee: string;
+  date_souhaitee: string | null;
+  created_at: string;
+  prix_estime: number | null;
+  source: "devis" | "demande";
+  statut: string;
 }
 
 const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "terminee", "annulee"] as const;
@@ -36,21 +48,71 @@ const statutPill: Record<string, string> = {
 function ProMissions() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<MissionRow[]>([]);
+  const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("tous");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    supabase
+    let cancelled = false;
+    setLoading(true);
+    const email = user.email ?? "";
+    const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
+
+    const mPromise = supabase
       .from("missions")
       .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setMissions((data ?? []) as MissionRow[]);
-        setLoading(false);
-      });
+      .order("created_at", { ascending: false });
+
+    const devisPending = supabase
+      .from("devis")
+      .select("id, numero, depart, arrivee, date_souhaitee, created_at, statut, prix_estime, mission_id")
+      .or(orFilter)
+      .is("mission_id", null)
+      .not("statut", "in", "(refuse,convertit)")
+      .order("created_at", { ascending: false });
+
+    const demandePending = supabase
+      .from("demandes_convoyage")
+      .select("id, depart, arrivee, date_souhaitee, created_at, statut, prix_estime")
+      .or(orFilter)
+      .not("statut", "in", "(refusee,annulee,convertie)")
+      .order("created_at", { ascending: false });
+
+    Promise.all([mPromise, devisPending, demandePending]).then(([mRes, dRes, demRes]) => {
+      if (cancelled) return;
+      setMissions((mRes.data ?? []) as MissionRow[]);
+      const pendingList: PendingItem[] = [
+        ...((dRes.data ?? []) as Array<{ id: string; numero: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string; statut: string; prix_estime: number | null }>).map(d => ({
+          id: `devis-${d.id}`,
+          numero: d.numero,
+          depart: d.depart,
+          arrivee: d.arrivee,
+          date_souhaitee: d.date_souhaitee,
+          created_at: d.created_at,
+          prix_estime: d.prix_estime,
+          source: "devis" as const,
+          statut: d.statut,
+        })),
+        ...((demRes.data ?? []) as Array<{ id: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string; statut: string; prix_estime: number | null }>).map(d => ({
+          id: `dem-${d.id}`,
+          numero: `DEM-${d.id.slice(0, 6).toUpperCase()}`,
+          depart: d.depart,
+          arrivee: d.arrivee,
+          date_souhaitee: d.date_souhaitee,
+          created_at: d.created_at,
+          prix_estime: d.prix_estime,
+          source: "demande" as const,
+          statut: d.statut,
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setPending(pendingList);
+      setLoading(false);
+    });
+
+    return () => { cancelled = true; };
   }, [user]);
 
   const filtered = useMemo(() => {
@@ -67,12 +129,22 @@ function ProMissions() {
     return list;
   }, [missions, filter, search]);
 
+  const pendingFiltered = useMemo(() => {
+    if (!search.trim()) return pending;
+    const q = search.toLowerCase();
+    return pending.filter(p =>
+      p.numero.toLowerCase().includes(q) ||
+      p.depart.toLowerCase().includes(q) ||
+      p.arrivee.toLowerCase().includes(q)
+    );
+  }, [pending, search]);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-pro-text">Missions</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Historique complet et suivi</p>
+          <h1 className="text-2xl font-semibold text-pro-text">Missions & demandes</h1>
+          <p className="text-pro-muted text-sm mt-0.5">Suivi complet de votre activité</p>
         </div>
         <Link
           to="/dashboard-pro/nouvelle-demande"
@@ -110,8 +182,57 @@ function ProMissions() {
         </div>
       </div>
 
-      {/* Liste */}
+      {/* Demandes en cours de validation */}
+      {!loading && filter === "tous" && pendingFiltered.length > 0 && (
+        <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
+          <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2 bg-amber-50/40">
+            <Clock size={14} className="text-amber-600" />
+            <h2 className="text-sm font-semibold text-pro-text">En cours de validation</h2>
+            <span className="ml-auto text-xs text-pro-text-soft">{pendingFiltered.length} demande{pendingFiltered.length > 1 ? "s" : ""}</span>
+          </div>
+          <ul className="divide-y divide-pro-border">
+            {pendingFiltered.map((p) => (
+              <li key={p.id}>
+                <Link
+                  to={p.source === "devis" ? "/dashboard-pro/devis-instantane" : "/dashboard-pro/missions"}
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-pro-bg-soft/60 transition-colors"
+                >
+                  <FileText size={14} className="text-pro-accent shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs text-pro-text-soft">{p.numero}</span>
+                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-amber-100 text-amber-700">
+                        {p.source === "devis" ? "Devis en attente" : "Demande reçue"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-pro-text mt-0.5 truncate">
+                      {p.depart} → {p.arrivee}
+                    </p>
+                    <p className="text-xs text-pro-text-soft mt-0.5 flex flex-wrap gap-x-3">
+                      <span><Calendar size={10} className="inline mr-1" />{new Date(p.created_at).toLocaleDateString("fr-FR")}</span>
+                      {p.date_souhaitee && <span>Souhaité : {new Date(p.date_souhaitee).toLocaleDateString("fr-FR")}</span>}
+                    </p>
+                  </div>
+                  {p.prix_estime != null && (
+                    <span className="text-sm font-semibold text-pro-text whitespace-nowrap">
+                      {Number(p.prix_estime).toFixed(2)} €
+                    </span>
+                  )}
+                  <ArrowRight size={14} className="text-pro-muted shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Liste missions */}
       <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
+        <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2">
+          <Truck size={14} className="text-pro-accent" />
+          <h2 className="text-sm font-semibold text-pro-text">Missions</h2>
+          <span className="ml-auto text-xs text-pro-text-soft">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</span>
+        </div>
         {loading ? (
           <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-pro-accent" size={24} /></div>
         ) : filtered.length === 0 ? (

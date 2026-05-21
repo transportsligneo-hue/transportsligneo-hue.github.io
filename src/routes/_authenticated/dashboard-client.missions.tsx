@@ -3,7 +3,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Truck, Loader2, PlusCircle, Clock, ArrowRight, FileText } from "lucide-react";
-import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { StatusBadge, missionStatusKind } from "@/components/dashboard/StatusBadge";
+
+const friendlyStatusLabel = (statut: string): string => ({
+  en_attente: "En attente de validation",
+  confirmee: "Devis prêt",
+  en_cours: "Convoyeur en route",
+  livree: "Véhicule livré",
+  terminee: "Terminée",
+  annulee: "Annulée",
+  refuse: "Refusée",
+}[statut] ?? statut);
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions")({
   component: ClientMissions,
@@ -160,7 +170,7 @@ function ClientMissions() {
                   <div className="flex items-center gap-3 flex-wrap mb-2">
                     <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
                     <StatusBadge kind={missionStatusKind(m.statut)}>
-                      {missionStatusLabel(m.statut)}
+                      {friendlyStatusLabel(m.statut)}
                     </StatusBadge>
                   </div>
                   <p className="text-cream font-heading text-base flex items-center gap-2">
