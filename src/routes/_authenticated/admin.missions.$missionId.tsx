@@ -59,6 +59,7 @@ interface AttributionFull {
   numero_mission: string | null;
   created_at: string;
   updated_at: string;
+  pdf_share_client?: boolean | null;
 }
 
 interface TrajetFull {
