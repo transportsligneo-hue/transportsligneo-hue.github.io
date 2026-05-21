@@ -164,7 +164,7 @@ function MissionDetail() {
         for (const p of (photos as { vue_type: string; url_photo: string }[]) ?? []) {
           const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(p.url_photo, 600);
           if (signed?.signedUrl) {
-            (ins.type_inspection === "arrivee" ? photosArrivee : photosDepart).push({ vue_type: p.vue_type, url: signed.signedUrl });
+            (ins.type === "arrivee" ? photosArrivee : photosDepart).push({ vue_type: p.vue_type, url: signed.signedUrl });
           }
         }
       }
