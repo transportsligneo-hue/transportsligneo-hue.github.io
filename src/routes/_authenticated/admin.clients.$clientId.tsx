@@ -55,6 +55,7 @@ interface Profile {
   tva_exemption_note: string | null;
   facture_mention_legale: string | null;
   facture_mention_active: boolean | null;
+  relances_disabled: boolean | null;
 }
 
 interface MissionItem {
