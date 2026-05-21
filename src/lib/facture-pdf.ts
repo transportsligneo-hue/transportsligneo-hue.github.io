@@ -2,6 +2,8 @@ import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
+import { resolveInvoiceMention } from "@/lib/invoice-settings";
+
 
 
 export interface FactureData {
@@ -34,7 +36,16 @@ export interface FactureData {
   iban?: string | null;
   bic?: string | null;
   banque?: string | null;
+  /** Si fourni, charge la mention légale (override profil > défaut global) et le mode fiscal. */
+  client_user_id?: string | null;
+  /** Force le mode TVA exonérée et ignore la ligne TVA. */
+  tva_exempt?: boolean;
+  /** Texte de la note d'exonération à imprimer si tva_exempt. */
+  tva_exemption_note?: string | null;
+  /** Mention légale brute à imprimer en pied (overrides resolver si défini). */
+  legal_mention?: string | null;
 }
+
 
 const NAVY: [number, number, number] = [11, 16, 38];
 const GOLD: [number, number, number] = [212, 175, 55];
@@ -182,12 +193,19 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
 
+  // Résolution mention légale + mode fiscal depuis profil/app_settings
+  const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
+  const tvaExempt = f.tva_exempt ?? resolved.pricingDisplayMode === "exempt";
+  const exemptionNote = f.tva_exemption_note ?? resolved.tvaExemptionNote ?? "TVA non applicable, art. 293 B du CGI";
+  const legalMention = (f.legal_mention ?? (resolved.active ? resolved.mention : null))?.trim() || null;
+
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
-  const tvaTaux = f.tva_taux ?? 20;
+  const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
   const ht = Number(f.prix_ht);
-  const tva = Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
-  const ttc = Number(f.prix_ttc);
+  const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
+  const ttc = tvaExempt ? ht : Number(f.prix_ttc);
+
 
   const badge = isB2B
     ? { kind: "echeance" as const, text: "Echeance de paiement", sub: f.date_echeance ? fmtDate(f.date_echeance) : "30 jours" }
@@ -350,11 +368,13 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFillColor(...NAVY);
   doc.rect(tx, ty, 50, 10, "F");
   doc.setTextColor(...GOLD_SOFT);
-  doc.text(`TVA (${tvaTaux}%)`, tx + 25, ty + 6.5, { align: "center" });
+  doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux}%)`, tx + 25, ty + 6.5, { align: "center" });
   doc.setDrawColor(...LINE);
   doc.rect(tx + 50, ty, 26, 10, "S");
   doc.setTextColor(...NAVY);
-  doc.text(eur(tva), tx + 50 + 23, ty + 6.5, { align: "right" });
+  doc.setFontSize(tvaExempt ? 7 : 9);
+  doc.text(tvaExempt ? "Exonérée" : eur(tva), tx + 50 + 23, ty + 6.5, { align: "right" });
+  doc.setFontSize(9);
 
   ty += 10;
   doc.setFillColor(...NAVY);
@@ -453,8 +473,27 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
     doc.text(f.bic || "CMCIFR2A", pageW - 30, y + 8.5);
   }
 
+  // ===== Mention légale (exonération TVA + mention configurée) =====
+  // Empilage juste au-dessus du bandeau émetteur (qui est à pageH - 40).
+  const mentionLines: string[] = [];
+  if (tvaExempt && exemptionNote) mentionLines.push(exemptionNote);
+  if (legalMention) mentionLines.push(legalMention);
+  if (mentionLines.length > 0) {
+    const blockTop = pageH - 52;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...MUTED);
+    let my = blockTop;
+    mentionLines.forEach((m) => {
+      const wrapped = doc.splitTextToSize(m, pageW - 28);
+      doc.text(wrapped, 14, my);
+      my += wrapped.length * 3.2 + 1;
+    });
+  }
+
   drawSocietyBlock(doc, pageW, pageH - 40);
   drawFooter(doc, pageW, pageH);
+
 
   return doc.output("blob");
 }

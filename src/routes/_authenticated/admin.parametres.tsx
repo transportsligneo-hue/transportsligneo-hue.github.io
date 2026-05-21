@@ -166,7 +166,7 @@ function AdminParametres() {
         </TabsContent>
 
         {/* === FACTURATION === */}
-        <TabsContent value="facturation" className="mt-0">
+        <TabsContent value="facturation" className="mt-0 space-y-4">
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField label="TVA appliquée (%)">
@@ -200,7 +200,10 @@ function AdminParametres() {
               <Button icon={<Save size={14} />} onClick={save}>Enregistrer</Button>
             </div>
           </Card>
+
+          <FactureMentionCard />
         </TabsContent>
+
 
         {/* === TEMPLATES EMAILS === */}
         <TabsContent value="emails" className="mt-0">
@@ -424,3 +427,73 @@ function ResetOperationalCard() {
     </Card>
   );
 }
+
+function FactureMentionCard() {
+  const [text, setText] = useState("");
+  const [active, setActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings" as never)
+        .select("value")
+        .eq("key" as never, "facture_mention_default" as never)
+        .maybeSingle();
+      const v = (data as { value?: { text?: string; active?: boolean } } | null)?.value;
+      setText(v?.text ?? "");
+      setActive(!!v?.active);
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings" as never)
+      .upsert({ key: "facture_mention_default", value: { text, active } } as never, { onConflict: "key" } as never);
+    setSaving(false);
+    if (error) toast.error("Échec de l'enregistrement", { description: error.message });
+    else toast.success("Mention légale par défaut enregistrée");
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+          <Receipt size={18} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-pro-text">Mention légale par défaut sur les factures</h3>
+          <p className="text-xs text-pro-muted mt-1">
+            Affichée en pied de toutes les factures clients qui n'ont pas d'override.
+            Exemple : informations sur l'auto-liquidation, médiation, etc.
+          </p>
+        </div>
+      </div>
+
+      <FormField label="Texte de la mention">
+        <textarea
+          className="w-full rounded-md border border-pro-border bg-white px-3 py-2 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pro-accent/30"
+          value={text}
+          disabled={loading}
+          placeholder="Ex. : En cas de retard de paiement, indemnité forfaitaire de 40 € (art. L441-10 du Code de commerce)."
+          onChange={(e) => setText(e.target.value)}
+        />
+      </FormField>
+
+      <label className="mt-3 flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={active} disabled={loading} onChange={(e) => setActive(e.target.checked)} />
+        Afficher cette mention sur les factures
+      </label>
+
+      <div className="mt-4 flex justify-end">
+        <Button icon={<Save size={14} />} onClick={save} disabled={saving || loading}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+

@@ -51,6 +51,10 @@ interface Profile {
   statut: string | null;
   logo_url: string | null;
   created_at: string;
+  pricing_display_mode: string | null;
+  tva_exemption_note: string | null;
+  facture_mention_legale: string | null;
+  facture_mention_active: boolean | null;
 }
 
 interface MissionItem {
@@ -79,6 +83,10 @@ type Editable = {
   adresse: string;
   adresse_facturation: string;
   type_client: string;
+  pricing_display_mode: string;
+  tva_exemption_note: string;
+  facture_mention_legale: string;
+  facture_mention_active: boolean;
 };
 
 const EMPTY: Editable = {
@@ -91,6 +99,10 @@ const EMPTY: Editable = {
   adresse: "",
   adresse_facturation: "",
   type_client: "particulier",
+  pricing_display_mode: "ttc",
+  tva_exemption_note: "",
+  facture_mention_legale: "",
+  facture_mention_active: false,
 };
 
 function AdminClientDetail() {
@@ -138,6 +150,10 @@ function AdminClientDetail() {
         adresse: prof.adresse ?? "",
         adresse_facturation: prof.adresse_facturation ?? "",
         type_client: prof.type_client ?? "particulier",
+        pricing_display_mode: prof.pricing_display_mode ?? (prof.type_client === "b2b" || prof.type_client === "flotte" ? "ht" : "ttc"),
+        tva_exemption_note: prof.tva_exemption_note ?? "",
+        facture_mention_legale: prof.facture_mention_legale ?? "",
+        facture_mention_active: !!prof.facture_mention_active,
       };
       setForm(init);
       setOriginal(init);
@@ -457,6 +473,60 @@ function AdminClientDetail() {
             </div>
           </div>
         </AdminSection>
+
+        {/* Configuration tarifaire & fiscale */}
+        <AdminSection
+          title="Configuration tarifaire & fiscale"
+          description="Mode d'affichage des prix, exonération TVA et mention légale propre à ce client."
+        >
+          <div className="space-y-4">
+            <AdminField label="Mode d'affichage des prix">
+              <select
+                className={inp}
+                value={form.pricing_display_mode}
+                onChange={(e) => setForm({ ...form, pricing_display_mode: e.target.value })}
+              >
+                <option value="ttc">TTC (particulier — défaut)</option>
+                <option value="ht">HT (pro — TVA ajoutée)</option>
+                <option value="exempt">Exonéré de TVA</option>
+              </select>
+            </AdminField>
+
+            {form.pricing_display_mode === "exempt" && (
+              <AdminField label="Mention d'exonération TVA">
+                <textarea
+                  className={`${inp} min-h-[60px]`}
+                  placeholder="TVA non applicable, art. 293 B du CGI"
+                  value={form.tva_exemption_note}
+                  onChange={(e) => setForm({ ...form, tva_exemption_note: e.target.value })}
+                />
+              </AdminField>
+            )}
+
+            <AdminField label="Mention légale facture (override client)">
+              <textarea
+                className={`${inp} min-h-[80px]`}
+                placeholder="Laisser vide pour utiliser la mention globale définie dans Paramètres."
+                value={form.facture_mention_legale}
+                onChange={(e) => setForm({ ...form, facture_mention_legale: e.target.value })}
+              />
+            </AdminField>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.facture_mention_active}
+                onChange={(e) => setForm({ ...form, facture_mention_active: e.target.checked })}
+              />
+              Activer cette mention spécifique au client
+            </label>
+            <p className="text-xs text-[color:var(--admin-muted)]">
+              Si désactivé ou vide, la mention globale (Paramètres → Facturation) sera utilisée.
+              N'oubliez pas d'enregistrer le profil après modification.
+            </p>
+          </div>
+        </AdminSection>
+
 
         {/* Historique missions */}
         <div className="lg:col-span-2">
