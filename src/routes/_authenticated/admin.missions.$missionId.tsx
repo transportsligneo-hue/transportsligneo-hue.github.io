@@ -42,6 +42,7 @@ import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf } from "@/lib/mission-number";
+import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
