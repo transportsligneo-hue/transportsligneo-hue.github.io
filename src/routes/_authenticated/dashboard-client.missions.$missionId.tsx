@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
+import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
@@ -40,6 +41,8 @@ function MissionDetail() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
+  const [pdfShareEnabled, setPdfShareEnabled] = useState(false);
+  const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
 
@@ -70,12 +73,15 @@ function MissionDetail() {
           if (trajetId) {
             const { data: attr } = await supabase
               .from("attributions")
-              .select("id")
+              .select("id, pdf_share_client")
               .eq("trajet_id", trajetId)
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (!cancelled && attr) setAttributionId(attr.id);
+            if (!cancelled && attr) {
+              setAttributionId(attr.id);
+              setPdfShareEnabled(Boolean((attr as { pdf_share_client?: boolean }).pdf_share_client));
+            }
           }
         }
 
@@ -129,6 +135,66 @@ function MissionDetail() {
       toast.error("Téléchargement impossible", { description: (e as Error).message });
     } finally {
       setDownloadingFact(false);
+    }
+  };
+
+  const handleDownloadEdl = async () => {
+    if (!attributionId || !mission || downloadingEdl) return;
+    setDownloadingEdl(true);
+    try {
+      const { data: attr } = await supabase
+        .from("attributions")
+        .select("numero_mission, trajet_id, convoyeur_id, pdf_share_client")
+        .eq("id", attributionId)
+        .maybeSingle();
+      if (!attr || !(attr as { pdf_share_client?: boolean }).pdf_share_client) {
+        toast.error("PDF non disponible", { description: "L'admin n'a pas encore partagé ce document." });
+        return;
+      }
+      const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
+        supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
+        supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
+        supabase.from("inspections").select("id, type, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
+        supabase.from("mission_signatures" as never).select("kind, url_signature").eq("attribution_id" as never, attributionId as never),
+      ]);
+      const photosDepart: { vue_type: string; url: string }[] = [];
+      const photosArrivee: { vue_type: string; url: string }[] = [];
+      for (const ins of (insps as { id: string; type: string; equipements?: unknown; kilometrage_depart?: number; kilometrage_arrivee?: number }[]) ?? []) {
+        const { data: photos } = await supabase.from("inspection_photos").select("vue_type, url_photo").eq("inspection_id", ins.id);
+        for (const p of (photos as { vue_type: string; url_photo: string }[]) ?? []) {
+          const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(p.url_photo, 600);
+          if (signed?.signedUrl) {
+            (ins.type_inspection === "arrivee" ? photosArrivee : photosDepart).push({ vue_type: p.vue_type, url: signed.signedUrl });
+          }
+        }
+      }
+      const signatures: { kind: string; url?: string | null }[] = [];
+      for (const s of (sigs as { kind: string; url_signature: string }[]) ?? []) {
+        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(s.url_signature, 600);
+        signatures.push({ kind: s.kind, url: signed?.signedUrl ?? null });
+      }
+      const lastIns = (insps as { equipements?: Record<string, unknown>; kilometrage_depart?: number; kilometrage_arrivee?: number }[])?.[0];
+      const blob = await generateEdlFinalPdf({
+        numero: attr.numero_mission ?? mission.numero,
+        date_mission: mission.date_prise_en_charge,
+        depart: trajet?.depart ?? mission.ville_depart,
+        arrivee: trajet?.arrivee ?? mission.ville_arrivee,
+        vehicule: { marque: mission.marque, modele: mission.modele, immatriculation: mission.immatriculation, vin: (trajet as { vin?: string } | null)?.vin ?? null },
+        convoyeur: conv ?? null,
+        equipements: lastIns?.equipements ?? null,
+        kilometrage_depart: lastIns?.kilometrage_depart ?? null,
+        kilometrage_arrivee: lastIns?.kilometrage_arrivee ?? null,
+        photosDepart, photosArrivee, signatures,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `EDL-${attr.numero_mission ?? mission.numero}.pdf`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    } finally {
+      setDownloadingEdl(false);
     }
   };
 

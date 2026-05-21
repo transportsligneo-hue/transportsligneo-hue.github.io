@@ -26,12 +26,18 @@ export interface MissionPdfData {
   marque?: string | null;
   modele?: string | null;
   immatriculation?: string | null;
+  vin?: string | null;
   carburant?: string | null;
   mode_transport?: string | null;
   mode_paiement?: string | null;
   conditions_paiement?: string | null;
   instructions?: string | null;
   prix?: number | null;
+  /** URLs signées (jpg/png) injectées dans les blocs signature si disponibles. */
+  signature_depart_url?: string | null;
+  signature_arrivee_url?: string | null;
+  signature_depart_nom?: string | null;
+  signature_arrivee_nom?: string | null;
 }
 
 const NAVY: [number, number, number] = [11, 16, 38];
@@ -149,6 +155,9 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
     ["Date de mission", fmtDate(m.date_mission)],
     ["Convoyeur assigne", `${m.convoyeur_prenom || ""} ${m.convoyeur_nom || ""}`.trim() || "A attribuer"],
     ["Telephone convoyeur", m.convoyeur_telephone || "—"],
+    ["Vehicule", [m.marque, m.modele].filter(Boolean).join(" ") || "—"],
+    ["Immatriculation", m.immatriculation || "—"],
+    ["VIN", m.vin || "—"],
     ["Mode de transport", m.mode_transport || "Conduite sur route"],
     ["Kilometrage total estime", m.distance_km != null ? `${m.distance_km} km` : "—"],
     ["Duree estimee", m.duree_estimee || "—"],
@@ -361,9 +370,20 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
-  doc.text("Date : ___ / ___ / _____   Heure : ______", 17, yy + 11);
-  doc.text("Nom du signataire : _____________________", 17, yy + 16);
-  doc.text("Signature :", 17, yy + 21);
+  if (m.signature_depart_url) {
+    const sigDep = await loadImageAsDataUrl(m.signature_depart_url);
+    if (sigDep) {
+      try {
+        const fmt = sigDep.includes("image/png") ? "PNG" : "JPEG";
+        doc.addImage(sigDep, fmt, 17, yy + 8, 56, 14);
+      } catch { /* ignore */ }
+    }
+    doc.text(`Signe par ${m.signature_depart_nom || "client"}`, 17, yy + 22.5);
+  } else {
+    doc.text("Date : ___ / ___ / _____   Heure : ______", 17, yy + 11);
+    doc.text("Nom du signataire : _____________________", 17, yy + 16);
+    doc.text("Signature :", 17, yy + 21);
+  }
 
   // Emergency
   const ex = pageW / 2 - 22;
@@ -394,9 +414,20 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
-  doc.text("Date : ___ / ___ / _____   Heure : ______", pageW - 73, yy + 11);
-  doc.text("Nom du signataire : _____________________", pageW - 73, yy + 16);
-  doc.text("Signature :", pageW - 73, yy + 21);
+  if (m.signature_arrivee_url) {
+    const sigArr = await loadImageAsDataUrl(m.signature_arrivee_url);
+    if (sigArr) {
+      try {
+        const fmt = sigArr.includes("image/png") ? "PNG" : "JPEG";
+        doc.addImage(sigArr, fmt, pageW - 73, yy + 8, 56, 14);
+      } catch { /* ignore */ }
+    }
+    doc.text(`Signe par ${m.signature_arrivee_nom || "client"}`, pageW - 73, yy + 22.5);
+  } else {
+    doc.text("Date : ___ / ___ / _____   Heure : ______", pageW - 73, yy + 11);
+    doc.text("Nom du signataire : _____________________", pageW - 73, yy + 16);
+    doc.text("Signature :", pageW - 73, yy + 21);
+  }
 
   drawFooter(doc, pageW, pageH);
   return doc.output("blob");

@@ -59,6 +59,7 @@ interface AttributionFull {
   numero_mission: string | null;
   created_at: string;
   updated_at: string;
+  pdf_share_client?: boolean | null;
 }
 
 interface TrajetFull {
@@ -205,7 +206,7 @@ function AdminMissionDetail() {
     setLoading(true);
     const { data: attr, error: attrErr } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at, pdf_share_client")
       .eq("id", missionId)
       .maybeSingle();
 
@@ -679,6 +680,30 @@ function AdminMissionDetail() {
             >
               PDF état des lieux
             </Button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!attribution) return;
+                const next = !attribution.pdf_share_client;
+                const { error } = await supabase
+                  .from("attributions")
+                  .update({ pdf_share_client: next } as never)
+                  .eq("id", attribution.id);
+                if (error) {
+                  toast.error("Erreur", { description: error.message });
+                  return;
+                }
+                setAttribution({ ...attribution, pdf_share_client: next });
+                toast.success(next ? "PDF partagé au client" : "Partage client désactivé");
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border transition-colors ${
+                attribution.pdf_share_client
+                  ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
+                  : "border-white/15 text-white/70 hover:bg-white/5"
+              }`}
+            >
+              {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager PDF au client"}
+            </button>
             {linkedFactureId ? (
               <Link
                 to="/admin/factures"
