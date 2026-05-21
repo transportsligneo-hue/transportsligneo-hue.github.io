@@ -154,7 +154,7 @@ function ConvoyeurMissions() {
     }
 
     if (data) {
-      const rows = data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null }>;
+      const rows = data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null; options_completion: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null }>;
       const enriched = await Promise.all(rows.map(async (attr) => {
         const [{ data: trajet }, { data: inspections }] = await Promise.all([
           supabase
@@ -177,6 +177,7 @@ function ConvoyeurMissions() {
           etape_courante: normalizeMissionEtape(attr.etape_courante),
           trajet_id: attr.trajet_id,
           numero_mission: attr.numero_mission,
+          options_completion: attr.options_completion ?? {},
           trajet,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
