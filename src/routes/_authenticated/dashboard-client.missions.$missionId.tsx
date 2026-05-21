@@ -129,7 +129,7 @@ function MissionDetail() {
         prix_tva: Number(full.prix_tva),
         prix_ttc: Number(full.prix_ttc),
         mode_paiement: full.mode_paiement,
-        client_user_id: (full as { user_id?: string | null }).user_id ?? mission.user_id ?? null,
+        client_user_id: (full as { user_id?: string | null }).user_id ?? (mission as unknown as { user_id?: string | null }).user_id ?? null,
       });
       downloadFacturePdf(blob, full.numero);
     } catch (e) {
