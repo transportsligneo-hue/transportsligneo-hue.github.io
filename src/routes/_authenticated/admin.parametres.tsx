@@ -202,6 +202,7 @@ function AdminParametres() {
           </Card>
 
           <FactureMentionCard />
+          <RelancesCard />
         </TabsContent>
 
 
@@ -493,6 +494,101 @@ function FactureMentionCard() {
           {saving ? "Enregistrement…" : "Enregistrer"}
         </Button>
       </div>
+    </Card>
+  );
+}
+
+function RelancesCard() {
+  const [autoRelances, setAutoRelances] = useState(true);
+  const [autoRetard, setAutoRetard] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings" as never)
+        .select("key, value")
+        .in("key" as never, ["factures.auto_relances", "factures.auto_retard"] as never);
+      const rows = (data as Array<{ key: string; value: { enabled?: boolean } }> | null) ?? [];
+      const r = rows.find((x) => x.key === "factures.auto_relances");
+      const t = rows.find((x) => x.key === "factures.auto_retard");
+      setAutoRelances(r?.value?.enabled ?? true);
+      setAutoRetard(t?.value?.enabled ?? true);
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings" as never)
+      .upsert(
+        [
+          { key: "factures.auto_relances", value: { enabled: autoRelances } },
+          { key: "factures.auto_retard", value: { enabled: autoRetard } },
+        ] as never,
+        { onConflict: "key" } as never,
+      );
+    setSaving(false);
+    if (error) toast.error("Échec de l'enregistrement", { description: error.message });
+    else toast.success("Réglages relances enregistrés");
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+          <AlertTriangle size={18} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-pro-text">Relances & retards de factures</h3>
+          <p className="text-xs text-pro-muted mt-1">
+            Désactive les automatismes pour les clients qui ont leur propre cycle de paiement (plateformes B2B type CCAT, paiement à 60-90j contractuel, etc.).
+            Le passage manuel d'un statut depuis la liste des factures reste toujours possible.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <label className="flex items-start justify-between gap-3 p-3 rounded-lg border border-pro-border hover:bg-pro-bg-soft/40 cursor-pointer">
+          <div>
+            <p className="text-sm font-medium text-pro-text">Relances automatiques par email</p>
+            <p className="text-xs text-pro-muted mt-0.5">Envoyer un rappel email aux clients dont la facture dépasse l'échéance.</p>
+          </div>
+          <input
+            type="checkbox"
+            checked={autoRelances}
+            disabled={loading}
+            onChange={(e) => setAutoRelances(e.target.checked)}
+            className="mt-1 h-5 w-9 appearance-none rounded-full bg-pro-border checked:bg-emerald-500 transition relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition checked:after:translate-x-4"
+          />
+        </label>
+
+        <label className="flex items-start justify-between gap-3 p-3 rounded-lg border border-pro-border hover:bg-pro-bg-soft/40 cursor-pointer">
+          <div>
+            <p className="text-sm font-medium text-pro-text">Passage automatique en "En retard"</p>
+            <p className="text-xs text-pro-muted mt-0.5">Marquer automatiquement les factures dont la date d'échéance est dépassée.</p>
+          </div>
+          <input
+            type="checkbox"
+            checked={autoRetard}
+            disabled={loading}
+            onChange={(e) => setAutoRetard(e.target.checked)}
+            className="mt-1 h-5 w-9 appearance-none rounded-full bg-pro-border checked:bg-emerald-500 transition relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition checked:after:translate-x-4"
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <Button icon={<Save size={14} />} onClick={save} disabled={saving || loading}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+
+      <p className="text-[11px] text-pro-muted mt-3">
+        Tip : tu peux aussi désactiver les relances pour un client précis depuis sa fiche dans <code>Admin &gt; Clients</code>.
+      </p>
     </Card>
   );
 }
