@@ -51,6 +51,10 @@ interface Profile {
   statut: string | null;
   logo_url: string | null;
   created_at: string;
+  pricing_display_mode: string | null;
+  tva_exemption_note: string | null;
+  facture_mention_legale: string | null;
+  facture_mention_active: boolean | null;
 }
 
 interface MissionItem {
@@ -79,6 +83,10 @@ type Editable = {
   adresse: string;
   adresse_facturation: string;
   type_client: string;
+  pricing_display_mode: string;
+  tva_exemption_note: string;
+  facture_mention_legale: string;
+  facture_mention_active: boolean;
 };
 
 const EMPTY: Editable = {
@@ -91,6 +99,10 @@ const EMPTY: Editable = {
   adresse: "",
   adresse_facturation: "",
   type_client: "particulier",
+  pricing_display_mode: "ttc",
+  tva_exemption_note: "",
+  facture_mention_legale: "",
+  facture_mention_active: false,
 };
 
 function AdminClientDetail() {
