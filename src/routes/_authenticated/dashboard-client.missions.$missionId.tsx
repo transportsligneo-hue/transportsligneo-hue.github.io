@@ -72,12 +72,15 @@ function MissionDetail() {
           if (trajetId) {
             const { data: attr } = await supabase
               .from("attributions")
-              .select("id")
+              .select("id, pdf_share_client")
               .eq("trajet_id", trajetId)
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (!cancelled && attr) setAttributionId(attr.id);
+            if (!cancelled && attr) {
+              setAttributionId(attr.id);
+              setPdfShareEnabled(Boolean((attr as { pdf_share_client?: boolean }).pdf_share_client));
+            }
           }
         }
 
