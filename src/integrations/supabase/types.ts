@@ -1168,6 +1168,8 @@ export type Database = {
           prix_ht: number
           prix_ttc: number
           prix_tva: number
+          reference_client: string | null
+          reference_label: string | null
           statut: string
           tva_taux: number
           type_facture: string
@@ -1201,6 +1203,8 @@ export type Database = {
           prix_ht?: number
           prix_ttc?: number
           prix_tva?: number
+          reference_client?: string | null
+          reference_label?: string | null
           statut?: string
           tva_taux?: number
           type_facture?: string
@@ -1234,6 +1238,8 @@ export type Database = {
           prix_ht?: number
           prix_ttc?: number
           prix_tva?: number
+          reference_client?: string | null
+          reference_label?: string | null
           statut?: string
           tva_taux?: number
           type_facture?: string
@@ -2047,6 +2053,7 @@ export type Database = {
           organization_id: string | null
           prenom: string
           pricing_display_mode: string
+          relances_disabled: boolean
           siret: string | null
           societe: string | null
           statut: string
@@ -2072,6 +2079,7 @@ export type Database = {
           organization_id?: string | null
           prenom?: string
           pricing_display_mode?: string
+          relances_disabled?: boolean
           siret?: string | null
           societe?: string | null
           statut?: string
@@ -2097,6 +2105,7 @@ export type Database = {
           organization_id?: string | null
           prenom?: string
           pricing_display_mode?: string
+          relances_disabled?: boolean
           siret?: string | null
           societe?: string | null
           statut?: string
