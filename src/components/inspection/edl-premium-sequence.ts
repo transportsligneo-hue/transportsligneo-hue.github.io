@@ -37,6 +37,8 @@ export type EdlStepKind =
   | "photo"
   | "scan"
   | "extras"
+  | "checklist"
+  | "kilometrage"
   | "validation";
 
 export interface EdlStepDef {
@@ -63,6 +65,11 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
   { num: 1, id: "selfie_driver_start", kind: "selfie", section: "demarrage", phase: "depart",
     label: "Selfie convoyeur",
     hint: "Prenez un selfie pour confirmer votre identité au démarrage de la mission" },
+
+  // ─── Équipements véhicule (checklist) ───
+  { num: 2, id: "equipements_check", kind: "checklist", section: "demarrage", phase: "depart",
+    label: "Équipements véhicule",
+    hint: "Vérifiez la présence des équipements de sécurité avant le départ" },
 
   // ─── Extérieur — tour véhicule ───
   { num: 2, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
@@ -144,16 +151,26 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Photos libres / dégâts",
     hint: "Ajoutez si besoin des photos complémentaires : dégâts, remarques, accessoires ou détail utile. Étape optionnelle." },
 
+  // ─── Kilométrage départ ───
+  { num: 21, id: "kilometrage_depart", kind: "kilometrage", section: "cloture", phase: "depart",
+    label: "Kilométrage de départ",
+    hint: "Saisissez le kilométrage exact affiché au compteur avant le départ" },
+
   // ─── Signatures départ (toujours dans le flow EDL départ) ───
-  { num: 21, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 22, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "driver_start",
     label: "Signature départ — convoyeur",
     hint: "Signez pour attester de l'état du véhicule au départ" },
 
-  { num: 22, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
+  { num: 23, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "client_start",
     label: "Signature départ — client / parc",
     hint: "Faites signer le donneur d'ordre (concession, parc, client)" },
+
+  // ─── Kilométrage arrivée (filtré sur phase=arrivee) ───
+  { num: 24, id: "kilometrage_arrivee", kind: "kilometrage", section: "cloture", phase: "arrivee",
+    label: "Kilométrage d'arrivée",
+    hint: "Saisissez le kilométrage exact affiché au compteur à l'arrivée" },
 ];
 
 /**
