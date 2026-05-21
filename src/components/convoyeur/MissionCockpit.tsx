@@ -420,6 +420,14 @@ export function MissionCockpit({
             </button>
           )}
 
+          {!isDone && (() => {
+            const arriveeSteps: ActionKind[] = ["arrive_livraison", "edl_arrivee", "signature_arrivee", "selfie_final", "cloturer"];
+            const focus: "depart" | "arrivee" | "both" = arriveeSteps.includes(currentKey)
+              ? "arrivee"
+              : (currentKey === "demarrer_livraison" ? "both" : "depart");
+            return <MissionContactsBlock attributionId={attributionId} focus={focus} />;
+          })()}
+
           {isDone && (
             <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium px-3 py-3 bg-white rounded-xl border border-emerald-200">
               <Check size={16} /> Mission envoyée. L'équipe va valider sous peu.
