@@ -153,6 +153,8 @@ function OrgDetail() {
           <TabsTrigger value="missions">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="b2b">Demandes B2B ({b2bRequests.length})</TabsTrigger>
           <TabsTrigger value="members">Membres ({members.length})</TabsTrigger>
+          <TabsTrigger value="pricing"><Euro size={13} className="mr-1.5" />Tarification</TabsTrigger>
+          <TabsTrigger value="addresses"><MapPin size={13} className="mr-1.5" />Adresses</TabsTrigger>
           <TabsTrigger value="activity">Historique ({activity.length})</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
