@@ -604,10 +604,12 @@ export function EdlPremiumFlow({
     setState(stepId, { status: "uploading", kilometrage: value });
     try {
       const insId = await ensureInspection();
-      const column = stepId === "kilometrage_arrivee" ? "kilometrage_arrivee" : "kilometrage_depart";
+      const payload = stepId === "kilometrage_arrivee"
+        ? { kilometrage_arrivee: value }
+        : { kilometrage_depart: value };
       const { error } = await supabase
         .from("inspections")
-        .update({ [column]: value })
+        .update(payload)
         .eq("id", insId);
       if (error) throw error;
       setState(stepId, { status: "success", kilometrage: value });
