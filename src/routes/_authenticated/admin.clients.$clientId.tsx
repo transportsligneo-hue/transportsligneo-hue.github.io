@@ -55,6 +55,7 @@ interface Profile {
   tva_exemption_note: string | null;
   facture_mention_legale: string | null;
   facture_mention_active: boolean | null;
+  relances_disabled: boolean | null;
 }
 
 interface MissionItem {
@@ -87,6 +88,7 @@ type Editable = {
   tva_exemption_note: string;
   facture_mention_legale: string;
   facture_mention_active: boolean;
+  relances_disabled: boolean;
 };
 
 const EMPTY: Editable = {
@@ -103,6 +105,7 @@ const EMPTY: Editable = {
   tva_exemption_note: "",
   facture_mention_legale: "",
   facture_mention_active: false,
+  relances_disabled: false,
 };
 
 function AdminClientDetail() {
@@ -154,6 +157,7 @@ function AdminClientDetail() {
         tva_exemption_note: prof.tva_exemption_note ?? "",
         facture_mention_legale: prof.facture_mention_legale ?? "",
         facture_mention_active: !!prof.facture_mention_active,
+        relances_disabled: !!prof.relances_disabled,
       };
       setForm(init);
       setOriginal(init);
@@ -524,6 +528,24 @@ function AdminClientDetail() {
               Si désactivé ou vide, la mention globale (Paramètres → Facturation) sera utilisée.
               N'oubliez pas d'enregistrer le profil après modification.
             </p>
+
+            <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={form.relances_disabled}
+                  onChange={(e) => setForm({ ...form, relances_disabled: e.target.checked })}
+                />
+                <span>
+                  <span className="font-medium">Désactiver les relances automatiques</span>
+                  <span className="block text-xs text-[color:var(--admin-muted)]">
+                    Aucun email de relance ni passage automatique en « En retard » pour ce client.
+                    Utile pour les comptes B2B qui paient à échéance fixe (ex&nbsp;: 30 jours).
+                  </span>
+                </span>
+              </label>
+            </div>
           </div>
         </AdminSection>
 
