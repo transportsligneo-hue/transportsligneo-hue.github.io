@@ -88,6 +88,7 @@ type Editable = {
   tva_exemption_note: string;
   facture_mention_legale: string;
   facture_mention_active: boolean;
+  relances_disabled: boolean;
 };
 
 const EMPTY: Editable = {
