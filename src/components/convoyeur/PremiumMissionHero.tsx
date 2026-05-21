@@ -14,6 +14,10 @@ export interface PremiumMissionHeroData {
   vehicule?: { marque?: string; modele?: string; immatriculation?: string; vin?: string } | null;
   contactDepartTel?: string | null;
   contactArriveeTel?: string | null;
+  /** Contact livraison enrichi (réceptionnaire), édité par l'admin. */
+  contactArriveeNom?: string | null;
+  contactArriveeTel2?: string | null;
+  contactArriveeInstructions?: string | null;
   gpsTarget?: string | null;
 }
 
