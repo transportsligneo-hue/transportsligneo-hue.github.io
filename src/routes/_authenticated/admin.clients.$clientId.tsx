@@ -30,6 +30,7 @@ import {
 } from "@/components/admin/ui";
 import { LogoUploader } from "@/components/LogoUploader";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
+import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 
 
 export const Route = createFileRoute("/_authenticated/admin/clients/$clientId")({
