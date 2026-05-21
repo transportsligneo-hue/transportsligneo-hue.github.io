@@ -154,7 +154,7 @@ function MissionDetail() {
       const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
         supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
-        supabase.from("inspections").select("id, type_inspection, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
+        supabase.from("inspections").select("id, type, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
         supabase.from("mission_signatures" as never).select("kind, url_signature").eq("attribution_id" as never, attributionId as never),
       ]);
       const photosDepart: { vue_type: string; url: string }[] = [];
