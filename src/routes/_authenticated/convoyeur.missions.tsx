@@ -547,32 +547,61 @@ function ConvoyeurMissions() {
           const meta = te?.options_meta ?? null;
           const energie = (te?.vehicule_energie ?? "").toLowerCase();
           const isElec = energie.includes("élec") || energie.includes("elec") || energie === "ev";
-          const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald" }[] = [];
-          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher la recharge à l'arrivée", tone: "blue" });
-          if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold" });
-          if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald" });
+          const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald"; required?: boolean }[] = [];
+          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher la recharge à l'arrivée", tone: "blue", required: true });
+          if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold", required: true });
+          if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald", required: true });
           if (meta?.express) tasks.push({ key: "express", label: "⚡ Mission express — priorité", tone: "gold" });
           if (meta?.aller_retour) tasks.push({ key: "ar", label: "↔ Aller-retour prévu", tone: "blue" });
           const hasExtra = te?.vehicule_type || te?.vehicule_couleur || te?.vehicule_km || te?.vehicule_notes;
           if (tasks.length === 0 && !hasExtra) return null;
-          const toneClass = (tone: string) =>
-            tone === "gold" ? "bg-[#d4af37]/15 text-[#8a6a10] border-[#d4af37]/40"
-            : tone === "emerald" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-            : "bg-blue-50 text-blue-700 border-blue-200";
+          const completion = (openMission.options_completion ?? {}) as Record<string, { done?: boolean; at?: string }>;
+          const toneRing = (tone: string, done: boolean) =>
+            done
+              ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+              : tone === "gold" ? "bg-[#d4af37]/10 border-[#d4af37]/40 text-[#6b5210]"
+              : tone === "emerald" ? "bg-emerald-50/60 border-emerald-200 text-emerald-700"
+              : "bg-blue-50/70 border-blue-200 text-blue-700";
+          const totalReq = tasks.filter(x => x.required).length;
+          const doneReq = tasks.filter(x => x.required && completion[x.key]?.done).length;
           return (
             <div className="bg-white rounded-2xl border border-pro-border p-4 space-y-3">
-              <div className="text-xs font-semibold text-pro-text-soft uppercase tracking-wide">À faire sur cette mission</div>
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold text-pro-text-soft uppercase tracking-wide">À faire sur cette mission</div>
+                {totalReq > 0 && (
+                  <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 border ${doneReq === totalReq ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                    {doneReq}/{totalReq} effectuée{totalReq > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
               {tasks.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {tasks.map((t) => (
-                    <span key={t.key} className={`text-xs font-medium rounded-full px-2.5 py-1 border ${toneClass(t.tone)}`}>
-                      {t.label}
-                    </span>
-                  ))}
+                <div className="space-y-1.5">
+                  {tasks.map((task) => {
+                    const isDone = !!completion[task.key]?.done;
+                    const at = completion[task.key]?.at;
+                    return (
+                      <button
+                        key={task.key}
+                        type="button"
+                        onClick={() => toggleOptionCompletion(openMission, task.key, !isDone)}
+                        className={`w-full flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm text-left transition active:scale-[0.99] ${toneRing(task.tone, isDone)}`}
+                      >
+                        <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-current/40 bg-white"}`}>
+                          {isDone && <Check size={12} strokeWidth={3} />}
+                        </span>
+                        <span className={`flex-1 ${isDone ? "line-through opacity-70" : "font-medium"}`}>{task.label}</span>
+                        {at && (
+                          <span className="text-[10px] text-emerald-700 shrink-0">
+                            ✓ {new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
               {hasExtra && (
-                <div className="grid grid-cols-2 gap-2 text-xs text-pro-text-soft">
+                <div className="grid grid-cols-2 gap-2 text-xs text-pro-text-soft pt-2 border-t border-pro-border">
                   {te?.vehicule_type && <div><span className="text-pro-muted">Type:</span> {te.vehicule_type}</div>}
                   {te?.vehicule_couleur && <div><span className="text-pro-muted">Couleur:</span> {te.vehicule_couleur}</div>}
                   {te?.vehicule_km != null && <div><span className="text-pro-muted">Km:</span> {te.vehicule_km}</div>}
