@@ -151,10 +151,9 @@ function AdminClients() {
       <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-900 flex items-start gap-3">
         <AlertTriangle size={16} className="mt-0.5 shrink-0" />
         <div className="flex-1">
-          <p className="font-medium">Page en cours de migration</p>
+          <p className="font-medium">Tarification et adresses disponibles ici</p>
           <p className="text-amber-800">
-            La gestion des clients (prix personnalisés, adresses favorites, missions) est désormais centralisée dans{" "}
-            <a href="/admin/organisations" className="underline font-medium hover:text-amber-950">Organisations</a>.
+            Ouvre la fiche d’un client avec l’icône œil pour accéder aux blocs <span className="font-medium">Règles de tarification</span> et <span className="font-medium">Adresses favorites</span>.
           </p>
         </div>
       </div>

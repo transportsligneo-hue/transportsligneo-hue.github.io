@@ -17,6 +17,7 @@ import {
   CreditCard,
   Bell,
   Handshake,
+  UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -74,6 +75,7 @@ function AdminLayout() {
 
     // Comptes
     { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Comptes" },
+    { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
     { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Comptes" },
     { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Comptes" },
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Comptes" },
