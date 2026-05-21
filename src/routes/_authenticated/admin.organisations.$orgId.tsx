@@ -48,10 +48,27 @@ function OrgDetail() {
       ]);
       setOrg(orgRes.data);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
-      setMembers(membersRes.data ?? []);
+      const memberRows = membersRes.data ?? [];
+      setMembers(memberRows);
       setMissions(missionsRes.data ?? []);
       setB2bRequests(b2bRes.data ?? []);
       setActivity(activityRes.data ?? []);
+
+      // Resolve "owner" user for pricing rules + favorite addresses
+      const ownerRow =
+        memberRows.find((m: any) => m.member_role === "owner" && m.status === "active") ??
+        memberRows.find((m: any) => m.status === "active") ??
+        memberRows[0];
+      if (ownerRow) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("user_id", ownerRow.user_id)
+          .maybeSingle();
+        setOwner({ user_id: ownerRow.user_id, email: prof?.email ?? orgRes.data?.primary_contact_email ?? null });
+      } else {
+        setOwner(null);
+      }
     } finally {
       setLoading(false);
     }
