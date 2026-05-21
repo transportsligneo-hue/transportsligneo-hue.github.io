@@ -203,6 +203,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                     {r.notes && <p className="text-xs text-slate-500 italic mt-1">{r.notes}</p>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => startEdit(r)} className="admin-btn-ghost" title="Modifier">
+                      <Pencil size={14} />
+                    </button>
                     <button onClick={() => toggleActive(r)} className="admin-btn-ghost" title={r.active ? "Désactiver" : "Activer"}>
                       {r.active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                     </button>
@@ -210,6 +213,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                       <Trash2 size={14} />
                     </button>
                   </div>
+
                 </div>
               </div>
             ))}
