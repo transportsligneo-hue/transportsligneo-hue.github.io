@@ -162,15 +162,35 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     return () => { cancelled = true; };
   }, [user]);
 
-  // Apply favorite address
-  const applyFavorite = (f: FavoriteAddress) => {
+  // Apply favorite address (departure or arrival, depending on type)
+  const applyFavorite = (f: FavoriteAddress, forceTarget?: "depart" | "arrivee") => {
     setDefaultAddressId(f.id);
-    setDepart(f.address);
-    if (f.contact_nom) setContactDepartNom(f.contact_nom);
-    if (f.contact_tel) setContactDepartTel(f.contact_tel);
-    if (f.notes_acces) setContactDepartNote(f.notes_acces);
-    toast.success(`Adresse « ${f.label} » utilisée`);
+    const target = forceTarget ?? (f.address_type === "arrivee" ? "arrivee" : "depart");
+    const fullAddr = [f.address, [f.code_postal, f.ville].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+    if (target === "depart") {
+      setDepart(fullAddr);
+      if (f.contact_nom) setContactDepartNom(f.contact_nom);
+      if (f.contact_tel) setContactDepartTel(f.contact_tel);
+      if (f.notes_acces) setContactDepartNote(f.notes_acces);
+    } else {
+      setArrivee(fullAddr);
+      if (f.contact_nom) setContactArriveeNom(f.contact_nom);
+      if (f.contact_tel) setContactArriveeTel(f.contact_tel);
+      if (f.notes_acces) setContactArriveeNote(f.notes_acces);
+    }
+    toast.success(`Adresse « ${f.label} » utilisée (${target === "depart" ? "départ" : "arrivée"})`);
   };
+
+  // Auto-prefill default addresses on first load
+  useEffect(() => {
+    if (favorites.length === 0) return;
+    const defDep = favorites.find(f => f.is_default && (f.address_type === "depart" || f.address_type === "both"));
+    const defArr = favorites.find(f => f.is_default && (f.address_type === "arrivee" || f.address_type === "both"));
+    if (defDep && !depart) applyFavorite(defDep, "depart");
+    if (defArr && !arrivee) applyFavorite(defArr, "arrivee");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites]);
+
 
   // Resolve price whenever inputs change
   useEffect(() => {
