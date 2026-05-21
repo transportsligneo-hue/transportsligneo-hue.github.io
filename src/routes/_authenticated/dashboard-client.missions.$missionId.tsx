@@ -40,6 +40,8 @@ function MissionDetail() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
+  const [pdfShareEnabled, setPdfShareEnabled] = useState(false);
+  const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
 
