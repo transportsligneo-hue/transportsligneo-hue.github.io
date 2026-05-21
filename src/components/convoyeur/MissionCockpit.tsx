@@ -376,32 +376,55 @@ export function MissionCockpit({
 
   return (
     <>
-      <div className={`rounded-2xl border shadow-sm overflow-hidden ${isDone ? "bg-emerald-50 border-emerald-200" : "bg-white border-pro-border"}`}>
-        <div className="px-4 sm:px-5 pt-4 pb-3">
+      <div className={`rounded-2xl border shadow-lg overflow-hidden ${isDone ? "bg-emerald-50 border-emerald-200" : "border-pro-border"}`}>
+        {/* HERO premium midnight/gold */}
+        <div className={`relative px-4 sm:px-5 pt-5 pb-4 ${isDone ? "bg-emerald-600 text-white" : "bg-gradient-to-br from-[#0b1026] via-[#141432] to-[#0b1026] text-white"}`}>
           <div className="flex items-start gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-600 text-white" : "bg-[#0b1026] text-[#d4af37]"}`}>
-              <currentDef.icon size={22} />
+            <div className={`w-14 h-14 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${isDone ? "bg-white text-emerald-600" : "bg-[#d4af37] text-[#0b1026]"}`}>
+              <currentDef.icon size={26} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-semibold">
-                Étape {Math.min(visualIdx + 1, totalVisual)} / {totalVisual}
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[#e7c76a] font-semibold">
+                Étape {Math.min(visualIdx + 1, totalVisual)} / {totalVisual} · Prochaine action
               </p>
-              <p className="text-pro-text font-semibold text-base sm:text-lg leading-tight mt-0.5">{currentDef.label}</p>
-              {currentDef.hint && !isDone && <p className="text-pro-text-soft text-xs mt-1">{currentDef.hint}</p>}
+              <p className="font-semibold text-lg sm:text-xl leading-tight mt-1">{currentDef.label}</p>
+              {currentDef.hint && !isDone && <p className="text-white/70 text-xs mt-1.5 leading-snug">{currentDef.hint}</p>}
             </div>
             <div className="text-right shrink-0">
-              <p className="text-pro-muted text-[10px] uppercase tracking-wider">Avancement</p>
-              <p className="text-emerald-700 font-bold text-sm tabular-nums">{progressPct}%</p>
+              <p className="text-[#e7c76a]/80 text-[10px] uppercase tracking-wider">Avanc.</p>
+              <p className="text-white font-bold text-lg tabular-nums">{progressPct}%</p>
             </div>
           </div>
 
-          <div className="mt-3 h-1.5 bg-pro-bg-soft rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-[#d4af37] to-emerald-500 transition-all duration-500" style={{ width: `${progressPct}%` }} />
+          <div className="mt-3 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#d4af37] to-emerald-400 transition-all duration-500" style={{ width: `${progressPct}%` }} />
           </div>
+
+          {!isDone && (
+            <div className="mt-3 -mx-4 sm:-mx-5 px-4 sm:px-5 flex gap-1.5 overflow-x-auto snap-x" style={{ scrollbarWidth: "none" }}>
+              {visualSteps.map((s, i) => {
+                const done = i < visualIdx;
+                const active = i === visualIdx;
+                return (
+                  <span
+                    key={s.key}
+                    className={`shrink-0 snap-start text-[10px] px-2.5 py-1 rounded-full border whitespace-nowrap ${
+                      active
+                        ? "bg-[#d4af37] text-[#0b1026] border-[#d4af37] font-semibold"
+                        : done
+                          ? "bg-emerald-500/20 text-emerald-100 border-emerald-400/40"
+                          : "bg-white/5 text-white/50 border-white/10"
+                    }`}
+                  >
+                    {done && "✓ "}{s.short}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="px-4 sm:px-5 pb-4">
-          {/* Lock warning only when blocking — i.e., user is past arrival but no selfie yet */}
+        <div className="px-4 sm:px-5 py-4 bg-white">
           {!selfieOK && (currentKey === "edl_depart" || currentKey === "demarrer_livraison") && (
             <div className="mb-3 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
               <Lock size={14} className="mt-0.5 shrink-0" />
@@ -413,10 +436,10 @@ export function MissionCockpit({
             <button
               onClick={handleAdvance}
               disabled={busy}
-              className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-5 py-5 bg-emerald-600 text-white rounded-2xl text-base font-semibold shadow-md hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed min-h-[56px]"
             >
-              {busy ? <Loader2 className="animate-spin" size={18} /> : <ChevronRight size={20} />}
-              {currentDef.cta}
+              {busy ? <Loader2 className="animate-spin" size={20} /> : <ChevronRight size={22} />}
+              <span>{currentDef.cta}</span>
             </button>
           )}
 
@@ -437,7 +460,7 @@ export function MissionCockpit({
           {!isDone && (
             <button
               onClick={() => setOpenIncident(true)}
-              className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium transition"
+              className="w-full mt-3 flex items-center justify-center gap-1.5 py-2.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium transition border border-red-100"
             >
               <AlertTriangle size={13} /> Signaler un incident
             </button>
