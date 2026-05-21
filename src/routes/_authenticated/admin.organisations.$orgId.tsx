@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Loader2, Building2, Users, Truck, FileText, History as HistoryIcon, StickyNote } from "lucide-react";
+import { ArrowLeft, Loader2, Building2, Users, Truck, FileText, History as HistoryIcon, StickyNote, Euro, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
+import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
@@ -26,6 +28,7 @@ function OrgDetail() {
   const [missions, setMissions] = useState<any[]>([]);
   const [b2bRequests, setB2bRequests] = useState<any[]>([]);
   const [activity, setActivity] = useState<any[]>([]);
+  const [owner, setOwner] = useState<{ user_id: string; email: string | null } | null>(null);
 
   useEffect(() => {
     void load();
@@ -45,10 +48,27 @@ function OrgDetail() {
       ]);
       setOrg(orgRes.data);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
-      setMembers(membersRes.data ?? []);
+      const memberRows = membersRes.data ?? [];
+      setMembers(memberRows);
       setMissions(missionsRes.data ?? []);
       setB2bRequests(b2bRes.data ?? []);
       setActivity(activityRes.data ?? []);
+
+      // Resolve "owner" user for pricing rules + favorite addresses
+      const ownerRow =
+        memberRows.find((m: any) => m.member_role === "owner" && m.status === "active") ??
+        memberRows.find((m: any) => m.status === "active") ??
+        memberRows[0];
+      if (ownerRow) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("user_id", ownerRow.user_id)
+          .maybeSingle();
+        setOwner({ user_id: ownerRow.user_id, email: prof?.email ?? orgRes.data?.primary_contact_email ?? null });
+      } else {
+        setOwner(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -133,6 +153,8 @@ function OrgDetail() {
           <TabsTrigger value="missions">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="b2b">Demandes B2B ({b2bRequests.length})</TabsTrigger>
           <TabsTrigger value="members">Membres ({members.length})</TabsTrigger>
+          <TabsTrigger value="pricing"><Euro size={13} className="mr-1.5" />Tarification</TabsTrigger>
+          <TabsTrigger value="addresses"><MapPin size={13} className="mr-1.5" />Adresses</TabsTrigger>
           <TabsTrigger value="activity">Historique ({activity.length})</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
@@ -191,6 +213,24 @@ function OrgDetail() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="pricing" className="space-y-3">
+          {owner ? (
+            <ClientPricingRulesBlock clientUserId={owner.user_id} clientEmail={owner.email ?? ""} />
+          ) : (
+            <NoOwnerNotice />
+          )}
+        </TabsContent>
+
+        <TabsContent value="addresses" className="space-y-3">
+          {owner ? (
+            <ClientDefaultAddressesBlock clientUserId={owner.user_id} clientEmail={owner.email ?? ""} />
+          ) : (
+            <NoOwnerNotice />
+          )}
+        </TabsContent>
+
+
 
         <TabsContent value="activity" className="bg-white border border-pro-border rounded-xl p-4">
           {activity.length === 0 ? <Empty icon={HistoryIcon} text="Aucune activité" /> : (
@@ -252,3 +292,15 @@ function Empty({ icon: Icon, text }: { icon: typeof StickyNote; text: string }) 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="text-xs uppercase tracking-wider text-pro-muted">{children}</p>;
 }
+
+function NoOwnerNotice() {
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-sm text-amber-900">
+      <p className="font-medium">Aucun utilisateur rattaché à cette organisation.</p>
+      <p className="mt-1 text-amber-800">
+        Pour configurer les prix personnalisés ou les adresses favorites, ajoutez d'abord un membre (owner) à l'organisation.
+      </p>
+    </div>
+  );
+}
+
