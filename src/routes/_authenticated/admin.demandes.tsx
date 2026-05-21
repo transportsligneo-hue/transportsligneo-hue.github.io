@@ -48,6 +48,7 @@ interface Demande {
   vehicule_type?: string | null;
   vehicule_couleur?: string | null;
   vehicule_km?: number | null;
+  vehicule_notes?: string | null;
   options_meta?: Record<string, unknown> | null;
 }
 
