@@ -1390,9 +1390,11 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onRetake, onDelete, onRetryUpload,
+  step, state, onCapture, onSimpleCapture, onSkipScan, onRetake, onDelete, onRetryUpload,
 }: {
-  step: EdlStepDef; state?: StepState; onCapture: () => void; onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
+  step: EdlStepDef; state?: StepState; onCapture: () => void;
+  onSimpleCapture?: () => void; onSkipScan?: () => void;
+  onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
 }) {
   const taken = Boolean(state?.previewUrl);
 
@@ -1470,6 +1472,28 @@ function PhotoOrScanArea({
             {step.kind === "scan" ? <ScanLine size={22}/> : <Camera size={22}/>}
             {step.kind === "scan" ? "Scanner le document" : "Prendre la photo"}
           </button>
+
+          {/* Pour les étapes scan : alternatives pour ne pas bloquer */}
+          {step.kind === "scan" && (
+            <div className="grid grid-cols-2 gap-2">
+              {onSimpleCapture && (
+                <button
+                  onClick={onSimpleCapture}
+                  className="h-11 rounded-2xl edl-glass text-white font-semibold flex items-center justify-center gap-2 text-sm"
+                >
+                  <Camera size={15}/> Photo simple
+                </button>
+              )}
+              {onSkipScan && (
+                <button
+                  onClick={onSkipScan}
+                  className="h-11 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-amber-100 font-semibold flex items-center justify-center gap-2 text-sm"
+                >
+                  Ignorer le scan
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
@@ -1492,7 +1516,7 @@ function PhotoOrScanArea({
       {step.kind === "scan" && (
         <div className="edl-glass p-3 text-xs text-[var(--edl-text-soft)] flex items-start gap-2">
           <ScanLine size={14} className="text-[var(--edl-gold)] shrink-0 mt-0.5"/>
-          <span>OCR + détection automatique des contours. Le document sera classé et transmis à l'admin.</span>
+          <span>OCR optionnel : si le scan ne fonctionne pas, utilisez "Photo simple" ou "Ignorer le scan" pour continuer.</span>
         </div>
       )}
     </div>
