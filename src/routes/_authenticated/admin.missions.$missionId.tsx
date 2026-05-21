@@ -206,7 +206,7 @@ function AdminMissionDetail() {
     setLoading(true);
     const { data: attr, error: attrErr } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, updated_at, pdf_share_client")
       .eq("id", missionId)
       .maybeSingle();
 
