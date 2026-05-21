@@ -26,12 +26,18 @@ export interface MissionPdfData {
   marque?: string | null;
   modele?: string | null;
   immatriculation?: string | null;
+  vin?: string | null;
   carburant?: string | null;
   mode_transport?: string | null;
   mode_paiement?: string | null;
   conditions_paiement?: string | null;
   instructions?: string | null;
   prix?: number | null;
+  /** URLs signées (jpg/png) injectées dans les blocs signature si disponibles. */
+  signature_depart_url?: string | null;
+  signature_arrivee_url?: string | null;
+  signature_depart_nom?: string | null;
+  signature_arrivee_nom?: string | null;
 }
 
 const NAVY: [number, number, number] = [11, 16, 38];
