@@ -76,6 +76,7 @@ function ProDocuments() {
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [payingFactureId, setPayingFactureId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("ht");
   const [yearFilter, setYearFilter] = useState<string>("all");
