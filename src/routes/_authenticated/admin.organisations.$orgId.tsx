@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Loader2, Building2, Users, Truck, FileText, History as HistoryIcon, StickyNote } from "lucide-react";
+import { ArrowLeft, Loader2, Building2, Users, Truck, FileText, History as HistoryIcon, StickyNote, Euro, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
+import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
