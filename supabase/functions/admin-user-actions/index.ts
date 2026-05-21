@@ -31,6 +31,8 @@ interface Payload {
 const PROFILE_ALLOWED = new Set([
   "prenom", "nom", "telephone", "societe", "siret",
   "adresse", "adresse_facturation", "tva_intra", "type_client", "logo_url",
+  "pricing_display_mode", "tva_exemption_note",
+  "facture_mention_legale", "facture_mention_active",
 ]);
 
 Deno.serve(async (req) => {
