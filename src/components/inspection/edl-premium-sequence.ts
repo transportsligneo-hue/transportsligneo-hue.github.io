@@ -66,6 +66,11 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Selfie convoyeur",
     hint: "Prenez un selfie pour confirmer votre identité au démarrage de la mission" },
 
+  // ─── Équipements véhicule (checklist) ───
+  { num: 2, id: "equipements_check", kind: "checklist", section: "demarrage", phase: "depart",
+    label: "Équipements véhicule",
+    hint: "Vérifiez la présence des équipements de sécurité avant le départ" },
+
   // ─── Extérieur — tour véhicule ───
   { num: 2, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
     label: "Avant", hint: "Cadrez la face avant complète, calandre + phares visibles",
