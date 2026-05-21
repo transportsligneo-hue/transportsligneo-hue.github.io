@@ -144,7 +144,7 @@ function ConvoyeurMissions() {
 
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, statut, trajet_id, etape_courante, numero_mission" as never)
+      .select("id, statut, trajet_id, etape_courante, numero_mission, options_completion" as never)
       .eq("convoyeur_id", conv.id)
       .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
 
