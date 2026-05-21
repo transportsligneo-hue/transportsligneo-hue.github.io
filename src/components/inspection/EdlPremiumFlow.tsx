@@ -199,6 +199,11 @@ export function EdlPremiumFlow({
       if (step.kind === "selfie") return false;
       if (type === "arrivee" && step.kind === "signature") return false;
       if (step.electricOnly && !isElectric) return false;
+      // Filtre phase : équipements et km départ uniquement au départ,
+      // km arrivée uniquement à l'arrivée.
+      if (step.id === "equipements_check" && type !== "depart") return false;
+      if (step.id === "kilometrage_depart" && type !== "depart") return false;
+      if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
     });
     return base;
