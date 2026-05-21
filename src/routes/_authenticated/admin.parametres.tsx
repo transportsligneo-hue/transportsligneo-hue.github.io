@@ -166,7 +166,7 @@ function AdminParametres() {
         </TabsContent>
 
         {/* === FACTURATION === */}
-        <TabsContent value="facturation" className="mt-0">
+        <TabsContent value="facturation" className="mt-0 space-y-4">
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField label="TVA appliquée (%)">
@@ -200,7 +200,10 @@ function AdminParametres() {
               <Button icon={<Save size={14} />} onClick={save}>Enregistrer</Button>
             </div>
           </Card>
+
+          <FactureMentionCard />
         </TabsContent>
+
 
         {/* === TEMPLATES EMAILS === */}
         <TabsContent value="emails" className="mt-0">
