@@ -287,27 +287,51 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
     y = await drawPhotoGrid(doc, m.photosArrivee, y, logo, m);
   }
 
-  // === Signatures ===
-  if (m.signatures?.length) {
+  // === Signatures (toujours afficher Départ + Arrivée, même si manquantes) ===
+  {
+    const SIG_LABELS: Record<string, string> = {
+      depart: "Signature — Départ",
+      arrivee: "Signature — Arrivée",
+    };
+    const byKind = new Map<string, string | null | undefined>();
+    for (const s of m.signatures ?? []) byKind.set(s.kind, s.url);
+    const slots: { kind: string; url?: string | null }[] = [
+      { kind: "depart", url: byKind.get("depart") ?? byKind.get("client_depart") },
+      { kind: "arrivee", url: byKind.get("arrivee") ?? byKind.get("client_arrivee") },
+    ];
+
     y += 4;
     y = ensureSpace(doc, y, 60, logo, m);
     y = sectionTitle(doc, "Signatures", y);
     const sigW = 70;
     const sigH = 35;
     let sx = 12;
-    for (const sig of m.signatures) {
+    for (const sig of slots) {
       if (sx + sigW > pageW - 10) {
         sx = 12; y += sigH + 12;
         y = ensureSpace(doc, y, sigH + 14, logo, m);
       }
       doc.setDrawColor(...GOLD); doc.setLineWidth(0.3);
       doc.roundedRect(sx, y, sigW, sigH, 1.5, 1.5, "S");
+      let drawn = false;
       if (sig.url) {
         const data = await loadAsDataUrl(sig.url);
-        if (data) { try { doc.addImage(data, "PNG", sx + 1, y + 1, sigW - 2, sigH - 2); } catch { /* ignore */ } }
+        if (data) {
+          try {
+            const fmt = data.includes("image/png") ? "PNG" : "JPEG";
+            doc.addImage(data, fmt, sx + 1, y + 1, sigW - 2, sigH - 2);
+            drawn = true;
+          } catch { /* ignore */ }
+        }
       }
-      doc.setTextColor(...MUTED); doc.setFontSize(7.5);
-      doc.text(sig.kind.replace(/_/g, " "), sx + 2, y + sigH + 4);
+      if (!drawn) {
+        doc.setTextColor(...MUTED); doc.setFont("helvetica", "italic"); doc.setFontSize(8);
+        doc.text(sig.url ? "(signature indisponible)" : "Non signée", sx + sigW / 2, y + sigH / 2 + 1, { align: "center" });
+        doc.setFont("helvetica", "normal");
+      }
+      doc.setTextColor(...NAVY); doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+      doc.text(SIG_LABELS[sig.kind] ?? sig.kind, sx + 2, y + sigH + 4);
+      doc.setFont("helvetica", "normal");
       sx += sigW + 8;
     }
     y += sigH + 12;
