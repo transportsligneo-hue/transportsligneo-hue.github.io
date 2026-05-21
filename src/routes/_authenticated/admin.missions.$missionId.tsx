@@ -1009,6 +1009,58 @@ function AdminMissionDetail() {
             </Card>
           )}
 
+          {/* Contact livraison (point d'arrivée) */}
+          <Card>
+            <div className="flex items-center gap-2 mb-3">
+              <Phone size={15} className="text-pro-accent" />
+              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+                Contact livraison
+              </h3>
+            </div>
+            <p className="text-pro-muted text-xs mb-3">
+              Personne à appeler à l'arrivée. Visible par le convoyeur dans son interface mobile.
+            </p>
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={contactNom}
+                onChange={(e) => setContactNom(e.target.value)}
+                placeholder="Nom et prénom"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="tel"
+                value={contactTel}
+                onChange={(e) => setContactTel(e.target.value)}
+                placeholder="Téléphone principal"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="tel"
+                value={contactTel2}
+                onChange={(e) => setContactTel2(e.target.value)}
+                placeholder="Téléphone secondaire (optionnel)"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <textarea
+                value={contactInstr}
+                onChange={(e) => setContactInstr(e.target.value)}
+                placeholder="Instructions d'accès, code, étage…"
+                rows={3}
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none resize-none"
+              />
+              <Button
+                size="sm"
+                onClick={saveContactArrivee}
+                disabled={savingContact}
+                icon={savingContact ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </Card>
+
+
           {/* GPS live */}
           <Card>
             <div className="flex items-center justify-between mb-3">
