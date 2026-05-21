@@ -36,7 +36,16 @@ export interface FactureData {
   iban?: string | null;
   bic?: string | null;
   banque?: string | null;
+  /** Si fourni, charge la mention légale (override profil > défaut global) et le mode fiscal. */
+  client_user_id?: string | null;
+  /** Force le mode TVA exonérée et ignore la ligne TVA. */
+  tva_exempt?: boolean;
+  /** Texte de la note d'exonération à imprimer si tva_exempt. */
+  tva_exemption_note?: string | null;
+  /** Mention légale brute à imprimer en pied (overrides resolver si défini). */
+  legal_mention?: string | null;
 }
+
 
 const NAVY: [number, number, number] = [11, 16, 38];
 const GOLD: [number, number, number] = [212, 175, 55];
