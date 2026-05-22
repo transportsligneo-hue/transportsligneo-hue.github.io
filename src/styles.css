@@ -87,6 +87,33 @@
   html {
     scroll-behavior: smooth;
   }
+
+  /* ============================================================
+     FIX GLOBAL — Lisibilité des menus déroulants natifs et inputs
+     Le <body> applique color: cream pour le thème navy global.
+     Sur les surfaces claires (admin, dashboard-pro), les contrôles
+     natifs <select>/<option>/<input>/<textarea> héritaient de cette
+     couleur → texte cream sur fond blanc = invisible.
+     ============================================================ */
+  select,
+  option,
+  optgroup {
+    color-scheme: light;
+    color: #0f172a;
+    background-color: #ffffff;
+  }
+  input.bg-white,
+  textarea.bg-white,
+  select.bg-white,
+  .admin-shell input,
+  .admin-shell textarea,
+  .admin-shell select {
+    color: #0f172a;
+  }
+  .admin-shell input::placeholder,
+  .admin-shell textarea::placeholder {
+    color: #94a3b8;
+  }
 }
 
 @layer utilities {
