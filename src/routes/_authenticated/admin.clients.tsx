@@ -247,7 +247,7 @@ function AdminClients() {
           footer={
             <div className="flex flex-wrap gap-2">
               {selected.actif ? (
-                <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }}>
                   <Ban size={12} className="mr-1" /> Suspendre
                 </Button>
               ) : (
