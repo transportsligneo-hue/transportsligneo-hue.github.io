@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, Mail, Phone, Building2, Calendar, MapPin, Truck, Receipt, AlertTriangle } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, Mail, Phone, Building2, Calendar, MapPin, Truck, Receipt, AlertTriangle, Euro } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+
 import {
   PageHeader,
   Card,
@@ -217,6 +219,15 @@ function AdminClients() {
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
+                    <Link
+                      to="/admin/clients/$clientId"
+                      params={{ clientId: c.user_id }}
+                      hash="tarifs"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
+                      title="Gérer les tarifs personnalisés"
+                    >
+                      <Euro size={15} />
+                    </Link>
                     <button
                       onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
@@ -230,6 +241,7 @@ function AdminClients() {
                       <IconButton onClick={() => toggleActif(c.user_id, true)} title="Réactiver" tone="success"><CheckCircle size={15} /></IconButton>
                     )}
                   </div>
+
                 </TD>
               </TR>
             ))}
@@ -247,7 +259,7 @@ function AdminClients() {
           footer={
             <div className="flex flex-wrap gap-2">
               {selected.actif ? (
-                <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }}>
                   <Ban size={12} className="mr-1" /> Suspendre
                 </Button>
               ) : (

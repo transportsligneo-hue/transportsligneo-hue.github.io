@@ -600,10 +600,15 @@ function AdminClientDetail() {
 
           {profile.email && (
             <div className="mt-6 space-y-6">
-              <ClientDefaultAddressesBlock clientUserId={clientId} clientEmail={profile.email} />
-              <ClientPricingRulesBlock clientUserId={clientId} clientEmail={profile.email} />
+              <div id="adresses" className="scroll-mt-24">
+                <ClientDefaultAddressesBlock clientUserId={clientId} clientEmail={profile.email} />
+              </div>
+              <div id="tarifs" className="scroll-mt-24">
+                <ClientPricingRulesBlock clientUserId={clientId} clientEmail={profile.email} />
+              </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
