@@ -1,70 +1,96 @@
 
-# Plan de stabilisation Transports Ligneo
+# Phase 2 — Livrable unique (à valider avant phase 3/4)
 
-Demande très large (12 chantiers). Pour éviter de tout casser, je propose **4 phases livrables indépendamment**, dans cet ordre. Vous validez globalement, j'exécute phase par phase et vous testez entre chaque.
+Le brief contient 14 chantiers. Je propose de **livrer en une seule phase les 6 points bloquants métier** que vous avez explicitement marqués prioritaires, et de garder le reste (notifications push, tarifs, estimateur mobile, accueil mobile) pour des phases suivantes — sinon je casse l'existant.
 
----
+## Périmètre de CETTE intervention
 
-## Phase 1 — Lisibilité UI (rapide, gros impact visuel)
+### 1. PV de livraison digitalisés (Model/Arval & Welcomauto/Ayvens)
+- Nouvelle table `mission_pv_digitaux` (mission_id, plateforme, actif, url, code, plaque, instruction).
+- Bloc admin dans `admin.missions.$missionId.tsx` : "PV de livraison digitalisés" avec 2 cartes (Model/Arval, Welcomauto/Ayvens), toggle actif + champs URL/code/plaque/instruction.
+- Bloc Driver dans `MissionCockpit` / `MissionWorkflow` : "PV de livraison digitalisés", uniquement les plateformes actives, boutons **Ouvrir** (window.open) + **Copier code** + **Copier plaque** (`navigator.clipboard.writeText` + toast).
+- Jamais appelé "état des lieux".
 
-Objectif : plus aucun texte invisible, partout.
+### 2. Documents de mission (admin + client + driver)
+- Table `mission_documents` existe déjà — étendre avec `visible_driver bool`, `visible_client bool`, `type_document` (enum élargi : pv_livraison_vierge, pv_restitution_vierge, carte_grise, bon_transport, instruction, autre).
+- **Admin** (fiche mission) : bloc "Documents de mission" → upload multiple, nom, type, toggle visibilité driver/client, suppression, remplacement. Possible **avant publication** ET en cours de mission.
+- **Client** (`dashboard-client.missions.$missionId.tsx` + `dashboard-pro.missions`) : bloc "Mes documents" → upload + liste, ajout possible en cours de mission tant que non archivée.
+- **Driver** (`MissionCockpit`) : section "Documents de mission" → liste avec bouton Télécharger/Ouvrir (signed URL Supabase storage).
+- Bucket storage `mission-documents` (privé, RLS par mission_id).
+- Notification admin quand client ajoute un doc (via `notifyAdmin` existant).
 
-- Audit + correction globale via les **tokens du design system** (`src/styles.css`) :
-  - Forcer `bg-popover` + `text-popover-foreground` sur tous les composants Radix : `Select`, `DropdownMenu`, `Command`, `Popover`, `ContextMenu`, `Menubar`, `HoverCard`.
-  - Vérifier `Dialog`, `Sheet`, `AlertDialog`, `Drawer` → `bg-background text-foreground`, bordures `border-border`.
-  - Boutons `variant="ghost"` / `outline` sur fonds sombres : ajouter contraste hover/active.
-- **Dashboard Driver** : passer en revue `convoyeur/*`, `MissionCockpit`, `MissionWorkflow`, `MissionCard`, boutons photo/signature/docs → forcer couleurs explicites lisibles sur mobile (fonds sombres → texte clair, et inverse).
-- **Vues "œil" / drawers admin** : `AdminDetailDrawer` + drawers missions/devis/factures → contraste texte/labels, bordures visibles.
+### 3. Publication catalogue vs assignation directe
+- Sur `admin.missions.$missionId` (ou création), ajouter un **toggle "Mode d'attribution"** : `assignation_directe` | `catalogue_public`.
+- Si `catalogue_public` : pas de `convoyeur_id` obligatoire ; la mission apparaît dans `convoyeur.disponibles.tsx` pour les drivers éligibles.
+- Si un driver l'accepte → bascule en `assignation_directe` avec son `convoyeur_id`, sort du catalogue.
+- Ajouter colonne `mode_attribution` sur `attributions` (ou flag `is_public boolean default false`).
+- Vérifier `convoyeur.disponibles.tsx` lit bien le catalogue.
 
-Pas de refonte : uniquement corrections de classes Tailwind / tokens.
+### 4. Lisibilité Driver (noir illisible UNIQUEMENT)
+- **Ne pas toucher** au workflow ni à la structure.
+- Audit ciblé : `convoyeur/MissionCockpit.tsx`, `MissionWorkflow.tsx`, `MissionCard.tsx`, `PremiumMissionHero.tsx`, `VehiculeDocsView.tsx`, `ArriveeSignatureSheet.tsx`, `DoubleSignatureModal.tsx`, `IncidentReportSheet.tsx`.
+- Remplacer `bg-black text-black`, `Button variant="ghost"` sur fond sombre, etc. par tokens design system (`bg-primary`, `text-primary-foreground`, `bg-accent`, contraste visible).
+- Garder la palette bleu premium Ligneo.
 
----
+### 5. Lisibilité globale (menus déroulants déjà partiellement faite)
+- Vérifier `Select`, `DropdownMenu`, `Popover`, `Command` → `bg-popover text-popover-foreground` (déjà appliqué en partie, compléter si trous).
 
-## Phase 2 — Tarifs personnalisés & adresses (déjà partiellement en place)
+### 6. Libellé "Recharge du véhicule"
+- Search & replace global "Recharger le véhicule à l'arrivée" / "avant d'y aller" → "Recharge du véhicule" dans tout `src/`.
 
-Objectif : rendre le système existant **visible et accessible** depuis les bons endroits.
+## Hors périmètre (phases suivantes, à valider)
 
-- **Fiche client admin** (`/admin/clients/$clientId`) : vérifier que `ClientPricingRulesBlock` et `ClientDefaultAddressesBlock` sont bien rendus en haut, avec un titre clair "Tarifs personnalisés" + bouton "Ajouter un tarif" déjà existant mais à mettre en évidence (CTA primary visible).
-- **Liste clients** (`/admin/clients`) : ajouter une action rapide "💶 Tarifs" sur chaque ligne → ouvre la fiche client ancrée sur la section tarifs.
-- **Fiche organisation** (`/admin/organisations/$orgId`) : les onglets Tarification / Adresses existent déjà → vérifier qu'ils sont visibles et fonctionnels pour CAT FRANCE.
-- **Adresses par défaut côté client Partner** : la page `/dashboard-pro/adresses` existe déjà ; vérifier qu'elle est bien liée dans la sidebar Pro et que le préremplissage fonctionne dans `QuickMissionForm` / `dashboard-pro.nouvelle-demande`.
+- **Phase notifications push** (point 7) : système web-push complet + service worker, gros chantier dédié.
+- **Phase tarifs perso & moteur unique** (points 8-9-10) : déjà partiellement en place (`ClientPricingRulesBlock`, `resolveClientPrice`), audit complet réservé pour la phase 3.
+- **Estimateur mobile + Google Places** (point 10) : refonte à part.
+- **Page accueil mobile premium** (point 12) : refonte design dédiée.
 
-Aucune nouvelle table — tout existe (`client_pricing_rules`, `client_default_addresses`).
+## Migrations SQL prévues
 
----
+```sql
+-- 1. PV digitalisés
+CREATE TABLE public.mission_pv_digitaux (
+  id uuid PK default gen_random_uuid(),
+  attribution_id uuid NOT NULL,
+  plateforme text NOT NULL CHECK (plateforme IN ('model_arval','welcomauto_ayvens')),
+  actif boolean NOT NULL DEFAULT false,
+  url text, code text, plaque text, instruction text,
+  created_at timestamptz default now(), updated_at timestamptz default now(),
+  UNIQUE(attribution_id, plateforme)
+);
+-- RLS : admin all, convoyeur SELECT si owner attribution
 
-## Phase 3 — Cohérence des prix & liaisons données
+-- 2. Documents mission : étendre mission_documents
+ALTER TABLE mission_documents
+  ADD COLUMN visible_driver boolean DEFAULT true,
+  ADD COLUMN visible_client boolean DEFAULT false,
+  ADD COLUMN ajoute_par text DEFAULT 'admin' CHECK (ajoute_par IN ('admin','client','convoyeur'));
+-- Nouvelles policies : client peut INSERT/SELECT ses docs
 
-Objectif : plus de "79 € ici, 70 € là".
+-- 3. Catalogue public
+ALTER TABLE attributions
+  ADD COLUMN is_public boolean DEFAULT false;
+-- ou: permettre convoyeur_id null + flag
 
-- **Source unique de vérité** : le prix calculé à la création de la demande est figé dans `demandes_convoyage.prix_estime` → repris tel quel par `trajets.prix_client` (trigger `auto_create_trajet_from_devis` existe déjà) → repris par `factures.prix_ttc`.
-- Auditer tous les écrans qui **recalculent** au lieu de lire le prix stocké, et les corriger pour lire la valeur figée.
-- Vérifier que `resolveClientPrice` (déjà implémenté) est bien appelé **uniquement à la création** de la demande, pas en lecture.
-- **Numéros de mission** : la fonction `next_document_number('MIS-TLG', …)` + trigger `missions_set_numero` / `attributions_set_numero` existent déjà → vérifier que toutes les vues utilisent `missionNumberOf()` (helper déjà présent) et pas un calcul ad-hoc.
-- **Liaisons** : vérifier `demande_id` sur `trajets`, `mission_id` sur `factures`, `attribution_id` → afficher partout dans les vues détail.
+-- 4. Storage bucket
+INSERT INTO storage.buckets (id, name, public) VALUES ('mission-documents','mission-documents',false);
+-- policies storage par attribution_id
+```
 
----
+## Ordre d'exécution
 
-## Phase 4 — Édition complète admin (clients + convoyeurs)
+1. Migrations SQL (PV table, mission_documents extension, catalogue flag, storage bucket + policies).
+2. Bloc admin PV digitalisés + bloc Driver PV digitalisés.
+3. Bloc admin documents + bloc client documents + bloc Driver documents.
+4. Toggle publication catalogue / assignation + visibilité dans `convoyeur.disponibles`.
+5. Audit lisibilité Driver (contraste boutons/textes noirs).
+6. Replace "Recharger le véhicule…" → "Recharge du véhicule".
+7. Message de clôture demandé exactement par vous.
 
-Objectif : l'admin peut tout modifier.
+## Risques / décisions à valider
 
-- **Fiche client admin** : formulaire d'édition complet (nom, société, email, téléphone, adresse, SIRET, TVA, mode HT/TTC, notes internes) → écrit dans `profiles`.
-- **Fiche convoyeur admin** (`/admin/convoyeurs/$convoyeurId`) : édition nom/prénom/email/téléphone/adresse/statut/notes → écrit dans `convoyeurs`. Validation documents déjà gérée.
-- Vérifier que la modification email/téléphone se propage (pas de duplication) — utiliser `user_id` comme clé partout, jamais l'email en dur.
+- **Périmètre réduit assumé** : je ne traite PAS notifs push, tarifs, estimateur, accueil mobile dans ce livrable. Sinon on dépasse 3-4h de travail et risque casse.
+- **Confirmation** : la table `mission_documents` existe déjà — j'étends, je ne recrée pas.
+- **PV digitalisés** liés à `attribution_id` (et non `mission_id` qui n'existe pas en tant que tel — la mission EST l'attribution).
 
----
-
-## Ce que je ne ferai PAS sans confirmation
-
-- Pas de refonte de l'estimateur (il reste unique, seuls les prix changent par client → déjà le cas via `resolveClientPrice`).
-- Pas de migration destructive sur les données existantes.
-- Pas de changement des numéros déjà attribués.
-
----
-
-## Question avant de lancer
-
-Vous voulez que je commence par **Phase 1 (lisibilité, ~30 min, impact immédiat visible partout)**, ou que je traite d'abord **Phase 2 (tarifs CAT France visibles)** parce que c'est bloquant métier ?
-
-Dites-moi simplement "phase 1" / "phase 2" / "tout dans l'ordre" et j'exécute.
+Validez-vous ce périmètre ? Si oui je lance les migrations puis le code dans la foulée.

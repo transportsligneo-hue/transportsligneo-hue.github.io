@@ -133,6 +133,7 @@ export type Database = {
           created_at: string
           etape_courante: string | null
           id: string
+          is_public: boolean
           numero_mission: string | null
           options_completion: Json
           pdf_share_client: boolean
@@ -145,6 +146,7 @@ export type Database = {
           created_at?: string
           etape_courante?: string | null
           id?: string
+          is_public?: boolean
           numero_mission?: string | null
           options_completion?: Json
           pdf_share_client?: boolean
@@ -157,6 +159,7 @@ export type Database = {
           created_at?: string
           etape_courante?: string | null
           id?: string
+          is_public?: boolean
           numero_mission?: string | null
           options_completion?: Json
           pdf_share_client?: boolean
@@ -1529,6 +1532,7 @@ export type Database = {
       }
       mission_documents: {
         Row: {
+          ajoute_par: string
           attribution_id: string
           created_at: string
           id: string
@@ -1536,8 +1540,11 @@ export type Database = {
           type_document: string
           uploaded_by: string
           url_fichier: string
+          visible_client: boolean
+          visible_driver: boolean
         }
         Insert: {
+          ajoute_par?: string
           attribution_id: string
           created_at?: string
           id?: string
@@ -1545,8 +1552,11 @@ export type Database = {
           type_document?: string
           uploaded_by: string
           url_fichier: string
+          visible_client?: boolean
+          visible_driver?: boolean
         }
         Update: {
+          ajoute_par?: string
           attribution_id?: string
           created_at?: string
           id?: string
@@ -1554,6 +1564,8 @@ export type Database = {
           type_document?: string
           uploaded_by?: string
           url_fichier?: string
+          visible_client?: boolean
+          visible_driver?: boolean
         }
         Relationships: [
           {
@@ -1757,6 +1769,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mission_pv_digitaux: {
+        Row: {
+          actif: boolean
+          attribution_id: string
+          code: string | null
+          created_at: string
+          id: string
+          instruction: string | null
+          plaque: string | null
+          plateforme: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          actif?: boolean
+          attribution_id: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          instruction?: string | null
+          plaque?: string | null
+          plateforme: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          actif?: boolean
+          attribution_id?: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          instruction?: string | null
+          plaque?: string | null
+          plateforme?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
       }
       mission_selfies: {
         Row: {
