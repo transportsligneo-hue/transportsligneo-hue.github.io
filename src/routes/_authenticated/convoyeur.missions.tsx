@@ -12,6 +12,7 @@ import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { MissionDocuments } from "@/components/MissionDocuments";
+import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
@@ -696,6 +697,11 @@ function ConvoyeurMissions() {
             }}
           />
         )}
+
+        {/* PV de livraison digitalisés (plateformes externes) */}
+        <div className="bg-white rounded-2xl border border-pro-border p-4">
+          <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
+        </div>
 
         {/* Documents */}
         {user && (

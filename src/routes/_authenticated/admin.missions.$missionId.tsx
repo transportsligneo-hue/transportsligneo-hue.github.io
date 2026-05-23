@@ -40,6 +40,7 @@ import { RoleBadge } from "@/components/brand/LigneoBrand";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionReport } from "@/components/MissionReport";
+import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
@@ -951,6 +952,11 @@ function AdminMissionDetail() {
               </h3>
             </div>
             <MissionDocuments attributionId={attribution.id} userId="" isAdmin />
+          </Card>
+
+          {/* PV de livraison digitalisés (Model/Arval, Welcomauto/Ayvens) */}
+          <Card>
+            <MissionPVDigitauxBlock attributionId={attribution.id} mode="admin" />
           </Card>
 
           {/* Traçabilité double signature (départ + arrivée, convoyeur + client) */}
