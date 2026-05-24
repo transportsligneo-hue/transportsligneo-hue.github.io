@@ -55,7 +55,9 @@ function ClientProfil() {
     if (!user) return;
     setSaving(true);
     setSavedMsg("");
-    const { error } = await supabase
+
+    // 1. Met à jour le profil (nom/prenom/téléphone/société…)
+    const { error: profileError } = await supabase
       .from("profiles")
       .upsert({
         user_id: user.id,
@@ -67,9 +69,21 @@ function ClientProfil() {
         siret: form.siret || null,
         tva_intra: form.tva_intra || null,
       } as never, { onConflict: "user_id" });
+
+    // 2. Si l'email a changé → déclenche le flow de vérification Supabase Auth
+    let emailMsg = "";
+    if (!profileError && form.email && form.email.trim().toLowerCase() !== (user.email ?? "").toLowerCase()) {
+      const { error: emailError } = await supabase.auth.updateUser({ email: form.email.trim() });
+      if (emailError) {
+        emailMsg = ` (email : ${emailError.message})`;
+      } else {
+        emailMsg = " — un email de confirmation a été envoyé à votre nouvelle adresse.";
+      }
+    }
+
     setSaving(false);
-    setSavedMsg(error ? `Erreur : ${error.message}` : "Profil mis à jour ✓");
-    setTimeout(() => setSavedMsg(""), 3000);
+    setSavedMsg(profileError ? `Erreur : ${profileError.message}` : `Profil mis à jour ✓${emailMsg}`);
+    setTimeout(() => setSavedMsg(""), 6000);
   };
 
   const handleLogoChange = async (url: string | null) => {
@@ -133,8 +147,8 @@ function ClientProfil() {
 
         <div>
           <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1"><Mail size={11} className="inline mr-1" />Email</label>
-          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} disabled />
-          <p className="text-cream/30 text-xs mt-1">L'email ne peut pas être modifié depuis cette page.</p>
+          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required />
+          <p className="text-cream/40 text-xs mt-1">Un email de confirmation sera envoyé à la nouvelle adresse avant qu'elle ne devienne active.</p>
         </div>
 
         <div>
