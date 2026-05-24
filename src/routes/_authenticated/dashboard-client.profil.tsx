@@ -55,7 +55,9 @@ function ClientProfil() {
     if (!user) return;
     setSaving(true);
     setSavedMsg("");
-    const { error } = await supabase
+
+    // 1. Met à jour le profil (nom/prenom/téléphone/société…)
+    const { error: profileError } = await supabase
       .from("profiles")
       .upsert({
         user_id: user.id,
@@ -67,9 +69,21 @@ function ClientProfil() {
         siret: form.siret || null,
         tva_intra: form.tva_intra || null,
       } as never, { onConflict: "user_id" });
+
+    // 2. Si l'email a changé → déclenche le flow de vérification Supabase Auth
+    let emailMsg = "";
+    if (!profileError && form.email && form.email.trim().toLowerCase() !== (user.email ?? "").toLowerCase()) {
+      const { error: emailError } = await supabase.auth.updateUser({ email: form.email.trim() });
+      if (emailError) {
+        emailMsg = ` (email : ${emailError.message})`;
+      } else {
+        emailMsg = " — un email de confirmation a été envoyé à votre nouvelle adresse.";
+      }
+    }
+
     setSaving(false);
-    setSavedMsg(error ? `Erreur : ${error.message}` : "Profil mis à jour ✓");
-    setTimeout(() => setSavedMsg(""), 3000);
+    setSavedMsg(profileError ? `Erreur : ${profileError.message}` : `Profil mis à jour ✓${emailMsg}`);
+    setTimeout(() => setSavedMsg(""), 6000);
   };
 
   const handleLogoChange = async (url: string | null) => {
