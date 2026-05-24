@@ -1117,10 +1117,10 @@
   }
   .admin-label {
     font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--admin-muted);
+    color: #475569;
   }
   .admin-value {
     font-size: 0.95rem;
@@ -1132,7 +1132,25 @@
     font-weight: 700;
     color: var(--admin-text);
   }
-  .admin-muted { color: var(--admin-muted); }
+  .admin-muted { color: #475569; }
+
+  /* Fallback contraste : tout texte qui hérite de body cream dans le shell admin */
+  .admin-shell,
+  .admin-shell p,
+  .admin-shell span,
+  .admin-shell div,
+  .admin-shell h1,
+  .admin-shell h2,
+  .admin-shell h3,
+  .admin-shell h4,
+  .admin-shell label,
+  .admin-shell li,
+  .admin-shell td,
+  .admin-shell th,
+  .admin-shell a {
+    color: inherit;
+  }
+  .admin-shell { color: var(--admin-text); }
 
   .admin-badge {
     display: inline-flex;
