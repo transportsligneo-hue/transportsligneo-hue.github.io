@@ -147,8 +147,8 @@ function ClientProfil() {
 
         <div>
           <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1"><Mail size={11} className="inline mr-1" />Email</label>
-          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} disabled />
-          <p className="text-cream/30 text-xs mt-1">L'email ne peut pas être modifié depuis cette page.</p>
+          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required />
+          <p className="text-cream/40 text-xs mt-1">Un email de confirmation sera envoyé à la nouvelle adresse avant qu'elle ne devienne active.</p>
         </div>
 
         <div>
