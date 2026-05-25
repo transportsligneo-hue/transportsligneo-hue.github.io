@@ -769,6 +769,7 @@ export type Database = {
           arrivee: string
           arrivee_retour: string | null
           carburant: string | null
+          client_pricing_rule_id: string | null
           contact_arrivee_nom: string | null
           contact_arrivee_note: string | null
           contact_arrivee_tel: string | null
@@ -821,6 +822,7 @@ export type Database = {
           arrivee: string
           arrivee_retour?: string | null
           carburant?: string | null
+          client_pricing_rule_id?: string | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -873,6 +875,7 @@ export type Database = {
           arrivee?: string
           arrivee_retour?: string | null
           carburant?: string | null
+          client_pricing_rule_id?: string | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -930,6 +933,7 @@ export type Database = {
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
+          client_pricing_rule_id: string | null
           contact_arrivee_nom: string | null
           contact_arrivee_note: string | null
           contact_arrivee_tel: string | null
@@ -984,6 +988,7 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          client_pricing_rule_id?: string | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -1038,6 +1043,7 @@ export type Database = {
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
+          client_pricing_rule_id?: string | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -2810,6 +2816,19 @@ export type Database = {
       recalculate_company_score: {
         Args: { _company_id: string }
         Returns: undefined
+      }
+      resolve_client_pricing_rule: {
+        Args: {
+          _arrivee: string
+          _depart: string
+          _email: string
+          _is_aller_retour: boolean
+          _user_id: string
+        }
+        Returns: {
+          prix_ttc: number
+          rule_id: string
+        }[]
       }
     }
     Enums: {
