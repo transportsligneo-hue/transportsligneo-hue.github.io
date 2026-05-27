@@ -47,14 +47,11 @@ function ConvoyeurDashboard() {
       if (!cancelled) setAvailableCount(count ?? 0);
     };
     fetchAvail();
-    // Realtime: refresh quand un trajet est publié/attribué
-    const channel = supabase
-      .channel("driver-home-trajets")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trajets" }, fetchAvail)
-      .subscribe();
+    // Poll instead of Realtime to avoid broadcasting client PII via CDC payloads.
+    const interval = setInterval(fetchAvail, 30000);
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, []);
 
