@@ -77,13 +77,21 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0];
     if (!rawFile || !currentVue) return;
+    const vueId = currentVue.id;
 
+    // Reset input immediately so user can re-pick same file later
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    // 1) Local preview + activate "Suivant" button instantly (optimistic)
+    const previewUrl = URL.createObjectURL(rawFile);
+    setPhotos((prev) => ({ ...prev, [vueId]: previewUrl }));
     setUploading(true);
+
+    // 2) Compress + upload in background — does not block UI
     try {
-      // Compress for fast upload (~150-300KB instead of 3-5MB)
       const file = await compressImage(rawFile);
       const insId = await ensureInspection();
-      const path = `${userId}/${insId}/${currentVue.id}.jpg`;
+      const path = `${userId}/${insId}/${vueId}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from("inspection-photos")
@@ -93,26 +101,19 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
 
       await supabase.from("inspection_photos").upsert({
         inspection_id: insId,
-        vue_type: currentVue.id,
+        vue_type: vueId,
         url_photo: path,
       }, { onConflict: "inspection_id,vue_type" });
-
-      // Show local preview immediately
-      const previewUrl = URL.createObjectURL(file);
-      const capturedStep = currentStep;
-      setPhotos((prev) => ({ ...prev, [currentVue.id]: previewUrl }));
-
-      // Auto-advance after a brief preview moment for fluidity
-      setTimeout(() => {
-        if (capturedStep < VUE_TYPES.length - 1) {
-          animateStep(capturedStep + 1);
-        }
-      }, 600);
     } catch (err) {
       console.error("Upload error:", err);
+      // Rollback local preview on failure so user can retry
+      setPhotos((prev) => {
+        const { [vueId]: _, ...rest } = prev;
+        return rest;
+      });
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleRetake = () => {
