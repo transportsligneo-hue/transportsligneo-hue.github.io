@@ -629,124 +629,130 @@ export function EdlPremiumFlow({
   };
 
   const processPhotoFile = async (raw: File) => {
-
     const stepId = currentStep.id;
+    const isScan = currentStep.kind === "scan";
     let previewUrl: string | undefined;
 
+    // 1) Prépare l'aperçu local + marque IMMÉDIATEMENT l'étape "success"
+    //    pour activer le bouton "Photo suivante" sans attendre l'upload.
+    //    L'upload + insert DB continuent en tâche de fond ci-dessous.
     try {
       const stableFile = await prepareCapturedImage(raw);
       previewUrl = URL.createObjectURL(stableFile);
-      setState(stepId, { status: "uploading", previewUrl });
-
-      const insId = await ensureInspection();
-      let compressed: File;
-      try {
-        compressed = await compressImage(stableFile);
-      } catch {
-        compressed = stableFile;
-      }
-      const path = `${userId}/${insId}/${stepId}.jpg`;
-      await uploadWithRetry("inspection-photos", path, compressed);
-
-      // Stratégie robuste : delete-then-insert (plus fiable que upsert sur certaines configs RLS)
-      await supabase.from("inspection_photos")
-        .delete()
-        .eq("inspection_id", insId)
-        .eq("vue_type", stepId);
-
-      const { error: insertErr } = await supabase
-        .from("inspection_photos")
-        .insert({
-          inspection_id: insId,
-          vue_type: stepId,
-          url_photo: path,
-          file_size_bytes: compressed.size,
-        });
-
-      if (insertErr) {
-        // Dernier recours : tente l'upsert si la contrainte unique existe
-        const { error: upsertErr } = await supabase
-          .from("inspection_photos")
-          .upsert(
-            { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
-            { onConflict: "inspection_id,vue_type" },
-          );
-        if (upsertErr) throw upsertErr;
-      }
-
       setState(stepId, {
-        status: "success", previewUrl, storagePath: path,
-        ocr: currentStep.kind === "scan" ? { status: "pending" } : undefined,
+        status: "success",
+        previewUrl,
+        ocr: isScan ? { status: "pending" } : undefined,
       });
 
-      // PAS d'auto-avance : on laisse l'utilisateur voir la photo et appuyer
-      // manuellement sur "Photo suivante" pour passer à l'étape suivante.
+      // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
+      void (async () => {
+        try {
+          const insId = await ensureInspection();
+          let compressed: File;
+          try { compressed = await compressImage(stableFile); }
+          catch { compressed = stableFile; }
+          const path = `${userId}/${insId}/${stepId}.jpg`;
+          await uploadWithRetry("inspection-photos", path, compressed);
 
+          // delete-then-insert (plus fiable que upsert sur certaines configs RLS)
+          await supabase.from("inspection_photos")
+            .delete().eq("inspection_id", insId).eq("vue_type", stepId);
 
+          const { error: insertErr } = await supabase
+            .from("inspection_photos")
+            .insert({
+              inspection_id: insId, vue_type: stepId,
+              url_photo: path, file_size_bytes: compressed.size,
+            });
 
-
-
-
-
-
-      // OCR auto pour scans (PV livraison + carte grise) — non bloquant
-      if (currentStep.kind === "scan") {
-        supabase.functions.invoke("edl-document-ocr", {
-          body: {
-            storage_path: path,
-            document_type: stepId,
-            inspection_id: insId,
-            attribution_id: attributionId,
-            vue_type: stepId,
-          },
-        }).then(({ data, error }) => {
-          if (error || !data) {
-            console.warn("[EDL OCR]", error);
-            setStates(prev => ({
-              ...prev,
-              [stepId]: { ...prev[stepId], ocr: { status: "failed", error: error?.message ?? "OCR indisponible" } },
-            }));
-            toast.warning("OCR indisponible", { description: "Document enregistré sans extraction." });
-            return;
+          if (insertErr) {
+            const { error: upsertErr } = await supabase
+              .from("inspection_photos")
+              .upsert(
+                { inspection_id: insId, vue_type: stepId, url_photo: path, file_size_bytes: compressed.size },
+                { onConflict: "inspection_id,vue_type" },
+              );
+            if (upsertErr) throw upsertErr;
           }
-          const fields = Object.entries((data.structured ?? {}) as Record<string, unknown>)
-            .filter(([k, v]) => k !== "raw_text" && typeof v === "string" && v)
-            .length;
-          setStates(prev => ({
-            ...prev,
-            [stepId]: {
-              ...prev[stepId],
-              ocr: {
-                status: "completed",
-                classification: data.classification,
-                fieldsCount: fields,
+
+          // Mise à jour avec le storagePath confirmé (status reste success).
+          setStates((prev) => {
+            const cur = prev[stepId];
+            if (!cur || cur.previewUrl !== previewUrl) return prev; // étape déjà retaken/supprimée
+            return { ...prev, [stepId]: { ...cur, status: "success", storagePath: path } };
+          });
+
+          // OCR auto pour scans — non bloquant
+          if (isScan) {
+            supabase.functions.invoke("edl-document-ocr", {
+              body: {
+                storage_path: path, document_type: stepId,
+                inspection_id: insId, attribution_id: attributionId, vue_type: stepId,
               },
-            },
-          }));
-          if (fields > 0) {
-            toast.success(`Scan OCR · ${fields} champ(s) extraits`, {
-              description: `Classé : ${data.classification === "admin" ? "Admin" : data.classification === "client" ? "Client" : "Driver"}`,
+            }).then(({ data, error }) => {
+              if (error || !data) {
+                setStates(prev => ({
+                  ...prev,
+                  [stepId]: { ...prev[stepId], ocr: { status: "failed", error: error?.message ?? "OCR indisponible" } },
+                }));
+                toast.warning("OCR indisponible", { description: "Document enregistré sans extraction." });
+                return;
+              }
+              const fields = Object.entries((data.structured ?? {}) as Record<string, unknown>)
+                .filter(([k, v]) => k !== "raw_text" && typeof v === "string" && v).length;
+              setStates(prev => ({
+                ...prev,
+                [stepId]: {
+                  ...prev[stepId],
+                  ocr: { status: "completed", classification: data.classification, fieldsCount: fields },
+                },
+              }));
+              if (fields > 0) {
+                toast.success(`Scan OCR · ${fields} champ(s) extraits`, {
+                  description: `Classé : ${data.classification === "admin" ? "Admin" : data.classification === "client" ? "Client" : "Driver"}`,
+                });
+              }
+            }).catch(e => {
+              setStates(prev => ({
+                ...prev,
+                [stepId]: { ...prev[stepId], ocr: { status: "failed", error: String(e) } },
+              }));
             });
           }
-        }).catch(e => {
-          console.warn("[EDL OCR] invoke failed", e);
-          setStates(prev => ({
-            ...prev,
-            [stepId]: { ...prev[stepId], ocr: { status: "failed", error: String(e) } },
-          }));
-        });
-      }
+        } catch (err) {
+          console.error("[EDL Premium] background upload failed", err);
+          // Rollback : repasse l'étape en erreur si l'aperçu local est toujours actif.
+          setStates((prev) => {
+            const cur = prev[stepId];
+            if (!cur || cur.previewUrl !== previewUrl) return prev;
+            return {
+              ...prev,
+              [stepId]: {
+                ...cur,
+                status: "error",
+                error: err instanceof Error ? err.message : "Erreur réseau",
+              },
+            };
+          });
+          toast.error("Échec d'envoi", {
+            description: err instanceof Error ? err.message : "Réessayez la photo.",
+          });
+        }
+      })();
     } catch (err) {
-      console.error("[EDL Premium] photo upload failed", err);
+      // Erreur SYNCHRONE de préparation (fichier invalide, etc.)
+      console.error("[EDL Premium] photo preparation failed", err);
       setState(stepId, {
         status: "error", previewUrl,
-        error: err instanceof Error ? err.message : "Erreur réseau",
+        error: err instanceof Error ? err.message : "Image invalide",
       });
-      toast.error("Échec d'envoi", {
+      toast.error("Photo invalide", {
         description: err instanceof Error ? err.message : "Réessayez la photo.",
       });
     }
   };
+
 
   const handleExtraPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
