@@ -446,6 +446,129 @@ export function EdlPremiumFlow({
     };
   }, [STEPS, attributionId, type]);
 
+  const reconcileCurrentPhotoStep = useCallback(async () => {
+    if (!currentStep || (currentStep.kind !== "photo" && currentStep.kind !== "scan")) {
+      return false;
+    }
+
+    if (states[currentStep.id]?.status === "success") {
+      return true;
+    }
+
+    try {
+      let insId = inspectionId;
+
+      if (!insId) {
+        const { data: existingInspection } = await supabase
+          .from("inspections")
+          .select("id")
+          .eq("attribution_id", attributionId)
+          .eq("type", type)
+          .maybeSingle();
+
+        insId = existingInspection?.id ?? null;
+        if (!insId) return false;
+        setInspectionId(insId);
+      }
+
+      const { data: photoRow } = await supabase
+        .from("inspection_photos")
+        .select("url_photo")
+        .eq("inspection_id", insId)
+        .eq("vue_type", currentStep.id)
+        .maybeSingle();
+
+      if (!photoRow?.url_photo) return false;
+
+      let previewUrl = states[currentStep.id]?.previewUrl;
+      try {
+        const { data } = await supabase.storage
+          .from("inspection-photos")
+          .createSignedUrl(photoRow.url_photo, 3600);
+        previewUrl = data?.signedUrl ?? previewUrl;
+      } catch {
+        // Best effort: le status success suffit à réactiver "Photo suivante".
+      }
+
+      setStates((prev) => {
+        const current = prev[currentStep.id];
+        if (
+          current?.status === "success" &&
+          current.storagePath === photoRow.url_photo &&
+          (current.previewUrl || !previewUrl)
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [currentStep.id]: {
+            ...current,
+            status: "success",
+            storagePath: photoRow.url_photo,
+            previewUrl: previewUrl ?? current?.previewUrl,
+            ocr: current?.ocr,
+          },
+        };
+      });
+
+      return true;
+    } catch (error) {
+      console.warn("[EDL reconcile] current photo step sync failed", error);
+      return false;
+    }
+  }, [attributionId, currentStep, inspectionId, states, type]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!currentStep || (currentStep.kind !== "photo" && currentStep.kind !== "scan")) return;
+
+    let cancelled = false;
+    let timeoutId: number | null = null;
+
+    const clearTimer = () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
+    const pollForCurrentPhoto = () => {
+      clearTimer();
+      if (states[currentStep.id]?.status === "success") return;
+
+      let attempts = 0;
+      const run = async () => {
+        if (cancelled || document.visibilityState === "hidden") return;
+        attempts += 1;
+        const found = await reconcileCurrentPhotoStep();
+        if (!found && attempts < 6) {
+          timeoutId = window.setTimeout(run, 700);
+        }
+      };
+
+      void run();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        pollForCurrentPhoto();
+      }
+    };
+
+    window.addEventListener("focus", pollForCurrentPhoto);
+    window.addEventListener("pageshow", pollForCurrentPhoto);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      cancelled = true;
+      clearTimer();
+      window.removeEventListener("focus", pollForCurrentPhoto);
+      window.removeEventListener("pageshow", pollForCurrentPhoto);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [currentStep, reconcileCurrentPhotoStep, states]);
+
   // === Préchargement image exemple suivante (perf)
   useEffect(() => {
     const next = STEPS[safeIndex + 1];
