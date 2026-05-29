@@ -94,9 +94,16 @@ export interface DevisGeneratorProps {
   hideAccountStep?: boolean;
   /** Where the "Mon espace client" CTA points after submission. */
   successRedirect?: string;
+  /**
+   * Visual layout of step 0.
+   * - "bar"        : current full-width horizontal bar (used on /tarifs and everywhere else).
+   * - "hero-card"  : compact vertical card meant to live in the right column of the hero.
+   * Only the step-0 visual changes — wizard, calculations and modal are identical.
+   */
+  variant?: "bar" | "hero-card";
 }
 
-export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login" }: DevisGeneratorProps = {}) {
+export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
   // --- core trajet ---
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
@@ -485,130 +492,270 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }
 
   // --- ESTIMATEUR : carte premium "chauffeur" ---
+  const isHero = variant === "hero-card";
+
   return (
     <div className="w-full">
-      <div className="relative z-30 max-w-5xl mx-auto">
-        {/* Halo doré */}
-        <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
+      <div className={isHero ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
+        {/* Halo doré — uniquement variante bar (le hero gère son propre fond) */}
+        {!isHero && (
+          <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
+        )}
 
-        <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
+        {isHero ? (
+          // ============================================================
+          // VARIANTE HERO-CARD — layout vertical compact (maquette)
+          // Mêmes états, mêmes setters, mêmes calculs. Seul l'agencement change.
+          // ============================================================
+          <div className="relative z-30 rounded-[26px] border border-[#e7c76a]/35 bg-gradient-to-b from-[#0e1535]/95 to-[#080d22]/95 backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.10)_inset] p-7 lg:p-8">
+            {/* Filet doré supérieur */}
+            <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/70 to-transparent" />
 
-          {/* Type de prestation */}
-          <div className="mb-5">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
-            <div className="grid grid-cols-3 gap-2">
+            {/* Titre intégré */}
+            <div className="mb-6">
+              <h3 className="font-heading text-cream text-[26px] lg:text-[28px] leading-[1.15] tracking-[0.01em]">
+                Obtenez votre tarif
+                <br />
+                en <span className="text-[#e7c76a]">quelques secondes</span>
+              </h3>
+              <p className="text-cream/65 text-[13px] leading-relaxed mt-3">
+                Renseignez votre trajet et recevez un tarif immédiat, sans engagement.
+              </p>
+            </div>
+
+            {/* Départ / Arrivée — 2 colonnes */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#5fb6ff]/40 transition-colors px-4 py-3 relative">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
+                  <MapPin size={11} className="text-[#5fb6ff]" /> Départ
+                </label>
+                <PlacesInput
+                  value={departure}
+                  onChange={setDeparture}
+                  placeholder="Ville ou code postal de départ"
+                  className="w-full bg-transparent text-cream text-[13.5px] placeholder:text-cream/35 focus:outline-none h-7"
+                  fallbackOptions={CITIES}
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-4 py-3 relative">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
+                  <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
+                </label>
+                <PlacesInput
+                  value={arrival}
+                  onChange={setArrival}
+                  placeholder="Ville ou code postal d'arrivée"
+                  className="w-full bg-transparent text-cream text-[13.5px] placeholder:text-cream/35 focus:outline-none h-7"
+                  fallbackOptions={CITIES}
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
+              </div>
+            </div>
+
+            {/* Petit pictogramme central swap (décoratif) */}
+            <div className="flex justify-center -my-1">
+              <span className="h-7 w-7 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
+                <ArrowRight size={12} strokeWidth={2.5} className="rotate-90" />
+              </span>
+            </div>
+
+            {/* Véhicule — pleine largeur */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
+              <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
+                <Car size={11} className="text-[#e7c76a]" /> Véhicule
+              </label>
+              <select
+                value={vehicleType}
+                onChange={e => setVehicleType(e.target.value)}
+                className="w-full bg-transparent text-cream text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
+              >
+                <option value="" className="bg-[#0b1026]">Sélectionnez votre véhicule</option>
+                {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+              </select>
+              <ChevronDown size={13} className="absolute right-3 bottom-3.5 text-[#e7c76a]/70 pointer-events-none" />
+            </div>
+
+            {/* Date / Heure — 2 colonnes */}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
+                  <Calendar size={11} className="text-[#e7c76a]" /> Date
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="w-full bg-transparent text-cream text-[13.5px] focus:outline-none [color-scheme:dark]"
+                />
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
+                  <Clock size={11} className="text-[#e7c76a]" /> Heure
+                </label>
+                <input
+                  type="time"
+                  value={heure}
+                  onChange={e => setHeure(e.target.value)}
+                  className="w-full bg-transparent text-cream text-[13.5px] focus:outline-none [color-scheme:dark]"
+                />
+              </div>
+            </div>
+
+            {/* CTA principal — pleine largeur, doré */}
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={!isComplete}
+              className="mt-5 w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[12px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Send size={14} /> Obtenir mon prix
+            </button>
+
+            {/* Choix de prestation — discret en bas, ne casse pas l'identité maquette */}
+            <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
               {[
-                { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
-                { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
-                { v: "express", l: "Express", s: "Urgent · +20%" },
+                { v: "aller-simple", l: "Aller simple" },
+                { v: "aller-retour", l: "Aller-retour" },
+                { v: "express", l: "Express +20%" },
               ].map((o) => (
                 <button
                   key={o.v}
                   type="button"
                   onClick={() => setOption(o.v as typeof option)}
-                  className={`rounded-xl px-3 py-2.5 border text-left transition ${
+                  className={`px-3 py-1.5 rounded-full text-[10.5px] tracking-[0.12em] uppercase font-heading transition ${
                     option === o.v
-                      ? "border-[#e7c76a] bg-[#e7c76a]/10 text-[#e7c76a] shadow-[0_0_0_1px_rgba(231,199,106,0.25)]"
-                      : "border-white/10 bg-white/[0.03] text-cream/75 hover:border-white/25"
+                      ? "bg-[#e7c76a]/15 border border-[#e7c76a]/50 text-[#e7c76a]"
+                      : "bg-white/[0.03] border border-white/10 text-cream/55 hover:text-cream/85 hover:border-white/20"
                   }`}
                 >
-                  <span className="block text-[11px] sm:text-xs font-heading tracking-wide">{o.l}</span>
-                  <span className="block text-[9px] sm:text-[10px] uppercase tracking-[0.18em] opacity-70 mt-0.5">{o.s}</span>
+                  {o.l}
                 </button>
               ))}
             </div>
           </div>
+        ) : (
+          // ============================================================
+          // VARIANTE BAR — rendu original (utilisé sur /tarifs etc.)
+          // ============================================================
+          <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
 
-          {/* Trajet : Départ ↔ Arrivée */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-5 items-stretch">
-            {/* Bloc Départ */}
-            <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#5fb6ff]/40 transition-colors px-5 py-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="h-7 w-7 rounded-full grid place-items-center bg-[#5fb6ff]/15 border border-[#5fb6ff]/30">
-                  <MapPin size={13} className="text-[#5fb6ff]" />
-                </span>
-                <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse de départ</label>
+            {/* Type de prestation */}
+            <div className="mb-5">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
+                  { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
+                  { v: "express", l: "Express", s: "Urgent · +20%" },
+                ].map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setOption(o.v as typeof option)}
+                    className={`rounded-xl px-3 py-2.5 border text-left transition ${
+                      option === o.v
+                        ? "border-[#e7c76a] bg-[#e7c76a]/10 text-[#e7c76a] shadow-[0_0_0_1px_rgba(231,199,106,0.25)]"
+                        : "border-white/10 bg-white/[0.03] text-cream/75 hover:border-white/25"
+                    }`}
+                  >
+                    <span className="block text-[11px] sm:text-xs font-heading tracking-wide">{o.l}</span>
+                    <span className="block text-[9px] sm:text-[10px] uppercase tracking-[0.18em] opacity-70 mt-0.5">{o.s}</span>
+                  </button>
+                ))}
               </div>
-              <PlacesInput
-                value={departure}
-                onChange={setDeparture}
-                placeholder="Ville, rue, code postal…"
-                className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                fallbackOptions={CITIES}
-                dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
-              />
             </div>
 
-            {/* Séparateur central doré */}
-            <div className="hidden md:flex flex-col items-center justify-center px-1">
-              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
-              <span className="my-2 h-9 w-9 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_8px_25px_-8px_rgba(231,199,106,0.7)]">
-                <ArrowRight size={16} strokeWidth={2.5} />
-              </span>
-              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
-            </div>
-            <div className="md:hidden flex items-center justify-center -my-1">
-              <span className="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
-                <ArrowRight size={14} strokeWidth={2.5} className="rotate-90" />
-              </span>
-            </div>
-
-            {/* Bloc Arrivée */}
-            <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-5 py-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="h-7 w-7 rounded-full grid place-items-center bg-[#e7c76a]/15 border border-[#e7c76a]/30">
-                  <MapPinned size={13} className="text-[#e7c76a]" />
-                </span>
-                <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
+            {/* Trajet : Départ ↔ Arrivée */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-5 items-stretch">
+              <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#5fb6ff]/40 transition-colors px-5 py-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="h-7 w-7 rounded-full grid place-items-center bg-[#5fb6ff]/15 border border-[#5fb6ff]/30">
+                    <MapPin size={13} className="text-[#5fb6ff]" />
+                  </span>
+                  <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse de départ</label>
+                </div>
+                <PlacesInput
+                  value={departure}
+                  onChange={setDeparture}
+                  placeholder="Ville, rue, code postal…"
+                  className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
+                  fallbackOptions={CITIES}
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
               </div>
-              <PlacesInput
-                value={arrival}
-                onChange={setArrival}
-                placeholder="Ville, rue, code postal…"
-                className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                fallbackOptions={CITIES}
-                dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
-              />
+
+              <div className="hidden md:flex flex-col items-center justify-center px-1">
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
+                <span className="my-2 h-9 w-9 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_8px_25px_-8px_rgba(231,199,106,0.7)]">
+                  <ArrowRight size={16} strokeWidth={2.5} />
+                </span>
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
+              </div>
+              <div className="md:hidden flex items-center justify-center -my-1">
+                <span className="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
+                  <ArrowRight size={14} strokeWidth={2.5} className="rotate-90" />
+                </span>
+              </div>
+
+              <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-5 py-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="h-7 w-7 rounded-full grid place-items-center bg-[#e7c76a]/15 border border-[#e7c76a]/30">
+                    <MapPinned size={13} className="text-[#e7c76a]" />
+                  </span>
+                  <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
+                </div>
+                <PlacesInput
+                  value={arrival}
+                  onChange={setArrival}
+                  placeholder="Ville, rue, code postal…"
+                  className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
+                  fallbackOptions={CITIES}
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
+              </div>
+            </div>
+
+            {/* Détails trajet + CTA */}
+            <div className="mt-5 grid grid-cols-2 md:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-3 md:gap-4 items-end">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                  <Car size={11} className="text-[#e7c76a]" /> Véhicule
+                </label>
+                <select value={vehicleType} onChange={e => setVehicleType(e.target.value)}
+                  className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
+                  <option value="" className="bg-[#0b1026]">Sélectionner</option>
+                  {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                </select>
+                <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                  <Calendar size={11} className="text-[#e7c76a]" /> Date
+                </label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                  className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                  <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison
+                </label>
+                <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
+                  className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                disabled={!isComplete}
+                className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
+              >
+                <Send size={14} /> Obtenir mon prix
+              </button>
             </div>
           </div>
+        )}
 
-          {/* Détails trajet + CTA */}
-          <div className="mt-5 grid grid-cols-2 md:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-3 md:gap-4 items-end">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                <Car size={11} className="text-[#e7c76a]" /> Véhicule
-              </label>
-              <select value={vehicleType} onChange={e => setVehicleType(e.target.value)}
-                className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
-                <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
-              </select>
-              <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                <Calendar size={11} className="text-[#e7c76a]" /> Date
-              </label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison
-              </label>
-              <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
-                className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
-            </div>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              disabled={!isComplete}
-              className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
-            >
-              <Send size={14} /> Obtenir mon prix
-            </button>
-          </div>
-        </div>
+
 
 
         {/* Détail prix EN LIVE — visible immédiatement, sans clic */}
