@@ -1147,13 +1147,21 @@ export function EdlPremiumFlow({
     const s = currentState?.status;
     if (currentStep.kind === "extras") return true;
     // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
-    // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
       return true;
     }
     if (isStepBypassed(currentStep)) return true;
+    // Étapes photo/scan : dès qu'une photo a été capturée (preview locale présente),
+    // on autorise "Photo suivante". L'upload finalise en arrière-plan ; en cas d'échec,
+    // un bouton "Réessayer l'envoi" séparé reste disponible.
+    if (currentStep.kind === "photo" || currentStep.kind === "scan") {
+      if (s === "success" || s === "uploading") return true;
+      if (s === "error" && currentState?.previewUrl) return true;
+      return false;
+    }
     return s === "success";
   };
+
 
   const goNext = () => {
     if (!canAdvance()) {
