@@ -1482,7 +1482,7 @@ export function EdlPremiumFlow({
             capture, ce qui obligeait le convoyeur à actualiser la page
             pour passer à la photo suivante. */}
         <input
-          key={`edl-file-${currentStep.id}-${currentState?.status ?? "idle"}`}
+          key={`edl-file-${currentStep.id}`}
           ref={fileRef}
           type="file"
           accept="image/*"
