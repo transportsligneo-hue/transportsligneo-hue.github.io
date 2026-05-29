@@ -119,16 +119,24 @@ export default function HeroDesktop() {
         </div>
       </div>
 
-      {/* Courbe blanc cassé : accueille la section stats suivante (façon maquette) */}
+      {/* Courbe blanc cassé organique (façon maquette) */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-20 lg:h-24"
-        style={{
-          background: "var(--surface-cream, #faf7ef)",
-          borderTopLeftRadius: "48px",
-          borderTopRightRadius: "48px",
-        }}
-      />
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{ height: "140px" }}
+      >
+        <svg
+          viewBox="0 0 1440 140"
+          preserveAspectRatio="none"
+          className="w-full h-full block"
+        >
+          <path
+            d="M0,90 C260,30 620,5 900,30 C1130,50 1300,90 1440,70 L1440,140 L0,140 Z"
+            fill="var(--surface-cream, #faf7ef)"
+          />
+        </svg>
+      </div>
+
     </section>
   );
 }
