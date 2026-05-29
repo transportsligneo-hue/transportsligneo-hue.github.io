@@ -756,17 +756,23 @@ export function EdlPremiumFlow({
     const isScan = currentStep.kind === "scan";
     let previewUrl: string | undefined;
 
-    // 1) Prépare l'aperçu local + marque IMMÉDIATEMENT l'étape "success"
-    //    pour activer le bouton "Photo suivante" sans attendre l'upload.
-    //    L'upload + insert DB continuent en tâche de fond ci-dessous.
+    // 1) ACTIVATION IMMÉDIATE du bouton "Photo suivante" :
+    //    on crée l'aperçu DIRECTEMENT depuis le File brut (synchrone, instantané)
+    //    et on met l'étape en "success" AVANT tout await. Cela garantit que le
+    //    bouton devient actif dès que la photo est sélectionnée, sans attendre
+    //    `prepareCapturedImage` (qui fait un arrayBuffer() pouvant prendre
+    //    plusieurs centaines de ms sur mobile pour les gros JPEG/HEIC).
     try {
-      const stableFile = await prepareCapturedImage(raw);
-      previewUrl = URL.createObjectURL(stableFile);
+      previewUrl = URL.createObjectURL(raw);
       setState(stepId, {
         status: "success",
         previewUrl,
         ocr: isScan ? { status: "pending" } : undefined,
       });
+
+      // 1bis) Préparation du fichier stable (peut être lente sur mobile)
+      const stableFile = await prepareCapturedImage(raw);
+
 
       // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
       void (async () => {
