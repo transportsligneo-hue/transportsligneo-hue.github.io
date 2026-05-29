@@ -24,10 +24,10 @@ function TarifsPage() {
     <>
       <Navbar />
       <main className="pt-24 edl-section-bg">
-        {/* === ESTIMATEUR — placé EN HAUT, au-dessus des prix === */}
+        {/* === ESTIMATEUR — variante hero-card premium === */}
         <section id="devis" className="pt-6 pb-16 lg:pt-10 lg:pb-20 scroll-mt-32">
-          <div className="max-w-6xl mx-auto px-5 lg:px-6">
-            <div className="text-center mb-8">
+          <div className="max-w-3xl mx-auto px-5 lg:px-6">
+            <div className="text-center mb-10">
               <span className="edl-chip inline-flex">
                 <Sparkles size={12} />
                 Estimation gratuite
@@ -40,16 +40,15 @@ function TarifsPage() {
               </p>
             </div>
 
-            {/* Estimateur desktop — sans wrapper lourd, intégré directement */}
             <div className="hidden md:block">
-              <DevisGenerator />
+              <DevisGenerator variant="hero-card" />
             </div>
-            {/* Estimateur mobile */}
             <div className="md:hidden">
               <MobileDevisGenerator />
             </div>
           </div>
         </section>
+
 
         <Tarifs />
 
