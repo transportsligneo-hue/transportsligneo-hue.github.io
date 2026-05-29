@@ -60,52 +60,52 @@ function RetourPage() {
   }, [session_id]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#faf7ef]">
       <Navbar />
       <div className="mx-auto max-w-2xl px-4 py-16">
-        <div className="rounded-2xl border border-emerald-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-            <CheckCircle2 className="h-9 w-9 text-emerald-600" />
+        <div className="rounded-2xl border border-[#e7c76a]/30 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e7c76a]/15">
+            <CheckCircle2 className="h-9 w-9 text-[#b8860b]" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Paiement confirmé</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="text-2xl font-bold text-[#0b1026]">Paiement confirmé</h1>
+          <p className="mt-2 text-[#0b1026]/65">
             Votre demande de transport B2B a bien été enregistrée. Notre équipe vous contacte sous 24h pour la planification opérationnelle.
           </p>
 
           {loading && !request && (
-            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-500">
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-[#0b1026]/55">
               <Loader2 className="h-4 w-4 animate-spin" /> Confirmation en cours…
             </div>
           )}
 
           {request && (
-            <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5 text-left">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="font-mono text-xs text-slate-500">{request.numero}</span>
+            <div className="mt-6 rounded-lg border border-[#0b1026]/10 bg-[#faf7ef] p-5 text-left">
+              <div className="flex items-center justify-between border-b border-[#0b1026]/10 pb-3">
+                <span className="font-mono text-xs text-[#0b1026]/55">{request.numero}</span>
                 <span className={`rounded px-2 py-0.5 text-[11px] font-medium ${
                   request.payment_status === "paid"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-amber-100 text-amber-800"
+                    ? "bg-[#e7c76a]/15 text-[#b8860b]"
+                    : "bg-[#e7c76a]/15 text-amber-800"
                 }`}>
                   {request.payment_status === "paid" ? "Payé" : "En attente"}
                 </span>
               </div>
               <div className="mt-3 space-y-2 text-sm">
                 <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 text-slate-400" />
+                  <MapPin className="mt-0.5 h-4 w-4 text-[#0b1026]/45" />
                   <div>
-                    <div className="text-slate-700">{request.pickup_address}</div>
-                    <div className="text-slate-500">→ {request.dropoff_address}</div>
+                    <div className="text-[#0b1026]/80">{request.pickup_address}</div>
+                    <div className="text-[#0b1026]/55">→ {request.dropoff_address}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-slate-600">
+                <div className="flex items-center gap-4 text-[#0b1026]/65">
                   <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{request.scheduled_date}</span>
                   <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{request.scheduled_time}</span>
                 </div>
                 {request.estimated_price_ttc && (
-                  <div className="border-t border-slate-200 pt-2 text-right">
-                    <span className="text-xs text-slate-500">Total TTC</span>
-                    <div className="text-lg font-bold text-slate-900">
+                  <div className="border-t border-[#0b1026]/10 pt-2 text-right">
+                    <span className="text-xs text-[#0b1026]/55">Total TTC</span>
+                    <div className="text-lg font-bold text-[#0b1026]">
                       {Number(request.estimated_price_ttc).toFixed(2)} €
                     </div>
                   </div>
@@ -115,18 +115,18 @@ function RetourPage() {
           )}
 
           {session_id && (
-            <p className="mt-4 text-xs text-slate-400">Référence Stripe : {session_id.slice(0, 18)}…</p>
+            <p className="mt-4 text-xs text-[#0b1026]/45">Référence Stripe : {session_id.slice(0, 18)}…</p>
           )}
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               to="/b2b"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#0b1026]/10 bg-white px-4 py-2 text-sm text-[#0b1026]/80 hover:bg-[#faf7ef]"
             >
               <ArrowLeft className="h-4 w-4" /> Solutions B2B
             </Link>
             <Link
               to="/b2b/transport-ponctuel"
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              className="rounded-md bg-[#d4af37] px-4 py-2 text-sm font-medium text-white hover:bg-[#b8860b]"
             >
               Nouvelle demande
             </Link>
