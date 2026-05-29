@@ -20,7 +20,7 @@ function ServicesPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24">
+      <main>
         <ServicesContent />
         <Engagements />
       </main>
