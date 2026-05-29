@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
   Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
@@ -744,8 +745,10 @@ export default function MobileDevisGenerator() {
         )}
       </div>
 
-      {/* Bottom sheet — Sélecteur de villes */}
-      {pickerType && (
+      {/* Bottom sheet — Sélecteur de villes (portal pour échapper à tout
+          ancêtre avec filter / backdrop-filter / transform qui briserait
+          le position: fixed) */}
+      {pickerType && typeof document !== "undefined" && createPortal((
         <div className="fixed inset-0 z-50 flex flex-col">
           <button
             type="button"
@@ -825,7 +828,7 @@ export default function MobileDevisGenerator() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
     </section>
   );
 }
