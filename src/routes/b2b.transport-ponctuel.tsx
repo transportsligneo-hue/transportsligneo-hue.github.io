@@ -199,12 +199,12 @@ function TransportPonctuelPage() {
           ] as const).map((s, i, arr) => (
             <li key={s.n} className="flex flex-1 items-center gap-3">
               <div className={`flex items-center gap-2 ${step >= s.n ? "text-[#b8860b]" : "text-[#0b1026]/45"}`}>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${step >= s.n ? "border-emerald-600 bg-[#e7c76a]/10" : "border-[#0b1026]/15 bg-white"}`}>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${step >= s.n ? "border-[#d4af37] bg-[#e7c76a]/10" : "border-[#0b1026]/15 bg-white"}`}>
                   {step > s.n ? <CheckCircle2 className="h-4 w-4" /> : <s.icon className="h-4 w-4" />}
                 </div>
                 <span className="hidden font-medium sm:inline">{s.label}</span>
               </div>
-              {i < arr.length - 1 && <div className={`h-px flex-1 ${step > s.n ? "bg-[#d4af37]" : "bg-slate-200"}`} />}
+              {i < arr.length - 1 && <div className={`h-px flex-1 ${step > s.n ? "bg-[#d4af37]" : "bg-[#0b1026]/10"}`} />}
             </li>
           ))}
         </ol>
@@ -324,7 +324,7 @@ function TransportPonctuelPage() {
               <h2 className="text-xl font-semibold text-[#0b1026]">Estimation et paiement</h2>
 
               {estimate?.isEstimable ? (
-                <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-6">
+                <div className="rounded-xl bg-gradient-to-br from-[#e7c76a]/10 to-[#e7c76a]/5 p-6">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-[#0b1026]/65">Distance estimée</span><strong>{estimate.distanceKm} km</strong></div>
                     {estimate.breakdown.map((b, i) => (
@@ -334,7 +334,7 @@ function TransportPonctuelPage() {
                   <div className="mt-4 space-y-1 border-t border-[#e7c76a]/30 pt-4 text-sm">
                     <div className="flex justify-between"><span>Prix HT</span><span>{estimate.priceHt.toFixed(2)} €</span></div>
                     <div className="flex justify-between"><span>TVA 20%</span><span>{estimate.vat.toFixed(2)} €</span></div>
-                    <div className="flex justify-between text-lg font-bold text-emerald-700"><span>Total TTC</span><span>{estimate.priceTtc.toFixed(2)} €</span></div>
+                    <div className="flex justify-between text-lg font-bold text-[#b8860b]"><span>Total TTC</span><span>{estimate.priceTtc.toFixed(2)} €</span></div>
                   </div>
                   <p className="mt-3 text-xs text-[#0b1026]/55">Estimation indicative, sous réserve de validation opérationnelle.</p>
                 </div>
@@ -355,7 +355,7 @@ function TransportPonctuelPage() {
                   <div>{form.pickupAddress} → {form.dropoffAddress}</div>
                   <div>{form.scheduledDate} à {form.scheduledTime}</div>
                   <div>{B2B_VEHICLE_LABELS[form.vehicleType]} · {form.vehicleRunning === "oui" ? "Roulant" : "Non roulant"} · {B2B_URGENCY_LABELS[form.urgency]}</div>
-                  {requestNumero && <div className="pt-2 text-xs text-emerald-700">Demande {requestNumero} créée — finalisez le paiement ci-dessous.</div>}
+                  {requestNumero && <div className="pt-2 text-xs text-[#b8860b]">Demande {requestNumero} créée — finalisez le paiement ci-dessous.</div>}
                 </div>
               </div>
 

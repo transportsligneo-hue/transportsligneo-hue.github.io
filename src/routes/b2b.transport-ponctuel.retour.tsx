@@ -84,7 +84,7 @@ function RetourPage() {
                 <span className="font-mono text-xs text-[#0b1026]/55">{request.numero}</span>
                 <span className={`rounded px-2 py-0.5 text-[11px] font-medium ${
                   request.payment_status === "paid"
-                    ? "bg-[#e7c76a]/15 text-emerald-800"
+                    ? "bg-[#e7c76a]/15 text-[#b8860b]"
                     : "bg-[#e7c76a]/15 text-amber-800"
                 }`}>
                   {request.payment_status === "paid" ? "Payé" : "En attente"}

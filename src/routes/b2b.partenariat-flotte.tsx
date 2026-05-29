@@ -233,7 +233,7 @@ function FleetPartnershipPage() {
         </Link>
 
         <div className="mb-8">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#0b1026]/20 bg-[#0b1026]/5 px-3 py-1 text-xs font-medium text-blue-700">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#0b1026]/20 bg-[#0b1026]/5 px-3 py-1 text-xs font-medium text-[#0b1026]">
             <Users className="h-3.5 w-3.5" /> Partenariat flotte
           </div>
           <h1 className="text-3xl font-bold text-[#0b1026]">Demander une étude flotte</h1>
