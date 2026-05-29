@@ -1253,4 +1253,96 @@
     padding: 0.75rem 1rem;
     z-index: 5;
   }
+
+  /* ============================================================
+     === Refonte claire 70/30 — utilitaires section / cartes / boutons
+     Additif uniquement, n'affecte rien qui n'utilise pas ces classes.
+     ============================================================ */
+  .section-light {
+    background: var(--surface-white);
+    color: var(--ink-navy);
+  }
+  .section-cream {
+    background: var(--surface-cream);
+    color: var(--ink-navy);
+  }
+  .section-mist {
+    background: var(--surface-mist);
+    color: var(--ink-navy);
+  }
+  .section-navy-clean {
+    background: linear-gradient(180deg, #0b1026 0%, #111a3d 100%);
+    color: var(--cream);
+  }
+
+  .card-light {
+    background: #ffffff;
+    border: 1px solid rgba(11, 16, 38, 0.08);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    color: var(--ink-navy);
+  }
+  .card-light-hover {
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card-light-hover:hover {
+    transform: translateY(-2px);
+    border-color: var(--hairline-gold);
+    box-shadow: 0 2px 6px rgba(11,16,38,.06), 0 24px 50px -24px rgba(11,16,38,.20);
+  }
+
+  .hairline-gold-top {
+    position: relative;
+  }
+  .hairline-gold-top::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary) 50%, transparent);
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+
+  .text-ink { color: var(--ink-navy); }
+  .text-ink-soft { color: var(--ink-soft); }
+  .text-ink-muted { color: var(--ink-muted); }
+
+  /* Boutons cohérents refonte claire */
+  .btn-primary-navy {
+    background: linear-gradient(180deg, #15214a 0%, #0b1026 100%);
+    color: var(--cream);
+    border: 1px solid rgba(212,175,55,0.35);
+    box-shadow: 0 10px 28px -12px rgba(11,16,38,0.45);
+    transition: filter .2s ease, transform .15s ease, border-color .2s ease;
+    font-weight: 600;
+  }
+  .btn-primary-navy:hover { filter: brightness(1.08); border-color: var(--primary); }
+  .btn-primary-navy:active { transform: translateY(1px); }
+
+  .btn-accent-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #e7c76a 100%);
+    color: #0b1026;
+    border: 1px solid rgba(212,175,55,0.55);
+    box-shadow: 0 10px 28px -12px rgba(212,175,55,0.55);
+    transition: filter .2s ease, transform .15s ease;
+    font-weight: 700;
+  }
+  .btn-accent-gold:hover { filter: brightness(1.06); }
+  .btn-accent-gold:active { transform: translateY(1px); }
+
+  .btn-ghost-light {
+    background: #ffffff;
+    color: var(--ink-navy);
+    border: 1px solid rgba(11, 16, 38, 0.18);
+    transition: border-color .2s ease, background .2s ease;
+    font-weight: 600;
+  }
+  .btn-ghost-light:hover { border-color: var(--ink-navy); background: #f7f8fc; }
+
+  /* Filet doré bas de navbar */
+  .navbar-hairline {
+    box-shadow: 0 1px 0 rgba(212,175,55,0.35), 0 6px 24px -10px rgba(0,0,0,0.45);
+  }
 }
+
