@@ -110,16 +110,6 @@ export default function Navbar() {
           </div>
         </div>
 
-          {/* Mobile toggle */}
-          <button
-            className="md:hidden text-primary"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
