@@ -756,17 +756,23 @@ export function EdlPremiumFlow({
     const isScan = currentStep.kind === "scan";
     let previewUrl: string | undefined;
 
-    // 1) Prépare l'aperçu local + marque IMMÉDIATEMENT l'étape "success"
-    //    pour activer le bouton "Photo suivante" sans attendre l'upload.
-    //    L'upload + insert DB continuent en tâche de fond ci-dessous.
+    // 1) ACTIVATION IMMÉDIATE du bouton "Photo suivante" :
+    //    on crée l'aperçu DIRECTEMENT depuis le File brut (synchrone, instantané)
+    //    et on met l'étape en "success" AVANT tout await. Cela garantit que le
+    //    bouton devient actif dès que la photo est sélectionnée, sans attendre
+    //    `prepareCapturedImage` (qui fait un arrayBuffer() pouvant prendre
+    //    plusieurs centaines de ms sur mobile pour les gros JPEG/HEIC).
     try {
-      const stableFile = await prepareCapturedImage(raw);
-      previewUrl = URL.createObjectURL(stableFile);
+      previewUrl = URL.createObjectURL(raw);
       setState(stepId, {
         status: "success",
         previewUrl,
         ocr: isScan ? { status: "pending" } : undefined,
       });
+
+      // 1bis) Préparation du fichier stable (peut être lente sur mobile)
+      const stableFile = await prepareCapturedImage(raw);
+
 
       // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
       void (async () => {
@@ -1141,13 +1147,21 @@ export function EdlPremiumFlow({
     const s = currentState?.status;
     if (currentStep.kind === "extras") return true;
     // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
-    // La validation admin réelle s'enregistre dans attributions/etape_courante via send_admin (étape 25).
     if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
       return true;
     }
     if (isStepBypassed(currentStep)) return true;
+    // Étapes photo/scan : dès qu'une photo a été capturée (preview locale présente),
+    // on autorise "Photo suivante". L'upload finalise en arrière-plan ; en cas d'échec,
+    // un bouton "Réessayer l'envoi" séparé reste disponible.
+    if (currentStep.kind === "photo" || currentStep.kind === "scan") {
+      if (s === "success" || s === "uploading") return true;
+      if (s === "error" && currentState?.previewUrl) return true;
+      return false;
+    }
     return s === "success";
   };
+
 
   const goNext = () => {
     if (!canAdvance()) {
@@ -1468,7 +1482,7 @@ export function EdlPremiumFlow({
             capture, ce qui obligeait le convoyeur à actualiser la page
             pour passer à la photo suivante. */}
         <input
-          key={`edl-file-${currentStep.id}-${currentState?.status ?? "idle"}`}
+          key={`edl-file-${currentStep.id}`}
           ref={fileRef}
           type="file"
           accept="image/*"
