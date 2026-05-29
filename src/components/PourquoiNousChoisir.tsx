@@ -35,14 +35,14 @@ const reasons = [
 
 export default function PourquoiNousChoisir() {
   return (
-    <section className="py-24 section-bg">
+    <section className="py-24 section-light">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <div className="gold-divider-short mb-4" />
-          <h2 className="font-heading text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary">
+          <h2 className="font-heading text-3xl md:text-4xl tracking-[0.2em] uppercase text-ink">
             Pourquoi nous choisir
           </h2>
-          <p className="text-cream/60 mt-4 max-w-lg mx-auto text-sm">
+          <p className="text-ink-muted mt-4 max-w-lg mx-auto text-sm">
             Des engagements concrets pour un service d'exception.
           </p>
           <div className="gold-divider-short mt-4" />
@@ -52,15 +52,15 @@ export default function PourquoiNousChoisir() {
           {reasons.map((r, i) => (
             <div
               key={i}
-              className="card-premium p-8 rounded text-center group hover:border-primary/40 transition-all duration-300"
+              className="card-light card-light-hover hairline-gold-top p-8 text-center group"
             >
-              <div className="w-14 h-14 rounded-full gold-border flex items-center justify-center mx-auto mb-5 group-hover:border-primary/60 transition-colors">
-                <r.icon className="text-primary group-hover:text-gold-light transition-colors" size={24} />
+              <div className="w-14 h-14 rounded-full border border-primary/40 flex items-center justify-center mx-auto mb-5 bg-primary/5 group-hover:border-primary/70 transition-colors">
+                <r.icon className="text-primary" size={24} />
               </div>
-              <h3 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-3">
+              <h3 className="font-heading text-ink tracking-[0.1em] uppercase text-sm mb-3">
                 {r.title}
               </h3>
-              <p className="text-cream/65 text-sm leading-relaxed">{r.desc}</p>
+              <p className="text-ink-muted text-sm leading-relaxed">{r.desc}</p>
             </div>
           ))}
         </div>
@@ -70,7 +70,7 @@ export default function PourquoiNousChoisir() {
           {["Service rapide", "Disponible 7j/7", "Assurance incluse", "Devis gratuit"].map((badge) => (
             <span
               key={badge}
-              className="px-5 py-2 gold-border rounded-full text-xs uppercase tracking-wider text-primary font-heading"
+              className="px-5 py-2 rounded-full text-xs uppercase tracking-wider font-heading bg-white border border-primary/40 text-ink-soft shadow-sm"
             >
               {badge}
             </span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User, Sparkles } from "lucide-react";
+import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,7 +48,7 @@ export default function Navbar() {
       <nav
         className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-navy/95 backdrop-blur-md shadow-lg shadow-black/30"
+            ? "bg-navy/95 backdrop-blur-md navbar-hairline"
             : "bg-transparent"
         }`}
       >
@@ -77,6 +77,16 @@ export default function Navbar() {
               </li>
             ))}
             <li>
+              <a
+                href="tel:+33782456181"
+                className="hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 text-[11px] tracking-[0.15em] uppercase text-cream/85 hover:text-primary hover:border-primary/60 transition-colors"
+                aria-label="Appeler Transports Ligneo"
+              >
+                <Phone size={12} className="text-primary" />
+                07 82 45 61 81
+              </a>
+            </li>
+            <li>
               <button
                 onClick={goToEstimer}
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs tracking-[0.15em] uppercase font-medium edl-cta"
@@ -88,7 +98,7 @@ export default function Navbar() {
             <li>
               <button
                 onClick={goToEspace}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium hover:bg-primary hover:text-navy transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium hover:bg-primary hover:text-navy transition-colors"
               >
                 <User size={14} />
                 {isAuthenticated ? "Mon espace" : "Connexion"}
