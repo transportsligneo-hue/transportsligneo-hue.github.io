@@ -147,7 +147,10 @@ export default function MobileHomeScreen() {
             Gratuit
           </span>
         </div>
-        <div className="rounded-2xl border border-white/8 bg-white/[0.025] backdrop-blur-md p-1">
+        {/* NB: pas de backdrop-filter / filter / transform sur ce wrapper —
+            cela créerait un containing block pour le bottom-sheet `fixed`
+            du picker de villes et empêcherait son ouverture. */}
+        <div className="rounded-2xl border border-white/8 bg-white/[0.025] p-1">
           <MobileDevisGenerator />
         </div>
 
