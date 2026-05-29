@@ -177,17 +177,17 @@ function TransportPonctuelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#faf7ef]">
       <Navbar />
 
       <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-        <Link to="/b2b" className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900">
+        <Link to="/b2b" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[#0b1026]/65 hover:text-[#0b1026]">
           <ArrowLeft className="h-4 w-4" /> Retour aux solutions B2B
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Transport ponctuel B2B</h1>
-          <p className="mt-2 text-slate-600">Devis instantané et paiement sécurisé en 3 étapes.</p>
+          <h1 className="text-3xl font-bold text-[#0b1026]">Transport ponctuel B2B</h1>
+          <p className="mt-2 text-[#0b1026]/65">Devis instantané et paiement sécurisé en 3 étapes.</p>
         </div>
 
         {/* Stepper */}
@@ -198,21 +198,21 @@ function TransportPonctuelPage() {
             { n: 3, label: "Paiement", icon: CreditCard },
           ] as const).map((s, i, arr) => (
             <li key={s.n} className="flex flex-1 items-center gap-3">
-              <div className={`flex items-center gap-2 ${step >= s.n ? "text-emerald-600" : "text-slate-400"}`}>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${step >= s.n ? "border-emerald-600 bg-emerald-50" : "border-slate-300 bg-white"}`}>
+              <div className={`flex items-center gap-2 ${step >= s.n ? "text-[#b8860b]" : "text-[#0b1026]/45"}`}>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${step >= s.n ? "border-emerald-600 bg-[#e7c76a]/10" : "border-[#0b1026]/15 bg-white"}`}>
                   {step > s.n ? <CheckCircle2 className="h-4 w-4" /> : <s.icon className="h-4 w-4" />}
                 </div>
                 <span className="hidden font-medium sm:inline">{s.label}</span>
               </div>
-              {i < arr.length - 1 && <div className={`h-px flex-1 ${step > s.n ? "bg-emerald-600" : "bg-slate-200"}`} />}
+              {i < arr.length - 1 && <div className={`h-px flex-1 ${step > s.n ? "bg-[#d4af37]" : "bg-slate-200"}`} />}
             </li>
           ))}
         </ol>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-[#0b1026]/10 bg-white p-6 shadow-sm sm:p-8">
           {step === 1 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-semibold text-slate-900">Informations entreprise</h2>
+              <h2 className="text-xl font-semibold text-[#0b1026]">Informations entreprise</h2>
 
               <div>
                 <Label htmlFor="companyName">Nom entreprise *</Label>
@@ -253,7 +253,7 @@ function TransportPonctuelPage() {
 
           {step === 2 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-semibold text-slate-900">Détails du transport</h2>
+              <h2 className="text-xl font-semibold text-[#0b1026]">Détails du transport</h2>
 
               <div>
                 <Label htmlFor="pickupAddress">Adresse de départ *</Label>
@@ -321,22 +321,22 @@ function TransportPonctuelPage() {
 
           {step === 3 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-semibold text-slate-900">Estimation et paiement</h2>
+              <h2 className="text-xl font-semibold text-[#0b1026]">Estimation et paiement</h2>
 
               {estimate?.isEstimable ? (
                 <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-6">
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-slate-600">Distance estimée</span><strong>{estimate.distanceKm} km</strong></div>
+                    <div className="flex justify-between"><span className="text-[#0b1026]/65">Distance estimée</span><strong>{estimate.distanceKm} km</strong></div>
                     {estimate.breakdown.map((b, i) => (
-                      <div key={i} className="text-xs text-slate-500">{b}</div>
+                      <div key={i} className="text-xs text-[#0b1026]/55">{b}</div>
                     ))}
                   </div>
-                  <div className="mt-4 space-y-1 border-t border-emerald-200 pt-4 text-sm">
+                  <div className="mt-4 space-y-1 border-t border-[#e7c76a]/30 pt-4 text-sm">
                     <div className="flex justify-between"><span>Prix HT</span><span>{estimate.priceHt.toFixed(2)} €</span></div>
                     <div className="flex justify-between"><span>TVA 20%</span><span>{estimate.vat.toFixed(2)} €</span></div>
                     <div className="flex justify-between text-lg font-bold text-emerald-700"><span>Total TTC</span><span>{estimate.priceTtc.toFixed(2)} €</span></div>
                   </div>
-                  <p className="mt-3 text-xs text-slate-500">Estimation indicative, sous réserve de validation opérationnelle.</p>
+                  <p className="mt-3 text-xs text-[#0b1026]/55">Estimation indicative, sous réserve de validation opérationnelle.</p>
                 </div>
               ) : (
                 <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
@@ -348,9 +348,9 @@ function TransportPonctuelPage() {
                 </div>
               )}
 
-              <div className="rounded-xl bg-slate-50 p-4 text-sm">
-                <h3 className="mb-2 font-semibold text-slate-900">Récapitulatif</h3>
-                <div className="space-y-1 text-slate-600">
+              <div className="rounded-xl bg-[#faf7ef] p-4 text-sm">
+                <h3 className="mb-2 font-semibold text-[#0b1026]">Récapitulatif</h3>
+                <div className="space-y-1 text-[#0b1026]/65">
                   <div><strong>{form.companyName}</strong> — {form.contactName}</div>
                   <div>{form.pickupAddress} → {form.dropoffAddress}</div>
                   <div>{form.scheduledDate} à {form.scheduledTime}</div>
@@ -373,15 +373,15 @@ function TransportPonctuelPage() {
               <ArrowLeft className="mr-2 h-4 w-4" /> Précédent
             </Button>
             {step < 3 ? (
-              <Button onClick={next} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={next} className="bg-[#d4af37] hover:bg-[#b8860b]">
                 Suivant <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : !requestId ? (
-              <Button onClick={handleCreateRequest} disabled={submitting || !estimate?.isEstimable} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={handleCreateRequest} disabled={submitting || !estimate?.isEstimable} className="bg-[#d4af37] hover:bg-[#b8860b]">
                 {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Création…</> : <><CreditCard className="mr-2 h-4 w-4" /> Procéder au paiement</>}
               </Button>
             ) : (
-              <span className="text-xs text-slate-500">Saisissez vos informations de paiement ci-dessus</span>
+              <span className="text-xs text-[#0b1026]/55">Saisissez vos informations de paiement ci-dessus</span>
             )}
           </div>
         </div>
