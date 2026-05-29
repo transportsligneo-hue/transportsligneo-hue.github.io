@@ -19,7 +19,7 @@ function AProposPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 md:pt-24">
+      <main>
         <AProposContent />
       </main>
       <Footer />

@@ -20,7 +20,7 @@ function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24">
+      <main>
         <Contact />
         <FAQ />
       </main>

@@ -19,7 +19,7 @@ function CommentCaMarchePage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24">
+      <main>
         <CommentCaMarcheTimeline />
       </main>
       <Footer />
