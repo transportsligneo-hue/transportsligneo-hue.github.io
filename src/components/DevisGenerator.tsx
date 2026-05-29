@@ -570,8 +570,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 onChange={e => setVehicleType(e.target.value)}
                 className="w-full bg-transparent text-cream text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
               >
-                <option value="" className="bg-[#0b1026]">Sélectionnez votre véhicule</option>
-                {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                <option value="">Sélectionnez votre véhicule</option>
+                {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
               </select>
               <ChevronDown size={13} className="absolute right-3 bottom-3.5 text-[#e7c76a]/70 pointer-events-none" />
             </div>
@@ -724,8 +724,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 </label>
                 <select value={vehicleType} onChange={e => setVehicleType(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
-                  <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                  {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                  <option value="">Sélectionner</option>
+                  {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
                 </select>
                 <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
               </div>
@@ -1012,8 +1012,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Type de véhicule *</label>
                       <div className="relative">
                         <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={selectCard}>
-                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                          {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                          <option value="">Sélectionner</option>
+                          {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
                         </select>
                         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
                       </div>
@@ -1024,8 +1024,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Carburant</label>
                       <div className="relative">
                         <select value={energy} onChange={e => setEnergy(e.target.value)} className={selectCard}>
-                          <option value="" className="bg-[#0b1026]">Sélectionner</option>
-                          {ENERGY_TYPES.map(v => <option key={v.value} value={v.value} className="bg-[#0b1026]">{v.label}</option>)}
+                          <option value="">Sélectionner</option>
+                          {ENERGY_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
                         </select>
                         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
                       </div>
