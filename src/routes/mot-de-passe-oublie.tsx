@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, CheckCircle, ArrowLeft } from "lucide-react";
-import logoLigneo from "@/assets/logo-ligneo.png";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export const Route = createFileRoute("/mot-de-passe-oublie")({
   component: MotDePasseOublie,
