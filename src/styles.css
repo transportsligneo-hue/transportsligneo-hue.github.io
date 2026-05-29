@@ -64,6 +64,17 @@
   --cream: #f5f1e8;
   --electric-blue: oklch(0.62 0.22 250);
   --electric-blue-soft: oklch(0.72 0.18 250);
+
+  /* === Palette claire additive (refonte 70/30) === */
+  --surface-white: #ffffff;
+  --surface-cream: #faf8f3;
+  --surface-mist: #f3f5fa;
+  --ink-navy: #0b1026;
+  --ink-soft: #1e2547;
+  --ink-muted: #5b6485;
+  --hairline-gold: rgba(212, 175, 55, 0.55);
+  --shadow-soft: 0 1px 2px rgba(11,16,38,0.04), 0 8px 24px -14px rgba(11,16,38,0.10);
+  --shadow-card: 0 1px 3px rgba(11,16,38,0.05), 0 14px 36px -18px rgba(11,16,38,0.14);
 }
 
 @layer base {
