@@ -94,9 +94,16 @@ export interface DevisGeneratorProps {
   hideAccountStep?: boolean;
   /** Where the "Mon espace client" CTA points after submission. */
   successRedirect?: string;
+  /**
+   * Visual layout of step 0.
+   * - "bar"        : current full-width horizontal bar (used on /tarifs and everywhere else).
+   * - "hero-card"  : compact vertical card meant to live in the right column of the hero.
+   * Only the step-0 visual changes — wizard, calculations and modal are identical.
+   */
+  variant?: "bar" | "hero-card";
 }
 
-export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login" }: DevisGeneratorProps = {}) {
+export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
   // --- core trajet ---
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
