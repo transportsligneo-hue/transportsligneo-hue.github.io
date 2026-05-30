@@ -69,11 +69,12 @@ export default function Navbar() {
                 <Link
                   to={l.to}
                   activeOptions={{ exact: true }}
-                  activeProps={{ className: "text-primary" }}
-                  className="text-[11px] font-medium tracking-[0.22em] uppercase text-cream/75 hover:text-primary transition-colors duration-300"
+                  activeProps={{ className: "nav-link-active" }}
+                  className="nav-link-electric text-[11px] font-medium tracking-[0.22em] uppercase text-cream/75 transition-colors duration-300"
                 >
                   {l.label}
                 </Link>
+
               </li>
             ))}
           </ul>
