@@ -1435,3 +1435,43 @@
   }
 }
 
+
+/* === Accent bleu électrique (logo) === */
+@layer utilities {
+  .nav-link-electric {
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .nav-link-electric::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1.5px;
+    width: 0;
+    background: linear-gradient(90deg, #5fb6ff 0%, #2c6bff 100%);
+    box-shadow: 0 0 8px rgba(95, 182, 255, 0.55);
+    transition: width 320ms ease;
+  }
+  .nav-link-electric:hover {
+    color: #cfe7ff;
+  }
+  .nav-link-electric:hover::after,
+  .nav-link-active::after {
+    width: 100%;
+  }
+  .nav-link-active {
+    color: #e7c76a !important;
+  }
+  .text-electric { color: #5fb6ff; }
+  .bg-electric { background-color: #5fb6ff; }
+  .border-electric { border-color: rgba(95, 182, 255, 0.45); }
+  .electric-glow {
+    box-shadow: 0 0 24px -6px rgba(95, 182, 255, 0.45),
+      inset 0 0 0 1px rgba(95, 182, 255, 0.18);
+  }
+  .electric-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #5fb6ff 50%, transparent);
+  }
+}
