@@ -42,7 +42,7 @@ function MotDePasseOublie() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block mb-6">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-14 w-auto mx-auto" />
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-20 w-auto mx-auto" />
           </Link>
           <div className="gold-divider-short mb-4" />
           <h1 className="font-heading text-2xl md:text-3xl tracking-[0.15em] uppercase text-primary">
