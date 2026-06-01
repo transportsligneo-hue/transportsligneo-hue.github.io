@@ -50,11 +50,12 @@ export default function HeroDesktop() {
           {/* Colonne gauche : contenu éditorial */}
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-12 bg-[#e7c76a]" />
+              <span className="h-px w-12 bg-gradient-to-r from-[#5fb6ff] to-[#e7c76a]" />
               <span className="text-[#e7c76a] text-[11px] tracking-[0.32em] uppercase font-medium">
                 Convoyage automobile premium
               </span>
             </div>
+
 
             <h1 className="font-heading text-white text-5xl xl:text-6xl 2xl:text-[68px] tracking-wide leading-[1.05]">
               LA TRANQUILLITÉ
@@ -103,19 +104,20 @@ export default function HeroDesktop() {
 
           {/* Colonne droite : Simulateur en carte premium sombre */}
           <div id="devis" className="relative scroll-mt-32">
-            {/* Halo doré derrière la carte */}
+            {/* Halo doré + électrique derrière la carte */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-4 rounded-[32px] opacity-60 blur-2xl"
+              className="pointer-events-none absolute -inset-6 rounded-[36px] opacity-70 blur-3xl"
               style={{
                 background:
-                  "radial-gradient(closest-side, rgba(231,199,106,0.22), transparent 70%)",
+                  "radial-gradient(closest-side, rgba(231,199,106,0.28), transparent 70%), radial-gradient(closest-side at 80% 90%, rgba(95,182,255,0.30), transparent 70%)",
               }}
             />
             <div className="relative">
               <DevisGenerator variant="hero-card" />
             </div>
           </div>
+
         </div>
       </div>
 
