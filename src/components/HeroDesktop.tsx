@@ -50,11 +50,12 @@ export default function HeroDesktop() {
           {/* Colonne gauche : contenu éditorial */}
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-12 bg-[#e7c76a]" />
+              <span className="h-px w-12 bg-gradient-to-r from-[#5fb6ff] to-[#e7c76a]" />
               <span className="text-[#e7c76a] text-[11px] tracking-[0.32em] uppercase font-medium">
                 Convoyage automobile premium
               </span>
             </div>
+
 
             <h1 className="font-heading text-white text-5xl xl:text-6xl 2xl:text-[68px] tracking-wide leading-[1.05]">
               LA TRANQUILLITÉ
