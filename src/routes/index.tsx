@@ -55,7 +55,9 @@ function Index() {
         {/* === BANDE STATS BLANCHE PREMIUM (façon maquette) === */}
         <section className="bg-[#faf7ef] pt-4 pb-16 lg:pb-20">
           <div className="max-w-6xl mx-auto px-6">
-            <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_2px_4px_rgba(11,16,38,0.04),0_24px_60px_-30px_rgba(11,16,38,0.20)] px-8 lg:px-14 py-10 lg:py-12">
+            <div className="relative bg-white rounded-2xl border border-black/[0.06] shadow-[0_2px_4px_rgba(11,16,38,0.04),0_24px_60px_-30px_rgba(11,16,38,0.20)] px-8 lg:px-14 py-10 lg:py-12">
+              <span aria-hidden className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#5fb6ff] to-transparent" />
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-[rgba(11,16,38,0.08)]">
                 {heroTrustStats.map(({ icon: Icon, title, desc }, i) => (
                   <div
