@@ -352,145 +352,202 @@ export default function MobileDevisGenerator() {
     downloadDevisPdf(blob, savedDevis.numero);
   };
 
-  const inputCls = "w-full bg-navy/60 border border-primary/20 rounded-xl px-4 py-3.5 text-cream text-base focus:border-primary/60 focus:outline-none transition-colors";
-  const labelCls = "block text-[11px] uppercase tracking-[0.15em] text-cream/55 mb-1.5 font-heading";
+  const inputCls = "w-full bg-[rgba(11,16,38,0.55)] border border-[rgba(212,175,55,0.22)] rounded-xl px-4 py-3.5 text-cream text-[15px] placeholder:text-cream/35 focus:border-[#e7c76a]/70 focus:ring-2 focus:ring-[#e7c76a]/15 focus:outline-none transition-all";
+  const labelCls = "block text-[10.5px] uppercase tracking-[0.22em] text-[#e7c76a]/85 mb-1.5 font-heading";
+  // Carte premium navy verre-fumé avec hairline doré → bleu électrique en haut
+  const premiumCardCls =
+    "relative rounded-2xl border border-[rgba(212,175,55,0.22)] bg-gradient-to-b from-[rgba(20,28,60,0.78)] to-[rgba(11,16,38,0.88)] shadow-[0_22px_60px_-24px_rgba(0,0,0,0.75)] backdrop-blur-xl overflow-hidden";
+  const hairline = (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/70 to-transparent"
+    />
+  );
 
   return (
-    <section className="md:hidden section-bg pt-2 pb-8">
-      <div className="px-5">
-        {/* Titre */}
-        <div className="text-center mb-6">
-          <p className="font-heading text-primary/70 text-[11px] tracking-[0.3em] uppercase mb-1">
-            Estimation
-          </p>
-          <h2 className="font-heading text-primary text-2xl tracking-[0.05em]">
-            Estimez votre trajet
-          </h2>
-          <p className="text-cream/55 text-xs mt-2">Péages & carburant inclus</p>
-        </div>
-
-        {/* Carte trajet */}
+    <section className="md:hidden pt-3 pb-6">
+      <div className="px-1">
+        {/* Carte trajet — premium */}
         {!showForm && !submitted && (
-          <div className="mobile-card p-5 mb-4">
-            <p className={labelCls}>Trajet</p>
+          <div className={`${premiumCardCls} p-5 mb-4`}>
+            {hairline}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
+                Votre trajet
+              </p>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-[#e7c76a]/35 bg-[#e7c76a]/[0.06] text-[9px] tracking-[0.22em] uppercase text-[#e7c76a]/90 font-heading">
+                Live
+              </span>
+            </div>
 
             {/* Picker départ */}
             <button
               type="button"
               onClick={() => openPicker("dep")}
-              className="w-full flex items-center gap-3 py-3.5 px-4 bg-navy/40 border border-primary/20 rounded-xl tap-scale active:bg-navy/60 transition-colors mb-2"
+              className="group w-full flex items-center gap-3 py-3.5 px-3.5 bg-[rgba(11,16,38,0.55)] border border-[rgba(212,175,55,0.20)] rounded-xl tap-scale active:bg-[rgba(11,16,38,0.75)] hover:border-[#e7c76a]/45 transition-all mb-2.5"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <MapPin size={16} className="text-primary" />
-              </div>
+              <span className="w-10 h-10 rounded-xl border border-[rgba(212,175,55,0.4)] bg-gradient-to-br from-[rgba(212,175,55,0.18)] to-[rgba(212,175,55,0.04)] flex items-center justify-center shrink-0">
+                <MapPin size={16} className="text-[#e7c76a]" strokeWidth={1.7} />
+              </span>
               <div className="flex-1 text-left min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-cream/45">Départ</p>
-                <p className={`text-sm truncate ${departure ? "text-cream" : "text-cream/40"}`}>
-                  {departure || "Choisir une ville"}
+                <p className="text-[9.5px] uppercase tracking-[0.24em] text-[#e7c76a]/75 font-heading">Départ</p>
+                <p className={`text-[14px] truncate mt-0.5 font-heading tracking-wide ${departure ? "text-cream" : "text-cream/40 italic"}`}>
+                  {departure || "Choisir une adresse"}
                 </p>
               </div>
-              <ChevronRight size={16} className="text-primary/60 shrink-0" />
+              <ChevronRight size={16} className="text-[#5fb6ff]/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </button>
+
+            {/* Filet bleu électrique entre les deux pickers */}
+            <div className="relative h-0 mb-2.5">
+              <span aria-hidden className="absolute left-[35px] -top-1.5 h-3 w-px bg-gradient-to-b from-[#e7c76a]/60 to-[#5fb6ff]/60" />
+            </div>
 
             {/* Picker arrivée */}
             <button
               type="button"
               onClick={() => openPicker("arr")}
-              className="w-full flex items-center gap-3 py-3.5 px-4 bg-navy/40 border border-primary/20 rounded-xl tap-scale active:bg-navy/60 transition-colors"
+              className="group w-full flex items-center gap-3 py-3.5 px-3.5 bg-[rgba(11,16,38,0.55)] border border-[rgba(212,175,55,0.20)] rounded-xl tap-scale active:bg-[rgba(11,16,38,0.75)] hover:border-[#e7c76a]/45 transition-all"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Navigation size={16} className="text-primary" />
-              </div>
+              <span className="w-10 h-10 rounded-xl border border-[rgba(95,182,255,0.35)] bg-gradient-to-br from-[rgba(95,182,255,0.16)] to-[rgba(95,182,255,0.03)] flex items-center justify-center shrink-0">
+                <Navigation size={16} className="text-[#5fb6ff]" strokeWidth={1.7} />
+              </span>
               <div className="flex-1 text-left min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-cream/45">Arrivée</p>
-                <p className={`text-sm truncate ${arrival ? "text-cream" : "text-cream/40"}`}>
-                  {arrival || "Choisir une ville"}
+                <p className="text-[9.5px] uppercase tracking-[0.24em] text-[#5fb6ff]/85 font-heading">Arrivée</p>
+                <p className={`text-[14px] truncate mt-0.5 font-heading tracking-wide ${arrival ? "text-cream" : "text-cream/40 italic"}`}>
+                  {arrival || "Choisir une adresse"}
                 </p>
               </div>
-              <ChevronRight size={16} className="text-primary/60 shrink-0" />
+              <ChevronRight size={16} className="text-[#5fb6ff]/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </button>
 
-            {/* Type trajet — segmented control */}
-            <div className="mt-4">
+            {/* Type trajet — segmented control premium */}
+            <div className="mt-5">
               <p className={labelCls}>Type de trajet</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl border border-[rgba(212,175,55,0.18)] bg-[rgba(11,16,38,0.45)]">
                 {[
                   { value: "aller-simple", label: "Simple" },
-                  { value: "aller-retour", label: "Restitution" },
+                  { value: "aller-retour", label: "Retour" },
                   { value: "express", label: "Express" },
-                ].map(o => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => setOption(o.value)}
-                    className={`py-2.5 rounded-lg text-xs font-heading tracking-wide uppercase transition-all ${
-                      option === o.value
-                        ? "bg-primary text-primary-foreground shadow-[0_4px_14px_-4px_rgba(212,175,55,0.5)]"
-                        : "bg-navy/40 border border-primary/20 text-cream/65"
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
+                ].map(o => {
+                  const active = option === o.value;
+                  return (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => setOption(o.value)}
+                      className={`relative py-2.5 rounded-xl text-[10.5px] font-heading tracking-[0.18em] uppercase transition-all ${
+                        active
+                          ? "text-[#0b1026]"
+                          : "text-cream/70 hover:text-cream"
+                      }`}
+                      style={
+                        active
+                          ? {
+                              background: "linear-gradient(135deg, #e7c76a 0%, #d4af37 100%)",
+                              boxShadow:
+                                "0 8px 22px -10px rgba(212,175,55,0.6), inset 0 1px 0 rgba(255,255,255,0.35)",
+                            }
+                          : undefined
+                      }
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         )}
 
-        {/* Résultat */}
+        {/* Résultat — carte prix premium */}
         {!showForm && !submitted && distance !== null && pricing && (
-          <div className="mobile-card p-5 mb-4 gold-border-strong">
-            <div className="text-center mb-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1">Estimation</p>
-              <p className="font-heading gold-gradient-text text-5xl leading-none">
-                {pricing.finalPrice}<span className="text-2xl ml-1">€</span>
+          <div className={`${premiumCardCls} p-6 mb-4`}>
+            {/* halo doré derrière le prix */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full opacity-60"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(231,199,106,0.30), rgba(95,182,255,0.10) 55%, transparent 75%)",
+              }}
+            />
+            {hairline}
+
+            <div className="relative text-center mb-5">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#e7c76a]/85 mb-2 font-heading">
+                Estimation instantanée
+              </p>
+              <p
+                className="font-heading text-[64px] leading-none tracking-tight"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #fdf3c4 0%, #e7c76a 45%, #b8902e 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  textShadow: "0 1px 0 rgba(0,0,0,0.15)",
+                }}
+              >
+                {pricing.finalPrice}
+                <span className="text-[26px] ml-1 align-top">€</span>
               </p>
               {pricing.hasExtra && (
-                <p className="font-heading text-primary/80 text-[11px] mt-2 tracking-wider uppercase">
+                <p className="font-heading text-[#e7c76a]/85 text-[10px] mt-2 tracking-[0.22em] uppercase">
                   {pricing.multiplierLabel}
                 </p>
               )}
+              <span
+                aria-hidden
+                className="block mx-auto mt-3 h-px w-16 bg-gradient-to-r from-transparent via-[#5fb6ff]/70 to-transparent"
+              />
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-navy/40 rounded-lg p-3 text-center">
-                <Navigation size={14} className="text-primary mx-auto mb-1" />
-                <p className="text-cream font-heading text-sm">{distance} km</p>
-                <p className="text-cream/45 text-[10px] mt-0.5">Distance</p>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="rounded-xl border border-[rgba(212,175,55,0.22)] bg-[rgba(11,16,38,0.55)] p-3 text-center">
+                <Navigation size={14} className="text-[#e7c76a] mx-auto mb-1.5" strokeWidth={1.7} />
+                <p className="text-cream font-heading text-[14px] tracking-wide">{distance} km</p>
+                <p className="text-cream/45 text-[9.5px] mt-0.5 tracking-[0.18em] uppercase">Distance</p>
               </div>
-              <div className="bg-navy/40 rounded-lg p-3 text-center">
-                <Clock size={14} className="text-primary mx-auto mb-1" />
-                <p className="text-cream font-heading text-sm">{distance > 0 ? estimateDuration(distance) : "—"}</p>
-                <p className="text-cream/45 text-[10px] mt-0.5">Durée</p>
+              <div className="rounded-xl border border-[rgba(95,182,255,0.22)] bg-[rgba(11,16,38,0.55)] p-3 text-center">
+                <Clock size={14} className="text-[#5fb6ff] mx-auto mb-1.5" strokeWidth={1.7} />
+                <p className="text-cream font-heading text-[14px] tracking-wide">{distance > 0 ? estimateDuration(distance) : "—"}</p>
+                <p className="text-cream/45 text-[9.5px] mt-0.5 tracking-[0.18em] uppercase">Durée</p>
               </div>
             </div>
-            <p className="text-center text-primary/60 text-[10px] mt-3 tracking-wider uppercase">
-              Péages & carburant inclus
+
+            <p className="text-center text-cream/55 text-[10px] mt-4 tracking-[0.16em] uppercase">
+              Péages · Carburant · Assurance · Inclus
             </p>
-            <p className="text-cream/70 text-[11px] mt-3 leading-relaxed text-center">
-              <Sparkles size={10} className="inline mr-1 text-primary" />
-              Vous pouvez commander votre convoyage directement depuis cet estimateur.
-              Après validation, confirmez votre demande en quelques clics.
-            </p>
+
             <button
               onClick={() => setShowForm(true)}
-              className="mt-5 w-full h-13 py-4 rounded-xl bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase tap-scale flex items-center justify-center gap-2"
+              className="mt-5 w-full h-14 rounded-2xl font-heading text-[12px] tracking-[0.22em] uppercase tap-scale flex items-center justify-center gap-2 text-[#0b1026]"
+              style={{
+                background: "linear-gradient(135deg, #e7c76a 0%, #d4af37 100%)",
+                boxShadow:
+                  "0 14px 34px -12px rgba(212,175,55,0.6), inset 0 1px 0 rgba(255,255,255,0.4)",
+              }}
             >
+              <Sparkles size={15} />
               Demander un devis
-              <ChevronRight size={16} />
+              <ChevronRight size={15} />
             </button>
           </div>
         )}
 
         {!showForm && !submitted && departure && arrival && distance === null && distanceLoading && (
-          <div className="mobile-card p-4 text-center">
-            <p className="text-cream/60 text-sm inline-flex items-center gap-2">
-              <Loader2 size={12} className="animate-spin" /> Calcul de la distance…
+          <div className={`${premiumCardCls} p-4 text-center`}>
+            {hairline}
+            <p className="text-cream/65 text-sm inline-flex items-center gap-2 font-heading tracking-wide">
+              <Loader2 size={13} className="animate-spin text-[#e7c76a]" /> Calcul de la distance…
             </p>
           </div>
         )}
         {!showForm && !submitted && departure && arrival && distance === null && !distanceLoading && (
-          <div className="mobile-card p-4 text-center">
-            <p className="text-amber-300/80 text-xs">
+          <div className={`${premiumCardCls} p-4 text-center`}>
+            {hairline}
+            <p className="text-[#e7c76a]/85 text-[11.5px] tracking-wide">
               Distance non calculable automatiquement. Continuez votre demande, nous confirmerons manuellement.
             </p>
           </div>
