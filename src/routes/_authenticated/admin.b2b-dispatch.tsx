@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin, Calendar, Clock, Search, UserPlus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import {
   PageHeader,
   Card,
@@ -208,7 +209,7 @@ function AdminB2BDispatch() {
                           type="number"
                           step="0.01"
                           value={priceDraft}
-                          onChange={(e) => setPriceDraft(e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPriceDraft(e.target.value)}
                           className="h-9"
                         />
                       </div>
