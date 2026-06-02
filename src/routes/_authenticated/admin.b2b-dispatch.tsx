@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin, Calendar, Clock, Search, UserPlus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -209,7 +209,7 @@ function AdminB2BDispatch() {
                           type="number"
                           step="0.01"
                           value={priceDraft}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPriceDraft(e.target.value)}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setPriceDraft(e.target.value)}
                           className="h-9"
                         />
                       </div>

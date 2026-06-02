@@ -414,6 +414,9 @@ function DemandeDrawer({
   const fromOpts = extractFromOptions(demande.options);
   const [prixEdit, setPrixEdit] = useState<string>(String(demande.prix_estime ?? fromOpts.prix ?? ""));
   const [savingPrix, setSavingPrix] = useState(false);
+  useEffect(() => {
+    setPrixEdit(String(demande.prix_estime ?? fromOpts.prix ?? ""));
+  }, [demande.id, demande.prix_estime, fromOpts.prix]);
   const updateStatut = async (statut: string) => {
     await supabase.from("demandes_convoyage").update({ statut }).eq("id", demande.id);
     onChanged({ ...demande, statut });
