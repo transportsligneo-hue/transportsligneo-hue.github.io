@@ -566,7 +566,7 @@ export default function MobileDevisGenerator() {
 
             {/* Récap trajet */}
             {pricing && (
-              <div className="mobile-card p-4 gold-border">
+              <div className={`${premiumCardCls} p-4`}>
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-cream/55 text-[10px] uppercase tracking-wider">Trajet</p>
@@ -583,7 +583,7 @@ export default function MobileDevisGenerator() {
             )}
 
             {/* Coordonnées */}
-            <div className="mobile-card p-5 space-y-4">
+            <div className={`${premiumCardCls} p-5 space-y-4`}>
               <p className="font-heading text-primary/80 text-[11px] tracking-[0.2em] uppercase">
                 Vos coordonnées
               </p>
@@ -608,7 +608,7 @@ export default function MobileDevisGenerator() {
             </div>
 
             {/* Véhicule */}
-            <div className="mobile-card p-5 space-y-4">
+            <div className={`${premiumCardCls} p-5 space-y-4`}>
               <p className="font-heading text-primary/80 text-[11px] tracking-[0.2em] uppercase">
                 Véhicule
               </p>
@@ -704,7 +704,7 @@ export default function MobileDevisGenerator() {
             </div>
 
             {/* Prestation & date */}
-            <div className="mobile-card p-5 space-y-4">
+            <div className={`${premiumCardCls} p-5 space-y-4`}>
               <p className="font-heading text-primary/80 text-[11px] tracking-[0.2em] uppercase">
                 Prestation
               </p>
@@ -763,7 +763,7 @@ export default function MobileDevisGenerator() {
 
         {/* Confirmation */}
         {submitted && (
-          <div className="mobile-card p-6 text-center gold-border-strong">
+          <div className={`${premiumCardCls} p-6 text-center`}>
             <div className="w-16 h-16 rounded-full gold-border flex items-center justify-center mx-auto mb-5 bg-primary/10">
               <CheckCircle className="text-primary" size={32} />
             </div>
