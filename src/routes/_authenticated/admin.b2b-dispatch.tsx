@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin, Calendar, Clock, Search, UserPlus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import {
   PageHeader,
   Card,
@@ -74,6 +75,8 @@ function AdminB2BDispatch() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [assignTarget, setAssignTarget] = useState<Request | null>(null);
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState<string>("");
 
   async function load() {
     setLoading(true);
@@ -100,6 +103,23 @@ function AdminB2BDispatch() {
       return;
     }
     toast.success("Statut mis à jour");
+    void load();
+  }
+
+  async function savePrice(row: Request) {
+    const ttc = priceDraft.trim() === "" ? null : Number(priceDraft);
+    const ht = ttc == null || Number.isNaN(ttc) ? null : Math.round((ttc / 1.2) * 100) / 100;
+    const { error } = await supabase
+      .from("b2b_transport_requests")
+      .update({ estimated_price_ttc: ttc, estimated_price_ht: ht })
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Prix B2B mis à jour");
+    setEditingPriceId(null);
+    setPriceDraft("");
     void load();
   }
 
@@ -181,11 +201,36 @@ function AdminB2BDispatch() {
                   </div>
                 </TD>
                 <TD>
-                  <PriceBlock
-                    variant="compact"
-                    priceTtc={r.estimated_price_ttc != null ? Number(r.estimated_price_ttc) : null}
-                    priceHt={r.estimated_price_ht != null ? Number(r.estimated_price_ht) : null}
-                  />
+                  {editingPriceId === r.id ? (
+                    <div className="flex min-w-[180px] items-end gap-2">
+                      <div className="flex-1">
+                        <label className="mb-1 block text-[10px] uppercase tracking-wide text-pro-muted">Prix TTC</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={priceDraft}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setPriceDraft(e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <Button size="sm" onClick={() => void savePrice(r)}>OK</Button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-left"
+                      onClick={() => {
+                        setEditingPriceId(r.id);
+                        setPriceDraft(r.estimated_price_ttc != null ? String(Number(r.estimated_price_ttc)) : "");
+                      }}
+                    >
+                      <PriceBlock
+                        variant="compact"
+                        priceTtc={r.estimated_price_ttc != null ? Number(r.estimated_price_ttc) : null}
+                        priceHt={r.estimated_price_ht != null ? Number(r.estimated_price_ht) : null}
+                      />
+                    </button>
+                  )}
                 </TD>
                 <TD className="hidden lg:table-cell">
                   <Badge tone={PAYMENT_TONES[r.payment_status] ?? "neutral"}>

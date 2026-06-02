@@ -22,6 +22,8 @@ export interface PricingModeBlockProps {
   initial: {
     pricing_mode?: "fixe" | "enchere" | null;
     prix_client_ttc?: number | null;
+    prix_client?: number | null;
+    prix?: number | null;
     prix_convoyeur_fixe?: number | null;
     prix_convoyeur_min?: number | null;
     prix_convoyeur_max?: number | null;
@@ -39,7 +41,7 @@ const RECO_MIN_PCT = 55;
 const RECO_MAX_PCT = 65;
 
 export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedSourceLabel, onSaved }: PricingModeBlockProps) {
-  const effectiveClient = lockedClientPrice ?? initial.prix_client_ttc ?? null;
+  const effectiveClient = initial.prix_client_ttc ?? initial.prix_client ?? initial.prix ?? lockedClientPrice ?? null;
   const [mode, setMode] = useState<"fixe" | "enchere">(initial.pricing_mode ?? "fixe");
   const [prixClient, setPrixClient] = useState<string>(effectiveClient?.toString() ?? "");
   const [prixFixe, setPrixFixe] = useState<string>(initial.prix_convoyeur_fixe?.toString() ?? "");
@@ -51,13 +53,13 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
 
   useEffect(() => {
     setMode(initial.pricing_mode ?? "fixe");
-    const next = lockedClientPrice ?? initial.prix_client_ttc ?? null;
+    const next = initial.prix_client_ttc ?? initial.prix_client ?? initial.prix ?? lockedClientPrice ?? null;
     setPrixClient(next?.toString() ?? "");
     setPrixFixe(initial.prix_convoyeur_fixe?.toString() ?? "");
     setPrixMin(initial.prix_convoyeur_min?.toString() ?? "");
     setPrixMax(initial.prix_convoyeur_max?.toString() ?? "");
     setMargeCible(initial.marge_indicative_pct?.toString() ?? "35");
-  }, [trajetId, lockedClientPrice, initial.pricing_mode, initial.prix_client_ttc, initial.prix_convoyeur_fixe,
+  }, [trajetId, lockedClientPrice, initial.pricing_mode, initial.prix_client_ttc, initial.prix_client, initial.prix, initial.prix_convoyeur_fixe,
       initial.prix_convoyeur_min, initial.prix_convoyeur_max, initial.marge_indicative_pct]);
 
 
@@ -81,6 +83,8 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
     setSaving(true);
     const trajetUpdates = {
       pricing_mode: mode,
+      prix_client: num(prixClient),
+      prix: num(prixClient),
       prix_convoyeur_fixe: mode === "fixe" ? num(prixFixe) : null,
       prix_convoyeur_min: mode === "enchere" ? num(prixMin) : null,
       prix_convoyeur_max: mode === "enchere" ? num(prixMax) : null,
@@ -100,7 +104,11 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
     setSaving(false);
     if (!error && !adminError) {
       setSavedAt(Date.now());
-      onSaved?.({ ...trajetUpdates, prix_client_ttc: adminUpdates.prix_client_ttc, marge_indicative_pct: adminUpdates.marge_indicative_pct } as PricingModeBlockProps["initial"]);
+      onSaved?.({
+        ...trajetUpdates,
+        prix_client_ttc: adminUpdates.prix_client_ttc,
+        marge_indicative_pct: adminUpdates.marge_indicative_pct,
+      } as PricingModeBlockProps["initial"]);
       setTimeout(() => setSavedAt(null), 2500);
     } else {
       alert("Erreur de sauvegarde");
@@ -160,17 +168,16 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
 
         {/* === Inputs prix === */}
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <FormField label={lockedClientPrice != null ? "Prix client TTC (verrouillé devis)" : "Prix client TTC (€)"}>
+          <FormField label={lockedSourceLabel ? "Prix client TTC (€)" : "Prix client TTC (€)"}>
             <TextInput
               type="number"
               step="0.01"
               value={prixClient}
               onChange={(e) => setPrixClient(e.target.value)}
               placeholder="ex: 380"
-              disabled={lockedClientPrice != null}
             />
             {lockedSourceLabel && (
-              <p className="mt-1 text-[10px] text-pro-muted">Auto depuis {lockedSourceLabel}</p>
+              <p className="mt-1 text-[10px] text-pro-muted">Prérempli depuis {lockedSourceLabel} · modifiable manuellement</p>
             )}
           </FormField>
 
