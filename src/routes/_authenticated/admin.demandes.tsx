@@ -411,9 +411,31 @@ function DemandeDrawer({
 }) {
   if (!demande) return null;
   const quote = quoteFromDemande(demande);
+  const fromOpts = extractFromOptions(demande.options);
+  const [prixEdit, setPrixEdit] = useState<string>(String(demande.prix_estime ?? fromOpts.prix ?? ""));
+  const [savingPrix, setSavingPrix] = useState(false);
   const updateStatut = async (statut: string) => {
     await supabase.from("demandes_convoyage").update({ statut }).eq("id", demande.id);
     onChanged({ ...demande, statut });
+  };
+  const savePrix = async () => {
+    setSavingPrix(true);
+    try {
+      const parsed = prixEdit.trim() === "" ? null : Number(prixEdit);
+      const { error } = await supabase
+        .from("demandes_convoyage")
+        .update({ prix_estime: Number.isFinite(parsed as number) ? parsed : null })
+        .eq("id", demande.id);
+      if (error) throw error;
+      onChanged({ ...demande, prix_estime: Number.isFinite(parsed as number) ? parsed : null });
+      toast.success("Prix mis à jour");
+    } catch (error) {
+      toast.error("Impossible de modifier le prix", {
+        description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
+      });
+    } finally {
+      setSavingPrix(false);
+    }
   };
   return (
     <AdminDetailDrawer
@@ -491,15 +513,30 @@ function DemandeDrawer({
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
         {(() => {
-          const fromOpts = extractFromOptions(demande.options);
           const ttc = demande.prix_estime ?? fromOpts.prix ?? undefined;
           const km = demande.distance_km ?? fromOpts.distance ?? null;
           const src = demande.prix_estime != null
-            ? "Estimation de l'estimateur client"
+            ? "Prix actuellement enregistré"
             : fromOpts.prix != null ? "Estimation reconstituée depuis le devis" : undefined;
           return (
             <>
               <PriceBlock quote={quote} priceTtc={ttc} title="Estimation" source={src} />
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <label className="block text-[11px] text-white/60 mb-1">Prix TTC modifiable</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={prixEdit}
+                    onChange={(e) => setPrixEdit(e.target.value)}
+                    className="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#5fb6ff]/60"
+                    placeholder="Ex. 290"
+                  />
+                </div>
+                <Button size="sm" onClick={() => void savePrix()} disabled={savingPrix}>
+                  {savingPrix ? "Enregistrement…" : "Enregistrer le prix"}
+                </Button>
+              </div>
               {km != null && km > 0 && (
                 <p className="mt-2 text-xs text-white/60">Distance estimée : {km} km</p>
               )}
