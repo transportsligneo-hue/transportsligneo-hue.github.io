@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { AuthProvider } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import CursorSpotlight from "@/components/CursorSpotlight";
+import PwaProvider from "@/components/pwa/PwaProvider";
 
 import appCss from "../styles.css?url";
 
@@ -33,7 +34,13 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#0b1026" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Ligneo" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "application-name", content: "Transports Ligneo" },
       { title: "Transports Ligneo" },
       { name: "description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile, dédiée à la livraison de véhicules pour particuliers et professionnels." },
       { name: "author", content: "Lovable" },
@@ -48,10 +55,11 @@ export const Route = createRootRoute({
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/53a08c7a-21e8-42e2-803d-1f0891146ce4" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icons/icon-512.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -79,6 +87,7 @@ function RootComponent() {
       <CursorSpotlight />
       <Outlet />
       <MobileBottomNav />
+      <PwaProvider />
     </AuthProvider>
   );
 }

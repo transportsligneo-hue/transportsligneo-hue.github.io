@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hors ligne — Transports Ligneo</title>
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; padding: 0; height: 100%; background: #0b1026; color: #faf7ef; font-family: 'Playfair Display', Georgia, serif; }
+    .wrap { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px; }
+    .card { max-width: 480px; text-align: center; }
+    .badge { display: inline-block; padding: 6px 14px; border: 1px solid rgba(231,199,106,0.5); color: #e7c76a; border-radius: 999px; font-family: 'Inter', system-ui, sans-serif; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; }
+    h1 { font-size: 32px; margin: 24px 0 12px; letter-spacing: 0.02em; }
+    p { font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; color: #c9cbd6; margin: 0 0 24px; }
+    a { display: inline-block; padding: 12px 24px; background: #0b1026; border: 1px solid #d4af37; color: #faf7ef; text-decoration: none; font-family: 'Inter', system-ui, sans-serif; font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; }
+    a:hover { background: #111a3d; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <span class="badge">Hors ligne</span>
+      <h1>Connexion indisponible</h1>
+      <p>Vérifiez votre connexion internet. Les pages déjà visitées restent accessibles.</p>
+      <a href="/">Réessayer</a>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('online', () => location.reload());
+  </script>
+</body>
+</html>
