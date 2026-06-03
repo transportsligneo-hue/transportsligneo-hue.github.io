@@ -179,11 +179,12 @@ export function EdlPremiumFlow({
           .eq("id", attributionId)
           .maybeSingle();
         if (!attr?.trajet_id || cancelled) return;
-        const { data: traj } = await supabase
-          .from("trajets")
+        const { data: trajRaw } = await supabase
+          .from("trajets_assigned_safe" as never)
           .select("demande_id")
           .eq("id", attr.trajet_id)
           .maybeSingle();
+        const traj = trajRaw as { demande_id: string | null } | null;
         if (!traj?.demande_id || cancelled) return;
         const { data: dem } = await supabase
           .from("demandes_convoyage")

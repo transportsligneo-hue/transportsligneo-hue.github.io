@@ -157,10 +157,10 @@ function ConvoyeurMissions() {
     if (data) {
       const rows = data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null; options_completion: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null }>;
       const enriched = await Promise.all(rows.map(async (attr) => {
-        const [{ data: trajet }, { data: inspections }] = await Promise.all([
+        const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
-            .from("trajets")
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, client_telephone, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta")
+            .from("trajets_assigned_safe" as never)
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -168,6 +168,7 @@ function ConvoyeurMissions() {
             .select("type, statut")
             .eq("attribution_id", attr.id),
         ]);
+        const trajet = trajetRes.data as MissionCardData["trajet"];
 
         const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
         const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
@@ -510,8 +511,8 @@ function ConvoyeurMissions() {
               modele: t?.modele ?? undefined,
               immatriculation: t?.immatriculation ?? undefined,
             },
-            contactDepartTel: t?.client_telephone ?? null,
-            contactArriveeTel: (t as { arrivee_contact_telephone?: string | null } | null)?.arrivee_contact_telephone ?? t?.client_telephone ?? null,
+            contactDepartTel: (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null,
+            contactArriveeTel: (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null,
             contactArriveeNom: (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null,
             contactArriveeTel2: (t as { arrivee_contact_telephone2?: string | null } | null)?.arrivee_contact_telephone2 ?? null,
             contactArriveeInstructions: (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null,

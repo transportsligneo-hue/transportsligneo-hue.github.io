@@ -22,8 +22,10 @@ interface TodayMission {
     marque: string | null;
     modele: string | null;
     immatriculation: string | null;
-    client_telephone: string | null;
-    client_nom: string | null;
+    contact_depart_tel: string | null;
+    contact_depart_nom: string | null;
+    contact_arrivee_tel: string | null;
+    contact_arrivee_nom: string | null;
   } | null;
 }
 
@@ -41,7 +43,7 @@ function ConvoyeurDashboard() {
     let cancelled = false;
     const fetchAvail = async () => {
       const { count } = await supabase
-        .from("trajets")
+        .from("trajets_publies_safe")
         .select("id", { count: "exact", head: true })
         .eq("statut_publication", "publie");
       if (!cancelled) setAvailableCount(count ?? 0);
@@ -87,11 +89,11 @@ function ConvoyeurDashboard() {
         for (const a of attrs) {
           if (a.statut === "termine") continue;
           const { data: t } = await supabase
-            .from("trajets")
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, client_telephone, client_nom")
+            .from("trajets_assigned_safe" as never)
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, contact_depart_tel, contact_depart_nom, contact_arrivee_tel, contact_arrivee_nom")
             .eq("id", a.trajet_id)
             .maybeSingle();
-          enriched.push({ id: a.id, statut: a.statut, trajet: t ?? null });
+          enriched.push({ id: a.id, statut: a.statut, trajet: (t as unknown as TodayMission["trajet"]) ?? null });
         }
 
         // Priority: in_progress > today's > next upcoming
@@ -225,8 +227,8 @@ function ConvoyeurDashboard() {
             <span className="text-[11px] mt-0.5">Itinéraire</span>
           </a>
           <a
-            href={todayMission.trajet.client_telephone ? `tel:${todayMission.trajet.client_telephone}` : "#"}
-            className={`brex-action flex-col py-3.5 ${!todayMission.trajet.client_telephone ? "opacity-40 pointer-events-none" : ""}`}
+            href={todayMission.trajet.contact_depart_tel ? `tel:${todayMission.trajet.contact_depart_tel}` : "#"}
+            className={`brex-action flex-col py-3.5 ${!todayMission.trajet.contact_depart_tel ? "opacity-40 pointer-events-none" : ""}`}
           >
             <Phone size={16} />
             <span className="text-[11px] mt-0.5">Appeler</span>

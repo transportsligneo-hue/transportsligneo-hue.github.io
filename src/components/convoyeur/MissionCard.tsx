@@ -21,7 +21,8 @@ export interface MissionCardData {
     modele: string | null;
     immatriculation: string | null;
     tarif_convoyeur: number | null;
-    client_telephone?: string | null;
+    contact_depart_tel?: string | null;
+    contact_arrivee_tel?: string | null;
     vin?: string | null;
     carte_grise_recto_url?: string | null;
     carte_grise_verso_url?: string | null;
@@ -133,8 +134,8 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
         <ActionBtn
           label="Appeler"
           icon={<Phone size={14} />}
-          href={t?.client_telephone ? `tel:${t.client_telephone}` : undefined}
-          disabled={!t?.client_telephone}
+          href={t?.contact_depart_tel ? `tel:${t.contact_depart_tel}` : undefined}
+          disabled={!t?.contact_depart_tel}
           onClick={onCall}
         />
         <ActionBtn

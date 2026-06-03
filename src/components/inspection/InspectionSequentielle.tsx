@@ -265,11 +265,12 @@ export function InspectionSequentielle({
       const { data: attr } = await supabase
         .from("attributions").select("trajet_id").eq("id", attributionId).maybeSingle();
       if (!attr?.trajet_id) return;
-      const { data: t } = await supabase
-        .from("trajets")
+      const { data: tRaw } = await supabase
+        .from("trajets_assigned_safe" as never)
         .select("marque, modele, immatriculation, demande_id")
         .eq("id", attr.trajet_id)
         .maybeSingle();
+      const t = tRaw as { marque: string | null; modele: string | null; immatriculation: string | null; demande_id: string | null } | null;
       if (!t) return;
       let carburant: string | null = null;
       if (t.demande_id) {

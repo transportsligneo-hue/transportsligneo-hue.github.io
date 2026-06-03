@@ -186,6 +186,13 @@ export type Database = {
             foreignKeyName: "attributions_trajet_id_fkey"
             columns: ["trajet_id"]
             isOneToOne: false
+            referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attributions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
             referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
@@ -1771,6 +1778,13 @@ export type Database = {
             foreignKeyName: "mission_offres_trajet_id_fkey"
             columns: ["trajet_id"]
             isOneToOne: false
+            referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_offres_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
             referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
@@ -2612,6 +2626,13 @@ export type Database = {
             foreignKeyName: "trajets_admin_data_trajet_id_fkey"
             columns: ["trajet_id"]
             isOneToOne: true
+            referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
             referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
@@ -2643,6 +2664,162 @@ export type Database = {
       }
     }
     Views: {
+      trajets_assigned_safe: {
+        Row: {
+          arrivee: string | null
+          arrivee_contact_instructions: string | null
+          arrivee_contact_nom: string | null
+          arrivee_contact_telephone: string | null
+          arrivee_contact_telephone2: string | null
+          carte_grise_recto_url: string | null
+          carte_grise_verso_url: string | null
+          commission_convoyeur_pct: number | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
+          created_at: string | null
+          date_trajet: string | null
+          demande_id: string | null
+          depart: string | null
+          devis_id: string | null
+          heure_trajet: string | null
+          id: string | null
+          immatriculation: string | null
+          marque: string | null
+          modele: string | null
+          options_meta: Json | null
+          pricing_mode: string | null
+          prix_convoyeur: number | null
+          prix_convoyeur_fixe: number | null
+          prix_convoyeur_max: number | null
+          prix_convoyeur_min: number | null
+          prix_suggere: number | null
+          published_at: string | null
+          statut: string | null
+          statut_publication: string | null
+          tarif_convoyeur: number | null
+          updated_at: string | null
+          vehicule_couleur: string | null
+          vehicule_energie: string | null
+          vehicule_immatriculation: string | null
+          vehicule_km: number | null
+          vehicule_notes: string | null
+          vehicule_type: string | null
+          vehicule_vin: string | null
+          vin: string | null
+        }
+        Insert: {
+          arrivee?: string | null
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
+          commission_convoyeur_pct?: number | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
+          created_at?: string | null
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart?: string | null
+          devis_id?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          options_meta?: Json | null
+          pricing_mode?: string | null
+          prix_convoyeur?: number | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
+          prix_suggere?: number | null
+          published_at?: string | null
+          statut?: string | null
+          statut_publication?: string | null
+          tarif_convoyeur?: number | null
+          updated_at?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
+          vin?: string | null
+        }
+        Update: {
+          arrivee?: string | null
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
+          commission_convoyeur_pct?: number | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
+          created_at?: string | null
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart?: string | null
+          devis_id?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          options_meta?: Json | null
+          pricing_mode?: string | null
+          prix_convoyeur?: number | null
+          prix_convoyeur_fixe?: number | null
+          prix_convoyeur_max?: number | null
+          prix_convoyeur_min?: number | null
+          prix_suggere?: number | null
+          published_at?: string | null
+          statut?: string | null
+          statut_publication?: string | null
+          tarif_convoyeur?: number | null
+          updated_at?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trajets_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trajets_publies_safe: {
         Row: {
           arrivee: string | null
