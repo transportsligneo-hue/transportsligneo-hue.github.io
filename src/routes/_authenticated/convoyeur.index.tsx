@@ -22,8 +22,10 @@ interface TodayMission {
     marque: string | null;
     modele: string | null;
     immatriculation: string | null;
-    client_telephone: string | null;
-    client_nom: string | null;
+    contact_depart_tel: string | null;
+    contact_depart_nom: string | null;
+    contact_arrivee_tel: string | null;
+    contact_arrivee_nom: string | null;
   } | null;
 }
 
@@ -225,8 +227,8 @@ function ConvoyeurDashboard() {
             <span className="text-[11px] mt-0.5">Itinéraire</span>
           </a>
           <a
-            href={todayMission.trajet.client_telephone ? `tel:${todayMission.trajet.client_telephone}` : "#"}
-            className={`brex-action flex-col py-3.5 ${!todayMission.trajet.client_telephone ? "opacity-40 pointer-events-none" : ""}`}
+            href={todayMission.trajet.contact_depart_tel ? `tel:${todayMission.trajet.contact_depart_tel}` : "#"}
+            className={`brex-action flex-col py-3.5 ${!todayMission.trajet.contact_depart_tel ? "opacity-40 pointer-events-none" : ""}`}
           >
             <Phone size={16} />
             <span className="text-[11px] mt-0.5">Appeler</span>
