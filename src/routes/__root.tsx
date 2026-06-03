@@ -87,6 +87,7 @@ function RootComponent() {
       <CursorSpotlight />
       <Outlet />
       <MobileBottomNav />
+      <PwaProvider />
     </AuthProvider>
   );
 }
