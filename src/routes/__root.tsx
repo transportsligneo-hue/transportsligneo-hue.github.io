@@ -34,7 +34,13 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#0b1026" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Ligneo" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "application-name", content: "Transports Ligneo" },
       { title: "Transports Ligneo" },
       { name: "description", content: "Transports Ligneo est une entreprise spécialisée dans le convoyage automobile, dédiée à la livraison de véhicules pour particuliers et professionnels." },
       { name: "author", content: "Lovable" },
