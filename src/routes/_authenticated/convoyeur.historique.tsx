@@ -45,7 +45,7 @@ function ConvoyeurHistorique() {
         const items: HistoryItem[] = [];
         for (const attr of data) {
           const { data: trajet } = await supabase
-            .from("trajets")
+            .from("trajets_assigned_safe" as never)
             .select("depart, arrivee, date_trajet, marque, modele")
             .eq("id", attr.trajet_id)
             .single();

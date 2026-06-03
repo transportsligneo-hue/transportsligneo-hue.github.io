@@ -41,7 +41,7 @@ function ConvoyeurDashboard() {
     let cancelled = false;
     const fetchAvail = async () => {
       const { count } = await supabase
-        .from("trajets")
+        .from("trajets_publies_safe")
         .select("id", { count: "exact", head: true })
         .eq("statut_publication", "publie");
       if (!cancelled) setAvailableCount(count ?? 0);
@@ -87,11 +87,11 @@ function ConvoyeurDashboard() {
         for (const a of attrs) {
           if (a.statut === "termine") continue;
           const { data: t } = await supabase
-            .from("trajets")
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, client_telephone, client_nom")
+            .from("trajets_assigned_safe" as never)
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, contact_depart_tel, contact_depart_nom, contact_arrivee_tel, contact_arrivee_nom")
             .eq("id", a.trajet_id)
             .maybeSingle();
-          enriched.push({ id: a.id, statut: a.statut, trajet: t ?? null });
+          enriched.push({ id: a.id, statut: a.statut, trajet: (t as unknown as TodayMission["trajet"]) ?? null });
         }
 
         // Priority: in_progress > today's > next upcoming

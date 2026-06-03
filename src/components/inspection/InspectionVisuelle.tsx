@@ -98,11 +98,12 @@ export function InspectionVisuelle({
         .maybeSingle();
       if (!attr?.trajet_id) return;
       const { data: t } = await supabase
-        .from("trajets")
+        .from("trajets_assigned_safe" as never)
         .select("marque, modele, immatriculation")
         .eq("id", attr.trajet_id)
         .maybeSingle();
-      if (t) setVehicleInfo({ marque: t.marque ?? undefined, modele: t.modele ?? undefined, immat: t.immatriculation ?? undefined });
+      const tt = t as { marque: string | null; modele: string | null; immatriculation: string | null } | null;
+      if (tt) setVehicleInfo({ marque: tt.marque ?? undefined, modele: tt.modele ?? undefined, immat: tt.immatriculation ?? undefined });
     })();
   }, [attributionId]);
 

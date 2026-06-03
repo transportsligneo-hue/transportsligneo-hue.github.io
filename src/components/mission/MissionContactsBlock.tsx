@@ -34,7 +34,7 @@ export function MissionContactsBlock({ attributionId, focus = "both" }: Props) {
       const trajetId = (attr as { trajet_id?: string } | null)?.trajet_id;
       if (!trajetId) return;
       const { data: traj } = await supabase
-        .from("trajets")
+        .from("trajets_assigned_safe" as never)
         .select(
           "contact_depart_nom, contact_depart_tel, contact_depart_note, contact_arrivee_nom, contact_arrivee_tel, contact_arrivee_note, depart, arrivee",
         )
