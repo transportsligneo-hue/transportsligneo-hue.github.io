@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, CheckCircle, Building2, Hash, Car, MapPin } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
-import { verifyRecaptcha } from "@/server/recaptcha.functions";
+import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 
 export const Route = createFileRoute("/inscription-flotte")({
   component: InscriptionFlotte,

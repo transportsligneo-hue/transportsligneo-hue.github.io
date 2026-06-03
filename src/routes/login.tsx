@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, LogIn, User, Truck } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
-import { verifyRecaptcha } from "@/server/recaptcha.functions";
+import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 
 type Tab = "client" | "pro";
 
