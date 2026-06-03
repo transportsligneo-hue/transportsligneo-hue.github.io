@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { AuthProvider } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import CursorSpotlight from "@/components/CursorSpotlight";
+import PwaProvider from "@/components/pwa/PwaProvider";
 
 import appCss from "../styles.css?url";
 
