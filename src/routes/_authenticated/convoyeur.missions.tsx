@@ -157,10 +157,10 @@ function ConvoyeurMissions() {
     if (data) {
       const rows = data as unknown as Array<{ id: string; statut: string; trajet_id: string; etape_courante: string | null; numero_mission: string | null; options_completion: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null }>;
       const enriched = await Promise.all(rows.map(async (attr) => {
-        const [{ data: trajet }, { data: inspections }] = await Promise.all([
+        const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -168,6 +168,7 @@ function ConvoyeurMissions() {
             .select("type, statut")
             .eq("attribution_id", attr.id),
         ]);
+        const trajet = trajetRes.data as Record<string, unknown> | null;
 
         const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
         const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
