@@ -168,7 +168,7 @@ function ConvoyeurMissions() {
             .select("type, statut")
             .eq("attribution_id", attr.id),
         ]);
-        const trajet = trajetRes.data as Record<string, unknown> | null;
+        const trajet = trajetRes.data as MissionCardData["trajet"];
 
         const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
         const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
