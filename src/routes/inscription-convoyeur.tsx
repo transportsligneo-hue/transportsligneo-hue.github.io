@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock, Upload, BadgeCheck } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
-import { verifyRecaptcha } from "@/server/recaptcha.functions";
+import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   component: InscriptionConvoyeur,
