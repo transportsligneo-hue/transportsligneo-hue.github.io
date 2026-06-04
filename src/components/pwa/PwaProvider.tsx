@@ -5,79 +5,102 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-function isPreviewOrIframe(): boolean {
+/**
+ * Returns true in any context where the service worker MUST NOT register:
+ * dev, Lovable preview/iframe hosts, kill-switch URL param.
+ */
+function shouldSkipRegistration(): boolean {
   if (typeof window === "undefined") return true;
+  if (!import.meta.env.PROD) return true;
   try {
     if (window.self !== window.top) return true;
   } catch {
     return true;
   }
   const h = window.location.hostname;
-  return (
-    h.includes("id-preview--") ||
-    h.includes("lovableproject.com") ||
-    h.includes("lovable.dev") ||
+  if (
+    h.startsWith("id-preview--") ||
+    h.startsWith("preview--") ||
+    h === "lovableproject.com" ||
+    h.endsWith(".lovableproject.com") ||
+    h === "lovableproject-dev.com" ||
+    h.endsWith(".lovableproject-dev.com") ||
+    h === "beta.lovable.dev" ||
+    h.endsWith(".beta.lovable.dev") ||
     h === "localhost" ||
     h === "127.0.0.1"
-  );
+  ) {
+    return true;
+  }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sw") === "off") return true;
+  } catch {
+    /* noop */
+  }
+  return false;
 }
 
-/**
- * Registers the service worker, manages online/offline state and
- * the install prompt. Safe in iframes / Lovable preview: unregisters
- * any existing SW and never registers a new one in those contexts.
- */
+async function unregisterAppSW() {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(
+      regs
+        .filter((r) => {
+          const url = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
+          return url.endsWith("/sw.js") || url.endsWith("/service-worker.js");
+        })
+        .map((r) => r.unregister().catch(() => false))
+    );
+  } catch {
+    /* noop */
+  }
+}
+
 export default function PwaProvider() {
-  const inPreview = typeof window !== "undefined" && isPreviewOrIframe();
+  const inPreview = typeof window !== "undefined" && shouldSkipRegistration();
   const [offline, setOffline] = useState(
     !inPreview && typeof navigator !== "undefined" ? !navigator.onLine : false
   );
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
-  const [updateReady, setUpdateReady] = useState<ServiceWorker | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateFn, setUpdateFn] = useState<(() => Promise<void>) | null>(null);
 
-  // SW registration (or cleanup in preview/iframe)
+  // SW registration (or cleanup in dev/preview/iframe)
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
-    if (isPreviewOrIframe()) {
-      navigator.serviceWorker.getRegistrations().then((regs) => {
-        regs.forEach((r) => r.unregister().catch(() => {}));
-      });
+    if (shouldSkipRegistration()) {
+      void unregisterAppSW();
       return;
     }
 
-    const onLoad = () => {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .then((reg) => {
-          if (reg.waiting) setUpdateReady(reg.waiting);
-          reg.addEventListener("updatefound", () => {
-            const installing = reg.installing;
-            if (!installing) return;
-            installing.addEventListener("statechange", () => {
-              if (installing.state === "installed" && navigator.serviceWorker.controller) {
-                setUpdateReady(installing);
-              }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { registerSW } = await import("virtual:pwa-register");
+        if (cancelled) return;
+        const updateSW = registerSW({
+          immediate: true,
+          onNeedRefresh() {
+            setUpdateFn(() => async () => {
+              await updateSW(true);
             });
-          });
-        })
-        .catch(() => {});
-    };
-
-    let reloaded = false;
-    const onControllerChange = () => {
-      if (reloaded) return;
-      reloaded = true;
-      window.location.reload();
-    };
-    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
-
-    if (document.readyState === "complete") onLoad();
-    else window.addEventListener("load", onLoad, { once: true });
+            setUpdateAvailable(true);
+          },
+          onRegisterError() {
+            /* noop */
+          },
+        });
+      } catch {
+        /* virtual module unavailable — silent */
+      }
+    })();
 
     return () => {
-      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      cancelled = true;
     };
   }, []);
 
@@ -130,10 +153,10 @@ export default function PwaProvider() {
     setInstallVisible(false);
   };
 
-  const applyUpdate = () => {
-    if (!updateReady) return;
-    updateReady.postMessage({ type: "SKIP_WAITING" });
-    setUpdateReady(null);
+  const applyUpdate = async () => {
+    if (!updateFn) return;
+    await updateFn();
+    setUpdateAvailable(false);
   };
 
   return (
@@ -162,7 +185,7 @@ export default function PwaProvider() {
         </div>
       )}
 
-      {updateReady && (
+      {updateAvailable && (
         <div
           style={{
             position: "fixed",
