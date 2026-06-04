@@ -28,8 +28,9 @@ function isPreviewOrIframe(): boolean {
  * any existing SW and never registers a new one in those contexts.
  */
 export default function PwaProvider() {
+  const inPreview = typeof window !== "undefined" && isPreviewOrIframe();
   const [offline, setOffline] = useState(
-    typeof navigator !== "undefined" ? !navigator.onLine : false
+    !inPreview && typeof navigator !== "undefined" ? !navigator.onLine : false
   );
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
