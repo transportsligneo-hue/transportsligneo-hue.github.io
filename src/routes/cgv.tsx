@@ -20,6 +20,11 @@ function CGVPage() {
           <p className="font-heading text-primary text-base uppercase tracking-wide">Conditions Générales de Vente – Transports Ligneo</p>
 
           <section>
+            <h2 className="font-heading text-primary text-lg mb-3">Identité de l'entreprise</h2>
+            <p>Transports Ligneo — SIREN : 753 320 001 — Siège social à Tours (37), France.</p>
+          </section>
+
+          <section>
             <h2 className="font-heading text-primary text-lg mb-3">Objet</h2>
             <p>Les présentes Conditions Générales de Vente (CGV) définissent les modalités de prestation de services proposées par Transports Ligneo, spécialisée dans le convoyage et le transport de véhicules avec chauffeur professionnel.</p>
           </section>

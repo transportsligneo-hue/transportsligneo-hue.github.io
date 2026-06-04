@@ -19,7 +19,7 @@ function MentionsLegalesPage() {
         <div className="card-premium p-8 rounded space-y-6 text-cream/70 text-sm leading-relaxed">
           <section>
             <h2 className="font-heading text-primary text-lg mb-3">Éditeur du site</h2>
-            <p>Transports LIGNEO<br />Siège social : Tours (37), France<br />Téléphone : 07 82 45 61 81<br />Email : contact@transportsligneo.fr<br />Site : www.transportsligneo.fr</p>
+            <p>Transports LIGNEO<br />SIREN : 753 320 001<br />Siège social : Tours (37), France<br />Téléphone : 07 82 45 61 81<br />Email : contact@transportsligneo.fr<br />Site : www.transportsligneo.fr</p>
           </section>
           <section>
             <h2 className="font-heading text-primary text-lg mb-3">Propriété intellectuelle</h2>
