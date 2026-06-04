@@ -28,8 +28,9 @@ function isPreviewOrIframe(): boolean {
  * any existing SW and never registers a new one in those contexts.
  */
 export default function PwaProvider() {
+  const inPreview = typeof window !== "undefined" && isPreviewOrIframe();
   const [offline, setOffline] = useState(
-    typeof navigator !== "undefined" ? !navigator.onLine : false
+    !inPreview && typeof navigator !== "undefined" ? !navigator.onLine : false
   );
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
@@ -80,9 +81,9 @@ export default function PwaProvider() {
     };
   }, []);
 
-  // Online / offline
+  // Online / offline (disabled in preview/iframe where navigator.onLine is unreliable)
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || inPreview) return;
     const onOnline = () => setOffline(false);
     const onOffline = () => setOffline(true);
     window.addEventListener("online", onOnline);
@@ -91,7 +92,7 @@ export default function PwaProvider() {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
-  }, []);
+  }, [inPreview]);
 
   // Install prompt
   useEffect(() => {
