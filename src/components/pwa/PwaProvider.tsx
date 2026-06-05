@@ -59,10 +59,6 @@ async function unregisterAppSW() {
 }
 
 export default function PwaProvider() {
-  const inPreview = typeof window !== "undefined" && shouldSkipRegistration();
-  const [offline, setOffline] = useState(
-    !inPreview && typeof navigator !== "undefined" ? !navigator.onLine : false
-  );
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -104,18 +100,6 @@ export default function PwaProvider() {
     };
   }, []);
 
-  // Online / offline (disabled in preview/iframe where navigator.onLine is unreliable)
-  useEffect(() => {
-    if (typeof window === "undefined" || inPreview) return;
-    const onOnline = () => setOffline(false);
-    const onOffline = () => setOffline(true);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, [inPreview]);
 
   // Install prompt
   useEffect(() => {
@@ -161,30 +145,6 @@ export default function PwaProvider() {
 
   return (
     <>
-      {offline && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 2147483646,
-            background: "#0b1026",
-            borderBottom: "1px solid #d4af37",
-            color: "#faf7ef",
-            padding: "8px 16px",
-            textAlign: "center",
-            fontSize: 13,
-            letterSpacing: "0.08em",
-            fontFamily: "Inter, system-ui, sans-serif",
-          }}
-        >
-          Mode hors ligne — certaines fonctionnalités sont limitées.
-        </div>
-      )}
-
       {updateAvailable && (
         <div
           style={{
