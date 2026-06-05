@@ -59,10 +59,6 @@ async function unregisterAppSW() {
 }
 
 export default function PwaProvider() {
-  const inPreview = typeof window !== "undefined" && shouldSkipRegistration();
-  const [offline, setOffline] = useState(
-    !inPreview && typeof navigator !== "undefined" ? !navigator.onLine : false
-  );
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
