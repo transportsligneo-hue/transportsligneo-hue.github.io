@@ -399,27 +399,27 @@ function AdminMissionDetail() {
     if (!attribution || !trajet || generatingEdlPdf) return;
     setGeneratingEdlPdf(true);
     try {
-      // Fetch équipements + kilométrages depuis inspections
+      // Fetch équipements + kilométrages + VIN depuis inspections
       const { data: inspFull } = await supabase
         .from("inspections")
-        .select("type, equipements, kilometrage_depart, kilometrage_arrivee")
+        .select("type, equipements, kilometrage_depart, kilometrage_arrivee, vin, vehicule_vin")
         .eq("attribution_id", attribution.id);
       const inspDepart = inspFull?.find((i) => i.type === "depart");
       const inspArrivee = inspFull?.find((i) => i.type === "arrivee");
+      const vin = (inspDepart as { vin?: string | null; vehicule_vin?: string | null } | undefined)?.vin
+        ?? (inspDepart as { vehicule_vin?: string | null } | undefined)?.vehicule_vin
+        ?? (inspArrivee as { vin?: string | null; vehicule_vin?: string | null } | undefined)?.vin
+        ?? (inspArrivee as { vehicule_vin?: string | null } | undefined)?.vehicule_vin
+        ?? null;
 
-      // Signatures
+      // Signatures (stockées en data URL base64 dans signature_data)
       const { data: sigsRaw } = await supabase
-        .from("mission_signatures" as never)
-        .select("kind, storage_path")
-        .eq("attribution_id" as never, attribution.id as never);
-      const signatures = await Promise.all(
-        ((sigsRaw ?? []) as unknown as { kind: string; storage_path: string }[]).map(async (s) => {
-          const { data: signed } = await supabase.storage
-            .from("mission-signatures")
-            .createSignedUrl(s.storage_path, 3600);
-          return { kind: s.kind, url: signed?.signedUrl ?? null };
-        }),
-      );
+        .from("mission_signatures")
+        .select("kind, signature_data")
+        .eq("attribution_id", attribution.id);
+      const signatures = ((sigsRaw ?? []) as { kind: string; signature_data: string | null }[])
+        .map((s) => ({ kind: s.kind, url: s.signature_data }));
+
 
       // Incidents
       const { data: incidents } = await supabase
