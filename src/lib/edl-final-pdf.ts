@@ -287,24 +287,28 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
     y = await drawPhotoGrid(doc, m.photosArrivee, y, logo, m);
   }
 
-  // === Signatures (toujours afficher Départ + Arrivée, même si manquantes) ===
+  // === Signatures (Départ + Arrivée, convoyeur + client) ===
   {
     const SIG_LABELS: Record<string, string> = {
-      depart: "Signature — Départ",
-      arrivee: "Signature — Arrivée",
+      driver_start: "Convoyeur — Départ",
+      client_start: "Client — Départ",
+      driver_end: "Convoyeur — Arrivée",
+      client_end: "Client — Arrivée",
     };
     const byKind = new Map<string, string | null | undefined>();
     for (const s of m.signatures ?? []) byKind.set(s.kind, s.url);
     const slots: { kind: string; url?: string | null }[] = [
-      { kind: "depart", url: byKind.get("depart") ?? byKind.get("client_depart") },
-      { kind: "arrivee", url: byKind.get("arrivee") ?? byKind.get("client_arrivee") },
+      { kind: "driver_start", url: byKind.get("driver_start") ?? byKind.get("depart") },
+      { kind: "client_start", url: byKind.get("client_start") ?? byKind.get("client_depart") },
+      { kind: "driver_end", url: byKind.get("driver_end") ?? byKind.get("arrivee") },
+      { kind: "client_end", url: byKind.get("client_end") ?? byKind.get("client_arrivee") },
     ];
 
     y += 4;
     y = ensureSpace(doc, y, 60, logo, m);
     y = sectionTitle(doc, "Signatures", y);
-    const sigW = 70;
-    const sigH = 35;
+    const sigW = 88;
+    const sigH = 38;
     let sx = 12;
     for (const sig of slots) {
       if (sx + sigW > pageW - 10) {

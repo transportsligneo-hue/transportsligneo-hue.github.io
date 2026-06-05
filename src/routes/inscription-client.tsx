@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, CheckCircle } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
+import { notifyAdmin } from "@/lib/admin-notifications";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
@@ -86,6 +87,16 @@ function InscriptionClient() {
             prenom: form.prenom,
           }).eq("user_id", authData.user.id);
         }
+
+        // Notification admin (push + visible /admin)
+        void notifyAdmin({
+          type: "client_action",
+          titre: "Nouvelle inscription client",
+          message: `${form.prenom} ${form.nom} — ${form.email}`,
+          link: "/admin/clients",
+          entityType: "user",
+          entityId: authData.user.id,
+        });
 
         setSuccess(true);
         if (authData.session) {

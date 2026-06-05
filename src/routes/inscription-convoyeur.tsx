@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyAdmin } from "@/lib/admin-notifications";
 import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock, Upload, BadgeCheck } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
@@ -165,6 +166,15 @@ function InscriptionConvoyeur() {
       } catch (emailErr) {
         console.warn("[inscription-convoyeur] email notification failed:", emailErr);
       }
+
+      void notifyAdmin({
+        type: "driver_action",
+        titre: "Nouvelle inscription convoyeur",
+        message: `${form.prenom} ${form.nom} — ${form.email} — ${form.ville}`,
+        link: "/admin/convoyeurs",
+        entityType: "convoyeur",
+        entityId: userId,
+      });
 
       await supabase.auth.signOut();
       navigate({ to: "/attente-validation" });
