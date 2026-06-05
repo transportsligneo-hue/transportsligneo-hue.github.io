@@ -449,7 +449,7 @@ function AdminMissionDetail() {
           marque: trajet.marque,
           modele: trajet.modele,
           immatriculation: trajet.immatriculation,
-          vin: null,
+          vin,
         },
         convoyeur: convoyeur
           ? { prenom: convoyeur.prenom, nom: convoyeur.nom, telephone: convoyeur.telephone }
