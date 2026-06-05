@@ -100,18 +100,6 @@ export default function PwaProvider() {
     };
   }, []);
 
-  // Online / offline (disabled in preview/iframe where navigator.onLine is unreliable)
-  useEffect(() => {
-    if (typeof window === "undefined" || inPreview) return;
-    const onOnline = () => setOffline(false);
-    const onOffline = () => setOffline(true);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, [inPreview]);
 
   // Install prompt
   useEffect(() => {
