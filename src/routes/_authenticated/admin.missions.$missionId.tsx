@@ -407,19 +407,20 @@ function AdminMissionDetail() {
       const inspDepart = inspFull?.find((i) => i.type === "depart");
       const inspArrivee = inspFull?.find((i) => i.type === "arrivee");
 
-      // Signatures
+      // VIN depuis trajets
+      const vin = (trajet as { vin?: string | null; vehicule_vin?: string | null }).vin
+        ?? (trajet as { vehicule_vin?: string | null }).vehicule_vin
+        ?? null;
+
+      // Signatures (stockées en data URL base64 dans signature_data)
       const { data: sigsRaw } = await supabase
-        .from("mission_signatures" as never)
-        .select("kind, storage_path")
-        .eq("attribution_id" as never, attribution.id as never);
-      const signatures = await Promise.all(
-        ((sigsRaw ?? []) as unknown as { kind: string; storage_path: string }[]).map(async (s) => {
-          const { data: signed } = await supabase.storage
-            .from("mission-signatures")
-            .createSignedUrl(s.storage_path, 3600);
-          return { kind: s.kind, url: signed?.signedUrl ?? null };
-        }),
-      );
+        .from("mission_signatures")
+        .select("kind, signature_data")
+        .eq("attribution_id", attribution.id);
+      const signatures = ((sigsRaw ?? []) as { kind: string; signature_data: string | null }[])
+        .map((s) => ({ kind: s.kind, url: s.signature_data }));
+
+
 
       // Incidents
       const { data: incidents } = await supabase
@@ -448,7 +449,7 @@ function AdminMissionDetail() {
           marque: trajet.marque,
           modele: trajet.modele,
           immatriculation: trajet.immatriculation,
-          vin: null,
+          vin,
         },
         convoyeur: convoyeur
           ? { prenom: convoyeur.prenom, nom: convoyeur.nom, telephone: convoyeur.telephone }

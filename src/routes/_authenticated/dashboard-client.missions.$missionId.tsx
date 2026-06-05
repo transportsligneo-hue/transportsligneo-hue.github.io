@@ -156,7 +156,7 @@ function MissionDetail() {
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
         supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
         supabase.from("inspections").select("id, type, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
-        supabase.from("mission_signatures" as never).select("kind, url_signature").eq("attribution_id" as never, attributionId as never),
+        supabase.from("mission_signatures").select("kind, signature_data").eq("attribution_id", attributionId),
       ]);
       const photosDepart: { vue_type: string; url: string }[] = [];
       const photosArrivee: { vue_type: string; url: string }[] = [];
@@ -169,11 +169,9 @@ function MissionDetail() {
           }
         }
       }
-      const signatures: { kind: string; url?: string | null }[] = [];
-      for (const s of (sigs as { kind: string; url_signature: string }[]) ?? []) {
-        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(s.url_signature, 600);
-        signatures.push({ kind: s.kind, url: signed?.signedUrl ?? null });
-      }
+      const signatures: { kind: string; url?: string | null }[] = ((sigs as { kind: string; signature_data: string | null }[]) ?? [])
+        .map((s) => ({ kind: s.kind, url: s.signature_data }));
+
       const lastIns = (insps as { equipements?: Record<string, unknown>; kilometrage_depart?: number; kilometrage_arrivee?: number }[])?.[0];
       const blob = await generateEdlFinalPdf({
         numero: attr.numero_mission ?? mission.numero,
