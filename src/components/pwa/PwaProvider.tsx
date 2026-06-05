@@ -161,30 +161,6 @@ export default function PwaProvider() {
 
   return (
     <>
-      {offline && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 2147483646,
-            background: "#0b1026",
-            borderBottom: "1px solid #d4af37",
-            color: "#faf7ef",
-            padding: "8px 16px",
-            textAlign: "center",
-            fontSize: 13,
-            letterSpacing: "0.08em",
-            fontFamily: "Inter, system-ui, sans-serif",
-          }}
-        >
-          Mode hors ligne — certaines fonctionnalités sont limitées.
-        </div>
-      )}
-
       {updateAvailable && (
         <div
           style={{
