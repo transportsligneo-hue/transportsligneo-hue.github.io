@@ -399,17 +399,17 @@ function AdminMissionDetail() {
     if (!attribution || !trajet || generatingEdlPdf) return;
     setGeneratingEdlPdf(true);
     try {
-      // Fetch équipements + kilométrages + VIN depuis inspections
+      // Fetch équipements + kilométrages depuis inspections
       const { data: inspFull } = await supabase
         .from("inspections")
-        .select("type, equipements, kilometrage_depart, kilometrage_arrivee, vin, vehicule_vin")
+        .select("type, equipements, kilometrage_depart, kilometrage_arrivee")
         .eq("attribution_id", attribution.id);
       const inspDepart = inspFull?.find((i) => i.type === "depart");
       const inspArrivee = inspFull?.find((i) => i.type === "arrivee");
-      const vin = (inspDepart as { vin?: string | null; vehicule_vin?: string | null } | undefined)?.vin
-        ?? (inspDepart as { vehicule_vin?: string | null } | undefined)?.vehicule_vin
-        ?? (inspArrivee as { vin?: string | null; vehicule_vin?: string | null } | undefined)?.vin
-        ?? (inspArrivee as { vehicule_vin?: string | null } | undefined)?.vehicule_vin
+
+      // VIN depuis trajets
+      const vin = (trajet as { vin?: string | null; vehicule_vin?: string | null }).vin
+        ?? (trajet as { vehicule_vin?: string | null }).vehicule_vin
         ?? null;
 
       // Signatures (stockées en data URL base64 dans signature_data)
@@ -419,6 +419,7 @@ function AdminMissionDetail() {
         .eq("attribution_id", attribution.id);
       const signatures = ((sigsRaw ?? []) as { kind: string; signature_data: string | null }[])
         .map((s) => ({ kind: s.kind, url: s.signature_data }));
+
 
 
       // Incidents
