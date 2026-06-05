@@ -152,8 +152,8 @@ function LoginPage() {
     }
   };
 
-  const inscriptionLink = tab === "pro" ? "/inscription-convoyeur" : "/inscription-client";
-  const inscriptionLabel = tab === "pro" ? "Devenir convoyeur" : "Créer un compte client";
+  const inscriptionLink = "/choisir-compte";
+  const inscriptionLabel = "Créer un compte";
   /** True tant qu'on attend l'hydratation post-login */
   const awaitingRouting = justLoggedInRef.current && isAuthenticated && !isLoading;
   const loading = submitting || awaitingRouting;
