@@ -191,7 +191,7 @@ export function MissionPVDigitauxBlock({
         <h3 className="text-base font-semibold text-slate-900">PV de livraison digitalisés</h3>
       </div>
       <p className="text-xs text-slate-500 -mt-1">
-        Plateformes externes (Model/Arval, Welcomauto/Ayvens). À ne pas confondre avec l'état des lieux interne.
+        Plateformes externes partenaires. À ne pas confondre avec l'état des lieux interne.
       </p>
       <div className="grid gap-3 md:grid-cols-2">
         {PLATEFORMES.map(({ key, label, hint }) => {
