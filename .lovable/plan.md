@@ -1,129 +1,126 @@
-## Objectif
 
-Reproduire fidèlement la maquette sur la home desktop :
-- Hero en 2 colonnes : ton image actuelle + titre/CTAs à gauche, **carte sombre arrondie du simulateur à droite**.
-- Courbe blanc cassé sous le hero qui « accueille » le simulateur (l'arrondi visible en bas de ta maquette).
-- Sections sous l'estimateur entièrement remodernisées en alternance navy ↔ clair.
-- **Aucun champ, calcul, API, route, validation, étape du wizard n'est modifié.** Logo et image hero conservés.
+# Plan de refonte Transports Ligneo
 
-## 1. Simulateur — version « hero card » (sans casser le wizard)
+Travail découpé en 5 phases livrées séquentiellement. Chaque phase est testable et déployable seule. Je m'arrête en fin de chaque phase pour validation avant d'attaquer la suivante.
 
-Le composant `DevisGenerator` reste l'unique source de vérité (mêmes états, mêmes calculs, mêmes étapes 1→4 en modal).
+---
 
-J'ajoute une **prop visuelle** `variant?: "bar" | "hero-card"` (défaut `"bar"`, comportement actuel inchangé pour `/tarifs` et toutes les autres pages qui l'utilisent).
+## Phase 1 — Nettoyage marques & identité visuelle (rapide, sûr)
 
-Quand `variant="hero-card"`, **seul le rendu de l'étape 0** est réorganisé en layout vertical compact, fidèle à la maquette :
+**Objectif** : supprimer toute trace Welcome Auto / Ayvens, garantir que le logo Ligneo apparaît partout.
 
-```text
-┌─────────────────────────────┐
-│ Obtenez votre tarif         │
-│ en quelques secondes        │   (titre serif + accent doré)
-│ Renseignez votre trajet…    │
-├─────────────────────────────┤
-│ [Départ]      [Arrivée]     │   (2 colonnes)
-│ [Véhicule              ▾]   │   (pleine largeur)
-│ [Date]        [Heure]       │   (2 colonnes)
-│ ┌─────────────────────────┐ │
-│ │   OBTENIR MON PRIX  ➤   │ │   (CTA doré pleine largeur)
-│ └─────────────────────────┘ │
-└─────────────────────────────┘
-```
+- Recherche globale (`rg`) sur `welcome auto`, `ayvens`, `WelcomeAuto`, `AYVENS` dans :
+  - code source (`src/`, `supabase/`)
+  - templates email (`src/lib/email-templates/`)
+  - libs PDF (`devis-pdf.ts`, `facture-pdf.ts`, `mission-pdf.ts`, `edl-final-pdf.ts`)
+  - base de données (champs `logo_url`, `client_nom`, partners, etc.)
+- Remplacement par neutre ou logo Ligneo.
+- Vérifier `PartnersMarquee` (mémoire dit "intouchable" — je retire seulement Welcome Auto / Ayvens si présents).
+- Centraliser le logo Ligneo dans un composant unique + URL stable (`/logo-ligneo.png` ou import asset) utilisé dans :
+  - emails (composant `<Img />` partagé)
+  - PDF (devis/facture/mission/EDL)
+  - notifications navigateur
 
-- Carte = `glass-onyx` arrondie 24px, bordure dorée fine, ombre profonde.
-- Champs = mêmes inputs/onChange/state qu'aujourd'hui, juste réagencés dans un grid vertical.
-- Switch « Type de prestation » (3 boutons) : déplacé en chips discrètes au-dessus, ou masqué dans la variante hero-card avec valeur par défaut « livraison » (à confirmer si tu veux le garder visible).
-- Bouton « Obtenir mon prix » : déclenche exactement le même `setStep(1)` qu'aujourd'hui → ouvre le wizard modal complet inchangé.
-- Bloc résultat (prix HT/TTC/distance) : reste affiché sous la carte une fois calculé, même contenu.
+**Livrable** : 0 occurrence des deux marques, logo Ligneo cohérent partout.
 
-`/tarifs` continue d'utiliser la variante `"bar"` actuelle → zéro régression.
+---
 
-## 2. Hero desktop — layout 2 colonnes
+## Phase 2 — Fusion espaces B2B + Flotte
 
-`HeroDesktop` repensé :
+**Objectif** : un seul espace pro (`/pro`) qui sert client_b2b ET flotte_partenaire avec les mêmes routes/composants.
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│  [Image hero actuelle pleine largeur en fond + overlay navy] │
-│                                                              │
-│  ┌─ CONVOYAGE AUTOMOBILE PREMIUM ─┐    ┌──────────────────┐  │
-│  │                                │    │                  │  │
-│  │  LA TRANQUILLITÉ               │    │  Simulateur      │  │
-│  │  SUR TOUTE LA LIGNE.           │    │  (hero-card)     │  │
-│  │                                │    │                  │  │
-│  │  Transports Ligneo…            │    │  Départ  Arrivée │  │
-│  │                                │    │  Véhicule        │  │
-│  │  [Estimer mon trajet] [Tarifs] │    │  Date    Heure   │  │
-│  │                                │    │  [OBTENIR PRIX]  │  │
-│  │  ⚡ Réponse  🛡 Assurance       │    │                  │  │
-│  │  💼 Péages   ⏱ 7j/7            │    └──────────────────┘  │
-│  └────────────────────────────────┘                          │
-└──────────────────────────────────────────────────────────────┘
-       ╲___ bas du hero : arrondi blanc cassé ___╱
-```
+- Audit des routes existantes : `/dashboard-pro/*`, `/entreprise/*`, `/flotte/*`.
+- Choix de la cible : garder `/pro` comme racine unique, alias `/dashboard-pro`, `/entreprise`, `/flotte` en redirections.
+- Fusion sidebar : sidebar pro unique avec items conditionnels (ex. "Mes conducteurs" uniquement si `orgRole = flotte_partenaire`).
+- Mise à jour `useAuth.computeHomeRoute` → toutes les variantes pro retournent `/pro`.
+- Permissions : composant `<ProFeature requires="flotte_partenaire">` pour les blocs réservés flotte.
+- Migration : pas de changement schéma, juste route layer + composants.
 
-- Image hero **conservée à l'identique** (`hero-ligneo-night.jpg`), juste recadrée pour laisser respirer la colonne droite.
-- Grid `lg:grid-cols-[1.05fr_1fr]` avec gap généreux, padding latéral large.
-- Trust pills dorées intégrées sous les CTAs (Réponse immédiate / Assurance / Péages / 7j/7).
-- Numéro téléphone du header **conservé** (07 82 45 61 81 — pas celui de la maquette).
+**Livrable** : `/pro` unique, anciennes URLs redirigent, parité fonctionnelle.
 
-### Courbe blanc cassé en bas de hero
-Pseudo-élément qui « avale » le bas du hero pour reproduire l'arrondi de la maquette :
-```css
-section::after { content:''; position:absolute; bottom:-40px; inset-x:0; height:80px;
-  background: var(--surface-cream); border-radius: 40px 40px 0 0; }
-```
-Le simulateur dépasse visuellement sur cette courbe (impression d'intégration premium).
+---
 
-## 3. Sections sous l'estimateur — refonte alternée
+## Phase 3 — Refonte espace particulier sur design pro
 
-### Bande stats blanche (juste sous le hero, façon maquette)
-Carte unique blanche arrondie 24px, ombre douce, 3 colonnes séparées par des filets très fins :
-- 6+ ANS D'EXPÉRIENCE / 0 ANNULATION DE NOTRE PART / 7J/7 DISPONIBLE
-- Icônes dorées dans cercles dorés discrets, typo Playfair pour les titres en uppercase.
-- Fond de section : cream `#faf7ef` (pas blanc pur, respect du système 60/25/15).
+**Objectif** : `/dashboard-client` reprend la sidebar/cards/header de `/pro` avec un sous-ensemble d'items.
 
-### « Ils nous font confiance » — INTOUCHÉ
-PartnersMarquee reste exactement comme aujourd'hui (fond gris, défilement, logos, animation).
+- Réutiliser `ProSidebar` (renommée `ClientSidebar` ou paramétrée).
+- Items particulier : Vue d'ensemble · Nouvelle demande · Mes missions · Devis · Factures · Profil.
+- Pas d'accès : adresses favorites bulk, société, conducteurs, dispatch.
+- Réutiliser les mêmes composants cards/tables que le pro.
+- Conserver les routes existantes `/dashboard-client/*`, juste mise à niveau visuelle + UX.
 
-### « Pourquoi nous choisir » — refonte CLAIRE moderne
-- Fond cream avec halo doré subtil.
-- Eyebrow doré + titre Playfair grande taille + filet doré court.
-- Grille 3 colonnes de cartes `card-premium-light` mais redesign : grosse icône dorée en cercle ourlé doré, titre Playfair, description, mini-CTA texte « En savoir plus » apparaissant au hover.
-- Hover : lift discret + bordure dorée + ombre dorée subtile.
+**Livrable** : particulier ↔ pro = même feel, fonctions filtrées.
 
-### « Comment ça marche » — refonte NAVY premium
-- Bascule sur fond navy `#0b1026` (rythme : clair → navy).
-- Eyebrow doré + titre Playfair blanc cassé.
-- 3 étapes en cartes verre fumé (`glass-onyx` allégée) avec gros numéro 01/02/03 en doré géant en arrière-plan, icône, titre, description.
-- Filet doré horizontal reliant les 3 cartes (timeline visuelle).
+---
 
-### Footer — INTOUCHÉ
-Reste navy comme aujourd'hui.
+## Phase 4 — Stripe complet
 
-## 4. Détails techniques
+**Objectif** : paiement automatique pour particuliers + pros sans rôle org récurrent ; facturation différée pour `flotte_partenaire` et `client_b2b`.
 
-**Fichiers modifiés :**
-- `src/components/DevisGenerator.tsx` — ajout prop `variant`, branchement conditionnel sur l'étape 0 uniquement. Aucun changement aux états, calculs, wizard modal, RPC, validations, pricing.
-- `src/components/HeroDesktop.tsx` — passage en 2 colonnes, slot droit pour `<DevisGenerator variant="hero-card" />`, courbe blanc cassé en bas.
-- `src/routes/index.tsx` — suppression de la section estimateur séparée (l'estimateur vit dans le hero maintenant), réorganisation : Hero → Bande stats blanche → Partners (intact) → Pourquoi nous choisir (clair) → Comment ça marche (navy) → Footer.
-- `src/components/PourquoiNousChoisir.tsx` — refonte visuelle (mêmes 6 raisons, mêmes textes).
-- `src/components/CommentCaMarche.tsx` — refonte visuelle (mêmes 3 étapes, mêmes textes).
-- `src/styles.css` — ajout 1-2 utilitaires si besoin (`.hero-curve-cream`, `.step-card-navy`).
+Règle confirmée : `orgRole IN ('flotte_partenaire','client_b2b')` → différé. Sinon → Stripe obligatoire.
 
-**Non touché :**
-- `src/integrations/`, `src/lib/pricing-*`, `src/lib/*pdf*`, `src/server/`, `src/routes/api/`, `supabase/`, tous les hooks, l'auth, le dashboard, l'espace pro/convoyeur/admin, mobile (`MobileHomeScreen`/`MobileDevisGenerator`).
-- `PartnersMarquee`, `Footer`, `Navbar` (déjà fait).
-- Tous les calculs, validations, Stripe, emails, reCAPTCHA, Google Places, wizard modal étapes 1→4.
+- Audit existant : routes API Stripe déjà en place (`/api/devis/checkout`, `/api/b2b/checkout`, `/api/facture/checkout`, webhooks `/api/public/devis|facture|b2b/webhook`). Utilise `stripe-server.ts` via gateway Lovable.
+- Helper `requiresImmediatePayment(user)` côté client + serveur :
+  - lit `organization_roles` du user
+  - true sauf si flotte_partenaire ou client_b2b
+- Brancher dans :
+  - création devis → si paiement requis : tunnel Stripe Checkout embedded obligatoire avant validation
+  - création mission ponctuelle pro → idem
+  - particulier : Stripe systématique
+- Webhooks Stripe (déjà présents) : vérifier qu'au `payment_succeeded` :
+  1. statut paiement mis à jour (`paid_at`)
+  2. facture PDF générée auto (déclencher `facture-pdf.ts`)
+  3. notification admin (`notifyAdmin` type `b2b_paiement`)
+  4. email confirmation client (`mission-confirmation` ou nouveau template `paiement-confirme`)
+- Test sandbox : carte `4242 4242 4242 4242`.
+- Banner test mode (`PaymentTestModeBanner`) ajouté sur layouts paiement.
 
-**Responsive :**
-- `< lg` : la grille du hero passe en 1 colonne, le simulateur descend sous le bloc texte (pas de régression mobile, le composant `MobileHomeScreen` reste utilisé pour `< md`).
-- `lg → xl` : ajustement des gaps pour éviter que la carte du simulateur ne touche le bord droit.
+**Livrable** : flux paiement bout-en-bout, facture auto, notifications.
 
-## 5. Hors scope (à confirmer ensuite)
+---
 
-Une fois cette home validée visuellement, on enchaîne avec la même grammaire 60/25/15 + cartes verre fumé sur :
-- pages internes (`/services`, `/tarifs`, `/contact`, `/a-propos`, `/comment-ca-marche`, `/b2b`)
-- pages d'auth (`/login`, `/inscription-*`)
-- dashboards (client / pro / convoyeur / admin) — restylage visuel uniquement, zéro changement fonctionnel.
+## Phase 5 — Audit emails & notifications
 
-Pas inclus dans ce plan pour rester focus sur ta demande immédiate (hero + sections home).
+**Objectif** : pour chaque événement listé, un email + une notif admin déclenchés.
+
+Matrice à vérifier/compléter :
+
+| Événement | Email client | Notif admin | Statut actuel |
+|---|---|---|---|
+| Inscription | ✓ welcome | ✓ client_action/driver_action | déjà fait |
+| Validation compte convoyeur | ✓ convoyeur-validation | ✓ | à vérifier |
+| Demande de devis | ✓ devis-client | ✓ devis | à vérifier |
+| Création mission | ✓ mission-confirmation | ✓ | à vérifier |
+| Attribution convoyeur | ⨯ à créer | ✓ mission_acceptee | manquant côté client |
+| Changement statut | ⨯ optionnel | ⨯ | à décider |
+| Mission terminée | ⨯ à créer | ✓ mission_terminee | manquant côté client |
+| Facture générée | ⨯ à créer | ⨯ à créer | manquant |
+| Paiement Stripe validé | ⨯ à créer | ✓ b2b_paiement | template à créer |
+| Reset password | ✓ recovery (auth) | n/a | OK |
+
+- Audit `src/lib/email-templates/registry.ts` + tous les call sites.
+- Ajouter templates manquants (logo Ligneo en header).
+- Vérifier `notifyAdmin` appelé partout (déjà fait sur inscriptions selon historique).
+- Tester via `/lovable/email/transactional/preview` chaque template.
+- Vérifier que `email_send_log` n'a pas de DLQ.
+
+**Livrable** : matrice 100% verte.
+
+---
+
+## Détails techniques transverses
+
+- Aucun changement de stack (TanStack Start + Supabase + Stripe via gateway Lovable).
+- Migrations DB attendues : aucune phase 1-3 ; phase 4 possiblement une colonne `requires_stripe boolean` sur `organizations` si on retient l'override admin un jour. Pour l'instant règle déduite à la volée.
+- Tests : build après chaque phase, smoke test du flow concerné.
+- Pas de framer-motion (mémoire).
+- Respect tokens design `oklch` / `.glass-onyx` / `.card-premium-light`.
+
+---
+
+## Ordre d'exécution
+
+Je commence Phase 1 dès validation de ce plan, puis stop pour confirmation avant Phase 2. Si tu veux que j'enchaîne sans pause, dis-le et je fais 1 → 5 d'affilée (durée ≈ très longue, plusieurs tours d'outils).
+
+Validez-vous ce découpage ? Quelque chose à ajuster avant que je commence ?
