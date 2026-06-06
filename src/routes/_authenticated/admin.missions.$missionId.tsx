@@ -955,7 +955,7 @@ function AdminMissionDetail() {
             <MissionDocuments attributionId={attribution.id} userId="" isAdmin />
           </Card>
 
-          {/* PV de livraison digitalisés (Model/Arval, Welcomauto/Ayvens) */}
+          {/* PV de livraison digitalisés (plateformes partenaires) */}
           <Card>
             <MissionPVDigitauxBlock attributionId={attribution.id} mode="admin" />
           </Card>
