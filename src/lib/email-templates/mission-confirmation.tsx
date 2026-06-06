@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Hr, Html, Preview, Section, Text,
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
+import { LigneoEmailHeader } from './_ligneo-header'
 
 const SITE_NAME = "Transports Ligneo"
 
@@ -24,10 +25,7 @@ const MissionConfirmationEmail = ({
     <Preview>Réservation confirmée — {numero ?? 'Transports Ligneo'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={header}>
-          <Heading style={brand}>TRANSPORTS LIGNEO</Heading>
-          <Text style={subtitle}>Convoyage automobile premium</Text>
-        </Section>
+        <LigneoEmailHeader tagline="Convoyage automobile premium" />
         <Hr style={divider} />
         <Heading style={h1}>
           {prenom ? `Merci ${prenom},` : 'Merci !'} votre réservation est enregistrée

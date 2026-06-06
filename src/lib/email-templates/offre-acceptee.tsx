@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Hr, Html, Preview, Section, Text,
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
+import { LigneoEmailHeader } from './_ligneo-header'
 
 const SITE_NAME = 'Transports Ligneo'
 
@@ -20,10 +21,7 @@ const OffreAccepteeEmail = ({ prenom, depart, arrivee, date, prixPropose }: Offr
     <Preview>Votre offre a été acceptée — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={header}>
-          <Heading style={brand}>TRANSPORTS LIGNEO</Heading>
-          <Text style={subtitle}>Convoyage automobile premium</Text>
-        </Section>
+        <LigneoEmailHeader tagline="Convoyage automobile premium" />
         <Hr style={divider} />
         <Heading style={h1}>Bonne nouvelle {prenom || ''} ! 🎉</Heading>
         <Text style={text}>

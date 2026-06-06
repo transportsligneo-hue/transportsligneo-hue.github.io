@@ -3,6 +3,7 @@ import {
   Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text,
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
+import { LigneoEmailHeader } from './_ligneo-header'
 
 const SITE_NAME = 'Transports Ligneo'
 const SITE_URL = 'https://transportsligneo.fr'
@@ -18,10 +19,7 @@ const ConvoyeurValidationEmail = ({ prenom, nom }: ConvoyeurValidationProps) => 
     <Preview>Votre compte convoyeur est validé — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={header}>
-          <Heading style={brand}>TRANSPORTS LIGNEO</Heading>
-          <Text style={subtitle}>Convoyage automobile premium</Text>
-        </Section>
+        <LigneoEmailHeader tagline="Convoyage automobile premium" />
         <Hr style={divider} />
         <Heading style={h1}>Bienvenue {prenom || ''} {nom || ''} 🎉</Heading>
         <Text style={text}>
