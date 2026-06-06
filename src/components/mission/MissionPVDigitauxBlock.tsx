@@ -1,5 +1,5 @@
 /**
- * MissionPVDigitauxBlock — PV de livraison digitalisés (Model/Arval, Welcomauto/Ayvens).
+ * MissionPVDigitauxBlock — PV de livraison digitalisés (plateformes partenaires).
  *
  * NE PAS confondre avec l'état des lieux interne.
  * Ce bloc gère uniquement les PV digitalisés des plateformes externes.
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ExternalLink, Copy, ClipboardCheck, Loader2, Save } from "lucide-react";
 
-type Plateforme = "model_arval" | "welcomauto_ayvens";
+type Plateforme = "model_arval";
 
 interface PvRow {
   id?: string;
@@ -26,7 +26,6 @@ interface PvRow {
 
 const PLATEFORMES: { key: Plateforme; label: string; hint: string }[] = [
   { key: "model_arval", label: "Model / Arval", hint: "PV digitalisé Model utilisé par Arval." },
-  { key: "welcomauto_ayvens", label: "Welcomauto / Ayvens", hint: "PV digitalisé Welcomauto utilisé par Ayvens." },
 ];
 
 const emptyRow = (p: Plateforme): PvRow => ({
@@ -47,7 +46,6 @@ export function MissionPVDigitauxBlock({
 }) {
   const [rows, setRows] = useState<Record<Plateforme, PvRow>>({
     model_arval: emptyRow("model_arval"),
-    welcomauto_ayvens: emptyRow("welcomauto_ayvens"),
   });
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<Plateforme | null>(null);
@@ -62,7 +60,6 @@ export function MissionPVDigitauxBlock({
       if (!alive) return;
       const next: Record<Plateforme, PvRow> = {
         model_arval: emptyRow("model_arval"),
-        welcomauto_ayvens: emptyRow("welcomauto_ayvens"),
       };
       ((data as PvRow[]) || []).forEach((r) => {
         if (r.plateforme in next) next[r.plateforme] = r;
