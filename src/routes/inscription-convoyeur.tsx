@@ -25,22 +25,24 @@ function InscriptionConvoyeur() {
     permis_numero: "", annees_experience: "",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
+  const [cniFile, setCniFile] = useState<File | null>(null);
+  const [kbisFile, setKbisFile] = useState<File | null>(null);
+  const [rcProFile, setRcProFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const makeFileHandler = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError("La photo du permis ne doit pas dépasser 5 Mo.");
-        return;
-      }
-      setPermisFile(file);
-      setError("");
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Chaque document ne doit pas dépasser 5 Mo.");
+      return;
     }
+    setter(file);
+    setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
