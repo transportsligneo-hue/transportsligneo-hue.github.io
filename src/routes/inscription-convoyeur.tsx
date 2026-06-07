@@ -131,7 +131,7 @@ function InscriptionConvoyeur() {
       }
 
       // Insert convoyeur record (le trigger handle_new_user a déjà créé profile + user_roles)
-      const { error: convError } = await supabase.from("convoyeurs").insert({
+      const { data: convoyeurRow, error: convError } = await supabase.from("convoyeurs").insert({
         user_id: userId,
         nom: form.nom,
         prenom: form.prenom,
@@ -145,13 +145,46 @@ function InscriptionConvoyeur() {
         annees_experience: parseInt(form.annees_experience, 10) || 0,
         permis_photo_url: permisPhotoUrl,
         statut: "en_attente",
-      });
+      }).select("id").single();
 
       if (convError) {
         console.error("[inscription-convoyeur] insert convoyeur error:", convError);
         setError(`Erreur d'enregistrement : ${convError.message}`);
         setLoading(false);
         return;
+      }
+
+      // Upload documents complémentaires (CNI / Kbis / RC pro) — best-effort
+      const convoyeurId = convoyeurRow?.id;
+      if (convoyeurId && authData.session) {
+        const uploadDoc = async (file: File | null, type: string) => {
+          if (!file) return;
+          try {
+            const ext = file.name.split(".").pop() || "jpg";
+            const path = `${userId}/${type}-${Date.now()}.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from("convoyeur-documents")
+              .upload(path, file, { upsert: true });
+            if (upErr) {
+              console.warn(`[inscription-convoyeur] upload ${type} failed:`, upErr);
+              return;
+            }
+            await supabase.from("documents_convoyeurs").insert({
+              convoyeur_id: convoyeurId,
+              type_document: type,
+              nom_fichier: file.name,
+              url_fichier: path,
+              statut_validation: "en_attente",
+            });
+          } catch (e) {
+            console.warn(`[inscription-convoyeur] doc ${type} exception:`, e);
+          }
+        };
+        await Promise.all([
+          uploadDoc(cniFile, "cni"),
+          uploadDoc(kbisFile, "kbis"),
+          uploadDoc(rcProFile, "rc_pro"),
+        ]);
       }
 
       // Notification email (best-effort)
