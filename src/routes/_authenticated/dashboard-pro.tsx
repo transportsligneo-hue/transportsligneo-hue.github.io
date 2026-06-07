@@ -33,17 +33,17 @@ function ProLayout() {
       navigate({ to: "/login" });
       return;
     }
-    // Si user a un homeRoute spécifique (admin, convoyeur, entreprise, flotte) → redirige
-    if (homeRoute !== "/dashboard-pro") {
+    // Redirige uniquement si l'utilisateur n'a clairement rien à faire dans l'espace pro
+    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
       navigate({ to: homeRoute });
       return;
     }
-    if (typeClient !== "b2b") {
+    if (typeClient === "particulier") {
       navigate({ to: "/dashboard-client" });
     }
   }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
 
-  if (isLoading || !isAuthenticated || homeRoute !== "/dashboard-pro" || typeClient !== "b2b") {
+  if (isLoading || !isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "particulier") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />

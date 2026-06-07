@@ -21,6 +21,10 @@ import { template as documentMissionAdmin } from './document-mission-admin'
 import { template as b2bPaiementAdmin } from './b2b-paiement-admin'
 import { template as b2bLeadFlotteAdmin } from './b2b-lead-flotte-admin'
 import { template as b2bConversionSuggestionAdmin } from './b2b-conversion-suggestion-admin'
+import { template as paiementConfirme } from './paiement-confirme'
+import { template as attributionConvoyeur } from './attribution-convoyeur'
+import { template as missionTermineeClient } from './mission-terminee-client'
+import { template as factureDisponible } from './facture-disponible'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'demande-confirmation': demandeConfirmation,
@@ -35,4 +39,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'b2b-paiement-admin': b2bPaiementAdmin,
   'b2b-lead-flotte-admin': b2bLeadFlotteAdmin,
   'b2b-conversion-suggestion-admin': b2bConversionSuggestionAdmin,
+  'paiement-confirme': paiementConfirme,
+  'attribution-convoyeur': attributionConvoyeur,
+  'mission-terminee-client': missionTermineeClient,
+  'facture-disponible': factureDisponible,
 }

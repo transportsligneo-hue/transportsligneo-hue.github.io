@@ -46,11 +46,9 @@ function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string 
     return "/attente-validation";
   }
   // Org-based redirection (flotte / entreprise)
-  if (p.orgRole === "flotte_partenaire") return "/flotte";
-  if (p.orgRole === "client_b2b") return "/entreprise";
-  // Fallback selon typeClient
-  if (p.typeClient === "flotte") return "/flotte";
-  if (p.typeClient === "b2b") return "/dashboard-pro";
+  // Espace pro unifié — B2B + Flotte partagent /dashboard-pro
+  if (p.orgRole === "flotte_partenaire" || p.orgRole === "client_b2b") return "/dashboard-pro";
+  if (p.typeClient === "flotte" || p.typeClient === "b2b") return "/dashboard-pro";
   return "/dashboard-client";
 }
 

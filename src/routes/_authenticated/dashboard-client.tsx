@@ -3,7 +3,7 @@ import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileT
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardSidebar, type SidebarItem } from "@/components/dashboard/DashboardSidebar";
+import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client")({
   component: ClientLayout,
@@ -13,11 +13,12 @@ export const Route = createFileRoute("/_authenticated/dashboard-client")({
   },
 });
 
-const navItems: SidebarItem[] = [
-  { to: "/dashboard-client", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+// Sous-ensemble des items pro adapté aux particuliers
+const navItems: ProSidebarItem[] = [
+  { to: "/dashboard-client", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
+  { to: "/dashboard-client/nouvelle-reservation", label: "Nouvelle réservation", icon: PlusCircle },
   { to: "/dashboard-client/missions", label: "Mes missions", icon: Truck },
   { to: "/dashboard-client/devis", label: "Factures & devis", icon: FileText },
-  { to: "/dashboard-client/nouvelle-reservation", label: "Nouvelle réservation", icon: PlusCircle },
   { to: "/dashboard-client/documents", label: "Mes documents", icon: FolderOpen },
   { to: "/dashboard-client/profil", label: "Mon profil", icon: UserCog },
 ];
@@ -36,28 +37,28 @@ function ClientLayout() {
       navigate({ to: homeRoute });
       return;
     }
-    if (typeClient === "b2b") {
+    if (typeClient === "b2b" || typeClient === "flotte") {
       navigate({ to: "/dashboard-pro" });
     }
   }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg client-shell">
-        <Loader2 className="animate-spin text-primary" size={32} />
+      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
+        <Loader2 className="animate-spin text-pro-accent" size={32} />
       </div>
     );
   }
 
   if (!roleActif) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg client-shell px-4">
+      <div className="min-h-screen flex items-center justify-center bg-pro-bg px-4">
         <div className="text-center space-y-4 max-w-md">
           <h1 className="font-heading text-xl text-destructive tracking-[0.1em] uppercase">Compte suspendu</h1>
-          <p className="text-cream/50 text-sm">
+          <p className="text-pro-muted text-sm">
             Votre compte a été suspendu. Contactez notre équipe pour plus d'informations.
           </p>
-          <a href="mailto:contact@transportsligneo.fr" className="inline-block text-primary text-sm hover:text-gold-light transition-colors">
+          <a href="mailto:contact@transportsligneo.fr" className="inline-block text-pro-accent text-sm hover:underline">
             contact@transportsligneo.fr
           </a>
         </div>
@@ -65,17 +66,17 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "b2b") {
+  if (!isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "b2b" || typeClient === "flotte") {
     return (
-      <div className="min-h-screen flex items-center justify-center section-bg client-shell">
-        <Loader2 className="animate-spin text-primary" size={32} />
+      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
+        <Loader2 className="animate-spin text-pro-accent" size={32} />
       </div>
     );
   }
 
   return (
-    <DashboardSidebar title="Espace Client" subtitle="Gérez vos convoyages" items={navItems} shellClass="client-shell">
+    <ProSidebar items={navItems}>
       <Outlet />
-    </DashboardSidebar>
+    </ProSidebar>
   );
 }
