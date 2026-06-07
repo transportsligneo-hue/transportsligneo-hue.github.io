@@ -25,22 +25,24 @@ function InscriptionConvoyeur() {
     permis_numero: "", annees_experience: "",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
+  const [cniFile, setCniFile] = useState<File | null>(null);
+  const [kbisFile, setKbisFile] = useState<File | null>(null);
+  const [rcProFile, setRcProFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const makeFileHandler = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError("La photo du permis ne doit pas dépasser 5 Mo.");
-        return;
-      }
-      setPermisFile(file);
-      setError("");
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Chaque document ne doit pas dépasser 5 Mo.");
+      return;
     }
+    setter(file);
+    setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,7 +131,7 @@ function InscriptionConvoyeur() {
       }
 
       // Insert convoyeur record (le trigger handle_new_user a déjà créé profile + user_roles)
-      const { error: convError } = await supabase.from("convoyeurs").insert({
+      const { data: convoyeurRow, error: convError } = await supabase.from("convoyeurs").insert({
         user_id: userId,
         nom: form.nom,
         prenom: form.prenom,
@@ -143,13 +145,46 @@ function InscriptionConvoyeur() {
         annees_experience: parseInt(form.annees_experience, 10) || 0,
         permis_photo_url: permisPhotoUrl,
         statut: "en_attente",
-      });
+      }).select("id").single();
 
       if (convError) {
         console.error("[inscription-convoyeur] insert convoyeur error:", convError);
         setError(`Erreur d'enregistrement : ${convError.message}`);
         setLoading(false);
         return;
+      }
+
+      // Upload documents complémentaires (CNI / Kbis / RC pro) — best-effort
+      const convoyeurId = convoyeurRow?.id;
+      if (convoyeurId && authData.session) {
+        const uploadDoc = async (file: File | null, type: string) => {
+          if (!file) return;
+          try {
+            const ext = file.name.split(".").pop() || "jpg";
+            const path = `${userId}/${type}-${Date.now()}.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from("convoyeur-documents")
+              .upload(path, file, { upsert: true });
+            if (upErr) {
+              console.warn(`[inscription-convoyeur] upload ${type} failed:`, upErr);
+              return;
+            }
+            await supabase.from("documents_convoyeurs").insert({
+              convoyeur_id: convoyeurId,
+              type_document: type,
+              nom_fichier: file.name,
+              url_fichier: path,
+              statut_validation: "en_attente",
+            });
+          } catch (e) {
+            console.warn(`[inscription-convoyeur] doc ${type} exception:`, e);
+          }
+        };
+        await Promise.all([
+          uploadDoc(cniFile, "cni"),
+          uploadDoc(kbisFile, "kbis"),
+          uploadDoc(rcProFile, "rc_pro"),
+        ]);
       }
 
       // Notification email (best-effort)
@@ -263,21 +298,47 @@ function InscriptionConvoyeur() {
             </div>
           </div>
 
-          {/* Upload photo permis (optionnel) */}
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Upload size={12} className="inline mr-1" /> Photo du permis (optionnel)
-            </label>
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
-            />
-            {permisFile && (
-              <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>
-            )}
-            <p className="text-cream/30 text-xs mt-1">Format JPG, PNG ou PDF. Max 5 Mo. Ajoutable plus tard depuis votre espace.</p>
+          {/* Documents officiels (optionnels mais recommandés) */}
+          <div className="space-y-3 pt-2 border-t border-primary/10">
+            <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Photo du permis
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setPermisFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {permisFile && <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> CNI (recto/verso)
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setCniFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {cniFile && <p className="text-primary text-xs mt-1">✓ {cniFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Kbis (si auto-entrepreneur / société)
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setKbisFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {kbisFile && <p className="text-primary text-xs mt-1">✓ {kbisFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Attestation RC Pro
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setRcProFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {rcProFile && <p className="text-primary text-xs mt-1">✓ {rcProFile.name}</p>}
+            </div>
+
+            <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF — 5 Mo max par document. Ces pièces accélèrent la validation par notre équipe.</p>
           </div>
 
           {/* Infos complémentaires */}
