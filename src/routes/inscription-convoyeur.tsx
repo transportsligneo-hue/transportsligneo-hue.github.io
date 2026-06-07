@@ -298,21 +298,47 @@ function InscriptionConvoyeur() {
             </div>
           </div>
 
-          {/* Upload photo permis (optionnel) */}
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Upload size={12} className="inline mr-1" /> Photo du permis (optionnel)
-            </label>
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
-            />
-            {permisFile && (
-              <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>
-            )}
-            <p className="text-cream/30 text-xs mt-1">Format JPG, PNG ou PDF. Max 5 Mo. Ajoutable plus tard depuis votre espace.</p>
+          {/* Documents officiels (optionnels mais recommandés) */}
+          <div className="space-y-3 pt-2 border-t border-primary/10">
+            <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Photo du permis
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setPermisFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {permisFile && <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> CNI (recto/verso)
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setCniFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {cniFile && <p className="text-primary text-xs mt-1">✓ {cniFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Kbis (si auto-entrepreneur / société)
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setKbisFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {kbisFile && <p className="text-primary text-xs mt-1">✓ {kbisFile.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <Upload size={12} className="inline mr-1" /> Attestation RC Pro
+              </label>
+              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setRcProFile)}
+                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
+              {rcProFile && <p className="text-primary text-xs mt-1">✓ {rcProFile.name}</p>}
+            </div>
+
+            <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF — 5 Mo max par document. Ces pièces accélèrent la validation par notre équipe.</p>
           </div>
 
           {/* Infos complémentaires */}
