@@ -239,6 +239,25 @@ function AdminClients() {
           badge={<DrawerBadge tone={selected.actif ? "green" : "red"}>{selected.actif ? "Actif" : "Suspendu"}</DrawerBadge>}
           footer={
             <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  const next = window.prompt("Nouvel email du client :", selected.email ?? "");
+                  if (!next || next === selected.email) return;
+                  const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+                    body: { action: "change_email", user_id: selected.user_id, email: next.trim() },
+                  });
+                  if (error || (data as any)?.error) {
+                    window.alert(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
+                    return;
+                  }
+                  setSelected({ ...selected, email: next.trim() });
+                  await fetchClients();
+                }}
+              >
+                <Pencil size={12} className="mr-1" /> Modifier l'email
+              </Button>
               {selected.actif ? (
                 <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }}>
                   <Ban size={12} className="mr-1" /> Suspendre
