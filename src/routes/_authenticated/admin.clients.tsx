@@ -210,6 +210,15 @@ function AdminClients() {
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
+                    <Link
+                      to="/admin/clients/$clientId"
+                      params={{ clientId: c.user_id }}
+                      hash="tarifs"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
+                      title="Gérer les tarifs personnalisés (estimateur)"
+                    >
+                      <Euro size={15} />
+                    </Link>
                     <button
                       onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
