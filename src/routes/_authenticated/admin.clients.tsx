@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, Mail, Phone, Building2, Calendar, MapPin, Truck, Receipt, AlertTriangle, Euro } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil } from "lucide-react";
 
 import {
   PageHeader,
@@ -150,15 +149,6 @@ function AdminClients() {
 
   return (
     <div>
-      <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-900 flex items-start gap-3">
-        <AlertTriangle size={16} className="mt-0.5 shrink-0" />
-        <div className="flex-1">
-          <p className="font-medium">Tarification et adresses disponibles ici</p>
-          <p className="text-amber-800">
-            Ouvre la fiche d’un client avec l’icône œil pour accéder aux blocs <span className="font-medium">Règles de tarification</span> et <span className="font-medium">Adresses favorites</span>.
-          </p>
-        </div>
-      </div>
       <PageHeader
         title="Clients"
         subtitle={`${clients.length} client${clients.length > 1 ? "s" : ""} inscrit${clients.length > 1 ? "s" : ""}`}
@@ -219,15 +209,6 @@ function AdminClients() {
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
-                      hash="tarifs"
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
-                      title="Gérer les tarifs personnalisés"
-                    >
-                      <Euro size={15} />
-                    </Link>
                     <button
                       onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
@@ -258,6 +239,25 @@ function AdminClients() {
           badge={<DrawerBadge tone={selected.actif ? "green" : "red"}>{selected.actif ? "Actif" : "Suspendu"}</DrawerBadge>}
           footer={
             <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  const next = window.prompt("Nouvel email du client :", selected.email ?? "");
+                  if (!next || next === selected.email) return;
+                  const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+                    body: { action: "change_email", user_id: selected.user_id, email: next.trim() },
+                  });
+                  if (error || (data as any)?.error) {
+                    window.alert(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
+                    return;
+                  }
+                  setSelected({ ...selected, email: next.trim() });
+                  await fetchClients();
+                }}
+              >
+                <Pencil size={12} className="mr-1" /> Modifier l'email
+              </Button>
               {selected.actif ? (
                 <Button size="sm" variant="outline" onClick={async () => { await toggleActif(selected.user_id, false); setSelected({ ...selected, actif: false }); }}>
                   <Ban size={12} className="mr-1" /> Suspendre
