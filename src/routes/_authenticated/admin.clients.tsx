@@ -216,13 +216,6 @@ function AdminClients() {
                     >
                       <Eye size={15} />
                     </button>
-                    <button
-                      onClick={() => setSelected(c)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
-                      <Eye size={15} />
-                    </button>
                     {c.actif ? (
                       <IconButton onClick={() => toggleActif(c.user_id, false)} title="Suspendre" tone="danger"><Ban size={15} /></IconButton>
                     ) : (
