@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, Mail, Phone, Building2, Calendar, MapPin, Truck, Receipt, AlertTriangle, Euro } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil } from "lucide-react";
 
 import {
   PageHeader,
