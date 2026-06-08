@@ -43,17 +43,14 @@ function InscriptionPro() {
 
     setLoading(true);
     try {
-      const token = await getRecaptchaToken("signup_pro");
-      if (token) {
-        try {
+      // reCAPTCHA en mode soft : on log le score mais on ne bloque jamais l'inscription
+      try {
+        const token = await getRecaptchaToken("signup_pro");
+        if (token) {
           const r = await verifyRecaptcha({ data: { token, action: "signup_pro", minScore: 0.3 } });
-          if (!r.ok && !r.skipped) {
-            setError("Vérification de sécurité échouée. Réessayez.");
-            setLoading(false);
-            return;
-          }
-        } catch { /* skip on network error */ }
-      }
+          if (!r.ok && !r.skipped) console.warn("[signup_pro] recaptcha low score", r);
+        }
+      } catch (e) { console.warn("[signup_pro] recaptcha error", e); }
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,

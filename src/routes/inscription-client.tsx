@@ -43,17 +43,13 @@ function InscriptionClient() {
 
     setLoading(true);
     try {
-      const token = await getRecaptchaToken("signup_client");
-      if (token) {
-        try {
+      try {
+        const token = await getRecaptchaToken("signup_client");
+        if (token) {
           const r = await verifyRecaptcha({ data: { token, action: "signup_client", minScore: 0.3 } });
-          if (!r.ok && !r.skipped) {
-            setError("Vérification de sécurité échouée. Réessayez.");
-            setLoading(false);
-            return;
-          }
-        } catch { /* skip on network error */ }
-      }
+          if (!r.ok && !r.skipped) console.warn("[signup_client] recaptcha low score", r);
+        }
+      } catch (e) { console.warn("[signup_client] recaptcha error", e); }
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
