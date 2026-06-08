@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil } from "lucide-react";
 
 import {
   PageHeader,
@@ -210,15 +209,6 @@ function AdminClients() {
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
-                      hash="tarifs"
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
-                      title="Gérer les tarifs personnalisés (estimateur)"
-                    >
-                      <Euro size={15} />
-                    </Link>
                     <button
                       onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
