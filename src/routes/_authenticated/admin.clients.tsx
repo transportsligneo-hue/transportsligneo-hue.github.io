@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro } from "lucide-react";
@@ -19,6 +19,7 @@ import {
 import { getHighestActiveRole } from "@/lib/roles";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { Button } from "@/components/ui/button";
+import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -37,11 +38,11 @@ interface ClientRow {
 
 
 function AdminClients() {
-  const navigate = useNavigate();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ClientRow | null>(null);
+  const [pricingClient, setPricingClient] = useState<ClientRow | null>(null);
   const [missions, setMissions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -214,11 +215,7 @@ function AdminClients() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        void navigate({
-                          to: "/admin/clients/$clientId",
-                          params: { clientId: c.user_id },
-                          hash: "tarifs",
-                        });
+                        setPricingClient(c);
                       }}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
                       title="Gérer les tarifs personnalisés (estimateur)"
@@ -312,6 +309,32 @@ function AdminClients() {
               </div>
             )}
           </DrawerSection>
+        </AdminDetailDrawer>
+      )}
+
+      {pricingClient && (
+        <AdminDetailDrawer
+          open={!!pricingClient}
+          onClose={() => setPricingClient(null)}
+          title={`Tarifs estimateur — ${`${pricingClient.prenom} ${pricingClient.nom}`.trim() || "Client"}`}
+          subtitle={pricingClient.email ?? undefined}
+          badge={<DrawerBadge tone="green">Tarifs personnalisés</DrawerBadge>}
+          width="2xl"
+        >
+          <div id="tarifs" className="scroll-mt-24">
+            {pricingClient.email ? (
+              <ClientPricingRulesBlock
+                clientUserId={pricingClient.user_id}
+                clientEmail={pricingClient.email}
+              />
+            ) : (
+              <DrawerSection title="Tarifs personnalisés" icon={<Euro size={12} />}>
+                <p className="text-sm text-slate-500">
+                  Ajoutez d'abord un email au client pour pouvoir gérer ses tarifs personnalisés.
+                </p>
+              </DrawerSection>
+            )}
+          </div>
         </AdminDetailDrawer>
       )}
 
