@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 
 import {
   PageHeader,
@@ -38,6 +37,7 @@ interface ClientRow {
 
 
 function AdminClients() {
+  const navigate = useNavigate();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -210,15 +210,21 @@ function AdminClients() {
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      to="/admin/clients/$clientId"
-                      params={{ clientId: c.user_id }}
-                      hash="tarifs"
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void navigate({
+                          to: "/admin/clients/$clientId",
+                          params: { clientId: c.user_id },
+                          hash: "tarifs",
+                        });
+                      }}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
                       title="Gérer les tarifs personnalisés (estimateur)"
                     >
                       <Euro size={15} />
-                    </Link>
+                    </button>
                     <button
                       onClick={() => setSelected(c)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"

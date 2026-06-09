@@ -185,6 +185,26 @@ function AdminClientDetail() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#tarifs") return;
+
+    const scrollToPricing = () => {
+      const target = document.getElementById("tarifs");
+      if (!target) return false;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+
+    if (scrollToPricing()) return;
+
+    const timeout = window.setTimeout(() => {
+      scrollToPricing();
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [profile?.email]);
+
   const toggleActif = async () => {
     const next = !actif;
     if (!next && !window.confirm("Suspendre ce client ? Il ne pourra plus se connecter.")) return;
