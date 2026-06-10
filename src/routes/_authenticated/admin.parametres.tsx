@@ -135,7 +135,7 @@ function AdminParametres() {
         </TabsList>
 
         {/* === ENTREPRISE === */}
-        <TabsContent value="entreprise" className="mt-0">
+        <TabsContent value="entreprise" className="mt-0 space-y-4">
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField label="Raison sociale">
@@ -163,7 +163,10 @@ function AdminParametres() {
               <Button icon={<Save size={14} />} onClick={save}>Enregistrer</Button>
             </div>
           </Card>
+
+          <DevisAcceptationToggleCard />
         </TabsContent>
+
 
         {/* === FACTURATION === */}
         <TabsContent value="facturation" className="mt-0 space-y-4">
