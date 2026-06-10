@@ -934,6 +934,7 @@ export type Database = {
       }
       devis: {
         Row: {
+          accepted_at: string | null
           amount_paid_cents: number | null
           arrivee: string
           arrivee_retour: string | null
@@ -960,6 +961,7 @@ export type Database = {
           heure_souhaitee: string | null
           id: string
           immatriculation_retour: string | null
+          locked_at: string | null
           marque: string | null
           marque_retour: string | null
           message: string | null
@@ -985,10 +987,12 @@ export type Database = {
           updated_at: string
           user_id: string | null
           vehicule_docs_completed: boolean
+          version: number
           vin: string | null
           vin_retour: string | null
         }
         Insert: {
+          accepted_at?: string | null
           amount_paid_cents?: number | null
           arrivee: string
           arrivee_retour?: string | null
@@ -1015,6 +1019,7 @@ export type Database = {
           heure_souhaitee?: string | null
           id?: string
           immatriculation_retour?: string | null
+          locked_at?: string | null
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
@@ -1040,10 +1045,12 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           vehicule_docs_completed?: boolean
+          version?: number
           vin?: string | null
           vin_retour?: string | null
         }
         Update: {
+          accepted_at?: string | null
           amount_paid_cents?: number | null
           arrivee?: string
           arrivee_retour?: string | null
@@ -1070,6 +1077,7 @@ export type Database = {
           heure_souhaitee?: string | null
           id?: string
           immatriculation_retour?: string | null
+          locked_at?: string | null
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
@@ -1095,10 +1103,70 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           vehicule_docs_completed?: boolean
+          version?: number
           vin?: string | null
           vin_retour?: string | null
         }
         Relationships: []
+      }
+      devis_acceptations: {
+        Row: {
+          accepted_at: string
+          cgv_version: string
+          client_email: string
+          client_user_id: string | null
+          created_at: string
+          devis_id: string
+          devis_version: number
+          id: string
+          ip_address: string | null
+          metadata: Json
+          montant_accepte: number
+          pdf_url: string | null
+          statut: string
+          user_agent: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          cgv_version?: string
+          client_email: string
+          client_user_id?: string | null
+          created_at?: string
+          devis_id: string
+          devis_version?: number
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          montant_accepte: number
+          pdf_url?: string | null
+          statut?: string
+          user_agent?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          cgv_version?: string
+          client_email?: string
+          client_user_id?: string | null
+          created_at?: string
+          devis_id?: string
+          devis_version?: number
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          montant_accepte?: number
+          pdf_url?: string | null
+          statut?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_acceptations_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disponibilites_convoyeurs: {
         Row: {
@@ -2245,6 +2313,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          exempte_acceptation_devis: boolean
           facture_mention_active: boolean
           facture_mention_legale: string | null
           id: string
@@ -2271,6 +2340,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          exempte_acceptation_devis?: boolean
           facture_mention_active?: boolean
           facture_mention_legale?: string | null
           id?: string
@@ -2297,6 +2367,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          exempte_acceptation_devis?: boolean
           facture_mention_active?: boolean
           facture_mention_legale?: string | null
           id?: string
