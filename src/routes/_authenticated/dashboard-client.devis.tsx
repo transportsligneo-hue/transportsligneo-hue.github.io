@@ -121,9 +121,18 @@ function MesFacturesEtDevis() {
     ? `${window.location.origin}/dashboard-client/devis?paye=1`
     : "/";
 
-  const startPayment = (d: DevisRow) => {
+  const startPayment = async (d: DevisRow) => {
     setActiveId(d.id);
-    setStep(d.vehicule_docs_completed ? "pay" : "docs");
+    try {
+      const status = await getStatus({ data: { devisId: d.id } });
+      if (status.requiresAcceptation) {
+        setStep("acceptation");
+      } else {
+        setStep(d.vehicule_docs_completed ? "pay" : "docs");
+      }
+    } catch {
+      setStep(d.vehicule_docs_completed ? "pay" : "docs");
+    }
   };
 
   const handleDownloadFacture = async (f: FactureRow) => {
