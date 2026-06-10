@@ -6,7 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
 import { VehiculeDocsStep } from "@/components/devis/VehiculeDocsStep";
+import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { getDevisAcceptationStatus } from "@/lib/devis-acceptation.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 type DevisRow = {
   id: string;
