@@ -6,7 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
 import { VehiculeDocsStep } from "@/components/devis/VehiculeDocsStep";
+import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { getDevisAcceptationStatus } from "@/lib/devis-acceptation.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 type DevisRow = {
   id: string;
@@ -75,8 +78,9 @@ function MesFacturesEtDevis() {
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [step, setStep] = useState<"docs" | "pay">("docs");
+  const [step, setStep] = useState<"acceptation" | "docs" | "pay">("acceptation");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const getStatus = useServerFn(getDevisAcceptationStatus);
 
   const refresh = async () => {
     if (!user) return;
@@ -117,9 +121,18 @@ function MesFacturesEtDevis() {
     ? `${window.location.origin}/dashboard-client/devis?paye=1`
     : "/";
 
-  const startPayment = (d: DevisRow) => {
+  const startPayment = async (d: DevisRow) => {
     setActiveId(d.id);
-    setStep(d.vehicule_docs_completed ? "pay" : "docs");
+    try {
+      const status = await getStatus({ data: { devisId: d.id } });
+      if (status.requiresAcceptation) {
+        setStep("acceptation");
+      } else {
+        setStep(d.vehicule_docs_completed ? "pay" : "docs");
+      }
+    } catch {
+      setStep(d.vehicule_docs_completed ? "pay" : "docs");
+    }
   };
 
   const handleDownloadFacture = async (f: FactureRow) => {
@@ -298,26 +311,45 @@ function MesFacturesEtDevis() {
             </button>
             <div className="mb-4">
               <h2 className="font-heading text-xl text-primary tracking-wider">
-                {step === "docs" ? "Documents véhicule" : "Paiement"} — {active.numero}
+                {step === "acceptation" ? "Acceptation du devis" : step === "docs" ? "Documents véhicule" : "Paiement"} — {active.numero}
               </h2>
               <p className="text-cream/60 text-sm mt-1">{active.depart} → {active.arrivee} · {Number(active.prix_estime).toFixed(2)} €</p>
 
-              <div className="flex items-center gap-2 mt-4 text-[11px] uppercase tracking-wider">
-                <div className={`flex items-center gap-1.5 ${step === "docs" ? "text-primary" : "text-emerald-400"}`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === "docs" ? "bg-primary text-navy" : "bg-emerald-500/20"}`}>
-                    {step === "docs" ? "1" : "✓"}
-                  </span>
-                  Documents
-                </div>
-                <div className="h-px flex-1 bg-cream/10" />
-                <div className={`flex items-center gap-1.5 ${step === "pay" ? "text-primary" : "text-cream/40"}`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === "pay" ? "bg-primary text-navy" : "bg-cream/10"}`}>2</span>
-                  Paiement
-                </div>
+              <div className="flex items-center gap-1.5 mt-4 text-[10px] uppercase tracking-wider">
+                {(["acceptation", "docs", "pay"] as const).map((s, i) => {
+                  const labels = { acceptation: "Accept.", docs: "Documents", pay: "Paiement" };
+                  const order = ["acceptation", "docs", "pay"];
+                  const currentIdx = order.indexOf(step);
+                  const done = i < currentIdx;
+                  const isCurrent = i === currentIdx;
+                  return (
+                    <div key={s} className="flex items-center gap-1.5 flex-1">
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 ${isCurrent ? "bg-primary text-navy" : done ? "bg-emerald-500/20 text-emerald-300" : "bg-cream/10 text-cream/40"}`}>
+                        {done ? "✓" : i + 1}
+                      </span>
+                      <span className={isCurrent ? "text-primary" : done ? "text-emerald-400" : "text-cream/40"}>{labels[s]}</span>
+                      {i < 2 && <div className="h-px flex-1 bg-cream/10" />}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {step === "docs" ? (
+            {step === "acceptation" ? (
+              <DevisAcceptationStep
+                devisId={active.id}
+                numero={active.numero}
+                depart={active.depart}
+                arrivee={active.arrivee}
+                prixTtc={Number(active.prix_estime)}
+                dateSouhaitee={active.date_souhaitee}
+                onAccepted={() => {
+                  setStep(active.vehicule_docs_completed ? "pay" : "docs");
+                  refresh();
+                }}
+                onCancel={() => setActiveId(null)}
+              />
+            ) : step === "docs" ? (
               <VehiculeDocsStep
                 devisId={active.id}
                 initialVin={active.vin}

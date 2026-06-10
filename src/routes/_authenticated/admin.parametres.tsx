@@ -135,7 +135,7 @@ function AdminParametres() {
         </TabsList>
 
         {/* === ENTREPRISE === */}
-        <TabsContent value="entreprise" className="mt-0">
+        <TabsContent value="entreprise" className="mt-0 space-y-4">
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField label="Raison sociale">
@@ -163,7 +163,10 @@ function AdminParametres() {
               <Button icon={<Save size={14} />} onClick={save}>Enregistrer</Button>
             </div>
           </Card>
+
+          <DevisAcceptationToggleCard />
         </TabsContent>
+
 
         {/* === FACTURATION === */}
         <TabsContent value="facturation" className="mt-0 space-y-4">
@@ -593,3 +596,65 @@ function RelancesCard() {
   );
 }
 
+
+function DevisAcceptationToggleCard() {
+  const [enabled, setEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "devis_acceptation_obligatoire")
+        .maybeSingle();
+      const v = (data as { value?: unknown } | null)?.value;
+      setEnabled(v === true || v === "true");
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "devis_acceptation_obligatoire", value: enabled as unknown as never });
+    setSaving(false);
+    if (error) toast.error("Échec sauvegarde", { description: error.message });
+    else toast.success("Paramètre mis à jour");
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h2 className="font-semibold text-pro-text flex items-center gap-2">
+            <ShieldCheck size={16} className="text-pro-accent" />
+            Acceptation de devis obligatoire
+          </h2>
+          <p className="text-xs text-pro-muted mt-1">
+            Si activé, chaque client doit accepter explicitement le devis et les CGV (case à cocher horodatée)
+            avant la création de la demande de convoyage. Les clients marqués comme "exemptés" dans leur fiche
+            peuvent valider directement.
+          </p>
+        </div>
+        <label className="inline-flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={enabled}
+            disabled={loading}
+            onChange={(e) => setEnabled(e.target.checked)}
+            className="h-5 w-9 appearance-none rounded-full bg-pro-border checked:bg-emerald-500 transition relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition checked:after:translate-x-4"
+          />
+          <span className="text-xs font-medium text-pro-text">{enabled ? "Activée" : "Désactivée"}</span>
+        </label>
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Button icon={<Save size={14} />} onClick={save} disabled={saving || loading}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+    </Card>
+  );
+}

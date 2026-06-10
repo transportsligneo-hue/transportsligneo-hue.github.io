@@ -1,126 +1,88 @@
+Plan en 4 lots livrés dans cet ordre. Chaque lot est testable indépendamment.
 
-# Plan de refonte Transports Ligneo
+## Lot 1 — Workflow d'acceptation de devis (le plus gros)
 
-Travail découpé en 5 phases livrées séquentiellement. Chaque phase est testable et déployable seule. Je m'arrête en fin de chaque phase pour validation avant d'attaquer la suivante.
+**Base de données**
+- Nouveau paramètre global dans `app_settings` : `devis_acceptation_obligatoire` (bool, défaut `true`).
+- Nouveau champ `exempte_acceptation_devis` (bool, défaut `false`) sur `profiles`.
+- Nouvelle table `devis_acceptations` :
+  - devis_id, devis_version, client_user_id, client_email
+  - accepted_at (UTC), ip_address, user_agent
+  - montant_accepte, cgv_version, statut (`accepte`)
+  - pdf_url (lien vers le PDF figé du devis accepté)
+- Nouveau champ `version` (int, défaut 1) + `locked_at` sur `devis`. À chaque modification d'un devis déjà accepté → +1 version, `locked_at` reset, nouvelle acceptation requise.
+- RLS : client lit ses propres acceptations, admin lit tout, insert via server fn uniquement.
 
----
+**UI Client (étape d'acceptation)**
+- Nouveau composant `DevisAcceptationStep` inséré AVANT le paiement / la création de la demande.
+- Affiche : récap trajet, véhicule, total TTC détaillé, lien CGV (modale).
+- Case à cocher obligatoire avec le texte exact demandé.
+- Bouton "Accepter et continuer" désactivé tant que case non cochée.
+- Logique : si `devis_acceptation_obligatoire = false` OU `profile.exempte_acceptation_devis = true` → étape sautée.
 
-## Phase 1 — Nettoyage marques & identité visuelle (rapide, sûr)
+**Serveur**
+- `acceptDevis` serverFn : capture IP (`getRequestHeader('x-forwarded-for')`) + UA, génère PDF figé via `generateDevisPdf`, upload dans bucket `devis-pdfs` (nouveau, privé), insert dans `devis_acceptations`, envoie email avec PDF.
+- Email transactionnel : nouveau template `devis-accepte.tsx` (récap + date acceptation + lien PDF).
+- Verrouillage : trigger `protect_accepted_devis` → toute UPDATE sur un devis avec `locked_at != null` crée une nouvelle version au lieu de modifier.
 
-**Objectif** : supprimer toute trace Welcome Auto / Ayvens, garantir que le logo Ligneo apparaît partout.
+**Admin**
+- Toggle `devis_acceptation_obligatoire` dans `admin.parametres.tsx`.
+- Toggle `exempte_acceptation_devis` dans fiche client.
+- Sur fiche devis admin : statut acceptation, date, IP, lien PDF.
+- Export CSV/PDF des preuves d'acceptation depuis `admin.devis.tsx`.
 
-- Recherche globale (`rg`) sur `welcome auto`, `ayvens`, `WelcomeAuto`, `AYVENS` dans :
-  - code source (`src/`, `supabase/`)
-  - templates email (`src/lib/email-templates/`)
-  - libs PDF (`devis-pdf.ts`, `facture-pdf.ts`, `mission-pdf.ts`, `edl-final-pdf.ts`)
-  - base de données (champs `logo_url`, `client_nom`, partners, etc.)
-- Remplacement par neutre ou logo Ligneo.
-- Vérifier `PartnersMarquee` (mémoire dit "intouchable" — je retire seulement Welcome Auto / Ayvens si présents).
-- Centraliser le logo Ligneo dans un composant unique + URL stable (`/logo-ligneo.png` ou import asset) utilisé dans :
-  - emails (composant `<Img />` partagé)
-  - PDF (devis/facture/mission/EDL)
-  - notifications navigateur
+## Lot 2 — Bug lien confirmation email + notifs
 
-**Livrable** : 0 occurrence des deux marques, logo Ligneo cohérent partout.
+**Lien confirmation email**
+- Créer route `/auth/email-confirme.tsx` (page publique) qui affiche : logo, "Email validé ✓", "Votre compte est activé", bouton "Aller à mon espace".
+- Modifier le template auth `email-change.tsx` + `signup.tsx` pour pointer vers cette page après confirmation (URL `{{ .RedirectTo }}` → `/auth/email-confirme`).
+- Configurer Supabase Auth → `site_url` redirect inclut cette route.
 
----
+**Notifs push + email admin/client**
+- Audit des points d'envoi (création devis, acceptation, paiement, attribution, mission terminée) → garantir double envoi (push via `push_subscriptions` + email via `sendTransactionalEmail`).
+- Admin : s'abonner aux push pour tous les events `admin_notifications` non lus.
+- Ajouter logs `email_send_log` côté admin pour visibilité.
 
-## Phase 2 — Fusion espaces B2B + Flotte
+## Lot 3 — Lisibilité + splash logo animé PWA
 
-**Objectif** : un seul espace pro (`/pro`) qui sert client_b2b ET flotte_partenaire avec les mêmes routes/composants.
+**Lisibilité**
+- Augmenter contraste texte sur cartes :
+  - `.card-premium-light` (cream) : texte navy `#0b1026` au lieu de gris doux.
+  - Tableaux admin (clients, devis, factures) : `text-cream` au lieu de `text-cream/60`, headers en `text-cream`.
+  - Panneau tarifs (`Tarifs.tsx`) : passer libellés de `text-cream/70` à `text-cream` + augmenter weight `font-medium`.
+- Conserver design premium 60/25/15 (mémoire projet).
 
-- Audit des routes existantes : `/dashboard-pro/*`, `/entreprise/*`, `/flotte/*`.
-- Choix de la cible : garder `/pro` comme racine unique, alias `/dashboard-pro`, `/entreprise`, `/flotte` en redirections.
-- Fusion sidebar : sidebar pro unique avec items conditionnels (ex. "Mes conducteurs" uniquement si `orgRole = flotte_partenaire`).
-- Mise à jour `useAuth.computeHomeRoute` → toutes les variantes pro retournent `/pro`.
-- Permissions : composant `<ProFeature requires="flotte_partenaire">` pour les blocs réservés flotte.
-- Migration : pas de changement schéma, juste route layer + composants.
+**Splash logo animé**
+- Composant `LogoLoader` : logo Ligneo avec animation CSS (pulse doré + rotation lente).
+- Remplacer tous les `<Loader2 className="animate-spin" />` plein écran par `<LogoLoader />`.
+- Splash PWA : dans `public/manifest.webmanifest` + `__root.tsx` afficher `LogoLoader` pendant l'hydratation initiale.
 
-**Livrable** : `/pro` unique, anciennes URLs redirigent, parité fonctionnelle.
+## Lot 4 — Tarifs étendus ville/département
 
----
+**Base de données**
+- Étendre `client_pricing_rules` :
+  - `departement_depart` (text, ex "37")
+  - `departement_arrivee` (text, ex "75")
+  - `match_mode_depart` enum `ville | departement | both` (calculé)
+  - idem arrivée
+- Adapter `resolve_client_pricing_rule()` SQL function pour matcher aussi par département (via lookup ville → dept dans `pricing-departments.ts` existant).
+- Scoring : ville+ville > ville+dept > dept+dept > général.
 
-## Phase 3 — Refonte espace particulier sur design pro
-
-**Objectif** : `/dashboard-client` reprend la sidebar/cards/header de `/pro` avec un sous-ensemble d'items.
-
-- Réutiliser `ProSidebar` (renommée `ClientSidebar` ou paramétrée).
-- Items particulier : Vue d'ensemble · Nouvelle demande · Mes missions · Devis · Factures · Profil.
-- Pas d'accès : adresses favorites bulk, société, conducteurs, dispatch.
-- Réutiliser les mêmes composants cards/tables que le pro.
-- Conserver les routes existantes `/dashboard-client/*`, juste mise à niveau visuelle + UX.
-
-**Livrable** : particulier ↔ pro = même feel, fonctions filtrées.
-
----
-
-## Phase 4 — Stripe complet
-
-**Objectif** : paiement automatique pour particuliers + pros sans rôle org récurrent ; facturation différée pour `flotte_partenaire` et `client_b2b`.
-
-Règle confirmée : `orgRole IN ('flotte_partenaire','client_b2b')` → différé. Sinon → Stripe obligatoire.
-
-- Audit existant : routes API Stripe déjà en place (`/api/devis/checkout`, `/api/b2b/checkout`, `/api/facture/checkout`, webhooks `/api/public/devis|facture|b2b/webhook`). Utilise `stripe-server.ts` via gateway Lovable.
-- Helper `requiresImmediatePayment(user)` côté client + serveur :
-  - lit `organization_roles` du user
-  - true sauf si flotte_partenaire ou client_b2b
-- Brancher dans :
-  - création devis → si paiement requis : tunnel Stripe Checkout embedded obligatoire avant validation
-  - création mission ponctuelle pro → idem
-  - particulier : Stripe systématique
-- Webhooks Stripe (déjà présents) : vérifier qu'au `payment_succeeded` :
-  1. statut paiement mis à jour (`paid_at`)
-  2. facture PDF générée auto (déclencher `facture-pdf.ts`)
-  3. notification admin (`notifyAdmin` type `b2b_paiement`)
-  4. email confirmation client (`mission-confirmation` ou nouveau template `paiement-confirme`)
-- Test sandbox : carte `4242 4242 4242 4242`.
-- Banner test mode (`PaymentTestModeBanner`) ajouté sur layouts paiement.
-
-**Livrable** : flux paiement bout-en-bout, facture auto, notifications.
+**UI Admin (`ClientPricingRulesBlock`)**
+- Form : choix par règle entre "Ville", "Département" ou "Les deux" pour départ ET arrivée séparément.
+- Champ département = select des 101 départements FR.
+- Tableau récap montre clairement le scope de chaque règle.
 
 ---
 
-## Phase 5 — Audit emails & notifications
+## Détails techniques
 
-**Objectif** : pour chaque événement listé, un email + une notif admin déclenchés.
+- Stack : TanStack Start, server fns avec `requireSupabaseAuth`, RLS sur toutes nouvelles tables, GRANTs explicites.
+- PDF : réutilise `src/lib/devis-pdf.ts` existant, ajoute version au filename.
+- Storage : nouveau bucket `devis-acceptes` privé, RLS scopée client+admin.
+- Migrations Supabase séparées par lot pour rollback facile.
+- Pas de framer-motion (mémoire projet) — animations CSS pures.
 
-Matrice à vérifier/compléter :
+## Question avant de démarrer
 
-| Événement | Email client | Notif admin | Statut actuel |
-|---|---|---|---|
-| Inscription | ✓ welcome | ✓ client_action/driver_action | déjà fait |
-| Validation compte convoyeur | ✓ convoyeur-validation | ✓ | à vérifier |
-| Demande de devis | ✓ devis-client | ✓ devis | à vérifier |
-| Création mission | ✓ mission-confirmation | ✓ | à vérifier |
-| Attribution convoyeur | ⨯ à créer | ✓ mission_acceptee | manquant côté client |
-| Changement statut | ⨯ optionnel | ⨯ | à décider |
-| Mission terminée | ⨯ à créer | ✓ mission_terminee | manquant côté client |
-| Facture générée | ⨯ à créer | ⨯ à créer | manquant |
-| Paiement Stripe validé | ⨯ à créer | ✓ b2b_paiement | template à créer |
-| Reset password | ✓ recovery (auth) | n/a | OK |
-
-- Audit `src/lib/email-templates/registry.ts` + tous les call sites.
-- Ajouter templates manquants (logo Ligneo en header).
-- Vérifier `notifyAdmin` appelé partout (déjà fait sur inscriptions selon historique).
-- Tester via `/lovable/email/transactional/preview` chaque template.
-- Vérifier que `email_send_log` n'a pas de DLQ.
-
-**Livrable** : matrice 100% verte.
-
----
-
-## Détails techniques transverses
-
-- Aucun changement de stack (TanStack Start + Supabase + Stripe via gateway Lovable).
-- Migrations DB attendues : aucune phase 1-3 ; phase 4 possiblement une colonne `requires_stripe boolean` sur `organizations` si on retient l'override admin un jour. Pour l'instant règle déduite à la volée.
-- Tests : build après chaque phase, smoke test du flow concerné.
-- Pas de framer-motion (mémoire).
-- Respect tokens design `oklch` / `.glass-onyx` / `.card-premium-light`.
-
----
-
-## Ordre d'exécution
-
-Je commence Phase 1 dès validation de ce plan, puis stop pour confirmation avant Phase 2. Si tu veux que j'enchaîne sans pause, dis-le et je fais 1 → 5 d'affilée (durée ≈ très longue, plusieurs tours d'outils).
-
-Validez-vous ce découpage ? Quelque chose à ajuster avant que je commence ?
+Je commence par le **Lot 1** (workflow d'acceptation, ~le plus gros). Confirmez-vous ou voulez-vous changer l'ordre ?
