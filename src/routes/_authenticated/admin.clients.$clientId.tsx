@@ -109,6 +109,7 @@ const EMPTY: Editable = {
   facture_mention_legale: "",
   facture_mention_active: false,
   relances_disabled: false,
+  exempte_acceptation_devis: false,
 };
 
 function AdminClientDetail() {
