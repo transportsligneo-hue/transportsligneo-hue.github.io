@@ -321,13 +321,13 @@ function MesFacturesEtDevis() {
                   const order = ["acceptation", "docs", "pay"];
                   const currentIdx = order.indexOf(step);
                   const done = i < currentIdx;
-                  const active = i === currentIdx;
+                  const isCurrent = i === currentIdx;
                   return (
                     <div key={s} className="flex items-center gap-1.5 flex-1">
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 ${active ? "bg-primary text-navy" : done ? "bg-emerald-500/20 text-emerald-300" : "bg-cream/10 text-cream/40"}`}>
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 ${isCurrent ? "bg-primary text-navy" : done ? "bg-emerald-500/20 text-emerald-300" : "bg-cream/10 text-cream/40"}`}>
                         {done ? "✓" : i + 1}
                       </span>
-                      <span className={active ? "text-primary" : done ? "text-emerald-400" : "text-cream/40"}>{labels[s]}</span>
+                      <span className={isCurrent ? "text-primary" : done ? "text-emerald-400" : "text-cream/40"}>{labels[s]}</span>
                       {i < 2 && <div className="h-px flex-1 bg-cream/10" />}
                     </div>
                   );
