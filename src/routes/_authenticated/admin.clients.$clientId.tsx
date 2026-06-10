@@ -91,6 +91,7 @@ type Editable = {
   facture_mention_legale: string;
   facture_mention_active: boolean;
   relances_disabled: boolean;
+  exempte_acceptation_devis: boolean;
 };
 
 const EMPTY: Editable = {
