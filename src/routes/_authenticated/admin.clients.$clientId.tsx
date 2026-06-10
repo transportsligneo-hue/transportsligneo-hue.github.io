@@ -554,7 +554,7 @@ function AdminClientDetail() {
               N'oubliez pas d'enregistrer le profil après modification.
             </p>
 
-            <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
+            <div className="mt-4 pt-4 border-t border-slate-200 space-y-3">
               <label className="flex items-start gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
@@ -570,9 +570,27 @@ function AdminClientDetail() {
                   </span>
                 </span>
               </label>
+
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={form.exempte_acceptation_devis}
+                  onChange={(e) => setForm({ ...form, exempte_acceptation_devis: e.target.checked })}
+                />
+                <span>
+                  <span className="font-medium">Client exempté d'acceptation de devis</span>
+                  <span className="block text-xs text-[color:var(--admin-muted)]">
+                    Permet à ce client de valider directement ses demandes sans étape
+                    d'acceptation devis + CGV. Recommandé pour les clients professionnels,
+                    partenaires ou récurrents.
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
         </AdminSection>
+
 
 
         {/* Historique missions */}
