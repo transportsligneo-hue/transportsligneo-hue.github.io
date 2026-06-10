@@ -44,12 +44,14 @@ export const acceptDevis = createServerFn({ method: "POST" })
       return { ok: true, alreadyAccepted: true };
     }
 
+    const req = getRequest();
+    const headers = req?.headers;
     const ip =
-      getRequestHeader("cf-connecting-ip") ??
-      getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ??
-      getRequestHeader("x-real-ip") ??
+      headers?.get("cf-connecting-ip") ??
+      headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      headers?.get("x-real-ip") ??
       null;
-    const userAgent = getRequestHeader("user-agent") ?? null;
+    const userAgent = headers?.get("user-agent") ?? null;
 
     const clientEmail = (devis.email ?? email ?? "").toLowerCase();
     if (!clientEmail) throw new Error("Email client manquant");
