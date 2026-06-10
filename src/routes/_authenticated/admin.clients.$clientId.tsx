@@ -162,6 +162,7 @@ function AdminClientDetail() {
         facture_mention_legale: prof.facture_mention_legale ?? "",
         facture_mention_active: !!prof.facture_mention_active,
         relances_disabled: !!prof.relances_disabled,
+        exempte_acceptation_devis: !!prof.exempte_acceptation_devis,
       };
       setForm(init);
       setOriginal(init);
