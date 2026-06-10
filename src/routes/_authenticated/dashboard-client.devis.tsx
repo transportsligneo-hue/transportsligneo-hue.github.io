@@ -78,8 +78,9 @@ function MesFacturesEtDevis() {
   const [factures, setFactures] = useState<FactureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [step, setStep] = useState<"docs" | "pay">("docs");
+  const [step, setStep] = useState<"acceptation" | "docs" | "pay">("acceptation");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const getStatus = useServerFn(getDevisAcceptationStatus);
 
   const refresh = async () => {
     if (!user) return;
