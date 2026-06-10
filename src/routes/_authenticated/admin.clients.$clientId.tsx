@@ -57,6 +57,7 @@ interface Profile {
   facture_mention_legale: string | null;
   facture_mention_active: boolean | null;
   relances_disabled: boolean | null;
+  exempte_acceptation_devis: boolean | null;
 }
 
 interface MissionItem {
