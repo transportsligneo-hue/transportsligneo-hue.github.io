@@ -37,6 +37,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
+import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
@@ -96,6 +97,7 @@ import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
+import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -251,6 +253,11 @@ const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
   id: '/partenariat-flotte',
   path: '/partenariat-flotte',
   getParentRoute: () => B2bRoute,
+} as any)
+const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
+  id: '/auth/email-confirmation',
+  path: '/auth/email-confirmation',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedFlotteRoute = AuthenticatedFlotteRouteImport.update({
   id: '/flotte',
@@ -596,6 +603,12 @@ const AuthenticatedAdminAttributionsRoute =
     path: '/attributions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAcceptationsRoute =
+  AuthenticatedAdminAcceptationsRouteImport.update({
+    id: '/acceptations',
+    path: '/acceptations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -717,10 +730,12 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -815,10 +830,12 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -921,10 +938,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1027,10 +1046,12 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/entreprise'
     | '/flotte'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/admin/acceptations'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1125,10 +1146,12 @@ export interface FileRouteTypes {
     | '/services'
     | '/tarifs'
     | '/unsubscribe'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/admin/acceptations'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1230,10 +1253,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro'
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
     | '/_authenticated/admin/b2b-leads'
@@ -1330,6 +1355,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
@@ -1544,6 +1570,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/partenariat-flotte'
       preLoaderRoute: typeof B2bPartenariatFlotteRouteImport
       parentRoute: typeof B2bRoute
+    }
+    '/auth/email-confirmation': {
+      id: '/auth/email-confirmation'
+      path: '/auth/email-confirmation'
+      fullPath: '/auth/email-confirmation'
+      preLoaderRoute: typeof AuthEmailConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/flotte': {
       id: '/_authenticated/flotte'
@@ -1958,6 +1991,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAttributionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/acceptations': {
+      id: '/_authenticated/admin/acceptations'
+      path: '/acceptations'
+      fullPath: '/admin/acceptations'
+      preLoaderRoute: typeof AuthenticatedAdminAcceptationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -2133,6 +2173,7 @@ const AuthenticatedAdminOrganisationsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAcceptationsRoute: typeof AuthenticatedAdminAcceptationsRoute
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
@@ -2155,6 +2196,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAcceptationsRoute: AuthenticatedAdminAcceptationsRoute,
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
@@ -2411,6 +2453,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
@@ -2430,12 +2473,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

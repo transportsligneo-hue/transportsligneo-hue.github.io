@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, CreditCard, FileText, X, FileCheck2, Download, Receipt } from "lucide-react";
+import { Loader2, CreditCard, FileText, X, FileCheck2, Download, Receipt, PenLine, History } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,8 +8,10 @@ import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout"
 import { VehiculeDocsStep } from "@/components/devis/VehiculeDocsStep";
 import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { getDevisAcceptationStatus } from "@/lib/devis-acceptation.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 type DevisRow = {
   id: string;
@@ -25,7 +27,12 @@ type DevisRow = {
   carte_grise_recto_url: string | null;
   carte_grise_verso_url: string | null;
   vehicule_docs_completed: boolean;
-};
+  version: number | null;
+  locked_at: string | null;
+  accepted_at: string | null;
+  expires_at: string | null;
+  archived_at: string | null;
+} & Record<string, unknown>;
 
 type FactureRow = {
   id: string;
@@ -53,15 +60,26 @@ type FactureRow = {
   mode_paiement: string | null;
 };
 
+type HistoryRow = {
+  id: string;
+  old_statut: string | null;
+  new_statut: string;
+  created_at: string;
+};
+
 export const Route = createFileRoute("/_authenticated/dashboard-client/devis")({
   component: MesFacturesEtDevis,
 });
 
 const STATUT_LABELS: Record<string, { label: string; cls: string }> = {
-  envoye: { label: "En attente validation", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
-  accepte: { label: "Validé — à payer", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
-  convertit: { label: "Converti en mission", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+  brouillon: { label: "Brouillon", cls: "bg-cream/10 text-cream/70 border-cream/20" },
+  genere: { label: "Généré", cls: "bg-cream/10 text-cream border-cream/30" },
+  envoye: { label: "En attente d'acceptation", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+  en_attente: { label: "En attente d'acceptation", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+  accepte: { label: "Accepté — à payer", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+  convertit: { label: "Transformé en mission", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
   refuse: { label: "Refusé", cls: "bg-red-500/15 text-red-300 border-red-500/30" },
+  expire: { label: "Expiré", cls: "bg-cream/10 text-cream/60 border-cream/20" },
 };
 
 const FACT_STATUT_LABELS: Record<string, { label: string; cls: string }> = {
@@ -70,6 +88,12 @@ const FACT_STATUT_LABELS: Record<string, { label: string; cls: string }> = {
   en_retard: { label: "En retard", cls: "bg-red-500/15 text-red-300 border-red-500/30" },
   annulee: { label: "Annulée", cls: "bg-cream/10 text-cream/60 border-cream/20" },
 };
+
+function isExpired(d: DevisRow): boolean {
+  if (d.statut === "expire") return true;
+  if (!d.expires_at || d.paid_at || d.locked_at) return false;
+  return ["genere", "envoye", "en_attente"].includes(d.statut) && new Date(d.expires_at) < new Date();
+}
 
 function MesFacturesEtDevis() {
   const { user } = useAuth();
@@ -80,12 +104,13 @@ function MesFacturesEtDevis() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [step, setStep] = useState<"acceptation" | "docs" | "pay">("acceptation");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [historyFor, setHistoryFor] = useState<DevisRow | null>(null);
+  const [history, setHistory] = useState<HistoryRow[] | null>(null);
   const getStatus = useServerFn(getDevisAcceptationStatus);
 
   const refresh = async () => {
     if (!user) return;
     const authEmail = (user.email ?? "").toLowerCase();
-    // On regarde aussi l'email du profil (parfois différent de l'auth)
     const { data: prof } = await supabase
       .from("profiles").select("email").eq("user_id", user.id).maybeSingle();
     const profEmail = (prof?.email ?? "").toLowerCase();
@@ -94,8 +119,9 @@ function MesFacturesEtDevis() {
     const [dRes, fRes] = await Promise.all([
       supabase
         .from("devis")
-        .select("id, numero, depart, arrivee, prix_estime, statut, paid_at, created_at, date_souhaitee, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_docs_completed")
+        .select("*")
         .or(`user_id.eq.${user.id}${emails.length ? `,${emails.map(e => `email.eq.${e}`).join(",")}` : ""}`)
+        .is("archived_at", null)
         .order("created_at", { ascending: false }),
       emails.length > 0
         ? supabase
@@ -110,7 +136,6 @@ function MesFacturesEtDevis() {
     setLoading(false);
   };
 
-
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,7 +146,7 @@ function MesFacturesEtDevis() {
     ? `${window.location.origin}/dashboard-client/devis?paye=1`
     : "/";
 
-  const startPayment = async (d: DevisRow) => {
+  const openFlow = async (d: DevisRow) => {
     setActiveId(d.id);
     try {
       const status = await getStatus({ data: { devisId: d.id } });
@@ -131,8 +156,53 @@ function MesFacturesEtDevis() {
         setStep(d.vehicule_docs_completed ? "pay" : "docs");
       }
     } catch {
-      setStep(d.vehicule_docs_completed ? "pay" : "docs");
+      setStep(d.locked_at ? (d.vehicule_docs_completed ? "pay" : "docs") : "acceptation");
     }
+  };
+
+  const handleDownloadDevis = async (d: DevisRow) => {
+    setDownloadingId(d.id);
+    try {
+      // Si un PDF figé signé existe, on le télécharge en priorité
+      if (d.locked_at && user) {
+        const { data: acc } = await supabase
+          .from("devis_acceptations")
+          .select("pdf_url")
+          .eq("devis_id", d.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (acc?.pdf_url) {
+          const { data: signed } = await supabase.storage
+            .from("devis-acceptes")
+            .createSignedUrl(acc.pdf_url, 300);
+          if (signed?.signedUrl) {
+            window.open(signed.signedUrl, "_blank");
+            return;
+          }
+        }
+      }
+      const blob = await generateDevisPdf({
+        ...(d as unknown as DevisData),
+        version: d.version ?? 1,
+      });
+      downloadDevisPdf(blob, d.numero);
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const openHistory = async (d: DevisRow) => {
+    setHistoryFor(d);
+    setHistory(null);
+    const { data } = await supabase
+      .from("devis_status_history")
+      .select("id, old_statut, new_statut, created_at")
+      .eq("devis_id", d.id)
+      .order("created_at", { ascending: false });
+    setHistory((data ?? []) as HistoryRow[]);
   };
 
   const handleDownloadFacture = async (f: FactureRow) => {
@@ -174,14 +244,14 @@ function MesFacturesEtDevis() {
   };
 
   if (loading) {
-    return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
+    return <div className="flex justify-center py-12"><LogoLoader label="Chargement de vos devis…" /></div>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Factures &amp; devis</h1>
-        <p className="text-cream/50 text-sm mt-1">Validez vos devis et téléchargez vos factures</p>
+        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes devis &amp; factures</h1>
+        <p className="text-cream/60 text-sm mt-1">Historique complet — vos devis et factures restent visibles en permanence</p>
       </div>
 
       {/* Tabs */}
@@ -196,7 +266,7 @@ function MesFacturesEtDevis() {
             className={`px-4 py-2.5 text-xs uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors ${
               tab === t.key
                 ? "text-primary border-primary"
-                : "text-cream/50 border-transparent hover:text-cream/80"
+                : "text-cream/60 border-transparent hover:text-cream/90"
             }`}
           >
             <t.icon size={13} /> {t.label}
@@ -208,37 +278,68 @@ function MesFacturesEtDevis() {
         devis.length === 0 ? (
           <div className="card-premium rounded p-8 text-center">
             <FileText className="mx-auto text-cream/30 mb-3" size={40} />
-            <p className="text-cream/60">Aucun devis pour le moment.</p>
+            <p className="text-cream/70">Aucun devis pour le moment.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {devis.map((d) => {
-              const status = STATUT_LABELS[d.statut] ?? { label: d.statut, cls: "bg-cream/10 text-cream/60 border-cream/20" };
-              const payable = d.statut === "accepte" && !d.paid_at;
+              const expired = isExpired(d);
+              const statutKey = expired ? "expire" : d.statut;
+              const status = STATUT_LABELS[statutKey] ?? { label: d.statut, cls: "bg-cream/10 text-cream/70 border-cream/20" };
+              const signable = !d.locked_at && !d.paid_at && !expired && !["refuse", "expire", "convertit"].includes(d.statut);
+              const payable = d.statut === "accepte" && !d.paid_at && !expired;
               return (
                 <div key={d.id} className="card-premium rounded p-5 flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] px-2 py-0.5 rounded border bg-primary/15 text-primary border-primary/40 font-heading tracking-wider uppercase">Devis</span>
-                      <span className="text-cream/40 text-xs uppercase tracking-wider">{d.numero}</span>
+                      <span className="text-cream/70 text-xs uppercase tracking-wider font-medium">{d.numero}</span>
+                      {(d.version ?? 1) > 1 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border bg-cream/10 text-cream/70 border-cream/20">v{d.version}</span>
+                      )}
                       <span className={`text-xs px-2 py-1 rounded border ${status.cls}`}>{status.label}</span>
-                      {d.paid_at && <span className="text-xs px-2 py-1 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">Payé</span>}
-                      {payable && d.vehicule_docs_completed && (
-                        <span className="text-xs px-2 py-1 rounded border bg-blue-500/15 text-blue-300 border-blue-500/30 inline-flex items-center gap-1">
-                          <FileCheck2 size={11} /> Docs OK
+                      {d.locked_at && (
+                        <span className="text-xs px-2 py-1 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30 inline-flex items-center gap-1">
+                          <PenLine size={10} /> Signé
                         </span>
                       )}
+                      {d.paid_at && <span className="text-xs px-2 py-1 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">Payé</span>}
                     </div>
                     <p className="text-cream font-heading text-base mt-1 truncate">{d.depart} → {d.arrivee}</p>
-                    <p className="text-cream/50 text-xs mt-1">
-                      {d.date_souhaitee ? new Date(d.date_souhaitee).toLocaleDateString("fr-FR") : "Date à confirmer"}
+                    <p className="text-cream/60 text-xs mt-1">
+                      Créé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      {d.date_souhaitee ? ` · souhaité le ${new Date(d.date_souhaitee).toLocaleDateString("fr-FR")}` : ""}
+                      {d.expires_at && !d.locked_at && !d.paid_at ? ` · valable jusqu'au ${new Date(d.expires_at).toLocaleDateString("fr-FR")}` : ""}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <p className="font-heading text-xl text-primary whitespace-nowrap">{Number(d.prix_estime).toFixed(2)} €</p>
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <p className="font-heading text-xl text-primary whitespace-nowrap mr-1">{Number(d.prix_estime).toFixed(2)} €</p>
+                    <button
+                      onClick={() => openHistory(d)}
+                      title="Historique du devis"
+                      className="p-2 rounded border border-cream/20 text-cream/70 hover:text-cream hover:border-cream/40 transition-colors"
+                    >
+                      <History size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDownloadDevis(d)}
+                      disabled={downloadingId === d.id}
+                      title="Télécharger le PDF"
+                      className="p-2 rounded border border-cream/20 text-cream/70 hover:text-cream hover:border-cream/40 transition-colors disabled:opacity-50"
+                    >
+                      {downloadingId === d.id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                    </button>
+                    {signable && (
+                      <button
+                        onClick={() => openFlow(d)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded"
+                      >
+                        <PenLine size={14} /> Signer le devis
+                      </button>
+                    )}
                     {payable && (
                       <button
-                        onClick={() => startPayment(d)}
+                        onClick={() => openFlow(d)}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded"
                       >
                         {d.vehicule_docs_completed ? <CreditCard size={14} /> : <FileCheck2 size={14} />}
@@ -257,23 +358,23 @@ function MesFacturesEtDevis() {
         factures.length === 0 ? (
           <div className="card-premium rounded p-8 text-center">
             <Receipt className="mx-auto text-cream/30 mb-3" size={40} />
-            <p className="text-cream/60">Aucune facture émise pour le moment.</p>
-            <p className="text-cream/40 text-xs mt-1">Les factures apparaissent ici une fois la mission terminée.</p>
+            <p className="text-cream/70">Aucune facture émise pour le moment.</p>
+            <p className="text-cream/50 text-xs mt-1">Les factures apparaissent ici une fois la mission terminée.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {factures.map((f) => {
-              const st = FACT_STATUT_LABELS[f.statut] ?? { label: f.statut, cls: "bg-cream/10 text-cream/60 border-cream/20" };
+              const st = FACT_STATUT_LABELS[f.statut] ?? { label: f.statut, cls: "bg-cream/10 text-cream/70 border-cream/20" };
               return (
                 <div key={f.id} className="card-premium rounded p-5 flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] px-2 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-heading tracking-wider uppercase">Facture</span>
-                      <span className="text-cream/40 text-xs uppercase tracking-wider">{f.numero}</span>
+                      <span className="text-cream/70 text-xs uppercase tracking-wider font-medium">{f.numero}</span>
                       <span className={`text-xs px-2 py-1 rounded border ${st.cls}`}>{st.label}</span>
                     </div>
                     <p className="text-cream font-heading text-base mt-1 truncate">{f.depart} → {f.arrivee}</p>
-                    <p className="text-cream/50 text-xs mt-1">
+                    <p className="text-cream/60 text-xs mt-1">
                       {f.date_facture ? new Date(f.date_facture).toLocaleDateString("fr-FR") : "—"}
                       {f.distance_km ? ` · ${f.distance_km} km` : ""}
                     </p>
@@ -281,7 +382,7 @@ function MesFacturesEtDevis() {
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <p className="font-heading text-xl text-primary">{Number(f.prix_ttc).toFixed(2)} €</p>
-                      <p className="text-cream/40 text-[10px]">TTC ({Number(f.prix_ht).toFixed(2)} € HT)</p>
+                      <p className="text-cream/50 text-[10px]">TTC ({Number(f.prix_ht).toFixed(2)} € HT)</p>
                     </div>
                     <button
                       onClick={() => handleDownloadFacture(f)}
@@ -299,6 +400,44 @@ function MesFacturesEtDevis() {
         )
       )}
 
+      {/* Historique modal */}
+      {historyFor && (
+        <div className="fixed inset-0 bg-navy/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-navy-dark border border-primary/30 rounded-xl max-w-md w-full p-6 relative max-h-[80vh] overflow-auto">
+            <button
+              onClick={() => setHistoryFor(null)}
+              className="absolute top-4 right-4 text-cream/60 hover:text-cream"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <h2 className="font-heading text-lg text-primary tracking-wider mb-1">Historique — {historyFor.numero}</h2>
+            <p className="text-cream/60 text-xs mb-4">{historyFor.depart} → {historyFor.arrivee}</p>
+            {history === null ? (
+              <div className="flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={20} /></div>
+            ) : history.length === 0 ? (
+              <p className="text-cream/60 text-sm">Aucun événement enregistré.</p>
+            ) : (
+              <div className="space-y-2">
+                {history.map(h => {
+                  const to = STATUT_LABELS[h.new_statut]?.label ?? h.new_statut;
+                  const from = h.old_statut ? (STATUT_LABELS[h.old_statut]?.label ?? h.old_statut) : null;
+                  return (
+                    <div key={h.id} className="flex items-start gap-3 p-2.5 rounded border border-cream/10 bg-navy/40">
+                      <History size={13} className="text-primary shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <p className="text-cream">{from ? `${from} → ${to}` : `Créé (${to})`}</p>
+                        <p className="text-cream/50 mt-0.5">{new Date(h.created_at).toLocaleString("fr-FR")}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {active && (
         <div className="fixed inset-0 bg-navy/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
           <div className="bg-navy-dark border border-primary/30 rounded-xl max-w-2xl w-full p-6 my-8 relative">
@@ -313,11 +452,11 @@ function MesFacturesEtDevis() {
               <h2 className="font-heading text-xl text-primary tracking-wider">
                 {step === "acceptation" ? "Acceptation du devis" : step === "docs" ? "Documents véhicule" : "Paiement"} — {active.numero}
               </h2>
-              <p className="text-cream/60 text-sm mt-1">{active.depart} → {active.arrivee} · {Number(active.prix_estime).toFixed(2)} €</p>
+              <p className="text-cream/70 text-sm mt-1">{active.depart} → {active.arrivee} · {Number(active.prix_estime).toFixed(2)} €</p>
 
               <div className="flex items-center gap-1.5 mt-4 text-[10px] uppercase tracking-wider">
                 {(["acceptation", "docs", "pay"] as const).map((s, i) => {
-                  const labels = { acceptation: "Accept.", docs: "Documents", pay: "Paiement" };
+                  const labels = { acceptation: "Signature", docs: "Documents", pay: "Paiement" };
                   const order = ["acceptation", "docs", "pay"];
                   const currentIdx = order.indexOf(step);
                   const done = i < currentIdx;

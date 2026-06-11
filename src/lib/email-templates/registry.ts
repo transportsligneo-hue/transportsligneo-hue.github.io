@@ -25,6 +25,8 @@ import { template as paiementConfirme } from './paiement-confirme'
 import { template as attributionConvoyeur } from './attribution-convoyeur'
 import { template as missionTermineeClient } from './mission-terminee-client'
 import { template as factureDisponible } from './facture-disponible'
+import { template as devisAccepte } from './devis-accepte'
+
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'demande-confirmation': demandeConfirmation,
@@ -43,4 +45,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'attribution-convoyeur': attributionConvoyeur,
   'mission-terminee-client': missionTermineeClient,
   'facture-disponible': factureDisponible,
+  'devis-accepte': devisAccepte,
 }

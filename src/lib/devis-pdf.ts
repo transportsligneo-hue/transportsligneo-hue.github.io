@@ -36,6 +36,12 @@ export interface DevisData {
   mode_paiement?: string | null;
   validite_jours?: number;
   created_at?: string;
+  /** Version du devis (1 par défaut) — affichée si > 1 */
+  version?: number | null;
+  /** Signature manuscrite du client (data URL PNG) — bloc "Bon pour accord" */
+  clientSignatureDataUrl?: string | null;
+  /** Libellé de la date d'acceptation, ex "11/06/2026 à 14:32" */
+  acceptedAtLabel?: string | null;
 }
 
 const NAVY: [number, number, number] = [11, 16, 38];
@@ -184,7 +190,8 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
 
 
   const validite = d.validite_jours ?? 15;
-  drawHeader(doc, pageW, logoData, "DEVIS", d.numero, `Validite : ${validite} jours`);
+  const versionLabel = d.version && d.version > 1 ? ` · v${d.version}` : "";
+  drawHeader(doc, pageW, logoData, "DEVIS", d.numero, `Validite : ${validite} jours${versionLabel}`);
 
   // ===== DEVIS ETABLI POUR =====
   let y = 68;
@@ -383,10 +390,11 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.text(`Ce devis est valable ${validite} jours a compter de sa date d'emission.`, 14, y); y += 4.5;
   doc.text(`Le reglement s'effectue par ${(d.mode_paiement || "Carte bancaire").toLowerCase()}.`, 14, y); y += 4.5;
   doc.text("Aucun acompte n'est demande a la reservation.", 14, y); y += 4.5;
+  doc.text("Devis soumis aux Conditions Generales de Vente (www.transportsligneo.fr/cgv).", 14, y); y += 4.5;
   doc.text("Merci pour votre confiance.", 14, y);
 
-  // Signature (remontée + alignée, plus collée au cadre)
-  const sigBaseY = y - 18;
+  // Signature société (droite)
+  const sigBaseY = y - 22;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
@@ -406,6 +414,26 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
+
+  // Bloc "Bon pour accord" client (centre) — uniquement sur le PDF figé signé
+  if (d.clientSignatureDataUrl) {
+    const cx = pageW / 2 - 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...NAVY);
+    doc.text("Bon pour accord — Le client", cx, sigBaseY, { align: "left" });
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text(`${d.prenom} ${d.nom}`, cx, sigBaseY + 5, { align: "left" });
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", cx, sigBaseY + 7, 40, 16); } catch {}
+    if (d.acceptedAtLabel) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...MUTED);
+      doc.text(`Signe electroniquement le ${d.acceptedAtLabel}`, cx, sigBaseY + 27, { align: "left" });
+    }
+  }
 
 
 

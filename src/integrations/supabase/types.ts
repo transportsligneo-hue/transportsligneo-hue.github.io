@@ -521,9 +521,12 @@ export type Database = {
         Row: {
           active: boolean
           client_email: string
+          client_scope: string
           client_user_id: string | null
           created_at: string
           created_by: string | null
+          departement_arrivee: string | null
+          departement_depart: string | null
           id: string
           notes: string | null
           priority: number
@@ -542,9 +545,12 @@ export type Database = {
         Insert: {
           active?: boolean
           client_email: string
+          client_scope?: string
           client_user_id?: string | null
           created_at?: string
           created_by?: string | null
+          departement_arrivee?: string | null
+          departement_depart?: string | null
           id?: string
           notes?: string | null
           priority?: number
@@ -563,9 +569,12 @@ export type Database = {
         Update: {
           active?: boolean
           client_email?: string
+          client_scope?: string
           client_user_id?: string | null
           created_at?: string
           created_by?: string | null
+          departement_arrivee?: string | null
+          departement_depart?: string | null
           id?: string
           notes?: string | null
           priority?: number
@@ -772,6 +781,7 @@ export type Database = {
       }
       demandes_convoyage: {
         Row: {
+          adresse_recuperation_retour: string | null
           amount_paid_cents: number | null
           arrivee: string
           arrivee_retour: string | null
@@ -784,12 +794,14 @@ export type Database = {
           contact_depart_note: string | null
           contact_depart_tel: string | null
           created_at: string
+          date_retour: string | null
           date_souhaitee: string | null
           default_address_id: string | null
           depart: string
           depart_retour: string | null
           distance_km: number | null
           email: string
+          heure_retour: string | null
           heure_souhaitee: string | null
           id: string
           immatriculation: string | null
@@ -807,6 +819,7 @@ export type Database = {
           prenom: string
           pricing_display_mode: string | null
           prix_estime: number | null
+          recuperation_retour_identique: boolean
           statut: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -825,6 +838,7 @@ export type Database = {
           vin_retour: string | null
         }
         Insert: {
+          adresse_recuperation_retour?: string | null
           amount_paid_cents?: number | null
           arrivee: string
           arrivee_retour?: string | null
@@ -837,12 +851,14 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_retour?: string | null
           date_souhaitee?: string | null
           default_address_id?: string | null
           depart: string
           depart_retour?: string | null
           distance_km?: number | null
           email: string
+          heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
           immatriculation?: string | null
@@ -860,6 +876,7 @@ export type Database = {
           prenom: string
           pricing_display_mode?: string | null
           prix_estime?: number | null
+          recuperation_retour_identique?: boolean
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -878,6 +895,7 @@ export type Database = {
           vin_retour?: string | null
         }
         Update: {
+          adresse_recuperation_retour?: string | null
           amount_paid_cents?: number | null
           arrivee?: string
           arrivee_retour?: string | null
@@ -890,12 +908,14 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_retour?: string | null
           date_souhaitee?: string | null
           default_address_id?: string | null
           depart?: string
           depart_retour?: string | null
           distance_km?: number | null
           email?: string
+          heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
           immatriculation?: string | null
@@ -913,6 +933,7 @@ export type Database = {
           prenom?: string
           pricing_display_mode?: string | null
           prix_estime?: number | null
+          recuperation_retour_identique?: boolean
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -935,7 +956,9 @@ export type Database = {
       devis: {
         Row: {
           accepted_at: string | null
+          adresse_recuperation_retour: string | null
           amount_paid_cents: number | null
+          archived_at: string | null
           arrivee: string
           arrivee_retour: string | null
           carburant: string | null
@@ -951,6 +974,7 @@ export type Database = {
           converted_at: string | null
           converted_by: string | null
           created_at: string
+          date_retour: string | null
           date_souhaitee: string | null
           depart: string
           depart_retour: string | null
@@ -958,6 +982,8 @@ export type Database = {
           duree_estimee: string | null
           email: string
           email_envoye: boolean
+          expires_at: string | null
+          heure_retour: string | null
           heure_souhaitee: string | null
           id: string
           immatriculation_retour: string | null
@@ -978,6 +1004,9 @@ export type Database = {
           prestation: string | null
           prix_base: number | null
           prix_estime: number
+          recuperation_retour_identique: boolean
+          refused_at: string | null
+          sent_at: string | null
           statut: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -993,7 +1022,9 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          adresse_recuperation_retour?: string | null
           amount_paid_cents?: number | null
+          archived_at?: string | null
           arrivee: string
           arrivee_retour?: string | null
           carburant?: string | null
@@ -1009,6 +1040,7 @@ export type Database = {
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
+          date_retour?: string | null
           date_souhaitee?: string | null
           depart: string
           depart_retour?: string | null
@@ -1016,6 +1048,8 @@ export type Database = {
           duree_estimee?: string | null
           email: string
           email_envoye?: boolean
+          expires_at?: string | null
+          heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
           immatriculation_retour?: string | null
@@ -1036,6 +1070,9 @@ export type Database = {
           prestation?: string | null
           prix_base?: number | null
           prix_estime: number
+          recuperation_retour_identique?: boolean
+          refused_at?: string | null
+          sent_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -1051,7 +1088,9 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          adresse_recuperation_retour?: string | null
           amount_paid_cents?: number | null
+          archived_at?: string | null
           arrivee?: string
           arrivee_retour?: string | null
           carburant?: string | null
@@ -1067,6 +1106,7 @@ export type Database = {
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
+          date_retour?: string | null
           date_souhaitee?: string | null
           depart?: string
           depart_retour?: string | null
@@ -1074,6 +1114,8 @@ export type Database = {
           duree_estimee?: string | null
           email?: string
           email_envoye?: boolean
+          expires_at?: string | null
+          heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
           immatriculation_retour?: string | null
@@ -1094,6 +1136,9 @@ export type Database = {
           prestation?: string | null
           prix_base?: number | null
           prix_estime?: number
+          recuperation_retour_identique?: boolean
+          refused_at?: string | null
+          sent_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -1123,6 +1168,7 @@ export type Database = {
           metadata: Json
           montant_accepte: number
           pdf_url: string | null
+          signature_url: string | null
           statut: string
           user_agent: string | null
         }
@@ -1139,6 +1185,7 @@ export type Database = {
           metadata?: Json
           montant_accepte: number
           pdf_url?: string | null
+          signature_url?: string | null
           statut?: string
           user_agent?: string | null
         }
@@ -1155,12 +1202,51 @@ export type Database = {
           metadata?: Json
           montant_accepte?: number
           pdf_url?: string | null
+          signature_url?: string | null
           statut?: string
           user_agent?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "devis_acceptations_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          devis_id: string
+          id: string
+          new_statut: string
+          note: string | null
+          old_statut: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          devis_id: string
+          id?: string
+          new_statut: string
+          note?: string | null
+          old_statut?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          devis_id?: string
+          id?: string
+          new_statut?: string
+          note?: string | null
+          old_statut?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_status_history_devis_id_fkey"
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
@@ -2531,6 +2617,7 @@ export type Database = {
           client_email: string | null
           client_nom: string | null
           client_telephone: string | null
+          commande_ref: string | null
           commission_convoyeur_pct: number | null
           contact_arrivee_nom: string | null
           contact_arrivee_note: string | null
@@ -2549,6 +2636,7 @@ export type Database = {
           marque: string | null
           modele: string | null
           options_meta: Json
+          parent_trajet_id: string | null
           pricing_mode: string
           prix: number | null
           prix_client: number | null
@@ -2562,6 +2650,7 @@ export type Database = {
           statut: string
           statut_publication: string
           tarif_convoyeur: number | null
+          type_mission: string
           updated_at: string
           vehicule_couleur: string | null
           vehicule_energie: string | null
@@ -2583,6 +2672,7 @@ export type Database = {
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
+          commande_ref?: string | null
           commission_convoyeur_pct?: number | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
@@ -2601,6 +2691,7 @@ export type Database = {
           marque?: string | null
           modele?: string | null
           options_meta?: Json
+          parent_trajet_id?: string | null
           pricing_mode?: string
           prix?: number | null
           prix_client?: number | null
@@ -2614,6 +2705,7 @@ export type Database = {
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
+          type_mission?: string
           updated_at?: string
           vehicule_couleur?: string | null
           vehicule_energie?: string | null
@@ -2635,6 +2727,7 @@ export type Database = {
           client_email?: string | null
           client_nom?: string | null
           client_telephone?: string | null
+          commande_ref?: string | null
           commission_convoyeur_pct?: number | null
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
@@ -2653,6 +2746,7 @@ export type Database = {
           marque?: string | null
           modele?: string | null
           options_meta?: Json
+          parent_trajet_id?: string | null
           pricing_mode?: string
           prix?: number | null
           prix_client?: number | null
@@ -2666,6 +2760,7 @@ export type Database = {
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
+          type_mission?: string
           updated_at?: string
           vehicule_couleur?: string | null
           vehicule_energie?: string | null
@@ -2689,6 +2784,27 @@ export type Database = {
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -3078,6 +3194,7 @@ export type Database = {
         }
         Returns: number
       }
+      next_devis_numero: { Args: never; Returns: string }
       next_document_number: {
         Args: { _doc_prefix: string; _year?: number }
         Returns: string

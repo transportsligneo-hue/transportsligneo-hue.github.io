@@ -6,15 +6,19 @@ const CGV_VERSION = "v1-2026-01";
 
 interface AcceptInput {
   devisId: string;
+  /** Chemin storage (bucket devis-acceptes) de l'image de signature manuscrite */
+  signaturePath?: string;
+  /** Chemin storage (bucket devis-acceptes) du PDF figé signé */
+  pdfPath?: string;
 }
 
 /**
- * Enregistre une preuve d'acceptation de devis :
- * - capture IP + User-Agent
- * - insert dans devis_acceptations
- * - verrouille le devis (locked_at, accepted_at)
- *
- * RLS : insert via le client authentifié (policy "Client insert own acceptation").
+ * Enregistre une preuve d'acceptation de devis (valeur légale) :
+ * - capture IP + User-Agent + horodatage UTC
+ * - référence la signature manuscrite et le PDF figé (bucket privé)
+ * - insert dans devis_acceptations (audit trail permanent)
+ * - verrouille le devis (locked_at) et passe le statut à "accepte"
+ * - notifie l'administration (signature reçue)
  */
 export const acceptDevis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -22,16 +26,29 @@ export const acceptDevis = createServerFn({ method: "POST" })
     if (!input?.devisId || typeof input.devisId !== "string") {
       throw new Error("devisId requis");
     }
+    if (input.signaturePath && typeof input.signaturePath !== "string") {
+      throw new Error("signaturePath invalide");
+    }
+    if (input.pdfPath && typeof input.pdfPath !== "string") {
+      throw new Error("pdfPath invalide");
+    }
     return input;
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId, claims } = context;
     const email = (claims as { email?: string } | null)?.email ?? null;
 
+    // Sécurité : les fichiers doivent appartenir au dossier du user
+    for (const p of [data.signaturePath, data.pdfPath]) {
+      if (p && !p.startsWith(`${userId}/`)) {
+        throw new Error("Chemin de fichier non autorisé");
+      }
+    }
+
     // Récupère le devis (RLS s'applique : doit appartenir au user)
     const { data: devis, error: devisErr } = await supabase
       .from("devis")
-      .select("id, version, prix_estime, email, user_id, locked_at")
+      .select("id, numero, version, prix_estime, email, user_id, locked_at, depart, arrivee")
       .eq("id", data.devisId)
       .single();
 
@@ -54,7 +71,7 @@ export const acceptDevis = createServerFn({ method: "POST" })
     const clientEmail = (devis.email ?? email ?? "").toLowerCase();
     if (!clientEmail) throw new Error("Email client manquant");
 
-    // 1. Insert preuve
+    // 1. Insert preuve d'acceptation
     const { error: insertErr } = await supabase
       .from("devis_acceptations")
       .insert({
@@ -67,20 +84,39 @@ export const acceptDevis = createServerFn({ method: "POST" })
         montant_accepte: devis.prix_estime,
         cgv_version: CGV_VERSION,
         statut: "accepte",
+        signature_url: data.signaturePath ?? null,
+        pdf_url: data.pdfPath ?? null,
       });
 
     if (insertErr) {
       throw new Error(`Enregistrement acceptation échoué : ${insertErr.message}`);
     }
 
-    // 2. Verrouille le devis
+    // 2. Verrouille le devis + statut accepté (le devis ne disparaît jamais)
     const now = new Date().toISOString();
-    await supabase
+    const { error: updErr } = await supabase
       .from("devis")
-      .update({ locked_at: now, accepted_at: now })
+      .update({ locked_at: now, accepted_at: now, statut: "accepte" })
       .eq("id", devis.id);
+    if (updErr) {
+      throw new Error(`Verrouillage du devis échoué : ${updErr.message}`);
+    }
 
-    return { ok: true, acceptedAt: now };
+    // 3. Notification admin (best-effort, jamais bloquant)
+    try {
+      await supabase.rpc("create_admin_notification", {
+        _type: "devis",
+        _titre: `Signature reçue — devis ${devis.numero}`,
+        _message: `${clientEmail} a accepté et signé le devis ${devis.numero} (${Number(devis.prix_estime).toFixed(2)} € TTC) · ${devis.depart} → ${devis.arrivee}`,
+        _link: "/admin/devis",
+        _entity_type: "devis",
+        _entity_id: devis.id,
+      });
+    } catch {
+      // best-effort
+    }
+
+    return { ok: true, acceptedAt: now, numero: devis.numero, version: devis.version ?? 1 };
   });
 
 /**
