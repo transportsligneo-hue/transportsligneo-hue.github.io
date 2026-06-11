@@ -47,6 +47,12 @@ export const resolvePersonalizedPrice = createServerFn({ method: "POST" })
       _depart: data.depart,
       _arrivee: data.arrivee,
       _is_aller_retour: data.isAllerRetour,
+    } as unknown as {
+      _user_id: string;
+      _email: string;
+      _depart: string;
+      _arrivee: string;
+      _is_aller_retour: boolean;
     });
 
     if (error) {

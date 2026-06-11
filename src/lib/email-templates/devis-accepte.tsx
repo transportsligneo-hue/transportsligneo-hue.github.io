@@ -1,7 +1,7 @@
 import React from 'react'
 import { Body, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
 import type { TemplateEntry } from './registry'
-import { LigneoHeader } from './_ligneo-header'
+import { LigneoEmailHeader } from './_ligneo-header'
 
 interface Props {
   prenom?: string
@@ -19,7 +19,7 @@ const Email = ({ prenom, numero, depart, arrivee, montant, dateAcceptation, vers
     <Preview>Votre devis {numero ?? ''} est accepté et signé — Transports Ligneo</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoHeader />
+        <LigneoEmailHeader />
         <Section style={section}>
           <Heading style={h1}>Devis accepté ✓</Heading>
           <Text style={text}>
