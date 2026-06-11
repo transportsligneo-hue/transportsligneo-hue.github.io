@@ -9,7 +9,6 @@ import {
   FolderOpen,
   Receipt,
   MessageSquare,
-  Loader2,
   Users,
   Building2,
   History,
@@ -18,6 +17,7 @@ import {
   Bell,
   Handshake,
   UserRound,
+  PenLine,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
