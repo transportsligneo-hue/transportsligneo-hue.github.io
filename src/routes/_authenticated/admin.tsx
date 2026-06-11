@@ -22,6 +22,7 @@ import {
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
 import { supabase } from "@/integrations/supabase/client";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -82,6 +83,7 @@ function AdminLayout() {
 
     // Activité commerciale
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
+    { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
     { to: "/admin/demandes", label: "Demandes", icon: FileText, group: "Activité" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
@@ -102,7 +104,7 @@ function AdminLayout() {
   if (isLoading || !isAuthenticated || (role !== "admin" && role !== "super_admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
-        <Loader2 className="animate-spin text-pro-accent" size={32} />
+        <LogoLoader label="Connexion à l'administration…" />
       </div>
     );
   }
