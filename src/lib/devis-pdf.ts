@@ -36,6 +36,12 @@ export interface DevisData {
   mode_paiement?: string | null;
   validite_jours?: number;
   created_at?: string;
+  /** Version du devis (1 par défaut) — affichée si > 1 */
+  version?: number | null;
+  /** Signature manuscrite du client (data URL PNG) — bloc "Bon pour accord" */
+  clientSignatureDataUrl?: string | null;
+  /** Libellé de la date d'acceptation, ex "11/06/2026 à 14:32" */
+  acceptedAtLabel?: string | null;
 }
 
 const NAVY: [number, number, number] = [11, 16, 38];
