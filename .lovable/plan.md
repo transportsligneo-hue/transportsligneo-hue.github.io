@@ -1,88 +1,90 @@
-Plan en 4 lots livrés dans cet ordre. Chaque lot est testable indépendamment.
+# Audit & refonte plateforme convoyage — plan en 6 phases
 
-## Lot 1 — Workflow d'acceptation de devis (le plus gros)
+## Constats de l'audit (déjà vérifiés en base)
 
-**Base de données**
-- Nouveau paramètre global dans `app_settings` : `devis_acceptation_obligatoire` (bool, défaut `true`).
-- Nouveau champ `exempte_acceptation_devis` (bool, défaut `false`) sur `profiles`.
-- Nouvelle table `devis_acceptations` :
-  - devis_id, devis_version, client_user_id, client_email
-  - accepted_at (UTC), ip_address, user_agent
-  - montant_accepte, cgv_version, statut (`accepte`)
-  - pdf_url (lien vers le PDF figé du devis accepté)
-- Nouveau champ `version` (int, défaut 1) + `locked_at` sur `devis`. À chaque modification d'un devis déjà accepté → +1 version, `locked_at` reset, nouvelle acceptation requise.
-- RLS : client lit ses propres acceptations, admin lit tout, insert via server fn uniquement.
-
-**UI Client (étape d'acceptation)**
-- Nouveau composant `DevisAcceptationStep` inséré AVANT le paiement / la création de la demande.
-- Affiche : récap trajet, véhicule, total TTC détaillé, lien CGV (modale).
-- Case à cocher obligatoire avec le texte exact demandé.
-- Bouton "Accepter et continuer" désactivé tant que case non cochée.
-- Logique : si `devis_acceptation_obligatoire = false` OU `profile.exempte_acceptation_devis = true` → étape sautée.
-
-**Serveur**
-- `acceptDevis` serverFn : capture IP (`getRequestHeader('x-forwarded-for')`) + UA, génère PDF figé via `generateDevisPdf`, upload dans bucket `devis-pdfs` (nouveau, privé), insert dans `devis_acceptations`, envoie email avec PDF.
-- Email transactionnel : nouveau template `devis-accepte.tsx` (récap + date acceptation + lien PDF).
-- Verrouillage : trigger `protect_accepted_devis` → toute UPDATE sur un devis avec `locked_at != null` crée une nouvelle version au lieu de modifier.
-
-**Admin**
-- Toggle `devis_acceptation_obligatoire` dans `admin.parametres.tsx`.
-- Toggle `exempte_acceptation_devis` dans fiche client.
-- Sur fiche devis admin : statut acceptation, date, IP, lien PDF.
-- Export CSV/PDF des preuves d'acceptation depuis `admin.devis.tsx`.
-
-## Lot 2 — Bug lien confirmation email + notifs
-
-**Lien confirmation email**
-- Créer route `/auth/email-confirme.tsx` (page publique) qui affiche : logo, "Email validé ✓", "Votre compte est activé", bouton "Aller à mon espace".
-- Modifier le template auth `email-change.tsx` + `signup.tsx` pour pointer vers cette page après confirmation (URL `{{ .RedirectTo }}` → `/auth/email-confirme`).
-- Configurer Supabase Auth → `site_url` redirect inclut cette route.
-
-**Notifs push + email admin/client**
-- Audit des points d'envoi (création devis, acceptation, paiement, attribution, mission terminée) → garantir double envoi (push via `push_subscriptions` + email via `sendTransactionalEmail`).
-- Admin : s'abonner aux push pour tous les events `admin_notifications` non lus.
-- Ajouter logs `email_send_log` côté admin pour visibilité.
-
-## Lot 3 — Lisibilité + splash logo animé PWA
-
-**Lisibilité**
-- Augmenter contraste texte sur cartes :
-  - `.card-premium-light` (cream) : texte navy `#0b1026` au lieu de gris doux.
-  - Tableaux admin (clients, devis, factures) : `text-cream` au lieu de `text-cream/60`, headers en `text-cream`.
-  - Panneau tarifs (`Tarifs.tsx`) : passer libellés de `text-cream/70` à `text-cream` + augmenter weight `font-medium`.
-- Conserver design premium 60/25/15 (mémoire projet).
-
-**Splash logo animé**
-- Composant `LogoLoader` : logo Ligneo avec animation CSS (pulse doré + rotation lente).
-- Remplacer tous les `<Loader2 className="animate-spin" />` plein écran par `<LogoLoader />`.
-- Splash PWA : dans `public/manifest.webmanifest` + `__root.tsx` afficher `LogoLoader` pendant l'hydratation initiale.
-
-## Lot 4 — Tarifs étendus ville/département
-
-**Base de données**
-- Étendre `client_pricing_rules` :
-  - `departement_depart` (text, ex "37")
-  - `departement_arrivee` (text, ex "75")
-  - `match_mode_depart` enum `ville | departement | both` (calculé)
-  - idem arrivée
-- Adapter `resolve_client_pricing_rule()` SQL function pour matcher aussi par département (via lookup ville → dept dans `pricing-departments.ts` existant).
-- Scoring : ville+ville > ville+dept > dept+dept > général.
-
-**UI Admin (`ClientPricingRulesBlock`)**
-- Form : choix par règle entre "Ville", "Département" ou "Les deux" pour départ ET arrivée séparément.
-- Champ département = select des 101 départements FR.
-- Tableau récap montre clairement le scope de chaque règle.
+- **Acceptation devis cassée** : aucune acceptation enregistrée en base (tous les devis sont passés directement à « convertit » sans signature ni verrouillage). L'étape d'acceptation existe mais n'est pas déclenchée au bon moment dans le parcours client.
+- **Écart de prix 95 € / 79 €** : l'estimateur calcule le tarif standard dans le navigateur, puis la base applique le tarif personnalisé du client au moment de la création du devis. Deux calculs différents → deux montants. Il faut un calcul serveur unique.
+- **Devis invisibles côté admin** : la page admin charge bien les données ; le bug est dans l'affichage/filtrage de la liste (sera corrigé en Phase 1).
+- **Numérotation** : format actuel `DEV-TLG-2026-011` avec trous dans la séquence (008 manquant). Passage au format `DEV-YYYY-000001` sans réutilisation.
+- Déjà en place et réutilisé : table de preuves d'acceptation, versioning des devis, bucket sécurisé `devis-acceptes`, composant d'acceptation avec CGV.
 
 ---
 
+## Phase 1 — Devis : cycle de vie, visibilité, numérotation (Priorités 1, 4)
+
+**Base de données**
+- Statuts complets : brouillon → généré → envoyé → en attente d'acceptation → accepté → refusé → expiré → transformé en mission. Migration des statuts existants sans perte.
+- Nouvelle séquence `DEV-YYYY-000001` (unique, sans doublon ni réutilisation) ; les anciens numéros sont conservés tels quels.
+- Champ `expire_le` (durée de validité) + passage automatique à « expiré ».
+- Interdiction de suppression : les devis ne disparaissent jamais (archivage au lieu de suppression).
+
+**Admin — liste complète des devis**
+- Colonnes : numéro, client, date, montant, statut, PDF, signature, historique.
+- Filtres date / statut / client / numéro, tri et recherche.
+
+**Client — « Mes Devis » permanent**
+- Historique complet conservé indéfiniment, y compris devis convertis en mission : numéro, date, montant, statut, PDF, signer, historique.
+
+## Phase 2 — Signature électronique + preuves (Priorités 2, 3, 12, 13)
+
+- Ajout de la **signature manuscrite** (canvas tactile, déjà utilisé pour les états des lieux) à l'étape d'acceptation : devis → CGV → case obligatoire → signature → validation.
+- Enregistrement complet : devis, version, client, date/heure, IP, navigateur, image de signature, version CGV — dans la table de preuves existante (renforcée).
+- **PDF figé à l'acceptation** : généré automatiquement, stocké dans le bucket sécurisé, non modifiable. Toute modification ultérieure → nouvelle version + nouvelle signature obligatoire. Historique de toutes les versions.
+- **Admin « Preuves d'acceptation »** : devis, client, signature, horodatage, IP, PDF signé + exports CSV et PDF.
+
+## Phase 3 — Moteur tarifaire unique (Priorités 6, 7)
+
+- **Une seule source de vérité** : fonction de calcul côté serveur utilisée partout (estimateur, devis, PDF, dashboards, emails, missions). Écart toléré : 0 €.
+- L'estimateur d'un client connecté affiche directement **son** tarif personnalisé (fini le 95 €/79 €).
+- Tarification étendue : ville→ville, ville→département, département→ville, département→département.
+- Ordre de priorité : tarif client personnalisé > tarif professionnel > tarif ville > tarif département > tarif standard.
+- Interface admin pour gérer ces règles (choix ville/département au départ et à l'arrivée).
+
+## Phase 4 — Aller-retour + missions automatiques (Priorités 8, 9)
+
+**Formulaire de commande**
+- Mode Aller simple (inchangé) / **Aller-Retour** :
+  - Livraison : adresse récupération, adresse livraison, immatriculation.
+  - Restitution : adresse récupération restitution, adresse restitution finale, immatriculation indépendante, case « Même adresse de récupération que la livraison ».
+  - Date + heure de restitution (si vides → « En attente de planification »).
+
+**Création automatique**
+- À la validation d'une commande aller-retour : création automatique de **2 missions liées** (Livraison + Restitution) sous une même commande, visibles immédiatement dans les 3 dashboards (client, chauffeur, admin).
+- Attribution : même chauffeur ou chauffeur différent (réglage admin).
+
+## Phase 5 — Suivi temps réel + espace client (Priorités 10, 11)
+
+- **Timeline Livraison** : commande créée → devis accepté → mission planifiée → convoyeur affecté → véhicule récupéré → en transport → livré.
+- **Timeline Restitution** : restitution planifiée → convoyeur affecté → véhicule récupéré → en transport → restitué.
+- Espace client consolidé : Mes Devis / Mes Missions (livraison + restitution, documents, progression) / Mes Factures (PDF, historique).
+
+## Phase 6 — PDF, emails, notifications, UI (Priorités 5, 14, 15)
+
+**PDF professionnel A4**
+- Mise en page : logo → coordonnées société → client → détails mission → tarification → conditions → signature → pied de page. Adresses, CGV, durée de validité et mentions légales corrigées.
+
+**Emails & notifications**
+- Page `/auth/email-confirmation` : « Email validé ✓ » + bouton vers l'espace.
+- Notifications automatiques client (devis généré/accepté, mission planifiée, livraison, restitution) et admin (signature reçue, devis accepté, nouvelle mission), par email + push, toutes historisées.
+
+**UI / UX**
+- Contraste du thème crème renforcé, lisibilité des prix, responsive mobile/tablette/desktop.
+- Chargeur animé avec le logo (connexion, calcul tarifaire, génération PDF, signature, upload) — animations CSS pures.
+
+---
+
+## Tests de non-régression (Priorité 16)
+
+À chaque phase : génération + numérotation devis, signature, 3 dashboards, missions aller simple et aller-retour, mission retour automatique, cohérence des prix, PDF, notifications, emails, exports CSV/PDF. Aucune donnée existante n'est supprimée ; les migrations préservent tout.
+
 ## Détails techniques
 
-- Stack : TanStack Start, server fns avec `requireSupabaseAuth`, RLS sur toutes nouvelles tables, GRANTs explicites.
-- PDF : réutilise `src/lib/devis-pdf.ts` existant, ajoute version au filename.
-- Storage : nouveau bucket `devis-acceptes` privé, RLS scopée client+admin.
-- Migrations Supabase séparées par lot pour rollback facile.
-- Pas de framer-motion (mémoire projet) — animations CSS pures.
+- Migrations base séparées par phase (rollback facile), aucune suppression de données.
+- Calcul tarifaire : fonction serveur unique réutilisant `resolve_client_pricing_rule` étendue aux départements ; le trigger en base reste comme filet de sécurité mais ne peut plus créer d'écart.
+- Signature : réutilisation du composant canvas existant, image stockée dans le bucket privé.
+- Missions liées : champ `commande_id` + `type_mission` (livraison/restitution) sur les missions, lien parent.
+- PDF : génération côté client à l'acceptation puis upload dans le bucket (compatible avec l'environnement serveur).
 
-## Question avant de démarrer
+## Ordre de livraison
 
-Je commence par le **Lot 1** (workflow d'acceptation, ~le plus gros). Confirmez-vous ou voulez-vous changer l'ordre ?
+Phase 1 → 2 → 3 → 4 → 5 → 6. Je commence par la Phase 1 dès validation.
