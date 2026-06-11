@@ -37,6 +37,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
+import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
@@ -251,6 +252,11 @@ const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
   id: '/partenariat-flotte',
   path: '/partenariat-flotte',
   getParentRoute: () => B2bRoute,
+} as any)
+const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
+  id: '/auth/email-confirmation',
+  path: '/auth/email-confirmation',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedFlotteRoute = AuthenticatedFlotteRouteImport.update({
   id: '/flotte',
@@ -717,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -815,6 +822,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -921,6 +929,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -1027,6 +1036,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/entreprise'
     | '/flotte'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
@@ -1125,6 +1135,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/tarifs'
     | '/unsubscribe'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
@@ -1230,6 +1241,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro'
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
+    | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
@@ -1330,6 +1342,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
@@ -1544,6 +1557,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/partenariat-flotte'
       preLoaderRoute: typeof B2bPartenariatFlotteRouteImport
       parentRoute: typeof B2bRoute
+    }
+    '/auth/email-confirmation': {
+      id: '/auth/email-confirmation'
+      path: '/auth/email-confirmation'
+      fullPath: '/auth/email-confirmation'
+      preLoaderRoute: typeof AuthEmailConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/flotte': {
       id: '/_authenticated/flotte'
@@ -2411,6 +2431,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
