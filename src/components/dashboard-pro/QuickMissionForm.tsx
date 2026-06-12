@@ -380,6 +380,21 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         marque: marque || "",
         modele: modele || "",
         carburant: energie || "",
+        // Restitution (Aller-retour)
+        ...(tripType === "aller-retour"
+          ? {
+              depart_retour: departRetour || arrivee,
+              arrivee_retour: sameRetourAddress ? depart : (arriveeRetour || depart),
+              recuperation_retour_identique: sameRetourAddress,
+              adresse_recuperation_retour: sameRetourAddress ? null : (departRetour || null),
+              immatriculation_retour: sameRetourVehicle ? (immat || null) : (immatRetour || null),
+              marque_retour: sameRetourVehicle ? (marque || null) : (marqueRetour || null),
+              modele_retour: sameRetourVehicle ? (modele || null) : (modeleRetour || null),
+              vin_retour: sameRetourVehicle ? (vin || null) : (vinRetour || null),
+              date_retour: dateRetour || null,
+              heure_retour: heureRetour || null,
+            }
+          : {}),
       } as never;
 
       const { data: inserted, error: insErr } = await supabase
