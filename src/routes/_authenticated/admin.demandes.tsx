@@ -50,6 +50,17 @@ interface Demande {
   vehicule_km?: number | null;
   vehicule_notes?: string | null;
   options_meta?: Record<string, unknown> | null;
+  // Restitution (Aller-retour)
+  depart_retour?: string | null;
+  arrivee_retour?: string | null;
+  adresse_recuperation_retour?: string | null;
+  recuperation_retour_identique?: boolean | null;
+  immatriculation_retour?: string | null;
+  marque_retour?: string | null;
+  modele_retour?: string | null;
+  vin_retour?: string | null;
+  date_retour?: string | null;
+  heure_retour?: string | null;
 }
 
 const OPTION_LABELS: Record<string, string> = {
