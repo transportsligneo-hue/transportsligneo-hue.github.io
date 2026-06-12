@@ -524,6 +524,26 @@ function DemandeDrawer({
         )}
       </DrawerSection>
 
+      {(demande.options === "aller_retour" || demande.options === "aller-retour" || demande.depart_retour || demande.immatriculation_retour) && (
+        <DrawerSection title="Restitution (Aller-retour)" icon={<MapPin size={12} />}>
+          <DrawerGrid>
+            <DrawerField
+              label="Récupération retour"
+              value={demande.recuperation_retour_identique === false ? (demande.adresse_recuperation_retour || demande.depart_retour) : (demande.arrivee || "Adresse de livraison")}
+            />
+            <DrawerField label="Adresse de retour" value={demande.arrivee_retour || demande.depart} />
+            <DrawerField label="Date retour" value={demande.date_retour ? new Date(demande.date_retour).toLocaleDateString("fr-FR") : null} />
+            <DrawerField label="Heure retour" value={demande.heure_retour} />
+            <DrawerField label="Plaque retour" value={demande.immatriculation_retour} mono />
+            <DrawerField label="VIN retour" value={demande.vin_retour} mono />
+            <DrawerField
+              label="Marque / Modèle retour"
+              value={[demande.marque_retour, demande.modele_retour].filter(Boolean).join(" ") || null}
+            />
+          </DrawerGrid>
+        </DrawerSection>
+      )}
+
 
       <DrawerSection title="Estimation tarifaire" icon={<Calendar size={12} />}>
         {(() => {
