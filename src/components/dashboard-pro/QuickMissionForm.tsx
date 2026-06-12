@@ -296,6 +296,31 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     }
   };
 
+  // Plate lookup for return vehicle
+  const handlePlateRetourLookup = async () => {
+    if (!immatRetour || immatRetour.length < 4) {
+      toast.error("Saisissez une plaque retour valide");
+      return;
+    }
+    setPlateRetourBusy(true);
+    try {
+      const result = await lookupPlate({ data: { plate: immatRetour } });
+      if (!result.ok || !result.data) {
+        toast.error(result.error || "Aucune donnée trouvée");
+        return;
+      }
+      const d = result.data;
+      if (d.marque) setMarqueRetour(d.marque);
+      if (d.modele) setModeleRetour(d.modele);
+      if (d.vin) setVinRetour(d.vin);
+      toast.success("Véhicule retour récupéré");
+    } catch {
+      toast.error("Service indisponible");
+    } finally {
+      setPlateRetourBusy(false);
+    }
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !profile) return;
