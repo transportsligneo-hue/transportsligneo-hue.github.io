@@ -105,6 +105,19 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
   const [vehNotes, setVehNotes] = useState("");
   const [plateBusy, setPlateBusy] = useState(false);
 
+  // Restitution (Aller-retour) — 2e véhicule + adresses différentes
+  const [sameRetourAddress, setSameRetourAddress] = useState(true);
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
+  const [sameRetourVehicle, setSameRetourVehicle] = useState(true);
+  const [immatRetour, setImmatRetour] = useState("");
+  const [marqueRetour, setMarqueRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [dateRetour, setDateRetour] = useState("");
+  const [heureRetour, setHeureRetour] = useState("");
+  const [plateRetourBusy, setPlateRetourBusy] = useState(false);
+
   // Options
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
   const [autreNote, setAutreNote] = useState("");
@@ -283,6 +296,31 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     }
   };
 
+  // Plate lookup for return vehicle
+  const handlePlateRetourLookup = async () => {
+    if (!immatRetour || immatRetour.length < 4) {
+      toast.error("Saisissez une plaque retour valide");
+      return;
+    }
+    setPlateRetourBusy(true);
+    try {
+      const result = await lookupPlate({ data: { plate: immatRetour } });
+      if (!result.ok || !result.data) {
+        toast.error(result.error || "Aucune donnée trouvée");
+        return;
+      }
+      const d = result.data;
+      if (d.marque) setMarqueRetour(d.marque);
+      if (d.modele) setModeleRetour(d.modele);
+      if (d.vin) setVinRetour(d.vin);
+      toast.success("Véhicule retour récupéré");
+    } catch {
+      toast.error("Service indisponible");
+    } finally {
+      setPlateRetourBusy(false);
+    }
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !profile) return;
@@ -342,6 +380,21 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         marque: marque || "",
         modele: modele || "",
         carburant: energie || "",
+        // Restitution (Aller-retour)
+        ...(tripType === "aller-retour"
+          ? {
+              depart_retour: departRetour || arrivee,
+              arrivee_retour: sameRetourAddress ? depart : (arriveeRetour || depart),
+              recuperation_retour_identique: sameRetourAddress,
+              adresse_recuperation_retour: sameRetourAddress ? null : (departRetour || null),
+              immatriculation_retour: sameRetourVehicle ? (immat || null) : (immatRetour || null),
+              marque_retour: sameRetourVehicle ? (marque || null) : (marqueRetour || null),
+              modele_retour: sameRetourVehicle ? (modele || null) : (modeleRetour || null),
+              vin_retour: sameRetourVehicle ? (vin || null) : (vinRetour || null),
+              date_retour: dateRetour || null,
+              heure_retour: heureRetour || null,
+            }
+          : {}),
       } as never;
 
       const { data: inserted, error: insErr } = await supabase
@@ -591,6 +644,114 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           </div>
         </div>
       </section>
+
+      {/* Restitution (Aller-retour) */}
+      {tripType === "aller-retour" && (
+        <section className="bg-white rounded-xl border border-amber-200 ring-1 ring-amber-100 p-5 md:p-6">
+          <h2 className="text-sm font-semibold text-pro-text mb-1 flex items-center gap-1.5">
+            <MapPinned size={14} className="text-amber-600" /> Restitution (trajet retour)
+          </h2>
+          <p className="text-[12px] text-pro-text-soft mb-4">
+            Par défaut, on reprend le véhicule à l'adresse de livraison et on le ramène au point de départ.
+            Cochez les cases si l'adresse ou le véhicule diffèrent.
+          </p>
+
+          {/* Adresse de récupération retour */}
+          <div className="space-y-3 mb-4">
+            <label className="flex items-start gap-2 text-sm text-pro-text cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!sameRetourAddress}
+                onChange={(e) => setSameRetourAddress(!e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-pro-accent"
+              />
+              <span>
+                Adresse de récupération retour <em className="text-pro-text-soft">différente</em> de la livraison
+              </span>
+            </label>
+            {!sameRetourAddress && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-6">
+                <div>
+                  <label className={lbl}>Adresse de récupération retour</label>
+                  <PlacesInput value={departRetour} onChange={setDepartRetour} placeholder="Où récupérer le véhicule ?" className={inp} />
+                </div>
+                <div>
+                  <label className={lbl}>Adresse de retour (livraison finale)</label>
+                  <PlacesInput value={arriveeRetour} onChange={setArriveeRetour} placeholder={`Par défaut : ${depart || "départ initial"}`} className={inp} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Véhicule retour */}
+          <div className="space-y-3 mb-4">
+            <label className="flex items-start gap-2 text-sm text-pro-text cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!sameRetourVehicle}
+                onChange={(e) => setSameRetourVehicle(!e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-pro-accent"
+              />
+              <span>
+                Véhicule retour <em className="text-pro-text-soft">différent</em> du véhicule livré (2<sup>e</sup> plaque)
+              </span>
+            </label>
+            {!sameRetourVehicle && (
+              <div className="pl-6 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="md:col-span-2">
+                    <label className={lbl}>Plaque retour</label>
+                    <div className="flex gap-2">
+                      <input
+                        className={`${inp} uppercase`}
+                        value={immatRetour}
+                        onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
+                        placeholder="AA-123-BB"
+                        maxLength={15}
+                      />
+                      <button
+                        type="button"
+                        onClick={handlePlateRetourLookup}
+                        disabled={plateRetourBusy || !immatRetour}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-pro-accent text-white text-xs font-medium hover:bg-pro-accent-hover disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {plateRetourBusy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                        Récupérer
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={lbl}>VIN retour</label>
+                    <input className={inp} value={vinRetour} onChange={(e) => setVinRetour(e.target.value.toUpperCase())} maxLength={17} placeholder="Optionnel" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className={lbl}>Marque retour</label>
+                    <input className={inp} value={marqueRetour} onChange={(e) => setMarqueRetour(e.target.value)} placeholder="Peugeot" />
+                  </div>
+                  <div>
+                    <label className={lbl}>Modèle retour</label>
+                    <input className={inp} value={modeleRetour} onChange={(e) => setModeleRetour(e.target.value)} placeholder="208" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Date et heure retour */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date retour (optionnel)</label>
+              <input type="date" className={inp} value={dateRetour} onChange={(e) => setDateRetour(e.target.value)} min={date || new Date().toISOString().slice(0, 10)} />
+            </div>
+            <div>
+              <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure retour</label>
+              <input type="time" className={inp} value={heureRetour} onChange={(e) => setHeureRetour(e.target.value)} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Options & planning */}
       <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
