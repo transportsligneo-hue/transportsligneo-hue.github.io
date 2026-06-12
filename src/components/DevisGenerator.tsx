@@ -323,10 +323,33 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
 
+  // Prix serveur (source de vérité unique) — aligne l'estimateur avec la règle DB
+  const resolveServerPrice = useServerFn(resolvePersonalizedPrice);
+  const [serverTtc, setServerTtc] = useState<number | null>(null);
+  useEffect(() => {
+    setServerTtc(null);
+    if (!departure || !arrival || !pricing) return;
+    const fallback = pricing.finalPrice; // HT local
+    const fallbackTtc = Math.round(fallback * 1.2 * 100) / 100;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      resolveServerPrice({ data: {
+        depart: departure, arrivee: arrival,
+        isAllerRetour: option === "aller-retour",
+        fallbackPrice: fallbackTtc,
+      }}).then((res) => {
+        if (!cancelled && res?.personalized) setServerTtc(Number(res.price));
+      }).catch(() => {});
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [departure, arrival, option, pricing, resolveServerPrice]);
+
   const isComplete = !!(departure && arrival && vehicleType);
-  const priceHT = pricing?.finalPrice ?? 0;
-  const tva = Math.round(priceHT * 0.2);
-  const priceTTC = priceHT + tva;
+  const localHt = pricing?.finalPrice ?? 0;
+  const priceTTC = serverTtc ?? (localHt + Math.round(localHt * 0.2));
+  const priceHT = serverTtc ? Math.round((serverTtc / 1.2) * 100) / 100 : localHt;
+  const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
+
 
   // inputBare retiré : la barre principale utilise des styles inline premium
   const inputCard = "w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-cream text-sm placeholder:text-cream/40 focus:border-[#5fb6ff]/60 focus:outline-none focus:ring-1 focus:ring-[#5fb6ff]/30 transition-all";
