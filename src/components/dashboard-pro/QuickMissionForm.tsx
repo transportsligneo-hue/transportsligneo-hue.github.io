@@ -105,6 +105,19 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
   const [vehNotes, setVehNotes] = useState("");
   const [plateBusy, setPlateBusy] = useState(false);
 
+  // Restitution (Aller-retour) — 2e véhicule + adresses différentes
+  const [sameRetourAddress, setSameRetourAddress] = useState(true);
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
+  const [sameRetourVehicle, setSameRetourVehicle] = useState(true);
+  const [immatRetour, setImmatRetour] = useState("");
+  const [marqueRetour, setMarqueRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [dateRetour, setDateRetour] = useState("");
+  const [heureRetour, setHeureRetour] = useState("");
+  const [plateRetourBusy, setPlateRetourBusy] = useState(false);
+
   // Options
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
   const [autreNote, setAutreNote] = useState("");
