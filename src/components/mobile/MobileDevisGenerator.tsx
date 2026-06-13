@@ -323,6 +323,8 @@ export default function MobileDevisGenerator() {
           option && `Option: ${option}`,
           `Estimation: ${pricing.finalPrice}€`,
           `Distance: ${distance}km`,
+          option === "aller-retour" && `Retour: ${sameRetourAddress ? `${arrival} → ${departure}` : `${departRetour || "?"} → ${arriveeRetour || "?"}`}${dateRetour ? ` le ${dateRetour}` : ""}${heureRetour ? ` à ${heureRetour}` : ""}`,
+          option === "aller-retour" && !sameRetourVehicle && `Véhicule retour: ${[marqueRetour, modeleRetour].filter(Boolean).join(" ")}${immatRetour ? ` (${immatRetour})` : ""}${vinRetour ? ` VIN ${vinRetour}` : ""}`,
           comment,
         ].filter(Boolean).join(" | "),
         message: comment,
