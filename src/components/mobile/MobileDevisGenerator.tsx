@@ -782,6 +782,125 @@ export default function MobileDevisGenerator() {
               </div>
             </div>
 
+            {/* Restitution (Aller-retour) */}
+            {option === "aller-retour" && (
+              <div className={`${premiumCardCls} p-5 space-y-4`}>
+                <p className="font-heading text-primary/80 text-[11px] tracking-[0.2em] uppercase">
+                  Restitution (retour)
+                </p>
+
+                {/* Adresses */}
+                <label className="flex items-center gap-2 text-cream/85 text-[12px]">
+                  <input
+                    type="checkbox"
+                    checked={sameRetourAddress}
+                    onChange={(e) => setSameRetourAddress(e.target.checked)}
+                    className="w-4 h-4 accent-[#e7c76a]"
+                  />
+                  Mêmes adresses (retour = arrivée → départ)
+                </label>
+                {!sameRetourAddress && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className={labelCls}>Départ retour</label>
+                      <input
+                        type="text"
+                        value={departRetour}
+                        onChange={(e) => setDepartRetour(e.target.value)}
+                        placeholder="Adresse de prise en charge du retour"
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Arrivée retour</label>
+                      <input
+                        type="text"
+                        value={arriveeRetour}
+                        onChange={(e) => setArriveeRetour(e.target.value)}
+                        placeholder="Adresse de restitution"
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Date / Heure retour */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelCls}><Calendar size={11} className="inline mr-1" />Date retour</label>
+                    <input type="date" value={dateRetour} onChange={e => setDateRetour(e.target.value)} className={inputCls} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Heure retour</label>
+                    <input type="time" value={heureRetour} onChange={e => setHeureRetour(e.target.value)} className={inputCls} />
+                  </div>
+                </div>
+
+                {/* Véhicule retour */}
+                <label className="flex items-center gap-2 text-cream/85 text-[12px]">
+                  <input
+                    type="checkbox"
+                    checked={sameRetourVehicle}
+                    onChange={(e) => setSameRetourVehicle(e.target.checked)}
+                    className="w-4 h-4 accent-[#e7c76a]"
+                  />
+                  Même véhicule à l'aller et au retour
+                </label>
+                {!sameRetourVehicle && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className={labelCls}>Plaque retour</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={immatRetour}
+                          onChange={e => { setImmatRetour(e.target.value.toUpperCase()); setSivRetourMsg(null); }}
+                          placeholder="AA-123-AA"
+                          className={`${inputCls} uppercase tracking-widest flex-1`}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSivRetourLookup}
+                          disabled={sivRetourLoading || !immatRetour}
+                          className="px-4 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider disabled:opacity-40 flex items-center gap-1.5 whitespace-nowrap"
+                        >
+                          {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                          {sivRetourLoading ? "..." : "Rechercher"}
+                        </button>
+                      </div>
+                      {sivRetourMsg && (
+                        <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-500" : "text-red-500"}`}>
+                          {sivRetourMsg.text}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelCls}>VIN retour <span className="opacity-60 normal-case">(optionnel)</span></label>
+                      <input
+                        type="text"
+                        value={vinRetour}
+                        onChange={e => setVinRetour(e.target.value.toUpperCase())}
+                        className={`${inputCls} uppercase tracking-widest`}
+                        maxLength={17}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelCls}>Marque retour</label>
+                        <input type="text" value={marqueRetour} onChange={e => setMarqueRetour(e.target.value)} className={inputCls} />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Modèle retour</label>
+                        <input type="text" value={modeleRetour} onChange={e => setModeleRetour(e.target.value)} className={inputCls} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+
             {/* CTA submit fixe en bas du formulaire */}
             <button
               type="submit"
