@@ -257,6 +257,32 @@ export default function MobileDevisGenerator() {
     }
   }
 
+  async function handleSivRetourLookup() {
+    setSivRetourMsg(null);
+    const plate = immatRetour.trim().toUpperCase();
+    if (!plate || plate.length < 4) {
+      setSivRetourMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivRetourLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivRetourMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        if (d.marque) setMarqueRetour(d.marque);
+        if (d.modele) setModeleRetour(d.modele);
+        if (d.vin) setVinRetour(d.vin);
+        setSivRetourMsg({ type: "ok", text: "Véhicule retour trouvé ✓" });
+      }
+    } catch {
+      setSivRetourMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivRetourLoading(false);
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pricing || distance == null) return;
