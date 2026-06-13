@@ -77,8 +77,8 @@ export interface OptionItem {
 }
 
 export const RESERVATION_OPTIONS: OptionItem[] = [
-  { id: "lavage_int", label: "Lavage intérieur", price: 29.90 },
-  { id: "lavage_complet", label: "Lavage intérieur + extérieur", price: 79.90 },
+  { id: "lavage_ext", label: "Lavage extérieur", price: 24 },
+  { id: "lavage_complet", label: "Lavage intérieur + extérieur", price: 59 },
 ];
 
 export function calculateOptionsTotal(selectedIds: string[]): number {
