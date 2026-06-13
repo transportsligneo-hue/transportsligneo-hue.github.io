@@ -12,7 +12,7 @@ const stats = [
   { value: "2 300+", label: "Missions réalisées" },
   { value: "500 000+", label: "Kilomètres parcourus" },
   { value: "98 %", label: "Clients satisfaits" },
-  { value: "5 ans", label: "D'expérience terrain" },
+  { value: "6 ans", label: "D'expérience terrain" },
 ];
 
 export default function AProposContent() {
