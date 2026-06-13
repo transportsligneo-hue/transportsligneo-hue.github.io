@@ -63,10 +63,10 @@ export default function AProposContent() {
                   L'aventure démarre à Tours, en 2021. Après plusieurs années à constater les écarts de qualité du convoyage automobile, le constat est clair : il manque un acteur réellement <span className="text-[#b8860b] font-medium">premium</span>, capable d'allier rigueur, transparence tarifaire et relation humaine.
                 </p>
                 <p>
-                  Transports Ligneo naît de cette ambition. Une structure à taille humaine, des convoyeurs salariés formés en continu, une assurance circulation incluse, et une exigence absolue sur la prise en main du véhicule.
+                  Transports Ligneo naît de cette ambition. Une structure à taille humaine, des convoyeurs formés en continu, une assurance circulation incluse, et une exigence absolue sur la prise en main du véhicule.
                 </p>
                 <p>
-                  Cinq ans plus tard, l'entreprise est devenue le partenaire de référence de plusieurs concessionnaires, loueurs et particuliers exigeants partout en France.
+                  Six ans plus tard, l'entreprise est devenue le partenaire de référence de plusieurs concessionnaires, loueurs et particuliers exigeants partout en France.
                 </p>
               </div>
             </div>
