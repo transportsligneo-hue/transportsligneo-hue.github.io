@@ -12,7 +12,7 @@ const stats = [
   { value: "2 300+", label: "Missions réalisées" },
   { value: "500 000+", label: "Kilomètres parcourus" },
   { value: "98 %", label: "Clients satisfaits" },
-  { value: "5 ans", label: "D'expérience terrain" },
+  { value: "6 ans", label: "D'expérience terrain" },
 ];
 
 export default function AProposContent() {
@@ -63,10 +63,10 @@ export default function AProposContent() {
                   L'aventure démarre à Tours, en 2021. Après plusieurs années à constater les écarts de qualité du convoyage automobile, le constat est clair : il manque un acteur réellement <span className="text-[#b8860b] font-medium">premium</span>, capable d'allier rigueur, transparence tarifaire et relation humaine.
                 </p>
                 <p>
-                  Transports Ligneo naît de cette ambition. Une structure à taille humaine, des convoyeurs salariés formés en continu, une assurance circulation incluse, et une exigence absolue sur la prise en main du véhicule.
+                  Transports Ligneo naît de cette ambition. Une structure à taille humaine, des convoyeurs formés en continu, une assurance circulation incluse, et une exigence absolue sur la prise en main du véhicule.
                 </p>
                 <p>
-                  Cinq ans plus tard, l'entreprise est devenue le partenaire de référence de plusieurs concessionnaires, loueurs et particuliers exigeants partout en France.
+                  Six ans plus tard, l'entreprise est devenue le partenaire de référence de plusieurs concessionnaires, loueurs et particuliers exigeants partout en France.
                 </p>
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function AProposContent() {
                 </div>
               </div>
               <p className="text-[#0b1026]/75 text-[14.5px] leading-relaxed italic border-l-2 border-[#e7c76a] pl-4">
-                « Chaque véhicule qui nous est confié est un engagement personnel. Notre métier, c'est avant tout une question de confiance — celle qu'un client place entre nos mains, et que nous lui rendons à l'arrivée. »
+                « Chaque véhicule qui nous est confié est un engagement personnel. Notre métier, c'est avant tout une question de confiance, celle qu'un client place entre nos mains et que nous lui rendons à l'arrivée. »
               </p>
               <div className="h-px bg-[#0b1026]/10 my-7" />
               <div className="grid grid-cols-2 gap-4 text-center">

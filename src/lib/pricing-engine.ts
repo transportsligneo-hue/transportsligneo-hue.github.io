@@ -60,9 +60,13 @@ export function quoteB2C(input: B2CQuoteInput): UnifiedQuote {
     if (opt) lines.push({ label: opt.label, amount: opt.price });
   });
 
-  const priceHt = Math.round((base + optionsTotal) * 100) / 100;
-  const vat = Math.round(priceHt * VAT_RATE * 100) / 100;
-  const priceTtc = Math.round((priceHt + vat) * 100) / 100;
+  // Les grilles publiques (forfaits dept + tarifs km) sont exprimées en TTC client.
+  // On rétro-calcule le HT depuis le TTC pour garantir la cohérence avec
+  // resolve_client_pricing_rule (qui retourne lui aussi du TTC) et avec les
+  // prix affichés sur le site (79 € agglo, 99 € hors agglo, etc.).
+  const priceTtc = Math.round((base + optionsTotal) * 100) / 100;
+  const priceHt = Math.round((priceTtc / (1 + VAT_RATE)) * 100) / 100;
+  const vat = Math.round((priceTtc - priceHt) * 100) / 100;
 
   return {
     channel: "b2c",
