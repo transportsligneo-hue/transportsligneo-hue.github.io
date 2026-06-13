@@ -1,90 +1,154 @@
-# Audit & refonte plateforme convoyage — plan en 6 phases
+## Cadre
 
-## Constats de l'audit (déjà vérifiés en base)
-
-- **Acceptation devis cassée** : aucune acceptation enregistrée en base (tous les devis sont passés directement à « convertit » sans signature ni verrouillage). L'étape d'acceptation existe mais n'est pas déclenchée au bon moment dans le parcours client.
-- **Écart de prix 95 € / 79 €** : l'estimateur calcule le tarif standard dans le navigateur, puis la base applique le tarif personnalisé du client au moment de la création du devis. Deux calculs différents → deux montants. Il faut un calcul serveur unique.
-- **Devis invisibles côté admin** : la page admin charge bien les données ; le bug est dans l'affichage/filtrage de la liste (sera corrigé en Phase 1).
-- **Numérotation** : format actuel `DEV-TLG-2026-011` avec trous dans la séquence (008 manquant). Passage au format `DEV-YYYY-000001` sans réutilisation.
-- Déjà en place et réutilisé : table de preuves d'acceptation, versioning des devis, bucket sécurisé `devis-acceptes`, composant d'acceptation avec CGV.
+- Aucune fonctionnalité existante supprimée. Tous les écrans/routes actuels restent en place — on corrige, on enrichit, on harmonise.
+- Anciens devis/missions en base **non touchés** (audit légal). Nouvelle terminologie et nouveaux prix s'appliquent uniquement aux **nouveaux** documents.
+- **Bleu électrique en accent uniquement** : on garde navy `#0b1026` + or `#d4af37` (mémoire brand). Le bleu électrique sert aux CTA interactifs, focus, badges live, GPS, états temps réel sur dashboards/PWA — il ne remplace ni le navy ni l'or.
+- Livraison en 4 lots indépendants, testables séparément. Chaque lot finit par une passe build + vérification visuelle.
 
 ---
 
-## Phase 1 — Devis : cycle de vie, visibilité, numérotation (Priorités 1, 4)
+## Lot 1 — Estimateur, tarifs, terminologie (fondations métier)
 
-**Base de données**
-- Statuts complets : brouillon → généré → envoyé → en attente d'acceptation → accepté → refusé → expiré → transformé en mission. Migration des statuts existants sans perte.
-- Nouvelle séquence `DEV-YYYY-000001` (unique, sans doublon ni réutilisation) ; les anciens numéros sont conservés tels quels.
-- Champ `expire_le` (durée de validité) + passage automatique à « expiré ».
-- Interdiction de suppression : les devis ne disparaissent jamais (archivage au lieu de suppression).
+### Tarification (source de vérité)
 
-**Admin — liste complète des devis**
-- Colonnes : numéro, client, date, montant, statut, PDF, signature, historique.
-- Filtres date / statut / client / numéro, tri et recherche.
+- `pricing-engine.ts` + `resolve_client_pricing_rule` (déjà source unique côté serveur) : ajout des nouveaux modificateurs.
+- Options véhicule : roulant (base), **non roulant +70%**, plateau (forfait sur grille), **0 km** (forfait livraison neuf).
+- **Jockeyage** = nouveau type de prestation, tarif < convoyage standard (grille séparée courte distance / forfait ville).
+- Lavages : extérieur **24 € TTC**, intérieur+extérieur **59 € TTC**. Stockage **« sur devis »** — suppression du prix affiché, badge "Sur devis".
+- Express → renommé **« Horaire & week-end »** (majoration weekend + créneau hors heures ouvrées).
+- Recharge **batterie** et recharge **carburant** = options trajet (et non destination).
+- Correction du bug 79 vs 95 : audit `pricing-engine.ts` + `pricing-resolver.ts` + `client-pricing.ts` pour s'assurer que `resolvePersonalizedPrice` est appelé partout et qu'aucun arrondi/TVA n'est appliqué deux fois. Test : trajet de référence → 79 € TTC strictement identique estimateur / devis / PDF / dashboard.
 
-**Client — « Mes Devis » permanent**
-- Historique complet conservé indéfiniment, y compris devis convertis en mission : numéro, date, montant, statut, PDF, signer, historique.
+### UI estimateur (desktop + mobile)
 
-## Phase 2 — Signature électronique + preuves (Priorités 2, 3, 12, 13)
+- `DevisGenerator.tsx`, `MobileDevisGenerator.tsx`, `QuickMissionForm.tsx` : section options unifiée (composant `<EstimatorOptions />` partagé).
+- **Choix trajet** : sélecteur ville↔département (4 combinaisons) avec autocomplete adaptatif.
+- **Livraison + Restitution** remplace partout l'intitulé « aller-retour » côté UI (clé interne `is_aller_retour` conservée en DB pour compat). Étiquettes, libellés PDF, emails, statuts dashboard mis à jour.
+- **2ᵉ plaque** déjà ajoutée — on la généralise aux 3 estimateurs avec UX cohérente.
+- **Adresses favorites one-click** : composant `<FavoriteAddressPicker />` branché sur `client_default_addresses`, accessible dans estimateur client + QuickMissionForm.
+- **N° de commande client** : champ optionnel saisissable jusqu'à émission facture, modifiable depuis dashboard client/admin, affiché sur devis + facture.
 
-- Ajout de la **signature manuscrite** (canvas tactile, déjà utilisé pour les états des lieux) à l'étape d'acceptation : devis → CGV → case obligatoire → signature → validation.
-- Enregistrement complet : devis, version, client, date/heure, IP, navigateur, image de signature, version CGV — dans la table de preuves existante (renforcée).
-- **PDF figé à l'acceptation** : généré automatiquement, stocké dans le bucket sécurisé, non modifiable. Toute modification ultérieure → nouvelle version + nouvelle signature obligatoire. Historique de toutes les versions.
-- **Admin « Preuves d'acceptation »** : devis, client, signature, horodatage, IP, PDF signé + exports CSV et PDF.
+### Migration DB nouveaux devis
 
-## Phase 3 — Moteur tarifaire unique (Priorités 6, 7)
-
-- **Une seule source de vérité** : fonction de calcul côté serveur utilisée partout (estimateur, devis, PDF, dashboards, emails, missions). Écart toléré : 0 €.
-- L'estimateur d'un client connecté affiche directement **son** tarif personnalisé (fini le 95 €/79 €).
-- Tarification étendue : ville→ville, ville→département, département→ville, département→département.
-- Ordre de priorité : tarif client personnalisé > tarif professionnel > tarif ville > tarif département > tarif standard.
-- Interface admin pour gérer ces règles (choix ville/département au départ et à l'arrivée).
-
-## Phase 4 — Aller-retour + missions automatiques (Priorités 8, 9)
-
-**Formulaire de commande**
-- Mode Aller simple (inchangé) / **Aller-Retour** :
-  - Livraison : adresse récupération, adresse livraison, immatriculation.
-  - Restitution : adresse récupération restitution, adresse restitution finale, immatriculation indépendante, case « Même adresse de récupération que la livraison ».
-  - Date + heure de restitution (si vides → « En attente de planification »).
-
-**Création automatique**
-- À la validation d'une commande aller-retour : création automatique de **2 missions liées** (Livraison + Restitution) sous une même commande, visibles immédiatement dans les 3 dashboards (client, chauffeur, admin).
-- Attribution : même chauffeur ou chauffeur différent (réglage admin).
-
-## Phase 5 — Suivi temps réel + espace client (Priorités 10, 11)
-
-- **Timeline Livraison** : commande créée → devis accepté → mission planifiée → convoyeur affecté → véhicule récupéré → en transport → livré.
-- **Timeline Restitution** : restitution planifiée → convoyeur affecté → véhicule récupéré → en transport → restitué.
-- Espace client consolidé : Mes Devis / Mes Missions (livraison + restitution, documents, progression) / Mes Factures (PDF, historique).
-
-## Phase 6 — PDF, emails, notifications, UI (Priorités 5, 14, 15)
-
-**PDF professionnel A4**
-- Mise en page : logo → coordonnées société → client → détails mission → tarification → conditions → signature → pied de page. Adresses, CGV, durée de validité et mentions légales corrigées.
-
-**Emails & notifications**
-- Page `/auth/email-confirmation` : « Email validé ✓ » + bouton vers l'espace.
-- Notifications automatiques client (devis généré/accepté, mission planifiée, livraison, restitution) et admin (signature reçue, devis accepté, nouvelle mission), par email + push, toutes historisées.
-
-**UI / UX**
-- Contraste du thème crème renforcé, lisibilité des prix, responsive mobile/tablette/desktop.
-- Chargeur animé avec le logo (connexion, calcul tarifaire, génération PDF, signature, upload) — animations CSS pures.
+- `client_pricing_rules` : nouvelles colonnes `option_jockeyage_remise_pct`, `option_non_roulant_majoration_pct` (défauts 0).
+- `demandes_convoyage` / `devis` : `numero_commande_client text`, `prestation_type text` (convoyage / jockeyage / 0km), `option_lavage text`, `option_carburant boolean`, `option_batterie boolean`.
+- Pas de backfill, pas de recalcul des anciennes lignes.
 
 ---
 
-## Tests de non-régression (Priorité 16)
+## Lot 2 — Site vitrine (Services, Comment ça marche, À propos)
 
-À chaque phase : génération + numérotation devis, signature, 3 dashboards, missions aller simple et aller-retour, mission retour automatique, cohérence des prix, PDF, notifications, emails, exports CSV/PDF. Aucune donnée existante n'est supprimée ; les migrations préservent tout.
+### `/services` (`ServicesContent.tsx` + `Prestations.tsx`)
 
-## Détails techniques
+- Refonte de la liste pour intégrer : jockeyage CT / vacances / révision, convoyage porte-à-porte, EDL digitalisé, signature électronique, livraison sécurisée, recherche véhicule par plaque, devis 3 s, livraison+restitution, et "convoyage complet".
+- Chaque service = carte avec icône, titre, description courte, lien vers estimateur.
 
-- Migrations base séparées par phase (rollback facile), aucune suppression de données.
-- Calcul tarifaire : fonction serveur unique réutilisant `resolve_client_pricing_rule` étendue aux départements ; le trigger en base reste comme filet de sécurité mais ne peut plus créer d'écart.
-- Signature : réutilisation du composant canvas existant, image stockée dans le bucket privé.
-- Missions liées : champ `commande_id` + `type_mission` (livraison/restitution) sur les missions, lien parent.
-- PDF : génération côté client à l'acceptation puis upload dans le bucket (compatible avec l'environnement serveur).
+### `/comment-ca-marche` (`CommentCaMarcheTimeline.tsx`)
 
-## Ordre de livraison
+- Refonte en **10 étapes** détaillées : création compte → commande estimateur → devis auto → **signature obligatoire** → réception admin → validation → attribution convoyeur → suivi GPS → livraison + EDL signé → facturation auto.
+- Chaque étape : icône, titre, description, mini-illustration ou capture.
 
-Phase 1 → 2 → 3 → 4 → 5 → 6. Je commence par la Phase 1 dès validation.
+### `/a-propos` (`AProposContent.tsx`)
+
+- Suppression mention « salarié ».
+- Nettoyage du tiret/barre dans la bio dirigeant.
+- Correction chiffre **5 ans → 6 ans**.
+
+---
+
+## Lot 3 — Bug critique : signature devis + emails
+
+### Signature devis (`DevisAcceptationStep.tsx` + `devis-acceptation.functions.ts`)
+
+- Audit du flow actuel : SignatureCanvas → upload storage bucket `devis-acceptes` → `acceptDevis` server fn → PDF figé.
+- Correction des points de rupture : politique RLS bucket, normalisation chemin user, intégration PDF dans `factures` une fois signé.
+- Propagation : après signature, statut devis = `accepte` + `locked_at`, trigger `auto_create_trajet_from_devis` déjà existant produit livraison (+ restitution si AR). Vérifier que la mission remonte bien dans dashboard chauffeur / client / admin (cause des « devis perdus » signalés).
+
+### Emails (refaire directement)
+
+- Scaffold des templates manquants : **devis signé** (existe), **mission démarrée**, **incident**, **livraison terminée**, **nouveau devis admin**.
+- Branchement systématique : trigger `notifyAdmin` + `sendTransactionalEmail` à chaque transition de statut critique (devis créé, devis signé, mission attribuée, mission démarrée, incident, mission terminée, facture émise).
+- Vérification queue `email_send_log` + cron `process-email-queue` opérationnels.
+- Notifications push (`push_subscriptions`) : envoi parallèle pour driver (nouvelle mission, mission modifiée).
+
+---
+
+## Lot 4 — Dashboards (Admin / Client / Driver) + GPS + design
+
+### Design tokens (`src/styles.css`)
+
+- Ajout token `--accent-electric: oklch(...)` (bleu électrique premium).
+- Variantes : `.btn-electric`, `.badge-live`, `.gps-pulse`, `.focus-electric`.
+- **Aucune modification des tokens navy/or existants** — uniquement ajout.
+- Passe d'audit contraste (`text-cream/40` sur `bg-cream`, `text-white` sur fonds clairs, etc.) → remplacement par tokens sémantiques. Fichiers ciblés : dashboards, sidebars, cards admin.
+
+### Admin (`/admin/*`)
+
+- Renommage UI **« Organisation » → « Société / Partenaire »** (clé DB inchangée).
+- `admin.devis.tsx` : édition devis avec historique modifications (table `activity_logs` existe déjà — UI timeline ajoutée).
+- `admin.missions.$missionId.tsx` : édition adresse / heure / prix en cours de mission (server fn dédiée `updateMissionInFlight` qui propage vers trajet + notifie driver + client).
+- `admin.attributions.tsx` : amélioration UI catalogue/assignation, ajout colonne enchères convoyeur.
+- **Système d'enchères convoyeur** : nouvelle table `mission_enchere_proposals` (driver propose prix +X €, admin valide/refuse). Migration dédiée.
+- Pages détaillées clients (`admin.clients.$clientId.tsx`) : onglets missions / devis / factures / documents / EDL — l'existant est complété, pas remplacé.
+- Pages détaillées convoyeurs (`admin.convoyeurs.$convoyeurId.tsx`) : onglets documents / missions / EDL / paiements.
+
+### Client (`/dashboard-client/*`)
+
+- Signature devis (corrigée lot 3) accessible depuis `dashboard-client.devis.tsx`.
+- Vue **GPS live** sur `dashboard-client.missions.$missionId.tsx` (composant `<MissionLiveTracker />` existant).
+- Picker adresses favorites dans nouvelle réservation.
+- Refonte sidebar : accès direct devis / missions / factures / documents.
+
+### Driver PWA (`/convoyeur/*`)
+
+- Catalogue missions (`convoyeur.disponibles.tsx`) : style Uber Eats, cards avec prix, distance, durée estimée, bouton accepter/refuser large.
+- Onglets missions : en cours / validées / archivées (`convoyeur.missions.tsx` + `convoyeur.historique.tsx`).
+- Compteur revenus mensuels sur `convoyeur.index.tsx` (somme `attributions` du mois).
+- Scan documents (déjà présent via `DocumentScanner.tsx`) — vérification accès rapide depuis workflow.
+- Signature mobile + tampon digital sur EDL final (`EdlPremiumFlow.tsx`) — vérif fonctionnel.
+- Gate formation : nouveau champ `convoyeurs.formation_validee_at`, missions inaccessibles tant que NULL.
+
+### GPS / Tracking
+
+- `useGpsTracking.ts` : vérif émission position toutes les 30 s en mission, persisté dans `mission_locations` (table existe).
+- Realtime channel sur `mission_locations` côté admin + client.
+- Carte fluide (`GpsMapView.tsx`) avec marqueur animé + ETA.
+
+---
+
+## Détails techniques transverses
+
+### Migrations DB (par lot)
+
+- **Lot 1** : ajout colonnes `numero_commande_client`, `prestation_type`, options dans `devis` / `demandes_convoyage` / `trajets`. Pas de backfill.
+- **Lot 3** : table `mission_enchere_proposals` (id, mission_id, convoyeur_id, prix_propose, statut, created_at) + RLS + grants standard.
+- **Lot 4** : colonne `convoyeurs.formation_validee_at timestamptz`.
+
+Toutes migrations respectent le contrat GRANT obligatoire (SELECT/INSERT/UPDATE/DELETE TO authenticated + ALL TO service_role).
+
+### Auth (`/login`, `/reset-password`)
+
+- Renommage UI **« Espace Pro » → « Espace Driver »**.
+- Page « Mot de passe oublié » : libellé corrigé.
+- Page validation compte : route existe (`/auth/email-confirmation`) — vérif copie + design cohérent.
+- Appareil de confiance : badge "Cet appareil" via `localStorage` + UA hash.
+
+### Factures / Devis PDF
+
+- `devis-pdf.ts` + `facture-pdf.ts` : logo automatique depuis `app_settings.logo_url`, structure pro (en-tête société, mentions légales, signature en pied), affichage `numero_commande_client` si présent.
+- Synchronisation totale : édition admin → trigger `devis_bump_version_on_change` (existe) → invalidation queries dashboards.
+
+### Cohérence des données
+
+- Toute édition admin de prix / adresse / heure passe par une **server fn unique** qui : 1) update DB, 2) log dans `activity_logs`, 3) notifie admin/client/driver concernés. Pas d'`update` direct depuis composants.
+
+---
+
+## Ordre d'exécution suggéré
+
+1. **Lot 1** (estimateur + tarifs) — débloque la cohérence prix immédiatement.
+2. **Lot 3** (signature + emails) — débloque la chaîne devis→mission→facture.
+3. **Lot 2** (vitrine) — corrections rapides, indépendant.
+4. **Lot 4** (dashboards + GPS + design) — le plus gros, fait en dernier sur fondations stabilisées.
+
+Je propose d'enchaîner Lot 1 dès validation. Les lots suivants seront re-cadrés au moment de leur démarrage pour intégrer ce qu'on aura appris du précédent.
