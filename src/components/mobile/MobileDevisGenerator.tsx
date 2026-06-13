@@ -133,6 +133,20 @@ export default function MobileDevisGenerator() {
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [comment, setComment] = useState("");
+
+  // Restitution (aller-retour)
+  const [sameRetourAddress, setSameRetourAddress] = useState(true);
+  const [sameRetourVehicle, setSameRetourVehicle] = useState(true);
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
+  const [dateRetour, setDateRetour] = useState("");
+  const [heureRetour, setHeureRetour] = useState("");
+  const [immatRetour, setImmatRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [marqueRetour, setMarqueRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
+  const [sivRetourLoading, setSivRetourLoading] = useState(false);
+  const [sivRetourMsg, setSivRetourMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
