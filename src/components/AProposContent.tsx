@@ -83,7 +83,7 @@ export default function AProposContent() {
                 </div>
               </div>
               <p className="text-[#0b1026]/75 text-[14.5px] leading-relaxed italic border-l-2 border-[#e7c76a] pl-4">
-                « Chaque véhicule qui nous est confié est un engagement personnel. Notre métier, c'est avant tout une question de confiance — celle qu'un client place entre nos mains, et que nous lui rendons à l'arrivée. »
+                « Chaque véhicule qui nous est confié est un engagement personnel. Notre métier, c'est avant tout une question de confiance, celle qu'un client place entre nos mains et que nous lui rendons à l'arrivée. »
               </p>
               <div className="h-px bg-[#0b1026]/10 my-7" />
               <div className="grid grid-cols-2 gap-4 text-center">
