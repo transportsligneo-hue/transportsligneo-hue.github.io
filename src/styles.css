@@ -1481,3 +1481,44 @@
     background: linear-gradient(90deg, transparent, #5fb6ff 50%, transparent);
   }
 }
+
+@layer components {
+  /* === Mission surface — adaptive readable card for client mission detail ===
+     Light shells (Pro/Flotte sur bg-pro-bg) → carte blanche + texte navy.
+     Dark shell (.client-shell Particulier) → glass cream-on-navy conservé.
+     Accents = bleu électrique #00AEEF (cohérent palette opérationnelle). */
+  .mission-surface {
+    --ms-text: #0b1026;
+    --ms-text-soft: #475569;
+    --ms-text-muted: #94a3b8;
+    --ms-divider: rgba(15, 23, 42, 0.08);
+    --ms-accent: #00AEEF;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -16px rgba(15,23,42,0.10);
+    color: var(--ms-text);
+  }
+  .client-shell .mission-surface {
+    --ms-text: #f3f6ff;
+    --ms-text-soft: #c9d3ee;
+    --ms-text-muted: #8c97bd;
+    --ms-divider: rgba(120, 165, 255, 0.18);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    border: 1px solid var(--client-border);
+    box-shadow: 0 20px 50px -22px rgba(8,16,48,0.75);
+  }
+  .mission-text { color: var(--ms-text, #0b1026); }
+  .mission-text-soft { color: var(--ms-text-soft, #475569); }
+  .mission-text-muted { color: var(--ms-text-muted, #94a3b8); }
+  .mission-divider { border-color: var(--ms-divider, rgba(15,23,42,0.08)); }
+  .mission-accent { color: var(--ms-accent, #00AEEF); }
+  .mission-incident-row {
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .client-shell .mission-incident-row {
+    background: rgba(11, 18, 50, 0.40);
+    border-color: rgba(120, 165, 255, 0.18);
+  }
+}

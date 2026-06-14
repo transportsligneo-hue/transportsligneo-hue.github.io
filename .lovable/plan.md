@@ -1,73 +1,95 @@
+## Problème
+
+Sur ta capture (`/dashboard-pro/missions/...`), les blocs de la fiche mission sont quasi invisibles : seul le texte sélectionné (surligné bleu) se voit. Cause technique :
+
+- `ClientMissionDetailView` utilise partout `text-cream`, `text-cream/50`, `border-primary/10` (pensés pour le shell sombre `client-shell` navy + glass).
+- Mais l'espace **Pro** (`dashboard-pro.tsx`) et **Flotte** rendent sur fond clair `bg-pro-bg` (#F6F8FB). Résultat : du texte crème sur fond blanc → illisible.
+- Le badge "EN ATTENTE" reste visible parce qu'il a déjà une couleur saturée (la nouvelle palette opérationnelle).
+
 ## Objectif
 
-Apporter dans chaque espace client un panneau "Suivi de mission" complet, en lecture seule, avec le même contenu que la fiche admin (GPS temps réel, photos EDL, signatures horodatées, historique d'étapes, incidents, infos convoyeur), sans aucune fonction d'édition / suppression / bypass / note interne.
+Rendre la fiche mission lisible dans **tous** les espaces clients, en restant cohérent avec la charte déjà validée :
+- Espaces sombres (`dashboard-client`, `client-shell`) : on garde le rendu navy/glass actuel.
+- Espaces clairs (`dashboard-pro`, `flotte`) : carte claire haut de gamme + texte navy lisible + accents **bleu électrique #00AEEF** (déjà nos tokens `--op-electric` / `--op-violet` / `--op-green` / `--op-red` / `--op-orange`).
+- Aucun changement aux modules admin, site public, header/footer, ni à la palette navy/doré globale.
 
-Sécurité : RLS déjà en place côté DB (policies "Clients read … of own missions" sur `mission_locations`, `mission_etape_history`, `mission_signatures`, `mission_selfies`, `mission_incidents`, via `is_mission_client`). **Aucune migration nécessaire.**
+## Périmètre des fichiers
 
-Design : style espace client (card-premium navy + accents dorés, typo Playfair) — conforme à la mémoire de marque.
+- `src/components/mission/ClientMissionDetailView.tsx` — passer en classes adaptatives.
+- `src/components/mission/MissionTrackingPanel.tsx` — même traitement (lecture seule, doit être lisible sur fond clair comme sombre).
+- `src/styles.css` — ajouter une seule classe utilitaire `.mission-surface` qui s'adapte au shell parent (sombre → glass cream-on-navy, clair → carte blanche bordure fine ombre douce + texte navy). Pas de nouveau token couleur, on réutilise `--op-electric` déjà ajouté.
 
----
+Aucun changement de logique métier, de requêtes Supabase, de routes, ni de permissions.
 
-## Composant central réutilisable
+## Approche visuelle
 
-Nouveau composant **`src/components/mission/MissionTrackingPanel.tsx`** (lecture seule, réutilisable Particulier / B2B / Flotte) regroupant :
+Hiérarchie commune (les deux modes) :
 
-1. **En-tête mission** — numéro, statut, départ → arrivée, date/heure de prise en charge, durée si terminée.
-2. **Convoyeur** — prénom + nom + ville + téléphone + email (bouton click-to-call/mail). Pas de selfies dans les espaces clients (conformément à la consigne utilisateur).
-3. **Suivi temps réel** — réutilise `MissionLiveTracker` existant (carte GPS, timeline étapes, ETA).
-4. **Photos état des lieux** — galerie classée **Départ / Pendant / Arrivée** (le bucket existant range par `inspection.type` = `depart` / `arrivee` ; tout selfie/photo intermédiaire éventuelle ira dans "Pendant"). Lightbox plein écran, horodatage par photo, signed URLs 1h.
-5. **Signatures horodatées** — réutilise `MissionTraceability` existant (variant="full") : départ convoyeur + client, arrivée convoyeur + client, miniature + date/heure.
-6. **Historique chronologique complet** — lit `mission_etape_history` (toutes les étapes, pas seulement la dernière) + dérive : arrivée sur place, début intervention, fin intervention, événements importants. Affichage en timeline verticale avec horodatages.
-7. **Incidents éventuels** — lit `mission_incidents` en lecture seule (type, description, photos jointes, date).
-8. **Documents partagés** — réutilise `MissionClientGallery` (déjà filtre les docs partageables côté client).
-9. **Bandeau temps réel** — abonnement Supabase Realtime sur `mission_locations`, `mission_etape_history`, `mission_signatures`, `mission_incidents` pour rafraîchir GPS/timeline/signatures sans reload.
+```text
+┌─ Card surface ──────────────────────────────────────┐
+│ N° mission (eyebrow, muted small caps)              │
+│ Ville → Ville  (titre, icône bleu électrique)       │
+│ ─────────────────────────────────────────────────── │
+│ Date         |       Prix (accent doré OU navy)    │
+└─────────────────────────────────────────────────────┘
+```
 
-**Aucun bouton d'action** dans ce panneau : pas de delete, pas d'override, pas d'AdminLiveControl, pas de note interne, pas d'édition contact, pas de Stripe.
-
----
-
-## Intégration dans les espaces clients
-
-### 1. Particulier — `/dashboard-client/missions/$missionId`
-- `ClientMissionDetailView` simplifié : conserve l'en-tête véhicule / coordonnées / facture / téléchargement EDL PDF, **remplace** les blocs partiels actuels par `<MissionTrackingPanel />`.
-
-### 2. B2B / Pro — `/dashboard-pro/missions/$missionId`
-- Déjà câblé via `ClientMissionDetailView` → bénéficie automatiquement du nouveau panneau.
-
-### 3. Flotte — nouveau
-- Créer **`src/routes/_authenticated/flotte.missions.$missionId.tsx`** qui rend `<MissionTrackingPanel missionId=… backTo="/flotte/missions" />`.
-- Mettre à jour `flotte.missions.tsx` pour rendre chaque ligne cliquable (Link vers la route détail).
-
----
+- Titres de section : `text-[#00AEEF]` (au lieu de `text-primary` doré) → cohérent avec le module Suivi/Véhicules déjà refait.
+- Plaque immatriculation : on garde le bloc bleu électrique existant.
+- Statut : `StatusBadge` (déjà saturé, OK partout).
+- Lien retour, eyebrows, valeurs : tokens adaptatifs via `.mission-surface` (sombre = cream/cream-muted, clair = `#0b1026` / `#475569`).
 
 ## Détails techniques
 
-- Chargement : un seul `useEffect` qui résout `mission → attribution → trajet → convoyeur` (logique déjà présente dans `ClientMissionDetailView`, extraite dans un hook `useMissionTrackingData(missionId)`).
-- Realtime : un canal Supabase unique par mission, désabonné au unmount.
-- Photos & docs : `createSignedUrl(…, 3600)` ; classement "Pendant" = photos liées à l'attribution mais hors inspections `depart`/`arrivee` (selfies exclus, conformément à la demande).
-- Responsive : grille `lg:grid-cols-3` pour desktop, `space-y-5` empilé en mobile. Composants tactiles ≥ 44 px.
-- Aucun changement de schéma DB, aucune nouvelle policy RLS, aucun edge function.
+1. Ajouter dans `src/styles.css` :
 
----
-
-## Fichiers touchés
-
+```css
+.mission-surface { /* défaut = mode clair Pro/Flotte */
+  --ms-bg: #ffffff;
+  --ms-border: rgba(15, 23, 42, 0.08);
+  --ms-text: #0b1026;
+  --ms-text-soft: #475569;
+  --ms-text-muted: #94a3b8;
+  --ms-divider: rgba(15, 23, 42, 0.08);
+  --ms-accent: #00AEEF;
+  background: var(--ms-bg);
+  border: 1px solid var(--ms-border);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -16px rgba(15,23,42,0.10);
+  color: var(--ms-text);
+}
+.client-shell .mission-surface { /* mode sombre Particulier */
+  --ms-bg: transparent;
+  --ms-border: var(--client-border);
+  --ms-text: #f3f6ff;
+  --ms-text-soft: #c9d3ee;
+  --ms-text-muted: #8c97bd;
+  --ms-divider: rgba(120,165,255,0.18);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+  box-shadow: 0 20px 50px -22px rgba(8,16,48,0.75);
+}
+.mission-text       { color: var(--ms-text); }
+.mission-text-soft  { color: var(--ms-text-soft); }
+.mission-text-muted { color: var(--ms-text-muted); }
+.mission-divider    { border-color: var(--ms-divider); }
+.mission-accent     { color: var(--ms-accent); }
 ```
-created  src/components/mission/MissionTrackingPanel.tsx
-created  src/hooks/useMissionTrackingData.ts
-created  src/routes/_authenticated/flotte.missions.$missionId.tsx
-edited   src/components/mission/ClientMissionDetailView.tsx   (utilise le panneau)
-edited   src/routes/_authenticated/flotte.missions.tsx        (liens vers détail)
-```
 
-Aucune migration SQL. Aucun secret à ajouter.
+2. Dans `ClientMissionDetailView.tsx` et `MissionTrackingPanel.tsx` :
+   - Remplacer chaque `card-premium` → `mission-surface`.
+   - `text-cream` → `mission-text`.
+   - `text-cream/80` → `mission-text-soft`.
+   - `text-cream/50` / `text-cream/40` → `mission-text-muted`.
+   - `border-primary/10` → `mission-divider`.
+   - Les titres `<h2>` de section et les icônes principales : `text-primary` (doré) → `mission-accent` (bleu électrique #00AEEF). Cohérent avec la décision prise pour Suivi/Véhicules.
+   - Le prix total et la facture restent en `text-primary` (doré) dans le shell sombre, en navy `mission-text` + chiffre `font-semibold` en mode clair (déjà géré par le token).
+   - Lien retour `text-cream/60 hover:text-primary` → `mission-text-muted hover:mission-accent`.
 
----
+3. Aucun changement aux composants `StatusBadge`, `GpsMapView`, `MissionDocuments`, `FactureEmbeddedCheckout`, etc. Ils sont déjà lisibles (palette opérationnelle saturée).
 
-## Vérifications post-implémentation
+## Vérification après build
 
-- Client particulier voit GPS live + photos + signatures horodatées sur sa mission, et **ne voit pas** les missions d'autres clients (RLS).
-- Client B2B/Pro idem via `/dashboard-pro/missions/:id`.
-- Espace flotte : la liste des missions ouvre la nouvelle page détail avec le même panneau.
-- Aucun bouton d'édition / suppression / bypass visible dans aucun des trois espaces.
-- Mise à jour temps réel : un nouveau point GPS ou une nouvelle étape apparaît sans recharger.
+- `/dashboard-pro/missions/:id` (cas du screenshot) : titre, adresse, date, prix, sections Véhicule / Détails / Contact, panneau Suivi → tout en navy foncé sur cartes blanches, accents bleu électrique.
+- `/flotte/missions/:id` : idem (shell light).
+- `/dashboard-client/missions/:id` : rendu inchangé (toujours dans `client-shell`, donc styles glass/navy conservés via override CSS).
+- `/admin/missions/:id` : non touché.

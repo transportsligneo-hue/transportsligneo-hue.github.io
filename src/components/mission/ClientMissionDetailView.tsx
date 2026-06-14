@@ -270,12 +270,12 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
     }
   };
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin mission-accent" size={28} /></div>;
   if (!mission) {
     return (
       <div className="text-center py-12 space-y-4">
-        <p className="text-cream/60 text-sm">Mission introuvable.</p>
-        <Link to={backTo} className="text-primary text-xs uppercase tracking-wider hover:text-gold-light">
+        <p className="mission-text-muted text-sm">Mission introuvable.</p>
+        <Link to={backTo} className="mission-accent text-xs uppercase tracking-wider hover:opacity-80">
           ← {backLabel}
         </Link>
       </div>
@@ -286,16 +286,16 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <Link to={backTo} className="inline-flex items-center gap-2 text-cream/60 text-xs uppercase tracking-wider hover:text-primary transition-colors">
+      <Link to={backTo} className="inline-flex items-center gap-2 mission-text-muted text-xs uppercase tracking-wider hover:mission-accent transition-colors">
         <ArrowLeft size={14} /> {backLabel}
       </Link>
 
-      <div className="card-premium p-6 rounded">
+      <div className="mission-surface p-6">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
-            <p className="text-cream/40 text-[10px] uppercase tracking-wider">{mission.numero}</p>
-            <h1 className="font-heading text-2xl text-cream mt-1 flex items-center gap-2">
-              <MapPin size={18} className="text-primary" />
+            <p className="mission-text-muted text-[10px] uppercase tracking-wider">{mission.numero}</p>
+            <h1 className="font-heading text-2xl mission-text mt-1 flex items-center gap-2">
+              <MapPin size={18} className="mission-accent" />
               {mission.ville_depart} → {mission.ville_arrivee}
             </h1>
           </div>
@@ -303,11 +303,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             {missionStatusLabel(mission.statut)}
           </StatusBadge>
         </div>
-        <div className="flex items-center justify-between border-t border-primary/10 pt-4">
-          <span className="text-cream/50 text-xs uppercase tracking-wider flex items-center gap-1">
+        <div className="flex items-center justify-between border-t mission-divider pt-4">
+          <span className="mission-text-soft text-xs uppercase tracking-wider flex items-center gap-1">
             <Calendar size={12} /> {new Date(mission.date_prise_en_charge).toLocaleDateString("fr-FR")}
           </span>
-          <span className="font-heading text-primary text-2xl">{Number(mission.prix_total).toFixed(2)} €</span>
+          <span className="font-heading mission-text text-2xl font-semibold">{Number(mission.prix_total).toFixed(2)} €</span>
         </div>
       </div>
 
@@ -321,42 +321,42 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       )}
 
       {attributionId && hasProofs && (
-        <div className="card-premium p-5 rounded flex items-center justify-between flex-wrap gap-3">
+        <div className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (PDF unique)</p>
-            <p className="text-cream/50 text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
+            <p className="font-heading text-sm mission-text tracking-wider">Rapport de mission (PDF unique)</p>
+            <p className="mission-text-soft text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
           </div>
           <button
             onClick={handleDownloadEdl}
             disabled={downloadingEdl}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#00AEEF] text-white font-heading text-xs tracking-[0.15em] uppercase hover:bg-[#0098d1] transition-colors rounded disabled:opacity-50"
           >
             {downloadingEdl ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} Télécharger PDF
           </button>
         </div>
       )}
 
-      <div className="card-premium p-5 rounded">
-        <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+      <div className="mission-surface p-5">
+        <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
           <Car size={16} /> Véhicule
         </h2>
         <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
           <div className="min-w-0">
-            <p className="text-cream/50 text-[10px] uppercase tracking-wider">Modèle</p>
-            <p className="text-cream text-lg font-semibold mt-1 truncate">
+            <p className="mission-text-muted text-[10px] uppercase tracking-wider">Modèle</p>
+            <p className="mission-text text-lg font-semibold mt-1 truncate">
               {[mission.marque, mission.modele].filter(Boolean).join(" ") || "—"}
             </p>
           </div>
           {mission.immatriculation && (
             <div className="shrink-0">
-              <p className="text-cream/50 text-[10px] uppercase tracking-wider mb-1 text-right">Plaque</p>
+              <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 text-right">Plaque</p>
               <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-[#00AEEF] text-white font-mono font-bold tracking-[0.18em] text-sm shadow-md border border-[#00AEEF]">
                 {mission.immatriculation}
               </span>
             </div>
           )}
         </div>
-        <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-primary/10">
+        <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t mission-divider">
           <Field label="Carburant" value={mission.carburant} />
         </div>
       </div>
@@ -366,12 +366,12 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <Field label="Type de trajet" value={mission.type_trajet?.replace(/_/g, " ")} />
         {options.length > 0 && (
           <div className="sm:col-span-2">
-            <p className="text-cream/40 text-[10px] uppercase tracking-wider mb-2">Options</p>
+            <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-2">Options</p>
             <div className="space-y-1.5">
               {options.map((o, i) => (
-                <div key={i} className="flex items-center justify-between text-sm bg-navy/40 px-3 py-1.5 rounded border border-primary/10">
-                  <span className="text-cream/80">{o.label}</span>
-                  <span className="text-primary text-xs">+ {o.price.toFixed(2)} €</span>
+                <div key={i} className="flex items-center justify-between text-sm mission-incident-row px-3 py-1.5 rounded">
+                  <span className="mission-text-soft">{o.label}</span>
+                  <span className="mission-accent text-xs font-semibold">+ {o.price.toFixed(2)} €</span>
                 </div>
               ))}
             </div>
@@ -379,8 +379,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         )}
         {mission.remarques && (
           <div className="sm:col-span-2">
-            <p className="text-cream/40 text-[10px] uppercase tracking-wider mb-1">Remarques</p>
-            <p className="text-cream/80 text-sm">{mission.remarques}</p>
+            <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1">Remarques</p>
+            <p className="mission-text-soft text-sm">{mission.remarques}</p>
           </div>
         )}
       </Section>
@@ -392,27 +392,27 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       </Section>
 
       {facture && (
-        <div className="card-premium p-5 rounded">
-          <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+        <div className="mission-surface p-5">
+          <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <Receipt size={16} /> Facture
           </h2>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-cream/40 text-[10px] uppercase tracking-wider">{facture.numero}</p>
-              <p className="text-cream/80 text-sm mt-0.5">
+              <p className="mission-text-muted text-[10px] uppercase tracking-wider">{facture.numero}</p>
+              <p className="mission-text-soft text-sm mt-0.5">
                 {facture.date_facture ? new Date(facture.date_facture).toLocaleDateString("fr-FR") : "—"}
                 {" · "}
-                <span className={facture.statut === "payee" ? "text-emerald-300" : "text-amber-300"}>
+                <span className={facture.statut === "payee" ? "text-[#22C55E] font-semibold" : "text-[#F59E0B] font-semibold"}>
                   {facture.statut === "payee" ? "Payée" : "À régler"}
                 </span>
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="font-heading text-primary text-lg">{Number(facture.prix_ttc).toFixed(2)} €</span>
+              <span className="font-heading mission-text text-lg font-semibold">{Number(facture.prix_ttc).toFixed(2)} €</span>
               <button
                 onClick={handleDownloadFacture}
                 disabled={downloadingFact}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-[#00AEEF] text-white font-heading text-xs tracking-[0.15em] uppercase hover:bg-[#0098d1] transition-colors rounded disabled:opacity-50"
               >
                 {downloadingFact ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} PDF
               </button>
@@ -421,7 +421,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
       )}
 
-      <p className="text-cream/30 text-xs text-center">
+      <p className="mission-text-muted text-xs text-center">
         Vous serez notifié par email à chaque évolution du statut de votre mission.
       </p>
     </div>
@@ -430,8 +430,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="card-premium p-5 rounded">
-      <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+    <div className="mission-surface p-5">
+      <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
         {icon} {title}
       </h2>
       <div className="grid sm:grid-cols-2 gap-4">{children}</div>
@@ -442,10 +442,10 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
 function Field({ label, value, icon }: { label: string; value: string | null | undefined; icon?: React.ReactNode }) {
   return (
     <div>
-      <p className="text-cream/40 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+      <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
         {icon} {label}
       </p>
-      <p className="text-cream/85 text-sm">{value || "—"}</p>
+      <p className="mission-text text-sm font-medium">{value || "—"}</p>
     </div>
   );
 }
