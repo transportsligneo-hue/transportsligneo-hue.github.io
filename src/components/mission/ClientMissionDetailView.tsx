@@ -131,12 +131,14 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         if (finalTrajetId && !cancelled) {
           const { data: tj } = await supabase
             .from("trajets")
-            .select("arrivee, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("arrivee, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_societe, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", finalTrajetId)
             .maybeSingle();
           if (!cancelled && tj) {
             setArrivalContact({
               nom: tj.arrivee_contact_nom ?? null,
+              prenom: tj.arrivee_contact_prenom ?? null,
+              societe: tj.arrivee_contact_societe ?? null,
               telephone: tj.arrivee_contact_telephone ?? null,
               telephone2: tj.arrivee_contact_telephone2 ?? null,
               instructions: tj.arrivee_contact_instructions ?? null,
