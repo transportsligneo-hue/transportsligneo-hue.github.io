@@ -26,6 +26,7 @@ function AdminDevisDetailPage() {
   const { devisId } = Route.useParams();
   const navigate = useNavigate();
   const [devis, setDevis] = useState<any | null>(null);
+  const [acceptation, setAcceptation] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
