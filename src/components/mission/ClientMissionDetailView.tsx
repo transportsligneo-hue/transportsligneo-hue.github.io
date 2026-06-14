@@ -32,7 +32,7 @@ interface Mission {
 
 interface ClientMissionDetailViewProps {
   missionId: string;
-  backTo: "/dashboard-client/missions" | "/dashboard-pro/missions";
+  backTo: "/dashboard-client/missions" | "/dashboard-pro/missions" | "/flotte/missions";
   backLabel?: string;
 }
 
