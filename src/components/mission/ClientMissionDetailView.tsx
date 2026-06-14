@@ -336,12 +336,31 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
       )}
 
-      <Section title="Véhicule" icon={<Car size={16} />}>
-        <Field label="Marque" value={mission.marque} />
-        <Field label="Modèle" value={mission.modele} />
-        <Field label="Immatriculation" value={mission.immatriculation} />
-        <Field label="Carburant" value={mission.carburant} />
-      </Section>
+      <div className="card-premium p-5 rounded">
+        <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+          <Car size={16} /> Véhicule
+        </h2>
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
+          <div className="min-w-0">
+            <p className="text-cream/50 text-[10px] uppercase tracking-wider">Modèle</p>
+            <p className="text-cream text-lg font-semibold mt-1 truncate">
+              {[mission.marque, mission.modele].filter(Boolean).join(" ") || "—"}
+            </p>
+          </div>
+          {mission.immatriculation && (
+            <div className="shrink-0">
+              <p className="text-cream/50 text-[10px] uppercase tracking-wider mb-1 text-right">Plaque</p>
+              <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-[#00AEEF] text-white font-mono font-bold tracking-[0.18em] text-sm shadow-md border border-[#00AEEF]">
+                {mission.immatriculation}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-primary/10">
+          <Field label="Carburant" value={mission.carburant} />
+        </div>
+      </div>
+
 
       <Section title="Détails du convoyage" icon={<FileText size={16} />}>
         <Field label="Type de trajet" value={mission.type_trajet?.replace(/_/g, " ")} />
