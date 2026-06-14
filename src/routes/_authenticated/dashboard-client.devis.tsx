@@ -110,26 +110,19 @@ function MesFacturesEtDevis() {
 
   const refresh = async () => {
     if (!user) return;
-    const authEmail = (user.email ?? "").toLowerCase();
-    const { data: prof } = await supabase
-      .from("profiles").select("email").eq("user_id", user.id).maybeSingle();
-    const profEmail = (prof?.email ?? "").toLowerCase();
-    const emails = Array.from(new Set([authEmail, profEmail].filter(Boolean)));
-
+    // RLS gère le filtrage (user_id OU email case-insensitive via profiles/JWT).
+    // On évite les filtres .or()/.in() côté client qui sont case-sensitive et
+    // rateraient les factures/devis dont l'email a une casse différente.
     const [dRes, fRes] = await Promise.all([
       supabase
         .from("devis")
         .select("*")
-        .or(`user_id.eq.${user.id}${emails.length ? `,${emails.map(e => `email.eq.${e}`).join(",")}` : ""}`)
         .is("archived_at", null)
         .order("created_at", { ascending: false }),
-      emails.length > 0
-        ? supabase
-            .from("factures")
-            .select("*")
-            .in("client_email", emails)
-            .order("created_at", { ascending: false })
-        : Promise.resolve({ data: [] as FactureRow[] }),
+      supabase
+        .from("factures")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
     setDevis((dRes.data ?? []) as DevisRow[]);
     setFactures((fRes.data ?? []) as FactureRow[]);
