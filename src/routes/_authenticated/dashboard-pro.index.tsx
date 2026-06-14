@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,7 @@ const statutPillClasses: Record<string, string> = {
 
 function ProDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -203,7 +204,11 @@ function ProDashboard() {
               </thead>
               <tbody>
                 {missions.slice(0, 8).map((m) => (
-                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer">
+                  <tr
+                    key={m.id}
+                    className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer"
+                    onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
+                  >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{m.numero}</Link>
                     </td>
@@ -224,7 +229,16 @@ function ProDashboard() {
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-right font-semibold text-pro-text">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{Number(m.prix_total).toFixed(2)} €</Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{Number(m.prix_total).toFixed(2)} €</Link>
+                        <Link
+                          to="/dashboard-pro/missions/$missionId"
+                          params={{ missionId: m.id }}
+                          className="inline-flex items-center gap-1 text-pro-accent text-[11px] uppercase tracking-wider hover:underline"
+                        >
+                          Voir le suivi <ArrowUpRight size={12} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
