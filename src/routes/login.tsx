@@ -77,7 +77,7 @@ function LoginPage() {
 
     // Onglet client
     if (role === "convoyeur") {
-      setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Pro ».");
+      setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Driver ».");
       void logout();
       return;
     }
@@ -194,7 +194,7 @@ function LoginPage() {
                 : "bg-navy/40 text-cream/60 hover:text-primary"
             }`}
           >
-            <Truck size={14} /> Espace Pro
+            <Truck size={14} /> Espace Driver
           </button>
         </div>
 
