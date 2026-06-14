@@ -126,6 +126,24 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             setTrajetId(trajetCandidate);
           }
         }
+
+        const finalTrajetId = attr?.trajet_id ?? trajetCandidate ?? null;
+        if (finalTrajetId && !cancelled) {
+          const { data: tj } = await supabase
+            .from("trajets")
+            .select("arrivee, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .eq("id", finalTrajetId)
+            .maybeSingle();
+          if (!cancelled && tj) {
+            setArrivalContact({
+              nom: tj.arrivee_contact_nom ?? null,
+              telephone: tj.arrivee_contact_telephone ?? null,
+              telephone2: tj.arrivee_contact_telephone2 ?? null,
+              instructions: tj.arrivee_contact_instructions ?? null,
+              adresse: tj.arrivee ?? null,
+            });
+          }
+        }
       }
 
       const { data: fact } = await supabase
