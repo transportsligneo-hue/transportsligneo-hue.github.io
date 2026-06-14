@@ -119,6 +119,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           if (attr) {
             setAttributionId(attr.id);
             setTrajetId(attr.trajet_id ?? trajetCandidate ?? null);
+            setConvoyeurId(attr.convoyeur_id ?? null);
             setPdfShareEnabled(Boolean(attr.pdf_share_client));
           } else if (trajetCandidate) {
             setTrajetId(trajetCandidate);
