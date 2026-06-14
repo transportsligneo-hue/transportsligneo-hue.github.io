@@ -60,7 +60,7 @@ export default function AProposContent() {
               </h2>
               <div className="space-y-4 text-[#0b1026]/75 text-[15px] leading-relaxed">
                 <p>
-                  L'aventure démarre à Tours, en 2021. Après plusieurs années à constater les écarts de qualité du convoyage automobile, le constat est clair : il manque un acteur réellement <span className="text-[#b8860b] font-medium">premium</span>, capable d'allier rigueur, transparence tarifaire et relation humaine.
+                  L'aventure démarre à Tours, en 2021. Après plusieurs années à constater les écarts de qualité du convoyage automobile, le constat est clair : il manque un acteur réellement <span className="text-[#b8860b] font-medium">soigné</span>, capable d'allier rigueur, transparence tarifaire et relation humaine.
                 </p>
                 <p>
                   Transports Ligneo naît de cette ambition. Une structure à taille humaine, des convoyeurs formés en continu, une assurance circulation incluse, et une exigence absolue sur la prise en main du véhicule.
@@ -144,7 +144,7 @@ export default function AProposContent() {
             </div>
             <h3 className="font-heading text-[#0b1026] text-xl tracking-wide mb-3">Notre vision</h3>
             <p className="text-[#0b1026]/70 text-[14.5px] leading-relaxed">
-              Devenir la référence française du convoyage automobile premium. Un service où la technologie (suivi GPS, inspection digitalisée, espace client) sert avant tout l'humain et la qualité.
+              Devenir la référence française du convoyage automobile. Un service où la technologie (suivi GPS, inspection digitalisée, espace client) sert avant tout l'humain et la qualité.
             </p>
           </div>
         </div>

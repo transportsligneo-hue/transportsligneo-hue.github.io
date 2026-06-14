@@ -61,7 +61,7 @@ const FREQUENCIES = [
 const VEHICLE_TYPES = [
   { value: "leger", label: "Véhicules légers" },
   { value: "utilitaire", label: "Utilitaires" },
-  { value: "premium", label: "Premium" },
+  { value: "premium", label: "Haut de gamme" },
   { value: "electrique", label: "Électriques" },
   { value: "mix", label: "Mix" },
 ] as const;

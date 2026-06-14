@@ -8,7 +8,7 @@ export const Route = createFileRoute("/a-propos")({
   head: () => ({
     meta: [
       { title: "À propos — Transports Ligneo" },
-      { name: "description", content: "Découvrez l'histoire, la mission et les valeurs de Transports Ligneo, spécialiste du convoyage automobile premium depuis Tours." },
+      { name: "description", content: "Découvrez l'histoire, la mission et les valeurs de Transports Ligneo, spécialiste du convoyage automobile depuis Tours." },
       { property: "og:title", content: "À propos — Transports Ligneo" },
       { property: "og:description", content: "Notre histoire, nos valeurs, notre fondateur et nos chiffres clés." },
     ],

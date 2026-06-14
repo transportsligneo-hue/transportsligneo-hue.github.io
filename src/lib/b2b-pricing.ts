@@ -102,7 +102,7 @@ export function estimateB2BPrice(input: B2BEstimateInput): B2BEstimate {
 export const B2B_VEHICLE_LABELS: Record<B2BVehicleType, string> = {
   leger: "Véhicule léger",
   utilitaire: "Utilitaire",
-  premium: "Premium / Haut de gamme",
+  premium: "Haut de gamme",
   electrique: "Électrique",
 };
 
