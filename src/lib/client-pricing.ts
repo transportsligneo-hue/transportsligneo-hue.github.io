@@ -30,6 +30,8 @@ interface RuleRow {
   client_email: string | null;
   ville_depart: string | null;
   ville_arrivee: string | null;
+  departement_depart: string | null;
+  departement_arrivee: string | null;
   zone_label: string | null;
   trip_type: "aller" | "aller_retour" | "any";
   prix_ttc: number;
@@ -48,26 +50,52 @@ function cityMatch(needle: string | null, haystack: string | null | undefined): 
   return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
-/**
- * Priority scoring (higher wins):
- *   P1 = 100 : ville_depart AND ville_arrivee both match (exact trajet)
- *   P2 =  50 : ville_depart OR ville_arrivee matches, or zone_label defined
- *   P3 =  10 : general client rule (no city/zone constraints)
- * Bonus +5 if trip_type is an exact match (not "any").
- * Bonus + rule.priority (admin override, default 0).
- */
+function extractDept(address: string | null | undefined): string | null {
+  if (!address) return null;
+  const m = address.match(/\b(\d{5})\b/);
+  if (!m) return null;
+  const cp = m[1];
+  if (cp.startsWith("20")) {
+    const n = parseInt(cp, 10);
+    return n >= 20200 ? "2B" : "2A";
+  }
+  return cp.slice(0, 2);
+}
+
+function deptMatch(needle: string | null, addrDept: string | null): boolean {
+  if (!needle) return false;
+  if (!addrDept) return false;
+  return needle.trim().toUpperCase() === addrDept.trim().toUpperCase();
+}
+
 function score(rule: RuleRow, depart: string, arrivee: string, tripType: ResolverTripType): number {
-  const hasDep = !!rule.ville_depart;
-  const hasArr = !!rule.ville_arrivee;
+  const depDept = extractDept(depart);
+  const arrDept = extractDept(arrivee);
+
+  const hasDepVille = !!rule.ville_depart;
+  const hasArrVille = !!rule.ville_arrivee;
+  const hasDepDept = !!rule.departement_depart;
+  const hasArrDept = !!rule.departement_arrivee;
   const hasZone = !!rule.zone_label;
-  const depOk = hasDep ? cityMatch(rule.ville_depart, depart) : true;
-  const arrOk = hasArr ? cityMatch(rule.ville_arrivee, arrivee) : true;
-  if (hasDep && !depOk) return -1;
-  if (hasArr && !arrOk) return -1;
+
+  let depScore = 0;
+  if (hasDepVille || hasDepDept) {
+    const villeOk = hasDepVille && cityMatch(rule.ville_depart, depart);
+    const deptOk = hasDepDept && deptMatch(rule.departement_depart, depDept);
+    if (!villeOk && !deptOk) return -1;
+    depScore = villeOk ? 50 : 30;
+  }
+  let arrScore = 0;
+  if (hasArrVille || hasArrDept) {
+    const villeOk = hasArrVille && cityMatch(rule.ville_arrivee, arrivee);
+    const deptOk = hasArrDept && deptMatch(rule.departement_arrivee, arrDept);
+    if (!villeOk && !deptOk) return -1;
+    arrScore = villeOk ? 50 : 30;
+  }
 
   let s: number;
-  if (hasDep && hasArr) s = 100;
-  else if (hasDep || hasArr || hasZone) s = 50;
+  if (depScore + arrScore > 0) s = depScore + arrScore;
+  else if (hasZone) s = 50;
   else s = 10;
 
   if (tripType !== "express" && rule.trip_type === tripType) s += 5;
