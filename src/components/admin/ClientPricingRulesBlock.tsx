@@ -118,12 +118,20 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
 
     const basePrice = pas ?? par ?? pex ?? 0;
 
+    const normDept = (s: string) => {
+      const t = s.trim().toUpperCase();
+      if (!t) return null;
+      if (/^\d{1}$/.test(t)) return "0" + t;
+      return t;
+    };
     const payload = {
       client_user_id: clientUserId,
       client_email: clientEmail.toLowerCase(),
       zone_label: form.zone_label.trim() || null,
       ville_depart: form.ville_depart.trim() || null,
       ville_arrivee: form.ville_arrivee.trim() || null,
+      departement_depart: normDept(form.departement_depart),
+      departement_arrivee: normDept(form.departement_arrivee),
       trip_type: "any" as const,
       prix_aller_simple: pas,
       prix_aller_retour: par,
