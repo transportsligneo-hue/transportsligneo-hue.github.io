@@ -177,11 +177,40 @@ function AdminAttributions() {
       // 2. Charge trajet
       const { data: trajet, error: tErr } = await supabase
         .from("trajets")
-        .select("id, depart, arrivee, date_trajet, client_email, client_nom, client_telephone, marque, modele, immatriculation, prix")
+        .select("id, depart, arrivee, date_trajet, client_email, client_nom, client_telephone, marque, modele, immatriculation, prix, devis_id, demande_id")
         .eq("id", a.trajet_id)
         .maybeSingle();
       if (tErr || !trajet) throw new Error("Trajet introuvable");
-      if (!trajet.client_email) throw new Error("Email client manquant sur le trajet");
+
+      // 2bis. Fallback email : devis -> demande -> mission -> profile (via user_id)
+      let clientEmail = (trajet.client_email ?? "").trim();
+      let clientNom = trajet.client_nom ?? "";
+      if (!clientEmail && trajet.devis_id) {
+        const { data: dv } = await supabase
+          .from("devis").select("email, nom, prenom").eq("id", trajet.devis_id).maybeSingle();
+        if (dv?.email) clientEmail = dv.email;
+        if (!clientNom && dv) clientNom = `${dv.prenom ?? ""} ${dv.nom ?? ""}`.trim();
+      }
+      if (!clientEmail && trajet.demande_id) {
+        const { data: dc } = await supabase
+          .from("demandes_convoyage").select("email, nom, prenom").eq("id", trajet.demande_id).maybeSingle();
+        if (dc?.email) clientEmail = dc.email;
+        if (!clientNom && dc) clientNom = `${dc.prenom ?? ""} ${dc.nom ?? ""}`.trim();
+      }
+      if (!clientEmail) {
+        const { data: mis } = await supabase
+          .from("missions").select("email, user_id").eq("numero", a.numero_mission).maybeSingle();
+        if (mis?.email) clientEmail = mis.email;
+        if (!clientEmail && mis?.user_id) {
+          const { data: pr } = await supabase
+            .from("profiles").select("email, nom, prenom").eq("user_id", mis.user_id).maybeSingle();
+          if (pr?.email) clientEmail = pr.email;
+          if (!clientNom && pr) clientNom = `${pr.prenom ?? ""} ${pr.nom ?? ""}`.trim();
+        }
+      }
+      if (!clientEmail) throw new Error("Email client introuvable (trajet, devis, demande, mission, profil) — renseignez l'email client sur le trajet");
+      trajet.client_email = clientEmail;
+      trajet.client_nom = clientNom || trajet.client_nom;
 
       const prixHT = Number(trajet.prix ?? 0) > 0 ? Number(trajet.prix) / 1.2 : 0;
       const prixTTC = Number(trajet.prix ?? 0);
