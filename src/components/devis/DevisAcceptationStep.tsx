@@ -113,28 +113,31 @@ export function DevisAcceptationStep({
       // 4. Preuve d'acceptation côté serveur (IP, user-agent, verrouillage)
       await accept({ data: { devisId, signaturePath, pdfPath } });
 
-      // 5. Email de confirmation (best-effort)
+      // 5. Email de confirmation client + admin (best-effort, parallèle)
       try {
         const email = (devisRow as { email?: string }).email ?? userData.user?.email;
+        const prenom = (devisRow as { prenom?: string }).prenom ?? "";
+        const nom = (devisRow as { nom?: string }).nom ?? "";
+        const sends: Promise<unknown>[] = [
+          sendTransactionalEmail({
+            templateName: "devis-accepte-admin",
+            idempotencyKey: `admin-devis-accepte-${devisId}-v${version}`,
+            templateData: { prenom, nom, email: email ?? "", numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
+          }),
+        ];
         if (email) {
-          await sendTransactionalEmail({
+          sends.unshift(sendTransactionalEmail({
             templateName: "devis-accepte",
             recipientEmail: email,
             idempotencyKey: `devis-accepte-${devisId}-v${version}`,
-            templateData: {
-              prenom: (devisRow as { prenom?: string }).prenom ?? "",
-              numero,
-              depart,
-              arrivee,
-              montant: `${prixTtc.toFixed(2)} €`,
-              dateAcceptation: acceptedAtLabel,
-              version: String(version),
-            },
-          });
+            templateData: { prenom, numero, depart, arrivee, montant: `${prixTtc.toFixed(2)} €`, dateAcceptation: acceptedAtLabel, version: String(version) },
+          }));
         }
+        await Promise.allSettled(sends);
       } catch {
         // l'email ne doit jamais bloquer l'acceptation
       }
+
 
       toast.success("Devis signé et accepté", {
         description: "Le PDF signé est archivé dans votre espace. Vous pouvez poursuivre.",

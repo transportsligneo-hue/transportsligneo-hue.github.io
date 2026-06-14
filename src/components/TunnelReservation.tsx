@@ -183,25 +183,35 @@ export default function TunnelReservation({ onClose }: Props) {
       const numero = data?.numero as string;
       setMissionNumero(numero);
 
-      // Email de confirmation (best-effort)
+      // Email de confirmation client + notification admin (best-effort, en parallèle)
+      const dateFr = new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR");
+      const trajetLabel = tripTypeLabel(form.type_trajet);
       try {
-        await sendTransactionalEmail({
-          templateName: "mission-confirmation",
-          recipientEmail: form.email,
-          idempotencyKey: `mission-${data?.id}`,
-          templateData: {
-            prenom: form.prenom,
-            numero,
-            villeDepart: form.ville_depart,
-            villeArrivee: form.ville_arrivee,
-            date: new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR"),
-            prixTotal: total,
-            typeTrajet: tripTypeLabel(form.type_trajet),
-          },
-        });
+        await Promise.allSettled([
+          sendTransactionalEmail({
+            templateName: "mission-confirmation",
+            recipientEmail: form.email,
+            idempotencyKey: `mission-${data?.id}`,
+            templateData: {
+              prenom: form.prenom, numero,
+              villeDepart: form.ville_depart, villeArrivee: form.ville_arrivee,
+              date: dateFr, prixTotal: total, typeTrajet: trajetLabel,
+            },
+          }),
+          sendTransactionalEmail({
+            templateName: "nouvelle-demande-admin",
+            idempotencyKey: `admin-demande-${data?.id}`,
+            templateData: {
+              prenom: form.prenom, nom: form.nom, email: form.email, telephone: form.telephone,
+              depart: form.ville_depart, arrivee: form.ville_arrivee,
+              date: dateFr, prix: total, numero, type: trajetLabel,
+            },
+          }),
+        ]);
       } catch (emailErr) {
         console.error("Email confirmation failed:", emailErr);
       }
+
 
       setStep(5);
     } catch (e: any) {
