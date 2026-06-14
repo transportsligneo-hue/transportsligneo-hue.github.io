@@ -190,8 +190,29 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
           </div>
         )}
 
-        {showMap && allPoints.length > 0 && (
-          <GpsMapView points={allPoints} className="h-[240px] rounded-lg" />
+        {eta && (
+          <div className="flex items-center gap-3 text-xs bg-primary/10 border border-primary/30 rounded-md px-3 py-2">
+            <Navigation size={14} className="text-primary" />
+            <div className="flex flex-col">
+              <span className="text-cream font-medium">
+                Arrivée estimée vers {eta.etaAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <span className="text-cream/50 text-[10px]">
+                {eta.distanceKm < 1
+                  ? `${Math.round(eta.distanceKm * 1000)} m`
+                  : `${eta.distanceKm.toFixed(1)} km`} restants · ~{eta.etaMinutes} min · {Math.round(eta.avgKmh)} km/h
+              </span>
+            </div>
+          </div>
+        )}
+
+        {showMap && (allPoints.length > 0 || origin || destination) && (
+          <GpsMapView
+            points={allPoints}
+            origin={origin}
+            destination={destination}
+            className="h-[260px] rounded-lg"
+          />
         )}
 
         {showMap && allPoints.length === 0 && !rt.lastGps && currentIdx < 0 && (
