@@ -11,7 +11,7 @@ const Email = (p: Props) => (
     <Preview>Véhicule livré — {p.numero ?? 'Transports Ligneo'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>{p.prenom ? `${p.prenom},` : ''} votre véhicule est arrivé</Heading>
         <Text style={text}>

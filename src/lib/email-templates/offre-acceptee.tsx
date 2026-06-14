@@ -21,7 +21,7 @@ const OffreAccepteeEmail = ({ prenom, depart, arrivee, date, prixPropose }: Offr
     <Preview>Votre offre a été acceptée — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>Bonne nouvelle {prenom || ''} ! 🎉</Heading>
         <Text style={text}>

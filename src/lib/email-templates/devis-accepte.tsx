@@ -48,7 +48,7 @@ const Email = ({ prenom, numero, depart, arrivee, montant, dateAcceptation, vers
           </Text>
           <Hr style={hr} />
           <Text style={muted}>
-            Transports Ligneo — Convoyage automobile premium · contact@transportsligneo.fr · 07 82 45 61 81
+            Transports Ligneo — Convoyage automobile · contact@transportsligneo.fr · 07 82 45 61 81
           </Text>
         </Section>
       </Container>

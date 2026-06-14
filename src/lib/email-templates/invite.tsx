@@ -17,7 +17,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
       <Container style={container}>
         <Section style={header}>
           <Heading style={brand}>TRANSPORTS LIGNEO</Heading>
-          <Text style={subtitle}>Convoyage automobile premium</Text>
+          <Text style={subtitle}>Convoyage automobile</Text>
         </Section>
         <Hr style={divider} />
         <Heading style={h1}>Vous êtes invité</Heading>

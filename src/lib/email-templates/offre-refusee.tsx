@@ -21,7 +21,7 @@ const OffreRefuseeEmail = ({ prenom, depart, arrivee, date, prixPropose }: Offre
     <Preview>Votre offre n'a pas été retenue — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>Bonjour {prenom || ''},</Heading>
         <Text style={text}>
