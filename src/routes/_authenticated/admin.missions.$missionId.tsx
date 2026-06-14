@@ -1067,7 +1067,21 @@ function AdminMissionDetail() {
                 type="text"
                 value={contactNom}
                 onChange={(e) => setContactNom(e.target.value)}
-                placeholder="Nom et prénom"
+                placeholder="Nom"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={contactPrenom}
+                onChange={(e) => setContactPrenom(e.target.value)}
+                placeholder="Prénom"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={contactSociete}
+                onChange={(e) => setContactSociete(e.target.value)}
+                placeholder="Société (optionnel)"
                 className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
               />
               <input
