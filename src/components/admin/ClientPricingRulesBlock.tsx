@@ -252,13 +252,22 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
             </AdminField>
 
             <div className="grid grid-cols-2 gap-3">
-              <AdminField label="Ville départ (filtre, optionnel)">
+              <AdminField label="Ville départ (optionnel)">
                 <input className={inp} value={form.ville_depart} onChange={(e) => setForm({ ...form, ville_depart: e.target.value })} placeholder="ex: Tours" />
               </AdminField>
-              <AdminField label="Ville arrivée (filtre, optionnel)">
-                <input className={inp} value={form.ville_arrivee} onChange={(e) => setForm({ ...form, ville_arrivee: e.target.value })} />
+              <AdminField label="Ville arrivée (optionnel)">
+                <input className={inp} value={form.ville_arrivee} onChange={(e) => setForm({ ...form, ville_arrivee: e.target.value })} placeholder="ex: Blois" />
+              </AdminField>
+              <AdminField label="Département départ (ex: 37)">
+                <input className={inp} value={form.departement_depart} onChange={(e) => setForm({ ...form, departement_depart: e.target.value })} placeholder="ex: 37" maxLength={3} />
+              </AdminField>
+              <AdminField label="Département arrivée (ex: 41, 72, 2A)">
+                <input className={inp} value={form.departement_arrivee} onChange={(e) => setForm({ ...form, departement_arrivee: e.target.value })} placeholder="ex: 41" maxLength={3} />
               </AdminField>
             </div>
+            <p className="text-xs text-slate-500 -mt-1">
+              Remplis ville <b>OU</b> département (ou les deux). Les 4 combinaisons sont supportées : ville→ville, ville→département, département→ville, département→département. Détection automatique du département depuis le code postal de l'adresse client.
+            </p>
             <div className="grid grid-cols-3 gap-3">
               <AdminField label="Prix aller simple (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_simple} onChange={(e) => setForm({ ...form, prix_aller_simple: e.target.value })} placeholder="70" />
