@@ -10,7 +10,7 @@ function FlotteMissionDetail() {
   return (
     <ClientMissionDetailView
       missionId={missionId}
-      backTo={"/flotte/missions" as never}
+      backTo="/flotte/missions"
       backLabel="Retour aux missions"
     />
   );
