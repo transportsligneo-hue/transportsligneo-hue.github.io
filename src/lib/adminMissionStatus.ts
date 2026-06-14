@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { pushToUser, pushToAdmins } from "@/lib/push/notify.functions";
 
 async function notifyMissionLifecycle(trajetId: string, statut: string) {
   try {
@@ -19,20 +20,46 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
       .maybeSingle();
     const numero = a?.numero_mission ?? "";
     const base = { prenom, numero, depart: t.depart, arrivee: t.arrivee };
+    // Find user_id for client push
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .ilike("email", t.client_email)
+      .maybeSingle();
     if (statut === "en_cours") {
-      await sendTransactionalEmail({
-        templateName: "mission-demarree-client",
-        recipientEmail: t.client_email,
-        idempotencyKey: `mission-demarree-${trajetId}`,
-        templateData: base,
-      });
+      await Promise.allSettled([
+        sendTransactionalEmail({
+          templateName: "mission-demarree-client",
+          recipientEmail: t.client_email,
+          idempotencyKey: `mission-demarree-${trajetId}`,
+          templateData: base,
+        }),
+        prof?.user_id
+          ? pushToUser({ data: { userId: prof.user_id, payload: {
+              title: "Véhicule en route",
+              body: `${t.depart} → ${t.arrivee}`,
+              url: "/client/missions",
+              tag: `mission-${trajetId}-start`,
+            } } })
+          : Promise.resolve(),
+      ]);
     } else if (statut === "validee" || statut === "termine") {
-      await sendTransactionalEmail({
-        templateName: "mission-livree-client",
-        recipientEmail: t.client_email,
-        idempotencyKey: `mission-livree-${trajetId}`,
-        templateData: base,
-      });
+      await Promise.allSettled([
+        sendTransactionalEmail({
+          templateName: "mission-livree-client",
+          recipientEmail: t.client_email,
+          idempotencyKey: `mission-livree-${trajetId}`,
+          templateData: base,
+        }),
+        prof?.user_id
+          ? pushToUser({ data: { userId: prof.user_id, payload: {
+              title: "Véhicule livré",
+              body: `Mission ${numero} terminée`,
+              url: "/client/missions",
+              tag: `mission-${trajetId}-end`,
+            } } })
+          : Promise.resolve(),
+      ]);
     }
   } catch (e) {
     console.warn("[mission-lifecycle email] échec", e);
