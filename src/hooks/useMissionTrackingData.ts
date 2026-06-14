@@ -18,8 +18,10 @@ export interface EtapeRow {
 
 export interface IncidentRow {
   id: string;
-  type: string | null;
-  description: string | null;
+  titre: string;
+  description: string;
+  gravite: string;
+  statut: string;
   created_at: string;
   photos: string[];
 }
