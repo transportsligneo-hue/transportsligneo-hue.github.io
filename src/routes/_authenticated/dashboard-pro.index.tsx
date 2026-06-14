@@ -45,15 +45,50 @@ function ProDashboard() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setMissions((data ?? []) as MissionRow[]);
-        setLoading(false);
-      });
+    let cancelled = false;
+
+    const loadMissionRows = async () => {
+      const email = user.email ?? "";
+      const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
+      const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
+        supabase
+          .from("missions")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
+          .or(orFilter)
+          .order("created_at", { ascending: false }),
+        supabase.from("profiles").select("organization_id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("organization_members").select("organization_id").eq("user_id", user.id).eq("status", "active"),
+      ]);
+
+      const orgIds = Array.from(new Set([
+        profile?.organization_id,
+        ...((memberships ?? []).map((m) => m.organization_id)),
+      ].filter(Boolean))) as string[];
+
+      let orgRows: MissionRow[] = [];
+      if (orgIds.length > 0) {
+        const { data } = await supabase
+          .from("missions")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
+          .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
+          .order("created_at", { ascending: false });
+        orgRows = (data ?? []) as MissionRow[];
+      }
+
+      const merged = [...((directRows ?? []) as MissionRow[]), ...orgRows];
+      return Array.from(new Map(merged.map((row) => [row.id, row])).values())
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    };
+
+    void loadMissionRows().then((rows) => {
+      if (cancelled) return;
+      setMissions(rows);
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   if (loading) {
@@ -168,24 +203,28 @@ function ProDashboard() {
               </thead>
               <tbody>
                 {missions.slice(0, 8).map((m) => (
-                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors">
-                    <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">{m.numero}</td>
+                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer">
+                    <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{m.numero}</Link>
+                    </td>
                     <td className="px-5 py-3 text-pro-text">
-                      <span className="inline-flex items-center gap-1.5">
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
                         <MapPin size={12} className="text-pro-muted" />
                         {m.ville_depart} → {m.ville_arrivee}
-                      </span>
+                      </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text-soft">
-                      {new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</Link>
                     </td>
                     <td className="px-5 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statutPillClasses[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
-                        {statutLabel[m.statut] ?? m.statut}
-                      </span>
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statutPillClasses[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
+                          {statutLabel[m.statut] ?? m.statut}
+                        </span>
+                      </Link>
                     </td>
                     <td className="px-5 py-3 text-right font-semibold text-pro-text">
-                      {Number(m.prix_total).toFixed(2)} €
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{Number(m.prix_total).toFixed(2)} €</Link>
                     </td>
                   </tr>
                 ))}

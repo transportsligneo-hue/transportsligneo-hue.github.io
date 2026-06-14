@@ -3170,6 +3170,10 @@ export type Database = {
         Args: { _attribution_id: string; _user_id: string }
         Returns: boolean
       }
+      is_mission_client: {
+        Args: { _mission_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean

@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ClientMissionDetailView } from "@/components/mission/ClientMissionDetailView";
 
-export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
-  component: MissionDetail,
+export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/$missionId")({
+  component: ProMissionDetail,
 });
 
-function MissionDetail() {
+function ProMissionDetail() {
   const { missionId } = Route.useParams();
 
   return (
     <ClientMissionDetailView
       missionId={missionId}
-      backTo="/dashboard-client/missions"
+      backTo="/dashboard-pro/missions"
       backLabel="Retour aux missions"
     />
   );
