@@ -74,7 +74,7 @@ function MissionDetail() {
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (byNumero) attr = byNumero as typeof attr;
+            if (byNumero) attr = byNumero as unknown as AttrLite;
           }
 
           if (!attr) {
