@@ -4,10 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
 import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
-import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
+import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
-import { MissionClientGallery } from "@/components/mission/MissionClientGallery";
 
 interface Mission {
   id: string;
@@ -33,7 +32,7 @@ interface Mission {
 
 interface ClientMissionDetailViewProps {
   missionId: string;
-  backTo: "/dashboard-client/missions" | "/dashboard-pro/missions";
+  backTo: "/dashboard-client/missions" | "/dashboard-pro/missions" | "/flotte/missions";
   backLabel?: string;
 }
 
@@ -42,6 +41,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
   const [trajetId, setTrajetId] = useState<string | null>(null);
+  const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [, setPdfShareEnabled] = useState(false);
   const [hasProofs, setHasProofs] = useState(false);
   const [downloadingEdl, setDownloadingEdl] = useState(false);
@@ -119,6 +119,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           if (attr) {
             setAttributionId(attr.id);
             setTrajetId(attr.trajet_id ?? trajetCandidate ?? null);
+            setConvoyeurId(attr.convoyeur_id ?? null);
             setPdfShareEnabled(Boolean(attr.pdf_share_client));
           } else if (trajetCandidate) {
             setTrajetId(trajetCandidate);
@@ -310,12 +311,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
       </div>
 
-      {attributionId && <MissionLiveTracker attributionId={attributionId} />}
-
       {attributionId && (
-        <MissionClientGallery
+        <MissionTrackingPanel
           attributionId={attributionId}
           trajetId={trajetId}
+          convoyeurId={convoyeurId}
           onProofsAvailable={setHasProofs}
         />
       )}

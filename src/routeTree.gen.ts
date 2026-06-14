@@ -110,6 +110,7 @@ import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/d
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
+import { Route as AuthenticatedFlotteMissionsMissionIdRouteImport } from './routes/_authenticated/flotte.missions.$missionId'
 import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-pro.missions.$missionId'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
@@ -678,6 +679,12 @@ const ApiPublicB2bLeadCreatedRoute = ApiPublicB2bLeadCreatedRouteImport.update({
   path: '/api/public/b2b/lead-created',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedFlotteMissionsMissionIdRoute =
+  AuthenticatedFlotteMissionsMissionIdRouteImport.update({
+    id: '/$missionId',
+    path: '/$missionId',
+    getParentRoute: () => AuthenticatedFlotteMissionsRoute,
+  } as any)
 const AuthenticatedDashboardProMissionsMissionIdRoute =
   AuthenticatedDashboardProMissionsMissionIdRouteImport.update({
     id: '/$missionId',
@@ -797,7 +804,7 @@ export interface FileRoutesByFullPath {
   '/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
   '/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
   '/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
-  '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/flotte/missions': typeof AuthenticatedFlotteMissionsRouteWithChildren
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
@@ -817,6 +824,7 @@ export interface FileRoutesByFullPath {
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -899,7 +907,7 @@ export interface FileRoutesByTo {
   '/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
   '/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
   '/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
-  '/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/flotte/missions': typeof AuthenticatedFlotteMissionsRouteWithChildren
   '/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
@@ -919,6 +927,7 @@ export interface FileRoutesByTo {
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -1010,7 +1019,7 @@ export interface FileRoutesById {
   '/_authenticated/entreprise/societe': typeof AuthenticatedEntrepriseSocieteRoute
   '/_authenticated/flotte/conducteurs': typeof AuthenticatedFlotteConducteursRoute
   '/_authenticated/flotte/disponibilites': typeof AuthenticatedFlotteDisponibilitesRoute
-  '/_authenticated/flotte/missions': typeof AuthenticatedFlotteMissionsRoute
+  '/_authenticated/flotte/missions': typeof AuthenticatedFlotteMissionsRouteWithChildren
   '/_authenticated/flotte/societe': typeof AuthenticatedFlotteSocieteRoute
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
@@ -1030,6 +1039,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/_authenticated/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/_authenticated/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
@@ -1141,6 +1151,7 @@ export interface FileRouteTypes {
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
+    | '/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
@@ -1243,6 +1254,7 @@ export interface FileRouteTypes {
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
+    | '/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
@@ -1353,6 +1365,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/_authenticated/dashboard-pro/missions/$missionId'
+    | '/_authenticated/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
@@ -2119,6 +2132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicB2bLeadCreatedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/flotte/missions/$missionId': {
+      id: '/_authenticated/flotte/missions/$missionId'
+      path: '/$missionId'
+      fullPath: '/flotte/missions/$missionId'
+      preLoaderRoute: typeof AuthenticatedFlotteMissionsMissionIdRouteImport
+      parentRoute: typeof AuthenticatedFlotteMissionsRoute
+    }
     '/_authenticated/dashboard-pro/missions/$missionId': {
       id: '/_authenticated/dashboard-pro/missions/$missionId'
       path: '/$missionId'
@@ -2419,10 +2439,25 @@ const AuthenticatedEntrepriseRouteWithChildren =
     AuthenticatedEntrepriseRouteChildren,
   )
 
+interface AuthenticatedFlotteMissionsRouteChildren {
+  AuthenticatedFlotteMissionsMissionIdRoute: typeof AuthenticatedFlotteMissionsMissionIdRoute
+}
+
+const AuthenticatedFlotteMissionsRouteChildren: AuthenticatedFlotteMissionsRouteChildren =
+  {
+    AuthenticatedFlotteMissionsMissionIdRoute:
+      AuthenticatedFlotteMissionsMissionIdRoute,
+  }
+
+const AuthenticatedFlotteMissionsRouteWithChildren =
+  AuthenticatedFlotteMissionsRoute._addFileChildren(
+    AuthenticatedFlotteMissionsRouteChildren,
+  )
+
 interface AuthenticatedFlotteRouteChildren {
   AuthenticatedFlotteConducteursRoute: typeof AuthenticatedFlotteConducteursRoute
   AuthenticatedFlotteDisponibilitesRoute: typeof AuthenticatedFlotteDisponibilitesRoute
-  AuthenticatedFlotteMissionsRoute: typeof AuthenticatedFlotteMissionsRoute
+  AuthenticatedFlotteMissionsRoute: typeof AuthenticatedFlotteMissionsRouteWithChildren
   AuthenticatedFlotteSocieteRoute: typeof AuthenticatedFlotteSocieteRoute
   AuthenticatedFlotteIndexRoute: typeof AuthenticatedFlotteIndexRoute
 }
@@ -2431,7 +2466,8 @@ const AuthenticatedFlotteRouteChildren: AuthenticatedFlotteRouteChildren = {
   AuthenticatedFlotteConducteursRoute: AuthenticatedFlotteConducteursRoute,
   AuthenticatedFlotteDisponibilitesRoute:
     AuthenticatedFlotteDisponibilitesRoute,
-  AuthenticatedFlotteMissionsRoute: AuthenticatedFlotteMissionsRoute,
+  AuthenticatedFlotteMissionsRoute:
+    AuthenticatedFlotteMissionsRouteWithChildren,
   AuthenticatedFlotteSocieteRoute: AuthenticatedFlotteSocieteRoute,
   AuthenticatedFlotteIndexRoute: AuthenticatedFlotteIndexRoute,
 }

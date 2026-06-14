@@ -1,79 +1,73 @@
-
-# Suivi mission client — complet, en direct et après livraison
-
 ## Objectif
 
-Quand un client ouvre une mission (en cours OU terminée) dans `/dashboard-client/missions`, il doit voir et télécharger :
+Apporter dans chaque espace client un panneau "Suivi de mission" complet, en lecture seule, avec le même contenu que la fiche admin (GPS temps réel, photos EDL, signatures horodatées, historique d'étapes, incidents, infos convoyeur), sans aucune fonction d'édition / suppression / bypass / note interne.
 
-1. Suivi GPS live + timeline d'étapes + ETA
-2. Carte grise (recto/verso)
-3. Photos d'inspection départ + arrivée (lightbox, téléchargeables individuellement)
-4. Signatures (départ / arrivée)
-5. Documents partagés (PV livraison, PV restitution, CG, contrat, autres)
-6. **Un PDF unique consolidé** (toutes les preuves dans un rapport) — toujours disponible si la mission a au moins une preuve, sans dépendre du flag `pdf_share_client`
-7. Téléchargement individuel de chaque pièce (photo, signature, document)
+Sécurité : RLS déjà en place côté DB (policies "Clients read … of own missions" sur `mission_locations`, `mission_etape_history`, `mission_signatures`, `mission_selfies`, `mission_incidents`, via `is_mission_client`). **Aucune migration nécessaire.**
 
-## Diagnostic
+Design : style espace client (card-premium navy + accents dorés, typo Playfair) — conforme à la mémoire de marque.
 
-L'écran `dashboard-client.missions.$missionId.tsx` rend déjà `MissionLiveTracker` + `MissionClientGallery`, mais 3 verrous bloquent les clients :
+---
 
-- **Résolution attribution fragile** : sur d'anciennes missions (avant la séquence numero), le matching `numero_mission` peut échouer ; le fallback trajet exige une triple égalité (`depart` / `arrivee` / `date_trajet`) qui ne tient pas si l'admin a normalisé une adresse → `attributionId` reste `null` → aucun bloc suivi/galerie n'apparaît.
-- **PDF EDL conditionné à `pdf_share_client`** : tant que l'admin n'a pas coché le partage, le client ne voit rien à télécharger, même sur une mission livrée et signée. Le besoin exprimé est l'inverse : le PDF doit être disponible dès qu'il y a des preuves.
-- **Téléchargement individuel** : la galerie ouvre un lightbox mais ne propose pas de bouton « Télécharger » par photo/signature/CG.
+## Composant central réutilisable
 
-Les RLS et le bucket sont déjà OK (migration `is_attribution_client` + politiques `inspection_photos` / `mission_signatures` / `mission_documents` / `mission_locations` / `mission_etape_history` + storage `inspection-photos` / `mission-selfies` / `mission-documents`). Pas de nouvelle migration nécessaire pour le client. Les RLS bucket `cartes-grises` côté client sont à vérifier — j'ajoute une policy SELECT scopée si manquante.
+Nouveau composant **`src/components/mission/MissionTrackingPanel.tsx`** (lecture seule, réutilisable Particulier / B2B / Flotte) regroupant :
 
-## Plan d'exécution
+1. **En-tête mission** — numéro, statut, départ → arrivée, date/heure de prise en charge, durée si terminée.
+2. **Convoyeur** — prénom + nom + ville + téléphone + email (bouton click-to-call/mail). Pas de selfies dans les espaces clients (conformément à la consigne utilisateur).
+3. **Suivi temps réel** — réutilise `MissionLiveTracker` existant (carte GPS, timeline étapes, ETA).
+4. **Photos état des lieux** — galerie classée **Départ / Pendant / Arrivée** (le bucket existant range par `inspection.type` = `depart` / `arrivee` ; tout selfie/photo intermédiaire éventuelle ira dans "Pendant"). Lightbox plein écran, horodatage par photo, signed URLs 1h.
+5. **Signatures horodatées** — réutilise `MissionTraceability` existant (variant="full") : départ convoyeur + client, arrivée convoyeur + client, miniature + date/heure.
+6. **Historique chronologique complet** — lit `mission_etape_history` (toutes les étapes, pas seulement la dernière) + dérive : arrivée sur place, début intervention, fin intervention, événements importants. Affichage en timeline verticale avec horodatages.
+7. **Incidents éventuels** — lit `mission_incidents` en lecture seule (type, description, photos jointes, date).
+8. **Documents partagés** — réutilise `MissionClientGallery` (déjà filtre les docs partageables côté client).
+9. **Bandeau temps réel** — abonnement Supabase Realtime sur `mission_locations`, `mission_etape_history`, `mission_signatures`, `mission_incidents` pour rafraîchir GPS/timeline/signatures sans reload.
 
-### 1. Résolution attribution robuste (composant détail mission client)
-Fichier : `src/routes/_authenticated/dashboard-client.missions.$missionId.tsx`
-- Garder le matching par `numero_mission` en priorité.
-- Étendre les fallbacks dans cet ordre :
-  1. Trajet par `commande_ref = mission.numero` (devis/demande).
-  2. Trajet via `devis.id` (si `mission.devis_id` ou via `commande_ref`).
-  3. Trajet par `(depart ILIKE %ville%, arrivee ILIKE %ville%, date_trajet)`.
-  4. Dernière attribution `convoyeur_id IS NOT NULL` sur le trajet trouvé.
-- Logger discrètement en console quand aucun n'aboutit, mais afficher quand même un message « Suivi non encore disponible » sans casser la page.
+**Aucun bouton d'action** dans ce panneau : pas de delete, pas d'override, pas d'AdminLiveControl, pas de note interne, pas d'édition contact, pas de Stripe.
 
-### 2. PDF unique consolidé sans dépendance admin
-Fichier : `src/routes/_authenticated/dashboard-client.missions.$missionId.tsx`
-- Remplacer la condition `pdfShareEnabled` par « PDF disponible dès qu'il existe au moins 1 photo OU 1 signature OU 1 document partagé ».
-- Le bouton « Télécharger le rapport PDF » utilise `generateEdlFinalPdf` (déjà en place) et empile **toutes** les preuves résolues côté client.
-- Garder un fallback gracieux : si rien à mettre, masquer le bouton (pas d'erreur).
+---
 
-### 3. Téléchargement individuel des pièces (galerie)
-Fichier : `src/components/mission/MissionClientGallery.tsx`
-- Sur chaque `ImgTile` (photos, CG, signatures) : ajouter une icône « Download » qui force `download=` via un `<a>` masqué (fonctionne car URLs signed même cross-bucket).
-- Pour les signatures (data URL base64), convertir en `Blob` à la volée pour permettre le `download`.
-- Conserver l'ouverture en lightbox au clic principal ; le bouton download est un sous-bouton dédié.
+## Intégration dans les espaces clients
 
-### 4. Petit polish du tracker
-Fichier : `src/components/mission/MissionLiveTracker.tsx`
-- Aucun changement structurel : la timeline + GPS live + ETA fonctionnent déjà ; juste s'assurer qu'on n'affiche pas « En attente du démarrage » quand la mission est `termine` (cas déjà couvert via `isFinished`, à confirmer).
-- Sur mission terminée, afficher le trajet final (origin/dest + tracé complet) au lieu d'attendre un nouveau point GPS.
+### 1. Particulier — `/dashboard-client/missions/$missionId`
+- `ClientMissionDetailView` simplifié : conserve l'en-tête véhicule / coordonnées / facture / téléchargement EDL PDF, **remplace** les blocs partiels actuels par `<MissionTrackingPanel />`.
 
-### 5. Vérif RLS bucket carte grise (préventif, micro-migration uniquement si manquant)
-Avant migration je lis la policy actuelle de `storage.objects` pour le bucket `cartes-grises`. Si aucune SELECT client n'existe, j'ajoute :
-```sql
--- Pseudo (uniquement si nécessaire) :
--- Clients lisent la CG du trajet d'une de leurs missions
-```
-Sinon, rien à faire.
+### 2. B2B / Pro — `/dashboard-pro/missions/$missionId`
+- Déjà câblé via `ClientMissionDetailView` → bénéficie automatiquement du nouveau panneau.
+
+### 3. Flotte — nouveau
+- Créer **`src/routes/_authenticated/flotte.missions.$missionId.tsx`** qui rend `<MissionTrackingPanel missionId=… backTo="/flotte/missions" />`.
+- Mettre à jour `flotte.missions.tsx` pour rendre chaque ligne cliquable (Link vers la route détail).
+
+---
 
 ## Détails techniques
 
-- Pas de nouveau hook ni de nouvelle table : tout passe par la résolution composant + le composant `MissionClientGallery` enrichi.
-- `generateEdlFinalPdf` (déjà testé) accepte la signature actuelle ; on lui passe les photos signées + signatures + équipements + KM exactement comme aujourd'hui, juste sans le gate `pdf_share_client`.
-- Realtime déjà OK (les tables sont dans `supabase_realtime`), donc les nouvelles photos/signatures apparaissent live dans la galerie tant que le client est sur la page (un `bumpKey` du hook réalimente déjà l'effet).
-- Pas de changement côté admin pour cette étape : le besoin n'inclut pas le dispatch admin ici.
+- Chargement : un seul `useEffect` qui résout `mission → attribution → trajet → convoyeur` (logique déjà présente dans `ClientMissionDetailView`, extraite dans un hook `useMissionTrackingData(missionId)`).
+- Realtime : un canal Supabase unique par mission, désabonné au unmount.
+- Photos & docs : `createSignedUrl(…, 3600)` ; classement "Pendant" = photos liées à l'attribution mais hors inspections `depart`/`arrivee` (selfies exclus, conformément à la demande).
+- Responsive : grille `lg:grid-cols-3` pour desktop, `space-y-5` empilé en mobile. Composants tactiles ≥ 44 px.
+- Aucun changement de schéma DB, aucune nouvelle policy RLS, aucun edge function.
 
-## Hors scope (volontairement)
+---
 
-- Dispatch carto admin « style Uber » — sera traité dans un lot séparé.
-- Génération d'un PDF côté serveur — on garde la génération client (déjà en place, suffisant pour la volumétrie).
+## Fichiers touchés
 
-## Validation après build
+```
+created  src/components/mission/MissionTrackingPanel.tsx
+created  src/hooks/useMissionTrackingData.ts
+created  src/routes/_authenticated/flotte.missions.$missionId.tsx
+edited   src/components/mission/ClientMissionDetailView.tsx   (utilise le panneau)
+edited   src/routes/_authenticated/flotte.missions.tsx        (liens vers détail)
+```
 
-1. Mission terminée d'un client de test → la page détail affiche tracker (avec trajet figé) + galerie + bouton PDF + téléchargements unitaires.
-2. Mission en cours → GPS live + ETA + timeline qui avance + nouvelles photos qui apparaissent sans refresh.
-3. Tester un cas issu de `devis` (paiement Stripe) ET un cas issu de `demandes_convoyage` pour valider la résolution attribution.
+Aucune migration SQL. Aucun secret à ajouter.
+
+---
+
+## Vérifications post-implémentation
+
+- Client particulier voit GPS live + photos + signatures horodatées sur sa mission, et **ne voit pas** les missions d'autres clients (RLS).
+- Client B2B/Pro idem via `/dashboard-pro/missions/:id`.
+- Espace flotte : la liste des missions ouvre la nouvelle page détail avec le même panneau.
+- Aucun bouton d'édition / suppression / bypass visible dans aucun des trois espaces.
+- Mise à jour temps réel : un nouveau point GPS ou une nouvelle étape apparaît sans recharger.
