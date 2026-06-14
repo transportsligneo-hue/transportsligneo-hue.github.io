@@ -2610,6 +2610,8 @@ export type Database = {
           arrivee: string
           arrivee_contact_instructions: string | null
           arrivee_contact_nom: string | null
+          arrivee_contact_prenom: string | null
+          arrivee_contact_societe: string | null
           arrivee_contact_telephone: string | null
           arrivee_contact_telephone2: string | null
           carte_grise_recto_url: string | null
@@ -2665,6 +2667,8 @@ export type Database = {
           arrivee: string
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
+          arrivee_contact_prenom?: string | null
+          arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
           carte_grise_recto_url?: string | null
@@ -2720,6 +2724,8 @@ export type Database = {
           arrivee?: string
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
+          arrivee_contact_prenom?: string | null
+          arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
           carte_grise_recto_url?: string | null

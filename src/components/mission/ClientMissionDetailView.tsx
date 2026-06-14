@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
@@ -47,7 +47,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
-  const [arrivalContact, setArrivalContact] = useState<{ nom: string | null; telephone: string | null; telephone2: string | null; instructions: string | null; adresse: string | null } | null>(null);
+  const [arrivalContact, setArrivalContact] = useState<{ nom: string | null; prenom: string | null; societe: string | null; telephone: string | null; telephone2: string | null; instructions: string | null; adresse: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,12 +131,14 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         if (finalTrajetId && !cancelled) {
           const { data: tj } = await supabase
             .from("trajets")
-            .select("arrivee, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("arrivee, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_societe, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", finalTrajetId)
             .maybeSingle();
           if (!cancelled && tj) {
             setArrivalContact({
               nom: tj.arrivee_contact_nom ?? null,
+              prenom: tj.arrivee_contact_prenom ?? null,
+              societe: tj.arrivee_contact_societe ?? null,
               telephone: tj.arrivee_contact_telephone ?? null,
               telephone2: tj.arrivee_contact_telephone2 ?? null,
               instructions: tj.arrivee_contact_instructions ?? null,
@@ -410,14 +412,16 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <Field label="Téléphone" value={mission.telephone} icon={<Phone size={11} />} />
       </Section>
 
-      {arrivalContact && (arrivalContact.nom || arrivalContact.telephone || arrivalContact.adresse) && (
+      {arrivalContact && (arrivalContact.nom || arrivalContact.prenom || arrivalContact.societe || arrivalContact.telephone || arrivalContact.adresse) && (
         <div className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <MapPin size={16} /> Coordonnées d'arrivée
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {arrivalContact.adresse && <Field label="Adresse de livraison" value={arrivalContact.adresse} icon={<MapPin size={11} />} />}
-            {arrivalContact.nom && <Field label="Contact sur place" value={arrivalContact.nom} icon={<User size={11} />} />}
+            {arrivalContact.societe && <Field label="Société" value={arrivalContact.societe} icon={<Building2 size={11} />} />}
+            {arrivalContact.nom && <Field label="Nom" value={arrivalContact.nom} icon={<User size={11} />} />}
+            {arrivalContact.prenom && <Field label="Prénom" value={arrivalContact.prenom} icon={<User size={11} />} />}
             {arrivalContact.telephone && (
               <div>
                 <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">

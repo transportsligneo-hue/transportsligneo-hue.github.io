@@ -78,6 +78,8 @@ interface TrajetFull {
   client_telephone: string | null;
   prix: number | null;
   arrivee_contact_nom: string | null;
+  arrivee_contact_prenom: string | null;
+  arrivee_contact_societe: string | null;
   arrivee_contact_telephone: string | null;
   arrivee_contact_telephone2: string | null;
   arrivee_contact_instructions: string | null;
@@ -191,6 +193,8 @@ function AdminMissionDetail() {
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [contactNom, setContactNom] = useState("");
+  const [contactPrenom, setContactPrenom] = useState("");
+  const [contactSociete, setContactSociete] = useState("");
   const [contactTel, setContactTel] = useState("");
   const [contactTel2, setContactTel2] = useState("");
   const [contactInstr, setContactInstr] = useState("");
@@ -198,6 +202,8 @@ function AdminMissionDetail() {
   useEffect(() => {
     if (!trajet) return;
     setContactNom(trajet.arrivee_contact_nom ?? "");
+    setContactPrenom(trajet.arrivee_contact_prenom ?? "");
+    setContactSociete(trajet.arrivee_contact_societe ?? "");
     setContactTel(trajet.arrivee_contact_telephone ?? "");
     setContactTel2(trajet.arrivee_contact_telephone2 ?? "");
     setContactInstr(trajet.arrivee_contact_instructions ?? "");
@@ -374,6 +380,8 @@ function AdminMissionDetail() {
         .from("trajets")
         .update({
           arrivee_contact_nom: contactNom.trim() || null,
+          arrivee_contact_prenom: contactPrenom.trim() || null,
+          arrivee_contact_societe: contactSociete.trim() || null,
           arrivee_contact_telephone: contactTel.trim() || null,
           arrivee_contact_telephone2: contactTel2.trim() || null,
           arrivee_contact_instructions: contactInstr.trim() || null,
@@ -383,6 +391,8 @@ function AdminMissionDetail() {
       setTrajet({
         ...trajet,
         arrivee_contact_nom: contactNom.trim() || null,
+        arrivee_contact_prenom: contactPrenom.trim() || null,
+        arrivee_contact_societe: contactSociete.trim() || null,
         arrivee_contact_telephone: contactTel.trim() || null,
         arrivee_contact_telephone2: contactTel2.trim() || null,
         arrivee_contact_instructions: contactInstr.trim() || null,
@@ -1057,7 +1067,21 @@ function AdminMissionDetail() {
                 type="text"
                 value={contactNom}
                 onChange={(e) => setContactNom(e.target.value)}
-                placeholder="Nom et prénom"
+                placeholder="Nom"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={contactPrenom}
+                onChange={(e) => setContactPrenom(e.target.value)}
+                placeholder="Prénom"
+                className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={contactSociete}
+                onChange={(e) => setContactSociete(e.target.value)}
+                placeholder="Société (optionnel)"
                 className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
               />
               <input
