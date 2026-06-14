@@ -412,14 +412,16 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <Field label="Téléphone" value={mission.telephone} icon={<Phone size={11} />} />
       </Section>
 
-      {arrivalContact && (arrivalContact.nom || arrivalContact.telephone || arrivalContact.adresse) && (
+      {arrivalContact && (arrivalContact.nom || arrivalContact.prenom || arrivalContact.societe || arrivalContact.telephone || arrivalContact.adresse) && (
         <div className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <MapPin size={16} /> Coordonnées d'arrivée
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {arrivalContact.adresse && <Field label="Adresse de livraison" value={arrivalContact.adresse} icon={<MapPin size={11} />} />}
-            {arrivalContact.nom && <Field label="Contact sur place" value={arrivalContact.nom} icon={<User size={11} />} />}
+            {arrivalContact.societe && <Field label="Société" value={arrivalContact.societe} icon={<Building2 size={11} />} />}
+            {arrivalContact.nom && <Field label="Nom" value={arrivalContact.nom} icon={<User size={11} />} />}
+            {arrivalContact.prenom && <Field label="Prénom" value={arrivalContact.prenom} icon={<User size={11} />} />}
             {arrivalContact.telephone && (
               <div>
                 <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
