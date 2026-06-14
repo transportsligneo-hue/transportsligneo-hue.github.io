@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,7 @@ const statutPillClasses: Record<string, string> = {
 
 function ProDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -203,7 +204,11 @@ function ProDashboard() {
               </thead>
               <tbody>
                 {missions.slice(0, 8).map((m) => (
-                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors">
+                  <tr
+                    key={m.id}
+                    className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer"
+                    onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
+                  >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{m.numero}</Link>
                     </td>
