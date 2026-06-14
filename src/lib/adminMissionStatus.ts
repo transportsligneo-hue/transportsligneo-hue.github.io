@@ -5,12 +5,19 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
   try {
     const { data: t } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, client_nom, client_email, numero_mission")
+      .select("id, depart, arrivee, client_nom, client_email")
       .eq("id", trajetId)
       .maybeSingle();
     if (!t?.client_email) return;
     const prenom = (t.client_nom ?? "").split(" ")[0] ?? "";
-    const numero = (t as { numero_mission?: string }).numero_mission ?? "";
+    const { data: a } = await supabase
+      .from("attributions")
+      .select("numero_mission")
+      .eq("trajet_id", trajetId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const numero = a?.numero_mission ?? "";
     const base = { prenom, numero, depart: t.depart, arrivee: t.arrivee };
     if (statut === "en_cours") {
       await sendTransactionalEmail({
