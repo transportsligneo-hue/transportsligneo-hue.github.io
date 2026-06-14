@@ -287,34 +287,43 @@ function ProMissions() {
               </thead>
               <tbody>
                 {filtered.map((m) => (
-                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer">
+                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors">
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">
                         {m.numero}
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
                         <MapPin size={12} className="text-pro-muted" />
-                        {m.ville_depart} → {m.ville_arrivee}
+                        <span className="flex-1 truncate">{m.ville_depart} → {m.ville_arrivee}</span>
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text-soft">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">
                         {new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}
                       </Link>
                     </td>
                     <td className="px-5 py-3">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statutPill[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
                           {statutLabel[m.statut] ?? m.statut}
                         </span>
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-right font-semibold text-pro-text">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
-                        {Number(m.prix_total).toFixed(2)} €
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">
+                          {Number(m.prix_total).toFixed(2)} €
+                        </Link>
+                        <Link
+                          to="/dashboard-pro/missions/$missionId"
+                          params={{ missionId: m.id }}
+                          className="inline-flex items-center gap-1 text-pro-accent text-[11px] uppercase tracking-wider hover:underline"
+                        >
+                          Voir le suivi <ArrowRight size={12} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
