@@ -54,7 +54,7 @@ const docLabel = (t: string) =>
     autre: "Autre",
   }[t] ?? t);
 
-export function MissionClientGallery({ attributionId, trajetId }: Props) {
+export function MissionClientGallery({ attributionId, trajetId, onProofsAvailable }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [signatures, setSignatures] = useState<SignatureItem[]>([]);
   const [docs, setDocs] = useState<DocItem[]>([]);
