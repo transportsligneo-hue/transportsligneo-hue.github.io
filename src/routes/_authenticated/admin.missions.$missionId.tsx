@@ -202,6 +202,8 @@ function AdminMissionDetail() {
   useEffect(() => {
     if (!trajet) return;
     setContactNom(trajet.arrivee_contact_nom ?? "");
+    setContactPrenom(trajet.arrivee_contact_prenom ?? "");
+    setContactSociete(trajet.arrivee_contact_societe ?? "");
     setContactTel(trajet.arrivee_contact_telephone ?? "");
     setContactTel2(trajet.arrivee_contact_telephone2 ?? "");
     setContactInstr(trajet.arrivee_contact_instructions ?? "");
