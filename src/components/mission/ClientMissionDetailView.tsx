@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
