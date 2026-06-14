@@ -47,6 +47,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
+  const [arrivalContact, setArrivalContact] = useState<{ nom: string | null; telephone: string | null; telephone2: string | null; instructions: string | null; adresse: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +124,24 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             setPdfShareEnabled(Boolean(attr.pdf_share_client));
           } else if (trajetCandidate) {
             setTrajetId(trajetCandidate);
+          }
+        }
+
+        const finalTrajetId = attr?.trajet_id ?? trajetCandidate ?? null;
+        if (finalTrajetId && !cancelled) {
+          const { data: tj } = await supabase
+            .from("trajets")
+            .select("arrivee, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .eq("id", finalTrajetId)
+            .maybeSingle();
+          if (!cancelled && tj) {
+            setArrivalContact({
+              nom: tj.arrivee_contact_nom ?? null,
+              telephone: tj.arrivee_contact_telephone ?? null,
+              telephone2: tj.arrivee_contact_telephone2 ?? null,
+              instructions: tj.arrivee_contact_instructions ?? null,
+              adresse: tj.arrivee ?? null,
+            });
           }
         }
       }
@@ -390,6 +409,44 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <Field label="Email" value={mission.email} icon={<Mail size={11} />} />
         <Field label="Téléphone" value={mission.telephone} icon={<Phone size={11} />} />
       </Section>
+
+      {arrivalContact && (arrivalContact.nom || arrivalContact.telephone || arrivalContact.adresse) && (
+        <div className="mission-surface p-5">
+          <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+            <MapPin size={16} /> Coordonnées d'arrivée
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {arrivalContact.adresse && <Field label="Adresse de livraison" value={arrivalContact.adresse} icon={<MapPin size={11} />} />}
+            {arrivalContact.nom && <Field label="Contact sur place" value={arrivalContact.nom} icon={<User size={11} />} />}
+            {arrivalContact.telephone && (
+              <div>
+                <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <Phone size={11} /> Téléphone
+                </p>
+                <a href={`tel:${arrivalContact.telephone}`} className="mission-text text-sm font-medium hover:mission-accent transition-colors">
+                  {arrivalContact.telephone}
+                </a>
+              </div>
+            )}
+            {arrivalContact.telephone2 && (
+              <div>
+                <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <Phone size={11} /> Téléphone secondaire
+                </p>
+                <a href={`tel:${arrivalContact.telephone2}`} className="mission-text text-sm font-medium hover:mission-accent transition-colors">
+                  {arrivalContact.telephone2}
+                </a>
+              </div>
+            )}
+            {arrivalContact.instructions && (
+              <div className="sm:col-span-2">
+                <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1">Instructions de livraison</p>
+                <p className="mission-text-soft text-sm whitespace-pre-line">{arrivalContact.instructions}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {facture && (
         <div className="mission-surface p-5">
