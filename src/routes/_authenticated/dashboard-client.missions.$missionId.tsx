@@ -214,13 +214,14 @@ function MissionDetail() {
     try {
       const { data: attr } = await supabase
         .from("attributions")
-        .select("numero_mission, trajet_id, convoyeur_id, pdf_share_client")
+        .select("numero_mission, trajet_id, convoyeur_id")
         .eq("id", attributionId)
         .maybeSingle();
-      if (!attr || !(attr as { pdf_share_client?: boolean }).pdf_share_client) {
-        toast.error("PDF non disponible", { description: "L'admin n'a pas encore partagé ce document." });
+      if (!attr) {
+        toast.error("PDF non disponible");
         return;
       }
+
       const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
         supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
