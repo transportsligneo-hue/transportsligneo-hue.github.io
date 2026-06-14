@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
 import { GpsMapView } from "@/components/GpsMapView";
-import { Activity, MapPin, Clock, Truck, CheckCircle2, Loader2 } from "lucide-react";
+import { Activity, MapPin, Clock, Truck, CheckCircle2, Loader2, Navigation } from "lucide-react";
+import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
 
 interface MissionLiveTrackerProps {
   /** ID de l'attribution liée à la mission/demande */
