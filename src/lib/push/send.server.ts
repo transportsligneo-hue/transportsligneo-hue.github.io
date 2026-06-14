@@ -68,7 +68,10 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 /**
  * Sends to all users with a given role (admin, super_admin, etc.).
  */
-export async function sendPushToRole(role: string, payload: PushPayload) {
+export async function sendPushToRole(
+  role: "admin" | "super_admin" | "client" | "convoyeur" | "manager" | "sous_traitant",
+  payload: PushPayload
+) {
   configure();
   const { data: roles } = await supabaseAdmin
     .from("user_roles")
