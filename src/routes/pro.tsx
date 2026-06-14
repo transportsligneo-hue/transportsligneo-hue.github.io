@@ -79,7 +79,7 @@ function ProPage() {
     <>
       <Navbar />
 
-      {/* === HERO navy premium === */}
+      {/* === HERO navy === */}
       <section
         className="relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
