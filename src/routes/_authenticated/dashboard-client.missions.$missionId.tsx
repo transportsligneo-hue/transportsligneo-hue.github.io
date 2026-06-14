@@ -8,6 +8,7 @@ import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
+import { MissionClientGallery } from "@/components/mission/MissionClientGallery";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
@@ -41,6 +42,7 @@ function MissionDetail() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
+  const [trajetId, setTrajetId] = useState<string | null>(null);
   const [pdfShareEnabled, setPdfShareEnabled] = useState(false);
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
