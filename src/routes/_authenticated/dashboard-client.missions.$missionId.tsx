@@ -313,14 +313,20 @@ function MissionDetail() {
       {attributionId && <MissionLiveTracker attributionId={attributionId} />}
 
       {/* Galerie : photos, signatures, carte grise, documents partagés */}
-      {attributionId && <MissionClientGallery attributionId={attributionId} trajetId={trajetId} />}
+      {attributionId && (
+        <MissionClientGallery
+          attributionId={attributionId}
+          trajetId={trajetId}
+          onProofsAvailable={setHasProofs}
+        />
+      )}
 
-      {/* PDF EDL final si admin a partagé */}
-      {attributionId && pdfShareEnabled && (
+      {/* PDF EDL consolidé — disponible dès qu'il y a au moins une preuve */}
+      {attributionId && hasProofs && (
         <div className="card-premium p-5 rounded flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (EDL final)</p>
-            <p className="text-cream/50 text-xs mt-1">Toutes les preuves consolidées dans un PDF unique.</p>
+            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (PDF unique)</p>
+            <p className="text-cream/50 text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
           </div>
           <button
             onClick={handleDownloadEdl}
@@ -331,6 +337,7 @@ function MissionDetail() {
           </button>
         </div>
       )}
+
 
       {/* Vehicule */}
       <Section title="Véhicule" icon={<Car size={16} />}>
