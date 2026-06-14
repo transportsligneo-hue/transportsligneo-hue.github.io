@@ -199,7 +199,7 @@ function AdminAttributions() {
       }
       if (!clientEmail) {
         const { data: mis } = await supabase
-          .from("missions").select("email, user_id").eq("numero", a.numero_mission).maybeSingle();
+          .from("missions").select("email, user_id").eq("numero", a.numero_mission ?? "").maybeSingle();
         if (mis?.email) clientEmail = mis.email;
         if (!clientEmail && mis?.user_id) {
           const { data: pr } = await supabase
