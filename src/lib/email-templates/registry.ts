@@ -26,6 +26,14 @@ import { template as attributionConvoyeur } from './attribution-convoyeur'
 import { template as missionTermineeClient } from './mission-terminee-client'
 import { template as factureDisponible } from './facture-disponible'
 import { template as devisAccepte } from './devis-accepte'
+import { template as welcomeClient } from './welcome-client'
+import { template as nouvelleDemandeAdmin } from './nouvelle-demande-admin'
+import { template as devisCreeAdmin } from './devis-cree-admin'
+import { template as devisAccepteAdmin } from './devis-accepte-admin'
+import { template as missionDemarreeClient } from './mission-demarree-client'
+import { template as missionLivreeClient } from './mission-livree-client'
+
+
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -46,4 +54,10 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-terminee-client': missionTermineeClient,
   'facture-disponible': factureDisponible,
   'devis-accepte': devisAccepte,
+  'welcome-client': welcomeClient,
+  'nouvelle-demande-admin': nouvelleDemandeAdmin,
+  'devis-cree-admin': devisCreeAdmin,
+  'devis-accepte-admin': devisAccepteAdmin,
+  'mission-demarree-client': missionDemarreeClient,
+  'mission-livree-client': missionLivreeClient,
 }

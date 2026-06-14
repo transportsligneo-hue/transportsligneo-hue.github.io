@@ -492,14 +492,22 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       setSavedDevis(devisData);
 
       try {
-        await sendTransactionalEmail({
-          templateName: "devis-client",
-          recipientEmail: email,
-          idempotencyKey: `devis-${devisRow?.id || devisData.numero}`,
-          templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: pricing.finalPrice, optionTrajet: option },
-        });
+        await Promise.allSettled([
+          sendTransactionalEmail({
+            templateName: "devis-client",
+            recipientEmail: email,
+            idempotencyKey: `devis-${devisRow?.id || devisData.numero}`,
+            templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: pricing.finalPrice, optionTrajet: option },
+          }),
+          sendTransactionalEmail({
+            templateName: "devis-cree-admin",
+            idempotencyKey: `admin-devis-${devisRow?.id || devisData.numero}`,
+            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || "—", prix: pricing.finalPrice },
+          }),
+        ]);
         if (devisRow?.id) await supabase.from("devis").update({ email_envoye: true }).eq("id", devisRow.id);
       } catch (e) { console.warn("Email devis non envoyé", e); }
+
 
       setSubmitted(true);
     } catch (err) {

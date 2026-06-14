@@ -5,6 +5,7 @@ import { Loader2, User, Mail, Phone, Lock, CheckCircle } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
@@ -93,6 +94,18 @@ function InscriptionClient() {
           entityType: "user",
           entityId: authData.user.id,
         });
+
+        // Email de bienvenue (best-effort, fixed-to admin not required car welcome a recipientEmail)
+        if (authData.session) {
+          void sendTransactionalEmail({
+            templateName: "welcome-client",
+            recipientEmail: form.email,
+            idempotencyKey: `welcome-${authData.user.id}`,
+            templateData: { prenom: form.prenom },
+          }).catch(() => {});
+        }
+
+
 
         setSuccess(true);
         if (authData.session) {
