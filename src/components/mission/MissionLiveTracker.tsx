@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
 import { GpsMapView } from "@/components/GpsMapView";
-import { Activity, MapPin, Clock, Truck, CheckCircle2, Loader2 } from "lucide-react";
+import { Activity, MapPin, Clock, Truck, CheckCircle2, Loader2, Navigation } from "lucide-react";
+import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
 
 interface MissionLiveTrackerProps {
   /** ID de l'attribution liée à la mission/demande */
@@ -39,6 +40,35 @@ const ETAPE_LABELS: Record<string, string> = Object.fromEntries(
 export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiveTrackerProps) {
   const rt = useMissionRealtime(attributionId);
   const [allPoints, setAllPoints] = useState<{ latitude: number; longitude: number; recorded_at: string; accuracy: number | null }[]>([]);
+  const [origin, setOrigin] = useState<GeoPoint | null>(null);
+  const [destination, setDestination] = useState<GeoPoint | null>(null);
+
+  // Resolve trajet endpoints once (depart / arrivee) and geocode them.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: attr } = await supabase
+        .from("attributions")
+        .select("trajet_id")
+        .eq("id", attributionId)
+        .maybeSingle();
+      if (!attr?.trajet_id) return;
+      const { data: trajet } = await supabase
+        .from("trajets")
+        .select("depart, arrivee")
+        .eq("id", attr.trajet_id)
+        .maybeSingle();
+      if (cancelled || !trajet) return;
+      const [o, d] = await Promise.all([
+        geocodeAddress(trajet.depart),
+        geocodeAddress(trajet.arrivee),
+      ]);
+      if (cancelled) return;
+      if (o) setOrigin(o);
+      if (d) setDestination(d);
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
 
   useEffect(() => {
     if (!showMap) return;
@@ -73,6 +103,11 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
     ? ETAPES_ORDER.findIndex(e => e.key === rt.etape_courante)
     : -1;
   const isFinished = rt.statut === "termine" || rt.statut === "validee";
+
+  // ETA dynamique : calculé dès qu'on a une position GPS + une destination géocodée.
+  const eta = destination && allPoints.length > 0 && !isFinished
+    ? computeEta(allPoints, destination)
+    : null;
 
   return (
     <div className="card-premium rounded overflow-hidden">
@@ -155,8 +190,29 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
           </div>
         )}
 
-        {showMap && allPoints.length > 0 && (
-          <GpsMapView points={allPoints} className="h-[240px] rounded-lg" />
+        {eta && (
+          <div className="flex items-center gap-3 text-xs bg-primary/10 border border-primary/30 rounded-md px-3 py-2">
+            <Navigation size={14} className="text-primary" />
+            <div className="flex flex-col">
+              <span className="text-cream font-medium">
+                Arrivée estimée vers {eta.etaAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <span className="text-cream/50 text-[10px]">
+                {eta.distanceKm < 1
+                  ? `${Math.round(eta.distanceKm * 1000)} m`
+                  : `${eta.distanceKm.toFixed(1)} km`} restants · ~{eta.etaMinutes} min · {Math.round(eta.avgKmh)} km/h
+              </span>
+            </div>
+          </div>
+        )}
+
+        {showMap && (allPoints.length > 0 || origin || destination) && (
+          <GpsMapView
+            points={allPoints}
+            origin={origin}
+            destination={destination}
+            className="h-[260px] rounded-lg"
+          />
         )}
 
         {showMap && allPoints.length === 0 && !rt.lastGps && currentIdx < 0 && (
