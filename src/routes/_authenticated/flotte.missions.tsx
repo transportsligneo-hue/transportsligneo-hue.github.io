@@ -65,9 +65,17 @@ function FlotteMissions() {
             ) : rows.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-pro-muted">Aucune mission assignée</TableCell></TableRow>
             ) : rows.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell className="font-mono text-xs">{r.numero}</TableCell>
-                <TableCell>{r.ville_depart} → {r.ville_arrivee}</TableCell>
+              <TableRow key={r.id} className="cursor-pointer hover:bg-pro-bg-soft">
+                <TableCell className="font-mono text-xs">
+                  <Link to="/flotte/missions/$missionId" params={{ missionId: r.id }} className="text-pro-accent hover:underline">
+                    {r.numero}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <Link to="/flotte/missions/$missionId" params={{ missionId: r.id }}>
+                    {r.ville_depart} → {r.ville_arrivee}
+                  </Link>
+                </TableCell>
                 <TableCell>{new Date(r.date_prise_en_charge).toLocaleDateString("fr-FR")}</TableCell>
                 <TableCell><Badge variant="outline">{r.statut}</Badge></TableCell>
                 <TableCell className="text-right">{Number(r.prix_total).toFixed(2)} €</TableCell>
