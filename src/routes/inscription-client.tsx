@@ -5,6 +5,7 @@ import { Loader2, User, Mail, Phone, Lock, CheckCircle } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
