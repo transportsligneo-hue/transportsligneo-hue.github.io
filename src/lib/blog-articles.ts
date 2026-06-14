@@ -14,7 +14,7 @@ export const articles: BlogArticle[] = [
     slug: "comment-fonctionne-le-convoyage-automobile",
     title: "Comment fonctionne le convoyage automobile ?",
     excerpt:
-      "Du devis à la livraison : découvrez chaque étape d'un convoyage professionnel et ce qui distingue un service premium d'un simple transfert.",
+      "Du devis à la livraison : découvrez chaque étape d'un convoyage professionnel et ce qui distingue un service soigné d'un simple transfert.",
     date: "15 mars 2025",
     readTime: "5 min",
     category: "Guide",

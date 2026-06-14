@@ -89,7 +89,7 @@ function drawHeader(doc: jsPDF, pageW: number, logoData: string | null, title: s
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   let y = 16;
-  doc.setTextColor(...GOLD); doc.text("•", 60, y); doc.setTextColor(...WHITE); doc.text("Convoyage automobile premium", 65, y);
+  doc.setTextColor(...GOLD); doc.text("•", 60, y); doc.setTextColor(...WHITE); doc.text("Convoyage automobile", 65, y);
   y += 7; doc.setTextColor(...GOLD); doc.text("@", 60, y); doc.setTextColor(...WHITE); doc.text("contact@transportsligneo.fr", 65, y);
   y += 7; doc.setTextColor(...GOLD); doc.text("T", 60, y); doc.setTextColor(...WHITE); doc.text("07 82 45 61 81", 65, y);
   y += 7; doc.setTextColor(...GOLD); doc.text("W", 60, y); doc.setTextColor(...WHITE); doc.text("www.transportsligneo.fr", 65, y);
