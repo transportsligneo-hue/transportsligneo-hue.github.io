@@ -11,6 +11,8 @@ interface Rule {
   client_user_id: string | null;
   ville_depart: string | null;
   ville_arrivee: string | null;
+  departement_depart: string | null;
+  departement_arrivee: string | null;
   zone_label: string | null;
   trip_type: "aller" | "aller_retour" | "any";
   prix_ttc: number;
@@ -32,7 +34,9 @@ interface Props {
 const EMPTY_FORM = {
   zone_label: "",
   ville_depart: "",
+  departement_depart: "",
   ville_arrivee: "",
+  departement_arrivee: "",
   prix_aller_simple: "",
   prix_aller_retour: "",
   prix_express: "",
@@ -82,7 +86,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     setForm({
       zone_label: r.zone_label ?? "",
       ville_depart: r.ville_depart ?? "",
+      departement_depart: r.departement_depart ?? "",
       ville_arrivee: r.ville_arrivee ?? "",
+      departement_arrivee: r.departement_arrivee ?? "",
       prix_aller_simple: r.prix_aller_simple != null ? String(r.prix_aller_simple) : "",
       prix_aller_retour: r.prix_aller_retour != null ? String(r.prix_aller_retour) : "",
       prix_express: r.prix_express != null ? String(r.prix_express) : "",
@@ -112,12 +118,20 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
 
     const basePrice = pas ?? par ?? pex ?? 0;
 
+    const normDept = (s: string) => {
+      const t = s.trim().toUpperCase();
+      if (!t) return null;
+      if (/^\d{1}$/.test(t)) return "0" + t;
+      return t;
+    };
     const payload = {
       client_user_id: clientUserId,
       client_email: clientEmail.toLowerCase(),
       zone_label: form.zone_label.trim() || null,
       ville_depart: form.ville_depart.trim() || null,
       ville_arrivee: form.ville_arrivee.trim() || null,
+      departement_depart: normDept(form.departement_depart),
+      departement_arrivee: normDept(form.departement_arrivee),
       trip_type: "any" as const,
       prix_aller_simple: pas,
       prix_aller_retour: par,
@@ -187,7 +201,10 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">
-                      {r.zone_label || [r.ville_depart, r.ville_arrivee].filter(Boolean).join(" → ") || "Toutes zones"}
+                      {r.zone_label || [
+                        r.ville_depart || (r.departement_depart ? `Dépt ${r.departement_depart}` : null),
+                        r.ville_arrivee || (r.departement_arrivee ? `Dépt ${r.departement_arrivee}` : null),
+                      ].filter(Boolean).join(" → ") || "Toutes zones"}
                     </p>
                     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600 mt-1">
                       {r.prix_aller_simple != null && <span><b>Aller :</b> {Number(r.prix_aller_simple).toFixed(2)} €</span>}
@@ -235,13 +252,22 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
             </AdminField>
 
             <div className="grid grid-cols-2 gap-3">
-              <AdminField label="Ville départ (filtre, optionnel)">
+              <AdminField label="Ville départ (optionnel)">
                 <input className={inp} value={form.ville_depart} onChange={(e) => setForm({ ...form, ville_depart: e.target.value })} placeholder="ex: Tours" />
               </AdminField>
-              <AdminField label="Ville arrivée (filtre, optionnel)">
-                <input className={inp} value={form.ville_arrivee} onChange={(e) => setForm({ ...form, ville_arrivee: e.target.value })} />
+              <AdminField label="Ville arrivée (optionnel)">
+                <input className={inp} value={form.ville_arrivee} onChange={(e) => setForm({ ...form, ville_arrivee: e.target.value })} placeholder="ex: Blois" />
+              </AdminField>
+              <AdminField label="Département départ (ex: 37)">
+                <input className={inp} value={form.departement_depart} onChange={(e) => setForm({ ...form, departement_depart: e.target.value })} placeholder="ex: 37" maxLength={3} />
+              </AdminField>
+              <AdminField label="Département arrivée (ex: 41, 72, 2A)">
+                <input className={inp} value={form.departement_arrivee} onChange={(e) => setForm({ ...form, departement_arrivee: e.target.value })} placeholder="ex: 41" maxLength={3} />
               </AdminField>
             </div>
+            <p className="text-xs text-slate-500 -mt-1">
+              Remplis ville <b>OU</b> département (ou les deux). Les 4 combinaisons sont supportées : ville→ville, ville→département, département→ville, département→département. Détection automatique du département depuis le code postal de l'adresse client.
+            </p>
             <div className="grid grid-cols-3 gap-3">
               <AdminField label="Prix aller simple (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_simple} onChange={(e) => setForm({ ...form, prix_aller_simple: e.target.value })} placeholder="70" />
