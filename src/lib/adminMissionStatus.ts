@@ -1,4 +1,37 @@
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/email/send";
+
+async function notifyMissionLifecycle(trajetId: string, statut: string) {
+  try {
+    const { data: t } = await supabase
+      .from("trajets")
+      .select("id, depart, arrivee, client_nom, client_email, numero_mission")
+      .eq("id", trajetId)
+      .maybeSingle();
+    if (!t?.client_email) return;
+    const prenom = (t.client_nom ?? "").split(" ")[0] ?? "";
+    const numero = (t as { numero_mission?: string }).numero_mission ?? "";
+    const base = { prenom, numero, depart: t.depart, arrivee: t.arrivee };
+    if (statut === "en_cours") {
+      await sendTransactionalEmail({
+        templateName: "mission-demarree-client",
+        recipientEmail: t.client_email,
+        idempotencyKey: `mission-demarree-${trajetId}`,
+        templateData: base,
+      });
+    } else if (statut === "validee" || statut === "termine") {
+      await sendTransactionalEmail({
+        templateName: "mission-livree-client",
+        recipientEmail: t.client_email,
+        idempotencyKey: `mission-livree-${trajetId}`,
+        templateData: base,
+      });
+    }
+  } catch (e) {
+    console.warn("[mission-lifecycle email] échec", e);
+  }
+}
+
 
 type AdminMissionStatusInput = {
   attributionId: string;
@@ -71,8 +104,12 @@ export async function updateAdminMissionStatus({
 
   if (historyError) throw historyError;
 
+  // Notification client (best-effort) — démarrage / livraison
+  void notifyMissionLifecycle(trajetId, statut);
+
   return payload;
 }
+
 
 export async function forceAdminMissionStep({ attributionId, etape, note }: AdminMissionStepInput) {
   const { error: stepError } = await supabase
