@@ -47,6 +47,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
+  const [arrivalContact, setArrivalContact] = useState<{ nom: string | null; telephone: string | null; telephone2: string | null; instructions: string | null; adresse: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
