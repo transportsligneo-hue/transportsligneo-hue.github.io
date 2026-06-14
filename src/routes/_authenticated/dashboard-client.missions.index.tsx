@@ -15,7 +15,7 @@ const friendlyStatusLabel = (statut: string): string => ({
   refuse: "Refusée",
 }[statut] ?? statut);
 
-export const Route = createFileRoute("/_authenticated/dashboard-client/missions")({
+export const Route = createFileRoute("/_authenticated/dashboard-client/missions/")({
   component: ClientMissions,
 });
 
