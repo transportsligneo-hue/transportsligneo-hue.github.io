@@ -94,7 +94,7 @@ function MissionDetail() {
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
-              if (byTrajet) attr = byTrajet as typeof attr;
+              if (byTrajet) attr = byTrajet as unknown as AttrLite;
             }
           }
 
