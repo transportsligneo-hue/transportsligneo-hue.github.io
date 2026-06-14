@@ -136,9 +136,13 @@ export function MissionClientGallery({ attributionId, trajetId }: Props) {
       setDocs(dList);
       setCg(cgState);
       setLoading(false);
+      const hasAnyProofs =
+        allPhotos.length > 0 || sigList.length > 0 || dList.length > 0 || !!cgState.recto || !!cgState.verso;
+      onProofsAvailable?.(hasAnyProofs);
     })();
     return () => { cancelled = true; };
-  }, [attributionId, trajetId]);
+  }, [attributionId, trajetId, onProofsAvailable]);
+
 
   if (loading) {
     return (
