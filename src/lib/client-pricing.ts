@@ -132,7 +132,7 @@ export async function resolveClientPrice(
   const { data } = await supabase
     .from("client_pricing_rules" as never)
     .select(
-      "id,client_user_id,client_email,ville_depart,ville_arrivee,zone_label,trip_type,prix_ttc,prix_ht,prix_aller_simple,prix_aller_retour,prix_express,supplements,active,priority",
+      "id,client_user_id,client_email,ville_depart,ville_arrivee,departement_depart,departement_arrivee,zone_label,trip_type,prix_ttc,prix_ht,prix_aller_simple,prix_aller_retour,prix_express,supplements,active,priority",
     )
     .or(filters.join(","))
     .eq("active", true);
