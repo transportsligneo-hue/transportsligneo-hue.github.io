@@ -74,6 +74,7 @@ import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } f
 import { Route as AuthenticatedDashboardClientMissionsRouteImport } from './routes/_authenticated/dashboard-client.missions'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
 import { Route as AuthenticatedDashboardClientDevisRouteImport } from './routes/_authenticated/dashboard-client.devis'
+import { Route as AuthenticatedDashboardClientAdressesRouteImport } from './routes/_authenticated/dashboard-client.adresses'
 import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_authenticated/convoyeur.profil'
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
 import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_authenticated/convoyeur.historique'
@@ -466,6 +467,12 @@ const AuthenticatedDashboardClientDevisRoute =
     path: '/devis',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedDashboardClientAdressesRoute =
+  AuthenticatedDashboardClientAdressesRouteImport.update({
+    id: '/adresses',
+    path: '/adresses',
+    getParentRoute: () => AuthenticatedDashboardClientRoute,
+  } as any)
 const AuthenticatedConvoyeurProfilRoute =
   AuthenticatedConvoyeurProfilRouteImport.update({
     id: '/profil',
@@ -759,6 +766,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
@@ -859,6 +867,7 @@ export interface FileRoutesByTo {
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
@@ -967,6 +976,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
+  '/_authenticated/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/_authenticated/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/_authenticated/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsRouteWithChildren
@@ -1075,6 +1085,7 @@ export interface FileRouteTypes {
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
+    | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
@@ -1175,6 +1186,7 @@ export interface FileRouteTypes {
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
+    | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/missions'
@@ -1282,6 +1294,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/historique'
     | '/_authenticated/convoyeur/missions'
     | '/_authenticated/convoyeur/profil'
+    | '/_authenticated/dashboard-client/adresses'
     | '/_authenticated/dashboard-client/devis'
     | '/_authenticated/dashboard-client/documents'
     | '/_authenticated/dashboard-client/missions'
@@ -1830,6 +1843,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientDevisRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/dashboard-client/adresses': {
+      id: '/_authenticated/dashboard-client/adresses'
+      path: '/adresses'
+      fullPath: '/dashboard-client/adresses'
+      preLoaderRoute: typeof AuthenticatedDashboardClientAdressesRouteImport
+      parentRoute: typeof AuthenticatedDashboardClientRoute
+    }
     '/_authenticated/convoyeur/profil': {
       id: '/_authenticated/convoyeur/profil'
       path: '/profil'
@@ -2269,6 +2289,7 @@ const AuthenticatedDashboardClientMissionsRouteWithChildren =
   )
 
 interface AuthenticatedDashboardClientRouteChildren {
+  AuthenticatedDashboardClientAdressesRoute: typeof AuthenticatedDashboardClientAdressesRoute
   AuthenticatedDashboardClientDevisRoute: typeof AuthenticatedDashboardClientDevisRoute
   AuthenticatedDashboardClientDocumentsRoute: typeof AuthenticatedDashboardClientDocumentsRoute
   AuthenticatedDashboardClientMissionsRoute: typeof AuthenticatedDashboardClientMissionsRouteWithChildren
@@ -2279,6 +2300,8 @@ interface AuthenticatedDashboardClientRouteChildren {
 
 const AuthenticatedDashboardClientRouteChildren: AuthenticatedDashboardClientRouteChildren =
   {
+    AuthenticatedDashboardClientAdressesRoute:
+      AuthenticatedDashboardClientAdressesRoute,
     AuthenticatedDashboardClientDevisRoute:
       AuthenticatedDashboardClientDevisRoute,
     AuthenticatedDashboardClientDocumentsRoute:
@@ -2473,12 +2496,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

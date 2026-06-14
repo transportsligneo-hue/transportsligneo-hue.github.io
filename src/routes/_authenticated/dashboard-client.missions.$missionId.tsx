@@ -60,28 +60,47 @@ function MissionDetail() {
         setMission(m);
         setLoading(false);
 
-        // Résolution best-effort de l'attribution liée (via trajet correspondant)
+        // Résolution robuste de l'attribution : priorité au matching par numéro de mission
+        // (attributions.numero_mission = missions.numero), puis fallback sur trajet (depart/arrivee/date).
         if (m) {
-          const { data: trajets } = await supabase
-            .from("trajets")
-            .select("id")
-            .eq("depart", m.ville_depart)
-            .eq("arrivee", m.ville_arrivee)
-            .eq("date_trajet", m.date_prise_en_charge)
-            .limit(1);
-          const trajetId = trajets?.[0]?.id;
-          if (trajetId) {
-            const { data: attr } = await supabase
+          type AttrLite = { id: string; pdf_share_client?: boolean | null };
+          let attr: AttrLite | null = null;
+
+          if (m.numero) {
+            const { data: byNumero } = await supabase
               .from("attributions")
               .select("id, pdf_share_client")
-              .eq("trajet_id", trajetId)
+              .eq("numero_mission", m.numero)
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (!cancelled && attr) {
-              setAttributionId(attr.id);
-              setPdfShareEnabled(Boolean((attr as { pdf_share_client?: boolean }).pdf_share_client));
+            if (byNumero) attr = byNumero as unknown as AttrLite;
+          }
+
+          if (!attr) {
+            const { data: trajets } = await supabase
+              .from("trajets")
+              .select("id")
+              .eq("depart", m.ville_depart)
+              .eq("arrivee", m.ville_arrivee)
+              .eq("date_trajet", m.date_prise_en_charge)
+              .limit(1);
+            const trajetId = trajets?.[0]?.id;
+            if (trajetId) {
+              const { data: byTrajet } = await supabase
+                .from("attributions")
+                .select("id, pdf_share_client")
+                .eq("trajet_id", trajetId)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (byTrajet) attr = byTrajet as unknown as AttrLite;
             }
+          }
+
+          if (!cancelled && attr) {
+            setAttributionId(attr.id);
+            setPdfShareEnabled(Boolean(attr.pdf_share_client));
           }
         }
 

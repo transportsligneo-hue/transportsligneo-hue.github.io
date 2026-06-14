@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText } from "lucide-react";
+import { LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText, MapPin } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ const navItems: ProSidebarItem[] = [
   { to: "/dashboard-client/nouvelle-reservation", label: "Nouvelle réservation", icon: PlusCircle },
   { to: "/dashboard-client/missions", label: "Mes missions", icon: Truck },
   { to: "/dashboard-client/devis", label: "Factures & devis", icon: FileText },
+  { to: "/dashboard-client/adresses", label: "Mes adresses", icon: MapPin },
   { to: "/dashboard-client/documents", label: "Mes documents", icon: FolderOpen },
   { to: "/dashboard-client/profil", label: "Mon profil", icon: UserCog },
 ];
