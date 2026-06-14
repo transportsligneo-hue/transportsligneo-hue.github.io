@@ -201,7 +201,10 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">
-                      {r.zone_label || [r.ville_depart, r.ville_arrivee].filter(Boolean).join(" → ") || "Toutes zones"}
+                      {r.zone_label || [
+                        r.ville_depart || (r.departement_depart ? `Dépt ${r.departement_depart}` : null),
+                        r.ville_arrivee || (r.departement_arrivee ? `Dépt ${r.departement_arrivee}` : null),
+                      ].filter(Boolean).join(" → ") || "Toutes zones"}
                     </p>
                     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600 mt-1">
                       {r.prix_aller_simple != null && <span><b>Aller :</b> {Number(r.prix_aller_simple).toFixed(2)} €</span>}
