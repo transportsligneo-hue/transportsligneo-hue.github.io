@@ -41,6 +41,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
   const [trajetId, setTrajetId] = useState<string | null>(null);
+  const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [, setPdfShareEnabled] = useState(false);
   const [hasProofs, setHasProofs] = useState(false);
   const [downloadingEdl, setDownloadingEdl] = useState(false);
