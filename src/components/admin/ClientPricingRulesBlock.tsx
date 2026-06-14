@@ -86,7 +86,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     setForm({
       zone_label: r.zone_label ?? "",
       ville_depart: r.ville_depart ?? "",
+      departement_depart: r.departement_depart ?? "",
       ville_arrivee: r.ville_arrivee ?? "",
+      departement_arrivee: r.departement_arrivee ?? "",
       prix_aller_simple: r.prix_aller_simple != null ? String(r.prix_aller_simple) : "",
       prix_aller_retour: r.prix_aller_retour != null ? String(r.prix_aller_retour) : "",
       prix_express: r.prix_express != null ? String(r.prix_express) : "",
