@@ -78,6 +78,38 @@ function AdminDevisDetailPage() {
     }
     const enriched = { ...data, _profile: profile };
     setDevis(enriched);
+
+    // Load acceptance signature / signed PDF if available
+    if (enriched.locked_at) {
+      const { data: acc } = await supabase
+        .from("devis_acceptations")
+        .select("*")
+        .eq("devis_id", enriched.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (acc) {
+        const signedUrls: any = {};
+        if (acc.signature_url) {
+          const { data: sig } = await supabase.storage
+            .from("devis-acceptes")
+            .createSignedUrl(acc.signature_url, 300);
+          if (sig?.signedUrl) signedUrls.signature = sig.signedUrl;
+        }
+        if (acc.pdf_url) {
+          const { data: pdf } = await supabase.storage
+            .from("devis-acceptes")
+            .createSignedUrl(acc.pdf_url, 300);
+          if (pdf?.signedUrl) signedUrls.pdf = pdf.signedUrl;
+        }
+        setAcceptation({ ...acc, _signedUrls: signedUrls });
+      } else {
+        setAcceptation(null);
+      }
+    } else {
+      setAcceptation(null);
+    }
+
     setLoading(false);
     try {
       const blob = await generateDevisPdf(buildDevisData(enriched));
