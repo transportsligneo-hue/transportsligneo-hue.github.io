@@ -36,7 +36,7 @@ export default function Hero() {
             De la prise en charge à la restitution, nous vous tenons informés à chaque étape.
           </p>
           <p className="text-cream/60 max-w-xl mx-auto text-sm">
-            Un service premium, assuré avec rigueur et discrétion.
+            Un service soigné, assuré avec rigueur et discrétion.
           </p>
         </div>
 

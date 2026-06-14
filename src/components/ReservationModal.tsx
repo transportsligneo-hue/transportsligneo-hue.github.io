@@ -41,7 +41,7 @@ export default function ReservationModal({ open, onClose }: Props) {
           <div className="text-center mb-6">
             <p className="text-xs uppercase tracking-[0.3em] text-primary/80 mb-2">Réservation</p>
             <h2 className="font-heading text-3xl sm:text-4xl gold-gradient-text">
-              Votre convoyage premium
+              Votre convoyage
             </h2>
             <div className="gold-divider-short mt-3" />
           </div>

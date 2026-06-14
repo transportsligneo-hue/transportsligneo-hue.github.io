@@ -19,7 +19,7 @@ export default function Footer() {
               Transports Ligneo
             </p>
             <p className="text-cream/50 text-sm leading-relaxed">
-              Convoyage automobile premium<br />
+              Convoyage automobile<br />
               Basé à Tours (37)
             </p>
           </div>
