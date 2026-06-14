@@ -98,6 +98,7 @@ import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
+import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -611,6 +612,12 @@ const AuthenticatedAdminAcceptationsRoute =
     path: '/acceptations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedDashboardProMissionsIndexRoute =
+  AuthenticatedDashboardProMissionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardProMissionsRoute,
+  } as any)
 const AuthenticatedDashboardClientMissionsIndexRoute =
   AuthenticatedDashboardClientMissionsIndexRouteImport.update({
     id: '/missions/',
@@ -821,6 +828,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
+  '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -883,7 +891,6 @@ export interface FileRoutesByTo {
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
-  '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -923,6 +930,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
+  '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1033,6 +1041,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
+  '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1143,6 +1152,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/dashboard-client/missions/'
+    | '/dashboard-pro/missions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1205,7 +1215,6 @@ export interface FileRouteTypes {
     | '/dashboard-pro/adresses'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
-    | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
     | '/entreprise/factures'
@@ -1245,6 +1254,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/dashboard-client/missions'
+    | '/dashboard-pro/missions'
   id:
     | '__root__'
     | '/'
@@ -1354,6 +1364,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/dashboard-client/missions/'
+    | '/_authenticated/dashboard-pro/missions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2024,6 +2035,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcceptationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/dashboard-pro/missions/': {
+      id: '/_authenticated/dashboard-pro/missions/'
+      path: '/'
+      fullPath: '/dashboard-pro/missions/'
+      preLoaderRoute: typeof AuthenticatedDashboardProMissionsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardProMissionsRoute
+    }
     '/_authenticated/dashboard-client/missions/': {
       id: '/_authenticated/dashboard-client/missions/'
       path: '/missions'
@@ -2331,12 +2349,15 @@ const AuthenticatedDashboardClientRouteWithChildren =
 
 interface AuthenticatedDashboardProMissionsRouteChildren {
   AuthenticatedDashboardProMissionsMissionIdRoute: typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  AuthenticatedDashboardProMissionsIndexRoute: typeof AuthenticatedDashboardProMissionsIndexRoute
 }
 
 const AuthenticatedDashboardProMissionsRouteChildren: AuthenticatedDashboardProMissionsRouteChildren =
   {
     AuthenticatedDashboardProMissionsMissionIdRoute:
       AuthenticatedDashboardProMissionsMissionIdRoute,
+    AuthenticatedDashboardProMissionsIndexRoute:
+      AuthenticatedDashboardProMissionsIndexRoute,
   }
 
 const AuthenticatedDashboardProMissionsRouteWithChildren =
