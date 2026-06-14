@@ -146,9 +146,8 @@ function AdminDevisDetailPage() {
     if (!confirm(`Convertir ${devis.numero} en mission ?`)) return;
     setConverting(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      if (!userId) throw new Error("Non authentifié");
+      const userId = devis.user_id;
+      if (!userId) throw new Error("Ce devis n'est pas lié à un compte client");
       const { data: mission, error } = await supabase.from("missions").insert({
         user_id: userId, nom: devis.nom, prenom: devis.prenom, email: devis.email,
         telephone: devis.telephone, ville_depart: devis.depart, ville_arrivee: devis.arrivee,
@@ -159,7 +158,7 @@ function AdminDevisDetailPage() {
       }).select("id, numero").single();
       if (error) throw error;
       await supabase.from("devis").update({
-        statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString(), converted_by: userId,
+        statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString(), converted_by: (await supabase.auth.getUser()).data.user?.id,
       }).eq("id", devis.id);
       toast.success("Mission créée", { description: mission.numero });
       setDevis({ ...devis, statut: "convertit", mission_id: mission.id });
