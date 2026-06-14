@@ -9,12 +9,18 @@ interface GpsPoint {
   accuracy: number | null;
 }
 
+interface LatLngLabel { lat: number; lng: number; label?: string }
+
 interface GpsMapViewProps {
   points: GpsPoint[];
   className?: string;
+  /** Optional origin marker (green pin with label) */
+  origin?: LatLngLabel | null;
+  /** Optional destination marker (red pin) + projected dashed line from current pos */
+  destination?: LatLngLabel | null;
 }
 
-export function GpsMapView({ points, className = "" }: GpsMapViewProps) {
+export function GpsMapView({ points, className = "", origin, destination }: GpsMapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
