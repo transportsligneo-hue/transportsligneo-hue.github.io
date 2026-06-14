@@ -1,34 +1,40 @@
 import { Link } from "@tanstack/react-router";
-import { FileText, Car, MapPin, CheckCircle, ShieldCheck, Clock, ArrowRight } from "lucide-react";
+import {
+  UserPlus,
+  Calculator,
+  FileText,
+  PenLine,
+  Inbox,
+  ShieldCheck,
+  UserCheck,
+  MapPin,
+  Car,
+  ClipboardCheck,
+  Receipt,
+  CheckCircle,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 
 const steps = [
-  {
-    icon: FileText,
-    n: "01",
-    title: "Réservation",
-    desc: "Estimez votre trajet en ligne en moins de 30 secondes. Validez votre devis, communiquez les informations du véhicule et choisissez votre date de prise en charge.",
-    bullets: ["Estimation instantanée", "Devis transparent", "Confirmation par email"],
-  },
-  {
-    icon: Car,
-    n: "02",
-    title: "Prise en charge",
-    desc: "Notre convoyeur dédié récupère votre véhicule à l'endroit convenu. Inspection complète, photos contradictoires et mise en main soignée.",
-    bullets: ["Inspection 360°", "État des lieux signé", "Communication directe"],
-  },
-  {
-    icon: MapPin,
-    n: "03",
-    title: "Livraison",
-    desc: "Votre véhicule est conduit par un professionnel formé, suivi en temps réel, puis remis au destinataire avec inspection finale et compte-rendu.",
-    bullets: ["Suivi GPS", "Livraison ponctuelle", "Compte-rendu complet"],
-  },
+  { icon: UserPlus, n: "01", title: "Création de compte client", desc: "Inscription en moins d'une minute. Espace personnel sécurisé avec accès à vos devis, factures, missions et documents." },
+  { icon: Calculator, n: "02", title: "Commande via estimateur", desc: "Saisie du départ, de l'arrivée, du véhicule (recherche par plaque possible) et de la date. Tarif clair en 3 secondes." },
+  { icon: FileText, n: "03", title: "Génération automatique du devis", desc: "Devis horodaté, numéroté, transmis instantanément par email et disponible dans votre espace client." },
+  { icon: PenLine, n: "04", title: "Signature électronique du devis", desc: "Signature en ligne à valeur probante. Étape obligatoire avant la mise en production de votre mission." },
+  { icon: Inbox, n: "05", title: "Réception du devis côté admin", desc: "Notre équipe reçoit le devis signé directement dans le dashboard administratif avec toutes les pièces jointes." },
+  { icon: ShieldCheck, n: "06", title: "Validation admin", desc: "Contrôle de cohérence, vérification des contraintes et validation finale par notre service exploitation." },
+  { icon: UserCheck, n: "07", title: "Attribution convoyeur", desc: "Affectation à un convoyeur certifié selon zone, disponibilité et notation. Notification immédiate au chauffeur." },
+  { icon: MapPin, n: "08", title: "Suivi GPS en temps réel", desc: "Vous suivez le véhicule en direct depuis votre espace client : position, ETA, étapes franchies." },
+  { icon: Car, n: "09", title: "Livraison du véhicule", desc: "Convoyeur identifié, ponctualité contractuelle, communication directe avec le destinataire." },
+  { icon: ClipboardCheck, n: "10", title: "État des lieux signé", desc: "EDL digitalisé entrée et sortie : photos 360°, kilométrage, niveau carburant, signature contradictoire." },
+  { icon: Receipt, n: "11", title: "Facturation automatique", desc: "Facture générée automatiquement à la livraison, conforme et archivée dans votre espace." },
+  { icon: CheckCircle, n: "12", title: "Devis & factures centralisés", desc: "Tout votre historique consultable en un clic : devis, signatures, EDL, factures, photos, GPS." },
 ];
 
 export default function CommentCaMarcheTimeline() {
   return (
     <>
-      {/* ===== HERO navy premium ===== */}
+      {/* HERO */}
       <section
         className="relative overflow-hidden pt-28 pb-28 lg:pt-36 lg:pb-36"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
@@ -43,7 +49,7 @@ export default function CommentCaMarcheTimeline() {
             Comment <span className="gold-gradient-text">ça marche</span>
           </h1>
           <p className="text-cream/70 mt-6 text-base lg:text-lg leading-relaxed">
-            De la réservation à la livraison, un processus simple, fluide et transparent.
+            De la création de compte à la facture : 12 étapes claires, traçables et 100% digitalisées.
           </p>
         </div>
 
@@ -55,7 +61,7 @@ export default function CommentCaMarcheTimeline() {
         </div>
       </section>
 
-      {/* ===== TIMELINE — section cream ===== */}
+      {/* TIMELINE */}
       <section className="py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="relative">
@@ -64,13 +70,12 @@ export default function CommentCaMarcheTimeline() {
               aria-hidden
             />
 
-            <div className="space-y-12 md:space-y-20">
+            <div className="space-y-10 md:space-y-14">
               {steps.map((step, i) => {
                 const Icon = step.icon;
                 const isLeft = i % 2 === 0;
                 return (
                   <div key={i} className="relative md:grid md:grid-cols-2 md:gap-14 items-center">
-                    {/* Pastille dorée */}
                     <div className="absolute left-6 md:left-1/2 -translate-x-1/2 z-10">
                       <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#e7c76a] to-[#d4af37] flex items-center justify-center shadow-[0_10px_30px_-8px_rgba(231,199,106,0.6)]">
                         <Icon className="text-[#0b1026]" size={22} strokeWidth={2.2} />
@@ -82,29 +87,16 @@ export default function CommentCaMarcheTimeline() {
                         isLeft ? "md:pr-14 md:text-right" : "md:col-start-2 md:pl-14"
                       }`}
                     >
-                      <div className="card-premium-light p-7 lg:p-9 inline-block w-full">
+                      <div className="card-premium-light p-7 lg:p-8 inline-block w-full">
                         <p className="font-heading text-[#b8860b] text-[10.5px] tracking-[0.3em] uppercase mb-2">
                           Étape {step.n}
                         </p>
-                        <h2 className="font-heading text-2xl lg:text-[28px] text-[#0b1026] tracking-wide mb-3">
+                        <h2 className="font-heading text-xl lg:text-[24px] text-[#0b1026] tracking-wide mb-3">
                           {step.title}
                         </h2>
-                        <p className="text-[#0b1026]/70 text-[14.5px] leading-relaxed mb-5">
+                        <p className="text-[#0b1026]/70 text-[14px] leading-relaxed">
                           {step.desc}
                         </p>
-                        <ul className={`space-y-2 ${isLeft ? "md:flex md:flex-col md:items-end" : ""}`}>
-                          {step.bullets.map((b, j) => (
-                            <li
-                              key={j}
-                              className={`flex items-center gap-2 text-[#0b1026]/75 text-[13px] ${
-                                isLeft ? "md:flex-row-reverse" : ""
-                              }`}
-                            >
-                              <CheckCircle size={14} className="text-[#b8860b] shrink-0" />
-                              <span>{b}</span>
-                            </li>
-                          ))}
-                        </ul>
                       </div>
                     </div>
 
@@ -117,7 +109,7 @@ export default function CommentCaMarcheTimeline() {
         </div>
       </section>
 
-      {/* ===== Réassurance + CTA — section navy ===== */}
+      {/* Réassurance + CTA */}
       <section
         className="relative py-20 lg:py-24"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
