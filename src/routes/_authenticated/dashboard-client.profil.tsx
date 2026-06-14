@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle, Building2 } from "lucide-react";
 import { LogoUploader } from "@/components/LogoUploader";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/profil")({
   component: ClientProfil,
@@ -123,9 +124,12 @@ function ClientProfil() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mon profil</h1>
-        <p className="text-cream/50 text-sm mt-1">Gérez vos informations personnelles et votre mot de passe</p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mon profil</h1>
+          <p className="text-cream/50 text-sm mt-1">Gérez vos informations personnelles et votre mot de passe</p>
+        </div>
+        <PushNotificationToggle />
       </div>
 
       {/* Profile */}

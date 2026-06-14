@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle,
 } from "lucide-react";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/profil")({
   component: ConvoyeurProfil,
@@ -110,6 +111,7 @@ function ConvoyeurProfil() {
           <span className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">
             {typeConv === "independant" ? "Indépendant" : "Salarié"}
           </span>
+          <PushNotificationToggle />
         </div>
       </div>
 
