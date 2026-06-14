@@ -2,10 +2,12 @@ import { supabase } from '@/integrations/supabase/client'
 
 interface SendTransactionalEmailParams {
   templateName: string
-  recipientEmail: string
+  /** Optional when the template has a fixed `to` recipient (e.g. admin notifications). */
+  recipientEmail?: string
   idempotencyKey?: string
   templateData?: Record<string, any>
 }
+
 
 export async function sendTransactionalEmail(params: SendTransactionalEmailParams) {
   const { data: { session } } = await supabase.auth.getSession()
