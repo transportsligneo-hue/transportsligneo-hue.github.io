@@ -1,95 +1,76 @@
-## Problème
 
-Sur ta capture (`/dashboard-pro/missions/...`), les blocs de la fiche mission sont quasi invisibles : seul le texte sélectionné (surligné bleu) se voit. Cause technique :
+# Refonte module GPS — style Uber/Bolt
 
-- `ClientMissionDetailView` utilise partout `text-cream`, `text-cream/50`, `border-primary/10` (pensés pour le shell sombre `client-shell` navy + glass).
-- Mais l'espace **Pro** (`dashboard-pro.tsx`) et **Flotte** rendent sur fond clair `bg-pro-bg` (#F6F8FB). Résultat : du texte crème sur fond blanc → illisible.
-- Le badge "EN ATTENTE" reste visible parce qu'il a déjà une couleur saturée (la nouvelle palette opérationnelle).
+## Périmètre strict
 
-## Objectif
+- Uniquement **visuel + UX** du suivi GPS.
+- **Aucune modification** : tables Supabase, hooks `useMissionRealtime` / `useGpsTracking`, `mission_locations`, statuts métier, workflow convoyeur, calculs ETA (`computeEta`), géocodage.
+- Conservation totale du flux temps réel actuel (Realtime Supabase).
+- Affecté : Dashboard Admin (détail mission) + Dashboard Client (Particulier + Pro + Flotte, vue `ClientMissionDetailView`).
+- **Non affecté** : app convoyeur, espace public, autres pages.
 
-Rendre la fiche mission lisible dans **tous** les espaces clients, en restant cohérent avec la charte déjà validée :
-- Espaces sombres (`dashboard-client`, `client-shell`) : on garde le rendu navy/glass actuel.
-- Espaces clairs (`dashboard-pro`, `flotte`) : carte claire haut de gamme + texte navy lisible + accents **bleu électrique #00AEEF** (déjà nos tokens `--op-electric` / `--op-violet` / `--op-green` / `--op-red` / `--op-orange`).
-- Aucun changement aux modules admin, site public, header/footer, ni à la palette navy/doré globale.
+## Fichiers touchés
 
-## Périmètre des fichiers
-
-- `src/components/mission/ClientMissionDetailView.tsx` — passer en classes adaptatives.
-- `src/components/mission/MissionTrackingPanel.tsx` — même traitement (lecture seule, doit être lisible sur fond clair comme sombre).
-- `src/styles.css` — ajouter une seule classe utilitaire `.mission-surface` qui s'adapte au shell parent (sombre → glass cream-on-navy, clair → carte blanche bordure fine ombre douce + texte navy). Pas de nouveau token couleur, on réutilise `--op-electric` déjà ajouté.
-
-Aucun changement de logique métier, de requêtes Supabase, de routes, ni de permissions.
-
-## Approche visuelle
-
-Hiérarchie commune (les deux modes) :
-
-```text
-┌─ Card surface ──────────────────────────────────────┐
-│ N° mission (eyebrow, muted small caps)              │
-│ Ville → Ville  (titre, icône bleu électrique)       │
-│ ─────────────────────────────────────────────────── │
-│ Date         |       Prix (accent doré OU navy)    │
-└─────────────────────────────────────────────────────┘
-```
-
-- Titres de section : `text-[#00AEEF]` (au lieu de `text-primary` doré) → cohérent avec le module Suivi/Véhicules déjà refait.
-- Plaque immatriculation : on garde le bloc bleu électrique existant.
-- Statut : `StatusBadge` (déjà saturé, OK partout).
-- Lien retour, eyebrows, valeurs : tokens adaptatifs via `.mission-surface` (sombre = cream/cream-muted, clair = `#0b1026` / `#475569`).
+| Fichier | Action |
+|---|---|
+| `src/components/GpsMapView.tsx` | Refonte visuelle (tuiles claires premium, marqueurs modernes, voiture animée, polyline dégradée bleu/violet) |
+| `src/components/mission/MissionLiveTracker.tsx` | Refonte layout : grande carte immersive + carte flottante glassmorphism ETA |
+| `src/components/mission/ClientMissionDetailView.tsx` | Réorganisation : carte plein écran en tête + panneau infos client (chauffeur, véhicule, contact) + coordonnées d'arrivée visibles |
+| `src/components/mission/UberStyleTrackingCard.tsx` | **Nouveau** — carte flottante glass (statut, ETA, distance, chauffeur, véhicule, bouton contact) |
+| `src/components/mission/AnimatedVehicleMarker.tsx` | **Nouveau** — logique d'interpolation + rotation du marqueur voiture |
+| `src/components/mission/MissionEventTimeline.tsx` | **Nouveau** — timeline événements/notifications côté Admin |
+| `src/routes/_authenticated/admin.missions.$missionId.tsx` | Intégration nouvelle disposition (carte XL gauche + timeline droite) |
+| `src/styles.css` | Tokens GPS premium (`--gps-route-start`, `--gps-route-end`, `--gps-glass-bg`, gradient bleu→violet, shadows) |
 
 ## Détails techniques
 
-1. Ajouter dans `src/styles.css` :
+### Carte (GpsMapView)
+- Tuiles : passage à **CartoDB Positron** (style clair épuré, type Uber) — gratuit, OSM-compatible, pas de clé.
+- Polyline : remplacement du gold actuel par dégradé bleu `#2563eb` → violet `#7c3aed`, épaisseur 5, opacité 0.9, halo blanc derrière (effet « stroke ») pour lisibilité.
+- Tracé projeté (position → destination) : pointillé violet `#a78bfa`.
+- Marqueurs : départ vert pulsant, arrivée pin rouge moderne (SVG), voiture = SVG top-down dans `divIcon` qui tourne via `transform: rotate(bearing)`.
+- Recentrage : auto-fit aux bounds avec padding ; bouton flottant « recenter » (icône `Navigation`).
+- Zoom : auto selon distance restante (proche → zoom 15, loin → zoom 11).
 
-```css
-.mission-surface { /* défaut = mode clair Pro/Flotte */
-  --ms-bg: #ffffff;
-  --ms-border: rgba(15, 23, 42, 0.08);
-  --ms-text: #0b1026;
-  --ms-text-soft: #475569;
-  --ms-text-muted: #94a3b8;
-  --ms-divider: rgba(15, 23, 42, 0.08);
-  --ms-accent: #00AEEF;
-  background: var(--ms-bg);
-  border: 1px solid var(--ms-border);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -16px rgba(15,23,42,0.10);
-  color: var(--ms-text);
-}
-.client-shell .mission-surface { /* mode sombre Particulier */
-  --ms-bg: transparent;
-  --ms-border: var(--client-border);
-  --ms-text: #f3f6ff;
-  --ms-text-soft: #c9d3ee;
-  --ms-text-muted: #8c97bd;
-  --ms-divider: rgba(120,165,255,0.18);
-  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
-  box-shadow: 0 20px 50px -22px rgba(8,16,48,0.75);
-}
-.mission-text       { color: var(--ms-text); }
-.mission-text-soft  { color: var(--ms-text-soft); }
-.mission-text-muted { color: var(--ms-text-muted); }
-.mission-divider    { border-color: var(--ms-divider); }
-.mission-accent     { color: var(--ms-accent); }
-```
+### Voiture animée (AnimatedVehicleMarker)
+- Interpolation linéaire entre dernière position connue et nouveau point GPS sur 1.2s via `requestAnimationFrame`.
+- Bearing calculé à partir des 2 derniers points (atan2) → rotation appliquée à l'icône.
+- Aucun changement aux données : on consomme `mission_locations` comme aujourd'hui.
 
-2. Dans `ClientMissionDetailView.tsx` et `MissionTrackingPanel.tsx` :
-   - Remplacer chaque `card-premium` → `mission-surface`.
-   - `text-cream` → `mission-text`.
-   - `text-cream/80` → `mission-text-soft`.
-   - `text-cream/50` / `text-cream/40` → `mission-text-muted`.
-   - `border-primary/10` → `mission-divider`.
-   - Les titres `<h2>` de section et les icônes principales : `text-primary` (doré) → `mission-accent` (bleu électrique #00AEEF). Cohérent avec la décision prise pour Suivi/Véhicules.
-   - Le prix total et la facture restent en `text-primary` (doré) dans le shell sombre, en navy `mission-text` + chiffre `font-semibold` en mode clair (déjà géré par le token).
-   - Lien retour `text-cream/60 hover:text-primary` → `mission-text-muted hover:mission-accent`.
+### Carte flottante (UberStyleTrackingCard)
+- Position : `absolute bottom-4 left-4 right-4` sur mobile, `bottom-6 left-6 max-w-md` desktop.
+- Style : `backdrop-blur-xl bg-white/85 border border-white/60 rounded-3xl shadow-2xl` ; dark mode (espace Particulier) : `bg-slate-900/80 text-white`.
+- Contenu : pastille statut animée, **ETA en gros (display font)**, distance restante, séparateur, ligne chauffeur (avatar + nom + véhicule + plaque), bouton « Contacter » (tel: + sms:).
+- Apparition : `animate-in slide-in-from-bottom-4 fade-in duration-500`.
 
-3. Aucun changement aux composants `StatusBadge`, `GpsMapView`, `MissionDocuments`, `FactureEmbeddedCheckout`, etc. Ils sont déjà lisibles (palette opérationnelle saturée).
+### Dashboard Client — coordonnées d'arrivée
+- Ajout d'un bloc « Coordonnées d'arrivée » dans `ClientMissionDetailView` affichant nom contact arrivée + téléphone arrivée (champs déjà présents dans `demandes_convoyage`/`trajets` : `contact_arrivee_nom`, `contact_arrivee_telephone`). Lecture seule, pas de migration.
 
-## Vérification après build
+### Dashboard Admin — colonne droite
+- Layout `lg:grid-cols-[1fr_360px]` : carte XL à gauche, panneau droite avec :
+  - `MissionEventTimeline` (réutilise `mission_etape_history` déjà chargée).
+  - Dernière position GPS (lat/lng + horodatage + précision).
+  - Liste notifications liées (filtre `admin_notifications` par `mission_id` — lecture seule, aucune écriture).
 
-- `/dashboard-pro/missions/:id` (cas du screenshot) : titre, adresse, date, prix, sections Véhicule / Détails / Contact, panneau Suivi → tout en navy foncé sur cartes blanches, accents bleu électrique.
-- `/flotte/missions/:id` : idem (shell light).
-- `/dashboard-client/missions/:id` : rendu inchangé (toujours dans `client-shell`, donc styles glass/navy conservés via override CSS).
-- `/admin/missions/:id` : non touché.
+### Animations & micro-interactions
+- Pulsation marqueur position actuelle (CSS keyframes, déjà en place — conservée).
+- Apparition progressive panneaux : `animate-in fade-in slide-in-from-right` via tailwindcss-animate (déjà installé).
+- Hover boutons : `hover:scale-[1.02] transition`.
+- **Aucune** dépendance framer-motion (interdit par mémoire projet).
+
+### Palette
+- Tokens ajoutés à `src/styles.css` :
+  - `--gps-primary: #2563eb` (bleu profond)
+  - `--gps-secondary: #7c3aed` (violet premium)
+  - `--gps-start: #10b981` (vert départ)
+  - `--gps-end: #ef4444` (rouge arrivée)
+  - `--gps-glass: rgba(255,255,255,0.85)`
+  - `--gps-glass-dark: rgba(15,23,42,0.8)`
+  - Gradient `--gps-route: linear-gradient(90deg, var(--gps-primary), var(--gps-secondary))`
+
+## Non-objectifs
+
+- Pas de nouvelle dépendance (Mapbox, Google Maps JS, framer-motion).
+- Pas de migration SQL.
+- Pas de changement aux edge functions ni au tracking convoyeur.
+- L'identité navy/doré globale est préservée ; le bleu/violet reste **circonscrit au module GPS** comme charte « métier opérationnel » (cohérent avec la mémoire « bleu électrique modules métier »).
