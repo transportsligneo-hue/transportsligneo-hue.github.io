@@ -71,7 +71,7 @@ function MissionDetail() {
           if (m.numero) {
             const { data: byNumero } = await supabase
               .from("attributions")
-              .select("id, pdf_share_client")
+              .select("id, trajet_id, pdf_share_client")
               .eq("numero_mission", m.numero)
               .order("created_at", { ascending: false })
               .limit(1)
@@ -87,12 +87,12 @@ function MissionDetail() {
               .eq("arrivee", m.ville_arrivee)
               .eq("date_trajet", m.date_prise_en_charge)
               .limit(1);
-            const trajetId = trajets?.[0]?.id;
-            if (trajetId) {
+            const tId = trajets?.[0]?.id;
+            if (tId) {
               const { data: byTrajet } = await supabase
                 .from("attributions")
-                .select("id, pdf_share_client")
-                .eq("trajet_id", trajetId)
+                .select("id, trajet_id, pdf_share_client")
+                .eq("trajet_id", tId)
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
@@ -102,6 +102,7 @@ function MissionDetail() {
 
           if (!cancelled && attr) {
             setAttributionId(attr.id);
+            setTrajetId(attr.trajet_id ?? null);
             setPdfShareEnabled(Boolean(attr.pdf_share_client));
           }
         }
