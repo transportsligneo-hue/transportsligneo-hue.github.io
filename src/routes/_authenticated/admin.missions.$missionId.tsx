@@ -193,6 +193,8 @@ function AdminMissionDetail() {
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [contactNom, setContactNom] = useState("");
+  const [contactPrenom, setContactPrenom] = useState("");
+  const [contactSociete, setContactSociete] = useState("");
   const [contactTel, setContactTel] = useState("");
   const [contactTel2, setContactTel2] = useState("");
   const [contactInstr, setContactInstr] = useState("");
