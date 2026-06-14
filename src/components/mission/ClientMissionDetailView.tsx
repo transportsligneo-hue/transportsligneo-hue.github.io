@@ -4,10 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2, Receipt, Download } from "lucide-react";
 import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
-import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
+import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
-import { MissionClientGallery } from "@/components/mission/MissionClientGallery";
 
 interface Mission {
   id: string;
