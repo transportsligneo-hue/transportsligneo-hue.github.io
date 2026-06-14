@@ -311,12 +311,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
       </div>
 
-      {attributionId && <MissionLiveTracker attributionId={attributionId} />}
-
       {attributionId && (
-        <MissionClientGallery
+        <MissionTrackingPanel
           attributionId={attributionId}
           trajetId={trajetId}
+          convoyeurId={convoyeurId}
           onProofsAvailable={setHasProofs}
         />
       )}
