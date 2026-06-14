@@ -110,13 +110,13 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
     : null;
 
   return (
-    <div className="card-premium rounded overflow-hidden">
-      <div className="px-4 py-3 border-b border-primary/15 flex items-center gap-2">
+    <div className="mission-surface rounded overflow-hidden">
+      <div className="px-4 py-3 mission-divider border-b flex items-center gap-2">
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
         </span>
-        <h3 className="font-heading text-sm text-cream tracking-wider">Suivi en temps réel</h3>
+        <h3 className="font-heading text-sm mission-text tracking-wider">Suivi en temps réel</h3>
         {statutMeta && (
           <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full border ${statutMeta.cls}`}>
             {statutMeta.label}
@@ -127,8 +127,8 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       <div className="p-4 space-y-4">
         {etapeLabel && (
           <div className="flex items-center gap-2 text-sm">
-            <Truck size={14} className="text-primary" />
-            <span className="text-cream">{etapeLabel}</span>
+            <Truck size={14} className="mission-accent" />
+            <span className="mission-text font-medium">{etapeLabel}</span>
           </div>
         )}
 
@@ -143,23 +143,23 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
                   <span
                     className={`h-3 w-3 rounded-full border ${
                       done
-                        ? "bg-emerald-400 border-emerald-400"
+                        ? "bg-emerald-500 border-emerald-500"
                         : active
-                          ? "bg-primary border-primary animate-pulse"
-                          : "bg-cream/5 border-cream/20"
+                          ? "bg-[#00AEEF] border-[#00AEEF] animate-pulse"
+                          : "bg-transparent border-current opacity-30"
                     }`}
                   />
                   {i < ETAPES_ORDER.length - 1 && (
                     <span
                       className={`w-px flex-1 mt-1 min-h-[14px] ${
-                        done ? "bg-emerald-400/40" : "bg-cream/10"
+                        done ? "bg-emerald-500/40" : "mission-divider border-l"
                       }`}
                     />
                   )}
                 </div>
                 <p
                   className={`text-xs pb-2 ${
-                    active ? "text-cream font-medium" : done ? "text-cream/70" : "text-cream/40"
+                    active ? "mission-text font-semibold" : done ? "mission-text-soft" : "mission-text-muted"
                   }`}
                 >
                   {e.label}
@@ -170,11 +170,11 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
         </div>
 
         {rt.lastEtape && (
-          <div className="flex items-start gap-2 text-xs bg-navy/40 border border-primary/10 rounded-md px-3 py-2">
-            <Activity size={12} className="mt-0.5 text-primary/70" />
+          <div className="flex items-start gap-2 text-xs mission-divider border rounded-md px-3 py-2">
+            <Activity size={12} className="mt-0.5 mission-accent" />
             <div className="min-w-0">
-              <p className="text-cream/80">{rt.lastEtape.notes ?? rt.lastEtape.etape}</p>
-              <p className="text-[10px] text-cream/40 mt-0.5">
+              <p className="mission-text-soft">{rt.lastEtape.notes ?? rt.lastEtape.etape}</p>
+              <p className="text-[10px] mission-text-muted mt-0.5">
                 {new Date(rt.lastEtape.created_at).toLocaleString("fr-FR")}
               </p>
             </div>
@@ -182,22 +182,22 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
         )}
 
         {rt.lastGps && (
-          <div className="flex items-center gap-2 text-xs text-cream/70">
-            <MapPin size={12} className="text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs mission-text-soft">
+            <MapPin size={12} className="text-emerald-500" />
             <span>Position : {rt.lastGps.latitude.toFixed(4)}, {rt.lastGps.longitude.toFixed(4)}</span>
-            <Clock size={11} className="text-cream/40 ml-auto" />
-            <span className="text-cream/50">{new Date(rt.lastGps.recorded_at).toLocaleTimeString("fr-FR")}</span>
+            <Clock size={11} className="mission-text-muted ml-auto" />
+            <span className="mission-text-muted">{new Date(rt.lastGps.recorded_at).toLocaleTimeString("fr-FR")}</span>
           </div>
         )}
 
         {eta && (
-          <div className="flex items-center gap-3 text-xs bg-primary/10 border border-primary/30 rounded-md px-3 py-2">
-            <Navigation size={14} className="text-primary" />
+          <div className="flex items-center gap-3 text-xs bg-[#00AEEF]/10 border border-[#00AEEF]/30 rounded-md px-3 py-2">
+            <Navigation size={14} className="text-[#00AEEF]" />
             <div className="flex flex-col">
-              <span className="text-cream font-medium">
+              <span className="mission-text font-semibold">
                 Arrivée estimée vers {eta.etaAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
               </span>
-              <span className="text-cream/50 text-[10px]">
+              <span className="mission-text-soft text-[10px]">
                 {eta.distanceKm < 1
                   ? `${Math.round(eta.distanceKm * 1000)} m`
                   : `${eta.distanceKm.toFixed(1)} km`} restants · ~{eta.etaMinutes} min · {Math.round(eta.avgKmh)} km/h
@@ -216,14 +216,14 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
         )}
 
         {showMap && allPoints.length === 0 && !rt.lastGps && currentIdx < 0 && (
-          <div className="flex items-center justify-center gap-2 text-xs text-cream/50 py-6">
+          <div className="flex items-center justify-center gap-2 text-xs mission-text-muted py-6">
             <Loader2 size={12} className="animate-spin" />
             En attente du démarrage de la mission
           </div>
         )}
 
         {isFinished && (
-          <div className="flex items-center gap-2 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-md px-3 py-2">
+          <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-500/10 border border-emerald-500/30 rounded-md px-3 py-2">
             <CheckCircle2 size={14} />
             Mission livrée. Merci de votre confiance !
           </div>
