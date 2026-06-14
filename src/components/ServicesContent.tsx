@@ -11,13 +11,41 @@ import {
   Truck,
   HardHat,
   ArrowRight,
+  Car,
+  ClipboardCheck,
+  PenLine,
+  PackageCheck,
+  Search,
+  Zap,
+  Repeat,
+  Sparkles,
+  Warehouse,
 } from "lucide-react";
 
-const particuliers = [
-  { icon: Home, title: "Livraison à domicile", desc: "Votre véhicule récupéré et livré directement chez vous, partout en France." },
-  { icon: Plane, title: "Déménagement / mutation", desc: "Idéal pour rejoindre votre nouveau lieu de vie sans contrainte de transport." },
-  { icon: Wrench, title: "Aller-retour atelier", desc: "Convoyage vers votre garagiste ou concession, retour inclus." },
-  { icon: ShieldCheck, title: "Achat / vente à distance", desc: "Récupération du véhicule chez le vendeur, livraison sécurisée chez vous." },
+const jockeyage = [
+  { icon: ClipboardCheck, title: "Jockeyage contrôle technique", desc: "On récupère votre véhicule, on passe le CT, et on vous le ramène. Tarif réduit vs convoyage standard." },
+  { icon: Plane, title: "Jockeyage départ vacances", desc: "Récupération à votre domicile, livraison à la gare, l'aéroport ou tout point de départ — restitution au retour." },
+  { icon: Wrench, title: "Jockeyage révision / atelier", desc: "On emmène votre véhicule chez votre garagiste ou concession, on récupère après intervention." },
+];
+
+const convoyage = [
+  { icon: Home, title: "Convoyage porte à porte", desc: "Prise en charge et livraison directement à l'adresse de votre choix, partout en France et en Europe." },
+  { icon: Repeat, title: "Livraison + restitution", desc: "Aller simple, ou livraison puis restitution sur deuxième plaque — pratique pour location, prêt, événement." },
+  { icon: Truck, title: "Véhicule sur plateau", desc: "Véhicule non roulant ou zéro kilomètre : transport sécurisé sur plateau (+70% sur la part transport)." },
+];
+
+const digital = [
+  { icon: ClipboardCheck, title: "État des lieux digitalisé", desc: "Capture complète 360° du véhicule avant et après convoyage, photos horodatées et géolocalisées." },
+  { icon: PenLine, title: "Signature électronique", desc: "Devis, EDL et bon de livraison signés en ligne, valeur probante, archivage automatique." },
+  { icon: PackageCheck, title: "Livraison sécurisée", desc: "Suivi GPS temps réel, convoyeur identifié, assurance tous risques incluse." },
+  { icon: Search, title: "Recherche véhicule par plaque", desc: "Saisie de la plaque d'immatriculation pour récupérer automatiquement marque, modèle et énergie." },
+  { icon: Zap, title: "Devis instantané en 3 secondes", desc: "Estimateur en ligne : départ, arrivée, véhicule — tarif clair et engageant immédiatement." },
+];
+
+const extras = [
+  { icon: Sparkles, title: "Lavage extérieur", desc: "Carrosserie nettoyée avant remise.", price: "24€ TTC" },
+  { icon: Sparkles, title: "Lavage intérieur + extérieur", desc: "Nettoyage complet, prêt à rouler.", price: "59€ TTC" },
+  { icon: Warehouse, title: "Stockage sécurisé", desc: "Gardiennage en site clos, durée à la demande.", price: "Sur devis" },
 ];
 
 const professionnels = [
@@ -29,8 +57,7 @@ const professionnels = [
   { icon: Briefcase, title: "Partenariats sur-mesure", desc: "Tarification négociée, interlocuteur dédié, reporting mensuel." },
 ];
 
-/** Carte claire cream — alignée homepage */
-function ServiceCardLight({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
+function ServiceCardLight({ icon: Icon, title, desc, price }: { icon: React.ElementType; title: string; desc: string; price?: string }) {
   return (
     <div className="card-premium-light group relative flex flex-col p-7 transition-all duration-500 hover:-translate-y-1">
       <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#b8860b]">
@@ -38,6 +65,9 @@ function ServiceCardLight({ icon: Icon, title, desc }: { icon: React.ElementType
       </div>
       <h3 className="font-heading text-[#0b1026] text-[17px] tracking-wide mb-2">{title}</h3>
       <p className="text-[#0b1026]/65 text-[13.5px] leading-relaxed flex-1">{desc}</p>
+      {price && (
+        <p className="mt-4 font-heading text-[#b8860b] text-[15px] tracking-wide">{price}</p>
+      )}
       <Link
         to="/tarifs"
         className="mt-5 inline-flex items-center gap-2 text-[#b8860b] text-[10.5px] font-heading tracking-[0.24em] uppercase hover:text-[#0b1026] transition-colors"
@@ -48,7 +78,6 @@ function ServiceCardLight({ icon: Icon, title, desc }: { icon: React.ElementType
   );
 }
 
-/** Carte glass navy — alignée homepage */
 function ServiceCardDark({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
   return (
     <div className="group relative flex flex-col p-7 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm transition-all duration-500 hover:border-[#e7c76a]/40 hover:bg-white/[0.05]">
@@ -67,10 +96,19 @@ function ServiceCardDark({ icon: Icon, title, desc }: { icon: React.ElementType;
   );
 }
 
+function SectionLabel({ icon: Icon, children, tone = "gold" }: { icon: React.ElementType; children: React.ReactNode; tone?: "gold" | "ink" }) {
+  const cls = tone === "gold" ? "text-[#e7c76a]" : "text-[#b8860b]";
+  return (
+    <span className={`inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.28em] ${cls} font-heading`}>
+      <Icon size={13} /> {children}
+    </span>
+  );
+}
+
 export default function ServicesContent() {
   return (
     <>
-      {/* ===== HERO navy premium avec courbe cream ===== */}
+      {/* ===== HERO ===== */}
       <section
         className="relative overflow-hidden pt-28 pb-28 lg:pt-36 lg:pb-36"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
@@ -85,11 +123,10 @@ export default function ServicesContent() {
             Nos <span className="gold-gradient-text">services</span>
           </h1>
           <p className="text-cream/70 mt-6 text-base lg:text-lg leading-relaxed max-w-2xl mx-auto">
-            Une réponse pour chaque besoin de convoyage : des particuliers aux flottes professionnelles, partout en France et en Europe.
+            Jockeyage, convoyage porte à porte, état des lieux digitalisé, signature électronique : un service complet pour particuliers et professionnels.
           </p>
         </div>
 
-        {/* courbe cream organique */}
         <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "120px" }}>
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full block">
             <path d="M0,80 C320,20 760,5 1080,30 C1240,42 1360,70 1440,55 L1440,120 L0,120 Z"
@@ -98,27 +135,25 @@ export default function ServicesContent() {
         </div>
       </section>
 
-      {/* ===== Particuliers — section cream ===== */}
+      {/* ===== JOCKEYAGE — cream ===== */}
       <section className="py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.28em] text-[#b8860b] font-heading">
-              <User size={13} /> Pour les particuliers
-            </span>
+            <SectionLabel icon={Car} tone="ink">Jockeyage premium</SectionLabel>
             <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-3">
-              Votre véhicule livré, sans contrainte
+              On prend votre véhicule, on le ramène
             </h2>
             <p className="text-[#0b1026]/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-              Déménagement, achat à distance, mise au garage : nous prenons en charge l'intégralité du trajet, péages et carburant inclus.
+              Tarif allégé par rapport au convoyage standard : <strong>-10% sur un aller, -20% sur un aller-retour</strong>.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {particuliers.map((s, i) => <ServiceCardLight key={i} {...s} />)}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jockeyage.map((s, i) => <ServiceCardLight key={i} {...s} />)}
           </div>
         </div>
       </section>
 
-      {/* ===== Professionnels — section navy ===== */}
+      {/* ===== CONVOYAGE — navy ===== */}
       <section
         className="relative py-20 lg:py-24"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
@@ -126,22 +161,86 @@ export default function ServicesContent() {
         <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
-              <Briefcase size={13} /> Pour les professionnels
-            </span>
+            <SectionLabel icon={Truck}>Convoyage automobile</SectionLabel>
             <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-3">
-              Un partenaire dédié à votre activité
+              Porte à porte, partout en France
             </h2>
             <p className="text-cream/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-              Concessionnaires, loueurs, assureurs, gestionnaires de flotte : nous structurons une réponse sur-mesure pour fluidifier votre activité.
+              Roulant, non roulant, zéro km : nous adaptons le mode de transport à votre véhicule.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {professionnels.map((s, i) => <ServiceCardDark key={i} {...s} />)}
+            {convoyage.map((s, i) => <ServiceCardDark key={i} {...s} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== DIGITAL — cream ===== */}
+      <section className="py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <SectionLabel icon={ShieldCheck} tone="ink">Plateforme digitale</SectionLabel>
+            <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-3">
+              Une expérience 100% digitalisée
+            </h2>
+            <p className="text-[#0b1026]/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
+              De la recherche véhicule à la signature de l'EDL, tout se passe en ligne — clair, rapide, traçable.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {digital.map((s, i) => <ServiceCardLight key={i} {...s} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== OPTIONS / TARIFS COURTS — navy ===== */}
+      <section
+        className="relative py-20 lg:py-24"
+        style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <SectionLabel icon={Sparkles}>Options & services additionnels</SectionLabel>
+            <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-3">
+              Personnalisez votre prestation
+            </h2>
+            <p className="text-cream/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
+              Lavage, stockage, recharge batterie ou mise de carburant — disponibles directement depuis l'estimateur.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {extras.map((s, i) => (
+              <div key={i} className="relative flex flex-col p-7 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm transition-all duration-500 hover:border-[#e7c76a]/40">
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a]">
+                  <s.icon size={20} />
+                </div>
+                <h3 className="font-heading text-cream text-[17px] tracking-wide mb-2">{s.title}</h3>
+                <p className="text-cream/60 text-[13.5px] leading-relaxed flex-1">{s.desc}</p>
+                <p className="mt-4 font-heading text-[#e7c76a] text-[15px] tracking-wide">{s.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PROS — cream ===== */}
+      <section className="py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <SectionLabel icon={Briefcase} tone="ink">Pour les professionnels</SectionLabel>
+            <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-3">
+              Un partenaire dédié à votre activité
+            </h2>
+            <p className="text-[#0b1026]/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
+              Concessionnaires, loueurs, assureurs, gestionnaires de flotte : nous structurons une réponse sur-mesure.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {professionnels.map((s, i) => <ServiceCardLight key={i} {...s} />)}
           </div>
 
-          <div className="mt-16 text-center max-w-3xl mx-auto p-9 rounded-2xl border border-[#e7c76a]/30 bg-white/[0.03] backdrop-blur-sm">
-            <p className="text-cream/80 text-base lg:text-lg leading-relaxed mb-6">
+          <div className="mt-16 text-center max-w-3xl mx-auto p-9 rounded-2xl border border-[#e7c76a]/40 bg-white/60 backdrop-blur-sm">
+            <p className="text-[#0b1026]/80 text-base lg:text-lg leading-relaxed mb-6">
               Vous gérez une flotte ou cherchez un partenariat récurrent ?
               <br className="hidden sm:block" />
               Construisons ensemble une offre dédiée.
