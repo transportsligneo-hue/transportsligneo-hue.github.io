@@ -40,6 +40,35 @@ const ETAPE_LABELS: Record<string, string> = Object.fromEntries(
 export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiveTrackerProps) {
   const rt = useMissionRealtime(attributionId);
   const [allPoints, setAllPoints] = useState<{ latitude: number; longitude: number; recorded_at: string; accuracy: number | null }[]>([]);
+  const [origin, setOrigin] = useState<GeoPoint | null>(null);
+  const [destination, setDestination] = useState<GeoPoint | null>(null);
+
+  // Resolve trajet endpoints once (depart / arrivee) and geocode them.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: attr } = await supabase
+        .from("attributions")
+        .select("trajet_id")
+        .eq("id", attributionId)
+        .maybeSingle();
+      if (!attr?.trajet_id) return;
+      const { data: trajet } = await supabase
+        .from("trajets")
+        .select("depart, arrivee")
+        .eq("id", attr.trajet_id)
+        .maybeSingle();
+      if (cancelled || !trajet) return;
+      const [o, d] = await Promise.all([
+        geocodeAddress(trajet.depart),
+        geocodeAddress(trajet.arrivee),
+      ]);
+      if (cancelled) return;
+      if (o) setOrigin(o);
+      if (d) setDestination(d);
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
 
   useEffect(() => {
     if (!showMap) return;
