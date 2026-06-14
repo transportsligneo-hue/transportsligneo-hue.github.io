@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +47,7 @@ const statutPill: Record<string, string> = {
 
 function ProMissions() {
   const { user } = useAuth();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,7 +288,11 @@ function ProMissions() {
               </thead>
               <tbody>
                 {filtered.map((m) => (
-                  <tr key={m.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors">
+                  <tr
+                    key={m.id}
+                    className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer"
+                    onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
+                  >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">
                         {m.numero}
