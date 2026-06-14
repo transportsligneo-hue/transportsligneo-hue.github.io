@@ -104,6 +104,11 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
     : -1;
   const isFinished = rt.statut === "termine" || rt.statut === "validee";
 
+  // ETA dynamique : calculé dès qu'on a une position GPS + une destination géocodée.
+  const eta = destination && allPoints.length > 0 && !isFinished
+    ? computeEta(allPoints, destination)
+    : null;
+
   return (
     <div className="card-premium rounded overflow-hidden">
       <div className="px-4 py-3 border-b border-primary/15 flex items-center gap-2">
