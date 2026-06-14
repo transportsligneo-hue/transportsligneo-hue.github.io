@@ -207,6 +207,12 @@ export default function TunnelReservation({ onClose }: Props) {
               date: dateFr, prix: total, numero, type: trajetLabel,
             },
           }),
+          import("@/lib/push/notify.functions").then(m => m.pushToAdmins({ data: { payload: {
+            title: "Nouvelle demande de convoyage",
+            body: `${form.prenom} ${form.nom} • ${form.ville_depart} → ${form.ville_arrivee}`,
+            url: "/admin/demandes",
+            tag: `demande-${data?.id}`,
+          } } })).catch(() => {}),
         ]);
       } catch (emailErr) {
         console.error("Email confirmation failed:", emailErr);

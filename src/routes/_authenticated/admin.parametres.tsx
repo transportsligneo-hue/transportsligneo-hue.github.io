@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -106,9 +107,12 @@ function AdminParametres() {
         title="Paramètres"
         subtitle="Configuration globale, facturation, emails, intégrations et rôles."
         actions={
-          savedAt ? (
-            <span className="text-xs text-emerald-600 font-medium">Sauvegardé à {savedAt}</span>
-          ) : null
+          <div className="flex items-center gap-3">
+            {savedAt ? (
+              <span className="text-xs text-emerald-600 font-medium">Sauvegardé à {savedAt}</span>
+            ) : null}
+            <PushNotificationToggle />
+          </div>
         }
       />
 

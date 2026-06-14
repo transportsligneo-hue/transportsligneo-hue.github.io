@@ -124,6 +124,12 @@ export function DevisAcceptationStep({
             idempotencyKey: `admin-devis-accepte-${devisId}-v${version}`,
             templateData: { prenom, nom, email: email ?? "", numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
           }),
+          import("@/lib/push/notify.functions").then(m => m.pushToAdmins({ data: { payload: {
+            title: "Devis signé",
+            body: `${prenom} ${nom} • ${numero} • ${prixTtc.toFixed(2)} €`,
+            url: "/admin/devis",
+            tag: `devis-signe-${devisId}`,
+          } } })).catch(() => {}),
         ];
         if (email) {
           sends.unshift(sendTransactionalEmail({
