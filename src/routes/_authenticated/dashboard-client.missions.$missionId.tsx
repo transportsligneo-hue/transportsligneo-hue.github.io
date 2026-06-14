@@ -62,16 +62,16 @@ function MissionDetail() {
         setMission(m);
         setLoading(false);
 
-        // Résolution robuste de l'attribution : priorité au matching par numéro de mission
-        // (attributions.numero_mission = missions.numero), puis fallback sur trajet (depart/arrivee/date).
+        // Résolution attribution robuste : numero_mission → commande_ref → trajet via devis → fallback fuzzy
         if (m) {
-          type AttrLite = { id: string; trajet_id?: string | null; pdf_share_client?: boolean | null };
+          type AttrLite = { id: string; trajet_id?: string | null; pdf_share_client?: boolean | null; convoyeur_id?: string | null };
           let attr: AttrLite | null = null;
 
+          // 1) Matching direct par numéro
           if (m.numero) {
             const { data: byNumero } = await supabase
               .from("attributions")
-              .select("id, trajet_id, pdf_share_client")
+              .select("id, trajet_id, pdf_share_client, convoyeur_id")
               .eq("numero_mission", m.numero)
               .order("created_at", { ascending: false })
               .limit(1)
@@ -79,31 +79,51 @@ function MissionDetail() {
             if (byNumero) attr = byNumero as unknown as AttrLite;
           }
 
-          if (!attr) {
+          // 2) Trajet par commande_ref = numero mission
+          let trajetCandidate: string | null = null;
+          if (!attr && m.numero) {
+            const { data: tByRef } = await supabase
+              .from("trajets")
+              .select("id")
+              .eq("commande_ref", m.numero)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (tByRef?.id) trajetCandidate = tByRef.id;
+          }
+
+          // 3) Trajet par fuzzy (ville/date)
+          if (!attr && !trajetCandidate) {
             const { data: trajets } = await supabase
               .from("trajets")
               .select("id")
-              .eq("depart", m.ville_depart)
-              .eq("arrivee", m.ville_arrivee)
+              .ilike("depart", `%${m.ville_depart}%`)
+              .ilike("arrivee", `%${m.ville_arrivee}%`)
               .eq("date_trajet", m.date_prise_en_charge)
+              .order("created_at", { ascending: false })
               .limit(1);
-            const tId = trajets?.[0]?.id;
-            if (tId) {
-              const { data: byTrajet } = await supabase
-                .from("attributions")
-                .select("id, trajet_id, pdf_share_client")
-                .eq("trajet_id", tId)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-              if (byTrajet) attr = byTrajet as unknown as AttrLite;
-            }
+            if (trajets?.[0]?.id) trajetCandidate = trajets[0].id;
           }
 
-          if (!cancelled && attr) {
-            setAttributionId(attr.id);
-            setTrajetId(attr.trajet_id ?? null);
-            setPdfShareEnabled(Boolean(attr.pdf_share_client));
+          // 4) Récupère l'attribution sur le trajet candidat (priorité : avec convoyeur)
+          if (!attr && trajetCandidate) {
+            const { data: byTrajet } = await supabase
+              .from("attributions")
+              .select("id, trajet_id, pdf_share_client, convoyeur_id")
+              .eq("trajet_id", trajetCandidate)
+              .order("created_at", { ascending: false });
+            const list = (byTrajet ?? []) as unknown as AttrLite[];
+            attr = list.find(a => a.convoyeur_id) ?? list[0] ?? null;
+          }
+
+          if (!cancelled) {
+            if (attr) {
+              setAttributionId(attr.id);
+              setTrajetId(attr.trajet_id ?? trajetCandidate ?? null);
+              setPdfShareEnabled(Boolean(attr.pdf_share_client));
+            } else if (trajetCandidate) {
+              setTrajetId(trajetCandidate);
+            }
           }
         }
 
@@ -118,6 +138,7 @@ function MissionDetail() {
       });
     return () => { cancelled = true; };
   }, [missionId, user]);
+
 
   // Realtime : toast + maj du statut quand la mission évolue côté admin/convoyeur
   useEffect(() => {
