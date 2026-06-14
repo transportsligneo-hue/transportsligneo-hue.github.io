@@ -116,6 +116,30 @@ function MissionDetail() {
     return () => { cancelled = true; };
   }, [missionId, user]);
 
+  // Realtime : toast + maj du statut quand la mission évolue côté admin/convoyeur
+  useEffect(() => {
+    if (!missionId) return;
+    const channel = supabase
+      .channel(`mission-${missionId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "missions", filter: `id=eq.${missionId}` },
+        (payload) => {
+          const next = payload.new as Partial<Mission>;
+          setMission((prev) => (prev ? { ...prev, ...next } : prev));
+          if (next.statut) {
+            toast.success("Statut mis à jour", {
+              description: missionStatusLabel(next.statut),
+            });
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [missionId]);
+
   const handleDownloadFacture = async () => {
     if (!mission || !facture) return;
     setDownloadingFact(true);
