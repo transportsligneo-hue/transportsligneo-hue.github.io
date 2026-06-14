@@ -94,6 +94,18 @@ function InscriptionClient() {
           entityId: authData.user.id,
         });
 
+        // Email de bienvenue (best-effort, fixed-to admin not required car welcome a recipientEmail)
+        if (authData.session) {
+          void sendTransactionalEmail({
+            templateName: "welcome-client",
+            recipientEmail: form.email,
+            idempotencyKey: `welcome-${authData.user.id}`,
+            templateData: { prenom: form.prenom },
+          }).catch(() => {});
+        }
+
+
+
         setSuccess(true);
         if (authData.session) {
           setTimeout(() => navigate({ to: "/dashboard-client" }), 1500);
