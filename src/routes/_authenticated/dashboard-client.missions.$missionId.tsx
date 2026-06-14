@@ -8,6 +8,7 @@ import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
+import { MissionClientGallery } from "@/components/mission/MissionClientGallery";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/missions/$missionId")({
   component: MissionDetail,
@@ -41,6 +42,7 @@ function MissionDetail() {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
+  const [trajetId, setTrajetId] = useState<string | null>(null);
   const [pdfShareEnabled, setPdfShareEnabled] = useState(false);
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
@@ -63,13 +65,13 @@ function MissionDetail() {
         // Résolution robuste de l'attribution : priorité au matching par numéro de mission
         // (attributions.numero_mission = missions.numero), puis fallback sur trajet (depart/arrivee/date).
         if (m) {
-          type AttrLite = { id: string; pdf_share_client?: boolean | null };
+          type AttrLite = { id: string; trajet_id?: string | null; pdf_share_client?: boolean | null };
           let attr: AttrLite | null = null;
 
           if (m.numero) {
             const { data: byNumero } = await supabase
               .from("attributions")
-              .select("id, pdf_share_client")
+              .select("id, trajet_id, pdf_share_client")
               .eq("numero_mission", m.numero)
               .order("created_at", { ascending: false })
               .limit(1)
@@ -85,12 +87,12 @@ function MissionDetail() {
               .eq("arrivee", m.ville_arrivee)
               .eq("date_trajet", m.date_prise_en_charge)
               .limit(1);
-            const trajetId = trajets?.[0]?.id;
-            if (trajetId) {
+            const tId = trajets?.[0]?.id;
+            if (tId) {
               const { data: byTrajet } = await supabase
                 .from("attributions")
-                .select("id, pdf_share_client")
-                .eq("trajet_id", trajetId)
+                .select("id, trajet_id, pdf_share_client")
+                .eq("trajet_id", tId)
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
@@ -100,6 +102,7 @@ function MissionDetail() {
 
           if (!cancelled && attr) {
             setAttributionId(attr.id);
+            setTrajetId(attr.trajet_id ?? null);
             setPdfShareEnabled(Boolean(attr.pdf_share_client));
           }
         }
@@ -284,6 +287,26 @@ function MissionDetail() {
 
       {/* Suivi temps réel — apparaît dès qu'une attribution est rattachée */}
       {attributionId && <MissionLiveTracker attributionId={attributionId} />}
+
+      {/* Galerie : photos, signatures, carte grise, documents partagés */}
+      {attributionId && <MissionClientGallery attributionId={attributionId} trajetId={trajetId} />}
+
+      {/* PDF EDL final si admin a partagé */}
+      {attributionId && pdfShareEnabled && (
+        <div className="card-premium p-5 rounded flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (EDL final)</p>
+            <p className="text-cream/50 text-xs mt-1">Toutes les preuves consolidées dans un PDF unique.</p>
+          </div>
+          <button
+            onClick={handleDownloadEdl}
+            disabled={downloadingEdl}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded disabled:opacity-50"
+          >
+            {downloadingEdl ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} Télécharger PDF
+          </button>
+        </div>
+      )}
 
       {/* Vehicule */}
       <Section title="Véhicule" icon={<Car size={16} />}>
