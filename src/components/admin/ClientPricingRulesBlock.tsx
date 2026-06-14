@@ -11,6 +11,8 @@ interface Rule {
   client_user_id: string | null;
   ville_depart: string | null;
   ville_arrivee: string | null;
+  departement_depart: string | null;
+  departement_arrivee: string | null;
   zone_label: string | null;
   trip_type: "aller" | "aller_retour" | "any";
   prix_ttc: number;
