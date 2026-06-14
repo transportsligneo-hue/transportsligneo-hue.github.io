@@ -43,10 +43,12 @@ function MissionDetail() {
   const [loading, setLoading] = useState(true);
   const [attributionId, setAttributionId] = useState<string | null>(null);
   const [trajetId, setTrajetId] = useState<string | null>(null);
-  const [pdfShareEnabled, setPdfShareEnabled] = useState(false);
+  const [, setPdfShareEnabled] = useState(false);
+  const [hasProofs, setHasProofs] = useState(false);
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
@@ -62,16 +64,16 @@ function MissionDetail() {
         setMission(m);
         setLoading(false);
 
-        // Résolution robuste de l'attribution : priorité au matching par numéro de mission
-        // (attributions.numero_mission = missions.numero), puis fallback sur trajet (depart/arrivee/date).
+        // Résolution attribution robuste : numero_mission → commande_ref → trajet via devis → fallback fuzzy
         if (m) {
-          type AttrLite = { id: string; trajet_id?: string | null; pdf_share_client?: boolean | null };
+          type AttrLite = { id: string; trajet_id?: string | null; pdf_share_client?: boolean | null; convoyeur_id?: string | null };
           let attr: AttrLite | null = null;
 
+          // 1) Matching direct par numéro
           if (m.numero) {
             const { data: byNumero } = await supabase
               .from("attributions")
-              .select("id, trajet_id, pdf_share_client")
+              .select("id, trajet_id, pdf_share_client, convoyeur_id")
               .eq("numero_mission", m.numero)
               .order("created_at", { ascending: false })
               .limit(1)
@@ -79,31 +81,51 @@ function MissionDetail() {
             if (byNumero) attr = byNumero as unknown as AttrLite;
           }
 
-          if (!attr) {
+          // 2) Trajet par commande_ref = numero mission
+          let trajetCandidate: string | null = null;
+          if (!attr && m.numero) {
+            const { data: tByRef } = await supabase
+              .from("trajets")
+              .select("id")
+              .eq("commande_ref", m.numero)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (tByRef?.id) trajetCandidate = tByRef.id;
+          }
+
+          // 3) Trajet par fuzzy (ville/date)
+          if (!attr && !trajetCandidate) {
             const { data: trajets } = await supabase
               .from("trajets")
               .select("id")
-              .eq("depart", m.ville_depart)
-              .eq("arrivee", m.ville_arrivee)
+              .ilike("depart", `%${m.ville_depart}%`)
+              .ilike("arrivee", `%${m.ville_arrivee}%`)
               .eq("date_trajet", m.date_prise_en_charge)
+              .order("created_at", { ascending: false })
               .limit(1);
-            const tId = trajets?.[0]?.id;
-            if (tId) {
-              const { data: byTrajet } = await supabase
-                .from("attributions")
-                .select("id, trajet_id, pdf_share_client")
-                .eq("trajet_id", tId)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-              if (byTrajet) attr = byTrajet as unknown as AttrLite;
-            }
+            if (trajets?.[0]?.id) trajetCandidate = trajets[0].id;
           }
 
-          if (!cancelled && attr) {
-            setAttributionId(attr.id);
-            setTrajetId(attr.trajet_id ?? null);
-            setPdfShareEnabled(Boolean(attr.pdf_share_client));
+          // 4) Récupère l'attribution sur le trajet candidat (priorité : avec convoyeur)
+          if (!attr && trajetCandidate) {
+            const { data: byTrajet } = await supabase
+              .from("attributions")
+              .select("id, trajet_id, pdf_share_client, convoyeur_id")
+              .eq("trajet_id", trajetCandidate)
+              .order("created_at", { ascending: false });
+            const list = (byTrajet ?? []) as unknown as AttrLite[];
+            attr = list.find(a => a.convoyeur_id) ?? list[0] ?? null;
+          }
+
+          if (!cancelled) {
+            if (attr) {
+              setAttributionId(attr.id);
+              setTrajetId(attr.trajet_id ?? trajetCandidate ?? null);
+              setPdfShareEnabled(Boolean(attr.pdf_share_client));
+            } else if (trajetCandidate) {
+              setTrajetId(trajetCandidate);
+            }
           }
         }
 
@@ -118,6 +140,7 @@ function MissionDetail() {
       });
     return () => { cancelled = true; };
   }, [missionId, user]);
+
 
   // Realtime : toast + maj du statut quand la mission évolue côté admin/convoyeur
   useEffect(() => {
@@ -191,13 +214,14 @@ function MissionDetail() {
     try {
       const { data: attr } = await supabase
         .from("attributions")
-        .select("numero_mission, trajet_id, convoyeur_id, pdf_share_client")
+        .select("numero_mission, trajet_id, convoyeur_id")
         .eq("id", attributionId)
         .maybeSingle();
-      if (!attr || !(attr as { pdf_share_client?: boolean }).pdf_share_client) {
-        toast.error("PDF non disponible", { description: "L'admin n'a pas encore partagé ce document." });
+      if (!attr) {
+        toast.error("PDF non disponible");
         return;
       }
+
       const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
         supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
         supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
@@ -289,14 +313,20 @@ function MissionDetail() {
       {attributionId && <MissionLiveTracker attributionId={attributionId} />}
 
       {/* Galerie : photos, signatures, carte grise, documents partagés */}
-      {attributionId && <MissionClientGallery attributionId={attributionId} trajetId={trajetId} />}
+      {attributionId && (
+        <MissionClientGallery
+          attributionId={attributionId}
+          trajetId={trajetId}
+          onProofsAvailable={setHasProofs}
+        />
+      )}
 
-      {/* PDF EDL final si admin a partagé */}
-      {attributionId && pdfShareEnabled && (
+      {/* PDF EDL consolidé — disponible dès qu'il y a au moins une preuve */}
+      {attributionId && hasProofs && (
         <div className="card-premium p-5 rounded flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (EDL final)</p>
-            <p className="text-cream/50 text-xs mt-1">Toutes les preuves consolidées dans un PDF unique.</p>
+            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (PDF unique)</p>
+            <p className="text-cream/50 text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
           </div>
           <button
             onClick={handleDownloadEdl}
@@ -307,6 +337,7 @@ function MissionDetail() {
           </button>
         </div>
       )}
+
 
       {/* Vehicule */}
       <Section title="Véhicule" icon={<Car size={16} />}>

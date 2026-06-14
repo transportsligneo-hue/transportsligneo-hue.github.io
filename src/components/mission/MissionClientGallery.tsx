@@ -12,7 +12,9 @@ import { Camera, FileText, PenTool, CarFront, Download, Eye, Loader2, X } from "
 interface Props {
   attributionId: string;
   trajetId?: string | null;
+  onProofsAvailable?: (has: boolean) => void;
 }
+
 
 interface PhotoItem { id: string; vue_type: string; url: string; type: "depart" | "arrivee" }
 interface SignatureItem { kind: string; url: string }
@@ -52,7 +54,7 @@ const docLabel = (t: string) =>
     autre: "Autre",
   }[t] ?? t);
 
-export function MissionClientGallery({ attributionId, trajetId }: Props) {
+export function MissionClientGallery({ attributionId, trajetId, onProofsAvailable }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [signatures, setSignatures] = useState<SignatureItem[]>([]);
   const [docs, setDocs] = useState<DocItem[]>([]);
@@ -134,9 +136,13 @@ export function MissionClientGallery({ attributionId, trajetId }: Props) {
       setDocs(dList);
       setCg(cgState);
       setLoading(false);
+      const hasAnyProofs =
+        allPhotos.length > 0 || sigList.length > 0 || dList.length > 0 || !!cgState.recto || !!cgState.verso;
+      onProofsAvailable?.(hasAnyProofs);
     })();
     return () => { cancelled = true; };
-  }, [attributionId, trajetId]);
+  }, [attributionId, trajetId, onProofsAvailable]);
+
 
   if (loading) {
     return (
@@ -257,17 +263,69 @@ function Grid({ items, onOpen }: { items: PhotoItem[]; onOpen: (url: string) => 
 }
 
 function ImgTile({ url, label, onClick }: { url: string; label: string; onClick: () => void }) {
+  const filename = `${label.replace(/[^a-z0-9]+/gi, "_").toLowerCase() || "piece"}.${
+    url.startsWith("data:image/png") ? "png" : url.startsWith("data:") ? "jpg" : (url.split("?")[0].split(".").pop() || "jpg")
+  }`;
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      let blobUrl = url;
+      let revoke = false;
+      if (url.startsWith("data:")) {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        blobUrl = URL.createObjectURL(blob);
+        revoke = true;
+      } else {
+        // Pour les URLs distantes (signed), passer par un blob garantit le download cross-origin
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const blob = await res.blob();
+            blobUrl = URL.createObjectURL(blob);
+            revoke = true;
+          }
+        } catch {
+          /* fallback à l'URL d'origine */
+        }
+      }
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (revoke) setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative aspect-square overflow-hidden rounded border border-primary/15 bg-navy/40 hover:border-primary/40 transition-colors"
-    >
-      <img src={url} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy via-navy/70 to-transparent p-2">
-        <p className="text-cream text-[10px] uppercase tracking-wider truncate">{label}</p>
-      </div>
-      <Eye size={14} className="absolute top-2 right-2 text-cream/80 opacity-0 group-hover:opacity-100 transition-opacity" />
-    </button>
+    <div className="group relative aspect-square overflow-hidden rounded border border-primary/15 bg-navy/40 hover:border-primary/40 transition-colors">
+      <button
+        type="button"
+        onClick={onClick}
+        className="absolute inset-0 w-full h-full"
+        aria-label={`Agrandir ${label}`}
+      >
+        <img src={url} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy via-navy/70 to-transparent p-2">
+          <p className="text-cream text-[10px] uppercase tracking-wider truncate text-left">{label}</p>
+        </div>
+        <Eye size={14} className="absolute top-2 left-2 text-cream/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </button>
+      <button
+        type="button"
+        onClick={handleDownload}
+        className="absolute top-1.5 right-1.5 z-10 bg-navy/80 hover:bg-primary hover:text-navy text-cream rounded p-1.5 transition-colors"
+        aria-label={`Télécharger ${label}`}
+        title="Télécharger"
+      >
+        <Download size={12} />
+      </button>
+    </div>
   );
 }
+
