@@ -91,21 +91,24 @@ export function useMissionTrackingData(
           .order("created_at", { ascending: true }),
         supabase
           .from("mission_incidents")
-          .select("id, type_incident, description, created_at, photos_urls")
+          .select("id, titre, description, gravite, statut, created_at, photos")
           .eq("attribution_id", attributionId)
           .order("created_at", { ascending: false }),
       ]);
       if (cancelled) return;
       setHistory((hist as EtapeRow[] | null) ?? []);
+      const incRows = (inc as
+        | { id: string; titre: string; description: string; gravite: string; statut: string; created_at: string; photos: unknown }[]
+        | null) ?? [];
       setIncidents(
-        ((inc as
-          | { id: string; type_incident: string | null; description: string | null; created_at: string; photos_urls: string[] | null }[]
-          | null) ?? []).map((i) => ({
+        incRows.map((i) => ({
           id: i.id,
-          type: i.type_incident,
+          titre: i.titre,
           description: i.description,
+          gravite: i.gravite,
+          statut: i.statut,
           created_at: i.created_at,
-          photos: i.photos_urls ?? [],
+          photos: Array.isArray(i.photos) ? (i.photos as string[]) : [],
         })),
       );
       setLoading(false);
@@ -127,13 +130,23 @@ export function useMissionTrackingData(
         (payload) => {
           const r = payload.new as {
             id: string;
-            type_incident: string | null;
-            description: string | null;
+            titre: string;
+            description: string;
+            gravite: string;
+            statut: string;
             created_at: string;
-            photos_urls: string[] | null;
+            photos: unknown;
           };
           setIncidents((prev) => [
-            { id: r.id, type: r.type_incident, description: r.description, created_at: r.created_at, photos: r.photos_urls ?? [] },
+            {
+              id: r.id,
+              titre: r.titre,
+              description: r.description,
+              gravite: r.gravite,
+              statut: r.statut,
+              created_at: r.created_at,
+              photos: Array.isArray(r.photos) ? (r.photos as string[]) : [],
+            },
             ...prev,
           ]);
         },
