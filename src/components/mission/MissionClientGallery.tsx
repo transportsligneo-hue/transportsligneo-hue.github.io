@@ -12,7 +12,9 @@ import { Camera, FileText, PenTool, CarFront, Download, Eye, Loader2, X } from "
 interface Props {
   attributionId: string;
   trajetId?: string | null;
+  onProofsAvailable?: (has: boolean) => void;
 }
+
 
 interface PhotoItem { id: string; vue_type: string; url: string; type: "depart" | "arrivee" }
 interface SignatureItem { kind: string; url: string }
