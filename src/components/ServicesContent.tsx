@@ -117,7 +117,7 @@ export default function ServicesContent() {
           style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%)" }} />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/[0.08] px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
-            Convoyage premium
+            Convoyage
           </span>
           <h1 className="font-heading text-4xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.1]">
             Nos <span className="gold-gradient-text">services</span>
@@ -139,12 +139,12 @@ export default function ServicesContent() {
       <section className="py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <SectionLabel icon={Car} tone="ink">Jockeyage premium</SectionLabel>
+            <SectionLabel icon={Car} tone="ink">Jockeyage</SectionLabel>
             <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-3">
               On prend votre véhicule, on le ramène
             </h2>
             <p className="text-[#0b1026]/65 text-sm lg:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
-              Tarif allégé par rapport au convoyage standard : <strong>-10% sur un aller, -20% sur un aller-retour</strong>.
+              Tarif allégé par rapport au convoyage standard : remise appliquée automatiquement dans l'estimateur.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
