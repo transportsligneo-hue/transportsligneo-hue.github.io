@@ -32,7 +32,9 @@ interface Props {
 const EMPTY_FORM = {
   zone_label: "",
   ville_depart: "",
+  departement_depart: "",
   ville_arrivee: "",
+  departement_arrivee: "",
   prix_aller_simple: "",
   prix_aller_retour: "",
   prix_express: "",
