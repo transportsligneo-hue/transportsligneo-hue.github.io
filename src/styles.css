@@ -64,6 +64,12 @@
   --cream: #f5f1e8;
   --electric-blue: oklch(0.62 0.22 250);
   --electric-blue-soft: oklch(0.72 0.18 250);
+  /* === Couleurs opérationnelles (suivi missions / véhicules) === */
+  --op-electric: #00AEEF;        /* Planifiée / accent métier */
+  --op-violet: #8B5CF6;          /* En cours */
+  --op-green: #22C55E;           /* Terminée / Disponible */
+  --op-red: #EF4444;             /* Annulée / Hors service */
+  --op-orange: #F59E0B;          /* En attente / Maintenance */
 
   /* === Palette claire additive (refonte 70/30) === */
   --surface-white: #ffffff;
