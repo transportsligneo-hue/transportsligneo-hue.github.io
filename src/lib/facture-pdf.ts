@@ -171,7 +171,7 @@ function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("Convoyage automobile premium", pageW / 2, y + 6.5, { align: "center" });
+  doc.text("Convoyage automobile", pageW / 2, y + 6.5, { align: "center" });
   doc.setTextColor(...TEXT);
   doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
 }

@@ -13,7 +13,7 @@ const Email = ({ prenom }: Props) => (
     <Preview>Bienvenue chez Transports Ligneo</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>{prenom ? `Bienvenue ${prenom},` : 'Bienvenue,'}</Heading>
         <Text style={text}>
