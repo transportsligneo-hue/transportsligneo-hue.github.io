@@ -63,7 +63,8 @@ function MissionDetail() {
         // Résolution robuste de l'attribution : priorité au matching par numéro de mission
         // (attributions.numero_mission = missions.numero), puis fallback sur trajet (depart/arrivee/date).
         if (m) {
-          let attr: { id: string; pdf_share_client?: boolean } | null = null;
+          type AttrLite = { id: string; pdf_share_client?: boolean | null };
+          let attr: AttrLite | null = null;
 
           if (m.numero) {
             const { data: byNumero } = await supabase
