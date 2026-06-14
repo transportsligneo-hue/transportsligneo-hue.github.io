@@ -288,6 +288,26 @@ function MissionDetail() {
       {/* Suivi temps réel — apparaît dès qu'une attribution est rattachée */}
       {attributionId && <MissionLiveTracker attributionId={attributionId} />}
 
+      {/* Galerie : photos, signatures, carte grise, documents partagés */}
+      {attributionId && <MissionClientGallery attributionId={attributionId} trajetId={trajetId} />}
+
+      {/* PDF EDL final si admin a partagé */}
+      {attributionId && pdfShareEnabled && (
+        <div className="card-premium p-5 rounded flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-heading text-sm text-cream tracking-wider">Rapport de mission (EDL final)</p>
+            <p className="text-cream/50 text-xs mt-1">Toutes les preuves consolidées dans un PDF unique.</p>
+          </div>
+          <button
+            onClick={handleDownloadEdl}
+            disabled={downloadingEdl}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase hover:bg-gold-light transition-colors rounded disabled:opacity-50"
+          >
+            {downloadingEdl ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} Télécharger PDF
+          </button>
+        </div>
+      )}
+
       {/* Vehicule */}
       <Section title="Véhicule" icon={<Car size={16} />}>
         <Field label="Marque" value={mission.marque} />
