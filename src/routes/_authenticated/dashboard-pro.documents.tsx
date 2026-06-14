@@ -87,33 +87,27 @@ function ProDocuments() {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const authEmail = (user.email ?? "").toLowerCase();
       const { data: prof } = await supabase
         .from("profiles")
-        .select("email, pricing_display_mode")
+        .select("pricing_display_mode")
         .eq("user_id", user.id)
         .maybeSingle();
-      const profEmail = (prof?.email ?? "").toLowerCase();
-      const emails = Array.from(new Set([authEmail, profEmail].filter(Boolean)));
       if (!cancelled) {
         setDisplayMode((prof?.pricing_display_mode as DisplayMode) ?? "ht");
       }
 
-      const orFilter = `user_id.eq.${user.id}${emails.length ? `,${emails.map(e => `email.eq.${e}`).join(",")}` : ""}`;
-
+      // RLS filtre déjà par user_id OU email (case-insensitive via JWT/profiles).
+      // On laisse RLS faire le travail au lieu d'un .or()/.in() côté client
+      // qui rate les enregistrements dont l'email a une casse différente.
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
           .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at")
-          .or(orFilter)
           .order("created_at", { ascending: false }),
-        emails.length > 0
-          ? supabase
-              .from("factures")
-              .select("*")
-              .in("client_email", emails)
-              .order("created_at", { ascending: false })
-          : Promise.resolve({ data: [] as FactureRow[] }),
+        supabase
+          .from("factures")
+          .select("*")
+          .order("created_at", { ascending: false }),
       ]);
 
       if (cancelled) return;
