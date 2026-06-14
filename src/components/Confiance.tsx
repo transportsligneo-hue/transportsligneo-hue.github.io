@@ -5,7 +5,7 @@ import { Shield, Clock, Award } from "lucide-react";
 const reassurance = [
   { icon: Shield, label: "Assurance incluse" },
   { icon: Clock, label: "Disponible 7j/7" },
-  { icon: Award, label: "Service premium" },
+  { icon: Award, label: "Service soigné" },
 ];
 
 const logos = [

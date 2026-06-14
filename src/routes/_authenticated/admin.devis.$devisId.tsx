@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
-  MapPin, Car, FileText, Calendar,
+  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
@@ -26,6 +26,7 @@ function AdminDevisDetailPage() {
   const { devisId } = Route.useParams();
   const navigate = useNavigate();
   const [devis, setDevis] = useState<any | null>(null);
+  const [acceptation, setAcceptation] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -77,6 +78,38 @@ function AdminDevisDetailPage() {
     }
     const enriched = { ...data, _profile: profile };
     setDevis(enriched);
+
+    // Load acceptance signature / signed PDF if available
+    if (enriched.locked_at) {
+      const { data: acc } = await supabase
+        .from("devis_acceptations")
+        .select("*")
+        .eq("devis_id", enriched.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (acc) {
+        const signedUrls: any = {};
+        if (acc.signature_url) {
+          const { data: sig } = await supabase.storage
+            .from("devis-acceptes")
+            .createSignedUrl(acc.signature_url, 300);
+          if (sig?.signedUrl) signedUrls.signature = sig.signedUrl;
+        }
+        if (acc.pdf_url) {
+          const { data: pdf } = await supabase.storage
+            .from("devis-acceptes")
+            .createSignedUrl(acc.pdf_url, 300);
+          if (pdf?.signedUrl) signedUrls.pdf = pdf.signedUrl;
+        }
+        setAcceptation({ ...acc, _signedUrls: signedUrls });
+      } else {
+        setAcceptation(null);
+      }
+    } else {
+      setAcceptation(null);
+    }
+
     setLoading(false);
     try {
       const blob = await generateDevisPdf(buildDevisData(enriched));
@@ -113,9 +146,8 @@ function AdminDevisDetailPage() {
     if (!confirm(`Convertir ${devis.numero} en mission ?`)) return;
     setConverting(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      if (!userId) throw new Error("Non authentifié");
+      const userId = devis.user_id;
+      if (!userId) throw new Error("Ce devis n'est pas lié à un compte client");
       const { data: mission, error } = await supabase.from("missions").insert({
         user_id: userId, nom: devis.nom, prenom: devis.prenom, email: devis.email,
         telephone: devis.telephone, ville_depart: devis.depart, ville_arrivee: devis.arrivee,
@@ -126,7 +158,7 @@ function AdminDevisDetailPage() {
       }).select("id, numero").single();
       if (error) throw error;
       await supabase.from("devis").update({
-        statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString(), converted_by: userId,
+        statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString(), converted_by: (await supabase.auth.getUser()).data.user?.id,
       }).eq("id", devis.id);
       toast.success("Mission créée", { description: mission.numero });
       setDevis({ ...devis, statut: "convertit", mission_id: mission.id });
@@ -221,6 +253,38 @@ function AdminDevisDetailPage() {
             <p className="text-[10px] text-pro-muted uppercase tracking-wider">TTC</p>
             {devis.tarif_label && <p className="text-xs text-pro-text-soft mt-2">{devis.tarif_label}</p>}
           </Card>
+
+          {acceptation && (
+            <Card>
+              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3 flex items-center gap-2">
+                <PenLine size={12} /> Signature client
+              </p>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck size={14} className="text-green-500" />
+                <span className="text-sm text-pro-text">Devis signé électroniquement</span>
+              </div>
+              <div className="space-y-1 text-xs text-pro-text-soft mb-3">
+                <p>Le {new Date(acceptation.accepted_at).toLocaleString("fr-FR")}</p>
+                <p>IP : {acceptation.ip_address || "—"}</p>
+                <p>CGV : {acceptation.cgv_version || "—"}</p>
+              </div>
+              {acceptation._signedUrls?.signature && (
+                <img src={acceptation._signedUrls.signature} alt="Signature client" className="max-h-24 mb-3 border border-pro-border rounded" />
+              )}
+              <div className="flex gap-2">
+                {acceptation._signedUrls?.pdf && (
+                  <Button icon={<Eye size={12} />} className="flex-1" onClick={() => window.open(acceptation._signedUrls.pdf, "_blank")}>
+                    PDF signé
+                  </Button>
+                )}
+                {acceptation._signedUrls?.signature && (
+                  <Button icon={<Download size={12} />} className="flex-1" onClick={() => window.open(acceptation._signedUrls.signature, "_blank")}>
+                    Signature
+                  </Button>
+                )}
+              </div>
+            </Card>
+          )}
 
           {devis.message && (
             <Card>

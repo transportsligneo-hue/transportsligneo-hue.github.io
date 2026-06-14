@@ -79,7 +79,7 @@ function ProPage() {
     <>
       <Navbar />
 
-      {/* === HERO navy premium === */}
+      {/* === HERO navy === */}
       <section
         className="relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32"
         style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
@@ -104,7 +104,7 @@ function ProPage() {
           </h1>
           <p className="mx-auto mt-7 max-w-2xl text-cream/70 text-base lg:text-lg leading-relaxed">
             Concessionnaires, loueurs, assureurs : externalisez vos convoyages
-            avec un acteur premium, fiable et transparent. Tarifs volume,
+            avec un acteur fiable et transparent. Tarifs volume,
             facturation mensuelle, interlocuteur unique.
           </p>
           <div className="electric-divider mx-auto mt-10 w-40" />

@@ -28,7 +28,7 @@ export default function HeroDesktop() {
       <div className="absolute inset-0">
         <img
           src={heroBg}
-          alt="Convoyeur Transports Ligneo photographiant un véhicule premium"
+          alt="Convoyeur Transports Ligneo photographiant un véhicule"
           className="w-full h-full object-cover object-[center_30%] lg:object-[35%_center]"
           width={1920}
           height={1080}
@@ -52,7 +52,7 @@ export default function HeroDesktop() {
             <div className="flex items-center gap-3 mb-6">
               <span className="h-px w-12 bg-gradient-to-r from-[#5fb6ff] to-[#e7c76a]" />
               <span className="text-[#e7c76a] text-[11px] tracking-[0.32em] uppercase font-medium">
-                Convoyage automobile premium
+                Convoyage automobile
               </span>
             </div>
 

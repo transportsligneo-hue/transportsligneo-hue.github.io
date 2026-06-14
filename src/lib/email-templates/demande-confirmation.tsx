@@ -20,7 +20,7 @@ const DemandeConfirmationEmail = ({ prenom, nom, depart, arrivee }: DemandeConfi
     <Preview>Votre demande de convoyage a bien été reçue — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>
           {prenom ? `Merci ${prenom} !` : 'Merci pour votre demande !'}

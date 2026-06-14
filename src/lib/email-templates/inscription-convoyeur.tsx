@@ -21,7 +21,7 @@ const InscriptionConvoyeurEmail = ({ prenom, nom, email, telephone, ville }: Ins
     <Preview>Nouvelle inscription convoyeur — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>Nouvelle inscription convoyeur</Heading>
         <Text style={text}>

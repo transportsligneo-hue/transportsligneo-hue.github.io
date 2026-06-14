@@ -24,7 +24,7 @@ const DevisClientEmail = ({ prenom, numero, depart, arrivee, distance, prix, opt
     <Preview>Votre devis {numero ? `n° ${numero}` : ''} — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
 
         <Heading style={h1}>

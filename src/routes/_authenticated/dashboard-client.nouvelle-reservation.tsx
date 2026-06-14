@@ -38,7 +38,7 @@ function NouvelleReservation() {
       <div>
         <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Devis instantané</h1>
         <p className="text-cream/50 text-sm mt-1">
-          Estimateur premium — vos coordonnées sont déjà renseignées.
+          Estimateur — vos coordonnées sont déjà renseignées.
         </p>
       </div>
       {/* Pas de wrapper card-premium : le DevisGenerator a son propre fond navy

@@ -18,7 +18,7 @@ export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }:
       <Container style={container}>
         <Section style={header}>
           <Heading style={brand}>TRANSPORTS LIGNEO</Heading>
-          <Text style={subtitle}>Convoyage automobile premium</Text>
+          <Text style={subtitle}>Convoyage automobile</Text>
         </Section>
         <Hr style={divider} />
         <Heading style={h1}>Confirmez le changement d'email</Heading>

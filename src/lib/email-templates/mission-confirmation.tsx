@@ -25,7 +25,7 @@ const MissionConfirmationEmail = ({
     <Preview>Réservation confirmée — {numero ?? 'Transports Ligneo'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>
           {prenom ? `Merci ${prenom},` : 'Merci !'} votre réservation est enregistrée

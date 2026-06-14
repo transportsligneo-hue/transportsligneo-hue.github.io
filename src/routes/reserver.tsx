@@ -8,9 +8,9 @@ export const Route = createFileRoute("/reserver")({
   head: () => ({
     meta: [
       { title: "Réserver un convoyage — Transports Ligneo" },
-      { name: "description", content: "Réservez votre convoyage automobile premium en 5 étapes : trajet, options, véhicule, coordonnées, confirmation. Prix transparent, péages inclus." },
+      { name: "description", content: "Réservez votre convoyage automobile en 5 étapes : trajet, options, véhicule, coordonnées, confirmation. Prix transparent, péages inclus." },
       { property: "og:title", content: "Réserver un convoyage — Transports Ligneo" },
-      { property: "og:description", content: "Tunnel de réservation en ligne pour votre convoyage premium." },
+      { property: "og:description", content: "Tunnel de réservation en ligne pour votre convoyage." },
     ],
   }),
 });
@@ -30,7 +30,7 @@ function ReserverPage() {
             </Link>
             <p className="text-xs uppercase tracking-[0.3em] text-primary/80 mb-2">Réservation</p>
             <h1 className="font-heading text-4xl sm:text-5xl gold-gradient-text mb-3">
-              Votre convoyage premium
+              Votre convoyage
             </h1>
             <div className="gold-divider-short mb-4" />
             <p className="text-cream/70 max-w-xl mx-auto">

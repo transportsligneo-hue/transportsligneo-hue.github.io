@@ -111,7 +111,7 @@ export default function MobileHomeScreen() {
               <span className="gold-gradient-text italic">sur toute la ligne.</span>
             </h1>
             <p className="text-cream/75 text-[13px] mt-3 leading-relaxed max-w-[88%]">
-              Convoyage automobile premium. Tarif live en 30&nbsp;secondes.
+              Convoyage automobile. Tarif live en 30&nbsp;secondes.
             </p>
             <span aria-hidden className="block mt-5 h-px w-24 bg-gradient-to-r from-[#5fb6ff] via-[#e7c76a] to-transparent" />
           </div>
@@ -305,7 +305,7 @@ export default function MobileHomeScreen() {
               En 3 étapes
             </p>
             <h2 className="font-heading text-cream text-[20px] tracking-wide mt-1.5">
-              Simple, rapide, premium.
+              Simple, rapide, efficace.
             </h2>
           </div>
           <Link

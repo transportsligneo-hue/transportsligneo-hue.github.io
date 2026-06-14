@@ -19,7 +19,7 @@ const ConvoyeurValidationEmail = ({ prenom, nom }: ConvoyeurValidationProps) => 
     <Preview>Votre compte convoyeur est validé — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile premium" />
+        <LigneoEmailHeader tagline="Convoyage automobile" />
         <Hr style={divider} />
         <Heading style={h1}>Bienvenue {prenom || ''} {nom || ''} 🎉</Heading>
         <Text style={text}>

@@ -30,6 +30,7 @@ import { template as welcomeClient } from './welcome-client'
 import { template as nouvelleDemandeAdmin } from './nouvelle-demande-admin'
 import { template as devisCreeAdmin } from './devis-cree-admin'
 import { template as devisAccepteAdmin } from './devis-accepte-admin'
+import { template as devisPaye } from './devis-paye'
 import { template as missionDemarreeClient } from './mission-demarree-client'
 import { template as missionLivreeClient } from './mission-livree-client'
 
@@ -58,6 +59,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'nouvelle-demande-admin': nouvelleDemandeAdmin,
   'devis-cree-admin': devisCreeAdmin,
   'devis-accepte-admin': devisAccepteAdmin,
+  'devis-paye': devisPaye,
   'mission-demarree-client': missionDemarreeClient,
   'mission-livree-client': missionLivreeClient,
 }
