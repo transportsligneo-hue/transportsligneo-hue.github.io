@@ -329,8 +329,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   useEffect(() => {
     setServerTtc(null);
     if (!departure || !arrival || !pricing) return;
-    const fallback = pricing.finalPrice; // HT local
-    const fallbackTtc = Math.round(fallback * 1.2 * 100) / 100;
+    // Les grilles publiques (forfaits dept + tarifs km) sont DÉJÀ exprimées en TTC client.
+    // On envoie le TTC tel quel au serveur, sans re-majoration de TVA (sinon 79 € → 95 €).
+    const fallbackTtc = pricing.finalPrice;
     let cancelled = false;
     const t = setTimeout(() => {
       resolveServerPrice({ data: {
@@ -345,9 +346,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType);
-  const localHt = pricing?.finalPrice ?? 0;
-  const priceTTC = serverTtc ?? (localHt + Math.round(localHt * 0.2));
-  const priceHT = serverTtc ? Math.round((serverTtc / 1.2) * 100) / 100 : localHt;
+  // priceTTC = source de vérité affichée. priceHT rétro-calculé depuis le TTC.
+  const localTtc = pricing?.finalPrice ?? 0;
+  const priceTTC = serverTtc ?? localTtc;
+  const priceHT = Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
 
 
