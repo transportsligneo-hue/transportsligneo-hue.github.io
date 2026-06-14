@@ -380,6 +380,8 @@ function AdminMissionDetail() {
         .from("trajets")
         .update({
           arrivee_contact_nom: contactNom.trim() || null,
+          arrivee_contact_prenom: contactPrenom.trim() || null,
+          arrivee_contact_societe: contactSociete.trim() || null,
           arrivee_contact_telephone: contactTel.trim() || null,
           arrivee_contact_telephone2: contactTel2.trim() || null,
           arrivee_contact_instructions: contactInstr.trim() || null,
@@ -389,6 +391,8 @@ function AdminMissionDetail() {
       setTrajet({
         ...trajet,
         arrivee_contact_nom: contactNom.trim() || null,
+        arrivee_contact_prenom: contactPrenom.trim() || null,
+        arrivee_contact_societe: contactSociete.trim() || null,
         arrivee_contact_telephone: contactTel.trim() || null,
         arrivee_contact_telephone2: contactTel2.trim() || null,
         arrivee_contact_instructions: contactInstr.trim() || null,
