@@ -254,6 +254,38 @@ function AdminDevisDetailPage() {
             {devis.tarif_label && <p className="text-xs text-pro-text-soft mt-2">{devis.tarif_label}</p>}
           </Card>
 
+          {acceptation && (
+            <Card>
+              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3 flex items-center gap-2">
+                <PenLine size={12} /> Signature client
+              </p>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck size={14} className="text-green-500" />
+                <span className="text-sm text-pro-text">Devis signé électroniquement</span>
+              </div>
+              <div className="space-y-1 text-xs text-pro-text-soft mb-3">
+                <p>Le {new Date(acceptation.accepted_at).toLocaleString("fr-FR")}</p>
+                <p>IP : {acceptation.ip_address || "—"}</p>
+                <p>CGV : {acceptation.cgv_version || "—"}</p>
+              </div>
+              {acceptation._signedUrls?.signature && (
+                <img src={acceptation._signedUrls.signature} alt="Signature client" className="max-h-24 mb-3 border border-pro-border rounded" />
+              )}
+              <div className="flex gap-2">
+                {acceptation._signedUrls?.pdf && (
+                  <Button icon={<Eye size={12} />} className="flex-1" onClick={() => window.open(acceptation._signedUrls.pdf, "_blank")}>
+                    PDF signé
+                  </Button>
+                )}
+                {acceptation._signedUrls?.signature && (
+                  <Button icon={<Download size={12} />} className="flex-1" onClick={() => window.open(acceptation._signedUrls.signature, "_blank")}>
+                    Signature
+                  </Button>
+                )}
+              </div>
+            </Card>
+          )}
+
           {devis.message && (
             <Card>
               <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2">Message client</p>
