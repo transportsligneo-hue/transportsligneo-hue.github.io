@@ -430,8 +430,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="card-premium p-5 rounded">
-      <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+    <div className="mission-surface p-5">
+      <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
         {icon} {title}
       </h2>
       <div className="grid sm:grid-cols-2 gap-4">{children}</div>
@@ -442,10 +442,10 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
 function Field({ label, value, icon }: { label: string; value: string | null | undefined; icon?: React.ReactNode }) {
   return (
     <div>
-      <p className="text-cream/40 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+      <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
         {icon} {label}
       </p>
-      <p className="text-cream/85 text-sm">{value || "—"}</p>
+      <p className="mission-text text-sm font-medium">{value || "—"}</p>
     </div>
   );
 }
