@@ -54,24 +54,46 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const next: Record<string, SlotData> = {};
+
+      // 1) mission_documents : type_document = pv_signature_*
+      const { data: docData } = await supabase
         .from("mission_documents")
         .select("type_document, url_fichier, created_at")
         .eq("attribution_id", attributionId)
         .in("type_document", SLOTS)
         .order("created_at", { ascending: false });
-      if (error || !data || cancelled) {
-        setLoading(false);
-        return;
-      }
-      const next: Record<string, SlotData> = {};
-      for (const row of data) {
-        if (next[row.type_document]) continue; // garde la plus récente
+      for (const row of docData ?? []) {
+        if (next[row.type_document]) continue;
         const { data: signed } = await supabase.storage
           .from("mission-documents")
           .createSignedUrl(row.url_fichier, 3600);
         next[row.type_document] = { signedAt: row.created_at, url: signed?.signedUrl };
       }
+
+      // 2) mission_signatures : signature_data (base64 data URL)
+      // kind : driver_start, client_start, driver_end, client_end
+      const KIND_TO_SLOT: Record<string, SlotKey> = {
+        driver_start: "pv_signature_depart_convoyeur",
+        client_start: "pv_signature_depart_client",
+        driver_end: "pv_signature_arrivee_convoyeur",
+        client_end: "pv_signature_arrivee_client",
+      };
+      const { data: sigData } = await supabase
+        .from("mission_signatures")
+        .select("kind, signature_data, signed_at, created_at")
+        .eq("attribution_id", attributionId);
+      for (const row of (sigData as Array<{ kind: string; signature_data: string | null; signed_at: string | null; created_at: string }> | null) ?? []) {
+        const slotKey = KIND_TO_SLOT[row.kind];
+        if (!slotKey || next[slotKey]) continue;
+        if (row.signature_data) {
+          next[slotKey] = {
+            signedAt: row.signed_at ?? row.created_at,
+            url: row.signature_data,
+          };
+        }
+      }
+
       if (!cancelled) {
         setSlots(next as Record<SlotKey, SlotData>);
         setLoading(false);
