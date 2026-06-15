@@ -37,10 +37,13 @@ interface Mission {
 const STATUS_FILTERS = [
   { value: "all", label: "Toutes" },
   { value: "en_attente", label: "En attente" },
-  { value: "confirmee", label: "Confirmées" },
+  { value: "confirmee", label: "Planifiées" },
   { value: "en_cours", label: "En cours" },
-  { value: "livree", label: "Livrées" },
+  { value: "archives", label: "Archives" },
 ];
+
+// Statuts considérés comme "terminés" pour les archives
+const ARCHIVE_STATUTS = ["livree", "terminee", "validee", "en_attente_validation", "annulee"];
 
 function ClientMissions() {
   const { user } = useAuth();
@@ -61,7 +64,11 @@ function ClientMissions() {
       .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation")
       .or(orFilter)
       .order("created_at", { ascending: false });
-    if (filter !== "all") q = q.eq("statut", filter);
+    if (filter === "archives") {
+      q = q.in("statut", ARCHIVE_STATUTS);
+    } else if (filter !== "all") {
+      q = q.eq("statut", filter);
+    }
 
     // Demandes non encore converties (devis + demandes_convoyage sans mission liée)
     const devisPending = supabase
