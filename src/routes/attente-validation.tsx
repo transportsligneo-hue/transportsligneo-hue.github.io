@@ -129,6 +129,8 @@ function AttenteValidation() {
 
   const refuse = convoyeur?.statut === "refuse";
   const suspendu = convoyeur?.statut === "suspendu";
+  // Cas particulier : pas de fiche convoyeur trouvée (email non encore confirmé, ou inscription partielle)
+  const noConvoyeur = !loading && !convoyeur;
 
   return (
     <div className="min-h-screen section-bg flex items-center justify-center px-4 py-10">
@@ -143,6 +145,8 @@ function AttenteValidation() {
                   ? "bg-red-500/10 border-red-500/30"
                   : suspendu
                   ? "bg-amber-500/10 border-amber-500/30"
+                  : noConvoyeur
+                  ? "bg-blue-500/10 border-blue-500/30"
                   : "bg-primary/10 border-primary/30"
               }`}
             >
@@ -150,6 +154,8 @@ function AttenteValidation() {
                 <AlertCircle size={40} className="text-red-400" />
               ) : suspendu ? (
                 <AlertCircle size={40} className="text-amber-400" />
+              ) : noConvoyeur ? (
+                <Mail size={40} className="text-blue-400" />
               ) : (
                 <Clock size={40} className="text-primary" />
               )}
@@ -160,15 +166,24 @@ function AttenteValidation() {
                 ? "Compte refusé"
                 : suspendu
                 ? "Compte suspendu"
+                : noConvoyeur
+                ? "Vérifiez votre email"
                 : "Compte en cours de validation"}
             </h1>
 
             {convoyeur?.prenom && !refuse && !suspendu && (
               <p className="text-cream/70 text-sm">
-                Bonjour {convoyeur.prenom}, votre dossier est en cours d'examen.
+                Bonjour {convoyeur.prenom}, votre dossier est en cours d'examen par notre équipe.
+              </p>
+            )}
+            {noConvoyeur && (
+              <p className="text-cream/70 text-sm">
+                Confirmez votre adresse email via le lien que nous vous avons envoyé pour finaliser votre inscription.
               </p>
             )}
           </div>
+
+
 
           {loading ? (
             <div className="flex justify-center py-6">

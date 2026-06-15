@@ -51,11 +51,17 @@ export function missionStatusKind(statut: string): StatusKind {
     case "confirmee":
     case "planifiee":
     case "attribuee":
+    case "propose":
+    case "accepte":
     case "acceptee": return "electric";              // Bleu électrique
     case "en_cours": return "violet";                // Violet
+    case "en_attente_validation": return "info";    // Bleu (livré, en attente validation)
     case "livree":
+    case "validee":
+    case "termine":
     case "terminee": return "success";               // Vert
     case "annulee":
+    case "annule":
     case "refuse":
     case "refusee": return "danger";                 // Rouge
     case "urgente": return "danger";
@@ -69,15 +75,21 @@ export function missionStatusLabel(statut: string): string {
     confirmee: "Planifiée",
     planifiee: "Planifiée",
     attribuee: "Planifiée",
-    acceptee: "Planifiée",
+    propose: "Convoyeur attribué",
+    accepte: "Mission acceptée",
+    acceptee: "Mission acceptée",
     en_cours: "En cours",
+    en_attente_validation: "Livré — validation en cours",
     livree: "Livrée",
+    validee: "Validée",
+    termine: "Terminée",
     terminee: "Terminée",
     annulee: "Annulée",
+    annule: "Annulée",
     refuse: "Refusée",
     refusee: "Refusée",
     urgente: "Urgente",
-  }[statut] ?? statut;
+  }[statut] ?? statut.replace(/_/g, " ");
 }
 
 /** Mapping véhicule (Disponible / En mission / Maintenance / Hors service) */

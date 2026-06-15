@@ -13,7 +13,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, AlertCircle, ShieldCheck, Loader2 } from "lucide-react";
+import { Check, AlertCircle, ShieldCheck, Loader2, PenTool, Download } from "lucide-react";
 
 interface Props {
   attributionId: string;
@@ -54,24 +54,46 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const next: Record<string, SlotData> = {};
+
+      // 1) mission_documents : type_document = pv_signature_*
+      const { data: docData } = await supabase
         .from("mission_documents")
         .select("type_document, url_fichier, created_at")
         .eq("attribution_id", attributionId)
         .in("type_document", SLOTS)
         .order("created_at", { ascending: false });
-      if (error || !data || cancelled) {
-        setLoading(false);
-        return;
-      }
-      const next: Record<string, SlotData> = {};
-      for (const row of data) {
-        if (next[row.type_document]) continue; // garde la plus récente
+      for (const row of docData ?? []) {
+        if (next[row.type_document]) continue;
         const { data: signed } = await supabase.storage
           .from("mission-documents")
           .createSignedUrl(row.url_fichier, 3600);
         next[row.type_document] = { signedAt: row.created_at, url: signed?.signedUrl };
       }
+
+      // 2) mission_signatures : signature_data (base64 data URL)
+      // kind : driver_start, client_start, driver_end, client_end
+      const KIND_TO_SLOT: Record<string, SlotKey> = {
+        driver_start: "pv_signature_depart_convoyeur",
+        client_start: "pv_signature_depart_client",
+        driver_end: "pv_signature_arrivee_convoyeur",
+        client_end: "pv_signature_arrivee_client",
+      };
+      const { data: sigData } = await supabase
+        .from("mission_signatures")
+        .select("kind, signature_data, signed_at, created_at")
+        .eq("attribution_id", attributionId);
+      for (const row of (sigData as Array<{ kind: string; signature_data: string | null; signed_at: string | null; created_at: string }> | null) ?? []) {
+        const slotKey = KIND_TO_SLOT[row.kind];
+        if (!slotKey || next[slotKey]) continue;
+        if (row.signature_data) {
+          next[slotKey] = {
+            signedAt: row.signed_at ?? row.created_at,
+            url: row.signature_data,
+          };
+        }
+      }
+
       if (!cancelled) {
         setSlots(next as Record<SlotKey, SlotData>);
         setLoading(false);
@@ -108,10 +130,13 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Traçabilité signatures</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <PenTool size={16} className="text-amber-500" />
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Signatures & Traçabilité</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+          </div>
         </div>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
           allComplete ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
@@ -149,8 +174,16 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
               {ok ? (
                 <>
                   {slot.url && (
-                    <div className="rounded-lg bg-white border border-slate-200 p-2 mb-2">
-                      <img src={slot.url} alt={`Signature ${meta.role} ${meta.phase}`} className="h-16 w-full object-contain" />
+                    <div className="relative rounded-lg bg-white border border-slate-200 p-2 mb-2 group">
+                      <img src={slot.url} alt={`Signature ${meta.role} ${meta.phase}`} className="h-20 w-full object-contain" />
+                      <a
+                        href={slot.url}
+                        download={`signature-${meta.phase}-${meta.role}.png`}
+                        className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition bg-slate-900/90 text-white p-1 rounded"
+                        aria-label="Télécharger la signature"
+                      >
+                        <Download size={11} />
+                      </a>
                     </div>
                   )}
                   <p className="text-[11px] text-slate-500">

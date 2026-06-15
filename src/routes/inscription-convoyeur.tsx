@@ -30,6 +30,7 @@ function InscriptionConvoyeur() {
   const [rcProFile, setRcProFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
@@ -75,7 +76,7 @@ function InscriptionConvoyeur() {
         email: form.email,
         password: form.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/auth/email-confirmation`,
           data: {
             role: "convoyeur",
             nom: form.nom,
@@ -207,8 +208,16 @@ function InscriptionConvoyeur() {
         entityId: userId,
       });
 
-      await supabase.auth.signOut();
-      navigate({ to: "/attente-validation" });
+      // Si on a une session active (auto-confirm), on amène le convoyeur vers son espace d'attente.
+      // Sinon, on affiche un écran "vérifiez votre email" — l'inscription reste valide tant que l'email
+      // n'est pas confirmé : la création du compte est complète côté admin (notification envoyée).
+      if (authData.session) {
+        await supabase.auth.signOut();
+        navigate({ to: "/attente-validation" });
+      } else {
+        setSubmittedEmail(form.email);
+        setLoading(false);
+      }
     } catch (err) {
       console.error("[inscription-convoyeur] unexpected error:", err);
       setError(err instanceof Error ? `Erreur : ${err.message}` : "Une erreur inattendue est survenue.");
@@ -218,9 +227,37 @@ function InscriptionConvoyeur() {
 
   const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
+  if (submittedEmail) {
+    return (
+      <div className="min-h-screen section-bg flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center space-y-5 card-premium p-8 rounded">
+          <div className="gold-divider-short mx-auto" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+            <Mail className="text-primary" size={28} />
+          </div>
+          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">
+            Vérifiez votre email
+          </h1>
+          <p className="text-cream/70 text-sm leading-relaxed">
+            Nous venons d'envoyer un lien de confirmation à <span className="text-primary font-medium">{submittedEmail}</span>.
+            Cliquez dessus pour activer votre compte. Une fois validé, vous accéderez à votre espace d'attente de validation des documents.
+          </p>
+          <div className="text-cream/40 text-xs space-y-1 pt-2 border-t border-primary/10">
+            <p>Pas reçu ? Vérifiez vos spams.</p>
+            <p>Notre équipe traite votre dossier sous 24-48h ouvrées.</p>
+          </div>
+          <Link to="/login" className="inline-block text-primary text-sm hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
+            Aller à la connexion →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen section-bg flex items-center justify-center px-4 py-12">
       <div className="max-w-lg w-full">
+
         <div className="text-center mb-8">
           <div className="gold-divider-short mb-4" />
           <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">

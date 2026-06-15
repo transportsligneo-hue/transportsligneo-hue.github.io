@@ -14,9 +14,11 @@ const STATUT_LABEL: Record<string, string> = {
   propose: "Convoyeur attribué",
   accepte: "Mission acceptée",
   en_cours: "En route",
-  en_attente_validation: "En attente de validation",
-  validee: "Validée",
+  en_attente_validation: "Livré — validation en cours",
+  validee: "Mission validée",
   termine: "Mission terminée",
+  terminee: "Mission terminée",
+  livree: "Véhicule livré",
   annule: "Annulée",
 };
 
@@ -119,11 +121,11 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
     }
   }, [rt.lastGps]);
 
-  const statutLabel = rt.statut ? STATUT_LABEL[rt.statut] ?? rt.statut : "En attente";
+  const isFinished = rt.statut === "termine" || rt.statut === "terminee" || rt.statut === "validee" || rt.statut === "livree" || rt.statut === "en_attente_validation";
+  const statutLabel = rt.statut ? STATUT_LABEL[rt.statut] ?? rt.statut.replace(/_/g, " ") : "En attente";
   const statutDot = rt.statut ? STATUT_DOT[rt.statut] ?? "bg-slate-400" : "bg-slate-400";
-  const etapeLabel = rt.etape_courante ? ETAPE_LABELS[rt.etape_courante] ?? rt.etape_courante : null;
+  const etapeLabel = rt.etape_courante && !isFinished ? ETAPE_LABELS[rt.etape_courante] ?? rt.etape_courante.replace(/_/g, " ") : null;
   const currentIdx = rt.etape_courante ? ETAPES_ORDER.findIndex((e) => e.key === rt.etape_courante) : -1;
-  const isFinished = rt.statut === "termine" || rt.statut === "validee";
 
   const eta = destination && allPoints.length > 0 && !isFinished ? computeEta(allPoints, destination) : null;
 
@@ -137,16 +139,26 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       : `${eta.distanceKm.toFixed(1)} km`
     : null;
 
+  // Confidentialité : après mission terminée, on n'expose pas le tracé détaillé.
+  // On décime les points en ~12 jalons pour garder la forme globale du parcours.
+  const displayedPoints = (() => {
+    if (!isFinished || allPoints.length <= 12) return allPoints;
+    const step = Math.ceil(allPoints.length / 12);
+    const out = allPoints.filter((_, i) => i % step === 0);
+    if (out[out.length - 1] !== allPoints[allPoints.length - 1]) out.push(allPoints[allPoints.length - 1]);
+    return out;
+  })();
+
   return (
     <div className="space-y-4">
       {/* Carte immersive + carte flottante Uber-style */}
       <div className="relative">
         {showMap && (
           <GpsMapView
-            points={allPoints}
+            points={displayedPoints}
             origin={origin}
             destination={destination}
-            className="h-[480px] sm:h-[560px]"
+            className="h-[320px] sm:h-[480px]"
           />
         )}
 
