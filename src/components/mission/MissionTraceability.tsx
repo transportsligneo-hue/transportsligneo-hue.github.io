@@ -13,7 +13,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, AlertCircle, ShieldCheck, Loader2 } from "lucide-react";
+import { Check, AlertCircle, ShieldCheck, Loader2, PenTool, Download } from "lucide-react";
 
 interface Props {
   attributionId: string;
@@ -108,10 +108,13 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Traçabilité signatures</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <PenTool size={16} className="text-amber-500" />
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Signatures & Traçabilité</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+          </div>
         </div>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
           allComplete ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
@@ -149,8 +152,16 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
               {ok ? (
                 <>
                   {slot.url && (
-                    <div className="rounded-lg bg-white border border-slate-200 p-2 mb-2">
-                      <img src={slot.url} alt={`Signature ${meta.role} ${meta.phase}`} className="h-16 w-full object-contain" />
+                    <div className="relative rounded-lg bg-white border border-slate-200 p-2 mb-2 group">
+                      <img src={slot.url} alt={`Signature ${meta.role} ${meta.phase}`} className="h-20 w-full object-contain" />
+                      <a
+                        href={slot.url}
+                        download={`signature-${meta.phase}-${meta.role}.png`}
+                        className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition bg-slate-900/90 text-white p-1 rounded"
+                        aria-label="Télécharger la signature"
+                      >
+                        <Download size={11} />
+                      </a>
                     </div>
                   )}
                   <p className="text-[11px] text-slate-500">
