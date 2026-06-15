@@ -75,7 +75,7 @@ function InscriptionConvoyeur() {
         email: form.email,
         password: form.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/auth/email-confirmation`,
           data: {
             role: "convoyeur",
             nom: form.nom,
