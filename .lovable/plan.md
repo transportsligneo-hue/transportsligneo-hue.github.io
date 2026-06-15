@@ -1,76 +1,67 @@
+## Lot suivant — corrections critiques & finitions GPS / Missions / Auth
 
-# Refonte module GPS — style Uber/Bolt
+### 1. GPS — overlay & z-index (bug visuel capture 1)
+- `GpsMapView` / `MissionLiveTracker` : la carte Leaflet déborde sur les blocs suivants (badge, prix, contacts).
+  - Ajouter `position: relative`, `z-index` bas (`z-0`) au conteneur carte, `isolation: isolate` sur la section parente.
+  - Forcer une hauteur fixe (`h-[280px]` mobile / `h-[420px]` desktop) avec `overflow: hidden` et `border-radius`.
+  - Bottom nav mobile : monter son `z-index` (`z-50`) pour qu'il passe au-dessus de la carte.
 
-## Périmètre strict
+### 2. GPS — confidentialité après mission terminée
+- Quand `statut ∈ {terminee, en_attente_validation, livree}` :
+  - **Client & Driver dashboards** : afficher uniquement une **polyline simplifiée** (start → end + tracé global lissé via `simplify-js` ou décimation 1 pt/2 km), sans markers intermédiaires, sans timestamps, sans bouton "centrer sur position live", sans réactualisation realtime.
+  - **Admin dashboard** : conserver le tracé complet, markers détaillés, timeline horodatée (vue actuelle).
+- Implémentation : prop `mode: "live" | "summary" | "admin"` sur `GpsMapView` + `MissionLiveTracker`.
 
-- Uniquement **visuel + UX** du suivi GPS.
-- **Aucune modification** : tables Supabase, hooks `useMissionRealtime` / `useGpsTracking`, `mission_locations`, statuts métier, workflow convoyeur, calculs ETA (`computeEta`), géocodage.
-- Conservation totale du flux temps réel actuel (Realtime Supabase).
-- Affecté : Dashboard Admin (détail mission) + Dashboard Client (Particulier + Pro + Flotte, vue `ClientMissionDetailView`).
-- **Non affecté** : app convoyeur, espace public, autres pages.
+### 3. GPS dans Dashboard Admin
+- Ajouter un onglet/carte **"Suivi GPS temps réel"** sur `admin.missions.$missionId.tsx` avec `GpsMapView mode="admin"` (réutilisation du composant existant, pas de nouvelle logique métier).
+- Ajouter une vue globale `admin.trajets.tsx` (déjà existante) : carte avec tous les convoyeurs actifs en live (markers cliquables → mission).
 
-## Fichiers touchés
+### 4. Statuts qui ne se mettent pas à jour ("Trajet en attente" sur mission finie)
+- Audit du badge de statut dans :
+  - `dashboard-client.missions.index.tsx`
+  - `dashboard-pro.missions.index.tsx`
+  - `convoyeur.missions.tsx` / `convoyeur.historique.tsx`
+  - `admin.missions.*`
+- Corriger la source : utiliser `attributions.statut` + `attributions.etape_courante` via `useMissionRealtime` (déjà existant) au lieu de `missions.statut` figé.
+- Mapping statut → label centralisé (`adminMissionStatus.ts` étendu) pour cohérence dashboard partout.
 
-| Fichier | Action |
-|---|---|
-| `src/components/GpsMapView.tsx` | Refonte visuelle (tuiles claires premium, marqueurs modernes, voiture animée, polyline dégradée bleu/violet) |
-| `src/components/mission/MissionLiveTracker.tsx` | Refonte layout : grande carte immersive + carte flottante glassmorphism ETA |
-| `src/components/mission/ClientMissionDetailView.tsx` | Réorganisation : carte plein écran en tête + panneau infos client (chauffeur, véhicule, contact) + coordonnées d'arrivée visibles |
-| `src/components/mission/UberStyleTrackingCard.tsx` | **Nouveau** — carte flottante glass (statut, ETA, distance, chauffeur, véhicule, bouton contact) |
-| `src/components/mission/AnimatedVehicleMarker.tsx` | **Nouveau** — logique d'interpolation + rotation du marqueur voiture |
-| `src/components/mission/MissionEventTimeline.tsx` | **Nouveau** — timeline événements/notifications côté Admin |
-| `src/routes/_authenticated/admin.missions.$missionId.tsx` | Intégration nouvelle disposition (carte XL gauche + timeline droite) |
-| `src/styles.css` | Tokens GPS premium (`--gps-route-start`, `--gps-route-end`, `--gps-glass-bg`, gradient bleu→violet, shadows) |
+### 5. Archivage missions terminées
+- Section **"Archives"** dédiée (onglet ou filtre `?archived=1`) dans :
+  - Admin (`admin.missions` + lien sidebar)
+  - Client (`dashboard-client.missions`)
+  - Pro / Flotte (`dashboard-pro.missions`, `flotte.missions`)
+  - Convoyeur (`convoyeur.historique` — déjà existe, à harmoniser)
+- Filtres : par date (range picker), client, convoyeur, ville départ/arrivée, statut final (livrée / annulée / litige), recherche texte (immat, n° mission).
+- Tri : date desc par défaut, prix, durée.
+- Tableau dense + export CSV (admin uniquement).
 
-## Détails techniques
+### 6. Fusion "Signatures" + "Traçabilité signatures" (capture 2)
+- Actuellement 2 blocs distincts dans `ClientMissionDetailView` (galerie 4 images + panneau traçabilité).
+- Fusionner en un seul bloc **"Signatures & Traçabilité"** :
+  - 2 colonnes par étape (Départ / Arrivée), chaque étape = Convoyeur + Client côte à côte
+  - Chaque entrée : vignette image signature + nom signataire + horodatage + statut (✓ signé / ⏳ en attente)
+  - Bouton download discret par signature
+  - Badge global "Complet / Incomplet" en haut
 
-### Carte (GpsMapView)
-- Tuiles : passage à **CartoDB Positron** (style clair épuré, type Uber) — gratuit, OSM-compatible, pas de clé.
-- Polyline : remplacement du gold actuel par dégradé bleu `#2563eb` → violet `#7c3aed`, épaisseur 5, opacité 0.9, halo blanc derrière (effet « stroke ») pour lisibilité.
-- Tracé projeté (position → destination) : pointillé violet `#a78bfa`.
-- Marqueurs : départ vert pulsant, arrivée pin rouge moderne (SVG), voiture = SVG top-down dans `divIcon` qui tourne via `transform: rotate(bearing)`.
-- Recentrage : auto-fit aux bounds avec padding ; bouton flottant « recenter » (icône `Navigation`).
-- Zoom : auto selon distance restante (proche → zoom 15, loin → zoom 11).
+### 7. Bug confirmation email inscription (client + convoyeur)
+- Symptôme : pas de message de confirmation, compte affiché "suspendu".
+- Audit `inscription-client.tsx` + `inscription-convoyeur.tsx` + trigger `handle_new_user` + page `auth.email-confirmation.tsx` + flow `/login`.
+- Vérifier :
+  - Template `signup` actif et bien enregistré dans `registry.ts` (déjà refactor récent — re-vérifier après scaffold)
+  - Redirect URL `emailRedirectTo` cohérent avec route existante (`/auth/email-confirmation` ou `/login`)
+  - Status profil créé par trigger ≠ `suspendu` par défaut (probable bug : `statut_compte = 'pending'` interprété "suspendu" côté UI)
+  - Message UI clair après inscription : "Vérifiez votre email pour activer votre compte"
+  - Page de confirmation qui consomme le `token_hash` et redirige proprement
+- Fix attendu : corriger le label du badge `suspendu` → `en attente de vérification email` quand `email_confirmed_at IS NULL`, et garantir l'envoi effectif du mail (route `/lovable/email/auth/webhook` opérationnelle).
 
-### Voiture animée (AnimatedVehicleMarker)
-- Interpolation linéaire entre dernière position connue et nouveau point GPS sur 1.2s via `requestAnimationFrame`.
-- Bearing calculé à partir des 2 derniers points (atan2) → rotation appliquée à l'icône.
-- Aucun changement aux données : on consomme `mission_locations` comme aujourd'hui.
+### Détails techniques
+- Aucun changement de logique métier (pricing, paiements, RLS existante intacte).
+- Réutilise hooks existants : `useMissionRealtime`, `useGpsTracking`, `useMissionGates`.
+- Ajout d'un util `src/lib/mission-display-status.ts` pour le mapping unifié label/couleur.
+- Pas de nouvelle table — éventuellement une vue `v_missions_archive` si besoin de perf sur les filtres.
 
-### Carte flottante (UberStyleTrackingCard)
-- Position : `absolute bottom-4 left-4 right-4` sur mobile, `bottom-6 left-6 max-w-md` desktop.
-- Style : `backdrop-blur-xl bg-white/85 border border-white/60 rounded-3xl shadow-2xl` ; dark mode (espace Particulier) : `bg-slate-900/80 text-white`.
-- Contenu : pastille statut animée, **ETA en gros (display font)**, distance restante, séparateur, ligne chauffeur (avatar + nom + véhicule + plaque), bouton « Contacter » (tel: + sms:).
-- Apparition : `animate-in slide-in-from-bottom-4 fade-in duration-500`.
-
-### Dashboard Client — coordonnées d'arrivée
-- Ajout d'un bloc « Coordonnées d'arrivée » dans `ClientMissionDetailView` affichant nom contact arrivée + téléphone arrivée (champs déjà présents dans `demandes_convoyage`/`trajets` : `contact_arrivee_nom`, `contact_arrivee_telephone`). Lecture seule, pas de migration.
-
-### Dashboard Admin — colonne droite
-- Layout `lg:grid-cols-[1fr_360px]` : carte XL à gauche, panneau droite avec :
-  - `MissionEventTimeline` (réutilise `mission_etape_history` déjà chargée).
-  - Dernière position GPS (lat/lng + horodatage + précision).
-  - Liste notifications liées (filtre `admin_notifications` par `mission_id` — lecture seule, aucune écriture).
-
-### Animations & micro-interactions
-- Pulsation marqueur position actuelle (CSS keyframes, déjà en place — conservée).
-- Apparition progressive panneaux : `animate-in fade-in slide-in-from-right` via tailwindcss-animate (déjà installé).
-- Hover boutons : `hover:scale-[1.02] transition`.
-- **Aucune** dépendance framer-motion (interdit par mémoire projet).
-
-### Palette
-- Tokens ajoutés à `src/styles.css` :
-  - `--gps-primary: #2563eb` (bleu profond)
-  - `--gps-secondary: #7c3aed` (violet premium)
-  - `--gps-start: #10b981` (vert départ)
-  - `--gps-end: #ef4444` (rouge arrivée)
-  - `--gps-glass: rgba(255,255,255,0.85)`
-  - `--gps-glass-dark: rgba(15,23,42,0.8)`
-  - Gradient `--gps-route: linear-gradient(90deg, var(--gps-primary), var(--gps-secondary))`
-
-## Non-objectifs
-
-- Pas de nouvelle dépendance (Mapbox, Google Maps JS, framer-motion).
-- Pas de migration SQL.
-- Pas de changement aux edge functions ni au tracking convoyeur.
-- L'identité navy/doré globale est préservée ; le bleu/violet reste **circonscrit au module GPS** comme charte « métier opérationnel » (cohérent avec la mémoire « bleu électrique modules métier »).
+### Ordre d'exécution proposé
+1. **Bug bloquant** : statuts "trajet en attente" partout (5) + statut "suspendu" inscription (7) — quick wins prioritaires
+2. **Visuel critique** : overlay GPS (1) + fusion signatures (6)
+3. **Confidentialité** : mode summary GPS post-mission (2)
+4. **Admin** : GPS admin (3) + archivage (5)
