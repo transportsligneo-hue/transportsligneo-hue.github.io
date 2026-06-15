@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Mail, Phone, Lock, CheckCircle } from "lucide-react";
+import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { notifyAdmin } from "@/lib/admin-notifications";
@@ -55,7 +55,7 @@ function InscriptionClient() {
         email: form.email,
         password: form.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/auth/email-confirmation`,
           data: {
             role: "client",
             type_client: "particulier",
@@ -121,17 +121,24 @@ function InscriptionClient() {
   if (success) {
     return (
       <div className="min-h-screen section-bg flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-6">
+        <div className="max-w-md w-full text-center space-y-5 card-premium p-8 rounded">
           <div className="gold-divider-short mx-auto" />
-          <CheckCircle className="mx-auto text-primary" size={48} />
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+            <Mail className="text-primary" size={28} />
+          </div>
           <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">
-            Compte créé !
+            Vérifiez votre email
           </h1>
-          <p className="text-cream/70 text-sm">
-            Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous.
+          <p className="text-cream/70 text-sm leading-relaxed">
+            Nous venons d'envoyer un lien de confirmation à <span className="text-primary font-medium">{form.email}</span>.
+            Cliquez dessus pour activer votre compte, puis revenez vous connecter.
           </p>
+          <div className="text-cream/40 text-xs space-y-1 pt-2 border-t border-primary/10">
+            <p>Pas reçu ? Vérifiez vos spams.</p>
+            <p>Le lien expire dans 24 heures.</p>
+          </div>
           <Link to="/login" className="inline-block text-primary text-sm hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
-            Se connecter →
+            Aller à la connexion →
           </Link>
         </div>
       </div>
