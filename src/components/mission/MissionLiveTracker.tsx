@@ -139,13 +139,23 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       : `${eta.distanceKm.toFixed(1)} km`
     : null;
 
+  // Confidentialité : après mission terminée, on n'expose pas le tracé détaillé.
+  // On décime les points en ~12 jalons pour garder la forme globale du parcours.
+  const displayedPoints = (() => {
+    if (!isFinished || allPoints.length <= 12) return allPoints;
+    const step = Math.ceil(allPoints.length / 12);
+    const out = allPoints.filter((_, i) => i % step === 0);
+    if (out[out.length - 1] !== allPoints[allPoints.length - 1]) out.push(allPoints[allPoints.length - 1]);
+    return out;
+  })();
+
   return (
     <div className="space-y-4">
       {/* Carte immersive + carte flottante Uber-style */}
       <div className="relative">
         {showMap && (
           <GpsMapView
-            points={allPoints}
+            points={displayedPoints}
             origin={origin}
             destination={destination}
             className="h-[320px] sm:h-[480px]"
