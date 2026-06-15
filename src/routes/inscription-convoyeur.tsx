@@ -30,6 +30,7 @@ function InscriptionConvoyeur() {
   const [rcProFile, setRcProFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
@@ -207,8 +208,16 @@ function InscriptionConvoyeur() {
         entityId: userId,
       });
 
-      await supabase.auth.signOut();
-      navigate({ to: "/attente-validation" });
+      // Si on a une session active (auto-confirm), on amène le convoyeur vers son espace d'attente.
+      // Sinon, on affiche un écran "vérifiez votre email" — l'inscription reste valide tant que l'email
+      // n'est pas confirmé : la création du compte est complète côté admin (notification envoyée).
+      if (authData.session) {
+        await supabase.auth.signOut();
+        navigate({ to: "/attente-validation" });
+      } else {
+        setSubmittedEmail(form.email);
+        setLoading(false);
+      }
     } catch (err) {
       console.error("[inscription-convoyeur] unexpected error:", err);
       setError(err instanceof Error ? `Erreur : ${err.message}` : "Une erreur inattendue est survenue.");
