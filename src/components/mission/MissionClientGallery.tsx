@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, FileText, PenTool, CarFront, Download, Eye, Loader2, X } from "lucide-react";
+import { Camera, FileText, CarFront, Download, Eye, Loader2, X } from "lucide-react";
 
 interface Props {
   attributionId: string;
@@ -189,15 +189,8 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
         </Section>
       )}
 
-      {signatures.length > 0 && (
-        <Section title="Signatures" icon={<PenTool size={16} />}>
-          <div className="grid grid-cols-2 gap-3">
-            {signatures.map((s, i) => (
-              <ImgTile key={i} url={s.url} label={s.kind.replace(/_/g, " ")} onClick={() => setLightbox(s.url)} />
-            ))}
-          </div>
-        </Section>
-      )}
+      {/* Signatures : section gérée par MissionTraceability — pas de doublon ici */}
+
 
       {docs.length > 0 && (
         <Section title={`Documents (${docs.length})`} icon={<FileText size={16} />}>
