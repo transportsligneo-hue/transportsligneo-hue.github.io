@@ -127,7 +127,10 @@ export function GpsMapView({ points, className = "", origin, destination }: GpsM
       style.textContent = `
         @keyframes ligneo-ping{0%{transform:scale(1);opacity:0.5}80%{transform:scale(2);opacity:0}100%{transform:scale(2);opacity:0}}
         .ligneo-car-marker{will-change:transform}
-        .leaflet-container{font-family:inherit;background:#f3f6fb}
+        .leaflet-container{font-family:inherit;background:#f3f6fb;z-index:0 !important}
+        .leaflet-pane,.leaflet-top,.leaflet-bottom,.leaflet-control{z-index:1 !important}
+        .leaflet-control-zoom{z-index:2 !important}
+        .leaflet-control-attribution{font-size:9px !important;padding:1px 4px !important;background:rgba(255,255,255,0.85) !important;border-radius:3px 0 0 0;z-index:2 !important}
         .leaflet-control-zoom a{border:none !important;background:rgba(255,255,255,0.95) !important;color:#0f172a !important;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(15,23,42,0.12)}
         .leaflet-control-zoom a:hover{background:#fff !important}
       `;
@@ -224,7 +227,10 @@ export function GpsMapView({ points, className = "", origin, destination }: GpsM
   }, [points, origin, destination]);
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-900/5 ${className}`} style={{ minHeight: 300 }}>
+    <div
+      className={`relative rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-900/5 ${className}`}
+      style={{ minHeight: 300, isolation: "isolate", zIndex: 0 }}
+    >
       <div ref={mapRef} className="absolute inset-0" />
     </div>
   );
