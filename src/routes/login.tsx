@@ -222,11 +222,22 @@ function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="card-premium p-7 rounded-t-none rounded-b space-y-5 border-t-0">
-          {error && (
+          {error === "EMAIL_NOT_CONFIRMED" ? (
+            <div className="p-3 rounded bg-primary/10 border border-primary/30 text-cream text-sm space-y-2">
+              <p>Votre adresse email n'a pas encore été confirmée.</p>
+              <button type="button" onClick={handleResendConfirmation} className="text-primary text-xs uppercase tracking-[0.15em] hover:text-gold-light">
+                → Renvoyer l'email de confirmation
+              </button>
+            </div>
+          ) : error === "RESENT" ? (
+            <div className="p-3 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm">
+              Email de confirmation renvoyé. Vérifiez votre boîte (et vos spams).
+            </div>
+          ) : error ? (
             <div className="p-3 rounded bg-destructive/15 border border-destructive/30 text-destructive text-sm">
               {error}
             </div>
-          )}
+          ) : null}
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Email</label>
