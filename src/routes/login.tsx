@@ -146,9 +146,31 @@ function LoginPage() {
     } catch (err: unknown) {
       justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
-      setError(msg.includes("Invalid") ? "Email ou mot de passe incorrect." : msg);
+      if (msg.toLowerCase().includes("email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+        setError("EMAIL_NOT_CONFIRMED");
+      } else {
+        setError(msg.includes("Invalid") ? "Email ou mot de passe incorrect." : msg);
+      }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer ».");
+      return;
+    }
+    try {
+      const { error: rErr } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/auth/email-confirmation` },
+      });
+      if (rErr) throw rErr;
+      setError("RESENT");
+    } catch (e: any) {
+      setError(e?.message || "Impossible de renvoyer l'email.");
     }
   };
 
