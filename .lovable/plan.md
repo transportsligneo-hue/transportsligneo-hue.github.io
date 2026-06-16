@@ -1,67 +1,128 @@
-## Lot suivant — corrections critiques & finitions GPS / Missions / Auth
 
-### 1. GPS — overlay & z-index (bug visuel capture 1)
-- `GpsMapView` / `MissionLiveTracker` : la carte Leaflet déborde sur les blocs suivants (badge, prix, contacts).
-  - Ajouter `position: relative`, `z-index` bas (`z-0`) au conteneur carte, `isolation: isolate` sur la section parente.
-  - Forcer une hauteur fixe (`h-[280px]` mobile / `h-[420px]` desktop) avec `overflow: hidden` et `border-radius`.
-  - Bottom nav mobile : monter son `z-index` (`z-50`) pour qu'il passe au-dessus de la carte.
+# Plan d'action — Corrections critiques & fiabilisation
 
-### 2. GPS — confidentialité après mission terminée
-- Quand `statut ∈ {terminee, en_attente_validation, livree}` :
-  - **Client & Driver dashboards** : afficher uniquement une **polyline simplifiée** (start → end + tracé global lissé via `simplify-js` ou décimation 1 pt/2 km), sans markers intermédiaires, sans timestamps, sans bouton "centrer sur position live", sans réactualisation realtime.
-  - **Admin dashboard** : conserver le tracé complet, markers détaillés, timeline horodatée (vue actuelle).
-- Implémentation : prop `mode: "live" | "summary" | "admin"` sur `GpsMapView` + `MissionLiveTracker`.
+Objectif : corriger les bugs bloquants, homogénéiser l'UX et améliorer les performances, sans casser l'existant ni introduire de régression.
 
-### 3. GPS dans Dashboard Admin
-- Ajouter un onglet/carte **"Suivi GPS temps réel"** sur `admin.missions.$missionId.tsx` avec `GpsMapView mode="admin"` (réutilisation du composant existant, pas de nouvelle logique métier).
-- Ajouter une vue globale `admin.trajets.tsx` (déjà existante) : carte avec tous les convoyeurs actifs en live (markers cliquables → mission).
+Travail découpé en 9 lots livrables indépendamment. Je peux tout enchaîner, ou tu me dis par où commencer.
 
-### 4. Statuts qui ne se mettent pas à jour ("Trajet en attente" sur mission finie)
-- Audit du badge de statut dans :
-  - `dashboard-client.missions.index.tsx`
-  - `dashboard-pro.missions.index.tsx`
-  - `convoyeur.missions.tsx` / `convoyeur.historique.tsx`
-  - `admin.missions.*`
-- Corriger la source : utiliser `attributions.statut` + `attributions.etape_courante` via `useMissionRealtime` (déjà existant) au lieu de `missions.statut` figé.
-- Mapping statut → label centralisé (`adminMissionStatus.ts` étendu) pour cohérence dashboard partout.
+---
 
-### 5. Archivage missions terminées
-- Section **"Archives"** dédiée (onglet ou filtre `?archived=1`) dans :
-  - Admin (`admin.missions` + lien sidebar)
-  - Client (`dashboard-client.missions`)
-  - Pro / Flotte (`dashboard-pro.missions`, `flotte.missions`)
-  - Convoyeur (`convoyeur.historique` — déjà existe, à harmoniser)
-- Filtres : par date (range picker), client, convoyeur, ville départ/arrivée, statut final (livrée / annulée / litige), recherche texte (immat, n° mission).
-- Tri : date desc par défaut, prix, durée.
-- Tableau dense + export CSV (admin uniquement).
+## Lot 1 — PDF : VIN + kilométrages
 
-### 6. Fusion "Signatures" + "Traçabilité signatures" (capture 2)
-- Actuellement 2 blocs distincts dans `ClientMissionDetailView` (galerie 4 images + panneau traçabilité).
-- Fusionner en un seul bloc **"Signatures & Traçabilité"** :
-  - 2 colonnes par étape (Départ / Arrivée), chaque étape = Convoyeur + Client côte à côte
-  - Chaque entrée : vignette image signature + nom signataire + horodatage + statut (✓ signé / ⏳ en attente)
-  - Bouton download discret par signature
-  - Badge global "Complet / Incomplet" en haut
+Fichiers : `src/lib/mission-pdf.ts`, `src/lib/devis-pdf.ts`, `src/lib/facture-pdf.ts`, `src/lib/edl-final-pdf.ts`, `src/components/MissionReport.tsx`, `src/components/mission/ClientMissionDetailView.tsx`.
 
-### 7. Bug confirmation email inscription (client + convoyeur)
-- Symptôme : pas de message de confirmation, compte affiché "suspendu".
-- Audit `inscription-client.tsx` + `inscription-convoyeur.tsx` + trigger `handle_new_user` + page `auth.email-confirmation.tsx` + flow `/login`.
-- Vérifier :
-  - Template `signup` actif et bien enregistré dans `registry.ts` (déjà refactor récent — re-vérifier après scaffold)
-  - Redirect URL `emailRedirectTo` cohérent avec route existante (`/auth/email-confirmation` ou `/login`)
-  - Status profil créé par trigger ≠ `suspendu` par défaut (probable bug : `statut_compte = 'pending'` interprété "suspendu" côté UI)
-  - Message UI clair après inscription : "Vérifiez votre email pour activer votre compte"
-  - Page de confirmation qui consomme le `token_hash` et redirige proprement
-- Fix attendu : corriger le label du badge `suspendu` → `en attente de vérification email` quand `email_confirmed_at IS NULL`, et garantir l'envoi effectif du mail (route `/lovable/email/auth/webhook` opérationnelle).
+- Ajouter dans la section "Informations véhicule" de chaque PDF :
+  - **VIN** (depuis `trajets.vehicule_vin` / `demandes.vin` / `missions` selon source)
+  - **Km départ** (depuis `inspections` étape départ)
+  - **Km arrivée** (depuis `inspections` étape arrivée — affiché "—" si absent)
+- Source de vérité unique : helper `getVehiculeInfo(missionId)` lisant `attributions` → `trajets` → `inspections` pour rester aligné avec l'admin.
+- Affichage identique dans l'encadré véhicule de la fiche mission client/driver/admin.
 
-### Détails techniques
-- Aucun changement de logique métier (pricing, paiements, RLS existante intacte).
-- Réutilise hooks existants : `useMissionRealtime`, `useGpsTracking`, `useMissionGates`.
-- Ajout d'un util `src/lib/mission-display-status.ts` pour le mapping unifié label/couleur.
-- Pas de nouvelle table — éventuellement une vue `v_missions_archive` si besoin de perf sur les filtres.
+## Lot 2 — Validation email & "Compte suspendu" (BUG CRITIQUE)
 
-### Ordre d'exécution proposé
-1. **Bug bloquant** : statuts "trajet en attente" partout (5) + statut "suspendu" inscription (7) — quick wins prioritaires
-2. **Visuel critique** : overlay GPS (1) + fusion signatures (6)
-3. **Confidentialité** : mode summary GPS post-mission (2)
-4. **Admin** : GPS admin (3) + archivage (5)
+Cause probable : le label "Compte suspendu" est affiché dès que `email_confirmed_at IS NULL` OU dès que `profiles.statut != 'actif'`, alors que `handle_new_user` met déjà `statut='actif'`. À vérifier : `attente-validation.tsx`, `useAuth.tsx`, et la lecture de `profiles.statut`.
+
+Actions :
+1. Auditer la chaîne : trigger `handle_new_user`, route `/auth/email-confirmation`, hook `useAuth`, page `attente-validation`.
+2. Garantir qu'après clic sur le lien Supabase :
+   - `email_confirmed_at` est set (natif Supabase) ;
+   - aucune logique ne repasse `profiles.statut` à `suspendu` ;
+   - redirection vers `/auth/email-confirmation` (page déjà créée).
+3. Remplacer tout label "Compte suspendu" par la bonne sémantique :
+   - `email_confirmed_at IS NULL` → "Email non vérifié — renvoyer le lien"
+   - `profiles.statut = 'suspendu'` (vrai cas admin) → "Compte suspendu, contactez le support"
+4. Ajouter bouton "Renvoyer l'email de confirmation" sur la page login + attente-validation.
+5. Vérifier que les convoyeurs en `pending` voient bien "En attente de validation admin" et non "suspendu".
+
+## Lot 3 — Notifications push
+
+État actuel : VAPID configuré, SW présent, `pushToUser`/`pushToAdmins` existent mais pas systématiquement câblés.
+
+Audit + câblage des déclencheurs manquants :
+
+| Évènement | Cible | Câblage |
+|---|---|---|
+| Nouvelle demande devis | admins | déjà via `notifyAdmin`, vérifier push |
+| Nouveau devis signé | admins | à câbler dans `devis-acceptation.functions.ts` |
+| Mission attribuée | convoyeur | à câbler dans `accept_mission_fixe` / serverFn |
+| Statut mission change | client + convoyeur | hook sur `MissionWorkflow` save |
+| Mission terminée | client + admin | déjà partiel |
+| Nouveau message | destinataire | à câbler dans `admin.messages` |
+| Inscription client/convoyeur | admins | déjà via `notifyAdmin` |
+
+Aussi :
+- Activer l'enregistrement du SW dès `PwaProvider` (vérifier que `getSubscription()` fonctionne sans clic manuel pour les utilisateurs déjà opt-in).
+- Ajouter `PushNotificationToggle` dans la sidebar admin/client/convoyeur (actuellement peu exposé).
+- Logger les erreurs `sendPushToUser` dans `activity_logs` pour diagnostic.
+
+## Lot 4 — Emails transactionnels
+
+Audit ciblé de chaque template du registry, vérification destinataires + variables + lien.
+
+Checklist (un passage = un fix si écart) :
+- Client : inscription, validation, reset MDP, devis créé, devis payé, mission confirmée, mission démarrée, mission livrée, mission terminée, facture dispo.
+- Admin : nouvelle demande, nouveau devis, devis accepté, devis payé, B2B lead/paiement, inscription convoyeur, document mission.
+- Convoyeur : attribution, validation compte, offre acceptée/refusée.
+
+Pour chaque template : tester via `/lovable/email/transactional/preview`, vérifier `recipientEmail` réel, idempotencyKey unique, variables non vides.
+
+## Lot 5 — Logo client visible partout (back-office)
+
+Sources : `profiles.avatar_url` (client) + `organizations.logo_url` (société). Bucket `company-logos` déjà public.
+
+Affichage à ajouter (composant réutilisable `<ClientLogo client={...} size="sm|md" />`) :
+- `admin.clients.tsx` (liste) — avatar 32px à gauche du nom
+- `admin.clients.$clientId.tsx` (fiche) — header avec logo 80px
+- `admin.demandes.tsx`, `admin.devis.tsx`, `admin.missions.*` — colonne client avec logo
+- Fiche mission convoyeur (`MissionCockpit`, `PremiumMissionHero`) — bloc "Client" avec logo + raison sociale
+
+Fallback : initiales sur fond `card-premium`.
+
+## Lot 6 — Nettoyage rédactionnel "ton IA"
+
+Pass sur :
+- `ServicesContent`, `AProposContent`, `HeroDesktop`, `Hero`, `Footer`, `blog-articles.ts`, templates emails, meta tags.
+- Supprimer : `—` (em-dash) décoratifs, formulations "Découvrez l'expérience…", "premium" résiduel, doubles adjectifs ("rapide, simple et efficace").
+- Reformuler en phrases courtes orientées action métier.
+
+Pas de changement fonctionnel — uniquement copywriting.
+
+## Lot 7 — UX/UI fluidité
+
+- Lazy-load : routes admin lourdes (`admin.trajets`, `admin.historique`, blog) via `lazy()` déjà géré par TanStack — vérifier qu'aucune route n'importe en eager des libs lourdes (leaflet, pdf-lib).
+- Pagination côté serveur sur `admin.devis`, `admin.missions`, `admin.factures`, `admin.clients` (range Supabase, 25/page) au lieu du fetch global actuel.
+- Cache TanStack Query : `staleTime: 30s` pour listes admin, `Infinity` pour referentiels (pricing rules, app_settings).
+- Mémoïsation des grosses tables (`React.memo` + `useMemo` sur filtres).
+- Mobile : vérifier z-index carte GPS (déjà fix), padding bottom-nav, scroll sur modals plein écran.
+
+## Lot 8 — Performance back
+
+- `supabase--slow_queries` pour identifier le top 10.
+- Index probables à ajouter (migration) :
+  - `missions(user_id, statut)`, `attributions(convoyeur_id, statut)`, `trajets(statut_publication, date_trajet)`, `devis(user_id, statut)`, `mission_locations(attribution_id, recorded_at)`.
+- Audit RLS coûteuses : `is_mission_client`, `is_attribution_client` (sous-requêtes multi-JOIN) — envisager une vue matérialisée `mission_access` rafraîchie par trigger si pg_stat_statements le justifie.
+- Vérifier qu'aucun composant ne fait du N+1 (boucle `await` sur missions pour aller chercher inspections).
+
+## Lot 9 — Contrôle qualité
+
+Plan de tests Playwright headless :
+1. Inscription client → email → activation → login → dashboard
+2. Inscription convoyeur → attente validation admin → activation → mission
+3. Création devis → signature → paiement → mission auto → attribution → workflow complet → PDF EDL + facture
+4. Vérif push reçue à chaque étape clé
+5. Vérif emails reçus (via `email_send_log`)
+6. Vérif logo client visible dans 6 emplacements admin
+
+---
+
+## Ordre proposé d'exécution
+
+1. **Lot 2** (BUG critique compte suspendu) — bloquant
+2. **Lot 1** (PDF VIN/km) — rapide, à fort impact pro
+3. **Lot 5** (logo client) — visuel, rapide
+4. **Lot 4** (emails) puis **Lot 3** (push) — fiabilisation comms
+5. **Lot 6** (copywriting) — pass global
+6. **Lots 7 + 8** (perf) — nécessitent `slow_queries` + mesure avant/après
+7. **Lot 9** (QA finale)
+
+Confirme l'ordre (ou dis-moi quels lots prioriser) et je passe en mode build.

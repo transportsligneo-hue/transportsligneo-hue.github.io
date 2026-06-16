@@ -5,6 +5,7 @@ import { Loader2, LogIn, User, Truck } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "client" | "pro";
 
@@ -146,9 +147,31 @@ function LoginPage() {
     } catch (err: unknown) {
       justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
-      setError(msg.includes("Invalid") ? "Email ou mot de passe incorrect." : msg);
+      if (msg.toLowerCase().includes("email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+        setError("EMAIL_NOT_CONFIRMED");
+      } else {
+        setError(msg.includes("Invalid") ? "Email ou mot de passe incorrect." : msg);
+      }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer ».");
+      return;
+    }
+    try {
+      const { error: rErr } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/auth/email-confirmation` },
+      });
+      if (rErr) throw rErr;
+      setError("RESENT");
+    } catch (e: any) {
+      setError(e?.message || "Impossible de renvoyer l'email.");
     }
   };
 
@@ -199,11 +222,22 @@ function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="card-premium p-7 rounded-t-none rounded-b space-y-5 border-t-0">
-          {error && (
+          {error === "EMAIL_NOT_CONFIRMED" ? (
+            <div className="p-3 rounded bg-primary/10 border border-primary/30 text-cream text-sm space-y-2">
+              <p>Votre adresse email n'a pas encore été confirmée.</p>
+              <button type="button" onClick={handleResendConfirmation} className="text-primary text-xs uppercase tracking-[0.15em] hover:text-gold-light">
+                → Renvoyer l'email de confirmation
+              </button>
+            </div>
+          ) : error === "RESENT" ? (
+            <div className="p-3 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm">
+              Email de confirmation renvoyé. Vérifiez votre boîte (et vos spams).
+            </div>
+          ) : error ? (
             <div className="p-3 rounded bg-destructive/15 border border-destructive/30 text-destructive text-sm">
               {error}
             </div>
-          )}
+          ) : null}
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Email</label>

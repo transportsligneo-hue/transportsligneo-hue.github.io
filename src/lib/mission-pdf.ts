@@ -27,6 +27,8 @@ export interface MissionPdfData {
   modele?: string | null;
   immatriculation?: string | null;
   vin?: string | null;
+  km_depart?: number | null;
+  km_arrivee?: number | null;
   carburant?: string | null;
   mode_transport?: string | null;
   mode_paiement?: string | null;
@@ -160,6 +162,8 @@ export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
     ["VIN", m.vin || "—"],
     ["Mode de transport", m.mode_transport || "Conduite sur route"],
     ["Kilometrage total estime", m.distance_km != null ? `${m.distance_km} km` : "—"],
+    ["Kilometrage depart", m.km_depart != null ? `${m.km_depart} km` : "—"],
+    ["Kilometrage arrivee", m.km_arrivee != null ? `${m.km_arrivee} km` : "—"],
     ["Duree estimee", m.duree_estimee || "—"],
     ["Carburant", m.carburant || "—"],
     ["Mode de paiement", m.mode_paiement || "—"],
