@@ -29,6 +29,12 @@ export interface FactureData {
   depart?: string | null;
   arrivee?: string | null;
   distance_km?: number | null;
+  vehicule_marque?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_immatriculation?: string | null;
+  vehicule_vin?: string | null;
+  km_depart?: number | null;
+  km_arrivee?: number | null;
   prix_ht: number;
   tva_taux?: number;
   prix_tva?: number;
