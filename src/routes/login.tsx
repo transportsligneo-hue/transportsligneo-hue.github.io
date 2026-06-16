@@ -5,6 +5,7 @@ import { Loader2, LogIn, User, Truck } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "client" | "pro";
 
