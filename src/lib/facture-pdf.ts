@@ -348,6 +348,14 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
     "Assurance tous risques incluse",
     "Convoyage realise par chauffeur professionnel",
   ];
+  // Bloc véhicule (VIN, km) — optionnel
+  const vehiculeBits: string[] = [];
+  const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
+  if (vehLabel) vehiculeBits.push(`Vehicule : ${vehLabel}${f.vehicule_immatriculation ? ` (${f.vehicule_immatriculation})` : ""}`);
+  if (f.vehicule_vin) vehiculeBits.push(`VIN : ${f.vehicule_vin}`);
+  if (f.km_depart != null) vehiculeBits.push(`Km depart : ${f.km_depart}`);
+  if (f.km_arrivee != null) vehiculeBits.push(`Km arrivee : ${f.km_arrivee}`);
+  details.push(...vehiculeBits);
   let dy = y + 7;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
