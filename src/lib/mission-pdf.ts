@@ -27,6 +27,8 @@ export interface MissionPdfData {
   modele?: string | null;
   immatriculation?: string | null;
   vin?: string | null;
+  km_depart?: number | null;
+  km_arrivee?: number | null;
   carburant?: string | null;
   mode_transport?: string | null;
   mode_paiement?: string | null;
