@@ -20,6 +20,7 @@ import { getHighestActiveRole } from "@/lib/roles";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { Button } from "@/components/ui/button";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -34,6 +35,9 @@ interface ClientRow {
   created_at: string;
   actif: boolean;
   missions_count: number;
+  avatar_url: string | null;
+  societe: string | null;
+  type_client: string | null;
 }
 
 
@@ -91,7 +95,7 @@ function AdminClients() {
 
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("user_id, prenom, nom, email, telephone, created_at")
+      .select("user_id, prenom, nom, email, telephone, created_at, avatar_url, societe, type_client")
       .in("user_id", clientUserIds);
 
     const { data: missionsRaw } = await supabase
@@ -104,7 +108,7 @@ function AdminClients() {
       countMap.set(m.user_id, (countMap.get(m.user_id) ?? 0) + 1);
     });
 
-    const rows: ClientRow[] = (profiles ?? []).map((p) => ({
+    const rows: ClientRow[] = (profiles ?? []).map((p: any) => ({
       user_id: p.user_id,
       prenom: p.prenom ?? "",
       nom: p.nom ?? "",
@@ -113,6 +117,9 @@ function AdminClients() {
       created_at: p.created_at,
       actif: actifMap.get(p.user_id) ?? true,
       missions_count: countMap.get(p.user_id) ?? 0,
+      avatar_url: p.avatar_url ?? null,
+      societe: p.societe ?? null,
+      type_client: p.type_client ?? null,
     }));
 
     rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -187,11 +194,15 @@ function AdminClients() {
               <TR key={c.user_id} className="cursor-pointer" onClick={() => setSelected(c)}>
                 <TD>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
-                      {(c.prenom?.[0] ?? "?").toUpperCase()}
-                    </div>
+                    <ClientLogo
+                      src={c.avatar_url}
+                      name={c.societe || `${c.prenom} ${c.nom}`.trim()}
+                      isCompany={!!c.societe || c.type_client === "b2b" || c.type_client === "flotte"}
+                      size="sm"
+                    />
                     <div className="min-w-0">
                       <p className="font-medium text-pro-text truncate">{c.prenom} {c.nom}</p>
+                      {c.societe && <p className="text-pro-muted text-xs truncate">{c.societe}</p>}
                       <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
                     </div>
                   </div>
