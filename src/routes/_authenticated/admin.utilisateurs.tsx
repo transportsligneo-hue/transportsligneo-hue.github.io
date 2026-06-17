@@ -26,6 +26,7 @@ import {
 import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
 import { getHighestActiveRole } from "@/lib/roles";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
@@ -46,6 +47,8 @@ type UnifiedUser = {
   adresse: string | null;
   created_at: string;
   source: "profile" | "convoyeur";
+  avatar_url: string | null;
+  logo_url: string | null;
 };
 
 const roleLabels: Record<string, { label: string; tone: string; icon: typeof Shield }> = {
@@ -79,7 +82,7 @@ function AdminUtilisateurs() {
     try {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, siret, adresse, created_at")
+        .select("user_id, email, nom, prenom, telephone, type_client, account_status, organization_id, societe, siret, adresse, created_at, avatar_url, logo_url")
         .order("created_at", { ascending: false });
 
       const { data: convoyeurs } = await supabase
@@ -107,6 +110,7 @@ function AdminUtilisateurs() {
           role, type_client: p.type_client, account_status: p.account_status ?? "active",
           organization_id: p.organization_id, societe: p.societe, siret: p.siret ?? null,
           adresse: p.adresse ?? null, created_at: p.created_at, source: "profile",
+          avatar_url: p.avatar_url ?? null, logo_url: p.logo_url ?? null,
         });
       });
       (convoyeurs ?? []).forEach((c: any) => {
@@ -116,6 +120,7 @@ function AdminUtilisateurs() {
           role: "convoyeur", type_client: null, account_status: c.account_status ?? "active",
           organization_id: c.organization_id, societe: null, siret: null, adresse: c.ville ?? null,
           created_at: c.created_at, source: "convoyeur",
+          avatar_url: null, logo_url: null,
         });
       });
       setUsers(rows);
@@ -228,8 +233,18 @@ function AdminUtilisateurs() {
                     onClick={() => setSelected(u)}
                   >
                     <TableCell>
-                      <div className="font-medium text-pro-text">{u.prenom} {u.nom}</div>
-                      <div className="text-xs text-pro-muted">{u.email ?? "—"}</div>
+                      <div className="flex items-center gap-2">
+                        <ClientLogo
+                          src={u.logo_url || u.avatar_url}
+                          name={u.societe || `${u.prenom} ${u.nom}`.trim() || u.email || "?"}
+                          isCompany={!!u.societe || u.type_client === "b2b" || u.type_client === "flotte"}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <div className="font-medium text-pro-text truncate">{u.prenom} {u.nom}</div>
+                          <div className="text-xs text-pro-muted truncate">{u.email ?? "—"}</div>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`gap-1 ${r.tone}`}>

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations")({
   component: AdminOrganisations,
@@ -49,6 +50,7 @@ type Row = {
   primary_contact_phone: string | null;
   created_at: string;
   roles: string[];
+  logo_url?: string | null;
   // For profile rows
   profileUserId?: string;
 };
@@ -94,7 +96,7 @@ function AdminOrganisations() {
         supabase.from("organization_roles").select("organization_id, role, active"),
         supabase
           .from("profiles")
-          .select("user_id, email, nom, prenom, telephone, societe, siret, type_client, statut, organization_id, created_at")
+          .select("user_id, email, nom, prenom, telephone, societe, siret, type_client, statut, organization_id, created_at, logo_url, avatar_url")
           .in("type_client", ["b2b", "flotte"])
           .order("created_at", { ascending: false }),
       ]);
@@ -127,8 +129,8 @@ function AdminOrganisations() {
       // (We can't know directly which profiles correspond to which org owner without org_members,
       // so just skip those that have organization_id set.)
       const profileRows: Row[] = (profiles ?? [])
-        .filter((p) => !p.organization_id && !linkedUserIds.has(p.user_id))
-        .map((p) => {
+        .filter((p: any) => !p.organization_id && !linkedUserIds.has(p.user_id))
+        .map((p: any) => {
           const legal =
             (p.societe && p.societe.trim()) ||
             [p.prenom, p.nom].filter(Boolean).join(" ").trim() ||
@@ -147,6 +149,7 @@ function AdminOrganisations() {
             primary_contact_phone: p.telephone,
             created_at: p.created_at,
             roles: [p.type_client === "flotte" ? "flotte_partenaire" : "client_b2b"],
+            logo_url: p.logo_url ?? p.avatar_url ?? null,
             profileUserId: p.user_id,
           };
         });
@@ -276,11 +279,12 @@ function AdminOrganisations() {
                 <TableRow key={o.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {o.kind === "profile" ? (
-                        <UserCircle2 size={16} className="text-pro-muted shrink-0" />
-                      ) : (
-                        <Building2 size={16} className="text-pro-accent shrink-0" />
-                      )}
+                      <ClientLogo
+                        src={o.logo_url}
+                        name={o.legal_name}
+                        isCompany
+                        size="sm"
+                      />
                       <div>
                         <div className="font-medium text-pro-text">{o.legal_name}</div>
                         <div className="text-xs text-pro-muted">
