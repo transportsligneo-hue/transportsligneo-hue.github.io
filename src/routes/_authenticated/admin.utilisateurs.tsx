@@ -87,7 +87,7 @@ function AdminUtilisateurs() {
 
       const { data: convoyeurs } = await supabase
         .from("convoyeurs")
-        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, ville, created_at, avatar_url");
+        .select("user_id, email, nom, prenom, telephone, account_status, organization_id, statut, ville, created_at");
 
       const { data: roles } = await supabase.from("user_roles").select("user_id, role, actif").eq("actif", true);
       const roleByUser = new Map<string, string>();
@@ -120,7 +120,7 @@ function AdminUtilisateurs() {
           role: "convoyeur", type_client: null, account_status: c.account_status ?? "active",
           organization_id: c.organization_id, societe: null, siret: null, adresse: c.ville ?? null,
           created_at: c.created_at, source: "convoyeur",
-          avatar_url: c.avatar_url ?? null, logo_url: null,
+          avatar_url: null, logo_url: null,
         });
       });
       setUsers(rows);
