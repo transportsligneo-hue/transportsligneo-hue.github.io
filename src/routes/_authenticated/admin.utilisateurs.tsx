@@ -26,6 +26,7 @@ import {
 import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
 import { getHighestActiveRole } from "@/lib/roles";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
