@@ -140,16 +140,26 @@ function AdminConvoyeurs() {
     setCreating(true);
     setCreateError("");
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
+      // Use the admin-create-account edge function so the admin session is
+      // never replaced and the server-side admin role check is enforced.
+      const { data, error } = await supabase.functions.invoke("admin-create-account", {
+        body: {
+          email: form.email,
+          password: form.password,
+          prenom: form.prenom,
+          nom: form.nom,
+          telephone: form.telephone,
+          role: "convoyeur",
+        },
       });
-      if (authError || !authData.user) {
-        setCreateError(authError?.message ?? "Erreur création compte");
+      const userId = (data as { ok?: boolean; user_id?: string; error?: string } | null)?.user_id;
+      const errMsg = (data as { error?: string } | null)?.error;
+      if (error || !userId) {
+        setCreateError(errMsg || error?.message || "Erreur création compte");
         return;
       }
       const { error: convError } = await supabase.from("convoyeurs").insert({
-        user_id: authData.user.id,
+        user_id: userId,
         nom: form.nom,
         prenom: form.prenom,
         email: form.email,
@@ -158,14 +168,6 @@ function AdminConvoyeurs() {
       });
       if (convError) {
         setCreateError(convError.message);
-        return;
-      }
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: authData.user.id,
-        role: "convoyeur" as const,
-      });
-      if (roleError) {
-        setCreateError(roleError.message);
         return;
       }
       setForm({ nom: "", prenom: "", email: "", telephone: "", password: "" });
