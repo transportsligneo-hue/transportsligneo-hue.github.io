@@ -233,8 +233,18 @@ function AdminUtilisateurs() {
                     onClick={() => setSelected(u)}
                   >
                     <TableCell>
-                      <div className="font-medium text-pro-text">{u.prenom} {u.nom}</div>
-                      <div className="text-xs text-pro-muted">{u.email ?? "—"}</div>
+                      <div className="flex items-center gap-2">
+                        <ClientLogo
+                          src={u.logo_url || u.avatar_url}
+                          name={u.societe || `${u.prenom} ${u.nom}`.trim() || u.email || "?"}
+                          isCompany={!!u.societe || u.type_client === "b2b" || u.type_client === "flotte"}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <div className="font-medium text-pro-text truncate">{u.prenom} {u.nom}</div>
+                          <div className="text-xs text-pro-muted truncate">{u.email ?? "—"}</div>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`gap-1 ${r.tone}`}>
