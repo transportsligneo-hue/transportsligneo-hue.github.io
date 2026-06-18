@@ -11,12 +11,14 @@ type Action =
   | "reactivate"
   | "reset_password"
   | "change_role"
+  | "activate_role"
   | "change_type_client"
   | "delete"
   | "update_profile"
   | "change_email"
   | "invite_account"
   | "get_account_status";
+
 
 interface Payload {
   action: Action;
