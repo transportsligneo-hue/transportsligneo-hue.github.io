@@ -131,7 +131,7 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                 console.error("[devis/webhook] email error", e);
               }
 
-              // 6. Notify admin
+              // 6. Notify admin (history + push)
               try {
                 await supabaseAdmin.rpc("create_admin_notification", {
                   _type: "b2b_paiement",
@@ -145,6 +145,18 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
               } catch (e) {
                 console.error("[devis/webhook] notification error", e);
               }
+              try {
+                const { sendPushToRole } = await import("@/lib/push/send.server");
+                await sendPushToRole("admin", {
+                  title: "Paiement reçu 💳",
+                  body: `Devis ${devis?.numero ?? devisId} · ${(amount / 100).toFixed(2)} €`,
+                  url: `/admin/devis/${devisId}`,
+                  tag: `paiement-devis-${devisId}`,
+                });
+              } catch (e) {
+                console.error("[devis/webhook] push error", e);
+              }
+
             }
           } else if (event.type === "payment_intent.payment_failed") {
             const pi = event.data.object;
