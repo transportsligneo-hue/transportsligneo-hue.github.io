@@ -11,12 +11,14 @@ type Action =
   | "reactivate"
   | "reset_password"
   | "change_role"
+  | "activate_role"
   | "change_type_client"
   | "delete"
   | "update_profile"
   | "change_email"
   | "invite_account"
   | "get_account_status";
+
 
 interface Payload {
   action: Action;
@@ -95,10 +97,31 @@ Deno.serve(async (req) => {
       }
       case "change_role": {
         if (!body.role) return json({ error: "Rôle manquant" }, 400);
+        // Désactive tous les rôles existants, puis upsert le nouveau actif=true.
+        // L'upsert évite l'échec UNIQUE(user_id, role) qui laissait tous les rôles inactifs.
         await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
-        await admin.from("user_roles").insert({ user_id: body.user_id, role: body.role, actif: true });
+        const { error: rErr } = await admin
+          .from("user_roles")
+          .upsert(
+            { user_id: body.user_id, role: body.role, actif: true },
+            { onConflict: "user_id,role" },
+          );
+        if (rErr) return json({ error: rErr.message }, 400);
         break;
       }
+      case "activate_role": {
+        // Réactive un rôle existant (ou tous si role omis) sans toucher aux autres
+        // colonnes. Idempotent — peut être appelé sur un compte déjà actif.
+        const q = admin.from("user_roles").update({ actif: true }).eq("user_id", body.user_id);
+        const { error: aErr } = body.role ? await q.eq("role", body.role) : await q;
+        if (aErr) return json({ error: aErr.message }, 400);
+        // Lève aussi un éventuel ban auth + statut profil
+        await admin.from("profiles").update({ account_status: "active" }).eq("user_id", body.user_id);
+        await admin.from("convoyeurs").update({ account_status: "active" }).eq("user_id", body.user_id);
+        await admin.auth.admin.updateUserById(body.user_id, { ban_duration: "none" });
+        break;
+      }
+
       case "change_type_client": {
         if (!body.type_client) return json({ error: "Type manquant" }, 400);
         await admin.from("profiles").update({ type_client: body.type_client }).eq("user_id", body.user_id);
