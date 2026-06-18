@@ -252,21 +252,11 @@ function AdminTrajets() {
       .eq("trajet_id" as never, selected.id as never)
       .neq("id" as never, offre.id as never);
     // 3) Créer une attribution officielle
-    const { data: attrCreated } = await supabase.from("attributions").insert({
+    await supabase.from("attributions").insert({
       trajet_id: selected.id,
       convoyeur_id: offre.convoyeur_id,
       statut: "propose",
-    }).select("id").maybeSingle();
-    // 3b) Push driver
-    if (attrCreated?.id) {
-      try {
-        const { notifyDriverAssigned } = await import("@/lib/push/notify.functions");
-        await notifyDriverAssigned({ data: { attributionId: attrCreated.id } });
-      } catch (e) {
-        console.warn("[admin.trajets] notifyDriverAssigned failed", e);
-      }
-    }
-
+    });
     // 4) Mettre le trajet en attribué + figer publication
     await supabase
       .from("trajets")

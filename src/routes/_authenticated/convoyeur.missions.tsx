@@ -325,19 +325,10 @@ function ConvoyeurMissions() {
       return false;
     }
     if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
-    if (statut === "termine") {
-      setActiveMissionId(null); setShowMap(false);
-      try {
-        const { notifyClientMissionCompleted } = await import("@/lib/push/notify.functions");
-        await notifyClientMissionCompleted({ data: { attributionId: id } });
-      } catch (e) {
-        console.warn("[convoyeur.missions] notifyClientMissionCompleted failed", e);
-      }
-    }
+    if (statut === "termine") { setActiveMissionId(null); setShowMap(false); }
     await fetchMissions();
     return true;
   };
-
 
   const toggleOptionCompletion = async (mission: Mission, key: string, done: boolean) => {
     const current = (mission.options_completion ?? {}) as Record<string, { done: boolean; at?: string }>;

@@ -2864,42 +2864,6 @@ export type Database = {
           },
         ]
       }
-      user_notifications: {
-        Row: {
-          created_at: string
-          id: string
-          link: string | null
-          lu: boolean
-          message: string | null
-          metadata: Json
-          titre: string
-          type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          lu?: boolean
-          message?: string | null
-          metadata?: Json
-          titre: string
-          type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          lu?: boolean
-          message?: string | null
-          metadata?: Json
-          titre?: string
-          type?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           actif: boolean

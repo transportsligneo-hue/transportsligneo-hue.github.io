@@ -102,7 +102,7 @@ export const acceptDevis = createServerFn({ method: "POST" })
       throw new Error(`Verrouillage du devis échoué : ${updErr.message}`);
     }
 
-    // 3. Notification admin (best-effort, jamais bloquant) + push
+    // 3. Notification admin (best-effort, jamais bloquant)
     try {
       await supabase.rpc("create_admin_notification", {
         _type: "devis",
@@ -115,18 +115,6 @@ export const acceptDevis = createServerFn({ method: "POST" })
     } catch {
       // best-effort
     }
-    try {
-      const { sendPushToRole } = await import("@/lib/push/send.server");
-      await sendPushToRole("admin", {
-        title: `Devis signé — ${devis.numero}`,
-        body: `${clientEmail} · ${Number(devis.prix_estime).toFixed(2)} € TTC`,
-        url: "/admin/devis",
-        tag: `devis-signe-${devis.id}`,
-      });
-    } catch (e) {
-      console.warn("[devis-acceptation] push admin failed", e);
-    }
-
 
     return { ok: true, acceptedAt: now, numero: devis.numero, version: devis.version ?? 1 };
   });

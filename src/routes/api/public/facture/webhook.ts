@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
                 })
                 .eq("id", factureId);
 
-              // Notify admin (history + push)
+              // Notify admin
               try {
                 await supabaseAdmin.rpc("create_admin_notification", {
                   _type: "facture_paiement",
@@ -70,18 +70,6 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
               } catch (e) {
                 console.error("[facture/webhook] notification error", e);
               }
-              try {
-                const { sendPushToRole } = await import("@/lib/push/send.server");
-                await sendPushToRole("admin", {
-                  title: "Paiement reçu 💳",
-                  body: `Facture ${facture?.numero ?? factureId} · ${(amount / 100).toFixed(2)} €`,
-                  url: `/admin/factures`,
-                  tag: `paiement-facture-${factureId}`,
-                });
-              } catch (e) {
-                console.error("[facture/webhook] push error", e);
-              }
-
 
               // Send confirmation email
               if (facture?.client_email) {

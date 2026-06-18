@@ -7,7 +7,6 @@
  * Tolère les erreurs silencieusement (best-effort) — ne casse jamais le flow utilisateur.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { pushToAdmins } from "@/lib/push/notify.functions";
 
 export type AdminNotificationType =
   | "incident"
@@ -33,7 +32,7 @@ export interface NotifyAdminInput {
 
 export async function notifyAdmin(input: NotifyAdminInput): Promise<void> {
   try {
-    // 1) Historique admin (RPC SECURITY DEFINER, type whitelist enforced).
+    // Server-side validated RPC (SECURITY DEFINER, type whitelist enforced).
     const { error } = await supabase.rpc("create_admin_notification" as never, {
       _type: input.type,
       _titre: input.titre,
@@ -47,21 +46,4 @@ export async function notifyAdmin(input: NotifyAdminInput): Promise<void> {
   } catch (err) {
     console.warn("[notifyAdmin] insert failed", err);
   }
-
-  // 2) Push Web vers tous les admins actifs (best-effort, non bloquant).
-  try {
-    await pushToAdmins({
-      data: {
-        payload: {
-          title: input.titre.slice(0, 120),
-          body: (input.message ?? "").slice(0, 500) || undefined,
-          url: input.link ?? "/admin/notifications",
-          tag: `admin-${input.type}-${input.entityId ?? Date.now()}`,
-        },
-      },
-    });
-  } catch (err) {
-    console.warn("[notifyAdmin] push failed", err);
-  }
 }
-
