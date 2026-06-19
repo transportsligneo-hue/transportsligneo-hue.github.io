@@ -69,17 +69,28 @@ Deno.serve(async (req) => {
 
     const newUserId = created.user.id;
 
-    // Forcer le bon rôle final si différent (admin / super_admin / manager / sous_traitant)
-    if (!["client", "convoyeur"].includes(body.role)) {
-      // Désactiver les rôles existants par défaut puis upsert le bon (actif=true).
-      // L'upsert évite l'échec UNIQUE(user_id, role) qui laissait le compte sans rôle actif.
-      await admin.from("user_roles").update({ actif: false }).eq("user_id", newUserId);
-      await admin
-        .from("user_roles")
-        .upsert(
-          { user_id: newUserId, role: body.role, actif: true },
-          { onConflict: "user_id,role" },
-        );
+    // Forcer le rôle final demandé pour tous les types de compte.
+    await admin.from("user_roles").update({ actif: false }).eq("user_id", newUserId);
+    await admin
+      .from("user_roles")
+      .upsert(
+        { user_id: newUserId, role: body.role, actif: true },
+        { onConflict: "user_id,role" },
+      );
+
+    if (body.role === "convoyeur") {
+      await admin.from("convoyeurs").upsert(
+        {
+          user_id: newUserId,
+          email: body.email.toLowerCase().trim(),
+          prenom: body.prenom ?? "",
+          nom: body.nom ?? "",
+          telephone: body.telephone ?? "",
+          statut: "valide",
+          account_status: "active",
+        },
+        { onConflict: "user_id" },
+      );
     }
 
 
