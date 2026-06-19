@@ -252,3 +252,40 @@ function json(body: unknown, status = 200) {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+async function ensureConvoyeurRecord(admin: ReturnType<typeof createClient>, userId: string, statut: "en_attente" | "valide") {
+  const { data: existing } = await admin
+    .from("convoyeurs")
+    .select("id, statut")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (existing) {
+    await admin
+      .from("convoyeurs")
+      .update({ statut, account_status: "active" })
+      .eq("user_id", userId);
+    return;
+  }
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("email, prenom, nom, telephone")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const { data: authUser } = await admin.auth.admin.getUserById(userId);
+  const meta = authUser.user?.user_metadata ?? {};
+  const email = profile?.email ?? authUser.user?.email ?? "";
+
+  if (!email) return;
+
+  await admin.from("convoyeurs").insert({
+    user_id: userId,
+    email,
+    prenom: profile?.prenom || meta.prenom || "",
+    nom: profile?.nom || meta.nom || "",
+    telephone: profile?.telephone || meta.telephone || "",
+    statut,
+    account_status: "active",
+  });
+}
