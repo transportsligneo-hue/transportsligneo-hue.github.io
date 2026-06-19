@@ -82,6 +82,12 @@ function InscriptionConvoyeur() {
             nom: form.nom,
             prenom: form.prenom,
             telephone: form.telephone,
+            ville: form.ville,
+            disponibilite: form.disponibilite,
+            permis: form.permis,
+            message: form.message,
+            permis_numero: form.permis_numero,
+            annees_experience: form.annees_experience,
           },
         },
       });
@@ -127,32 +133,20 @@ function InscriptionConvoyeur() {
         }
       }
 
-      // Insert convoyeur record (le trigger handle_new_user a déjà créé profile + user_roles)
-      const { data: convoyeurRow, error: convError } = await supabase.from("convoyeurs").insert({
-        user_id: userId,
-        nom: form.nom,
-        prenom: form.prenom,
-        email: form.email,
-        telephone: form.telephone,
-        ville: form.ville,
-        disponibilite: form.disponibilite,
-        permis: form.permis,
-        message: form.message,
-        permis_numero: form.permis_numero,
-        annees_experience: parseInt(form.annees_experience, 10) || 0,
-        permis_photo_url: permisPhotoUrl,
-        statut: "en_attente",
-      }).select("id").single();
-
-      if (convError) {
-        console.error("[inscription-convoyeur] insert convoyeur error:", convError);
-        setError(`Erreur d'enregistrement : ${convError.message}`);
-        setLoading(false);
-        return;
-      }
+      const { data: convoyeurRow } = authData.session
+        ? await supabase.from("convoyeurs").update({
+            ville: form.ville,
+            disponibilite: form.disponibilite,
+            permis: form.permis,
+            message: form.message,
+            permis_numero: form.permis_numero,
+            annees_experience: parseInt(form.annees_experience, 10) || 0,
+            permis_photo_url: permisPhotoUrl,
+          }).eq("user_id", userId).select("id").maybeSingle()
+        : { data: null };
 
       // Upload documents complémentaires (CNI / Kbis / RC pro) — best-effort
-      const convoyeurId = convoyeurRow?.id;
+      const convoyeurId = convoyeurRow?.id ?? null;
       if (convoyeurId && authData.session) {
         const uploadDoc = async (file: File | null, type: string) => {
           if (!file) return;
