@@ -116,6 +116,12 @@ function AdminConvoyeurs() {
 
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
 
+    if (statut === "valide" && previous?.user_id) {
+      await supabase.functions.invoke("admin-user-actions", {
+        body: { action: "activate_role", user_id: previous.user_id, role: "convoyeur" },
+      });
+    }
+
     if (statut === "valide" && wasNotValid && previous) {
       try {
         await sendTransactionalEmail({

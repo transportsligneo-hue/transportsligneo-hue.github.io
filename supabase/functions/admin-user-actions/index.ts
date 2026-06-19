@@ -107,17 +107,45 @@ Deno.serve(async (req) => {
             { onConflict: "user_id,role" },
           );
         if (rErr) return json({ error: rErr.message }, 400);
+        if (body.role === "convoyeur") {
+          await ensureConvoyeurRecord(admin, body.user_id, "en_attente");
+        }
         break;
       }
       case "activate_role": {
-        // Réactive un rôle existant (ou tous si role omis) sans toucher aux autres
-        // colonnes. Idempotent — peut être appelé sur un compte déjà actif.
-        const q = admin.from("user_roles").update({ actif: true }).eq("user_id", body.user_id);
-        const { error: aErr } = body.role ? await q.eq("role", body.role) : await q;
+        // Active un seul rôle métier. Si aucun rôle n'est fourni, on infère d'abord
+        // le rôle convoyeur depuis la fiche driver, afin d'éviter de réactiver manager/client par erreur.
+        let targetRole = body.role;
+        if (!targetRole) {
+          const { data: conv } = await admin.from("convoyeurs").select("id").eq("user_id", body.user_id).maybeSingle();
+          if (conv) targetRole = "convoyeur";
+        }
+        if (!targetRole) {
+          const { data: active } = await admin
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", body.user_id)
+            .eq("actif", true)
+            .limit(1)
+            .maybeSingle();
+          targetRole = (active?.role as Payload["role"] | undefined) ?? "client";
+        }
+
+        await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
+        const { error: aErr } = await admin
+          .from("user_roles")
+          .upsert(
+            { user_id: body.user_id, role: targetRole, actif: true },
+            { onConflict: "user_id,role" },
+          );
         if (aErr) return json({ error: aErr.message }, 400);
         // Lève aussi un éventuel ban auth + statut profil
-        await admin.from("profiles").update({ account_status: "active" }).eq("user_id", body.user_id);
-        await admin.from("convoyeurs").update({ account_status: "active" }).eq("user_id", body.user_id);
+        await admin.from("profiles").update({ account_status: "active", statut: "actif" }).eq("user_id", body.user_id);
+        if (targetRole === "convoyeur") {
+          await ensureConvoyeurRecord(admin, body.user_id, "valide");
+        } else {
+          await admin.from("convoyeurs").update({ account_status: "active" }).eq("user_id", body.user_id);
+        }
         await admin.auth.admin.updateUserById(body.user_id, { ban_duration: "none" });
         break;
       }
@@ -222,5 +250,42 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+async function ensureConvoyeurRecord(admin: ReturnType<typeof createClient>, userId: string, statut: "en_attente" | "valide") {
+  const { data: existing } = await admin
+    .from("convoyeurs")
+    .select("id, statut")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (existing) {
+    await admin
+      .from("convoyeurs")
+      .update({ statut, account_status: "active" })
+      .eq("user_id", userId);
+    return;
+  }
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("email, prenom, nom, telephone")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const { data: authUser } = await admin.auth.admin.getUserById(userId);
+  const meta = authUser.user?.user_metadata ?? {};
+  const email = profile?.email ?? authUser.user?.email ?? "";
+
+  if (!email) return;
+
+  await admin.from("convoyeurs").insert({
+    user_id: userId,
+    email,
+    prenom: profile?.prenom || meta.prenom || "",
+    nom: profile?.nom || meta.nom || "",
+    telephone: profile?.telephone || meta.telephone || "",
+    statut,
+    account_status: "active",
   });
 }
