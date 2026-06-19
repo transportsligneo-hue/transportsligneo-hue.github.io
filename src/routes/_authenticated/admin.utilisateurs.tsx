@@ -462,7 +462,7 @@ function UserDetailDrawer({
               <Ban size={14} className="mr-1" /> Suspendre
             </Button>
           )}
-          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id })} className="bg-emerald-500/90 hover:bg-emerald-500 text-white" title="Réactive tous les rôles du compte (utile si le compte ne peut plus se connecter à son espace)">
+          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id, role: user.role })} className="bg-emerald-500/90 hover:bg-emerald-500 text-white" title="Active uniquement le rôle affiché et réouvre le compte">
             <CheckCircle2 size={14} className="mr-1" /> Activer le rôle
           </Button>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
