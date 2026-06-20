@@ -49,6 +49,7 @@ type UnifiedUser = {
   source: "profile" | "convoyeur";
   avatar_url: string | null;
   logo_url: string | null;
+  convoyeur_statut: string | null;
 };
 
 const roleLabels: Record<string, { label: string; tone: string; icon: typeof Shield }> = {
@@ -103,14 +104,17 @@ function AdminUtilisateurs() {
       });
 
       const rows: UnifiedUser[] = [];
+      const convoyeurByUser = new Map<string, any>();
+      (convoyeurs ?? []).forEach((c: any) => convoyeurByUser.set(c.user_id, c));
       (profiles ?? []).forEach((p: any) => {
-        const role = roleByUser.get(p.user_id) ?? p.type_client ?? "client";
+        const conv = convoyeurByUser.get(p.user_id);
+        const role = roleByUser.get(p.user_id) ?? (conv ? "convoyeur" : p.type_client ?? "client");
         rows.push({
           user_id: p.user_id, email: p.email, nom: p.nom, prenom: p.prenom, telephone: p.telephone,
           role, type_client: p.type_client, account_status: p.account_status ?? "active",
           organization_id: p.organization_id, societe: p.societe, siret: p.siret ?? null,
           adresse: p.adresse ?? null, created_at: p.created_at, source: "profile",
-          avatar_url: p.avatar_url ?? null, logo_url: p.logo_url ?? null,
+          avatar_url: p.avatar_url ?? null, logo_url: p.logo_url ?? null, convoyeur_statut: conv?.statut ?? null,
         });
       });
       (convoyeurs ?? []).forEach((c: any) => {
@@ -120,7 +124,7 @@ function AdminUtilisateurs() {
           role: "convoyeur", type_client: null, account_status: c.account_status ?? "active",
           organization_id: c.organization_id, societe: null, siret: null, adresse: c.ville ?? null,
           created_at: c.created_at, source: "convoyeur",
-          avatar_url: null, logo_url: null,
+          avatar_url: null, logo_url: null, convoyeur_statut: c.statut ?? null,
         });
       });
       setUsers(rows);
@@ -462,7 +466,7 @@ function UserDetailDrawer({
               <Ban size={14} className="mr-1" /> Suspendre
             </Button>
           )}
-          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id })} className="bg-emerald-500/90 hover:bg-emerald-500 text-white" title="Réactive le rôle métier du compte sans activer les anciens rôles inactifs">
+          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id, role: user.role })} className="bg-emerald-500/90 hover:bg-emerald-500 text-white" title="Réactive le rôle métier du compte sans activer les anciens rôles inactifs">
             <CheckCircle2 size={14} className="mr-1" /> Activer le rôle
           </Button>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
