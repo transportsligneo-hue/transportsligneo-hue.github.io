@@ -306,26 +306,34 @@
      toucher aux composants de chaque écran.
      ============================================================ */
   .driver-shell {
-    --driver-bg: #0b1530;
-    --driver-bg-2: #122353;
-    --driver-surface: rgba(255, 255, 255, 0.06);
-    --driver-surface-strong: rgba(255, 255, 255, 0.10);
-    --driver-border: rgba(120, 165, 255, 0.22);
-    --driver-border-strong: rgba(120, 165, 255, 0.40);
-    --driver-text: #f4f7ff;
-    --driver-text-soft: #cdd6f1;
-    --driver-muted: #8f9ac2;
-    --driver-accent: #3b82f6;
-    --driver-accent-2: #5fb6ff;
-    --driver-accent-soft: rgba(59, 130, 246, 0.22);
+    /* === LIGNEO DRIVER — Electric Blue Premium (Tesla / Mercedes Me / Revolut) === */
+    --driver-bg: #041B52;
+    --driver-bg-2: #0D2E7A;
+    --driver-bg-3: #1343A9;
+    --driver-surface: rgba(255, 255, 255, 0.07);
+    --driver-surface-strong: rgba(255, 255, 255, 0.12);
+    --driver-border: rgba(103, 193, 255, 0.22);
+    --driver-border-strong: rgba(103, 193, 255, 0.50);
+    --driver-text: #FFFFFF;
+    --driver-text-soft: #D6E4FF;
+    --driver-muted: #A8C2FF;
+    --driver-accent: #2F7DFF;       /* primary electric */
+    --driver-accent-2: #4EA8FF;     /* neon */
+    --driver-accent-3: #67C1FF;     /* glow */
+    --driver-gold: #E7C15A;
+    --driver-accent-soft: rgba(47, 125, 255, 0.22);
+    --driver-glow: 0 0 24px rgba(78, 168, 255, 0.45);
 
     background:
-      radial-gradient(1200px 700px at 0% -15%, rgba(59, 130, 246, 0.30), transparent 60%),
-      radial-gradient(900px 600px at 110% 5%, rgba(95, 182, 255, 0.22), transparent 60%),
-      radial-gradient(900px 700px at 50% 110%, rgba(120, 165, 255, 0.12), transparent 60%),
-      linear-gradient(180deg, #0e1740 0%, #1a2a6e 55%, #0e1740 100%);
+      radial-gradient(1400px 800px at 0% -10%, rgba(47, 125, 255, 0.42), transparent 60%),
+      radial-gradient(1000px 700px at 110% 0%, rgba(103, 193, 255, 0.28), transparent 60%),
+      radial-gradient(900px 700px at 50% 115%, rgba(19, 67, 169, 0.55), transparent 60%),
+      linear-gradient(180deg, #041B52 0%, #0D2E7A 50%, #041B52 100%);
+    background-attachment: fixed;
     color: var(--driver-text);
     min-height: 100vh;
+    font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
   .driver-shell .bg-pro-bg,
   .driver-shell .bg-pro-bg-soft { background-color: transparent !important; }
