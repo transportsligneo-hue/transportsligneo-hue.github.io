@@ -349,23 +349,22 @@
   .driver-shell .bg-white\/90,
   .driver-shell .bg-white\/80,
   .driver-shell .bg-white\/70 {
-    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)) !important;
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)) !important;
+    backdrop-filter: blur(24px) saturate(180%);
     border-color: var(--driver-border) !important;
   }
   .driver-shell .shadow-sm,
   .driver-shell .shadow-pro-card {
     box-shadow:
-      0 18px 42px -22px rgba(8, 16, 48, 0.75),
-      inset 0 1px 0 rgba(255,255,255,0.08) !important;
+      0 22px 50px -24px rgba(4, 27, 82, 0.85),
+      0 0 0 1px rgba(103, 193, 255, 0.08),
+      inset 0 1px 0 rgba(255,255,255,0.10) !important;
   }
 
   /* Sticky bar premium glass utilisé dans les détails de mission driver */
   .driver-sticky-bar {
-    background: linear-gradient(180deg, rgba(15, 26, 70, 0.88), rgba(11, 18, 50, 0.82)) !important;
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    background: linear-gradient(180deg, rgba(13, 46, 122, 0.85), rgba(4, 27, 82, 0.80)) !important;
+    backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid var(--driver-border);
   }
 
@@ -382,32 +381,33 @@
   .driver-shell input:focus,
   .driver-shell select:focus,
   .driver-shell textarea:focus {
-    border-color: var(--driver-accent) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+    border-color: var(--driver-accent-2) !important;
+    box-shadow: 0 0 0 3px rgba(78, 168, 255, 0.28), 0 0 18px rgba(78, 168, 255, 0.22) !important;
     outline: none !important;
   }
 
   /* Boutons primaires "emerald" remplacés par bleu électrique premium */
   .driver-shell .bg-emerald-600,
   .driver-shell .bg-emerald-700 {
-    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%) !important;
+    background: linear-gradient(135deg, #2F7DFF 0%, #4EA8FF 50%, #67C1FF 100%) !important;
     color: #ffffff !important;
+    box-shadow: 0 10px 30px -10px rgba(47, 125, 255, 0.65), 0 0 24px rgba(78, 168, 255, 0.30) !important;
   }
-  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.06); }
+  .driver-shell .hover\:bg-emerald-700:hover { filter: brightness(1.08); }
   .driver-shell .text-emerald-600,
-  .driver-shell .text-emerald-700 { color: var(--driver-accent-2) !important; }
-  .driver-shell .bg-emerald-50 { background: rgba(59, 130, 246, 0.12) !important; }
+  .driver-shell .text-emerald-700 { color: var(--driver-accent-3) !important; }
+  .driver-shell .bg-emerald-50 { background: rgba(47, 125, 255, 0.14) !important; }
   .driver-shell .border-emerald-200,
-  .driver-shell .border-emerald-300 { border-color: rgba(120, 165, 255, 0.32) !important; }
-  .driver-shell .text-emerald-800 { color: var(--driver-accent-2) !important; }
-  .driver-shell .bg-emerald-100 { background: rgba(59, 130, 246, 0.18) !important; }
+  .driver-shell .border-emerald-300 { border-color: rgba(103, 193, 255, 0.40) !important; }
+  .driver-shell .text-emerald-800 { color: var(--driver-accent-3) !important; }
+  .driver-shell .bg-emerald-100 { background: rgba(47, 125, 255, 0.20) !important; }
 
   /* Amber alerts → premium warm */
-  .driver-shell .bg-amber-50 { background: rgba(245, 158, 11, 0.10) !important; }
-  .driver-shell .border-amber-200 { border-color: rgba(245, 158, 11, 0.30) !important; }
+  .driver-shell .bg-amber-50 { background: rgba(231, 193, 90, 0.10) !important; }
+  .driver-shell .border-amber-200 { border-color: rgba(231, 193, 90, 0.32) !important; }
   .driver-shell .text-amber-700,
   .driver-shell .text-amber-800,
-  .driver-shell .text-amber-900 { color: #f5c46b !important; }
+  .driver-shell .text-amber-900 { color: #f0d27a !important; }
 
   /* Red destructive → tone down for dark */
   .driver-shell .bg-red-50 { background: rgba(239, 68, 68, 0.10) !important; }
@@ -416,58 +416,95 @@
   .driver-shell .text-red-700 { color: #ff8a8a !important; }
 
   /* Blue & purple secondary tints */
-  .driver-shell .bg-blue-50 { background: rgba(59, 130, 246, 0.12) !important; }
+  .driver-shell .bg-blue-50 { background: rgba(78, 168, 255, 0.14) !important; }
   .driver-shell .text-blue-600,
-  .driver-shell .text-blue-700 { color: #93c5fd !important; }
+  .driver-shell .text-blue-700 { color: #A8C2FF !important; }
 
   /* Stat tiles colored backgrounds → navy glass with subtle accent border */
   .driver-shell [class*="border-amber-200"].rounded-xl,
   .driver-shell [class*="border-blue-200"].rounded-xl,
   .driver-shell [class*="border-emerald-200"].rounded-xl {
-    background: rgba(255,255,255,0.04) !important;
+    background: rgba(255,255,255,0.05) !important;
   }
 
   /* Premium driver utilities */
   .driver-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
     border: 1px solid var(--driver-border);
-    border-radius: 1rem;
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    box-shadow: 0 18px 42px -22px rgba(8,16,48,0.75), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+      0 22px 50px -24px rgba(4, 27, 82, 0.85),
+      0 0 0 1px rgba(103, 193, 255, 0.06),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+  .driver-card-active {
+    border-color: rgba(103, 193, 255, 0.55);
+    box-shadow:
+      0 0 0 1px rgba(78, 168, 255, 0.40),
+      0 0 32px rgba(78, 168, 255, 0.28),
+      0 22px 50px -22px rgba(47, 125, 255, 0.40);
   }
   .driver-cta {
-    background: linear-gradient(135deg, #3b82f6 0%, #5fb6ff 100%);
+    background: linear-gradient(135deg, #2F7DFF 0%, #4EA8FF 50%, #67C1FF 100%);
     color: #ffffff;
     font-weight: 700;
-    border-radius: 0.875rem;
-    box-shadow: 0 10px 30px -10px rgba(59,130,246,0.55);
-    transition: transform 120ms ease, filter 120ms ease;
+    border-radius: 1.125rem;
+    min-height: 56px;
+    box-shadow: 0 12px 32px -10px rgba(47, 125, 255, 0.65), 0 0 24px rgba(78, 168, 255, 0.28), inset 0 1px 0 rgba(255,255,255,0.20);
+    transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
   }
-  .driver-cta:active { transform: scale(0.98); }
-  .driver-cta:hover { filter: brightness(1.06); }
+  .driver-cta:active { transform: scale(0.97); }
+  .driver-cta:hover { filter: brightness(1.08); box-shadow: 0 16px 40px -10px rgba(47, 125, 255, 0.80), 0 0 32px rgba(103, 193, 255, 0.40); }
   .driver-secondary-cta {
-    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
     color: var(--driver-text);
     border: 1px solid var(--driver-border);
     font-weight: 600;
-    border-radius: 0.875rem;
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    border-radius: 1.125rem;
+    min-height: 56px;
+    backdrop-filter: blur(20px) saturate(170%);
+    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
   }
-  .driver-secondary-cta:active { transform: scale(0.98); }
-  .driver-secondary-cta:hover { border-color: var(--driver-border-strong); background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)); }
+  .driver-secondary-cta:active { transform: scale(0.97); }
+  .driver-secondary-cta:hover { border-color: var(--driver-border-strong); background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06)); }
   .driver-secondary-cta:disabled { opacity: 0.45; pointer-events: none; }
   .driver-chip {
     display: inline-flex; align-items: center; gap: 0.375rem;
-    padding: 0.25rem 0.625rem; border-radius: 9999px;
-    background: rgba(59, 130, 246, 0.14);
-    border: 1px solid rgba(120, 165, 255, 0.32);
-    color: #bcd4ff;
-    font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 0.3rem 0.7rem; border-radius: 9999px;
+    background: rgba(47, 125, 255, 0.16);
+    border: 1px solid rgba(103, 193, 255, 0.36);
+    color: #D6E4FF;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    backdrop-filter: blur(12px);
   }
+
+  /* === Premium status badges (En attente / À venir / En route / En cours / Terminée) === */
+  .driver-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 9999px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    font-variant-numeric: tabular-nums;
+  }
+  .driver-status::before {
+    content: ""; width: 6px; height: 6px; border-radius: 9999px;
+    background: currentColor;
+  }
+  .driver-status--pending { color: #f0d27a; background: rgba(231,193,90,0.12); border-color: rgba(231,193,90,0.40); box-shadow: 0 0 14px rgba(231,193,90,0.25); }
+  .driver-status--upcoming { color: #A8C2FF; background: rgba(168,194,255,0.10); border-color: rgba(168,194,255,0.35); }
+  .driver-status--enroute { color: #67C1FF; background: rgba(78,168,255,0.14); border-color: rgba(103,193,255,0.50); box-shadow: 0 0 18px rgba(78,168,255,0.35); }
+  .driver-status--enroute::before { animation: driver-pulse 1.6s ease-in-out infinite; }
+  .driver-status--inprogress { color: #67C1FF; background: rgba(47,125,255,0.18); border-color: rgba(103,193,255,0.55); box-shadow: 0 0 20px rgba(78,168,255,0.40); }
+  .driver-status--done { color: #7ee2b8; background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.40); }
+  @keyframes driver-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(103,193,255,0.55); }
+    50% { box-shadow: 0 0 0 5px rgba(103,193,255,0); }
+  }
+
 
   /* ============================================================
      === DRIVER STRIPE/BREX CARDS — SaaS premium, KPI, bleu électrique
