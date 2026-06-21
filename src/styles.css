@@ -137,12 +137,12 @@
   /* === Mobile App Shell === */
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-  .pb-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .pb-bottom-nav { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
   .h-bottom-nav { height: calc(64px + env(safe-area-inset-bottom)); }
 
-  /* Driver main : compense le header fixed mobile (safe-area + 56px) */
+  /* Driver main : compense le header mobile (safe-area + 64px) */
   @media (max-width: 767px) {
-    .driver-main { padding-top: calc(env(safe-area-inset-top) + 56px); }
+    .driver-main { padding-top: calc(env(safe-area-inset-top) + 64px); }
   }
 
   .mobile-card {
