@@ -95,6 +95,7 @@ function ConvoyeurMissions() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
+  const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -507,7 +508,8 @@ function ConvoyeurMissions() {
           </div>
         </div>
 
-        {/* HERO PREMIUM */}
+        {/* HERO PREMIUM — visible uniquement sur l'onglet Informations */}
+        {detailTab === "info" && (
         <PremiumMissionHero
           data={{
             numeroMission: openMission.numero_mission ?? null,
@@ -532,12 +534,66 @@ function ConvoyeurMissions() {
           totalSteps={TOTAL}
           currentStepLabel={currentStepLabel}
           onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
-          onOpenDocuments={() => setExpandedDocs(true)}
-          onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
+          onOpenDocuments={() => { setDetailTab("docs"); setExpandedDocs(true); }}
+          onOpenIncident={() => setDetailTab("action")}
         />
+        )}
+
+        {/* Bannière mission compacte (visible sur Action / Documents pour garder le contexte) */}
+        {detailTab !== "info" && (
+          <div
+            className="rounded-2xl p-4 text-white shadow-md"
+            style={{ background: "linear-gradient(135deg,#0b1026 0%,#131a3d 100%)" }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-cream/60 font-semibold">{statutLabel}</p>
+                <h2 className="font-serif text-xl tracking-tight truncate text-white">{openMission.numero_mission ?? "—"}</h2>
+                <p className="mt-0.5 text-cream/85 text-xs truncate">
+                  <span className="font-semibold">{dep.ville}</span> <span className="text-[var(--gold)]">→</span> <span className="font-semibold">{arr.ville}</span>
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] uppercase tracking-wider text-cream/60">Étape</p>
+                <p className="font-serif text-lg text-white">
+                  {Math.min(currentIdx, TOTAL)}<span className="text-cream/60 text-sm">/{TOTAL}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* === ONGLETS DÉTAIL MISSION (Action / Infos / Documents) === */}
+        <div className="sticky top-[44px] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-pro-bg-soft/95 backdrop-blur-md border-b border-pro-border">
+          <div className="flex gap-1 py-2 overflow-x-auto" role="tablist" aria-label="Détail mission">
+            {([
+              { key: "action", label: "Action" },
+              { key: "info", label: "Informations" },
+              { key: "docs", label: "Documents" },
+            ] as const).map((tab) => {
+              const active = detailTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setDetailTab(tab.key)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold tracking-tight transition active:scale-95 ${
+                    active
+                      ? "bg-[#0b1026] text-white shadow-md"
+                      : "bg-white text-[#0b1026] border border-pro-border hover:bg-pro-bg-soft"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Documents véhicule (VIN + carte grise) */}
-        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
+        {detailTab === "docs" && (t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
           <VehiculeDocsView
             vin={t?.vin ?? null}
             rectoPath={t?.carte_grise_recto_url ?? null}
@@ -545,8 +601,8 @@ function ConvoyeurMissions() {
           />
         )}
 
-        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) */}
-        {(() => {
+        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) — onglet Action */}
+        {detailTab === "action" && (() => {
           const te = t as (typeof t & {
             vehicule_energie?: string | null;
             vehicule_type?: string | null;
@@ -627,8 +683,8 @@ function ConvoyeurMissions() {
         })()}
 
 
-        {/* Live GPS */}
-        {isActive && (
+        {/* Live GPS — onglet Action */}
+        {detailTab === "action" && isActive && (
           <>
             <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -667,8 +723,8 @@ function ConvoyeurMissions() {
           </>
         )}
 
-        {/* Acceptation rapide si proposée */}
-        {openMission.statut === "propose" && (
+        {/* Acceptation rapide si proposée — onglet Action */}
+        {detailTab === "action" && openMission.statut === "propose" && (
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => updateStatus(openMission.id, "accepte")}
@@ -685,8 +741,8 @@ function ConvoyeurMissions() {
           </div>
         )}
 
-        {/* === COCKPIT MISSION : étape en cours unifiée (selfie + signatures + EDL + workflow) === */}
-        {openMission.statut !== "propose" && user && (
+        {/* === COCKPIT MISSION : étape en cours unifiée — onglet Action === */}
+        {detailTab === "action" && openMission.statut !== "propose" && user && (
           <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}
@@ -708,17 +764,19 @@ function ConvoyeurMissions() {
           />
         )}
 
-        {/* PV de livraison digitalisés (plateformes externes) */}
-        <div className="bg-white rounded-2xl border border-pro-border p-4">
-          <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
-        </div>
+        {/* PV de livraison digitalisés — onglet Documents */}
+        {detailTab === "docs" && (
+          <div className="bg-white rounded-2xl border border-pro-border p-4">
+            <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
+          </div>
+        )}
 
-        {/* Documents */}
-        {user && (
+        {/* Documents de mission — onglet Documents */}
+        {detailTab === "docs" && user && (
           <div className="bg-white rounded-2xl border border-pro-border p-4">
             <button
               onClick={() => setExpandedDocs(v => !v)}
-              className="flex items-center gap-2 text-sm text-pro-text-soft hover:text-pro-text w-full"
+              className="flex items-center gap-2 text-sm font-semibold text-[#0b1026] hover:text-[var(--gold)] w-full"
             >
               <FileText size={14} />
               Documents de mission

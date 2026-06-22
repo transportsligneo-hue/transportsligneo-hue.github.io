@@ -137,24 +137,24 @@ export function PremiumMissionHero({
       </div>
 
       {/* === LAYOUT 2 COLONNES : INFOS GAUCHE + TIMELINE DROITE === */}
-      <div className="px-4 sm:px-5 md:px-8 -mt-10 relative z-10">
+      <div className="px-4 sm:px-5 md:px-8 mt-4 sm:-mt-10 relative z-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6 items-start">
           {/* === COLONNE GAUCHE : cartes + raccourcis === */}
           <div className="space-y-4 min-w-0">
-            {/* 3 cartes Départ / Arrivée / Véhicule */}
+            {/* 3 cartes Départ / Arrivée / Véhicule — format unifié */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <InfoCard
                 label="Départ"
                 iconBg="bg-[#0b1026]"
-                icon={<MapPin size={16} className="text-white" />}
+                icon={<MapPin size={16} className="text-[var(--gold)]" />}
                 title={data.depart?.ville || "—"}
                 line1={data.depart?.adresse}
                 footer={fmtDate(data.depart?.date, data.depart?.heure)}
               />
               <InfoCard
                 label="Arrivée"
-                iconBg="bg-[var(--gold)]"
-                icon={<MapPin size={16} className="text-[#0b1026]" />}
+                iconBg="bg-[#0b1026]"
+                icon={<MapPin size={16} className="text-[var(--gold)]" />}
                 title={data.arrivee?.ville || "—"}
                 line1={data.arrivee?.adresse}
                 footer={fmtDate(data.arrivee?.date, data.arrivee?.heure)}
@@ -162,14 +162,14 @@ export function PremiumMissionHero({
               <InfoCard
                 label="Véhicule"
                 iconBg="bg-[#0b1026]"
-                icon={<Car size={16} className="text-white" />}
+                icon={<Car size={16} className="text-[var(--gold)]" />}
                 title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || "—"}
                 badge={data.vehicule?.immatriculation}
                 footer={data.vehicule?.vin ? `VIN : ${data.vehicule.vin}` : null}
               />
             </div>
 
-            {/* Raccourcis 6 boutons */}
+            {/* Raccourcis 6 boutons — boutons d'appel toujours actifs */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
               <ShortcutTile
                 label="Ouvrir GPS"
@@ -180,11 +180,13 @@ export function PremiumMissionHero({
                 label="Appeler enlèvement"
                 icon={<Phone size={20} />}
                 href={data.contactDepartTel ? `tel:${data.contactDepartTel}` : undefined}
+                fallbackMessage="Numéro d'enlèvement non renseigné"
               />
               <ShortcutTile
-                label="Appeler réception"
+                label="Appeler livraison"
                 icon={<Phone size={20} />}
                 href={data.contactArriveeTel ? `tel:${data.contactArriveeTel}` : undefined}
+                fallbackMessage="Numéro de livraison non renseigné"
               />
               <ShortcutTile label="Inspection" icon={<Search size={20} />} onClick={onOpenInspection} />
               <ShortcutTile label="Documents" icon={<FileText size={20} />} onClick={onOpenDocuments} />
@@ -266,17 +268,19 @@ function InfoCard({
 }) {
   return (
     <div className="bg-white rounded-2xl border border-pro-border p-4 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pro-muted">{label}</p>
-      <div className={`mt-2 w-9 h-9 rounded-full ${iconBg} flex items-center justify-center`}>{icon}</div>
-      <h4 className="mt-3 font-semibold text-[#0b1026] text-[15px] leading-tight truncate">{title}</h4>
-      {line1 && <p className="mt-0.5 text-pro-text-soft text-xs truncate">{line1}</p>}
+      <div className="flex items-center gap-2">
+        <div className={`w-8 h-8 rounded-full ${iconBg} flex items-center justify-center ring-1 ring-black/5`}>{icon}</div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-pro-muted">{label}</p>
+      </div>
+      <h4 className="mt-2.5 font-bold text-[#0b1026] text-[15px] leading-tight truncate tracking-tight">{title}</h4>
+      {line1 && <p className="mt-1 text-[#1f2540] text-xs truncate font-medium">{line1}</p>}
       {badge && (
         <span className="inline-flex items-center mt-2 px-2 py-0.5 rounded-md bg-[#0b1026] text-white text-[11px] font-mono tracking-wider">
           {badge}
         </span>
       )}
       {footer && (
-        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-pro-text-soft">
+        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#3a3f5a] font-medium">
           <Calendar size={11} />
           <span className="truncate">{footer}</span>
         </div>
@@ -286,22 +290,38 @@ function InfoCard({
 }
 
 function ShortcutTile({
-  label, icon, href, onClick,
-}: { label: string; icon: React.ReactNode; href?: string; onClick?: () => void }) {
-  const disabled = !href && !onClick;
+  label, icon, href, onClick, fallbackMessage,
+}: { label: string; icon: React.ReactNode; href?: string; onClick?: () => void; fallbackMessage?: string }) {
+  const hasAction = !!href || !!onClick;
+  const showFallback = !hasAction && !!fallbackMessage;
   const content = (
     <>
       <div className="text-[var(--gold)]">{icon}</div>
-      <span className="text-[11px] sm:text-xs text-cream text-center leading-tight">{label}</span>
+      <span className="text-[11px] sm:text-xs text-cream text-center leading-tight font-medium">{label}</span>
     </>
   );
-  const cls = `flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl p-2 sm:p-3 transition active:scale-95 ${
-    disabled
-      ? "bg-[#0b1026]/40 opacity-50 pointer-events-none"
-      : "bg-[#0b1026] hover:bg-[#131a3d] shadow-sm"
+  const baseCls = "flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl p-2 sm:p-3 transition active:scale-95";
+  const cls = `${baseCls} ${
+    hasAction || showFallback
+      ? "bg-[#0b1026] hover:bg-[#131a3d] shadow-sm"
+      : "bg-[#0b1026]/40 opacity-50 pointer-events-none"
   }`;
   if (href) return <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>{content}</a>;
-  return <button type="button" onClick={onClick} disabled={disabled} className={cls}>{content}</button>;
+  if (onClick) return <button type="button" onClick={onClick} className={cls}>{content}</button>;
+  if (showFallback) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          import("sonner").then(({ toast }) => toast.info(fallbackMessage!));
+        }}
+        className={cls}
+      >
+        {content}
+      </button>
+    );
+  }
+  return <button type="button" disabled className={cls}>{content}</button>;
 }
 
 /* === TIMELINE VERTICALE — style EDL Inspection Driver === */
