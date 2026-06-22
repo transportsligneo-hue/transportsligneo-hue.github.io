@@ -723,8 +723,8 @@ function ConvoyeurMissions() {
           </>
         )}
 
-        {/* Acceptation rapide si proposée */}
-        {openMission.statut === "propose" && (
+        {/* Acceptation rapide si proposée — onglet Action */}
+        {detailTab === "action" && openMission.statut === "propose" && (
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => updateStatus(openMission.id, "accepte")}
