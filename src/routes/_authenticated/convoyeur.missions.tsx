@@ -537,8 +537,36 @@ function ConvoyeurMissions() {
           onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
         />
 
+        {/* === ONGLETS DÉTAIL MISSION (Action / Infos / Documents) === */}
+        <div className="sticky top-[44px] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-pro-bg-soft/95 backdrop-blur-md border-b border-pro-border">
+          <div className="flex gap-1 py-2 overflow-x-auto" role="tablist" aria-label="Détail mission">
+            {([
+              { key: "action", label: "Action" },
+              { key: "info", label: "Informations" },
+              { key: "docs", label: "Documents" },
+            ] as const).map((tab) => {
+              const active = detailTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setDetailTab(tab.key)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold tracking-tight transition active:scale-95 ${
+                    active
+                      ? "bg-[#0b1026] text-white shadow-md"
+                      : "bg-white text-[#0b1026] border border-pro-border hover:bg-pro-bg-soft"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Documents véhicule (VIN + carte grise) */}
-        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
+        {detailTab === "docs" && (t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
           <VehiculeDocsView
             vin={t?.vin ?? null}
             rectoPath={t?.carte_grise_recto_url ?? null}
