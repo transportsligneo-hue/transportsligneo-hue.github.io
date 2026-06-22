@@ -508,7 +508,8 @@ function ConvoyeurMissions() {
           </div>
         </div>
 
-        {/* HERO PREMIUM */}
+        {/* HERO PREMIUM — visible uniquement sur l'onglet Informations */}
+        {detailTab === "info" && (
         <PremiumMissionHero
           data={{
             numeroMission: openMission.numero_mission ?? null,
@@ -533,9 +534,35 @@ function ConvoyeurMissions() {
           totalSteps={TOTAL}
           currentStepLabel={currentStepLabel}
           onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
-          onOpenDocuments={() => setExpandedDocs(true)}
-          onOpenIncident={() => alert("Aide / Incident — fonctionnalité à venir (couche 2)")}
+          onOpenDocuments={() => { setDetailTab("docs"); setExpandedDocs(true); }}
+          onOpenIncident={() => setDetailTab("action")}
         />
+        )}
+
+        {/* Bannière mission compacte (visible sur Action / Documents pour garder le contexte) */}
+        {detailTab !== "info" && (
+          <div
+            className="rounded-2xl p-4 text-white shadow-md"
+            style={{ background: "linear-gradient(135deg,#0b1026 0%,#131a3d 100%)" }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-cream/60 font-semibold">{statutLabel}</p>
+                <h2 className="font-serif text-xl tracking-tight truncate text-white">{openMission.numero_mission ?? "—"}</h2>
+                <p className="mt-0.5 text-cream/85 text-xs truncate">
+                  <span className="font-semibold">{dep.ville}</span> <span className="text-[var(--gold)]">→</span> <span className="font-semibold">{arr.ville}</span>
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] uppercase tracking-wider text-cream/60">Étape</p>
+                <p className="font-serif text-lg text-white">
+                  {Math.min(currentIdx, TOTAL)}<span className="text-cream/60 text-sm">/{TOTAL}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* === ONGLETS DÉTAIL MISSION (Action / Infos / Documents) === */}
         <div className="sticky top-[44px] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-pro-bg-soft/95 backdrop-blur-md border-b border-pro-border">
