@@ -741,8 +741,8 @@ function ConvoyeurMissions() {
           </div>
         )}
 
-        {/* === COCKPIT MISSION : étape en cours unifiée (selfie + signatures + EDL + workflow) === */}
-        {openMission.statut !== "propose" && user && (
+        {/* === COCKPIT MISSION : étape en cours unifiée — onglet Action === */}
+        {detailTab === "action" && openMission.statut !== "propose" && user && (
           <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}
