@@ -601,8 +601,8 @@ function ConvoyeurMissions() {
           />
         )}
 
-        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) */}
-        {(() => {
+        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) — onglet Action */}
+        {detailTab === "action" && (() => {
           const te = t as (typeof t & {
             vehicule_energie?: string | null;
             vehicule_type?: string | null;
