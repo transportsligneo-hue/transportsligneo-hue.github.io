@@ -764,17 +764,19 @@ function ConvoyeurMissions() {
           />
         )}
 
-        {/* PV de livraison digitalisés (plateformes externes) */}
-        <div className="bg-white rounded-2xl border border-pro-border p-4">
-          <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
-        </div>
+        {/* PV de livraison digitalisés — onglet Documents */}
+        {detailTab === "docs" && (
+          <div className="bg-white rounded-2xl border border-pro-border p-4">
+            <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
+          </div>
+        )}
 
-        {/* Documents */}
-        {user && (
+        {/* Documents de mission — onglet Documents */}
+        {detailTab === "docs" && user && (
           <div className="bg-white rounded-2xl border border-pro-border p-4">
             <button
               onClick={() => setExpandedDocs(v => !v)}
-              className="flex items-center gap-2 text-sm text-pro-text-soft hover:text-pro-text w-full"
+              className="flex items-center gap-2 text-sm font-semibold text-[#0b1026] hover:text-[var(--gold)] w-full"
             >
               <FileText size={14} />
               Documents de mission
