@@ -137,24 +137,24 @@ export function PremiumMissionHero({
       </div>
 
       {/* === LAYOUT 2 COLONNES : INFOS GAUCHE + TIMELINE DROITE === */}
-      <div className="px-4 sm:px-5 md:px-8 -mt-10 relative z-10">
+      <div className="px-4 sm:px-5 md:px-8 mt-4 sm:-mt-10 relative z-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6 items-start">
           {/* === COLONNE GAUCHE : cartes + raccourcis === */}
           <div className="space-y-4 min-w-0">
-            {/* 3 cartes Départ / Arrivée / Véhicule */}
+            {/* 3 cartes Départ / Arrivée / Véhicule — format unifié */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <InfoCard
                 label="Départ"
                 iconBg="bg-[#0b1026]"
-                icon={<MapPin size={16} className="text-white" />}
+                icon={<MapPin size={16} className="text-[var(--gold)]" />}
                 title={data.depart?.ville || "—"}
                 line1={data.depart?.adresse}
                 footer={fmtDate(data.depart?.date, data.depart?.heure)}
               />
               <InfoCard
                 label="Arrivée"
-                iconBg="bg-[var(--gold)]"
-                icon={<MapPin size={16} className="text-[#0b1026]" />}
+                iconBg="bg-[#0b1026]"
+                icon={<MapPin size={16} className="text-[var(--gold)]" />}
                 title={data.arrivee?.ville || "—"}
                 line1={data.arrivee?.adresse}
                 footer={fmtDate(data.arrivee?.date, data.arrivee?.heure)}
@@ -162,14 +162,14 @@ export function PremiumMissionHero({
               <InfoCard
                 label="Véhicule"
                 iconBg="bg-[#0b1026]"
-                icon={<Car size={16} className="text-white" />}
+                icon={<Car size={16} className="text-[var(--gold)]" />}
                 title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || "—"}
                 badge={data.vehicule?.immatriculation}
                 footer={data.vehicule?.vin ? `VIN : ${data.vehicule.vin}` : null}
               />
             </div>
 
-            {/* Raccourcis 6 boutons */}
+            {/* Raccourcis 6 boutons — boutons d'appel toujours actifs */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
               <ShortcutTile
                 label="Ouvrir GPS"
@@ -180,11 +180,13 @@ export function PremiumMissionHero({
                 label="Appeler enlèvement"
                 icon={<Phone size={20} />}
                 href={data.contactDepartTel ? `tel:${data.contactDepartTel}` : undefined}
+                fallbackMessage="Numéro d'enlèvement non renseigné"
               />
               <ShortcutTile
-                label="Appeler réception"
+                label="Appeler livraison"
                 icon={<Phone size={20} />}
                 href={data.contactArriveeTel ? `tel:${data.contactArriveeTel}` : undefined}
+                fallbackMessage="Numéro de livraison non renseigné"
               />
               <ShortcutTile label="Inspection" icon={<Search size={20} />} onClick={onOpenInspection} />
               <ShortcutTile label="Documents" icon={<FileText size={20} />} onClick={onOpenDocuments} />
