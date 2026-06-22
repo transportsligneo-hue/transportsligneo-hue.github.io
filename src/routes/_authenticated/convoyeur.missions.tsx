@@ -95,6 +95,7 @@ function ConvoyeurMissions() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
+  const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
