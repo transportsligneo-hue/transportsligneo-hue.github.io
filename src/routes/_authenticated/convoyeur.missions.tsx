@@ -683,8 +683,8 @@ function ConvoyeurMissions() {
         })()}
 
 
-        {/* Live GPS */}
-        {isActive && (
+        {/* Live GPS — onglet Action */}
+        {detailTab === "action" && isActive && (
           <>
             <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0" />
