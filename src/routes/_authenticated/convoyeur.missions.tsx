@@ -615,7 +615,7 @@ function ConvoyeurMissions() {
           const energie = (te?.vehicule_energie ?? "").toLowerCase();
           const isElec = energie.includes("élec") || energie.includes("elec") || energie === "ev";
           const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald"; required?: boolean }[] = [];
-          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher la recharge à l'arrivée", tone: "blue", required: true });
+          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher pour le trajet", tone: "blue", required: true });
           if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold", required: true });
           if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald", required: true });
           if (meta?.express) tasks.push({ key: "express", label: "⚡ Mission express — priorité", tone: "gold" });
