@@ -132,7 +132,7 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
         <ActionBtn
           label="Itinéraire"
           icon={<Navigation size={14} />}
-          href={departQuery ? `https://www.google.com/maps/dir/?api=1&destination=${departQuery}` : undefined}
+          href={itineraireHref}
           onClick={onNavigate}
         />
         <ActionBtn
