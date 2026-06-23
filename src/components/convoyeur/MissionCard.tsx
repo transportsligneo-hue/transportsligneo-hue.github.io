@@ -86,18 +86,20 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
       >
         <div className="flex items-start gap-3.5">
           <div className="flex flex-col items-center gap-1 pt-1.5 shrink-0">
-            <div className="w-2 h-2 rounded-full bg-[#e7c76a] ring-2 ring-[rgba(212,175,55,0.20)]" />
-            <div className="w-px h-6 bg-[rgba(255,255,255,0.12)]" />
-            <div className="w-2 h-2 rounded-full bg-[#93c5fd] ring-2 ring-[rgba(59,130,246,0.20)]" />
+            <div className={`w-2.5 h-2.5 rounded-full ${meta.live ? "bg-emerald-400 ring-2 ring-emerald-400/30 animate-pulse" : "bg-[#e7c76a] ring-2 ring-[rgba(212,175,55,0.25)]"}`} />
+            <div className="relative w-px h-7 bg-[rgba(255,255,255,0.10)] overflow-hidden">
+              <div className={`absolute inset-x-0 top-0 ${meta.live ? "h-full bg-gradient-to-b from-emerald-400 via-[#4EA8FF] to-[#93c5fd] animate-[pulse_2s_ease-in-out_infinite]" : "h-1/2 bg-gradient-to-b from-[#e7c76a] to-transparent"}`} />
+            </div>
+            <div className={`w-2.5 h-2.5 rounded-full ${meta.live ? "bg-[#4EA8FF] ring-2 ring-[#4EA8FF]/30" : "bg-[#93c5fd] ring-2 ring-[rgba(59,130,246,0.25)]"}`} />
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <div>
               <p className="brex-label-xs">Départ</p>
-              <p className="text-[13.5px] text-[var(--driver-text)] font-medium leading-snug truncate mt-0.5">{t?.depart || "—"}</p>
+              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.depart || "—"}</p>
             </div>
             <div>
               <p className="brex-label-xs">Arrivée</p>
-              <p className="text-[13.5px] text-[var(--driver-text)] font-medium leading-snug truncate mt-0.5">{t?.arrivee || "—"}</p>
+              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.arrivee || "—"}</p>
             </div>
           </div>
           <ChevronRight size={16} className="text-[var(--driver-muted)] shrink-0 mt-1" />
