@@ -92,7 +92,7 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>("today");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
