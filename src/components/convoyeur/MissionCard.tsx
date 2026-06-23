@@ -57,6 +57,10 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
   const t = mission.trajet;
 
   const departQuery = t?.depart ? encodeURIComponent(t.depart) : "";
+  const arriveeQuery = t?.arrivee ? encodeURIComponent(t.arrivee) : "";
+  const itineraireHref = arriveeQuery
+    ? `https://www.google.com/maps/dir/?api=1${departQuery ? `&origin=${departQuery}` : ""}&destination=${arriveeQuery}&travelmode=driving`
+    : undefined;
 
   return (
     <article className={`brex-card ${isActive ? "brex-card--active" : ""}`}>
