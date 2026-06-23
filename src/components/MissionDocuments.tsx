@@ -187,34 +187,24 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
       </div>
 
       {!isAdmin && (
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <label className="text-xs font-semibold text-slate-600">Type de document</label>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {DOC_TYPES.map((type) => {
-                const Icon = type.icon;
-                const active = selectedType === type.value;
-                return (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => setSelectedType(type.value)}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-semibold transition ${active ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}
-                  >
-                    <Icon size={14} /> {type.short}
-                  </button>
-                );
-              })}
-            </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <label className="text-xs font-semibold text-slate-600">Type de document</label>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {DOC_TYPES.map((type) => {
+              const Icon = type.icon;
+              const active = selectedType === type.value;
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  onClick={() => setSelectedType(type.value)}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-semibold transition ${active ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}
+                >
+                  <Icon size={14} /> {type.short}
+                </button>
+              );
+            })}
           </div>
-
-          <button
-            type="button"
-            onClick={() => setSignatureOpen(true)}
-            className="flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-4 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] sm:min-w-44"
-          >
-            <PenLine size={18} /> Signer le PV
-          </button>
         </div>
       )}
 
