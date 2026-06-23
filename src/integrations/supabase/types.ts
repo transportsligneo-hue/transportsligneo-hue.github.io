@@ -2114,6 +2114,7 @@ export type Database = {
       }
       missions: {
         Row: {
+          archived_at: string | null
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
@@ -2148,6 +2149,7 @@ export type Database = {
           vin: string | null
         }
         Insert: {
+          archived_at?: string | null
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -2182,6 +2184,7 @@ export type Database = {
           vin?: string | null
         }
         Update: {
+          archived_at?: string | null
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -2607,6 +2610,7 @@ export type Database = {
       }
       trajets: {
         Row: {
+          archived_at: string | null
           arrivee: string
           arrivee_contact_instructions: string | null
           arrivee_contact_nom: string | null
@@ -2664,6 +2668,7 @@ export type Database = {
           vin: string | null
         }
         Insert: {
+          archived_at?: string | null
           arrivee: string
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
@@ -2721,6 +2726,7 @@ export type Database = {
           vin?: string | null
         }
         Update: {
+          archived_at?: string | null
           arrivee?: string
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
@@ -3137,6 +3143,7 @@ export type Database = {
     Functions: {
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_reset_operational_data: { Args: never; Returns: Json }
+      auto_archive_old_records: { Args: never; Returns: undefined }
       can_driver_update_attribution: {
         Args: {
           _attribution_id: string
