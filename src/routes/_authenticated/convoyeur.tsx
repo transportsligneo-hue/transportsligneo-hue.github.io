@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_authenticated/convoyeur")({
 
 const navItems: ConvoyeurSidebarItem[] = [
   { to: "/convoyeur", label: "Tableau de bord", shortLabel: "Accueil", icon: LayoutDashboard, exact: true },
-  { to: "/convoyeur/disponibles", label: "Missions dispo", shortLabel: "Dispo", icon: Gavel },
-  { to: "/convoyeur/missions", label: "Mes missions", shortLabel: "Missions", icon: Truck },
+  { to: "/convoyeur/disponibles", label: "Missions dispo", shortLabel: "Missions dispo", icon: Gavel },
+  { to: "/convoyeur/missions", label: "Mes missions", shortLabel: "Mes missions", icon: Truck },
   { to: "/convoyeur/disponibilites", label: "Disponibilités", shortLabel: "Agenda", icon: CalendarDays },
   { to: "/convoyeur/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
   { to: "/convoyeur/historique", label: "Historique", icon: History },

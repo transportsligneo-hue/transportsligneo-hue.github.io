@@ -92,7 +92,7 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>("today");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
@@ -615,7 +615,7 @@ function ConvoyeurMissions() {
           const energie = (te?.vehicule_energie ?? "").toLowerCase();
           const isElec = energie.includes("élec") || energie.includes("elec") || energie === "ev";
           const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald"; required?: boolean }[] = [];
-          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher la recharge à l'arrivée", tone: "blue", required: true });
+          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher pour le trajet", tone: "blue", required: true });
           if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold", required: true });
           if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald", required: true });
           if (meta?.express) tasks.push({ key: "express", label: "⚡ Mission express — priorité", tone: "gold" });
@@ -632,11 +632,11 @@ function ConvoyeurMissions() {
           const totalReq = tasks.filter(x => x.required).length;
           const doneReq = tasks.filter(x => x.required && completion[x.key]?.done).length;
           return (
-            <div className="bg-white rounded-2xl border border-pro-border p-4 space-y-3">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold text-pro-text-soft uppercase tracking-wide">À faire sur cette mission</div>
+                <div className="text-xs font-bold text-slate-900 uppercase tracking-wide">À faire sur cette mission</div>
                 {totalReq > 0 && (
-                  <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 border ${doneReq === totalReq ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                  <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 border ${doneReq === totalReq ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-800 border-amber-200"}`}>
                     {doneReq}/{totalReq} effectuée{totalReq > 1 ? "s" : ""}
                   </span>
                 )}
@@ -653,12 +653,12 @@ function ConvoyeurMissions() {
                         onClick={() => toggleOptionCompletion(openMission, task.key, !isDone)}
                         className={`w-full flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm text-left transition active:scale-[0.99] ${toneRing(task.tone, isDone)}`}
                       >
-                        <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-current/40 bg-white"}`}>
+                        <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-400 bg-white"}`}>
                           {isDone && <Check size={12} strokeWidth={3} />}
                         </span>
-                        <span className={`flex-1 ${isDone ? "line-through opacity-70" : "font-medium"}`}>{task.label}</span>
+                        <span className={`flex-1 font-semibold text-slate-900 ${isDone ? "line-through opacity-60" : ""}`}>{task.label}</span>
                         {at && (
-                          <span className="text-[10px] text-emerald-700 shrink-0">
+                          <span className="text-[10px] text-emerald-700 shrink-0 font-semibold">
                             ✓ {new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         )}
@@ -668,15 +668,15 @@ function ConvoyeurMissions() {
                 </div>
               )}
               {hasExtra && (
-                <div className="grid grid-cols-2 gap-2 text-xs text-pro-text-soft pt-2 border-t border-pro-border">
-                  {te?.vehicule_type && <div><span className="text-pro-muted">Type:</span> {te.vehicule_type}</div>}
-                  {te?.vehicule_couleur && <div><span className="text-pro-muted">Couleur:</span> {te.vehicule_couleur}</div>}
-                  {te?.vehicule_km != null && <div><span className="text-pro-muted">Km:</span> {te.vehicule_km}</div>}
-                  {te?.vehicule_energie && <div><span className="text-pro-muted">Énergie:</span> {te.vehicule_energie}</div>}
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-800 pt-2 border-t border-slate-200">
+                  {te?.vehicule_type && <div><span className="text-slate-500 font-medium">Type :</span> <span className="font-semibold">{te.vehicule_type}</span></div>}
+                  {te?.vehicule_couleur && <div><span className="text-slate-500 font-medium">Couleur :</span> <span className="font-semibold">{te.vehicule_couleur}</span></div>}
+                  {te?.vehicule_km != null && <div><span className="text-slate-500 font-medium">Km :</span> <span className="font-semibold">{te.vehicule_km}</span></div>}
+                  {te?.vehicule_energie && <div><span className="text-slate-500 font-medium">Énergie :</span> <span className="font-semibold">{te.vehicule_energie}</span></div>}
                 </div>
               )}
               {te?.vehicule_notes && (
-                <p className="text-xs italic text-pro-text-soft whitespace-pre-wrap">"{te.vehicule_notes}"</p>
+                <p className="text-xs italic text-slate-700 whitespace-pre-wrap border-l-2 border-slate-300 pl-2">"{te.vehicule_notes}"</p>
               )}
             </div>
           );

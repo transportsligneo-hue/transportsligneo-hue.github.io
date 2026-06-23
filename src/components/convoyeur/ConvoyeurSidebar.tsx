@@ -106,7 +106,6 @@ export function ConvoyeurSidebar({ items, children }: Props) {
               className="relative w-11 h-11 rounded-2xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-[#D6E4FF] active:scale-95 transition-transform"
             >
               <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#4EA8FF] shadow-[0_0_10px_rgba(78,168,255,0.90)]" />
             </button>
             <button
               onClick={() => setMobileMenuOpen(true)}
