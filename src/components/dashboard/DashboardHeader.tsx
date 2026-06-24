@@ -8,7 +8,7 @@ type Variant = "light" | "dark";
 
 interface SearchResult {
   id: string;
-  type: "demande" | "trajet" | "client" | "convoyeur";
+  type: "demande" | "trajet" | "client" | "convoyeur" | "mission" | "devis" | "vehicle";
   title: string;
   subtitle?: string;
   to: string;
