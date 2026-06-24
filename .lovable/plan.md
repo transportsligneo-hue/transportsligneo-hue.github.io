@@ -1,128 +1,125 @@
 
-# Plan d'action — Corrections critiques & fiabilisation
+# Évolution Enterprise Ligneo — Plan de livraison par lots
 
-Objectif : corriger les bugs bloquants, homogénéiser l'UX et améliorer les performances, sans casser l'existant ni introduire de régression.
-
-Travail découpé en 9 lots livrables indépendamment. Je peux tout enchaîner, ou tu me dis par où commencer.
+Ce chantier représente plusieurs semaines de développement. Pour ne **rien casser** de l'existant (workflows convoyeur, paiements Stripe, EDL, signatures, GPS client, archivage 30j…), je propose de livrer en **8 lots indépendants et testables**, chacun déployable seul. Tu valides lot par lot.
 
 ---
 
-## Lot 1 — PDF : VIN + kilométrages
+## Lot 1 — Fondations data & sécurité (socle des autres lots)
 
-Fichiers : `src/lib/mission-pdf.ts`, `src/lib/devis-pdf.ts`, `src/lib/facture-pdf.ts`, `src/lib/edl-final-pdf.ts`, `src/components/MissionReport.tsx`, `src/components/mission/ClientMissionDetailView.tsx`.
+**Migration BDD** (tout en une seule migration approuvée) :
 
-- Ajouter dans la section "Informations véhicule" de chaque PDF :
-  - **VIN** (depuis `trajets.vehicule_vin` / `demandes.vin` / `missions` selon source)
-  - **Km départ** (depuis `inspections` étape départ)
-  - **Km arrivée** (depuis `inspections` étape arrivée — affiché "—" si absent)
-- Source de vérité unique : helper `getVehiculeInfo(missionId)` lisant `attributions` → `trajets` → `inspections` pour rester aligné avec l'admin.
-- Affichage identique dans l'encadré véhicule de la fiche mission client/driver/admin.
+- `missions.mission_group_id` (uuid) + `missions.leg_type` (`aller` / `retour` / `simple`) + `missions.leg_index`
+- `trajets.mission_group_id` (uuid) — déjà partiellement géré via `parent_trajet_id`, on ajoute la notion de groupe
+- Table `vehicles` (catalogue véhicules flotte) : `id, organization_id, vin, immatriculation, marque, modele, energie, statut (actif/archive), notes, created_at, updated_at`
+- Table `vehicle_movements` (historique mouvements) : `vehicle_id, mission_id, type (livraison/restitution/transfert), from_address, to_address, occurred_at`
+- Table `audit_logs` étendue (déjà `activity_logs`) → ajout colonnes `old_value jsonb`, `new_value jsonb`, `ip`, `user_agent`
+- **Index critiques** :
+  - `CREATE INDEX ON missions USING gin (vin gin_trgm_ops)` (extension `pg_trgm`)
+  - `CREATE INDEX ON missions USING gin (immatriculation gin_trgm_ops)`
+  - Idem sur `trajets`, `vehicles`, `demandes_convoyage`
+  - Index composés sur `(organization_id, statut, date_prise_en_charge)`
+- RLS + GRANT sur toutes les nouvelles tables (`authenticated` + `service_role`, jamais `anon`)
+- Trigger `auto_split_aller_retour` : à la création d'un trajet `type_mission='livraison'` avec retour, créer **2 trajets liés** partageant `mission_group_id` (remplace la logique actuelle qui les crée déjà séparés mais sans groupe explicite)
 
-## Lot 2 — Validation email & "Compte suspendu" (BUG CRITIQUE)
-
-Cause probable : le label "Compte suspendu" est affiché dès que `email_confirmed_at IS NULL` OU dès que `profiles.statut != 'actif'`, alors que `handle_new_user` met déjà `statut='actif'`. À vérifier : `attente-validation.tsx`, `useAuth.tsx`, et la lecture de `profiles.statut`.
-
-Actions :
-1. Auditer la chaîne : trigger `handle_new_user`, route `/auth/email-confirmation`, hook `useAuth`, page `attente-validation`.
-2. Garantir qu'après clic sur le lien Supabase :
-   - `email_confirmed_at` est set (natif Supabase) ;
-   - aucune logique ne repasse `profiles.statut` à `suspendu` ;
-   - redirection vers `/auth/email-confirmation` (page déjà créée).
-3. Remplacer tout label "Compte suspendu" par la bonne sémantique :
-   - `email_confirmed_at IS NULL` → "Email non vérifié — renvoyer le lien"
-   - `profiles.statut = 'suspendu'` (vrai cas admin) → "Compte suspendu, contactez le support"
-4. Ajouter bouton "Renvoyer l'email de confirmation" sur la page login + attente-validation.
-5. Vérifier que les convoyeurs en `pending` voient bien "En attente de validation admin" et non "suspendu".
-
-## Lot 3 — Notifications push
-
-État actuel : VAPID configuré, SW présent, `pushToUser`/`pushToAdmins` existent mais pas systématiquement câblés.
-
-Audit + câblage des déclencheurs manquants :
-
-| Évènement | Cible | Câblage |
-|---|---|---|
-| Nouvelle demande devis | admins | déjà via `notifyAdmin`, vérifier push |
-| Nouveau devis signé | admins | à câbler dans `devis-acceptation.functions.ts` |
-| Mission attribuée | convoyeur | à câbler dans `accept_mission_fixe` / serverFn |
-| Statut mission change | client + convoyeur | hook sur `MissionWorkflow` save |
-| Mission terminée | client + admin | déjà partiel |
-| Nouveau message | destinataire | à câbler dans `admin.messages` |
-| Inscription client/convoyeur | admins | déjà via `notifyAdmin` |
-
-Aussi :
-- Activer l'enregistrement du SW dès `PwaProvider` (vérifier que `getSubscription()` fonctionne sans clic manuel pour les utilisateurs déjà opt-in).
-- Ajouter `PushNotificationToggle` dans la sidebar admin/client/convoyeur (actuellement peu exposé).
-- Logger les erreurs `sendPushToUser` dans `activity_logs` pour diagnostic.
-
-## Lot 4 — Emails transactionnels
-
-Audit ciblé de chaque template du registry, vérification destinataires + variables + lien.
-
-Checklist (un passage = un fix si écart) :
-- Client : inscription, validation, reset MDP, devis créé, devis payé, mission confirmée, mission démarrée, mission livrée, mission terminée, facture dispo.
-- Admin : nouvelle demande, nouveau devis, devis accepté, devis payé, B2B lead/paiement, inscription convoyeur, document mission.
-- Convoyeur : attribution, validation compte, offre acceptée/refusée.
-
-Pour chaque template : tester via `/lovable/email/transactional/preview`, vérifier `recipientEmail` réel, idempotencyKey unique, variables non vides.
-
-## Lot 5 — Logo client visible partout (back-office)
-
-Sources : `profiles.avatar_url` (client) + `organizations.logo_url` (société). Bucket `company-logos` déjà public.
-
-Affichage à ajouter (composant réutilisable `<ClientLogo client={...} size="sm|md" />`) :
-- `admin.clients.tsx` (liste) — avatar 32px à gauche du nom
-- `admin.clients.$clientId.tsx` (fiche) — header avec logo 80px
-- `admin.demandes.tsx`, `admin.devis.tsx`, `admin.missions.*` — colonne client avec logo
-- Fiche mission convoyeur (`MissionCockpit`, `PremiumMissionHero`) — bloc "Client" avec logo + raison sociale
-
-Fallback : initiales sur fond `card-premium`.
-
-## Lot 6 — Nettoyage rédactionnel "ton IA"
-
-Pass sur :
-- `ServicesContent`, `AProposContent`, `HeroDesktop`, `Hero`, `Footer`, `blog-articles.ts`, templates emails, meta tags.
-- Supprimer : `—` (em-dash) décoratifs, formulations "Découvrez l'expérience…", "premium" résiduel, doubles adjectifs ("rapide, simple et efficace").
-- Reformuler en phrases courtes orientées action métier.
-
-Pas de changement fonctionnel — uniquement copywriting.
-
-## Lot 7 — UX/UI fluidité
-
-- Lazy-load : routes admin lourdes (`admin.trajets`, `admin.historique`, blog) via `lazy()` déjà géré par TanStack — vérifier qu'aucune route n'importe en eager des libs lourdes (leaflet, pdf-lib).
-- Pagination côté serveur sur `admin.devis`, `admin.missions`, `admin.factures`, `admin.clients` (range Supabase, 25/page) au lieu du fetch global actuel.
-- Cache TanStack Query : `staleTime: 30s` pour listes admin, `Infinity` pour referentiels (pricing rules, app_settings).
-- Mémoïsation des grosses tables (`React.memo` + `useMemo` sur filtres).
-- Mobile : vérifier z-index carte GPS (déjà fix), padding bottom-nav, scroll sur modals plein écran.
-
-## Lot 8 — Performance back
-
-- `supabase--slow_queries` pour identifier le top 10.
-- Index probables à ajouter (migration) :
-  - `missions(user_id, statut)`, `attributions(convoyeur_id, statut)`, `trajets(statut_publication, date_trajet)`, `devis(user_id, statut)`, `mission_locations(attribution_id, recorded_at)`.
-- Audit RLS coûteuses : `is_mission_client`, `is_attribution_client` (sous-requêtes multi-JOIN) — envisager une vue matérialisée `mission_access` rafraîchie par trigger si pg_stat_statements le justifie.
-- Vérifier qu'aucun composant ne fait du N+1 (boucle `await` sur missions pour aller chercher inspections).
-
-## Lot 9 — Contrôle qualité
-
-Plan de tests Playwright headless :
-1. Inscription client → email → activation → login → dashboard
-2. Inscription convoyeur → attente validation admin → activation → mission
-3. Création devis → signature → paiement → mission auto → attribution → workflow complet → PDF EDL + facture
-4. Vérif push reçue à chaque étape clé
-5. Vérif emails reçus (via `email_send_log`)
-6. Vérif logo client visible dans 6 emplacements admin
+**Aucun changement UI dans ce lot.** Toutes les vues existantes continuent à fonctionner.
 
 ---
 
-## Ordre proposé d'exécution
+## Lot 2 — Recherche universelle VIN / plaque
 
-1. **Lot 2** (BUG critique compte suspendu) — bloquant
-2. **Lot 1** (PDF VIN/km) — rapide, à fort impact pro
-3. **Lot 5** (logo client) — visuel, rapide
-4. **Lot 4** (emails) puis **Lot 3** (push) — fiabilisation comms
-5. **Lot 6** (copywriting) — pass global
-6. **Lots 7 + 8** (perf) — nécessitent `slow_queries` + mesure avant/après
-7. **Lot 9** (QA finale)
+- Server function `searchVehiclesAndMissions({ query, scope, limit, cursor })` avec `requireSupabaseAuth`
+  - Scope filtré selon rôle : admin = global, client = ses orgs, convoyeur = ses missions
+  - Recherche trigram (LIKE `%query%`) sur VIN + plaque, missions, trajets, vehicles
+  - Pagination cursor-based
+- Composant `<UniversalSearch />` (cmd+K style) injecté dans :
+  - `AdminSidebar` (barre globale)
+  - `ProSidebar` / `ConvoyeurSidebar`
+- Hook `useUniversalSearch` avec debounce 250ms + React Query
 
-Confirme l'ordre (ou dis-moi quels lots prioriser) et je passe en mode build.
+---
+
+## Lot 3 — Aller / Retour comme 2 missions liées
+
+- Refactor `auto_create_trajet_from_devis` : générer `mission_group_id` partagé
+- UI client (`ClientMissionDetailView`) : afficher bandeau « Mission Aller » / « Mission Retour » + lien vers la mission jumelle
+- UI convoyeur (`convoyeur.missions.tsx`) : filtre `mission_group_id IS NOT NULL` invisible — un convoyeur ne voit que les legs qui lui sont attribués (déjà le cas via RLS, à confirmer)
+- Catalogue convoyeur (`convoyeur.disponibles.tsx`) : afficher les 2 legs séparément avec badge « Aller-Retour groupe #XXX »
+- Système d'enchères activable par admin : ajout `trajets.bidding_enabled boolean` + toggle dans fiche admin trajet ; quand actif, les offres convoyeur passent par `mission_offres` (déjà existant) au lieu de `accept_mission_fixe`
+
+---
+
+## Lot 4 — Module Gestion de flotte (client pro)
+
+Nouveau espace `/dashboard-pro/flotte` :
+
+- **Sous-onglets** : Véhicules · Sites · Utilisateurs · Mouvements · Statistiques
+- CRUD véhicules avec import CSV (VIN, plaque, marque, modèle)
+- CRUD sites (`organization_sites` nouvelle table : nom, adresse, contact)
+- Gestion membres (existant `organization_members`, on ajoute UI)
+- Tableau de bord KPI : véhicules totaux, missions réalisées/en cours/en attente, km parcourus (somme `missions.distance_km`), taux de réussite (livrée / total), délai moyen (`date_livraison - date_prise_en_charge`)
+- Composants : `<FleetKPICards />`, `<FleetVehiclesTable />`, `<VehicleMovementsTimeline />`
+
+---
+
+## Lot 5 — Géolocalisation admin + Centre d'exploitation
+
+- Route `/admin/exploitation` : carte Leaflet plein écran
+- Réutilise `mission_locations` (déjà alimenté par convoyeur GPS)
+- Markers temps réel via Supabase Realtime sur `mission_locations`
+- Panneaux latéraux : missions en attente, urgentes, convoyeurs dispo (depuis `disponibilites_convoyeurs`), convoyeurs en mission
+- Filtres : région (département depuis CP), statut, convoyeur, client
+- Fiche véhicule depuis la carte : position actuelle, historique trajet, vitesse, ETA (calcul Google Maps Distance Matrix existant)
+
+---
+
+## Lot 6 — Audit trail enrichi
+
+- Trigger générique `log_changes()` sur `missions`, `trajets`, `attributions`, `vehicles`, `organization_members`
+- Stocke `old_value` / `new_value` JSONB + `actor_user_id` + `ip` (depuis JWT claims)
+- UI admin `/admin/historique` (déjà existant) : ajout filtres entité + diff visuel JSON
+
+---
+
+## Lot 7 — Performance & Architecture Enterprise
+
+- Pagination serveur sur toutes les tables admin (>50 lignes) : `admin.missions`, `admin.trajets`, `admin.devis`, `admin.factures`, `admin.utilisateurs`
+- Lazy loading photos EDL via `loading="lazy"` + signed URLs à la demande
+- React Query : `staleTime: 30s` par défaut, invalidations ciblées
+- Index SQL supplémentaires identifiés par `supabase--slow_queries`
+- Cache Cloudflare sur routes publiques (`/api/public/*` GET)
+
+---
+
+## Lot 8 — QA & rapport final
+
+- Tests Playwright des parcours critiques : login, création devis, paiement, attribution, mission complète, EDL, recherche universelle, aller-retour
+- Vérification permissions par rôle (admin, super_admin, manager, convoyeur, client, sous_traitant, flotte)
+- Rapport markdown : tables ajoutées, routes nouvelles, composants nouveaux, migrations, points de vigilance
+
+---
+
+## Estimation
+
+| Lot | Complexité | Risque régression |
+|-----|------------|---|
+| 1   | Élevée (BDD) | Faible (additif) |
+| 2   | Moyenne | Très faible |
+| 3   | Élevée | **Moyen** (touche workflow paiement) |
+| 4   | Élevée | Faible (nouveau module) |
+| 5   | Moyenne | Faible |
+| 6   | Faible | Très faible |
+| 7   | Moyenne | Faible |
+| 8   | Faible | — |
+
+---
+
+## Ma recommandation
+
+**Démarrer par Lot 1 + Lot 2** (socle data + recherche universelle) : ils débloquent tout le reste, sont 100% additifs (zéro risque sur l'existant), et apportent une valeur immédiate visible. Puis enchaîner Lot 3 ou Lot 4 selon ta priorité business.
+
+**Questions avant de lancer le Lot 1 :**
+
+1. **Priorité business** : flotte client (Lot 4) ou centre d'exploitation admin (Lot 5) en premier après le socle ?
+2. **Enchères** (Lot 3) : on garde le système actuel `mission_offres` existant et on ajoute juste le toggle admin, ou tu veux une refonte enchère temps réel (timer, surenchère) ?
+3. **Import véhicules flotte** (Lot 4) : CSV suffit, ou tu veux aussi une API publique pour les gros clients ?

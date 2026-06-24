@@ -23,8 +23,11 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: string
+          ip: string | null
           ip_address: string | null
           metadata: Json | null
+          new_value: Json | null
+          old_value: Json | null
           organization_id: string | null
           user_agent: string | null
         }
@@ -36,8 +39,11 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: string
+          ip?: string | null
           ip_address?: string | null
           metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
           organization_id?: string | null
           user_agent?: string | null
         }
@@ -49,8 +55,11 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: string
+          ip?: string | null
           ip_address?: string | null
           metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
           organization_id?: string | null
           user_agent?: string | null
         }
@@ -2130,7 +2139,10 @@ export type Database = {
           fleet_organization_id: string | null
           id: string
           immatriculation: string | null
+          leg_index: number | null
+          leg_type: string | null
           marque: string | null
+          mission_group_id: string | null
           modele: string | null
           nom: string
           numero: string
@@ -2165,7 +2177,10 @@ export type Database = {
           fleet_organization_id?: string | null
           id?: string
           immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           nom: string
           numero?: string
@@ -2200,7 +2215,10 @@ export type Database = {
           fleet_organization_id?: string | null
           id?: string
           immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           nom?: string
           numero?: string
@@ -2307,6 +2325,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "organization_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_sites: {
+        Row: {
+          actif: boolean
+          adresse: string | null
+          code_postal: string | null
+          contact_email: string | null
+          contact_nom: string | null
+          contact_telephone: string | null
+          created_at: string
+          id: string
+          nom: string
+          notes: string | null
+          organization_id: string
+          pays: string | null
+          updated_at: string
+          ville: string | null
+        }
+        Insert: {
+          actif?: boolean
+          adresse?: string | null
+          code_postal?: string | null
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          id?: string
+          nom: string
+          notes?: string | null
+          organization_id: string
+          pays?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Update: {
+          actif?: boolean
+          adresse?: string | null
+          code_postal?: string | null
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          id?: string
+          nom?: string
+          notes?: string | null
+          organization_id?: string
+          pays?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_sites_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2618,6 +2695,7 @@ export type Database = {
           arrivee_contact_societe: string | null
           arrivee_contact_telephone: string | null
           arrivee_contact_telephone2: string | null
+          bidding_enabled: boolean
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
           client_email: string | null
@@ -2639,7 +2717,10 @@ export type Database = {
           heure_trajet: string | null
           id: string
           immatriculation: string | null
+          leg_index: number | null
+          leg_type: string | null
           marque: string | null
+          mission_group_id: string | null
           modele: string | null
           options_meta: Json
           parent_trajet_id: string | null
@@ -2676,6 +2757,7 @@ export type Database = {
           arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
+          bidding_enabled?: boolean
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_email?: string | null
@@ -2697,7 +2779,10 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -2734,6 +2819,7 @@ export type Database = {
           arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
+          bidding_enabled?: boolean
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_email?: string | null
@@ -2755,7 +2841,10 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -2929,6 +3018,153 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicle_movements: {
+        Row: {
+          created_at: string
+          from_address: string | null
+          id: string
+          mission_id: string | null
+          notes: string | null
+          occurred_at: string
+          to_address: string | null
+          trajet_id: string | null
+          type: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_address?: string | null
+          id?: string
+          mission_id?: string | null
+          notes?: string | null
+          occurred_at?: string
+          to_address?: string | null
+          trajet_id?: string | null
+          type: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          from_address?: string | null
+          id?: string
+          mission_id?: string | null
+          notes?: string | null
+          occurred_at?: string
+          to_address?: string | null
+          trajet_id?: string | null
+          type?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_movements_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_movements_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_movements_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_movements_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_publies_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_movements_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          archived_at: string | null
+          couleur: string | null
+          created_at: string
+          energie: string | null
+          id: string
+          immatriculation: string | null
+          kilometrage: number | null
+          marque: string | null
+          modele: string | null
+          notes: string | null
+          organization_id: string
+          site_id: string | null
+          statut: string
+          type_vehicule: string | null
+          updated_at: string
+          vin: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          couleur?: string | null
+          created_at?: string
+          energie?: string | null
+          id?: string
+          immatriculation?: string | null
+          kilometrage?: number | null
+          marque?: string | null
+          modele?: string | null
+          notes?: string | null
+          organization_id: string
+          site_id?: string | null
+          statut?: string
+          type_vehicule?: string | null
+          updated_at?: string
+          vin?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          couleur?: string | null
+          created_at?: string
+          energie?: string | null
+          id?: string
+          immatriculation?: string | null
+          kilometrage?: number | null
+          marque?: string | null
+          modele?: string | null
+          notes?: string | null
+          organization_id?: string
+          site_id?: string | null
+          statut?: string
+          type_vehicule?: string | null
+          updated_at?: string
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -3285,6 +3521,8 @@ export type Database = {
           rule_id: string
         }[]
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role:
