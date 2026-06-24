@@ -225,6 +225,9 @@ export function DashboardHeader({
     trajet: "Trajet",
     client: "Client",
     convoyeur: "Convoyeur",
+    mission: "Mission",
+    devis: "Devis",
+    vehicle: "Véhicule",
   };
 
   return (
