@@ -95,16 +95,16 @@ export function DashboardHeader({
     }
     const t = setTimeout(async () => {
       const q = `%${query}%`;
-      const [demandes, trajets, clients, convoyeurs] = await Promise.all([
+      const [demandes, trajets, clients, convoyeurs, missions, devis, vehicles] = await Promise.all([
         supabase
           .from("demandes_convoyage")
-          .select("id, prenom, nom, depart, arrivee")
-          .or(`nom.ilike.${q},prenom.ilike.${q},depart.ilike.${q},arrivee.ilike.${q}`)
+          .select("id, prenom, nom, depart, arrivee, immatriculation")
+          .or(`nom.ilike.${q},prenom.ilike.${q},depart.ilike.${q},arrivee.ilike.${q},immatriculation.ilike.${q}`)
           .limit(4),
         supabase
           .from("trajets")
-          .select("id, depart, arrivee, client_nom")
-          .or(`depart.ilike.${q},arrivee.ilike.${q},client_nom.ilike.${q}`)
+          .select("id, depart, arrivee, client_nom, vin, immatriculation")
+          .or(`depart.ilike.${q},arrivee.ilike.${q},client_nom.ilike.${q},vin.ilike.${q},immatriculation.ilike.${q}`)
           .limit(4),
         supabase
           .from("profiles")
@@ -116,21 +116,57 @@ export function DashboardHeader({
           .select("id, prenom, nom, email, ville")
           .or(`nom.ilike.${q},prenom.ilike.${q},email.ilike.${q},ville.ilike.${q}`)
           .limit(4),
+        supabase
+          .from("missions")
+          .select("id, numero, vin, immatriculation, ville_depart, ville_arrivee")
+          .or(`numero.ilike.${q},vin.ilike.${q},immatriculation.ilike.${q}`)
+          .limit(4),
+        supabase
+          .from("devis")
+          .select("id, numero, vin, prenom, nom")
+          .or(`numero.ilike.${q},vin.ilike.${q}`)
+          .limit(4),
+        supabase
+          .from("vehicles" as never)
+          .select("id, vin, immatriculation, marque, modele")
+          .or(`vin.ilike.${q},immatriculation.ilike.${q},marque.ilike.${q},modele.ilike.${q}`)
+          .limit(4),
       ]);
 
       const merged: SearchResult[] = [
-        ...(demandes.data ?? []).map((d) => ({
+        ...((missions.data ?? []) as Array<{ id: string; numero: string; vin: string | null; immatriculation: string | null; ville_depart: string; ville_arrivee: string }>).map((m) => ({
+          id: m.id,
+          type: "mission" as const,
+          title: m.numero || "Mission",
+          subtitle: [m.immatriculation, m.vin, `${m.ville_depart} → ${m.ville_arrivee}`].filter(Boolean).join(" · "),
+          to: `/admin/missions/${m.id}`,
+        })),
+        ...((trajets.data ?? []) as Array<{ id: string; depart: string; arrivee: string; client_nom: string | null; vin: string | null; immatriculation: string | null }>).map((tr) => ({
+          id: tr.id,
+          type: "trajet" as const,
+          title: `${tr.depart} → ${tr.arrivee}`,
+          subtitle: [tr.immatriculation, tr.vin, tr.client_nom].filter(Boolean).join(" · ") || "Sans véhicule",
+          to: "/admin/trajets",
+        })),
+        ...((demandes.data ?? []) as Array<{ id: string; prenom: string | null; nom: string | null; depart: string; arrivee: string; immatriculation: string | null }>).map((d) => ({
           id: d.id,
           type: "demande" as const,
-          title: `${d.prenom} ${d.nom}`,
-          subtitle: `${d.depart} → ${d.arrivee}`,
+          title: `${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "Demande",
+          subtitle: [d.immatriculation, `${d.depart} → ${d.arrivee}`].filter(Boolean).join(" · "),
           to: "/admin/demandes",
         })),
-        ...(trajets.data ?? []).map((t) => ({
-          id: t.id,
-          type: "trajet" as const,
-          title: `${t.depart} → ${t.arrivee}`,
-          subtitle: t.client_nom ?? "Sans client",
+        ...((devis.data ?? []) as Array<{ id: string; numero: string; vin: string | null; prenom: string | null; nom: string | null }>).map((dv) => ({
+          id: dv.id,
+          type: "devis" as const,
+          title: dv.numero || "Devis",
+          subtitle: [dv.vin, `${dv.prenom ?? ""} ${dv.nom ?? ""}`.trim()].filter(Boolean).join(" · "),
+          to: `/admin/devis/${dv.id}`,
+        })),
+        ...((vehicles.data ?? []) as Array<{ id: string; vin: string | null; immatriculation: string | null; marque: string | null; modele: string | null }>).map((v) => ({
+          id: v.id,
+          type: "vehicle" as const,
+          title: `${v.marque ?? ""} ${v.modele ?? ""}`.trim() || v.immatriculation || v.vin || "Véhicule",
+          subtitle: [v.immatriculation, v.vin].filter(Boolean).join(" · "),
           to: "/admin/trajets",
         })),
         ...(clients.data ?? []).map((c) => ({
