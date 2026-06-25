@@ -58,12 +58,13 @@ function FleetPage() {
     (async () => {
       const { data: mems } = await supabase
         .from("organization_members")
-        .select("organization_id, role")
+        .select("organization_id, member_role")
         .eq("user_id", user.id)
         .limit(1);
-      if (mems && mems[0]) {
-        setOrgId(mems[0].organization_id as string);
-        setOrgRole((mems[0] as { role: string }).role);
+      const row = (mems ?? [])[0] as { organization_id: string; member_role: string } | undefined;
+      if (row) {
+        setOrgId(row.organization_id);
+        setOrgRole(row.member_role);
       }
     })();
   }, [user]);
