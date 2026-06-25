@@ -3333,12 +3333,15 @@ export type Database = {
       trajets_publies_safe: {
         Row: {
           arrivee: string | null
+          bidding_enabled: boolean | null
           created_at: string | null
           date_trajet: string | null
           depart: string | null
           heure_trajet: string | null
           id: string | null
+          leg_type: string | null
           marque: string | null
+          mission_group_id: string | null
           modele: string | null
           pricing_mode: string | null
           prix_convoyeur_fixe: number | null
@@ -3349,12 +3352,15 @@ export type Database = {
         }
         Insert: {
           arrivee?: string | null
+          bidding_enabled?: never
           created_at?: string | null
           date_trajet?: string | null
           depart?: string | null
           heure_trajet?: string | null
           id?: string | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           pricing_mode?: string | null
           prix_convoyeur_fixe?: number | null
@@ -3365,12 +3371,15 @@ export type Database = {
         }
         Update: {
           arrivee?: string | null
+          bidding_enabled?: never
           created_at?: string | null
           date_trajet?: string | null
           depart?: string | null
           heure_trajet?: string | null
           id?: string | null
+          leg_type?: string | null
           marque?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           pricing_mode?: string | null
           prix_convoyeur_fixe?: number | null
