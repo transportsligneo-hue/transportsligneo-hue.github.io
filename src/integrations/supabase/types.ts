@@ -1887,9 +1887,11 @@ export type Database = {
       }
       mission_offres: {
         Row: {
+          bid_round: number
           convoyeur_id: string
           created_at: string
           id: string
+          is_winning: boolean
           message: string | null
           prix_propose: number
           prix_suggere_snapshot: number | null
@@ -1899,9 +1901,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bid_round?: number
           convoyeur_id: string
           created_at?: string
           id?: string
+          is_winning?: boolean
           message?: string | null
           prix_propose: number
           prix_suggere_snapshot?: number | null
@@ -1911,9 +1915,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bid_round?: number
           convoyeur_id?: string
           created_at?: string
           id?: string
+          is_winning?: boolean
           message?: string | null
           prix_propose?: number
           prix_suggere_snapshot?: number | null
