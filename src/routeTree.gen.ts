@@ -66,6 +66,7 @@ import { Route as AuthenticatedEntrepriseFacturesRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
+import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_authenticated/dashboard-pro.flotte'
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
@@ -89,6 +90,7 @@ import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
+import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
@@ -422,6 +424,12 @@ const AuthenticatedDashboardProMissionsRoute =
     path: '/missions',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
+const AuthenticatedDashboardProFlotteRoute =
+  AuthenticatedDashboardProFlotteRouteImport.update({
+    id: '/flotte',
+    path: '/flotte',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardProDocumentsRoute =
   AuthenticatedDashboardProDocumentsRouteImport.update({
     id: '/documents',
@@ -558,6 +566,12 @@ const AuthenticatedAdminFacturesRoute =
   AuthenticatedAdminFacturesRouteImport.update({
     id: '/factures',
     path: '/factures',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminExploitationRoute =
+  AuthenticatedAdminExploitationRouteImport.update({
+    id: '/exploitation',
+    path: '/exploitation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDocumentsRoute =
@@ -772,6 +786,7 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -795,6 +810,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
@@ -876,6 +892,7 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -899,6 +916,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -987,6 +1005,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1010,6 +1029,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
@@ -1099,6 +1119,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/historique'
     | '/admin/messages'
@@ -1122,6 +1143,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/adresses'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/flotte'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
@@ -1203,6 +1225,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/historique'
     | '/admin/messages'
@@ -1226,6 +1249,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/adresses'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
     | '/entreprise/factures'
@@ -1313,6 +1337,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
+    | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/messages'
@@ -1336,6 +1361,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/adresses'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
+    | '/_authenticated/dashboard-pro/flotte'
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/societe'
@@ -1824,6 +1850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProMissionsRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
+    '/_authenticated/dashboard-pro/flotte': {
+      id: '/_authenticated/dashboard-pro/flotte'
+      path: '/flotte'
+      fullPath: '/dashboard-pro/flotte'
+      preLoaderRoute: typeof AuthenticatedDashboardProFlotteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
     '/_authenticated/dashboard-pro/documents': {
       id: '/_authenticated/dashboard-pro/documents'
       path: '/documents'
@@ -1983,6 +2016,13 @@ declare module '@tanstack/react-router' {
       path: '/factures'
       fullPath: '/admin/factures'
       preLoaderRoute: typeof AuthenticatedAdminFacturesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/exploitation': {
+      id: '/_authenticated/admin/exploitation'
+      path: '/exploitation'
+      fullPath: '/admin/exploitation'
+      preLoaderRoute: typeof AuthenticatedAdminExploitationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/documents': {
@@ -2260,6 +2300,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
+  AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
@@ -2284,6 +2325,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRouteWithChildren,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
+  AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
@@ -2389,6 +2431,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProAdressesRoute: typeof AuthenticatedDashboardProAdressesRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
+  AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
@@ -2403,6 +2446,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProDevisInstantaneRoute,
     AuthenticatedDashboardProDocumentsRoute:
       AuthenticatedDashboardProDocumentsRoute,
+    AuthenticatedDashboardProFlotteRoute: AuthenticatedDashboardProFlotteRoute,
     AuthenticatedDashboardProMissionsRoute:
       AuthenticatedDashboardProMissionsRouteWithChildren,
     AuthenticatedDashboardProNouvelleDemandeRoute:
