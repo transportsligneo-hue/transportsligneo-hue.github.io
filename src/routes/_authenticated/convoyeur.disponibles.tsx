@@ -36,6 +36,10 @@ interface TrajetDispo {
   prix_convoyeur_fixe: number | null;
   prix_convoyeur_min: number | null;
   prix_convoyeur_max: number | null;
+  // Lot 3 — A/R group + bidding
+  mission_group_id: string | null;
+  leg_type: "simple" | "aller" | "retour" | null;
+  bidding_enabled: boolean | null;
 }
 
 interface MyOffre {
@@ -86,7 +90,7 @@ function ConvoyeurDisponibles() {
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
         .from("trajets_publies_safe" as never)
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max")
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max, mission_group_id, leg_type, bidding_enabled")
         .order("created_at", { ascending: false }),
       supabase
         .from("mission_offres" as never)
