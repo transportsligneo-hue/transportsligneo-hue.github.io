@@ -36,6 +36,10 @@ interface TrajetDispo {
   prix_convoyeur_fixe: number | null;
   prix_convoyeur_min: number | null;
   prix_convoyeur_max: number | null;
+  // Lot 3 — A/R group + bidding
+  mission_group_id: string | null;
+  leg_type: "simple" | "aller" | "retour" | null;
+  bidding_enabled: boolean | null;
 }
 
 interface MyOffre {
@@ -86,7 +90,7 @@ function ConvoyeurDisponibles() {
     const [{ data: trajetsData }, { data: offresData }] = await Promise.all([
       supabase
         .from("trajets_publies_safe" as never)
-        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max")
+        .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, prix_suggere, statut_publication, created_at, pricing_mode, prix_convoyeur_fixe, prix_convoyeur_min, prix_convoyeur_max, mission_group_id, leg_type, bidding_enabled")
         .order("created_at", { ascending: false }),
       supabase
         .from("mission_offres" as never)
@@ -340,6 +344,23 @@ function ConvoyeurDisponibles() {
                         <span className="truncate">{t.depart}</span>
                         <span className="text-pro-muted">→</span>
                         <span className="truncate">{t.arrivee}</span>
+                        {(t.leg_type === "aller" || t.leg_type === "retour") && (
+                          <span
+                            className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                              t.leg_type === "aller"
+                                ? "bg-sky-100 text-sky-700"
+                                : "bg-indigo-100 text-indigo-700"
+                            }`}
+                            title="Mission liée à un aller-retour"
+                          >
+                            {t.leg_type === "aller" ? "Aller" : "Retour"}
+                          </span>
+                        )}
+                        {t.bidding_enabled && (
+                          <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
+                            Enchère
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-pro-text-soft">
                         {t.date_trajet && (

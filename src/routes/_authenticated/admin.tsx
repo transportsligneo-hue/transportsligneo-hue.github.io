@@ -18,6 +18,7 @@ import {
   Handshake,
   UserRound,
   PenLine,
+  Radar,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -89,6 +90,7 @@ function AdminLayout() {
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
 
     // Opérations
+    { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
     { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
     { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
 
