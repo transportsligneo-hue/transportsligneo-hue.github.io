@@ -1513,7 +1513,7 @@ export function EdlPremiumFlow({
               </span>
             )}
             <span className="text-white font-bold tabular-nums">
-              Étape {currentStep.num}/{TOTAL}
+              Étape {safeIndex + 1}/{TOTAL}
             </span>
           </div>
         </div>
