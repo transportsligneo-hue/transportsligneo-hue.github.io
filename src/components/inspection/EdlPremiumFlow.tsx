@@ -891,69 +891,72 @@ export function EdlPremiumFlow({
 
     const stepId = currentStep.id;
     const extraId = crypto.randomUUID();
-    let previewUrl = "";
+    // Preview INSTANTANÉ depuis le fichier brut — pas d'await avant l'affichage.
+    const previewUrl = URL.createObjectURL(raw);
+    setStates((prev) => ({
+      ...prev,
+      [stepId]: {
+        ...(prev[stepId] ?? { status: "idle" as const }),
+        status: "success",
+        extras: [
+          ...((prev[stepId]?.extras ?? []).filter(Boolean)),
+          { id: extraId, previewUrl, status: "uploading" as const },
+        ],
+      },
+    }));
 
-    try {
-      const stableFile = await prepareCapturedImage(raw);
-      previewUrl = URL.createObjectURL(stableFile);
-      setStates((prev) => ({
-        ...prev,
-        [stepId]: {
-          ...(prev[stepId] ?? { status: "idle" as const }),
-          status: "success",
-          extras: [
-            ...((prev[stepId]?.extras ?? []).filter(Boolean)),
-            { id: extraId, previewUrl, status: "uploading" as const },
-          ],
-        },
-      }));
+    // Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer
+    // ni d'ajouter d'autres photos (uploads parallèles possibles).
+    void (async () => {
+      try {
+        const stableFile = await prepareCapturedImage(raw);
+        const insId = await ensureInspection();
+        const compressed = await compressImage(stableFile).catch(() => stableFile);
+        const path = `${userId}/${insId}/${stepId}_${Date.now()}.jpg`;
+        await uploadWithRetry("inspection-photos", path, compressed);
 
-      const insId = await ensureInspection();
-      const compressed = await compressImage(stableFile).catch(() => stableFile);
-      const path = `${userId}/${insId}/${stepId}_${Date.now()}.jpg`;
-      await uploadWithRetry("inspection-photos", path, compressed);
+        const { error } = await supabase.from("inspection_photos").insert({
+          inspection_id: insId,
+          vue_type: `${stepId}_${Date.now()}`,
+          url_photo: path,
+          file_size_bytes: compressed.size,
+        });
+        if (error) throw error;
 
-      const { error } = await supabase.from("inspection_photos").insert({
-        inspection_id: insId,
-        vue_type: `${stepId}_${Date.now()}`,
-        url_photo: path,
-        file_size_bytes: compressed.size,
-      });
-      if (error) throw error;
-
-      setStates((prev) => ({
-        ...prev,
-        [stepId]: {
-          ...(prev[stepId] ?? { status: "idle" as const }),
-          status: "success",
-          extras: (prev[stepId]?.extras ?? []).map((item) =>
-            item.id === extraId ? { ...item, storagePath: path, status: "success" as const } : item,
-          ),
-        },
-      }));
-    } catch (err) {
-      setStates((prev) => ({
-        ...prev,
-        [stepId]: {
-          ...(prev[stepId] ?? { status: "idle" as const }),
-          status: "success",
-          extras: (prev[stepId]?.extras ?? []).map((item) =>
-            item.id === extraId
-              ? {
-                  ...item,
-                  previewUrl: item.previewUrl || previewUrl,
-                  status: "error" as const,
-                  error: err instanceof Error ? err.message : "Erreur d'envoi",
-                }
-              : item,
-          ),
-        },
-      }));
-      toast.error("Impossible d'ajouter la photo libre", {
-        description: err instanceof Error ? err.message : "Réessayez.",
-      });
-    }
+        setStates((prev) => ({
+          ...prev,
+          [stepId]: {
+            ...(prev[stepId] ?? { status: "idle" as const }),
+            status: "success",
+            extras: (prev[stepId]?.extras ?? []).map((item) =>
+              item.id === extraId ? { ...item, storagePath: path, status: "success" as const } : item,
+            ),
+          },
+        }));
+      } catch (err) {
+        setStates((prev) => ({
+          ...prev,
+          [stepId]: {
+            ...(prev[stepId] ?? { status: "idle" as const }),
+            status: "success",
+            extras: (prev[stepId]?.extras ?? []).map((item) =>
+              item.id === extraId
+                ? {
+                    ...item,
+                    status: "error" as const,
+                    error: err instanceof Error ? err.message : "Erreur d'envoi",
+                  }
+                : item,
+            ),
+          },
+        }));
+        toast.error("Impossible d'ajouter la photo libre", {
+          description: err instanceof Error ? err.message : "Réessayez.",
+        });
+      }
+    })();
   };
+
 
   const handleSelfieFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
