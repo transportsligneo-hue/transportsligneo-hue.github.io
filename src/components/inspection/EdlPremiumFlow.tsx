@@ -1376,7 +1376,7 @@ export function EdlPremiumFlow({
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   <span className="edl-chip">
-                    {currentStep.num}/{TOTAL}
+                    {safeIndex + 1}/{TOTAL}
                   </span>
                   {currentStep.kind === "scan" && (
                     <span className="edl-chip-gold edl-chip">
