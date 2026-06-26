@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+// NOTE: pas de middleware d'auth — la recherche SIV doit fonctionner
+// sur le site public (devis), dashboard client, pro et admin.
+// La clé RapidAPI reste côté serveur uniquement.
 
 const PlateSchema = z.object({
   plate: z
@@ -64,7 +66,6 @@ type ValidInput = { __ok: true; plate: string };
 type InvalidInput = { __ok: false; error: string };
 
 export const lookupPlate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown): ValidInput | InvalidInput => {
     const parsed = PlateSchema.safeParse(input);
     if (!parsed.success) {

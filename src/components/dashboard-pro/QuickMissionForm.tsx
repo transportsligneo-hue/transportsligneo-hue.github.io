@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import PlacesInput from "@/components/PlacesInput";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { lookupPlate } from "@/lib/plate.functions";
@@ -405,14 +406,51 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
 
       if (insErr) throw insErr;
 
+      const demandeId = inserted?.id;
+      const numero = demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "";
+      const clientLabel = profile.societe || `${profile.prenom} ${profile.nom}`.trim() || profile.email;
+
+      // Notification admin (in-app + push web)
       notifyAdmin({
         type: "client_action",
-        titre: `Nouvelle demande — ${profile.societe || profile.nom || profile.email}`,
+        titre: `Nouvelle demande — ${clientLabel}`,
         message: `${depart} → ${arrivee}${priceView ? ` · ${priceView.ttc.toFixed(0)} €` : ""}`,
         link: "/admin/demandes",
         entityType: "demande",
-        entityId: inserted?.id,
+        entityId: demandeId,
       }).catch(() => {});
+
+      // Emails transactionnels (client + admin) — non bloquants
+      void Promise.allSettled([
+        sendTransactionalEmail({
+          templateName: "demande-confirmation",
+          recipientEmail: profile.email,
+          idempotencyKey: demandeId ? `demande-confirm-${demandeId}` : undefined,
+          templateData: {
+            prenom: profile.prenom,
+            nom: profile.nom,
+            depart,
+            arrivee,
+          },
+        }),
+        sendTransactionalEmail({
+          templateName: "nouvelle-demande-admin",
+          idempotencyKey: demandeId ? `admin-demande-${demandeId}` : undefined,
+          templateData: {
+            prenom: profile.prenom,
+            nom: profile.nom,
+            email: profile.email,
+            telephone: profile.telephone,
+            depart,
+            arrivee,
+            date: date || "—",
+            prix: priceView?.ttc ?? null,
+            numero,
+            type: tripType,
+          },
+        }),
+      ]).catch(() => {});
+
 
       setSuccess(true);
       setTimeout(() => navigate({ to: successRedirect }), 1600);
