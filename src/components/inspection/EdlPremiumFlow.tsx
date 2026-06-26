@@ -1338,7 +1338,7 @@ export function EdlPremiumFlow({
               {EDL_SECTION_LABEL[currentStep.section]}
             </p>
             <p className="text-sm font-semibold text-white truncate">
-              Étape {currentStep.num}/{TOTAL}
+              Étape {safeIndex + 1}/{TOTAL}
             </p>
           </div>
         </div>
