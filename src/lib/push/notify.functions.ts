@@ -85,22 +85,51 @@ export const notifyDriverAssigned = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("attributions")
-      .select("id, numero_mission, convoyeur:convoyeurs(user_id), trajet:trajets(depart, arrivee, date_trajet)")
+      .select("id, numero_mission, convoyeur:convoyeurs(user_id), trajet:trajets(depart, arrivee, date_trajet, devis_id, demande_id)")
       .eq("id", data.attributionId)
       .maybeSingle();
     const driverUserId = (row as any)?.convoyeur?.user_id as string | undefined;
-    if (!driverUserId) return { sent: 0, removed: 0 };
-
     const trajet = (row as any)?.trajet ?? {};
-    const payload = {
-      title: "Mission attribuée 🚗",
-      body: `${trajet.depart ?? ""} → ${trajet.arrivee ?? ""}${trajet.date_trajet ? ` · ${trajet.date_trajet}` : ""}`,
-      url: "/convoyeur/missions",
-      tag: `attribution-${data.attributionId}`,
-    };
-    await insertUserNotification(supabaseAdmin, driverUserId, "mission_attribuee", payload);
+
     const { sendPushToUser } = await import("@/lib/push/send.server");
-    return sendPushToUser(driverUserId, payload);
+    let driverResult = { sent: 0, removed: 0 };
+    if (driverUserId) {
+      const driverPayload = {
+        title: "Mission attribuée 🚗",
+        body: `${trajet.depart ?? ""} → ${trajet.arrivee ?? ""}${trajet.date_trajet ? ` · ${trajet.date_trajet}` : ""}`,
+        url: "/convoyeur/missions",
+        tag: `attribution-${data.attributionId}`,
+      };
+      await insertUserNotification(supabaseAdmin, driverUserId, "mission_attribuee", driverPayload);
+      driverResult = await sendPushToUser(driverUserId, driverPayload);
+    }
+
+    // Notifier également le client
+    try {
+      let clientUserId: string | null = null;
+      if (trajet.devis_id) {
+        const { data: d } = await supabaseAdmin.from("devis").select("user_id").eq("id", trajet.devis_id).maybeSingle();
+        clientUserId = (d as any)?.user_id ?? null;
+      }
+      if (!clientUserId && trajet.demande_id) {
+        const { data: d } = await supabaseAdmin.from("demandes_convoyage").select("user_id").eq("id", trajet.demande_id).maybeSingle();
+        clientUserId = (d as any)?.user_id ?? null;
+      }
+      if (clientUserId) {
+        const clientPayload = {
+          title: "Convoyeur assigné ✓",
+          body: `Votre mission ${trajet.depart ?? ""} → ${trajet.arrivee ?? ""} est confirmée.`,
+          url: "/dashboard-client/missions",
+          tag: `client-attribution-${data.attributionId}`,
+        };
+        await insertUserNotification(supabaseAdmin, clientUserId, "convoyeur_assigne", clientPayload);
+        await sendPushToUser(clientUserId, clientPayload);
+      }
+    } catch (e) {
+      console.warn("[notify] client assign push failed", e);
+    }
+
+    return driverResult;
   });
 
 /**

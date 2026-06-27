@@ -81,6 +81,12 @@
   --hairline-gold: rgba(212, 175, 55, 0.55);
   --shadow-soft: 0 1px 2px rgba(11,16,38,0.04), 0 8px 24px -14px rgba(11,16,38,0.10);
   --shadow-card: 0 1px 3px rgba(11,16,38,0.05), 0 14px 36px -18px rgba(11,16,38,0.14);
+
+  /* === Drawer admin/clients (volets latéraux) === */
+  --admin-drawer-bg: #ffffff;
+  --admin-drawer-text: #0b1220;
+  --admin-drawer-muted: #475569;
+  --admin-drawer-border: #e4e9f2;
 }
 
 @layer base {
