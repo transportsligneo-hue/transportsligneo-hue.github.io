@@ -323,7 +323,7 @@ function AdminFacturesPage() {
             </DrawerGrid>
           </DrawerSection>
 
-          <DrawerSection title="Référence externe (plateforme client)" icon={<Receipt size={12} />}>
+          <DrawerSection title="Numéro de commande (PO) — Bon de commande" icon={<Receipt size={12} />}>
             <ReferenceDrawerEditor row={selected} onSave={saveReference} />
           </DrawerSection>
 
@@ -378,10 +378,10 @@ function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string
             ? "border-amber-400/60 bg-amber-50 text-amber-800 hover:bg-amber-100"
             : "border-dashed border-pro-border text-pro-muted hover:border-pro-accent hover:text-pro-accent"
         }`}
-        title={hasRef ? "Modifier la référence client" : "Ajouter une référence client (n° BC, n° dossier…)"}
+        title={hasRef ? "Modifier le numéro de commande (PO)" : "Ajouter un numéro de commande / Bon de commande (PO)"}
       >
-        <span className="font-medium">{row.reference_label || "Réf. client"}</span>
-        <span className="font-mono">{hasRef ? row.reference_client : "+ ajouter"}</span>
+        <span className="font-medium">{row.reference_label || "N° commande"}</span>
+        <span className="font-mono">{hasRef ? row.reference_client : "+ N° commande"}</span>
       </button>
     );
   }
@@ -398,7 +398,7 @@ function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string
             e.preventDefault();
             (async () => {
               setSaving(true);
-              const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "Référence client" : null));
+              const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "N° commande (PO)" : null));
               setSaving(false);
               if (ok) setEditing(false);
             })();
@@ -412,7 +412,7 @@ function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string
         disabled={saving}
         onClick={async () => {
           setSaving(true);
-          const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "Référence client" : null));
+          const ok = await onSave(row.id, val.trim() || null, row.reference_label || (val.trim() ? "N° commande (PO)" : null));
           setSaving(false);
           if (ok) setEditing(false);
         }}
@@ -433,7 +433,7 @@ function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string
 
 function ReferenceDrawerEditor({ row, onSave }: { row: FactureRow; onSave: (id: string, ref: string | null, label: string | null) => Promise<boolean> }) {
   const [ref, setRef] = useState(row.reference_client ?? "");
-  const [label, setLabel] = useState(row.reference_label ?? "Référence client");
+  const [label, setLabel] = useState(row.reference_label ?? "N° commande (PO)");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
