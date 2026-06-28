@@ -272,7 +272,7 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   ry += 11; drawInfoRow(doc, rx, ry, rw, "Reference facture", f.numero);
   if (f.reference_client && f.reference_client.trim().length > 0) {
     ry += 11;
-    drawInfoRow(doc, rx, ry, rw, (f.reference_label?.trim() || "Reference client"), f.reference_client.trim(), GOLD);
+    drawInfoRow(doc, rx, ry, rw, (f.reference_label?.trim() || "N° commande (PO)"), f.reference_client.trim(), GOLD);
   }
   ry += 11; drawInfoRow(doc, rx, ry, rw, "Mode de paiement", f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire"));
   if (isB2B) {

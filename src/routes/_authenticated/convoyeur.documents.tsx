@@ -26,7 +26,7 @@ const DOCS: DocSpec[] = [
   { key: "permis_verso", label: "Permis de conduire — verso", required: true },
   { key: "rib", label: "RIB", required: true },
   { key: "contrat", label: "Contrat signé", hint: "Fourni par Transports Ligneo", required: false },
-  { key: "rc_pro", label: "Assurance RC Pro", required: false, forIndependant: true },
+  { key: "rc_pro", label: "Assurance RC Pro", hint: "Responsabilité Civile Professionnelle (obligatoire)", required: true },
   { key: "kbis", label: "Extrait Kbis", required: false, forIndependant: true },
   { key: "vigilance", label: "Attestation de vigilance URSSAF", required: false, forIndependant: true },
   { key: "w_garage", label: "Plaque W Garage", hint: "Si applicable", required: false },
