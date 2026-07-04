@@ -1013,23 +1013,54 @@ function AdminTrajets() {
                           </Badge>
                         </div>
                       </div>
+                      {o.admin_counter_offer != null && (
+                        <div className="mt-2 rounded-md border border-amber-200 bg-amber-50/70 px-2 py-1.5 text-xs text-amber-900">
+                          Contre-proposition envoyée : <strong>{o.admin_counter_offer} €</strong>
+                          {o.admin_counter_at && (
+                            <span className="text-amber-700"> · {new Date(o.admin_counter_at).toLocaleString("fr-FR")}</span>
+                          )}
+                        </div>
+                      )}
                       {o.statut === "en_attente" && selected.statut_publication !== "attribue" && (
-                        <div className="flex gap-2 mt-3 pt-3 border-t border-pro-border">
-                          <Button
-                            variant="success"
-                            onClick={() => validerOffre(o)}
-                            icon={<CheckCircle2 size={13} />}
-                            className="flex-1"
-                          >
-                            Valider ce convoyeur
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={() => refuserOffre(o)}
-                            icon={<XCircle size={13} />}
-                          >
-                            Refuser
-                          </Button>
+                        <div className="mt-3 pt-3 border-t border-pro-border space-y-2">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="success"
+                              onClick={() => validerOffre(o)}
+                              icon={<CheckCircle2 size={13} />}
+                              className="flex-1"
+                            >
+                              Valider ce convoyeur
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={() => refuserOffre(o)}
+                              icon={<XCircle size={13} />}
+                            >
+                              Refuser
+                            </Button>
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              min={0}
+                              step="0.01"
+                              placeholder="Contre-proposer (€)"
+                              value={counterInputs[o.id] ?? ""}
+                              onChange={(e) =>
+                                setCounterInputs((prev) => ({ ...prev, [o.id]: e.target.value }))
+                              }
+                              className="flex-1 rounded-md border border-pro-border bg-white px-2 py-1.5 text-sm outline-none focus:border-pro-accent"
+                            />
+                            <Button
+                              variant="secondary"
+                              onClick={() => counterOffre(o)}
+                              disabled={savingCounter === o.id}
+                            >
+                              {savingCounter === o.id ? "…" : "Contre-proposer"}
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
