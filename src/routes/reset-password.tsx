@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Lock, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export const Route = createFileRoute("/reset-password")({
@@ -18,12 +18,12 @@ function ResetPassword() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [hasSession, setHasSession] = useState<boolean | null>(null);
 
-  // Vérifie qu'on a bien une session de recovery active (le lien magique l'établit)
   useEffect(() => {
     let cancelled = false;
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -39,10 +39,8 @@ function ResetPassword() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-
     if (password.length < 8) { setError("Le mot de passe doit contenir au moins 8 caractères."); return; }
     if (password !== confirmPassword) { setError("Les mots de passe ne correspondent pas."); return; }
-
     setLoading(true);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
@@ -58,84 +56,85 @@ function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center section-bg px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-6">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-20 w-auto mx-auto" />
+    <div className="auth-shell flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md auth-fade-in">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block mb-4">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
-          <div className="gold-divider-short mb-4" />
-          <h1 className="font-heading text-2xl md:text-3xl tracking-[0.15em] uppercase text-primary">
-            Nouveau mot de passe
-          </h1>
+          <h1 className="auth-title text-2xl md:text-3xl">Nouveau mot de passe</h1>
         </div>
 
         {success ? (
-          <div className="card-premium p-7 rounded text-center space-y-4">
-            <CheckCircle className="text-primary mx-auto" size={42} />
-            <h2 className="font-heading text-lg text-cream tracking-wider">Mot de passe modifié !</h2>
-            <p className="text-cream/60 text-sm">Redirection vers la page de connexion…</p>
-            <Loader2 className="animate-spin text-primary mx-auto" size={20} />
+          <div className="auth-card p-7 text-center space-y-4">
+            <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center">
+              <CheckCircle className="text-emerald-300" size={28} />
+            </div>
+            <h2 className="auth-title text-lg">Mot de passe modifié</h2>
+            <p className="auth-subtle text-sm">Redirection vers la page de connexion…</p>
+            <Loader2 className="animate-spin text-blue-300 mx-auto" size={20} />
           </div>
         ) : hasSession === false ? (
-          <div className="card-premium p-7 rounded text-center space-y-4">
-            <AlertCircle className="text-amber-400 mx-auto" size={42} />
-            <h2 className="font-heading text-lg text-cream tracking-wider">Lien invalide ou expiré</h2>
-            <p className="text-cream/60 text-sm">
+          <div className="auth-card p-7 text-center space-y-4">
+            <div className="mx-auto h-14 w-14 rounded-full bg-amber-500/15 border border-amber-400/30 flex items-center justify-center">
+              <AlertCircle className="text-amber-300" size={28} />
+            </div>
+            <h2 className="auth-title text-lg">Lien invalide ou expiré</h2>
+            <p className="auth-subtle text-sm">
               Ce lien de réinitialisation n'est plus valide. Demandez un nouveau lien depuis la page de connexion.
             </p>
-            <Link
-              to="/mot-de-passe-oublie"
-              className="inline-block mt-2 px-6 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
-            >
+            <Link to="/mot-de-passe-oublie" className="auth-btn-primary mt-2">
               Demander un nouveau lien
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="card-premium p-7 rounded space-y-5">
-            {error && (
-              <div className="p-3 rounded bg-destructive/15 border border-destructive/30 text-destructive text-sm">
-                {error}
+          <form onSubmit={handleSubmit} className="auth-card p-6 sm:p-7 space-y-5">
+            {error && <div className="auth-alert auth-alert-error">{error}</div>}
+
+            <div>
+              <label className="auth-label">Nouveau mot de passe</label>
+              <div className="auth-field">
+                <Lock size={16} className="auth-field-icon" />
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="auth-input pr-11"
+                  placeholder="Minimum 8 caractères"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                  aria-label={showPwd ? "Masquer" : "Afficher"}
+                  tabIndex={-1}
+                >
+                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
-            )}
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                <Lock size={12} className="inline mr-1" /> Nouveau mot de passe
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
-                placeholder="Minimum 8 caractères"
-              />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                <Lock size={12} className="inline mr-1" /> Confirmer le mot de passe
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
-                placeholder="Retapez votre mot de passe"
-              />
+              <label className="auth-label">Confirmer le mot de passe</label>
+              <div className="auth-field">
+                <Lock size={16} className="auth-field-icon" />
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="auth-input"
+                  placeholder="Retapez votre mot de passe"
+                />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || hasSession === null}
-              className="w-full inline-flex items-center justify-center gap-3 px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors disabled:opacity-60"
-            >
+            <button type="submit" disabled={loading || hasSession === null} className="auth-btn-primary">
               {loading ? <><Loader2 size={16} className="animate-spin" />Mise à jour…</> : "Modifier mon mot de passe"}
             </button>
           </form>
