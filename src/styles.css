@@ -214,16 +214,16 @@
   }
   .section-bg {
     background:
-      radial-gradient(1100px 600px at 0% -10%, rgba(44, 107, 255, 0.18), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.12), transparent 60%),
+      radial-gradient(1100px 600px at 0% -10%, rgba(59, 130, 246, 0.22), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(95, 182, 255, 0.14), transparent 60%),
       radial-gradient(800px 600px at 50% 110%, rgba(231, 199, 106, 0.08), transparent 60%),
-      linear-gradient(180deg, #111a3d 0%, #15214a 50%, #111a3d 100%);
+      linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%);
   }
   .section-bg-alt {
     background:
-      radial-gradient(900px 500px at 100% 0%, rgba(95, 182, 255, 0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(95, 182, 255, 0.12), transparent 60%),
       radial-gradient(800px 500px at 0% 100%, rgba(231, 199, 106, 0.08), transparent 60%),
-      linear-gradient(180deg, #15214a 0%, #1a2756 50%, #15214a 100%);
+      linear-gradient(180deg, #0a1f5c 0%, #0f2d80 50%, #0a1f5c 100%);
   }
   .card-premium {
     background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
