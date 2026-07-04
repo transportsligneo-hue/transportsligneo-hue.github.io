@@ -28,7 +28,7 @@ export default function CommentCaMarche() {
       className="relative py-24 lg:py-28 overflow-hidden"
       style={{
         background:
-          "linear-gradient(180deg, #0b1026 0%, #111a3d 50%, #0b1026 100%)",
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
       }}
     >
       {/* Halos discrets */}
@@ -39,8 +39,8 @@ export default function CommentCaMarche() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 right-10 w-[500px] h-[350px] rounded-full opacity-[0.12] blur-3xl"
-        style={{ background: "radial-gradient(closest-side, #5fb6ff, transparent 70%)" }}
+        className="pointer-events-none absolute -bottom-20 right-10 w-[500px] h-[350px] rounded-full opacity-[0.16] blur-3xl"
+        style={{ background: "radial-gradient(closest-side, #60a5fa, transparent 70%)" }}
       />
 
       <div className="relative max-w-6xl mx-auto px-6">
