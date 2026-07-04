@@ -16,7 +16,17 @@ import {
   FileText,
   User,
   Menu,
+  X,
+  Home,
+  Tag,
+  Info,
+  Briefcase,
+  MessageSquare,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
+
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
