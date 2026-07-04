@@ -37,7 +37,7 @@ export default function CommentCaMarcheTimeline() {
       {/* HERO */}
       <section
         className="relative overflow-hidden pt-28 pb-28 lg:pt-36 lg:pb-36"
-        style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
+        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
       >
         <div aria-hidden className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%)" }} />
@@ -112,7 +112,7 @@ export default function CommentCaMarcheTimeline() {
       {/* Réassurance + CTA */}
       <section
         className="relative py-20 lg:py-24"
-        style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
+        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
       >
         <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
         <div className="max-w-4xl mx-auto px-6">
