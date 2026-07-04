@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar } from "lucide-react";
+import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
