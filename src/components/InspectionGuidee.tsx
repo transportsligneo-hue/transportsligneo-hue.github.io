@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from "lucide-react";
+import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
 import { compressImage } from "@/lib/image-compression";
+import { enqueueUpload, subscribeQueue, pendingKeysForInspection, kickQueue } from "@/lib/edl-offline-queue";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
