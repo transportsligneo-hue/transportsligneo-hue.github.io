@@ -107,7 +107,7 @@ export default function Navbar() {
             </button>
             <button
               onClick={goToEspace}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary/55 text-primary text-[11px] tracking-[0.22em] uppercase font-heading hover:bg-primary hover:text-navy transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#60a5fa]/55 text-[#60a5fa] text-[11px] tracking-[0.22em] uppercase font-heading hover:bg-[#60a5fa] hover:text-[#061238] transition-colors"
             >
               <User size={13} />
               {isAuthenticated ? "Mon espace" : "Connexion"}
