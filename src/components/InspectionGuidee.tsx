@@ -218,6 +218,8 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   };
 
   const hasCurrentPhoto = !!photos[currentVue.id];
+  const pendingSyncCount = Object.values(syncState).filter((s) => s === "pending").length;
+  const failedSyncCount = Object.values(syncState).filter((s) => s === "failed").length;
 
   // Transition classes
   const slideClass = isTransitioning
@@ -225,6 +227,18 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
       ? "opacity-0 translate-x-8"
       : "opacity-0 -translate-x-8"
     : "opacity-100 translate-x-0";
+
+  const syncBadge = (!online || pendingSyncCount > 0 || failedSyncCount > 0) ? (
+    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] ${
+      !online ? "border-amber-400/40 text-amber-300 bg-amber-500/10"
+      : failedSyncCount > 0 ? "border-destructive/40 text-destructive bg-destructive/10"
+      : "border-primary/30 text-primary bg-primary/10"
+    }`}>
+      {!online ? <><CloudOff size={10} /> Hors ligne</>
+        : failedSyncCount > 0 ? <><AlertCircle size={10} /> {failedSyncCount} en attente</>
+        : <><CloudUpload size={10} /> Envoi {pendingSyncCount}</>}
+    </div>
+  ) : null;
 
   // ─── RECAP VIEW ───
   if (viewMode === "recap") {
