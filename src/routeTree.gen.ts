@@ -38,6 +38,7 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
 import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authenticated/dashboard-pro'
@@ -265,6 +266,12 @@ const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
   path: '/auth/email-confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFlotteRoute = AuthenticatedFlotteRouteImport.update({
   id: '/flotte',
   path: '/flotte',
@@ -772,6 +779,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -878,6 +886,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -991,6 +1000,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro': typeof AuthenticatedDashboardProRouteWithChildren
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1105,6 +1115,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/entreprise'
     | '/flotte'
+    | '/notifications'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1211,6 +1222,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/tarifs'
     | '/unsubscribe'
+    | '/notifications'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1323,6 +1335,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro'
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
+    | '/_authenticated/notifications'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1653,6 +1666,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/email-confirmation'
       preLoaderRoute: typeof AuthEmailConfirmationRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/flotte': {
       id: '/_authenticated/flotte'
@@ -2526,6 +2546,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardProRoute: typeof AuthenticatedDashboardProRouteWithChildren
   AuthenticatedEntrepriseRoute: typeof AuthenticatedEntrepriseRouteWithChildren
   AuthenticatedFlotteRoute: typeof AuthenticatedFlotteRouteWithChildren
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -2536,6 +2557,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardProRoute: AuthenticatedDashboardProRouteWithChildren,
   AuthenticatedEntrepriseRoute: AuthenticatedEntrepriseRouteWithChildren,
   AuthenticatedFlotteRoute: AuthenticatedFlotteRouteWithChildren,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
