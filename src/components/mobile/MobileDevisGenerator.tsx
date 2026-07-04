@@ -15,6 +15,7 @@ import {
 } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { lookupPlate } from "@/lib/plate.functions";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // === Mêmes données que la version desktop ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {

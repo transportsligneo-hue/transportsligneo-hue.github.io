@@ -135,7 +135,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     }
     setSivRetourLoading(true);
     try {
-      const r = await lookupPlateFn({ data: { plate } });
+      const captchaToken = (await getRecaptchaToken("plate_lookup")) ?? undefined;
+      const r = await lookupPlateFn({ data: { plate, recaptchaToken: captchaToken } });
       if (!r.ok || !r.data) {
         setSivRetourMsg({ type: "err", text: r.error || "Recherche impossible" });
       } else {
@@ -175,7 +176,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     }
     setSivLoading(true);
     try {
-      const r = await lookupPlateFn({ data: { plate } });
+      const captchaToken = (await getRecaptchaToken("plate_lookup")) ?? undefined;
+      const r = await lookupPlateFn({ data: { plate, recaptchaToken: captchaToken } });
       if (!r.ok || !r.data) {
         setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
       } else {
