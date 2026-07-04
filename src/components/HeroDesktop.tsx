@@ -54,8 +54,8 @@ export default function HeroDesktop() {
           {/* Colonne gauche : contenu éditorial */}
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-12 bg-gradient-to-r from-[#5fb6ff] to-[#e7c76a]" />
-              <span className="text-[#e7c76a] text-[11px] tracking-[0.32em] uppercase font-medium">
+              <span className="h-px w-12 bg-gradient-to-r from-[#60a5fa] to-[#3b82f6]" />
+              <span className="text-[#60a5fa] text-[11px] tracking-[0.32em] uppercase font-medium">
                 Convoyage automobile
               </span>
             </div>
