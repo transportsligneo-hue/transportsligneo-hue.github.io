@@ -127,6 +127,32 @@ function AdminTrajets() {
   const [linkedDevis, setLinkedDevis] = useState<DevisLink | null>(null);
   const [pctInput, setPctInput] = useState<string>("65");
   const [savingCommission, setSavingCommission] = useState(false);
+  const [counterInputs, setCounterInputs] = useState<Record<string, string>>({});
+  const [savingCounter, setSavingCounter] = useState<string | null>(null);
+
+  const counterOffre = async (offre: Offre) => {
+    const raw = counterInputs[offre.id];
+    const value = parseFloat((raw ?? "").replace(",", "."));
+    if (!value || value <= 0) {
+      toast.error("Saisis un montant de contre-proposition valide.");
+      return;
+    }
+    setSavingCounter(offre.id);
+    const { error } = await supabase
+      .from("mission_offres" as never)
+      .update({
+        admin_counter_offer: value,
+        admin_counter_at: new Date().toISOString(),
+      } as never)
+      .eq("id" as never, offre.id as never);
+    setSavingCounter(null);
+    if (error) {
+      toast.error("Impossible d'enregistrer la contre-proposition.");
+      return;
+    }
+    toast.success(`Contre-proposition à ${value} € envoyée.`);
+    if (selected) fetchOffres(selected.id);
+  };
 
   const isPartnershipTrajet = useCallback((trajet: Pick<Trajet, "depart" | "arrivee">) => {
     const depart = (trajet.depart ?? "").trim().toLowerCase();
