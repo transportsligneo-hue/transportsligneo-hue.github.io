@@ -272,45 +272,56 @@ function AdminMissionDetail() {
       }
     }
 
-    // Photos par inspection (avec signed URLs)
-    const inspWithPhotos: InspectionRow[] = [];
-    for (const insp of inspRes.data ?? []) {
-      const { data: photos } = await supabase
+    // Photos par inspection : UNE requête .in() + signed URLs en LOT
+    const inspList = (inspRes.data ?? []) as Array<{ id: string; type: string; created_at: string }>;
+    if (inspList.length) {
+      const { data: allPhotos } = await supabase
         .from("inspection_photos")
-        .select("id, vue_type, url_photo, created_at")
-        .eq("inspection_id", insp.id)
+        .select("id, inspection_id, vue_type, url_photo, created_at")
+        .in("inspection_id", inspList.map(i => i.id))
         .order("created_at", { ascending: true });
-      const enriched = await Promise.all(
-        (photos ?? []).map(async (p) => {
-          const isUrl = /^https?:\/\//i.test(p.url_photo);
-          const storage_path = isUrl ? "" : p.url_photo;
-          if (isUrl) return { ...p, storage_path };
-          const { data: signed } = await supabase.storage
-            .from("inspection-photos")
-            .createSignedUrl(p.url_photo, 3600);
-          return { ...p, storage_path, url_photo: signed?.signedUrl ?? p.url_photo };
-        }),
-      );
-      inspWithPhotos.push({ ...(insp as Omit<InspectionRow, "photos">), photos: enriched });
-    }
-    setInspections(inspWithPhotos);
+      const rawPhotos = (allPhotos ?? []) as Array<{ id: string; inspection_id: string; vue_type: string; url_photo: string; created_at: string }>;
 
-    // Selfies convoyeur (bucket privé → signed URLs)
+      const pathsToSign = Array.from(new Set(rawPhotos.filter(p => !/^https?:\/\//i.test(p.url_photo)).map(p => p.url_photo)));
+      const signedMap = new Map<string, string>();
+      if (pathsToSign.length) {
+        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrls(pathsToSign, 3600);
+        (signed ?? []).forEach((s, idx) => { if (s?.signedUrl) signedMap.set(pathsToSign[idx], s.signedUrl); });
+      }
+
+      const photosByInsp = new Map<string, InspectionRow["photos"]>();
+      for (const p of rawPhotos) {
+        const isUrl = /^https?:\/\//i.test(p.url_photo);
+        const storage_path = isUrl ? "" : p.url_photo;
+        const url_photo = isUrl ? p.url_photo : (signedMap.get(p.url_photo) ?? p.url_photo);
+        const arr = photosByInsp.get(p.inspection_id) ?? [];
+        arr.push({ id: p.id, vue_type: p.vue_type, url_photo, created_at: p.created_at, storage_path });
+        photosByInsp.set(p.inspection_id, arr);
+      }
+      setInspections(inspList.map(i => ({ ...(i as Omit<InspectionRow, "photos">), photos: photosByInsp.get(i.id) ?? [] })));
+    } else {
+      setInspections([]);
+    }
+
+    // Selfies convoyeur (bucket privé → signed URLs en LOT)
     const { data: selfiesRaw } = await supabase
       .from("mission_selfies" as never)
       .select("id, storage_path, taken_at, latitude, longitude")
       .eq("attribution_id" as never, missionId as never)
       .order("taken_at" as never, { ascending: false } as never);
     if (selfiesRaw) {
-      const enriched = await Promise.all(
-        (selfiesRaw as unknown as { id: string; storage_path: string; taken_at: string; latitude: number | null; longitude: number | null }[]).map(async (s) => {
-          const { data: signed } = await supabase.storage
-            .from("mission-selfies")
-            .createSignedUrl(s.storage_path, 3600);
-          return { id: s.id, url: signed?.signedUrl ?? "", taken_at: s.taken_at, latitude: s.latitude, longitude: s.longitude };
-        })
-      );
-      setSelfies(enriched);
+      const rows = selfiesRaw as unknown as { id: string; storage_path: string; taken_at: string; latitude: number | null; longitude: number | null }[];
+      const paths = rows.map(s => s.storage_path);
+      const { data: signed } = paths.length
+        ? await supabase.storage.from("mission-selfies").createSignedUrls(paths, 3600)
+        : { data: [] as { signedUrl: string }[] };
+      setSelfies(rows.map((s, i) => ({
+        id: s.id,
+        url: signed?.[i]?.signedUrl ?? "",
+        taken_at: s.taken_at,
+        latitude: s.latitude,
+        longitude: s.longitude,
+      })));
     }
 
     // Check existing facture

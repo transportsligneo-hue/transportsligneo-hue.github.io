@@ -145,22 +145,31 @@ function AdminAttributions() {
 
   useEffect(() => {
     if (!selectedAttr) { setAttrDetail(null); return; }
+    let cancelled = false;
     (async () => {
-      const { data: t } = await supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle();
-      const { data: a } = await supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle();
+      const [{ data: t }, { data: a }] = await Promise.all([
+        supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle(),
+        supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle(),
+      ]);
       const sign = async (path: string | null | undefined) => {
         if (!path) return null;
         if (/^https?:\/\//.test(path)) return path;
         const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(path, 3600);
         return data?.signedUrl ?? null;
       };
+      const [cgRectoSigned, cgVersoSigned] = await Promise.all([
+        sign(t?.carte_grise_recto_url),
+        sign(t?.carte_grise_verso_url),
+      ]);
+      if (cancelled) return;
       setAttrDetail({
         ...(t ?? {}),
         ...(a ?? {}),
-        cgRectoSigned: await sign(t?.carte_grise_recto_url),
-        cgVersoSigned: await sign(t?.carte_grise_verso_url),
+        cgRectoSigned,
+        cgVersoSigned,
       });
     })();
+    return () => { cancelled = true; };
   }, [selectedAttr]);
 
   const handleEmitFacture = async (a: Attribution) => {
@@ -455,17 +464,15 @@ function AdminAttributions() {
       .eq("inspection_id", inspection.id)
       .order("created_at", { ascending: true });
 
-    // Génère des signed URLs pour le bucket privé inspection-photos
-    const enriched = await Promise.all(
-      (photos ?? []).map(async (p) => {
-        // url_photo peut déjà être une URL complète (ancien format) ou un path stockage
-        if (/^https?:\/\//i.test(p.url_photo)) return p;
-        const { data: signed } = await supabase.storage
-          .from("inspection-photos")
-          .createSignedUrl(p.url_photo, 3600);
-        return { ...p, url_photo: signed?.signedUrl ?? p.url_photo };
-      })
-    );
+    // Génère des signed URLs en LOT pour le bucket privé inspection-photos
+    const rows = photos ?? [];
+    const pathsToSign = Array.from(new Set(rows.filter(p => !/^https?:\/\//i.test(p.url_photo)).map(p => p.url_photo)));
+    const signedMap = new Map<string, string>();
+    if (pathsToSign.length) {
+      const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrls(pathsToSign, 3600);
+      (signed ?? []).forEach((s, idx) => { if (s?.signedUrl) signedMap.set(pathsToSign[idx], s.signedUrl); });
+    }
+    const enriched = rows.map(p => /^https?:\/\//i.test(p.url_photo) ? p : { ...p, url_photo: signedMap.get(p.url_photo) ?? p.url_photo });
     setPhotosView({ id: attributionId, type, photos: enriched });
   };
 

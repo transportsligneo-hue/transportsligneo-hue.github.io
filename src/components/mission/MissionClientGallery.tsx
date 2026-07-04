@@ -67,68 +67,94 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
     let cancelled = false;
     (async () => {
       setLoading(true);
-      // Inspections + photos
-      const { data: insps } = await supabase
-        .from("inspections")
-        .select("id, type")
-        .eq("attribution_id", attributionId);
 
-      const allPhotos: PhotoItem[] = [];
-      for (const i of (insps as { id: string; type: string }[] | null) ?? []) {
-        const { data: ph } = await supabase
-          .from("inspection_photos")
-          .select("id, vue_type, url_photo")
-          .eq("inspection_id", i.id);
-        for (const p of (ph as { id: string; vue_type: string; url_photo: string }[] | null) ?? []) {
-          const isUrl = /^https?:\/\//.test(p.url_photo);
-          let url = p.url_photo;
-          if (!isUrl) {
-            const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrl(p.url_photo, 3600);
-            url = signed?.signedUrl ?? "";
-          }
-          if (url) allPhotos.push({ id: p.id, vue_type: p.vue_type, url, type: (i.type === "arrivee" ? "arrivee" : "depart") });
+      // Lancer TOUTES les requêtes racine en parallèle (au lieu de séquentiel)
+      const [inspsRes, sigsRes, docsRes, trajetRes] = await Promise.all([
+        supabase.from("inspections").select("id, type").eq("attribution_id", attributionId),
+        supabase.from("mission_signatures").select("kind, signature_data").eq("attribution_id", attributionId),
+        supabase
+          .from("mission_documents")
+          .select("id, type_document, nom_fichier, url_fichier, created_at")
+          .eq("attribution_id", attributionId)
+          .order("created_at", { ascending: false }),
+        trajetId
+          ? supabase.from("trajets").select("carte_grise_recto_url, carte_grise_verso_url").eq("id", trajetId).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+
+      const insps = (inspsRes.data as { id: string; type: string }[] | null) ?? [];
+      const inspTypeById = new Map(insps.map(i => [i.id, i.type]));
+
+      // Photos : UNE requête .in() au lieu de N requêtes
+      const photosRes = insps.length
+        ? await supabase
+            .from("inspection_photos")
+            .select("id, inspection_id, vue_type, url_photo")
+            .in("inspection_id", insps.map(i => i.id))
+        : { data: [] as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] };
+
+      const rawPhotos = (photosRes.data as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] | null) ?? [];
+
+      // Signed URLs en lot pour inspection-photos
+      const photoPathsToSign: string[] = [];
+      const photoPathIndex = new Map<string, number>();
+      rawPhotos.forEach((p) => {
+        if (!/^https?:\/\//.test(p.url_photo) && !photoPathIndex.has(p.url_photo)) {
+          photoPathIndex.set(p.url_photo, photoPathsToSign.length);
+          photoPathsToSign.push(p.url_photo);
         }
+      });
+      const signedPhotoMap = new Map<string, string>();
+      if (photoPathsToSign.length) {
+        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrls(photoPathsToSign, 3600);
+        (signed ?? []).forEach((s, idx) => {
+          if (s?.signedUrl) signedPhotoMap.set(photoPathsToSign[idx], s.signedUrl);
+        });
       }
 
-      // Signatures (data URL base64 dans signature_data)
-      const { data: sigs } = await supabase
-        .from("mission_signatures")
-        .select("kind, signature_data")
-        .eq("attribution_id", attributionId);
-      const sigList: SignatureItem[] = ((sigs as { kind: string; signature_data: string | null }[] | null) ?? [])
+      const allPhotos: PhotoItem[] = [];
+      for (const p of rawPhotos) {
+        const url = /^https?:\/\//.test(p.url_photo) ? p.url_photo : (signedPhotoMap.get(p.url_photo) ?? "");
+        if (!url) continue;
+        const t = inspTypeById.get(p.inspection_id) === "arrivee" ? "arrivee" : "depart";
+        allPhotos.push({ id: p.id, vue_type: p.vue_type, url, type: t });
+      }
+
+      // Signatures
+      const sigList: SignatureItem[] = ((sigsRes.data as { kind: string; signature_data: string | null }[] | null) ?? [])
         .filter(s => s.signature_data)
         .map(s => ({ kind: s.kind, url: s.signature_data! }));
 
-      // Documents partagés (visible_client)
-      const { data: dRaw } = await supabase
-        .from("mission_documents")
-        .select("id, type_document, nom_fichier, url_fichier, created_at")
-        .eq("attribution_id", attributionId)
-        .order("created_at", { ascending: false });
-      const dList: DocItem[] = [];
-      for (const d of (dRaw as { id: string; type_document: string; nom_fichier: string; url_fichier: string; created_at: string }[] | null) ?? []) {
-        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrl(d.url_fichier, 3600);
-        dList.push({ id: d.id, nom: d.nom_fichier, type: d.type_document, created_at: d.created_at, signedUrl: signed?.signedUrl ?? null });
+      // Documents : signed URLs en lot
+      const dRaw = (docsRes.data as { id: string; type_document: string; nom_fichier: string; url_fichier: string; created_at: string }[] | null) ?? [];
+      const docPaths = dRaw.map(d => d.url_fichier);
+      const signedDocMap = new Map<string, string>();
+      if (docPaths.length) {
+        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(docPaths, 3600);
+        (signed ?? []).forEach((s, idx) => {
+          if (s?.signedUrl) signedDocMap.set(docPaths[idx], s.signedUrl);
+        });
       }
+      const dList: DocItem[] = dRaw.map(d => ({
+        id: d.id,
+        nom: d.nom_fichier,
+        type: d.type_document,
+        created_at: d.created_at,
+        signedUrl: signedDocMap.get(d.url_fichier) ?? null,
+      }));
 
-      // Carte grise depuis trajet
+      // Carte grise : signer en parallèle
       let cgState = { recto: null as string | null, verso: null as string | null };
-      if (trajetId) {
-        const { data: tr } = await supabase
-          .from("trajets")
-          .select("carte_grise_recto_url, carte_grise_verso_url")
-          .eq("id", trajetId)
-          .maybeSingle();
+      const tr = trajetRes.data as { carte_grise_recto_url: string | null; carte_grise_verso_url: string | null } | null;
+      if (tr) {
         const sign = async (p: string | null | undefined) => {
           if (!p) return null;
           if (/^https?:\/\//.test(p)) return p;
           const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(p, 3600);
           return data?.signedUrl ?? null;
         };
-        cgState = {
-          recto: await sign(tr?.carte_grise_recto_url),
-          verso: await sign(tr?.carte_grise_verso_url),
-        };
+        const [recto, verso] = await Promise.all([sign(tr.carte_grise_recto_url), sign(tr.carte_grise_verso_url)]);
+        cgState = { recto, verso };
       }
 
       if (cancelled) return;
