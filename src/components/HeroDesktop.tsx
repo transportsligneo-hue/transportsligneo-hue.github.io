@@ -77,14 +77,14 @@ export default function HeroDesktop() {
               <button
                 type="button"
                 onClick={() => scrollToDevis()}
-                className="edl-cta-gold inline-flex items-center gap-3 px-8 py-4 font-heading text-[12px] tracking-[0.22em] uppercase"
+                className="edl-cta inline-flex items-center gap-3 px-8 py-4 font-heading text-[12px] tracking-[0.22em] uppercase"
               >
                 <Calendar size={16} />
                 Estimer mon trajet
               </button>
               <Link
                 to="/tarifs"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border border-[rgba(231,199,106,0.5)] text-cream font-heading text-[12px] tracking-[0.22em] uppercase hover:bg-white/5 hover:border-[#e7c76a] transition-all"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border border-[#60a5fa]/50 text-cream font-heading text-[12px] tracking-[0.22em] uppercase hover:bg-white/5 hover:border-[#60a5fa] transition-all"
               >
                 <Tag size={16} />
                 Voir les tarifs
