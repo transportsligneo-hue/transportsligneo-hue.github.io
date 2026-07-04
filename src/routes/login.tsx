@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, LogIn, User, Truck } from "lucide-react";
+import { Loader2, LogIn, User, Truck, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
@@ -35,69 +35,37 @@ function LoginPage() {
   const [tab, setTab] = useState<Tab>("client");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  /** True quand on vient de soumettre — déclenche la logique de routage post-login */
   const justLoggedInRef = useRef(false);
-  /** Onglet utilisé au moment du submit (figé pour éviter qu'un changement de tab casse la redirection) */
   const submittedTabRef = useRef<Tab>("client");
 
   useEffect(() => {
-    // On attend que l'auth soit complètement hydratée (role + profile + statut)
     if (isInitializing || isLoading || !isAuthenticated) return;
-
-    // Si l'utilisateur est déjà authentifié à l'arrivée sur la page (pas de submit en cours),
-    // on le renvoie directement vers son espace.
-    if (!justLoggedInRef.current) {
-      navigate({ to: homeRoute });
-      return;
-    }
-
-    // Routage strict par onglet après un login volontaire
+    if (!justLoggedInRef.current) { navigate({ to: homeRoute }); return; }
     const usedTab = submittedTabRef.current;
     justLoggedInRef.current = false;
 
-    if (role === "admin" || role === "super_admin") {
-      navigate({ to: "/admin" });
-      return;
-    }
-
+    if (role === "admin" || role === "super_admin") { navigate({ to: "/admin" }); return; }
     if (usedTab === "pro") {
       if (role !== "convoyeur") {
         setError("Cet email correspond à un compte client. Utilisez l'onglet « Espace Client ».");
         void logout();
         return;
       }
-      if (convoyeurStatut === "valide" || convoyeurStatut === "actif") {
-        navigate({ to: "/convoyeur" });
-      } else {
-        navigate({ to: "/attente-validation" });
-      }
+      if (convoyeurStatut === "valide" || convoyeurStatut === "actif") navigate({ to: "/convoyeur" });
+      else navigate({ to: "/attente-validation" });
       return;
     }
-
-    // Onglet client
     if (role === "convoyeur") {
       setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Driver ».");
       void logout();
       return;
     }
-    if (typeClient === "b2b") {
-      navigate({ to: "/dashboard-pro" });
-    } else {
-      navigate({ to: "/dashboard-client" });
-    }
-  }, [
-    isAuthenticated,
-    isLoading,
-    isInitializing,
-    role,
-    convoyeurStatut,
-    typeClient,
-    homeRoute,
-    navigate,
-    logout,
-  ]);
+    if (typeClient === "b2b") navigate({ to: "/dashboard-pro" });
+    else navigate({ to: "/dashboard-client" });
+  }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -106,17 +74,7 @@ function LoginPage() {
     submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
-      // reCAPTCHA v3 — best-effort, avec retry transparent.
-      // Un token expire ~2 min ; en cas d'échec on régénère un token frais
-      // une seconde fois. Les erreurs transitoires (timeout-or-duplicate,
-      // réseau) ne doivent JAMAIS bloquer le login : Supabase a déjà sa propre
-      // protection anti brute-force côté serveur.
-      const TRANSIENT = new Set([
-        "timeout-or-duplicate",
-        "missing-input-response",
-        "invalid-input-response",
-        "network",
-      ]);
+      const TRANSIENT = new Set(["timeout-or-duplicate", "missing-input-response", "invalid-input-response", "network"]);
       const tryVerify = async () => {
         const token = await getRecaptchaToken("login");
         if (!token) return { proceed: true } as const;
@@ -131,7 +89,6 @@ function LoginPage() {
       };
       let verify = await tryVerify();
       if (!verify.proceed && verify.transient) {
-        // Token expiré / réseau — on retente avec un token frais
         await new Promise((r) => setTimeout(r, 400));
         verify = await tryVerify();
       }
@@ -141,9 +98,7 @@ function LoginPage() {
         setError("Vérification de sécurité refusée. Si le problème persiste, contactez-nous.");
         return;
       }
-      // Erreur transitoire persistante → on poursuit (best-effort).
       await login(email.trim(), password);
-      // Le useEffect prendra le relais une fois l'auth hydratée
     } catch (err: unknown) {
       justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
@@ -158,10 +113,7 @@ function LoginPage() {
   };
 
   const handleResendConfirmation = async () => {
-    if (!email.trim()) {
-      setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer ».");
-      return;
-    }
+    if (!email.trim()) { setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer »."); return; }
     try {
       const { error: rErr } = await supabase.auth.resend({
         type: "signup",
@@ -175,111 +127,102 @@ function LoginPage() {
     }
   };
 
-  const inscriptionLink = "/choisir-compte";
-  const inscriptionLabel = "Créer un compte";
-  /** True tant qu'on attend l'hydratation post-login */
   const awaitingRouting = justLoggedInRef.current && isAuthenticated && !isLoading;
   const loading = submitting || awaitingRouting;
 
   return (
-    <div className="min-h-screen flex items-center justify-center section-bg px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-6">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-20 w-auto mx-auto" />
+    <div className="auth-shell flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md auth-fade-in">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block mb-4">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
-          <div className="gold-divider-short mb-4" />
-          <h1 className="font-heading text-2xl md:text-3xl tracking-[0.15em] uppercase text-primary">
-            Connexion
-          </h1>
-          <p className="text-cream/50 mt-2 text-sm">Accédez à votre espace sécurisé</p>
+          <h1 className="auth-title text-2xl md:text-3xl">Connexion</h1>
+          <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace sécurisé</p>
         </div>
 
-        {/* Tabs */}
-        <div className="grid grid-cols-2 gap-0 mb-0 rounded-t border border-primary/20 border-b-0 overflow-hidden">
+        <div className="auth-tabs mb-4">
           <button
             type="button"
             onClick={() => { setTab("client"); setError(""); }}
-            className={`flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-[0.15em] font-medium transition-all ${
-              tab === "client"
-                ? "bg-primary text-navy"
-                : "bg-navy/40 text-cream/60 hover:text-primary"
-            }`}
+            className={`auth-tab ${tab === "client" ? "auth-tab-active" : ""}`}
           >
-            <User size={14} /> Espace Client
+            <User size={13} /> Espace Client
           </button>
           <button
             type="button"
             onClick={() => { setTab("pro"); setError(""); }}
-            className={`flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-[0.15em] font-medium transition-all ${
-              tab === "pro"
-                ? "bg-primary text-navy"
-                : "bg-navy/40 text-cream/60 hover:text-primary"
-            }`}
+            className={`auth-tab ${tab === "pro" ? "auth-tab-active" : ""}`}
           >
-            <Truck size={14} /> Espace Driver
+            <Truck size={13} /> Espace Driver
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="card-premium p-7 rounded-t-none rounded-b space-y-5 border-t-0">
+        <form onSubmit={handleSubmit} className="auth-card p-6 sm:p-7 space-y-5">
           {error === "EMAIL_NOT_CONFIRMED" ? (
-            <div className="p-3 rounded bg-primary/10 border border-primary/30 text-cream text-sm space-y-2">
+            <div className="auth-alert auth-alert-info space-y-2">
               <p>Votre adresse email n'a pas encore été confirmée.</p>
-              <button type="button" onClick={handleResendConfirmation} className="text-primary text-xs uppercase tracking-[0.15em] hover:text-gold-light">
+              <button type="button" onClick={handleResendConfirmation} className="auth-link uppercase tracking-[0.14em] text-[11px]">
                 → Renvoyer l'email de confirmation
               </button>
             </div>
           ) : error === "RESENT" ? (
-            <div className="p-3 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm">
+            <div className="auth-alert auth-alert-success">
               Email de confirmation renvoyé. Vérifiez votre boîte (et vos spams).
             </div>
           ) : error ? (
-            <div className="p-3 rounded bg-destructive/15 border border-destructive/30 text-destructive text-sm">
-              {error}
-            </div>
+            <div className="auth-alert auth-alert-error">{error}</div>
           ) : null}
 
           <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              disabled={loading}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors disabled:opacity-60"
-              placeholder={tab === "pro" ? "convoyeur@email.com" : "votre@email.com"}
-            />
+            <label className="auth-label">Email</label>
+            <div className="auth-field">
+              <Mail size={16} className="auth-field-icon" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                disabled={loading}
+                className="auth-input"
+                placeholder={tab === "pro" ? "convoyeur@email.com" : "votre@email.com"}
+              />
+            </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs uppercase tracking-wider text-cream/50">Mot de passe</label>
-              <Link
-                to="/mot-de-passe-oublie"
-                className="text-[10px] uppercase tracking-wider text-primary/80 hover:text-primary transition-colors"
-              >
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="auth-label mb-0">Mot de passe</label>
+              <Link to="/mot-de-passe-oublie" className="auth-link uppercase tracking-[0.14em] text-[10px]">
                 Oublié ?
               </Link>
             </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              disabled={loading}
-              className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors disabled:opacity-60"
-              placeholder="••••••••"
-            />
+            <div className="auth-field">
+              <Lock size={16} className="auth-field-icon" />
+              <input
+                type={showPwd ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                disabled={loading}
+                className="auth-input pr-11"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                tabIndex={-1}
+              >
+                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-3 px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors duration-300 disabled:opacity-60"
-          >
+          <button type="submit" disabled={loading} className="auth-btn-primary">
             {loading ? (
               <><Loader2 size={16} className="animate-spin" />Connexion…</>
             ) : (
@@ -287,22 +230,22 @@ function LoginPage() {
             )}
           </button>
 
-          <div className="text-center pt-2 border-t border-primary/10">
-            <Link to={inscriptionLink} className="text-primary text-xs hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
-              {inscriptionLabel} →
+          <div className="text-center pt-3 border-t border-white/10">
+            <Link to="/choisir-compte" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
+              Créer un compte →
             </Link>
           </div>
         </form>
 
-        <div className="text-center mt-6 space-y-3">
-          <p className="text-[10px] leading-relaxed text-cream/40 px-2">
-            Protégé par reCAPTCHA et soumis à la{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Politique de Confidentialité</a>
-            {" "}et aux{" "}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Termes d'Utilisation</a>
-            {" "}de Google.
+        <div className="text-center mt-5 space-y-2.5">
+          <p className="inline-flex items-center gap-1.5 text-[10px] leading-relaxed text-white/45 px-2">
+            <ShieldCheck size={11} className="text-blue-300" />
+            Protégé par reCAPTCHA — {" "}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Confidentialité</a>
+            {" "}·{" "}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">CGU</a>
           </p>
-          <Link to="/" className="block text-cream/40 text-xs hover:text-primary transition-colors">
+          <Link to="/" className="block text-white/50 text-xs hover:text-white transition-colors">
             ← Retour au site
           </Link>
         </div>

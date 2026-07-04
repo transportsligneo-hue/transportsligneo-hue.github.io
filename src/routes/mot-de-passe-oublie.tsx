@@ -38,74 +38,56 @@ function MotDePasseOublie() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center section-bg px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-6">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-20 w-auto mx-auto" />
+    <div className="auth-shell flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md auth-fade-in">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block mb-4">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
-          <div className="gold-divider-short mb-4" />
-          <h1 className="font-heading text-2xl md:text-3xl tracking-[0.15em] uppercase text-primary">
-            Mot de passe oublié
-          </h1>
-          <p className="text-cream/50 mt-2 text-sm">Recevez un lien de réinitialisation</p>
+          <h1 className="auth-title text-2xl md:text-3xl">Mot de passe oublié</h1>
+          <p className="auth-subtle text-sm mt-1.5">Recevez un lien de réinitialisation</p>
         </div>
 
         {sent ? (
-          <div className="card-premium p-7 rounded text-center space-y-4">
-            <CheckCircle className="text-primary mx-auto" size={42} />
-            <h2 className="font-heading text-lg text-cream tracking-wider">Email envoyé !</h2>
-            <p className="text-cream/60 text-sm">
-              Si un compte existe pour <strong className="text-cream">{email}</strong>, vous recevrez un lien
+          <div className="auth-card p-7 text-center space-y-4">
+            <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center">
+              <CheckCircle className="text-emerald-300" size={28} />
+            </div>
+            <h2 className="auth-title text-lg">Email envoyé</h2>
+            <p className="auth-subtle text-sm">
+              Si un compte existe pour <strong className="text-white">{email}</strong>, vous recevrez un lien
               de réinitialisation dans quelques instants. Pensez à vérifier vos spams.
             </p>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
-            >
+            <Link to="/login" className="auth-btn-primary mt-2">
               <ArrowLeft size={14} /> Retour à la connexion
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="card-premium p-7 rounded space-y-5">
-            {error && (
-              <div className="p-3 rounded bg-destructive/15 border border-destructive/30 text-destructive text-sm">
-                {error}
-              </div>
-            )}
-            <p className="text-cream/60 text-sm">
+          <form onSubmit={handleSubmit} className="auth-card p-6 sm:p-7 space-y-5">
+            {error && <div className="auth-alert auth-alert-error">{error}</div>}
+            <p className="auth-subtle text-sm">
               Saisissez votre adresse email. Nous vous enverrons un lien sécurisé pour choisir un nouveau mot de passe.
             </p>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-                <Mail size={12} className="inline mr-1" /> Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
-                placeholder="votre@email.com"
-              />
+              <label className="auth-label">Email</label>
+              <div className="auth-field">
+                <Mail size={16} className="auth-field-icon" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="auth-input"
+                  placeholder="votre@email.com"
+                />
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-3 px-8 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors disabled:opacity-60"
-            >
+            <button type="submit" disabled={loading} className="auth-btn-primary">
               {loading ? <><Loader2 size={16} className="animate-spin" />Envoi…</> : "Envoyer le lien"}
             </button>
-            <div className="text-center pt-2 border-t border-primary/10 space-y-3">
-              <p className="text-[10px] leading-relaxed text-cream/40 px-2">
-                Protégé par reCAPTCHA et soumis à la{" "}
-                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Politique de Confidentialité</a>
-                {" "}et aux{" "}
-                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Termes d'Utilisation</a>
-                {" "}de Google.
-              </p>
-              <Link to="/login" className="block text-cream/50 text-xs hover:text-primary transition-colors">
+            <div className="text-center pt-3 border-t border-white/10">
+              <Link to="/login" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
                 ← Retour à la connexion
               </Link>
             </div>
