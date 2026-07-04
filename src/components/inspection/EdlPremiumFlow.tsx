@@ -681,6 +681,12 @@ export function EdlPremiumFlow({
     return data.id;
   }, [attributionId, inspectionId, type]);
 
+  useEffect(() => {
+    void ensureInspection().catch(() => {
+      // Non bloquant : un retry sera fait au premier upload si nécessaire.
+    });
+  }, [ensureInspection]);
+
   // ─────────────────────────── HANDLERS ───────────────────────────
   /** Avance vers l'étape suivante (utilisé après succès photo / scan / signature). */
   const autoAdvance = useCallback(() => {
