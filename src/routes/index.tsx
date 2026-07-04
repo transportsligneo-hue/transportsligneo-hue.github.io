@@ -49,47 +49,49 @@ function Index() {
       <div className="hidden md:block">
         <Navbar />
 
-        {/* Hero avec simulateur intégré à droite + courbe blanc cassé en bas */}
-        <HeroDesktop />
+        <main id="main-content">
+          {/* Hero avec simulateur intégré à droite + courbe blanc cassé en bas */}
+          <HeroDesktop />
 
-        {/* === BANDE STATS BLANCHE PREMIUM (façon maquette) === */}
-        <section className="bg-[#faf7ef] pt-4 pb-16 lg:pb-20">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="relative bg-white rounded-2xl border border-black/[0.06] shadow-[0_2px_4px_rgba(6,18,56,0.04),0_24px_60px_-30px_rgba(6,18,56,0.20)] px-8 lg:px-14 py-10 lg:py-12">
-              <span aria-hidden className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#60a5fa] to-transparent" />
+          {/* === BANDE STATS BLANCHE PREMIUM (façon maquette) === */}
+          <section className="bg-[#faf7ef] pt-4 pb-16 lg:pb-20">
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="relative bg-white rounded-2xl border border-black/[0.06] shadow-[0_2px_4px_rgba(6,18,56,0.04),0_24px_60px_-30px_rgba(6,18,56,0.20)] px-8 lg:px-14 py-10 lg:py-12">
+                <span aria-hidden className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#60a5fa] to-transparent" />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-[rgba(6,18,56,0.08)]">
-                {heroTrustStats.map(({ icon: Icon, title, desc }, i) => (
-                  <div
-                    key={title}
-                    className={`flex items-start gap-5 ${i > 0 ? "pt-8 md:pt-0 md:pl-12" : ""}`}
-                  >
-                    <span className="shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl border border-[rgba(96,165,250,0.45)] bg-gradient-to-br from-[rgba(96,165,250,0.14)] to-[rgba(96,165,250,0.04)]">
-                      <Icon size={24} className="text-[#60a5fa]" strokeWidth={1.7} />
-                    </span>
-                    <div>
-                      <h3 className="font-heading text-[#061238] text-[15px] tracking-[0.08em] uppercase">
-                        {title}
-                      </h3>
-                      <p className="text-[#5b6485] text-[13.5px] leading-relaxed mt-2">
-                        {desc}
-                      </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-[rgba(6,18,56,0.08)]">
+                  {heroTrustStats.map(({ icon: Icon, title, desc }, i) => (
+                    <div
+                      key={title}
+                      className={`flex items-start gap-5 ${i > 0 ? "pt-8 md:pt-0 md:pl-12" : ""}`}
+                    >
+                      <span className="shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl border border-[rgba(96,165,250,0.45)] bg-gradient-to-br from-[rgba(96,165,250,0.14)] to-[rgba(96,165,250,0.04)]">
+                        <Icon size={24} className="text-[#60a5fa]" strokeWidth={1.7} />
+                      </span>
+                      <div>
+                        <h3 className="font-heading text-[#061238] text-[15px] tracking-[0.08em] uppercase">
+                          {title}
+                        </h3>
+                        <p className="text-[#5b6485] text-[13.5px] leading-relaxed mt-2">
+                          {desc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* PartnersMarquee — INTOUCHÉ */}
-        <PartnersMarquee />
+          {/* PartnersMarquee — INTOUCHÉ */}
+          <PartnersMarquee />
 
-        {/* Pourquoi nous choisir — version claire */}
-        <PourquoiNousChoisir />
+          {/* Pourquoi nous choisir — version claire */}
+          <PourquoiNousChoisir />
 
-        {/* Comment ça marche — version navy premium */}
-        <CommentCaMarche />
+          {/* Comment ça marche — version navy premium */}
+          <CommentCaMarche />
+        </main>
 
         <Footer />
       </div>
