@@ -673,7 +673,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           // ============================================================
           // VARIANTE BAR — rendu original (utilisé sur /tarifs etc.)
           // ============================================================
-          <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
+          <div className="relative z-30 rounded-[24px] border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-5 md:p-7">
 
             {/* Type de prestation */}
             <div className="mb-5">
