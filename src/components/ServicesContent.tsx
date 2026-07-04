@@ -115,13 +115,17 @@ export default function ServicesContent() {
       >
         <div aria-hidden className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%)" }} />
+        <div aria-hidden className="cyber-aurora" />
+        <div aria-hidden className="cyber-grid opacity-60" />
+        <div aria-hidden className="cyber-scanline" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/[0.08] px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
+          <span className="cyber-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] font-heading">
             Convoyage
           </span>
           <h1 className="font-heading text-4xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.1]">
-            Nos <span className="gold-gradient-text">services</span>
+            Nos <span className="cyber-title-accent">services</span>
           </h1>
+
           <p className="text-cream/70 mt-6 text-base lg:text-lg leading-relaxed max-w-2xl mx-auto">
             Jockeyage, convoyage porte à porte, état des lieux digitalisé, signature électronique : un service complet pour particuliers et professionnels.
           </p>
