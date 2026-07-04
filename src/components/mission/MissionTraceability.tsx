@@ -13,7 +13,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, AlertCircle, ShieldCheck, Loader2, PenTool, Download } from "lucide-react";
+import { Check, AlertCircle, ShieldCheck, PenTool, Download } from "lucide-react";
 
 interface Props {
   attributionId: string;
@@ -118,9 +118,25 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
   const allComplete = departComplete && arriveeComplete;
 
   if (loading) {
+    if (variant === "compact") {
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="h-5 w-20 rounded-full bg-slate-200 animate-pulse" />
+          <span className="h-5 w-20 rounded-full bg-slate-200 animate-pulse" />
+        </div>
+      );
+    }
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-2 text-sm text-slate-500">
-        <Loader2 className="animate-spin" size={16} /> Chargement de la traçabilité…
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-4 w-4 rounded bg-slate-200 animate-pulse" />
+          <div className="h-3 w-48 rounded bg-slate-200 animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 h-32 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }

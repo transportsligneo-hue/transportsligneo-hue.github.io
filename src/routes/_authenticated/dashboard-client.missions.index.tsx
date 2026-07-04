@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Truck, Loader2, PlusCircle, Clock, ArrowRight, FileText } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 
 const friendlyStatusLabel = (statut: string): string => missionStatusLabel(statut);
 
@@ -162,9 +163,13 @@ function ClientMissions() {
               key={m.id}
               to="/dashboard-client/missions/$missionId"
               params={{ missionId: m.id }}
+              onMouseEnter={() => prefetchMissionTracking(m.numero, m.id)}
+              onFocus={() => prefetchMissionTracking(m.numero, m.id)}
+              onTouchStart={() => prefetchMissionTracking(m.numero, m.id)}
               className="card-premium p-5 rounded hover:border-primary/40 transition-all group"
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap mb-2">
                     <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>

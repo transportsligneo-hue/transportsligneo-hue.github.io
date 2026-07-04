@@ -4,10 +4,17 @@
  * - Signatures (départ / arrivée)
  * - Carte grise (recto / verso)
  * - Documents partagés (PV livraison, contrat, autres)
+ *
+ * Chargement progressif :
+ *   1. squelettes affichés immédiatement
+ *   2. chaque section (carte grise, photos, docs) se remplit indépendamment
+ *      dès que ses données arrivent — pas d'écran d'attente global
+ *   3. pagination "Voir plus" au-delà de 12 photos par section pour garder
+ *      un défilement fluide même sur mobile / grosses missions
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, FileText, CarFront, Download, Eye, Loader2, X } from "lucide-react";
+import { Camera, FileText, CarFront, Download, Eye, X, ChevronDown } from "lucide-react";
 
 interface Props {
   attributionId: string;
@@ -17,8 +24,9 @@ interface Props {
 
 
 interface PhotoItem { id: string; vue_type: string; url: string; type: "depart" | "arrivee" }
-interface SignatureItem { kind: string; url: string }
 interface DocItem { id: string; nom: string; type: string; created_at: string; signedUrl: string | null }
+
+const PAGE_SIZE = 12;
 
 const vueLabel = (k: string) => {
   const map: Record<string, string> = {
@@ -57,83 +65,82 @@ const docLabel = (t: string) =>
 
 export function MissionClientGallery({ attributionId, trajetId, onProofsAvailable }: Props) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [signatures, setSignatures] = useState<SignatureItem[]>([]);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [cg, setCg] = useState<{ recto: string | null; verso: string | null }>({ recto: null, verso: null });
-  const [loading, setLoading] = useState(true);
+
+  // Chargement indépendant par section — pas de "grand spinner" bloquant
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+  const [loadingCg, setLoadingCg] = useState(!!trajetId);
+
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [visibleDep, setVisibleDep] = useState(PAGE_SIZE);
+  const [visibleArr, setVisibleArr] = useState(PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
+    let hasAny = false;
+    const flagProofs = () => {
+      if (!hasAny) { hasAny = true; onProofsAvailable?.(true); }
+    };
+
+    // 1) Photos d'inspection — pipeline indépendant
     (async () => {
-      setLoading(true);
+      setLoadingPhotos(true);
+      const { data: insps } = await supabase
+        .from("inspections")
+        .select("id, type")
+        .eq("attribution_id", attributionId);
+      const inspList = (insps as { id: string; type: string }[] | null) ?? [];
+      if (!inspList.length) {
+        if (!cancelled) { setPhotos([]); setLoadingPhotos(false); }
+        return;
+      }
+      const inspTypeById = new Map(inspList.map(i => [i.id, i.type]));
+      const { data: rawRes } = await supabase
+        .from("inspection_photos")
+        .select("id, inspection_id, vue_type, url_photo")
+        .in("inspection_id", inspList.map(i => i.id));
+      const raw = (rawRes as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] | null) ?? [];
 
-      // Lancer TOUTES les requêtes racine en parallèle (au lieu de séquentiel)
-      const [inspsRes, sigsRes, docsRes, trajetRes] = await Promise.all([
-        supabase.from("inspections").select("id, type").eq("attribution_id", attributionId),
-        supabase.from("mission_signatures").select("kind, signature_data").eq("attribution_id", attributionId),
-        supabase
-          .from("mission_documents")
-          .select("id, type_document, nom_fichier, url_fichier, created_at")
-          .eq("attribution_id", attributionId)
-          .order("created_at", { ascending: false }),
-        trajetId
-          ? supabase.from("trajets").select("carte_grise_recto_url, carte_grise_verso_url").eq("id", trajetId).maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
-
-      const insps = (inspsRes.data as { id: string; type: string }[] | null) ?? [];
-      const inspTypeById = new Map(insps.map(i => [i.id, i.type]));
-
-      // Photos : UNE requête .in() au lieu de N requêtes
-      const photosRes = insps.length
-        ? await supabase
-            .from("inspection_photos")
-            .select("id, inspection_id, vue_type, url_photo")
-            .in("inspection_id", insps.map(i => i.id))
-        : { data: [] as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] };
-
-      const rawPhotos = (photosRes.data as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] | null) ?? [];
-
-      // Signed URLs en lot pour inspection-photos
-      const photoPathsToSign: string[] = [];
-      const photoPathIndex = new Map<string, number>();
-      rawPhotos.forEach((p) => {
-        if (!/^https?:\/\//.test(p.url_photo) && !photoPathIndex.has(p.url_photo)) {
-          photoPathIndex.set(p.url_photo, photoPathsToSign.length);
-          photoPathsToSign.push(p.url_photo);
-        }
-      });
-      const signedPhotoMap = new Map<string, string>();
-      if (photoPathsToSign.length) {
-        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrls(photoPathsToSign, 3600);
-        (signed ?? []).forEach((s, idx) => {
-          if (s?.signedUrl) signedPhotoMap.set(photoPathsToSign[idx], s.signedUrl);
-        });
+      const pathsToSign = Array.from(new Set(raw.filter(p => !/^https?:\/\//.test(p.url_photo)).map(p => p.url_photo)));
+      const signedMap = new Map<string, string>();
+      if (pathsToSign.length) {
+        const { data: signed } = await supabase.storage.from("inspection-photos").createSignedUrls(pathsToSign, 3600);
+        (signed ?? []).forEach((s, idx) => { if (s?.signedUrl) signedMap.set(pathsToSign[idx], s.signedUrl); });
       }
 
-      const allPhotos: PhotoItem[] = [];
-      for (const p of rawPhotos) {
-        const url = /^https?:\/\//.test(p.url_photo) ? p.url_photo : (signedPhotoMap.get(p.url_photo) ?? "");
+      const built: PhotoItem[] = [];
+      for (const p of raw) {
+        const url = /^https?:\/\//.test(p.url_photo) ? p.url_photo : (signedMap.get(p.url_photo) ?? "");
         if (!url) continue;
-        const t = inspTypeById.get(p.inspection_id) === "arrivee" ? "arrivee" : "depart";
-        allPhotos.push({ id: p.id, vue_type: p.vue_type, url, type: t });
-      }
-
-      // Signatures
-      const sigList: SignatureItem[] = ((sigsRes.data as { kind: string; signature_data: string | null }[] | null) ?? [])
-        .filter(s => s.signature_data)
-        .map(s => ({ kind: s.kind, url: s.signature_data! }));
-
-      // Documents : signed URLs en lot
-      const dRaw = (docsRes.data as { id: string; type_document: string; nom_fichier: string; url_fichier: string; created_at: string }[] | null) ?? [];
-      const docPaths = dRaw.map(d => d.url_fichier);
-      const signedDocMap = new Map<string, string>();
-      if (docPaths.length) {
-        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(docPaths, 3600);
-        (signed ?? []).forEach((s, idx) => {
-          if (s?.signedUrl) signedDocMap.set(docPaths[idx], s.signedUrl);
+        built.push({
+          id: p.id,
+          vue_type: p.vue_type,
+          url,
+          type: inspTypeById.get(p.inspection_id) === "arrivee" ? "arrivee" : "depart",
         });
+      }
+      if (cancelled) return;
+      setPhotos(built);
+      setLoadingPhotos(false);
+      if (built.length) flagProofs();
+    })();
+
+    // 2) Documents partagés — pipeline indépendant
+    (async () => {
+      setLoadingDocs(true);
+      const { data: dRes } = await supabase
+        .from("mission_documents")
+        .select("id, type_document, nom_fichier, url_fichier, created_at")
+        .eq("attribution_id", attributionId)
+        .order("created_at", { ascending: false });
+      const dRaw = (dRes as { id: string; type_document: string; nom_fichier: string; url_fichier: string; created_at: string }[] | null) ?? [];
+      const paths = dRaw.map(d => d.url_fichier);
+      const signedDocMap = new Map<string, string>();
+      if (paths.length) {
+        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(paths, 3600);
+        (signed ?? []).forEach((s, idx) => { if (s?.signedUrl) signedDocMap.set(paths[idx], s.signedUrl); });
       }
       const dList: DocItem[] = dRaw.map(d => ({
         id: d.id,
@@ -142,48 +149,50 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
         created_at: d.created_at,
         signedUrl: signedDocMap.get(d.url_fichier) ?? null,
       }));
+      if (cancelled) return;
+      setDocs(dList);
+      setLoadingDocs(false);
+      if (dList.length) flagProofs();
+    })();
 
-      // Carte grise : signer en parallèle
-      let cgState = { recto: null as string | null, verso: null as string | null };
-      const tr = trajetRes.data as { carte_grise_recto_url: string | null; carte_grise_verso_url: string | null } | null;
-      if (tr) {
+    // 3) Carte grise — pipeline indépendant
+    if (trajetId) {
+      (async () => {
+        setLoadingCg(true);
+        const { data: tr } = await supabase
+          .from("trajets")
+          .select("carte_grise_recto_url, carte_grise_verso_url")
+          .eq("id", trajetId)
+          .maybeSingle();
         const sign = async (p: string | null | undefined) => {
           if (!p) return null;
           if (/^https?:\/\//.test(p)) return p;
           const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(p, 3600);
           return data?.signedUrl ?? null;
         };
-        const [recto, verso] = await Promise.all([sign(tr.carte_grise_recto_url), sign(tr.carte_grise_verso_url)]);
-        cgState = { recto, verso };
-      }
+        const [recto, verso] = await Promise.all([
+          sign(tr?.carte_grise_recto_url),
+          sign(tr?.carte_grise_verso_url),
+        ]);
+        if (cancelled) return;
+        setCg({ recto, verso });
+        setLoadingCg(false);
+        if (recto || verso) flagProofs();
+      })();
+    } else {
+      setLoadingCg(false);
+    }
 
-      if (cancelled) return;
-      setPhotos(allPhotos);
-      setSignatures(sigList);
-      setDocs(dList);
-      setCg(cgState);
-      setLoading(false);
-      const hasAnyProofs =
-        allPhotos.length > 0 || sigList.length > 0 || dList.length > 0 || !!cgState.recto || !!cgState.verso;
-      onProofsAvailable?.(hasAnyProofs);
-    })();
     return () => { cancelled = true; };
   }, [attributionId, trajetId, onProofsAvailable]);
 
-
-  if (loading) {
-    return (
-      <div className="card-premium p-5 rounded flex items-center justify-center gap-2 text-cream/60 text-xs">
-        <Loader2 size={14} className="animate-spin" /> Chargement des pièces…
-      </div>
-    );
-  }
-
   const photosDep = photos.filter(p => p.type === "depart");
   const photosArr = photos.filter(p => p.type === "arrivee");
-  const hasAny = photos.length > 0 || signatures.length > 0 || docs.length > 0 || cg.recto || cg.verso;
+  const allDone = !loadingPhotos && !loadingDocs && !loadingCg;
+  const hasAny = photos.length > 0 || docs.length > 0 || cg.recto || cg.verso;
 
-  if (!hasAny) {
+  // Rien à afficher du tout après chargement complet
+  if (allDone && !hasAny) {
     return (
       <div className="card-premium p-5 rounded text-center">
         <p className="text-cream/50 text-xs">
@@ -195,55 +204,73 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
 
   return (
     <>
-      {(cg.recto || cg.verso) && (
+      {/* Carte grise */}
+      {loadingCg ? (
+        <SkeletonSection title="Carte grise" icon={<CarFront size={16} />} count={2} cols={2} />
+      ) : (cg.recto || cg.verso) ? (
         <Section title="Carte grise" icon={<CarFront size={16} />}>
           <div className="grid grid-cols-2 gap-3">
             {cg.recto && <ImgTile url={cg.recto} label="Recto" onClick={() => setLightbox(cg.recto!)} />}
             {cg.verso && <ImgTile url={cg.verso} label="Verso" onClick={() => setLightbox(cg.verso!)} />}
           </div>
         </Section>
+      ) : null}
+
+      {/* Photos */}
+      {loadingPhotos ? (
+        <SkeletonSection title="Photos d'inspection" icon={<Camera size={16} />} count={6} cols={3} />
+      ) : (
+        <>
+          {photosDep.length > 0 && (
+            <Section title={`Photos de prise en charge (${photosDep.length})`} icon={<Camera size={16} />}>
+              <Grid items={photosDep.slice(0, visibleDep)} onOpen={setLightbox} />
+              {photosDep.length > visibleDep && (
+                <LoadMore onClick={() => setVisibleDep(v => v + PAGE_SIZE)} remaining={photosDep.length - visibleDep} />
+              )}
+            </Section>
+          )}
+
+          {photosArr.length > 0 && (
+            <Section title={`Photos de livraison (${photosArr.length})`} icon={<Camera size={16} />}>
+              <Grid items={photosArr.slice(0, visibleArr)} onOpen={setLightbox} />
+              {photosArr.length > visibleArr && (
+                <LoadMore onClick={() => setVisibleArr(v => v + PAGE_SIZE)} remaining={photosArr.length - visibleArr} />
+              )}
+            </Section>
+          )}
+        </>
       )}
 
-      {photosDep.length > 0 && (
-        <Section title={`Photos de prise en charge (${photosDep.length})`} icon={<Camera size={16} />}>
-          <Grid items={photosDep} onOpen={setLightbox} />
-        </Section>
-      )}
-
-      {photosArr.length > 0 && (
-        <Section title={`Photos de livraison (${photosArr.length})`} icon={<Camera size={16} />}>
-          <Grid items={photosArr} onOpen={setLightbox} />
-        </Section>
-      )}
-
-      {/* Signatures : section gérée par MissionTraceability — pas de doublon ici */}
-
-
-      {docs.length > 0 && (
-        <Section title={`Documents (${docs.length})`} icon={<FileText size={16} />}>
-          <div className="grid gap-2">
-            {docs.map(d => (
-              <div key={d.id} className="flex items-center justify-between gap-3 bg-navy/40 border border-primary/10 rounded px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="text-cream/85 text-sm truncate">{d.nom}</p>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-0.5">
-                    {docLabel(d.type)} · {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                  </p>
+      {/* Documents */}
+      {loadingDocs ? (
+        <SkeletonSection title="Documents" icon={<FileText size={16} />} count={3} cols={1} />
+      ) : (
+        docs.length > 0 && (
+          <Section title={`Documents (${docs.length})`} icon={<FileText size={16} />}>
+            <div className="grid gap-2">
+              {docs.map(d => (
+                <div key={d.id} className="flex items-center justify-between gap-3 bg-navy/40 border border-primary/10 rounded px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-cream/85 text-sm truncate">{d.nom}</p>
+                    <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-0.5">
+                      {docLabel(d.type)} · {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                  {d.signedUrl && (
+                    <a
+                      href={d.signedUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-navy font-heading text-[10px] tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors"
+                    >
+                      <Download size={11} /> Voir
+                    </a>
+                  )}
                 </div>
-                {d.signedUrl && (
-                  <a
-                    href={d.signedUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-navy font-heading text-[10px] tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors"
-                  >
-                    <Download size={11} /> Voir
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </Section>
+              ))}
+            </div>
+          </Section>
+        )
       )}
 
       {lightbox && (
@@ -263,12 +290,48 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="card-premium p-5 rounded">
+    <div className="card-premium p-5 rounded animate-in fade-in duration-300">
       <h2 className="font-heading text-sm text-primary tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
         {icon} {title}
       </h2>
       {children}
     </div>
+  );
+}
+
+function SkeletonSection({ title, icon, count, cols }: { title: string; icon: React.ReactNode; count: number; cols: number }) {
+  const gridClass =
+    cols === 1
+      ? "grid gap-2"
+      : cols === 2
+        ? "grid grid-cols-2 gap-3"
+        : "grid grid-cols-2 sm:grid-cols-3 gap-2";
+  return (
+    <div className="card-premium p-5 rounded">
+      <h2 className="font-heading text-sm text-primary/60 tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
+        {icon} {title}
+      </h2>
+      <div className={gridClass}>
+        {Array.from({ length: count }).map((_, i) => (
+          <div
+            key={i}
+            className={cols === 1 ? "h-12 rounded bg-navy/40 border border-primary/10 animate-pulse" : "aspect-square rounded border border-primary/10 bg-navy/40 animate-pulse"}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LoadMore({ onClick, remaining }: { onClick: () => void; remaining: number }) {
+  return (
+    <button
+      onClick={onClick}
+      className="mt-4 w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded border border-primary/25 bg-navy/40 text-primary text-[11px] uppercase tracking-[0.15em] hover:bg-primary/10 hover:border-primary/50 transition-colors"
+    >
+      <ChevronDown size={13} /> Afficher {Math.min(remaining, PAGE_SIZE)} photos supplémentaires
+      <span className="text-cream/40 normal-case tracking-normal">({remaining} restantes)</span>
+    </button>
   );
 }
 
@@ -298,7 +361,6 @@ function ImgTile({ url, label, onClick }: { url: string; label: string; onClick:
         blobUrl = URL.createObjectURL(blob);
         revoke = true;
       } else {
-        // Pour les URLs distantes (signed), passer par un blob garantit le download cross-origin
         try {
           const res = await fetch(url);
           if (res.ok) {
@@ -330,7 +392,7 @@ function ImgTile({ url, label, onClick }: { url: string; label: string; onClick:
         className="absolute inset-0 w-full h-full"
         aria-label={`Agrandir ${label}`}
       >
-        <img src={url} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
+        <img src={url} alt={label} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy via-navy/70 to-transparent p-2">
           <p className="text-cream text-[10px] uppercase tracking-wider truncate text-left">{label}</p>
         </div>
@@ -348,4 +410,3 @@ function ImgTile({ url, label, onClick }: { url: string; label: string; onClick:
     </div>
   );
 }
-
