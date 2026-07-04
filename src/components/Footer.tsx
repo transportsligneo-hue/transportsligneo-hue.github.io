@@ -3,7 +3,13 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export default function Footer() {
   return (
-    <footer className="py-12 bg-navy border-t border-primary/15">
+    <footer
+      className="py-12 border-t border-[#60a5fa]/15"
+      style={{
+        background:
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
+      }}
+    >
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-8 mb-10">
           <div>
