@@ -31,6 +31,11 @@ export default function CommentCaMarche() {
           "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
       }}
     >
+      {/* Cyber ambient */}
+      <div aria-hidden className="cyber-aurora" />
+      <div aria-hidden className="cyber-grid opacity-70" />
+      <div aria-hidden className="cyber-scanline" />
+
       {/* Halos discrets */}
       <div
         aria-hidden
@@ -42,6 +47,7 @@ export default function CommentCaMarche() {
         className="pointer-events-none absolute -bottom-20 right-10 w-[500px] h-[350px] rounded-full opacity-[0.16] blur-3xl"
         style={{ background: "radial-gradient(closest-side, #60a5fa, transparent 70%)" }}
       />
+
 
       <div className="relative max-w-6xl mx-auto px-6">
         <div className="text-center mb-16 lg:mb-20">
