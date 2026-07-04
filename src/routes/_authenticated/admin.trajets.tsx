@@ -82,6 +82,9 @@ interface Offre {
   statut: string;
   message: string | null;
   created_at: string;
+  admin_counter_offer?: number | null;
+  admin_counter_at?: string | null;
+  commentaire_convoyeur?: string | null;
   convoyeur?: { prenom: string; nom: string; telephone: string; email: string } | null;
 }
 
