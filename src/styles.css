@@ -1407,8 +1407,8 @@
   .glass-onyx {
     position: relative;
     background:
-      linear-gradient(180deg, rgba(20, 28, 60, 0.78) 0%, rgba(11, 16, 38, 0.86) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.22);
+      linear-gradient(180deg, rgba(15, 45, 128, 0.78) 0%, rgba(6, 18, 56, 0.86) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.22);
     border-radius: 1.25rem;
     backdrop-filter: blur(28px) saturate(160%);
     -webkit-backdrop-filter: blur(28px) saturate(160%);
@@ -1423,7 +1423,7 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 10%, rgba(212,175,55,0.6) 50%, transparent 90%);
+    background: linear-gradient(90deg, transparent 10%, rgba(96, 165, 250, 0.6) 50%, transparent 90%);
     border-top-left-radius: inherit;
     border-top-right-radius: inherit;
   }
