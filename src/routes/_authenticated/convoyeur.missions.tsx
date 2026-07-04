@@ -77,7 +77,7 @@ function ConvoyeurMissions() {
   }, []);
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
-  const [inspection, setInspection] = useState<InspectionSession | null>(null);
+  const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
   const openInspection = useCallback((next: InspectionSession) => {
     if (typeof window !== "undefined") {
       const raw = JSON.stringify(next);
@@ -395,10 +395,9 @@ function ConvoyeurMissions() {
 
   const openMission = openMissionId ? missions.find(m => m.id === openMissionId) : null;
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
-
-  // Overlay plein écran via Portal (dans EtatDesLieuxFlow) — rendu en parallèle du DOM normal,
-  // ne dépend plus du re-render du parent. Survit aux fetchMissions / GPS realtime.
+  // Overlay plein écran via Portal (dans EtatDesLieuxFlow) — rendu même pendant
+  // le chargement parent : au retour de l'appareil photo Android, on évite
+  // l'écran blanc + spinner entre deux captures.
   const inspectionMission = inspection ? missions.find(m => m.id === inspection.attributionId) : null;
   const driverDisplayName =
     user?.user_metadata?.prenom && user?.user_metadata?.nom
@@ -417,6 +416,14 @@ function ConvoyeurMissions() {
       />
     </EdlErrorBoundary>
   ) : null;
+
+  if (loading) {
+    return inspectionOverlay ?? (
+      <div className="min-h-[60vh] flex items-center justify-center bg-[#050a1f]">
+        <Loader2 className="animate-spin text-[#d4af37]" size={24} />
+      </div>
+    );
+  }
 
   // === FICHE MISSION DÉTAILLÉE ===
   if (openMission) {

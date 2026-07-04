@@ -52,6 +52,8 @@ interface Props {
 
 interface StepState {
   status: "idle" | "uploading" | "success" | "error";
+  /** Identifiant local de capture pour protéger les uploads arrière-plan contre les reprises. */
+  captureId?: string;
   previewUrl?: string;
   storagePath?: string;
   error?: string;
@@ -162,6 +164,13 @@ async function prepareCapturedImage(raw: File) {
 function revokeBlobUrl(url?: string) {
   if (!url?.startsWith("blob:")) return;
   try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+}
+
+function newCaptureId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 export function EdlPremiumFlow({
@@ -672,6 +681,12 @@ export function EdlPremiumFlow({
     return data.id;
   }, [attributionId, inspectionId, type]);
 
+  useEffect(() => {
+    void ensureInspection().catch(() => {
+      // Non bloquant : un retry sera fait au premier upload si nécessaire.
+    });
+  }, [ensureInspection]);
+
   // ─────────────────────────── HANDLERS ───────────────────────────
   /** Avance vers l'étape suivante (utilisé après succès photo / scan / signature). */
   const autoAdvance = useCallback(() => {
@@ -750,16 +765,19 @@ export function EdlPremiumFlow({
   };
 
 
-  const handlePhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     e.target.value = "";
     if (!raw) return;
-    await processPhotoFile(raw);
+    // Ne jamais attendre la préparation/upload ici : sur Android, garder le
+    // handler ultra-court évite l'écran blanc de reprise Chrome entre 2 photos.
+    processPhotoFile(raw);
   };
 
-  const processPhotoFile = async (raw: File) => {
+  const processPhotoFile = (raw: File) => {
     const stepId = currentStep.id;
     const isScan = currentStep.kind === "scan";
+    const captureId = newCaptureId();
     let previewUrl: string | undefined;
 
     // 1) ACTIVATION IMMÉDIATE du bouton "Photo suivante" :
@@ -772,17 +790,16 @@ export function EdlPremiumFlow({
       previewUrl = URL.createObjectURL(raw);
       setState(stepId, {
         status: "success",
+        captureId,
         previewUrl,
         ocr: isScan ? { status: "pending" } : undefined,
       });
 
-      // 1bis) Préparation du fichier stable (peut être lente sur mobile)
-      const stableFile = await prepareCapturedImage(raw);
-
-
       // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
       void (async () => {
         try {
+          // Préparation du fichier stable (peut être lente sur mobile) en arrière-plan.
+          const stableFile = await prepareCapturedImage(raw);
           const insId = await ensureInspection();
           let compressed: File;
           try { compressed = await compressImage(stableFile); }
@@ -814,7 +831,7 @@ export function EdlPremiumFlow({
           // Mise à jour avec le storagePath confirmé (status reste success).
           setStates((prev) => {
             const cur = prev[stepId];
-            if (!cur || cur.previewUrl !== previewUrl) return prev; // étape déjà retaken/supprimée
+            if (!cur || cur.captureId !== captureId) return prev; // étape déjà retaken/supprimée
             return { ...prev, [stepId]: { ...cur, status: "success", storagePath: path } };
           });
 
@@ -860,7 +877,7 @@ export function EdlPremiumFlow({
           // Rollback : repasse l'étape en erreur si l'aperçu local est toujours actif.
           setStates((prev) => {
             const cur = prev[stepId];
-            if (!cur || cur.previewUrl !== previewUrl) return prev;
+            if (!cur || cur.captureId !== captureId) return prev;
             return {
               ...prev,
               [stepId]: {
