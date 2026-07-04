@@ -1239,7 +1239,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             {/* Footer navigation */}
-            <div className="sticky bottom-0 bg-gradient-to-t from-[#0b1026] to-[#0b1026]/95 backdrop-blur px-6 md:px-10 py-4 border-t border-white/5 flex items-center justify-between gap-3">
+            <div className="sticky bottom-0 bg-gradient-to-t from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 py-4 border-t border-white/5 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setStep(s => Math.max(1, s - 1))}
