@@ -716,7 +716,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
                   fallbackOptions={CITIES}
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
 
