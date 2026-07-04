@@ -104,26 +104,24 @@ export default function MobileHomeScreen() {
             : "bg-transparent"
         }`}
       >
-        <Link to="/" className="flex items-center gap-3 tap-scale min-w-0" aria-label="Accueil">
+        <Link to="/" className="flex items-center gap-2.5 tap-scale min-w-0" aria-label="Accueil">
           <span
             className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center border border-white/15 bg-white/[0.05] overflow-hidden"
             style={{ boxShadow: "0 0 24px -8px rgba(96,165,250,0.5)" }}
           >
             <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
           </span>
-          <div className="min-w-0 flex items-center">
-            <p className="font-heading text-white text-[15px] leading-tight tracking-wide truncate">
-              Transports Ligneo
-            </p>
-          </div>
+          <span className="hidden xs:inline-block font-heading text-white text-[13px] leading-tight tracking-[0.18em] uppercase truncate">
+            Ligneo
+          </span>
         </Link>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={goEspace}
             aria-label={espaceLabel}
-            className="h-11 pl-1.5 pr-3 rounded-2xl border border-[#e7c76a]/50 flex items-center gap-2 tap-scale active:scale-95 transition-transform"
+            className="h-11 w-11 rounded-2xl border border-[#e7c76a]/50 flex items-center justify-center tap-scale active:scale-95 transition-transform"
             style={{
-              background: "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(212,175,55,0.08) 100%)",
+              background: "linear-gradient(135deg, rgba(231,199,106,0.22) 0%, rgba(212,175,55,0.08) 100%)",
               boxShadow: "0 8px 22px -10px rgba(231,199,106,0.55)",
             }}
           >
@@ -132,9 +130,6 @@ export default function MobileHomeScreen() {
               style={{ background: "linear-gradient(135deg, #e7c76a, #d4af37)" }}
             >
               {isAuthenticated && userInitial ? userInitial : <User size={15} />}
-            </span>
-            <span className="font-heading text-[11px] tracking-[0.18em] uppercase text-[#f4e7bf]">
-              {isAuthenticated ? "Espace" : "Connexion"}
             </span>
           </button>
           <button
@@ -146,6 +141,7 @@ export default function MobileHomeScreen() {
             <Menu size={18} className="text-white/85" />
           </button>
         </div>
+
       </header>
 
       {/* === DRAWER MENU === */}
