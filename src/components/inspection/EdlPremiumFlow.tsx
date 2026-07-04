@@ -750,14 +750,16 @@ export function EdlPremiumFlow({
   };
 
 
-  const handlePhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
     e.target.value = "";
     if (!raw) return;
-    await processPhotoFile(raw);
+    // Ne jamais attendre la préparation/upload ici : sur Android, garder le
+    // handler ultra-court évite l'écran blanc de reprise Chrome entre 2 photos.
+    processPhotoFile(raw);
   };
 
-  const processPhotoFile = async (raw: File) => {
+  const processPhotoFile = (raw: File) => {
     const stepId = currentStep.id;
     const isScan = currentStep.kind === "scan";
     let previewUrl: string | undefined;
@@ -776,13 +778,11 @@ export function EdlPremiumFlow({
         ocr: isScan ? { status: "pending" } : undefined,
       });
 
-      // 1bis) Préparation du fichier stable (peut être lente sur mobile)
-      const stableFile = await prepareCapturedImage(raw);
-
-
       // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
       void (async () => {
         try {
+          // Préparation du fichier stable (peut être lente sur mobile) en arrière-plan.
+          const stableFile = await prepareCapturedImage(raw);
           const insId = await ensureInspection();
           let compressed: File;
           try { compressed = await compressImage(stableFile); }
