@@ -1015,15 +1015,20 @@ export type Database = {
           prix_estime: number
           recuperation_retour_identique: boolean
           refused_at: string | null
+          regime_snapshot: string | null
           sent_at: string | null
           statut: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
           tarif_label: string | null
           telephone: string | null
+          total_ht: number | null
+          total_ttc: number | null
+          total_tva: number | null
           type_vehicule: string | null
           updated_at: string
           user_id: string | null
+          vat_breakdown: Json | null
           vehicule_docs_completed: boolean
           version: number
           vin: string | null
@@ -1081,15 +1086,20 @@ export type Database = {
           prix_estime: number
           recuperation_retour_identique?: boolean
           refused_at?: string | null
+          regime_snapshot?: string | null
           sent_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           tarif_label?: string | null
           telephone?: string | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
           type_vehicule?: string | null
           updated_at?: string
           user_id?: string | null
+          vat_breakdown?: Json | null
           vehicule_docs_completed?: boolean
           version?: number
           vin?: string | null
@@ -1147,15 +1157,20 @@ export type Database = {
           prix_estime?: number
           recuperation_retour_identique?: boolean
           refused_at?: string | null
+          regime_snapshot?: string | null
           sent_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           tarif_label?: string | null
           telephone?: string | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
           type_vehicule?: string | null
           updated_at?: string
           user_id?: string | null
+          vat_breakdown?: Json | null
           vehicule_docs_completed?: boolean
           version?: number
           vin?: string | null
@@ -1468,12 +1483,17 @@ export type Database = {
           prix_tva: number
           reference_client: string | null
           reference_label: string | null
+          regime_snapshot: string | null
           statut: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
+          total_ht: number | null
+          total_ttc: number | null
+          total_tva: number | null
           tva_taux: number
           type_facture: string
           updated_at: string
+          vat_breakdown: Json | null
         }
         Insert: {
           amount_paid_cents?: number | null
@@ -1507,12 +1527,17 @@ export type Database = {
           prix_tva?: number
           reference_client?: string | null
           reference_label?: string | null
+          regime_snapshot?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
+          vat_breakdown?: Json | null
         }
         Update: {
           amount_paid_cents?: number | null
@@ -1546,12 +1571,17 @@ export type Database = {
           prix_tva?: number
           reference_client?: string | null
           reference_label?: string | null
+          regime_snapshot?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
+          vat_breakdown?: Json | null
         }
         Relationships: [
           {
@@ -2507,6 +2537,36 @@ export type Database = {
           },
         ]
       }
+      pricing_settings: {
+        Row: {
+          created_at: string
+          currency: string
+          default_vat_rate: number
+          id: boolean
+          regime: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          default_vat_rate?: number
+          id?: boolean
+          regime?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          default_vat_rate?: number
+          id?: boolean
+          regime?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string
@@ -3070,6 +3130,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vat_rates: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          label: string
+          rate: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          label: string
+          rate: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          label?: string
+          rate?: number
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }

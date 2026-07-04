@@ -1,85 +1,143 @@
-# Refonte module État des lieux — expérience native premium
+# Refonte Transports Lignéo — plan pluri-phases (avec analyse captures)
 
-Objectif : rendre la capture photo/scan instantanée, ajouter édition + galerie + mode hors-ligne, sans toucher au métier (API, workflows, statuts, PDF, notifications, permissions, calculs restent identiques).
+Choix produit confirmés :
+- **Régime facturation** : Micro-entreprise (défaut, prix saisis = TTC) / Société assujettie TVA **multi-taux** (20 / 10 / 5,5 / 0), taux par ligne.
+- **Attribution catalogue** : prix libre convoyeur (mode enchère). L'admin publie sans prix, les convoyeurs proposent leur tarif, l'admin accepte / refuse / contre-propose.
 
-## Principes
+## Analyse des captures reçues
 
-- Aucune modification de `src/lib/edl-final-pdf.ts`, des fonctions serveur, des tables Supabase, des statuts, ni des schémas de `inspections` / `inspection_photos` / `inspection_documents`.
-- Tous les changements sont côté client (composants, hooks, workers, cache local IndexedDB).
-- Fallback complet : si IndexedDB / caméra avancée / worker indisponible → comportement actuel préservé.
+| Capture | Constat | Action prévue |
+|---|---|---|
+| **Paramètres** | Bandeau "stockés localement… branchés sur la DB lors d'un prochain incrément" — non persisté. Pas de choix de régime, pas de taux TVA. | Phase 1 : table `pricing_settings` + section Facturation avec radio Micro/Société + tableau taux TVA. |
+| **Attributions** | Cards trop verbeuses, 6 icônes d'action non légendées, pas de filtres statut/client/date, pas de recherche. Le tri chronologique n'est pas évident. | Phase 4 : passage en tableau dense filtrable (statut, période, client, convoyeur, plaque) + actions groupées + hover reveal. |
+| **Trajets** | Bandeau "n'affiche plus les partenariats" mange 15 % de l'écran, colonne prix cassée sur 2 lignes ("180 €"), pas de KPI. | Phase 4 : passage bandeau en toast dismissible + KPI (24 trajets, X en cours, X à facturer) + colonnes recalibrées + tri natif. |
+| **Utilisateurs** | KPIs OK mais pas de fiche latérale rapide, pas d'export, filtres rôle/statut basiques, pas de tri. | Phase 4 : QuickView side sheet au clic ligne + tri colonnes + export CSV + actions bulk (suspendre, réinitialiser mdp). |
+| **Paiements/Devis** | Courbe "Factures payées" vide (Récent) mais prend 200 px, hiérarchie tabs "Stripe B2C (0) / B2B (0) / Factures (9)" — la donnée réelle est cachée. | Phase 4 : courbe conditionnelle (masquée si vide < 3 points), ordre tabs par volume, badges monétaires cumulés dans chaque tab. |
+| **Historique (flou et net)** | Libellés hashés `0d573428`, action = "user", payload JSON brut `{"role":"convoyeur"}`. Illisible. | Phase 4 : vue `v_activity_logs_readable` + composant `ActivityFeed` avec phrase humaine "Jean Dupont a promu Frédéric au rôle Convoyeur le 20/06/2026 à 04:47". |
+| **Fiche Client (Morgane Landais)** | Panel latéral 90 % vide sous "Historique missions (15)" — les 15 missions ne s'affichent pas. Onglets absents. | Phase 4 : refonte fiche avec tabs (Vue / Missions / Devis / Factures / Documents / Historique / Notes), KPI header (CA total, missions en cours, dernière activité), actions rapides. |
+| **Organisations & clients** | 2 lignes seulement, colonnes Score et Statut à moitié vides, pas de tri, pas d'action rapide autre que "Voir → 🗑". | Phase 4 : score calculé (missions / CA / paiement) + statut clair (actif / suspendu / prospect) + QuickView + fiche complète. |
+| **Espace client — dernières missions** | Colonne Montant mélange "0.00 €" et "180.00 €" pour des missions au même statut "En attente" → incohérence prix (les demandes sans devis affichent 0). | Phase 2 : génération auto d'un devis à la création de la demande → montant systématiquement présent. Phase 1 : `formatMoney` unifié. |
 
-## 1. Pipeline capture ultra-fluide (photos EDL)
+## Phase 1 — Fondations tarification (source unique de vérité + régime TTC/HT)
 
-Cible : `EdlPremiumFlow.tsx`, `InspectionGuidee.tsx`.
+**Migration**
+- Table `pricing_settings` (singleton) : `regime` (`micro`|`societe`), `default_vat_rate`, `currency`. GRANT admin, RLS admin.
+- Table `vat_rates` : liste éditable (20 / 10 / 5,5 / 0), flag `is_default`.
+- Colonnes ajoutées à `devis` et `factures` : `regime_snapshot`, `vat_breakdown jsonb`, `total_ht`, `total_tva`, `total_ttc` (nullable — rétrocompat, valeurs `NULL` traitées comme "micro" avec montant existant = TTC).
+- Trigger `set_pricing_snapshot` à l'insert d'un devis/facture.
 
-- **Retour UI immédiat** : la miniature s'affiche depuis le `File` brut via `URL.createObjectURL` ; l'étape avance sans attendre.
-- **Compression en Web Worker** (nouveau `src/lib/workers/image-worker.ts`) avec `OffscreenCanvas` quand dispo, fallback main-thread (queue existante conservée). Correction d'orientation EXIF via `createImageBitmap({ imageOrientation: 'from-image' })`.
-- **Upload en tâche de fond** géré par une file persistante (voir §4). Le composant ne bloque jamais sur l'upload.
-- **Anti-race** : chaque capture porte un `captureId` (déjà en place dans `EdlPremiumFlow`) — on l'étend à `InspectionGuidee`.
-- **Indicateur discret** par vue : petit point "sync" au coin de la miniature (pas de spinner plein écran).
+**Front (module unique `src/lib/pricing/`)**
+- `PricingProvider` initialisé au root, `usePricingRegime()` hook.
+- `formatMoney(amount, opts)` — fonction unique appelée par admin, client, convoyeur, PDF, emails.
+- Refonte `client-pricing.ts`, `b2b-pricing.ts`, `reservation-pricing.ts`, `pricing-engine.ts`, `pricing-resolver.ts` pour déléguer à ce module (aucune règle métier changée).
+- PDFs (`devis-pdf.ts`, `facture-pdf.ts`, `edl-final-pdf.ts`) et templates email branchés sur `formatMoney`.
 
-## 2. Galerie éditable inter-étapes
+**Admin — Paramètres facturation**
+- Nouveau tab "Facturation" dans `admin.parametres.tsx` : radio régime + tableau taux TVA + aperçu devis exemple.
+- Suppression du bandeau "stockés localement" — les valeurs viennent désormais de la DB.
+- Le changement n'affecte que les documents futurs (le snapshot fige les anciens).
 
-Nouveau composant `src/components/inspection/EdlGallery.tsx` accessible depuis un bouton "Galerie" présent en permanence dans le flow.
+## Phase 2 — Devis automatique à la demande client + validation convoyeur
 
-- Grille de toutes les vues (photos EDL + documents scannés) avec statut par vignette : `local` / `envoi` / `synchronisé` / `échec`.
-- Actions par vignette : voir plein écran (zoom pinch), reprendre, remplacer, supprimer.
-- Réutilise le `Dialog` shadcn + lecteur zoom (basé sur `react-zoom-pan-pinch` déjà présent ou implémentation CSS transform si absent — à vérifier au build).
-- Aucune modification de l'ordre d'envoi ni du schéma de stockage : `upsert` sur `(inspection_id, vue_type)` inchangé.
+**Backend**
+- Server fn `createQuoteFromDemande(demandeId)` — appelée à la création d'une `demandes_convoyage` (dashboard-client, TunnelReservation, B2B).
+- Statuts `attributions.statut_convoyeur` : `en_attente_reponse` → `accepte` | `refuse`. `attribuee` ne bascule `confirmee` qu'après acceptation convoyeur.
+- Notification convoyeur (in-app + push + email `attribution-convoyeur.tsx` déjà présent).
 
-## 3. Scanner documents professionnel
+**Front**
+- Bandeau convoyeur "Nouvelle mission proposée" avec CTA Accepter / Refuser (refus → retour dispatch admin).
+- Badge admin sur `admin.attributions.tsx` : "en attente réponse convoyeur".
+- L'espace client affiche systématiquement un montant (fini les "0,00 €" en attente).
 
-Refonte de `src/components/inspection/DocumentScanner.tsx` (déjà partiellement fait) pour atteindre le niveau Adobe Scan :
+## Phase 3 — Mode attribution catalogue (enchère prix libre convoyeur)
 
-- **Détection de bords temps réel** : worker dédié (`src/lib/workers/edge-detect-worker.ts`) — downscale 320px, Sobel + Hough simplifié → 4 coins, overlay SVG animé.
-- **Auto-capture** quand stabilité + netteté (variance Laplacien) + luminance OK pendant ~800ms. Toggle on/off persisté (`localStorage`).
-- **Post-traitement** : perspective correction (homographie 4 points, déjà en place), auto-crop, contraste adaptatif, gamma, unsharp mask, sortie A4 1240×1754 JPEG q=0.92.
-- **Écran de revue** : accepter / refaire / recadrer manuellement (poignées sur 4 coins) / pivoter 90°.
-- **Torch + fallback natif** `<input capture>` conservés.
-- **Hooks OCR-ready** : signature `onScanned(blob, meta)` où `meta = { corners, sharpness, brightness }` — pas d'OCR implémenté, mais structure prête.
+**Backend**
+- Colonne `attributions.mode` : `directe` (défaut) | `catalogue`.
+- Extension `mission_offres` : `prix_propose`, `commentaire_convoyeur`, `admin_counter_offer`, `admin_counter_at`, `statut_offre`.
+- Vue `v_missions_catalogue` filtrée pour convoyeur (publiées, non attribuées, matching disponibilités).
+- RPC `submit_offer(missionId, prix, message)` et `counter_offer(offerId, prix, message)`.
 
-## 4. Mode hors-ligne + file de synchro
+**Front convoyeur**
+- Nouvelle route `convoyeur.catalogue.tsx` : liste missions publiées, filtres zone/date/type.
+- Modal "Proposer mon prix" (montant + message).
 
-Nouveau `src/lib/edl-offline-queue.ts` (IndexedDB via `idb-keyval` déjà utilisé ailleurs, sinon `bun add idb`).
+**Front admin**
+- Radio "Publier au catalogue" au moment d'attribuer.
+- Tab "Candidatures" par mission : liste offres, actions accepter / refuser / contre-proposer.
+- Historique des allers-retours de négociation dans la fiche mission.
 
-- Chaque photo/document compressé est écrit dans IndexedDB **avant** tentative d'upload avec clé `{ inspectionId, vueType, captureId }`.
-- File d'upload avec retry exponentiel (1s, 3s, 10s, 30s, 2min), reprise auto sur `online` + `visibilitychange`.
-- Purge une fois l'`upsert` Supabase confirmé.
-- Au montage du flow : rejoue la file pour l'`attributionId` courant → aucune perte même après fermeture.
-- Badge global "N élément(s) en attente de synchronisation" discret dans le header du flow.
-- Aucune modification de `sw.js` (juste consommation d'événements `online/offline`).
+**Emails**
+- Nouveaux templates `nouvelle-offre-convoyeur.tsx` (admin) et `contre-proposition-admin.tsx` (convoyeur).
 
-## 5. Chargements & perf
+## Phase 4 — Refonte UX admin (fiches, historique, exploitation, listes)
 
-- Suppression des écrans blancs : squelettes courts + `LogoLoader` déjà présent réutilisé pour toute attente > 400ms.
-- `React.lazy` sur `DocumentScanner`, `EdlGallery`, `SignatureCanvas` pour alléger le bundle initial du flow.
-- Mémoïsation des vignettes (`memo` + `useMemo` des URLs blob).
-- Préchargement de la caméra dès l'ouverture du flow (permission demandée en amont pour éviter la latence au premier scan).
-- Nettoyage systématique des `blob:` URLs (déjà partiellement fait, on étend au scanner et à la galerie).
+**Layout uniforme des fiches "Voir"** (clients, convoyeurs, organisations, missions, devis)
+- Header identité + KPI (CA, missions actives, dernière activité, statut).
+- Tabs : Vue d'ensemble / Missions / Devis / Factures / Documents / Historique / Notes.
+- Actions rapides contextuelles en header (Créer devis, Envoyer email, Ajouter note, Suspendre).
+- Pré-chargement parallèle via `ensureQueryData` — aucun aller-retour.
 
-## 6. Compatibilité & garde-fous
+**Historique humain**
+- Vue SQL `v_activity_logs_readable` : jointure `activity_logs` + `profiles` + labels d'action/entité.
+- Composant `ActivityFeed` : "Jean Dupont a accepté la mission M-2025-004 le 14/07/2026 à 10:35".
+- Utilisé par `admin.historique.tsx`, tab Historique des fiches, `admin.notifications.tsx`.
 
-- Toutes les nouvelles fonctions détectent `typeof window` / support API et retombent sur l'existant.
-- Aucun changement des props d'entrée/sortie des composants exposés (`EdlPremiumFlow`, `InspectionGuidee`, `DocumentScanner`).
-- Aucun changement SQL, aucune migration, aucun edge function.
-- Tests manuels : 10 photos consécutives, scans CG/PV, coupure réseau au milieu du flow, réouverture app, iOS Safari + Android Chrome.
+**Exploitation temps réel** (`admin.exploitation.tsx`)
+- Colonnes enrichies (plaque, véhicule, client, convoyeur, départ, arrivée, statut, priorité, progression, prochaine étape).
+- Realtime Supabase sur `attributions`, `missions`, `mission_locations` — `useEffect` avec cleanup.
+- Bouton Rafraîchir → `router.invalidate()` + `queryClient.invalidateQueries` scopés.
 
-## Détails techniques
+**Attributions / Trajets / Utilisateurs / Organisations**
+- Tableaux denses filtrables, tri colonnes, QuickView side sheet au clic, actions bulk.
+- Bandeaux d'info transformés en toasts dismissibles.
+- Prix affichés sur une seule ligne (correction wrapping).
 
-**Nouveaux fichiers**
-- `src/lib/workers/image-worker.ts` — compression OffscreenCanvas
-- `src/lib/workers/edge-detect-worker.ts` — détection contours temps réel
-- `src/lib/edl-offline-queue.ts` — file IndexedDB + retry
-- `src/components/inspection/EdlGallery.tsx` — galerie éditable
-- `src/hooks/useOnlineStatus.ts` — hook online/offline
+**Paiements**
+- Courbe masquée si < 3 points de données.
+- Ordre des tabs par volume réel (Factures 9 en tête si non vide).
+- Badges monétaires cumulés dans les tabs.
 
-**Fichiers modifiés (UI/perf uniquement)**
-- `src/components/inspection/EdlPremiumFlow.tsx` — intégration galerie + queue offline + worker
-- `src/components/InspectionGuidee.tsx` — captureId + queue offline + indicateur par vignette
-- `src/components/inspection/DocumentScanner.tsx` — détection bords worker + auto-capture affinée + recadrage manuel
-- `src/lib/image-compression.ts` — route vers worker si dispo, fallback conservé
-- `src/styles.css` — mini animations (fade vignette sync, contour scanner)
+## Phase 5 — Performance transverse
 
-**Dépendances éventuelles** (`bun add`) : `idb` (petit, ~2ko gzip) si non présent. Rien d'autre.
+- Toutes les routes `_authenticated/admin.*` et `dashboard-client.*` : `ensureQueryData` en parallèle, préchargement au hover (`preload="intent"`).
+- Skeletons courts partout (< 400 ms → pas de loader visible).
+- Lazy loading des tabs lourds (Documents, Historique).
+- Migration des `useEffect + fetch` legacy → TanStack Query.
 
-**Non touché** : `edl-final-pdf.ts`, `edl-document-ocr` edge function, tous les emails, tous les statuts d'`inspections`, `attributions`, RLS, migrations.
+## Fichiers principaux (indicatif)
+
+**Nouveaux**
+- `src/lib/pricing/{index.ts, format.ts, context.tsx, types.ts}`
+- `src/lib/quote-from-demande.functions.ts`
+- `src/lib/offer.functions.ts`
+- `src/components/admin/{ActivityFeed.tsx, EntityHeader.tsx, EntityTabs.tsx, QuickViewSheet.tsx}`
+- `src/routes/_authenticated/convoyeur.catalogue.tsx`
+- `src/lib/email-templates/{nouvelle-offre-convoyeur.tsx, contre-proposition-admin.tsx}`
+
+**Migrations**
+- `pricing_settings` + `vat_rates` + colonnes snapshot devis/factures + trigger
+- `attributions.mode`, `attributions.statut_convoyeur` + colonnes `mission_offres`
+- Vue `v_activity_logs_readable`
+- `ALTER PUBLICATION supabase_realtime ADD TABLE attributions, mission_offres, mission_locations`
+
+**Modifiés** (UI/perf uniquement, aucune API métier changée)
+- Tous les `src/routes/_authenticated/admin.*`, `dashboard-client.*`, `convoyeur.*`
+- `client-pricing.ts`, `b2b-pricing.ts`, `pricing-engine.ts`, `pricing-resolver.ts`, `devis-pdf.ts`, `facture-pdf.ts`
+
+## Séquencement
+
+1. **Phase 1** (tarification + régime) — bloquant pour la cohérence prix.
+2. **Phase 2** (devis auto + validation convoyeur) — parcours métier.
+3. **Phase 3** (catalogue enchère) — nouvelle fonctionnalité.
+4. **Phase 4** (refonte fiches + historique + listes) — traite toutes les captures.
+5. **Phase 5** (perf) en continu.
+
+## Garanties zéro régression
+
+- Chaque migration additive, jamais destructive.
+- `regime_snapshot` fige les documents existants — le passage micro → société ne réécrit rien.
+- Mode d'attribution `directe` reste défaut ; catalogue = opt-in.
+- Statuts existants conservés ; nouveaux statuts additifs uniquement.
+- Tests manuels à chaque phase : devis existant / mission en cours / convoyeur actif ne doivent voir aucun changement.
+
+Je lance la Phase 1 dès validation.
