@@ -3,7 +3,13 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 export default function Footer() {
   return (
-    <footer className="py-12 bg-navy border-t border-primary/15">
+    <footer
+      className="py-12 border-t border-[#60a5fa]/15"
+      style={{
+        background:
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
+      }}
+    >
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-8 mb-10">
           <div>
@@ -15,7 +21,7 @@ export default function Footer() {
                 loading="lazy"
               />
             </Link>
-            <p className="font-heading text-primary tracking-[0.2em] uppercase text-base mb-2">
+            <p className="font-heading text-[#60a5fa] tracking-[0.2em] uppercase text-base mb-2">
               Transports Ligneo
             </p>
             <p className="text-cream/50 text-sm leading-relaxed">
@@ -32,7 +38,7 @@ export default function Footer() {
                 <li key={l}>
                   <a
                     href={`#${l.toLowerCase()}`}
-                    className="text-cream/50 hover:text-primary transition-colors"
+                    className="text-cream/50 hover:text-[#60a5fa] transition-colors"
                   >
                     {l}
                   </a>
@@ -53,13 +59,13 @@ export default function Footer() {
               Informations légales
             </p>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/pro" className="text-cream/50 hover:text-primary transition-colors">Espace professionnels</Link></li>
+              <li><Link to="/pro" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Espace professionnels</Link></li>
               
-              <li><Link to="/cgv" className="text-cream/50 hover:text-primary transition-colors">Conditions Générales de Vente</Link></li>
-              <li><Link to="/mentions-legales" className="text-cream/50 hover:text-primary transition-colors">Mentions Légales</Link></li>
-              <li><Link to="/confidentialite" className="text-cream/50 hover:text-primary transition-colors">Politique de Confidentialité</Link></li>
-              <li><Link to="/inscription-convoyeur" className="text-cream/50 hover:text-primary transition-colors">Devenir convoyeur</Link></li>
-              <li><Link to="/login" className="text-cream/30 hover:text-primary transition-colors text-xs mt-2 inline-block">Espace pro</Link></li>
+              <li><Link to="/cgv" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Conditions Générales de Vente</Link></li>
+              <li><Link to="/mentions-legales" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Mentions Légales</Link></li>
+              <li><Link to="/confidentialite" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Politique de Confidentialité</Link></li>
+              <li><Link to="/inscription-convoyeur" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Devenir convoyeur</Link></li>
+              <li><Link to="/login" className="text-cream/30 hover:text-[#60a5fa] transition-colors text-xs mt-2 inline-block">Espace pro</Link></li>
             </ul>
           </div>
         </div>

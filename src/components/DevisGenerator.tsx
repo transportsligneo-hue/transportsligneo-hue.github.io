@@ -542,112 +542,112 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           // VARIANTE HERO-CARD — layout vertical compact (maquette)
           // Mêmes états, mêmes setters, mêmes calculs. Seul l'agencement change.
           // ============================================================
-          <div className="relative z-30 rounded-[26px] border border-[#e7c76a]/35 bg-gradient-to-b from-[#0e1535]/95 to-[#080d22]/95 backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.10)_inset] p-7 lg:p-8">
-            {/* Filet doré supérieur */}
-            <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/70 to-transparent" />
+          <div className="relative z-30 rounded-[26px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-7 lg:p-8">
+            {/* Filet bleu électrique supérieur */}
+            <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#60a5fa]/70 to-transparent" />
 
             {/* Titre intégré */}
             <div className="mb-6">
-              <h3 className="font-heading text-cream text-[26px] lg:text-[28px] leading-[1.15] tracking-[0.01em]">
+              <h3 className="font-heading text-white text-[26px] lg:text-[28px] leading-[1.15] tracking-[0.01em]">
                 Obtenez votre tarif
                 <br />
-                en <span className="text-[#e7c76a]">quelques secondes</span>
+                en <span className="text-[#60a5fa]">quelques secondes</span>
               </h3>
-              <p className="text-cream/65 text-[13px] leading-relaxed mt-3">
+              <p className="text-white/75 text-[13px] leading-relaxed mt-3">
                 Renseignez votre trajet et recevez un tarif immédiat, sans engagement.
               </p>
             </div>
 
             {/* Départ / Arrivée — 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#5fb6ff]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
-                  <MapPin size={11} className="text-[#5fb6ff]" /> Départ
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
+                  <MapPin size={11} className="text-[#60a5fa]" /> Départ
                 </label>
                 <PlacesInput
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Ville ou code postal de départ"
-                  className="w-full bg-transparent text-cream text-[13.5px] placeholder:text-cream/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
                   fallbackOptions={CITIES}
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
-                  <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
+                  <MapPinned size={11} className="text-[#60a5fa]" /> Arrivée
                 </label>
                 <PlacesInput
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Ville ou code postal d'arrivée"
-                  className="w-full bg-transparent text-cream text-[13.5px] placeholder:text-cream/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
                   fallbackOptions={CITIES}
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
             </div>
 
             {/* Petit pictogramme central swap (décoratif) */}
             <div className="flex justify-center -my-1">
-              <span className="h-7 w-7 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
+              <span className="h-7 w-7 rounded-full grid place-items-center bg-gradient-to-br from-[#3b82f6] to-[#60a5fa] text-white shadow-[0_6px_18px_-6px_rgba(59,130,246,0.7)]">
                 <ArrowRight size={12} strokeWidth={2.5} className="rotate-90" />
               </span>
             </div>
 
             {/* Véhicule — pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
-                <Car size={11} className="text-[#e7c76a]" /> Véhicule
+              <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
+                <Car size={11} className="text-[#60a5fa]" /> Véhicule
               </label>
               <select
                 value={vehicleType}
                 onChange={e => setVehicleType(e.target.value)}
-                className="w-full bg-transparent text-cream text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
+                className="w-full bg-transparent text-white text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
               >
                 <option value="">Sélectionnez votre véhicule</option>
                 {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
               </select>
-              <ChevronDown size={13} className="absolute right-3 bottom-3.5 text-[#e7c76a]/70 pointer-events-none" />
+              <ChevronDown size={13} className="absolute right-3 bottom-3.5 text-[#60a5fa]/70 pointer-events-none" />
             </div>
 
             {/* Date / Heure — 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
-                  <Calendar size={11} className="text-[#e7c76a]" /> Date
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
+                  <Calendar size={11} className="text-[#60a5fa]" /> Date
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full bg-transparent text-cream text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-cream/65 font-heading mb-1.5">
-                  <Clock size={11} className="text-[#e7c76a]" /> Heure
+                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
+                  <Clock size={11} className="text-[#60a5fa]" /> Heure
                 </label>
                 <input
                   type="time"
                   value={heure}
                   onChange={e => setHeure(e.target.value)}
-                  className="w-full bg-transparent text-cream text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
                 />
               </div>
             </div>
 
-            {/* CTA principal — pleine largeur, doré */}
+            {/* CTA principal — pleine largeur, bleu électrique */}
             <button
               type="button"
               onClick={() => setStep(1)}
               disabled={!isComplete}
-              className="mt-5 w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[12px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="mt-5 w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[12px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Send size={14} /> Obtenir mon prix
             </button>
 
-            {/* Choix de prestation — discret en bas, ne casse pas l'identité maquette */}
+            {/* Choix de prestation — discret en bas */}
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
               {[
                 { v: "aller-simple", l: "Aller simple" },
@@ -660,8 +660,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onClick={() => setOption(o.v as typeof option)}
                   className={`px-3 py-1.5 rounded-full text-[10.5px] tracking-[0.12em] uppercase font-heading transition ${
                     option === o.v
-                      ? "bg-[#e7c76a]/15 border border-[#e7c76a]/50 text-[#e7c76a]"
-                      : "bg-white/[0.03] border border-white/10 text-cream/55 hover:text-cream/85 hover:border-white/20"
+                      ? "bg-[#3b82f6]/15 border border-[#60a5fa]/50 text-[#60a5fa]"
+                      : "bg-white/[0.03] border border-white/10 text-white/55 hover:text-white/85 hover:border-white/20"
                   }`}
                 >
                   {o.l}
@@ -673,7 +673,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           // ============================================================
           // VARIANTE BAR — rendu original (utilisé sur /tarifs etc.)
           // ============================================================
-          <div className="relative z-30 rounded-[24px] border border-[#e7c76a]/30 bg-[#0b1026]/85 backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.08)_inset] p-5 md:p-7">
+          <div className="relative z-30 rounded-[24px] border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-5 md:p-7">
 
             {/* Type de prestation */}
             <div className="mb-5">
@@ -716,7 +716,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
                   fallbackOptions={CITIES}
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
 
@@ -746,7 +746,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
                   fallbackOptions={CITIES}
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#0b1026] border border-[#e7c76a]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
             </div>
@@ -782,7 +782,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={!isComplete}
-                className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
+                className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
               >
                 <Send size={14} /> Obtenir mon prix
               </button>
@@ -857,9 +857,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       {/* === MODAL MULTI-ÉTAPES === */}
       {step > 0 && !submitted && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
             {/* Stepper */}
-            <div className="sticky top-0 z-10 bg-gradient-to-b from-[#0b1026] to-[#0b1026]/95 backdrop-blur px-6 md:px-10 pt-6 pb-4 border-b border-white/5">
+            <div className="sticky top-0 z-10 bg-gradient-to-b from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 pt-6 pb-4 border-b border-white/5">
               <div className="flex items-center justify-between mb-4">
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
                   <Sparkles size={11} /> Demande de devis
@@ -1239,7 +1239,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             {/* Footer navigation */}
-            <div className="sticky bottom-0 bg-gradient-to-t from-[#0b1026] to-[#0b1026]/95 backdrop-blur px-6 md:px-10 py-4 border-t border-white/5 flex items-center justify-between gap-3">
+            <div className="sticky bottom-0 bg-gradient-to-t from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 py-4 border-t border-white/5 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setStep(s => Math.max(1, s - 1))}
@@ -1268,7 +1268,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     type="button"
                     onClick={handleSubmit}
                     disabled={sending}
-                    className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(231,199,106,0.6)] hover:brightness-110 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(59,130,246,0.6)] hover:brightness-110 disabled:opacity-50"
                   >
                     {sending ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <><Send size={13} /> Confirmer ma demande</>}
                   </button>
@@ -1282,7 +1282,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       {/* === Confirmation === */}
       {submitted && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-xl rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
             <div className="w-16 h-16 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="text-[#e7c76a]" size={30} />
             </div>
@@ -1322,7 +1322,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
               {savedDevis && (
                 <button onClick={handleDownloadPdf}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
                   <Download size={13} /> Télécharger le PDF
                 </button>
               )}

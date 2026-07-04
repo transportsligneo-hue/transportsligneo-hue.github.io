@@ -22,7 +22,11 @@ export default function HeroDesktop() {
   return (
     <section
       id="accueil"
-      className="relative overflow-hidden pt-24 bg-[#0b1026]"
+      className="relative overflow-hidden pt-24"
+      style={{
+        background:
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 35%, #0f2d80 100%)",
+      }}
     >
       {/* Image de fond */}
       <div className="absolute inset-0">
@@ -39,7 +43,7 @@ export default function HeroDesktop() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(11,16,38,0.94) 0%, rgba(11,16,38,0.78) 35%, rgba(11,16,38,0.55) 65%, rgba(11,16,38,0.65) 100%)",
+              "linear-gradient(90deg, rgba(6,18,56,0.94) 0%, rgba(6,18,56,0.78) 35%, rgba(6,18,56,0.55) 65%, rgba(6,18,56,0.65) 100%)",
           }}
         />
       </div>
@@ -50,8 +54,8 @@ export default function HeroDesktop() {
           {/* Colonne gauche : contenu éditorial */}
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-12 bg-gradient-to-r from-[#5fb6ff] to-[#e7c76a]" />
-              <span className="text-[#e7c76a] text-[11px] tracking-[0.32em] uppercase font-medium">
+              <span className="h-px w-12 bg-gradient-to-r from-[#60a5fa] to-[#3b82f6]" />
+              <span className="text-[#60a5fa] text-[11px] tracking-[0.32em] uppercase font-medium">
                 Convoyage automobile
               </span>
             </div>
@@ -60,7 +64,7 @@ export default function HeroDesktop() {
             <h1 className="font-heading text-white text-5xl xl:text-6xl 2xl:text-[68px] tracking-wide leading-[1.05]">
               LA TRANQUILLITÉ
               <br />
-              SUR <span className="text-[#e7c76a]">TOUTE LA LIGNE.</span>
+              SUR <span className="text-[#60a5fa]">TOUTE LA LIGNE.</span>
             </h1>
 
             <p className="text-cream/85 text-base xl:text-lg leading-relaxed mt-8 max-w-xl">
@@ -73,26 +77,26 @@ export default function HeroDesktop() {
               <button
                 type="button"
                 onClick={() => scrollToDevis()}
-                className="edl-cta-gold inline-flex items-center gap-3 px-8 py-4 font-heading text-[12px] tracking-[0.22em] uppercase"
+                className="edl-cta inline-flex items-center gap-3 px-8 py-4 font-heading text-[12px] tracking-[0.22em] uppercase"
               >
                 <Calendar size={16} />
                 Estimer mon trajet
               </button>
               <Link
                 to="/tarifs"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border border-[rgba(231,199,106,0.5)] text-cream font-heading text-[12px] tracking-[0.22em] uppercase hover:bg-white/5 hover:border-[#e7c76a] transition-all"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border border-[#60a5fa]/50 text-cream font-heading text-[12px] tracking-[0.22em] uppercase hover:bg-white/5 hover:border-[#60a5fa] transition-all"
               >
                 <Tag size={16} />
                 Voir les tarifs
               </Link>
             </div>
 
-            {/* Trust pills dorées */}
+            {/* Trust pills bleu électrique */}
             <ul className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
               {trustPills.map(({ icon: Icon, label }) => (
                 <li key={label} className="flex items-center gap-2.5">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-[rgba(231,199,106,0.35)] bg-[rgba(231,199,106,0.08)]">
-                    <Icon size={13} className="text-[#e7c76a]" strokeWidth={2.2} />
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-[#60a5fa]/35 bg-[#60a5fa]/10">
+                    <Icon size={13} className="text-[#60a5fa]" strokeWidth={2.2} />
                   </span>
                   <span className="text-cream/85 text-[12.5px] tracking-[0.04em]">
                     {label}
@@ -104,13 +108,13 @@ export default function HeroDesktop() {
 
           {/* Colonne droite : Simulateur en carte premium sombre */}
           <div id="devis" className="relative scroll-mt-32">
-            {/* Halo doré + électrique derrière la carte */}
+            {/* Halo bleu électrique derrière la carte */}
             <div
               aria-hidden
               className="pointer-events-none absolute -inset-6 rounded-[36px] opacity-70 blur-3xl"
               style={{
                 background:
-                  "radial-gradient(closest-side, rgba(231,199,106,0.28), transparent 70%), radial-gradient(closest-side at 80% 90%, rgba(95,182,255,0.30), transparent 70%)",
+                  "radial-gradient(closest-side, rgba(59,130,246,0.35), transparent 70%), radial-gradient(closest-side at 80% 90%, rgba(96,165,250,0.30), transparent 70%)",
               }}
             />
             <div className="relative">
