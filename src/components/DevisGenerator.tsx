@@ -1268,7 +1268,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     type="button"
                     onClick={handleSubmit}
                     disabled={sending}
-                    className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(231,199,106,0.6)] hover:brightness-110 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(59,130,246,0.6)] hover:brightness-110 disabled:opacity-50"
                   >
                     {sending ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <><Send size={13} /> Confirmer ma demande</>}
                   </button>
