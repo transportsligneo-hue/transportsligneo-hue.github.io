@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  Sparkles,
   MapPin,
   Phone,
   ShieldCheck,
@@ -9,28 +8,23 @@ import {
   Clock,
   Euro,
   Zap,
-  Globe2,
   Award,
   Headphones,
   ArrowRight,
   Star,
-  Users,
+  Truck,
+  FileText,
+  User,
+  Menu,
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import MobilePartnersStrip from "@/components/mobile/MobilePartnersStrip";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * MobileHomeScreen — Electric Onyx Bento
- * Design premium mobile : bento grid, glassmorphism bleu néon, filets dorés.
- * Toutes les fonctionnalités existantes sont préservées :
- *  - Header sticky + logo Ligneo
- *  - CTA Estimer → scroll vers simulateur (#mobile-devis)
- *  - MobileDevisGenerator (simulateur devis inchangé)
- *  - MobilePartnersStrip (partenaires)
- *  - Navigation intelligente selon rôle (client / convoyeur / admin)
- *  - Footer légal complet
+ * MobileHomeScreen — App-like mobile experience
+ * Palette bleu roi profond (comme la capture driver) + accents dorés discrets.
+ * Style app, direct, sans emphase marketing.
  */
 export default function MobileHomeScreen() {
   const { isAuthenticated, role } = useAuth();
@@ -52,301 +46,307 @@ export default function MobileHomeScreen() {
 
   const handleScrollToDevis = () => {
     const el = document.getElementById("mobile-devis");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <div className="md:hidden relative min-h-screen overflow-x-hidden bg-[#0b1026] text-[#faf7ef] pb-bottom-nav">
-      {/* === Background glows (multi-layered blue neon) === */}
+    <div className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-bottom-nav"
+      style={{
+        background:
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 35%, #0f2d80 100%)",
+      }}
+    >
+      {/* Halos discrets */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-32 w-[420px] h-[420px] rounded-full blur-[110px] opacity-70"
-        style={{ background: "radial-gradient(circle, rgba(59,111,255,0.35) 0%, transparent 70%)" }}
+        className="pointer-events-none absolute -top-24 -right-24 w-[380px] h-[380px] rounded-full blur-[110px] opacity-60"
+        style={{ background: "radial-gradient(circle, rgba(96,165,250,0.35) 0%, transparent 70%)" }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute top-[38%] -left-40 w-[360px] h-[360px] rounded-full blur-[110px] opacity-60"
-        style={{ background: "radial-gradient(circle, rgba(95,182,255,0.22) 0%, transparent 70%)" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-[18%] -right-24 w-[300px] h-[300px] rounded-full blur-[100px] opacity-50"
-        style={{ background: "radial-gradient(circle, rgba(212,175,55,0.18) 0%, transparent 70%)" }}
+        className="pointer-events-none absolute top-[45%] -left-32 w-[300px] h-[300px] rounded-full blur-[100px] opacity-40"
+        style={{ background: "radial-gradient(circle, rgba(125,211,252,0.25) 0%, transparent 70%)" }}
       />
 
-      {/* === HEADER STICKY === */}
+      {/* === HEADER === */}
       <header
-        className={`safe-top sticky top-0 z-40 px-5 pt-3 pb-3 flex items-center justify-between transition-all duration-300 ${
+        className={`safe-top sticky top-0 z-40 px-4 pt-3 pb-3 flex items-center justify-between transition-all duration-300 ${
           scrolled
-            ? "bg-[#0b1026]/85 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_28px_-14px_rgba(0,0,0,0.8)]"
+            ? "bg-[#061238]/90 backdrop-blur-xl border-b border-white/10"
             : "bg-transparent"
         }`}
       >
-        <Link to="/" className="flex items-center gap-2.5 tap-scale" aria-label="Accueil">
-          <img
-            src={logoLigneo}
-            alt="Transports Ligneo"
-            className="h-10 w-auto object-contain"
-            loading="eager"
-          />
-        </Link>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleScrollToDevis}
-            aria-label="Estimer mon trajet"
-            className="h-10 min-w-[44px] px-4 rounded-full text-[10.5px] tracking-[0.22em] uppercase font-heading flex items-center gap-1.5 tap-scale text-[#0b1026] active:scale-[0.97] transition-transform"
-            style={{
-              background: "linear-gradient(135deg, #e7c76a 0%, #d4af37 100%)",
-              boxShadow:
-                "0 8px 24px -8px rgba(212,175,55,0.55), 0 0 0 1px rgba(255,255,255,0.15) inset, 0 1px 0 rgba(255,255,255,0.4) inset",
-            }}
+        <Link to="/" className="flex items-center gap-3 tap-scale min-w-0" aria-label="Accueil">
+          <span
+            className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center border border-white/15 bg-white/[0.05] overflow-hidden"
+            style={{ boxShadow: "0 0 24px -8px rgba(96,165,250,0.5)" }}
           >
-            <Sparkles size={13} /> Estimer
-          </button>
+            <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-white text-[15px] leading-tight tracking-wide truncate">
+              Transports Ligneo
+            </p>
+            <span
+              className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] tracking-[0.24em] uppercase font-heading"
+              style={{
+                background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
+                color: "#061238",
+              }}
+            >
+              {role === "convoyeur"
+                ? "Driver"
+                : role === "admin" || role === "super_admin"
+                ? "Admin"
+                : "Client"}
+            </span>
+          </div>
+        </Link>
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={goEspace}
             aria-label="Mon espace"
-            className="w-11 h-11 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md flex items-center justify-center tap-scale active:scale-[0.97] transition-transform"
+            className="w-11 h-11 rounded-2xl border border-white/15 bg-white/[0.05] flex items-center justify-center tap-scale active:scale-95 transition-transform"
           >
-            <ShieldCheck size={17} className="text-[#e7c76a]" />
+            <ShieldCheck size={17} className="text-[#93c5fd]" />
+          </button>
+          <button
+            aria-label="Menu"
+            className="w-11 h-11 rounded-2xl border border-white/15 bg-white/[0.05] flex items-center justify-center tap-scale active:scale-95 transition-transform"
+          >
+            <Menu size={18} className="text-white/85" />
           </button>
         </div>
       </header>
 
-      {/* === MAIN BENTO === */}
-      <main className="relative z-10 px-4 pt-2 space-y-4">
-        {/* --- Hero Bento Card --- */}
+      <main className="relative z-10 px-4 pt-4 space-y-5">
+        {/* === Greeting === */}
         <Reveal>
-          <section
-            className="relative overflow-hidden rounded-[2rem] p-7 backdrop-blur-xl border border-white/10 bg-white/[0.045]"
-            style={{
-              boxShadow:
-                "0 30px 80px -30px rgba(59,111,255,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset",
-            }}
-          >
-            <span
-              aria-hidden
-              className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#5fb6ff] to-transparent"
-            />
-            <span
-              aria-hidden
-              className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl bg-[#3b6fff]/25"
-            />
-
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#3b6fff]/40 bg-[#3b6fff]/10 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#5fb6ff] animate-pulse shadow-[0_0_8px_#5fb6ff]" />
-              <span className="text-[9.5px] tracking-[0.28em] uppercase text-[#5fb6ff] font-heading">
-                Disponible 7j/7
-              </span>
-            </div>
-
-            <h1 className="font-heading text-[36px] leading-[1.05] tracking-[-0.01em] text-cream">
-              Le convoyage <br />
-              <span className="italic bg-gradient-to-r from-[#e7c76a] to-[#d4af37] bg-clip-text text-transparent">
-                haute couture.
-              </span>
-            </h1>
-
-            <p className="text-cream/60 text-[13.5px] leading-relaxed mt-4 max-w-[22ch] font-light">
-              Transport automobile premium. Tarif live en 30 secondes,
-              livraison suivie à chaque étape.
+          <div>
+            <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
+              Accueil
             </p>
-
-            <button
-              onClick={handleScrollToDevis}
-              className="mt-6 h-12 px-5 rounded-2xl inline-flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase font-heading text-white active:scale-[0.97] transition-transform"
-              style={{
-                background: "linear-gradient(135deg, #3b6fff 0%, #5fb6ff 100%)",
-                boxShadow:
-                  "0 12px 32px -8px rgba(59,111,255,0.55), 0 0 0 1px rgba(255,255,255,0.18) inset",
-              }}
-            >
-              Estimer mon trajet
-              <ArrowRight size={15} />
-            </button>
-          </section>
+            <h1 className="font-heading text-[30px] leading-[1.1] text-white mt-2">
+              Bonjour 👋
+            </h1>
+            <p className="text-white/65 text-[13.5px] mt-2 leading-relaxed">
+              Estimez, réservez et suivez votre convoyage automobile.
+            </p>
+          </div>
         </Reveal>
 
-        {/* --- Simulator Bento Card --- */}
-        <Reveal delay={80}>
-          <section
-            id="mobile-devis"
-            className="scroll-mt-24 relative rounded-[2rem] p-1 border border-[#3b6fff]/30 bg-[#111a3d]/70 backdrop-blur-xl"
+        {/* === CTA principal === */}
+        <Reveal delay={60}>
+          <button
+            onClick={handleScrollToDevis}
+            className="w-full text-left rounded-3xl p-5 border border-[#60a5fa]/40 relative overflow-hidden active:scale-[0.98] transition-transform"
             style={{
+              background:
+                "linear-gradient(135deg, rgba(59,130,246,0.35) 0%, rgba(15,45,128,0.9) 100%)",
               boxShadow:
-                "0 30px 70px -22px rgba(59,111,255,0.30), 0 0 0 1px rgba(255,255,255,0.05) inset",
+                "0 24px 60px -20px rgba(59,130,246,0.55), 0 0 0 1px rgba(255,255,255,0.05) inset",
             }}
           >
-            <div className="flex items-end justify-between px-5 pt-5 pb-3">
-              <div>
-                <p className="text-[9.5px] tracking-[0.3em] uppercase text-[#e7c76a]/90 font-heading">
-                  Estimation · 30 sec
-                </p>
-                <h2 className="font-heading text-cream text-[20px] tracking-wide mt-1.5">
-                  Simulateur direct
-                </h2>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-[#e7c76a]/10 border border-[#e7c76a]/35 text-[9px] tracking-[0.22em] uppercase text-[#e7c76a] font-heading">
-                Gratuit
+            <span
+              aria-hidden
+              className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-[#60a5fa]/40"
+            />
+            <div className="flex items-center gap-4 relative">
+              <span
+                className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, #3b82f6, #60a5fa)",
+                  boxShadow: "0 10px 24px -8px rgba(59,130,246,0.6)",
+                }}
+              >
+                <Truck size={24} className="text-white" />
               </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-heading text-white text-[17px] tracking-wide">
+                  Estimer mon trajet
+                </p>
+                <p className="text-white/60 text-[12px] mt-0.5">
+                  Tarif en 30 secondes · gratuit
+                </p>
+              </div>
+              <ArrowRight size={20} className="text-white/70 shrink-0" />
             </div>
-            {/* Simulateur inchangé — toute la logique métier préservée */}
-            <MobileDevisGenerator />
-          </section>
+          </button>
         </Reveal>
 
-        {/* --- Trust Bento Row (2 cols) --- */}
-        <Reveal delay={120}>
+        {/* === Accès rapides === */}
+        <Reveal delay={100}>
           <div className="grid grid-cols-2 gap-3">
-            <BentoStat
-              value="4.9/5"
-              label={<>Note clients<br />satisfaits</>}
-              icon={<Star size={13} className="text-[#e7c76a] fill-[#e7c76a]" />}
-              accent="gold"
+            <QuickTile
+              icon={<FileText size={18} />}
+              label="Mes devis"
+              onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
             />
-            <BentoStat
-              value="6+ ans"
-              label={<>Expérience<br />terrain</>}
-              icon={<Award size={13} className="text-[#5fb6ff]" />}
-              accent="blue"
+            <QuickTile
+              icon={<Truck size={18} />}
+              label="Mes missions"
+              onClick={() =>
+                navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })
+              }
+            />
+            <QuickTile
+              icon={<User size={18} />}
+              label="Mon espace"
+              onClick={goEspace}
+            />
+            <QuickTile
+              icon={<Phone size={18} />}
+              label="Contact"
+              onClick={() => navigate({ to: "/contact" })}
             />
           </div>
         </Reveal>
 
-        {/* --- Trust chips (compact glassmorphism) --- */}
-        <Reveal delay={160}>
+        {/* === Simulateur === */}
+        <Reveal delay={140}>
+          <section
+            id="mobile-devis"
+            className="scroll-mt-20 rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden"
+            style={{
+              boxShadow:
+                "0 24px 60px -22px rgba(59,130,246,0.30), 0 0 0 1px rgba(255,255,255,0.04) inset",
+            }}
+          >
+            <div className="flex items-end justify-between px-5 pt-5 pb-3">
+              <div>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
+                  Estimation
+                </p>
+                <h2 className="font-heading text-white text-[19px] tracking-wide mt-1">
+                  Simulateur direct
+                </h2>
+              </div>
+              <span
+                className="px-2.5 py-1 rounded-full text-[9px] tracking-[0.22em] uppercase font-heading"
+                style={{
+                  background: "rgba(96,165,250,0.15)",
+                  border: "1px solid rgba(96,165,250,0.35)",
+                  color: "#93c5fd",
+                }}
+              >
+                Gratuit
+              </span>
+            </div>
+            <MobileDevisGenerator />
+          </section>
+        </Reveal>
+
+        {/* === Stats compactes === */}
+        <Reveal delay={180}>
+          <div>
+            <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading mb-3">
+              Vue d'ensemble
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                icon={<Star size={13} className="text-[#e7c76a] fill-[#e7c76a]" />}
+                value="4.9/5"
+                label="Note clients"
+              />
+              <StatCard
+                icon={<Award size={13} className="text-[#93c5fd]" />}
+                value="6+ ans"
+                label="D'expérience"
+              />
+              <StatCard
+                icon={<ShieldCheck size={13} className="text-[#93c5fd]" />}
+                value="0"
+                label="Annulation"
+              />
+              <StatCard
+                icon={<Clock size={13} className="text-[#e7c76a]" />}
+                value="7j/7"
+                label="Disponibilité"
+              />
+            </div>
+          </div>
+        </Reveal>
+
+        {/* === Points forts === */}
+        <Reveal delay={220}>
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { icon: Zap, label: "Réponse immédiate" },
               { icon: Euro, label: "Tarif transparent" },
               { icon: ShieldCheck, label: "Assurance incluse" },
-              { icon: Globe2, label: "Service Europe" },
+              { icon: Headphones, label: "Support 7j/7" },
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-sm"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl border border-white/10 bg-white/[0.04]"
               >
-                <Icon size={14} className="text-[#e7c76a] shrink-0" />
-                <span className="text-cream/85 text-[11px] tracking-wide">{label}</span>
+                <Icon size={14} className="text-[#93c5fd] shrink-0" />
+                <span className="text-white/85 text-[11.5px]">{label}</span>
               </div>
             ))}
           </div>
         </Reveal>
 
-        {/* --- Comment ça marche Bento --- */}
-        <Reveal delay={200}>
+        {/* === Comment ça marche === */}
+        <Reveal delay={260}>
           <section
-            className="relative rounded-[2rem] p-6 border border-white/10 bg-white/[0.045] backdrop-blur-xl"
-            style={{
-              boxShadow:
-                "0 24px 60px -22px rgba(59,111,255,0.22), 0 0 0 1px rgba(255,255,255,0.04) inset",
-            }}
+            className="rounded-3xl p-5 border border-white/10 bg-white/[0.04] backdrop-blur-xl"
           >
-            <div className="flex items-end justify-between mb-6">
-              <h3 className="font-heading text-cream text-[22px] leading-tight">
-                Expérience{" "}
-                <span className="italic text-[#e7c76a]">premium.</span>
+            <div className="flex items-end justify-between mb-5">
+              <h3 className="font-heading text-white text-[18px] tracking-wide">
+                Comment ça marche
               </h3>
               <Link
                 to="/comment-ca-marche"
-                className="text-[#e7c76a] text-[10.5px] tracking-[0.2em] uppercase flex items-center gap-1 font-heading"
+                className="text-[#93c5fd] text-[10.5px] tracking-[0.2em] uppercase flex items-center gap-1 font-heading"
               >
                 Détails <ChevronRight size={12} />
               </Link>
             </div>
-            <div className="space-y-5">
-              <Step
-                n="01"
-                title="Réservation express"
-                desc="Estimation instantanée, confirmation en 2 minutes."
-                color="blue"
-              />
-              <Step
-                n="02"
-                title="Prise en charge premium"
-                desc="État des lieux digitalisé, assurance incluse."
-                color="gold"
-              />
-              <Step
-                n="03"
-                title="Suivi temps réel"
-                desc="Tracking GPS et notifications à chaque étape."
-                color="blue"
-              />
-            </div>
-          </section>
-        </Reveal>
-
-        {/* --- Engagements Bento (single wide) --- */}
-        <Reveal delay={240}>
-          <section
-            className="relative rounded-[2rem] p-6 border border-[#e7c76a]/25 bg-gradient-to-b from-[rgba(20,28,60,0.7)] to-[rgba(11,16,38,0.85)] backdrop-blur-xl"
-            style={{
-              boxShadow:
-                "0 24px 60px -22px rgba(212,175,55,0.18), 0 0 0 1px rgba(255,255,255,0.04) inset",
-            }}
-          >
-            <p className="text-[9.5px] tracking-[0.3em] uppercase text-[#e7c76a] font-heading">
-              Nos engagements
-            </p>
-            <h3 className="font-heading text-cream text-[20px] tracking-wide mt-1.5 mb-5">
-              Un service <span className="italic text-[#e7c76a]">à votre image.</span>
-            </h3>
             <div className="space-y-4">
-              <Engagement icon={<ShieldCheck size={16} />} title="0 annulation" desc="Chaque mission validée est assurée jusqu'au bout." />
-              <Engagement icon={<Clock size={16} />} title="Prise en charge 24h" desc="Selon distance et disponibilité." />
-              <Engagement icon={<Headphones size={16} />} title="7j/7 disponible" desc="Un interlocuteur dédié pour vos urgences." />
+              <Step n="01" title="Réservation" desc="Estimation instantanée, confirmation rapide." />
+              <Step n="02" title="Prise en charge" desc="État des lieux digitalisé, assurance incluse." />
+              <Step n="03" title="Suivi temps réel" desc="Tracking GPS et notifications à chaque étape." />
             </div>
           </section>
         </Reveal>
 
-        {/* --- Partenaires (composant existant) --- */}
-        <Reveal delay={280}>
-          <div className="rounded-[2rem] overflow-hidden border border-white/10 bg-white/[0.035] backdrop-blur-xl">
-            <MobilePartnersStrip />
-          </div>
-        </Reveal>
-
-        {/* --- CTA Contact final --- */}
-        <Reveal delay={320}>
+        {/* === CTA Contact === */}
+        <Reveal delay={300}>
           <section
-            className="relative overflow-hidden rounded-[2rem] p-6 border border-[#3b6fff]/30"
+            className="rounded-3xl p-5 border border-[#60a5fa]/30"
             style={{
               background:
-                "linear-gradient(135deg, rgba(59,111,255,0.18) 0%, rgba(17,26,61,0.9) 100%)",
-              boxShadow:
-                "0 24px 60px -22px rgba(59,111,255,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset",
+                "linear-gradient(135deg, rgba(59,130,246,0.18) 0%, rgba(15,45,128,0.85) 100%)",
             }}
           >
             <div className="flex items-start gap-4">
               <span className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center bg-white/10 border border-white/15">
-                <Phone size={20} className="text-[#5fb6ff]" />
+                <Phone size={20} className="text-[#93c5fd]" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-heading text-cream text-[17px] leading-tight">
-                  Une question ? <span className="italic text-[#e7c76a]">Parlons-en.</span>
-                </p>
-                <p className="text-cream/60 text-[12px] mt-1">
+                <p className="font-heading text-white text-[16px]">Une question ?</p>
+                <p className="text-white/60 text-[12px] mt-0.5">
                   Devis personnalisé, urgences, flottes.
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 mt-5">
+            <div className="grid grid-cols-2 gap-2.5 mt-4">
               <a
                 href="tel:0782456181"
                 className="h-12 rounded-2xl flex items-center justify-center gap-2 text-[11px] tracking-[0.2em] uppercase font-heading text-white active:scale-[0.97] transition-transform"
                 style={{
-                  background: "linear-gradient(135deg, #3b6fff 0%, #5fb6ff 100%)",
-                  boxShadow: "0 10px 28px -10px rgba(59,111,255,0.6)",
+                  background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)",
+                  boxShadow: "0 10px 28px -10px rgba(59,130,246,0.6)",
                 }}
               >
                 <Phone size={14} /> Appeler
               </a>
               <Link
                 to="/contact"
-                className="h-12 rounded-2xl flex items-center justify-center gap-2 text-[11px] tracking-[0.2em] uppercase font-heading text-[#e7c76a] border border-[#e7c76a]/40 bg-[#e7c76a]/5 active:scale-[0.97] transition-transform"
+                className="h-12 rounded-2xl flex items-center justify-center gap-2 text-[11px] tracking-[0.2em] uppercase font-heading text-[#93c5fd] border border-[#60a5fa]/40 bg-white/[0.03] active:scale-[0.97] transition-transform"
               >
-                <Users size={14} /> Contact
+                Message
               </Link>
             </div>
           </section>
@@ -354,38 +354,35 @@ export default function MobileHomeScreen() {
       </main>
 
       {/* === FOOTER === */}
-      <footer className="relative z-10 px-5 pt-8 pb-6 mt-4">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-md p-4 flex items-center gap-3">
-          <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border border-[#e7c76a]/35 bg-[#e7c76a]/8">
-            <MapPin className="text-[#e7c76a]" size={17} />
+      <footer className="relative z-10 px-4 pt-8 pb-6 mt-4">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 flex items-center gap-3">
+          <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border border-[#60a5fa]/35 bg-[#60a5fa]/10">
+            <MapPin className="text-[#93c5fd]" size={17} />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-cream text-[13px] font-heading tracking-wide">Basé à Tours (37)</p>
-            <p className="text-cream/55 text-[11px] mt-0.5 truncate">
+            <p className="text-white text-[13px] font-heading tracking-wide">Basé à Tours (37)</p>
+            <p className="text-white/55 text-[11px] mt-0.5 truncate">
               07 82 45 61 81 · contact@transportsligneo.fr
             </p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-4 mt-5 text-[11px] text-cream/45 font-heading tracking-wider uppercase">
-          <Link to="/cgv" className="hover:text-[#e7c76a] transition-colors">CGV</Link>
-          <span className="text-cream/20">·</span>
-          <Link to="/mentions-legales" className="hover:text-[#e7c76a] transition-colors">Mentions</Link>
-          <span className="text-cream/20">·</span>
-          <Link to="/confidentialite" className="hover:text-[#e7c76a] transition-colors">Privacy</Link>
+        <div className="flex items-center justify-center gap-4 mt-5 text-[11px] text-white/50 font-heading tracking-wider uppercase">
+          <Link to="/cgv" className="hover:text-[#93c5fd] transition-colors">CGV</Link>
+          <span className="text-white/20">·</span>
+          <Link to="/mentions-legales" className="hover:text-[#93c5fd] transition-colors">Mentions</Link>
+          <span className="text-white/20">·</span>
+          <Link to="/confidentialite" className="hover:text-[#93c5fd] transition-colors">Privacy</Link>
         </div>
-        <p className="text-center text-cream/30 text-[10px] mt-3 tracking-wider">
-          © {new Date().getFullYear()} Transports LIGNEO — La tranquillité sur toute la ligne.
+        <p className="text-center text-white/35 text-[10px] mt-3 tracking-wider">
+          © {new Date().getFullYear()} Transports LIGNEO
         </p>
       </footer>
     </div>
   );
 }
 
-/* ============================================================
-   === Sub-components ===
-   ============================================================ */
+/* ==== Sub-components ==== */
 
-/** Fade-in + translate au scroll via IntersectionObserver (CSS-only anim) */
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -413,11 +410,9 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   return (
     <div
       ref={ref}
-      style={{
-        transitionDelay: `${delay}ms`,
-      }}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-500 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
       }`}
     >
       {children}
@@ -425,107 +420,67 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   );
 }
 
-function BentoStat({
+function QuickTile({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-2xl p-4 border border-white/10 bg-white/[0.04] flex items-center gap-3 active:scale-[0.97] transition-transform text-left"
+    >
+      <span
+        className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center border border-[#60a5fa]/30 text-[#93c5fd]"
+        style={{ background: "rgba(96,165,250,0.12)" }}
+      >
+        {icon}
+      </span>
+      <span className="text-white text-[13px] font-heading tracking-wide">{label}</span>
+    </button>
+  );
+}
+
+function StatCard({
+  icon,
   value,
   label,
-  icon,
-  accent,
 }: {
-  value: string;
-  label: React.ReactNode;
   icon: React.ReactNode;
-  accent: "gold" | "blue";
+  value: string;
+  label: string;
 }) {
-  const isGold = accent === "gold";
   return (
-    <div
-      className="relative rounded-[1.6rem] p-4 border backdrop-blur-xl overflow-hidden"
-      style={{
-        background: "rgba(255,255,255,0.035)",
-        borderColor: isGold ? "rgba(231,199,106,0.28)" : "rgba(95,182,255,0.28)",
-        boxShadow: isGold
-          ? "0 16px 40px -20px rgba(212,175,55,0.25), 0 0 0 1px rgba(255,255,255,0.04) inset"
-          : "0 16px 40px -20px rgba(59,111,255,0.28), 0 0 0 1px rgba(255,255,255,0.04) inset",
-      }}
-    >
-      <div className="flex items-center gap-1.5 mb-3">
+    <div className="rounded-2xl p-4 border border-white/10 bg-white/[0.04]">
+      <div className="flex items-center gap-1.5 mb-2">
         {icon}
-        <span
-          className={`text-[9px] tracking-[0.25em] uppercase font-heading ${
-            isGold ? "text-[#e7c76a]/85" : "text-[#5fb6ff]/85"
-          }`}
-        >
-          {isGold ? "Confiance" : "Expertise"}
+        <span className="text-[9px] tracking-[0.24em] uppercase text-white/50 font-heading">
+          {label}
         </span>
       </div>
-      <p
-        className="font-heading text-[26px] leading-none"
-        style={{ color: isGold ? "#e7c76a" : "#faf7ef" }}
-      >
-        {value}
-      </p>
-      <p className="text-[10.5px] uppercase tracking-[0.14em] text-cream/50 leading-tight mt-2 font-medium">
-        {label}
-      </p>
+      <p className="font-heading text-[24px] leading-none text-white">{value}</p>
     </div>
   );
 }
 
-function Step({
-  n,
-  title,
-  desc,
-  color,
-}: {
-  n: string;
-  title: string;
-  desc: string;
-  color: "blue" | "gold";
-}) {
-  const isBlue = color === "blue";
+function Step({ n, title, desc }: { n: string; title: string; desc: string }) {
   return (
     <div className="flex gap-4 items-start">
       <span
-        className={`w-9 h-9 shrink-0 rounded-full border flex items-center justify-center text-[11px] font-bold font-heading ${
-          isBlue
-            ? "border-[#3b6fff]/45 text-[#5fb6ff]"
-            : "border-[#e7c76a]/45 text-[#e7c76a]"
-        }`}
-        style={{
-          boxShadow: isBlue
-            ? "0 0 20px -6px rgba(59,111,255,0.5)"
-            : "0 0 20px -6px rgba(212,175,55,0.4)",
-        }}
+        className="w-9 h-9 shrink-0 rounded-full border border-[#60a5fa]/45 text-[#93c5fd] flex items-center justify-center text-[11px] font-bold font-heading"
+        style={{ boxShadow: "0 0 20px -6px rgba(96,165,250,0.5)" }}
       >
         {n}
       </span>
       <div className="flex-1 min-w-0 pt-1">
-        <p className="text-cream text-[13.5px] font-heading tracking-[0.04em] uppercase leading-tight">
+        <p className="text-white text-[13.5px] font-heading tracking-[0.04em] uppercase leading-tight">
           {title}
         </p>
-        <p className="text-cream/55 text-[12px] mt-1 leading-relaxed">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-function Engagement({
-  icon,
-  title,
-  desc,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="w-10 h-10 shrink-0 rounded-xl border border-[#e7c76a]/35 bg-[#e7c76a]/10 flex items-center justify-center text-[#e7c76a]">
-        {icon}
-      </span>
-      <div className="flex-1 min-w-0">
-        <p className="text-cream text-[13px] font-heading tracking-[0.06em] uppercase">{title}</p>
-        <p className="text-cream/60 text-[12px] mt-1 leading-relaxed">{desc}</p>
+        <p className="text-white/60 text-[12px] mt-1 leading-relaxed">{desc}</p>
       </div>
     </div>
   );
