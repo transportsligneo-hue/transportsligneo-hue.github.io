@@ -1,90 +1,89 @@
+# Plan — 3 chantiers
 
-# Lots 3 + 4 + 5 — Plan de livraison
+## 1. Aller-retour → 2 trajets côté admin
+Quand un client crée une demande "aller-retour", générer automatiquement **2 lignes de trajet** dans l'admin (aller + retour inversé) au lieu d'un seul enregistrement marqué "AR".
 
-Le socle (Lot 1 + Lot 2) est en place : `mission_group_id`, `leg_type`, `leg_index`, tables `vehicles`, `vehicle_movements`, `organization_sites`, recherche universelle VIN/plaque. On enchaîne les 3 lots métier dans cet ordre logique (Aller/Retour → Flotte → Exploitation).
+- Détecter le flag `aller_retour` dans `demandes_convoyage` / `devis` / `missions` (à confirmer sur quelle table).
+- À la validation admin (ou dès création selon flux actuel), insérer 2 entrées `trajets` :
+  - Trajet 1 : départ → arrivée à la date aller
+  - Trajet 2 : arrivée → départ à la date retour
+- Lier les deux via `mission_parent_id` (ou champ existant) pour regroupement.
+- Vues admin `admin.trajets` / `admin.missions` : afficher les deux lignes distinctes avec badge "Aller" / "Retour".
 
-> Volume important : ~15-20 fichiers / lot. Je livre **lot par lot**, chaque lot testable seul. Tu valides puis on passe au suivant.
+Fichiers probables : `src/routes/_authenticated/admin.demandes.tsx`, `admin.trajets.tsx`, logique de conversion demande→trajet.
 
----
+## 2. Tapis de sol dans checklist EDL
+Ajouter "Tapis de sol" dans les éléments cochables au début de l'état des lieux (avant photos), au même endroit que les autres accessoires (roue de secours, cric, etc.).
 
-## Lot 3 — Aller / Retour comme 2 missions liées
+Fichier : composant checklist EDL dans `src/components/inspection/` ou `src/components/mission/`.
 
-### Base de données (migration)
-- Ajout `trajets.bidding_enabled boolean default false`
-- Vérification trigger `auto_create_trajet_from_devis` : génère bien `mission_group_id` partagé entre Aller et Retour (Lot 1 a posé les colonnes, on branche le trigger)
-- Ajout colonnes `mission_offres.is_winning boolean`, `mission_offres.bid_round int` (système enchères léger)
+## 3. Système notifications complet (ADMIN / CLIENT / CONVOYEUR)
 
-### UI Convoyeur
-- `convoyeur.disponibles.tsx` : badge « Aller-Retour #XXX » sur les legs groupés + lien vers le leg jumeau
-- `MissionCard` : affichage `leg_type` (icône A/R) sur les missions attribuées
-- `convoyeur.missions.tsx` : section « Mission jumelle » dans le détail si `mission_group_id` non null
-- Si `bidding_enabled = true` : remplacer bouton « Accepter au prix fixe » par formulaire offre prix (passe par `mission_offres` existant)
+### 3.1 Infrastructure
+- Table existante `user_notifications` (déjà en base) → utiliser comme historique unifié pour les 3 rôles.
+- Table `admin_notifications` déjà en place → conserver pour admin.
+- Ajouter colonnes si manquantes : `category` (mission/paiement/document/message/systeme), `priority`, `deep_link`.
+- Ajouter table `notification_preferences` (user_id, channel, category, enabled) pour opt-in/out par canal + catégorie.
 
-### UI Admin
-- Fiche admin trajet : toggle « Activer les enchères »
-- Liste admin trajets : badge groupe A/R + filtre `mission_group_id`
+### 3.2 Helper unifié
+Créer `src/lib/notifications/notify.ts` avec API unique :
+```
+notifyUser({ userId, role, category, title, message, link, email?: {template, data}, push?: bool })
+```
+- Écrit en DB (`user_notifications` ou `admin_notifications` selon rôle).
+- Envoie push web (via `sendPushToUser` existant) si activé dans prefs.
+- Enqueue email (via `sendTransactionalEmail`) si `email` fourni et activé.
+- Déduplication : hash `(user_id, category, entity_id, event_key)` sur 5 min.
 
-### UI Client
-- `dashboard-client.missions.$missionId` + `dashboard-pro.missions.$missionId` : bandeau lien vers mission jumelle
+### 3.3 Événements à câbler
+**Client** (18 events) : compte créé/validé, demande créée, mission confirmée, convoyeur attribué/en route/arrivé, EDL départ/arrivée, convoyage commencé, incident, retard, heure modifiée, véhicule livré, mission terminée, facture, paiement, annulation, message, document.
 
-**Risque** : Moyen (touche workflow paiement). Aucune mission existante ne sera cassée — `leg_type='simple'` reste le comportement par défaut.
+**Convoyeur** (24 events) : compte créé/validé, docs refusés/validés, profil incomplet, mission attribuée/modifiée/annulée, rappels J-1 / H-2 / heure départ, arrivée véhicule, EDL non commencé/incomplet/photos manquantes/signature, upload OK, départ oublié, arrivée proche, EDL arrivée, mission terminée, paiement, message, expirations permis/assurance/CNI.
 
----
+**Admin** (25 events) : nouveaux inscrits, comptes/docs à valider, mission créée/sans convoyeur/urgente/modifiée/annulée/terminée, incident, réclamation, paiements OK/KO, facture, message, erreurs système, sécurité, maintenance, déploiement.
 
-## Lot 4 — Module Gestion de flotte (client pro)
+Chaque event = 1 appel `notifyUser(...)` placé au point de déclenchement (server fn ou trigger).
 
-### Nouvelle route : `/dashboard-pro/flotte`
-Sous-onglets via routes imbriquées :
-- `dashboard-pro.flotte.index.tsx` — Dashboard KPI
-- `dashboard-pro.flotte.vehicules.tsx` — CRUD `vehicles` + import CSV
-- `dashboard-pro.flotte.sites.tsx` — CRUD `organization_sites`
-- `dashboard-pro.flotte.membres.tsx` — UI sur `organization_members` (déjà existant)
-- `dashboard-pro.flotte.mouvements.tsx` — Timeline sur `vehicle_movements`
+### 3.4 Rappels planifiés (J-1, H-2, expirations docs)
+- Cron `pg_cron` (fonction SQL) qui scanne `missions` et `documents_convoyeurs` toutes les heures et enqueue les notifications correspondantes.
 
-### Composants
-- `<FleetKPICards />` : véhicules totaux, missions (réalisées/en cours/en attente), km totaux (`SUM(missions.distance_km)`), taux réussite, délai moyen
-- `<FleetVehiclesTable />` : table paginée VIN/plaque/marque/modèle/statut + recherche
-- `<VehicleCSVImport />` : parse CSV client-side (Papa Parse déjà dispo ? sinon `bun add papaparse`), preview, validation, insert batch via server fn
-- `<VehicleMovementsTimeline />` : groupé par véhicule, livraison/restitution/transfert
+### 3.5 Centre de notifications UI
+Créer route unique `/notifications` (adaptée par rôle) + widget cloche dans header :
+- Compteur non-lues temps réel (Supabase Realtime sur `user_notifications`).
+- Liste avec filtres : Toutes / Missions / Paiements / Documents / Messages / Système.
+- Recherche texte.
+- Actions : marquer lu, tout marquer, supprimer un, supprimer sélection.
+- Clic → deep link vers l'écran concerné.
+- Page admin `/admin/notifications` déjà existante → mettre à jour au même format + filtres catégories.
 
-### Server functions
-- `src/lib/fleet.functions.ts` : `listFleetVehicles`, `upsertVehicle`, `deleteVehicle`, `importVehiclesCSV`, `listFleetSites`, `upsertSite`, `getFleetKPI` — toutes scopées RLS par `organization_id`
+### 3.6 Préférences utilisateur
+Ajouter section "Notifications" dans :
+- `dashboard-client.profil.tsx`
+- `convoyeur.profil.tsx`
+- `admin.parametres.tsx`
 
-### Sidebar
-- Ajout entrée « Flotte » dans `ProSidebar`
-
-**Risque** : Faible (nouveau module additif).
-
----
-
-## Lot 5 — Géolocalisation admin + Centre d'exploitation
-
-### Nouvelle route : `/admin/exploitation`
-- Carte Leaflet plein écran (`react-leaflet` déjà utilisé pour `GpsMapView`)
-- Markers temps réel sur `mission_locations` via Supabase Realtime
-- 3 panneaux latéraux pliables :
-  - Missions en attente (`statut='en_attente_attribution'`)
-  - Missions en cours (avec position GPS dernière)
-  - Convoyeurs dispo (`disponibilites_convoyeurs` actives aujourd'hui)
-- Filtres : département (extrait du CP), statut, convoyeur, client
-- Click marker → drawer fiche mission (position, vitesse calculée, ETA via dernier point GPS)
-
-### Migration Realtime
-- `ALTER PUBLICATION supabase_realtime ADD TABLE mission_locations;` (si pas déjà fait)
-
-### Sidebar
-- Ajout entrée « Centre d'exploitation » dans `AdminSidebar` groupe « Opérations »
-
-**Risque** : Faible (lecture seule, additif).
+Toggle par catégorie × canal (push/email). Stocké dans `notification_preferences`.
 
 ---
 
-## Ordre & livraison
+## Détails techniques
+- **Migration** : ajout colonnes `user_notifications` (category, deep_link, priority, dedup_key), création `notification_preferences`, GRANTs + RLS, index sur (user_id, lu, created_at DESC).
+- **RPC** `create_user_notification` SECURITY DEFINER pour insertion depuis server fns avec dedup.
+- **Realtime** : `ALTER PUBLICATION supabase_realtime ADD TABLE public.user_notifications` (si pas déjà fait).
+- **Emails** : réutiliser templates existants dans `src/lib/email-templates/` (déjà 30+ templates). Ajouter les manquants au fur et à mesure.
+- **Push** : `sendPushToUser` / `sendPushToRole` déjà en place.
+- **Pas de framer-motion** (règle mémoire), animations CSS/Tailwind.
 
-1. **Lot 3** (migration + UI A/R) — je commence par ça
-2. **Lot 4** (module flotte) — après ta validation du Lot 3
-3. **Lot 5** (centre d'exploitation) — après validation du Lot 4
+## Ordre d'exécution proposé
+1. Chantier 1 (aller-retour) + chantier 2 (tapis) — petits, rapides.
+2. Migration DB + helper `notifyUser` + centre de notifications UI (fondations).
+3. Câblage progressif des events par rôle (client → convoyeur → admin).
+4. Préférences utilisateur + rappels cron.
 
-Chaque lot = 1 batch de modifications, build vérifié, puis je te livre un récap court avec les fichiers touchés.
+## Question avant de partir
+Ce chantier notifications est **très gros** (50+ events, migration, UI, cron, prefs). Je propose de livrer en **plusieurs itérations** :
+- **Itération A (ce tour)** : chantiers 1 + 2 + fondations notifications (migration, helper, centre UI cloche + page, realtime).
+- **Itération B** : câblage events client + convoyeur.
+- **Itération C** : câblage events admin + rappels cron + préférences.
 
-**Je lance le Lot 3 dès ta validation de ce plan.**
+OK pour ce découpage ? Ou tu veux que je tente tout d'un coup (risque plus élevé de bugs) ?
