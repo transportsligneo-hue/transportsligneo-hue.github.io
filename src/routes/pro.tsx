@@ -92,16 +92,20 @@ function ProPage() {
               "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%), radial-gradient(40% 40% at 80% 20%, rgba(95,182,255,0.12), transparent 70%)",
           }}
         />
+        <div aria-hidden className="cyber-aurora" />
+        <div aria-hidden className="cyber-grid opacity-60" />
+        <div aria-hidden className="cyber-scanline" />
         <div className="relative mx-auto max-w-5xl px-5 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/[0.08] px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
+          <span className="cyber-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] font-heading">
             <ShieldCheck className="h-3 w-3" />
             Solution professionnelle
           </span>
           <h1 className="font-heading text-4xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.1]">
             Votre partenaire convoyage,
             <br />
-            <span className="gold-gradient-text">pensé pour les pros.</span>
+            <span className="cyber-title-accent">pensé pour les pros.</span>
           </h1>
+
           <p className="mx-auto mt-7 max-w-2xl text-cream/70 text-base lg:text-lg leading-relaxed">
             Concessionnaires, loueurs, assureurs : externalisez vos convoyages
             avec un acteur fiable et transparent. Tarifs volume,
