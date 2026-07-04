@@ -75,6 +75,7 @@ interface StepState {
     kit_securite: boolean;
     cable_charge: boolean;
     tapis_sol: boolean;
+    doubles_cles: boolean;
     roue: "secours" | "kit" | "aucun" | null;
   };
   /** Kilométrage saisi */
