@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
+import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
