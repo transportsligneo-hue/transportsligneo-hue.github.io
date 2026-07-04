@@ -261,11 +261,14 @@ function OrgDetail() {
             <div className="divide-y">
               {activity.map((a) => (
                 <div key={a.id} className="py-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{a.action}</span>
-                    <span className="text-xs text-pro-muted">{new Date(a.created_at).toLocaleString("fr-FR")}</span>
+                  <div className="flex justify-between gap-3">
+                    <p className="text-pro-text leading-snug">
+                      <span className="font-medium">{actorLabel(a)}</span>{" "}
+                      {humanizeAction(a.action, a.entity_type, a.metadata)}
+                    </p>
+                    <span className="text-xs text-pro-muted shrink-0">{new Date(a.created_at).toLocaleString("fr-FR")}</span>
                   </div>
-                  <div className="text-xs text-pro-muted">{a.entity_type} · {a.actor_label ?? "système"}</div>
+                  <p className="text-[11px] text-pro-muted mt-0.5 capitalize">{a.entity_type} · <span className="font-mono">{a.action}</span></p>
                 </div>
               ))}
             </div>
