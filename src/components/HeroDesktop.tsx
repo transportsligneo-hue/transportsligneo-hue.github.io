@@ -64,7 +64,7 @@ export default function HeroDesktop() {
             <h1 className="font-heading text-white text-5xl xl:text-6xl 2xl:text-[68px] tracking-wide leading-[1.05]">
               LA TRANQUILLITÉ
               <br />
-              SUR <span className="text-[#e7c76a]">TOUTE LA LIGNE.</span>
+              SUR <span className="text-[#60a5fa]">TOUTE LA LIGNE.</span>
             </h1>
 
             <p className="text-cream/85 text-base xl:text-lg leading-relaxed mt-8 max-w-xl">
