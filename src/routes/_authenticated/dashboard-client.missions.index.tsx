@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Truck, Loader2, PlusCircle, Clock, ArrowRight, FileText } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 
 const friendlyStatusLabel = (statut: string): string => missionStatusLabel(statut);
 
