@@ -56,10 +56,10 @@ export default function CommentCaMarche() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8 relative">
-          {/* Filet doré horizontal (timeline) */}
+          {/* Filet bleu électrique horizontal (timeline) */}
           <div
             aria-hidden
-            className="hidden md:block absolute top-24 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-[#e7c76a]/35 to-transparent"
+            className="hidden md:block absolute top-24 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-[#60a5fa]/35 to-transparent"
           />
 
           {steps.map((s, i) => (
