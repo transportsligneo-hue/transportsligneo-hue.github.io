@@ -345,8 +345,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
         {!hasCurrentPhoto ? (
           <button
             onClick={handleCapture}
-            disabled={uploading}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-wider uppercase disabled:opacity-50 transition-opacity"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-wider uppercase transition-opacity"
           >
             <Camera size={18} /> Prendre la photo
           </button>
