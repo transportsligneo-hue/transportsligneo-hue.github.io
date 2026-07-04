@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, Ban } from "lucide-react";
-import { toast } from "sonner";
 import {
   PageHeader,
   Card,
@@ -24,6 +23,8 @@ import {
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({
   component: AdminTrajets,
@@ -160,7 +161,7 @@ function AdminTrajets() {
     if (!selected) return;
     const pct = parseFloat(pctInput);
     if (isNaN(pct) || pct < 0 || pct > 100) {
-      alert("Pourcentage invalide (0-100)");
+      toast.error("Pourcentage invalide (0-100)");
       return;
     }
     setSavingCommission(true);
@@ -234,7 +235,7 @@ function AdminTrajets() {
 
   const validerOffre = async (offre: Offre) => {
     if (!selected) return;
-    if (!confirm(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`)) return;
+    if (!(await confirmToast(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`))) return;
 
     // 1) Récupérer toutes les autres offres en attente pour les notifier
     const { data: autresOffres } = await supabase
@@ -502,7 +503,7 @@ function AdminTrajets() {
 
   const cancelTrajet = async (t: Trajet) => {
     if (t.statut === "annule") return;
-    if (!confirm(`Annuler la mission ${t.depart} → ${t.arrivee} ?`)) return;
+    if (!(await confirmToast(`Annuler la mission ${t.depart} → ${t.arrivee} ?`))) return;
     await updateStatut(t.id, "annule");
     if (selected?.id === t.id) {
       setSelected({ ...selected, statut: "annule", statut_publication: "brouillon" });

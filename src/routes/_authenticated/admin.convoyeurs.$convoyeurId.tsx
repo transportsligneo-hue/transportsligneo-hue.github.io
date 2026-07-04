@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import {
   ArrowLeft,
   CheckCircle,
@@ -25,6 +24,8 @@ import {
   AdminEmpty,
 } from "@/components/admin/ui";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,
@@ -177,7 +178,7 @@ function AdminConvoyeurDetail() {
         })
         .filter(Boolean);
       if (issues.length) {
-        window.alert(`Validation impossible :\n\n• ${issues.join("\n• ")}`);
+        toast.error(`Validation impossible :\n\n• ${issues.join("\n• ")}`);
         return;
       }
     }
@@ -240,7 +241,7 @@ function AdminConvoyeurDetail() {
     }
     const newEmail = window.prompt("Nouvel email du convoyeur :", conv.email);
     if (!newEmail || newEmail === conv.email) return;
-    if (!window.confirm(`Changer l'email pour ${newEmail} ?\nLe convoyeur devra utiliser cet email pour se connecter.`)) return;
+    if (!(await confirmToast(`Changer l'email pour ${newEmail} ?\nLe convoyeur devra utiliser cet email pour se connecter.`))) return;
     setBusy("email");
     const { data, error } = await supabase.functions.invoke("admin-user-actions", {
       body: { action: "change_email", user_id: conv.user_id, email: newEmail },
@@ -297,7 +298,7 @@ function AdminConvoyeurDetail() {
 
   const suspendAccount = async () => {
     if (!conv?.user_id) return;
-    if (!window.confirm("Suspendre ce convoyeur ? Il ne pourra plus se connecter.")) return;
+    if (!(await confirmToast("Suspendre ce convoyeur ? Il ne pourra plus se connecter."))) return;
     setBusy("suspend");
     const { data, error } = await supabase.functions.invoke("admin-user-actions", {
       body: { action: "suspend", user_id: conv.user_id },

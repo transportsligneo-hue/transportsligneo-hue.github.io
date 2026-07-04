@@ -25,6 +25,7 @@ import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf } from "@/lib/mission-number";
 import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
@@ -404,8 +405,8 @@ function AdminAttributions() {
     }
 
     if (!["annule", "validee", "termine"].includes(attribution.statut)) {
-      buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: () => {
-        if (!confirm("Annuler définitivement cette mission ?")) return;
+      buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: async () => {
+        if (!(await confirmToast("Annuler définitivement cette mission ?"))) return;
         void updateStatut(attribution, "annule", { note: "Mission annulée par l'admin" });
       } });
     }

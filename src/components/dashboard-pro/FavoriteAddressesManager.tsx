@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Star, StarOff, ToggleLeft, ToggleRight, Pencil, X } from "lucide-react";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export interface FavoriteAddressRow {
   id: string;
@@ -176,7 +177,7 @@ export function FavoriteAddressesManager({ clientUserId, clientEmail, variant = 
   };
 
   const remove = async (a: FavoriteAddressRow) => {
-    if (!window.confirm("Supprimer cette adresse ?")) return;
+    if (!(await confirmToast("Supprimer cette adresse ?"))) return;
     await supabase.from("client_default_addresses" as never).delete().eq("id", a.id);
     load();
   };

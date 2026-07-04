@@ -14,11 +14,12 @@ import {
   Save,
   AlertTriangle,
 } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -367,7 +368,7 @@ function ResetOperationalCard() {
       toast.error(`Tapez exactement "${REQUIRED}" pour confirmer.`);
       return;
     }
-    if (!confirm("Dernière confirmation : effacer toutes les missions, trajets, attributions et l'historique driver ?")) return;
+    if (!(await confirmToast("Dernière confirmation : effacer toutes les missions, trajets, attributions et l'historique driver ?"))) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc("admin_reset_operational_data" as never);

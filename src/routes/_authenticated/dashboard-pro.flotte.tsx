@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Car, Plus, Search, Loader2, Pencil, Trash2, X, Save, AlertCircle, CheckCircle2,
 } from "lucide-react";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
@@ -148,7 +149,7 @@ function FleetPage() {
   };
 
   const archive = async (v: Vehicle) => {
-    if (!confirm(`Archiver le véhicule ${v.immatriculation || v.vin || "?"} ?`)) return;
+    if (!(await confirmToast(`Archiver le véhicule ${v.immatriculation || v.vin || "?"} ?`))) return;
     await supabase.from("vehicles")
       .update({ statut: "archive", archived_at: new Date().toISOString() })
       .eq("id", v.id);

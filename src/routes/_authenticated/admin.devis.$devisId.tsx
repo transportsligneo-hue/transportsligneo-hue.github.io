@@ -5,11 +5,12 @@ import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye,
 } from "lucide-react";
-import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,
@@ -143,7 +144,7 @@ function AdminDevisDetailPage() {
 
   const handleConvert = async () => {
     if (!devis || devis.mission_id) return;
-    if (!confirm(`Convertir ${devis.numero} en mission ?`)) return;
+    if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
     setConverting(true);
     try {
       const userId = devis.user_id;
@@ -169,7 +170,7 @@ function AdminDevisDetailPage() {
 
   const handleDelete = async () => {
     if (!devis) return;
-    if (!confirm("Supprimer définitivement ce devis ?")) return;
+    if (!(await confirmToast("Supprimer définitivement ce devis ?"))) return;
     await supabase.from("devis").delete().eq("id", devis.id);
     toast.success("Devis supprimé");
     navigate({ to: "/admin/devis" });

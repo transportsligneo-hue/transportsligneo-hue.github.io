@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * PricingModeBlock — éditeur premium de la tarification d'un trajet (B1).
  *
@@ -111,7 +112,7 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
       } as PricingModeBlockProps["initial"]);
       setTimeout(() => setSavedAt(null), 2500);
     } else {
-      alert("Erreur de sauvegarde");
+      toast.error("Erreur de sauvegarde");
     }
   };
 

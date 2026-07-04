@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { FileText, Upload, Trash2, Download, Loader2, Eye, FileCheck2, FilePenLine, CarFront, MoreHorizontal, PenLine, X, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 const DOC_TYPES = [
   { value: "pv_livraison", label: "PV de livraison / restitution", short: "PV", icon: FileCheck2 },
@@ -88,7 +90,7 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
   const uploadFile = async (file: File, forcedType?: string) => {
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert("Fichier trop volumineux (max 10 Mo)");
+      toast.error("Fichier trop volumineux (max 10 Mo)");
       return;
     }
 
@@ -140,7 +142,7 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
   };
 
   const handleDelete = async (doc: MissionDocument) => {
-    if (!confirm(`Supprimer "${doc.nom_fichier}" ?`)) return;
+    if (!(await confirmToast(`Supprimer "${doc.nom_fichier}" ?`))) return;
     await supabase.storage.from("mission-documents").remove([doc.url_fichier]);
     await supabase.from("mission_documents").delete().eq("id", doc.id);
     fetchDocuments();

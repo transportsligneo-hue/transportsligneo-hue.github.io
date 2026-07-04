@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * MissionWorkflow — parcours étape par étape pour le convoyeur sur le terrain.
  *
@@ -127,7 +128,7 @@ export function MissionWorkflow({
     // Garde-fou : selfie obligatoire avant toute prise en charge / EDL
     const stepsRequiringSelfie: EtapeKey[] = ["sur_place", "vehicule_recupere", "arrive_destination"];
     if (!selfieOK && stepsRequiringSelfie.includes(effectiveEtape)) {
-      alert("Selfie d'identité obligatoire avant de prendre en charge le véhicule. Faites-le dans le bloc 'Validations obligatoires' au-dessus.");
+      toast.error("Selfie d'identité obligatoire avant de prendre en charge le véhicule. Faites-le dans le bloc 'Validations obligatoires' au-dessus.");
       return;
     }
 

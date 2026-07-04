@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * DocumentScanner — capture + recadrage 4 coins + correction de perspective
  * pour scanner proprement un document (PV de livraison, carte grise…).
@@ -279,7 +280,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
       await Promise.resolve(onScanned(file));
     } catch (err) {
       console.error("[DocumentScanner]", err);
-      alert("Recadrage impossible. Réessayez en élargissant les coins.");
+      toast.error("Recadrage impossible. Réessayez en élargissant les coins.");
     } finally {
       setProcessing(false);
     }

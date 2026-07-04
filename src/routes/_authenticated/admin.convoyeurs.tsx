@@ -22,6 +22,7 @@ import {
   FormField,
   convoyeurStatutTone,
 } from "@/components/admin/AdminUI";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,
@@ -104,7 +105,7 @@ function AdminConvoyeurs() {
           else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
         }
         if (issues.length > 0) {
-          window.alert(
+          toast.error(
             `Activation impossible — ce convoyeur indépendant doit avoir tous ses documents approuvés.\n\n• ${issues.join("\n• ")}`,
           );
           return;

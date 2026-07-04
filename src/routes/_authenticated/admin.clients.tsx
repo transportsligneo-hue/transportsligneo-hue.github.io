@@ -21,6 +21,8 @@ import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge 
 import { Button } from "@/components/ui/button";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,
@@ -134,7 +136,7 @@ function AdminClients() {
   const toggleActif = async (userId: string, nextActif: boolean) => {
     if (
       !nextActif &&
-      !window.confirm("Suspendre ce client ? Il ne pourra plus se connecter à son espace.")
+      !(await confirmToast("Suspendre ce client ? Il ne pourra plus se connecter à son espace."))
     )
       return;
     await supabase
@@ -273,7 +275,7 @@ function AdminClients() {
                     body: { action: "change_email", user_id: selected.user_id, email: next.trim() },
                   });
                   if (error || (data as any)?.error) {
-                    window.alert(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
+                    toast.error(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
                     return;
                   }
                   setSelected({ ...selected, email: next.trim() });

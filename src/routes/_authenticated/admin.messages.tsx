@@ -18,6 +18,7 @@ import {
   IconButton,
   Select,
 } from "@/components/admin/AdminUI";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
   component: AdminMessages,
@@ -101,7 +102,7 @@ function AdminMessages() {
   };
 
   const deleteMessage = async (id: string) => {
-    if (!confirm("Supprimer ce message ?")) return;
+    if (!(await confirmToast("Supprimer ce message ?"))) return;
     await supabase.from("contact_messages").delete().eq("id", id);
     setSelected(null);
     fetchMessages();

@@ -27,7 +27,6 @@ import {
   Download,
   Save,
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Card,
   Badge,
@@ -46,6 +45,8 @@ import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf } from "@/lib/mission-number";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -925,7 +926,7 @@ function AdminMissionDetail() {
                               <button
                                 type="button"
                                 onClick={async () => {
-                                  if (!window.confirm(`Supprimer la photo "${vueLabelFor(p.vue_type)}" ? Le conducteur pourra la reprendre.`)) return;
+                                  if (!(await confirmToast(`Supprimer la photo "${vueLabelFor(p.vue_type)}" ? Le conducteur pourra la reprendre.`))) return;
                                   try {
                                     if (p.storage_path) {
                                       await supabase.storage.from("inspection-photos").remove([p.storage_path]);

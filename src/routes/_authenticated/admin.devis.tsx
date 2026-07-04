@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
-import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
   PageHeader,
@@ -19,6 +18,8 @@ import {
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
@@ -130,7 +131,7 @@ function AdminDevisPage() {
       toast.info("Devis déjà converti", { description: `Mission ${row.mission_id.slice(0, 8)}…` });
       return;
     }
-    if (!confirm(`Convertir le devis ${row.numero} en mission ?`)) return;
+    if (!(await confirmToast(`Convertir le devis ${row.numero} en mission ?`))) return;
     setConvertingId(row.id);
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -223,7 +224,7 @@ function AdminDevisPage() {
 
   const handleArchive = async (row: DevisRow) => {
     const archiving = !row.archived_at;
-    if (archiving && !confirm(`Archiver le devis ${row.numero} ? Il restera consultable (les devis ne sont jamais supprimés).`)) return;
+    if (archiving && !(await confirmToast(`Archiver le devis ${row.numero} ? Il restera consultable (les devis ne sont jamais supprimés).`))) return;
     const archived_at = archiving ? new Date().toISOString() : null;
     const { error } = await supabase.from("devis").update({ archived_at }).eq("id", row.id);
     if (error) {

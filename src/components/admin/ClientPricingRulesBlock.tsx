@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X } from "lucide-react";
 import { AdminSection, AdminField, AdminEmpty } from "@/components/admin/ui";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 
 interface Rule {
@@ -165,7 +166,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
   };
 
   const remove = async (r: Rule) => {
-    if (!window.confirm("Supprimer ce tarif personnalisé ?")) return;
+    if (!(await confirmToast("Supprimer ce tarif personnalisé ?"))) return;
     await supabase.from("client_pricing_rules" as never).delete().eq("id", r.id);
     load();
   };
