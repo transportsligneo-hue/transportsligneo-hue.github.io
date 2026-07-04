@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from "lucide-react";
+import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
 import { compressImage } from "@/lib/image-compression";
+import { enqueueUpload, subscribeQueue, pendingKeysForInspection, kickQueue } from "@/lib/edl-offline-queue";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
@@ -31,12 +33,15 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   const [currentStep, setCurrentStep] = useState(0);
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [pendingUploads, setPendingUploads] = useState<Record<string, boolean>>({});
+  const [syncState, setSyncState] = useState<Record<string, "pending" | "sent" | "failed">>({});
+  const [captureIds, setCaptureIds] = useState<Record<string, string>>({});
   const [completing, setCompleting] = useState(false);
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("capture");
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const online = useOnlineStatus();
 
   const currentVue = VUE_TYPES[currentStep];
   const progress = Object.keys(photos).length / VUE_TYPES.length * 100;
@@ -77,6 +82,37 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Écoute la file de synchro pour mettre à jour le statut par vignette.
+  useEffect(() => {
+    const unsub = subscribeQueue((key, state) => {
+      const [insId, vueType] = key.split(":");
+      if (!inspectionId || insId !== inspectionId) return;
+      setSyncState((prev) => ({ ...prev, [vueType]: state }));
+      if (state === "sent") {
+        setPendingUploads((prev) => {
+          const { [vueType]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+    });
+    return () => { unsub(); };
+  }, [inspectionId]);
+
+  // Au montage, si des uploads sont encore en file pour cette inspection,
+  // marque leur statut "pending" et relance la file.
+  useEffect(() => {
+    if (!inspectionId) return;
+    void pendingKeysForInspection(inspectionId).then((keys) => {
+      if (keys.length === 0) return;
+      setSyncState((prev) => {
+        const next = { ...prev };
+        keys.forEach((k) => { next[k.split(":")[1]] = "pending"; });
+        return next;
+      });
+      kickQueue();
+    });
+  }, [inspectionId]);
+
 
 
   const animateStep = (newStep: number) => {
@@ -97,6 +133,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     const rawFile = e.target.files?.[0];
     if (!rawFile || !currentVue) return;
     const vueId = currentVue.id;
+    const captureId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     // Reset input immediately so user can re-pick same file later
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -110,34 +147,37 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
       }
       return { ...prev, [vueId]: previewUrl };
     });
+    setCaptureIds((prev) => ({ ...prev, [vueId]: captureId }));
     setPendingUploads((prev) => ({ ...prev, [vueId]: true }));
+    setSyncState((prev) => ({ ...prev, [vueId]: "pending" }));
 
-    // 2) Compress + upload en arrière-plan — TOTALEMENT non-bloquant.
-    //    L'utilisateur peut immédiatement passer à la vue suivante et prendre
-    //    une autre photo pendant que l'upload précédent finit.
+    // 2) Compression + mise en file offline en arrière-plan.
+    //    L'utilisateur peut immédiatement passer à la vue suivante.
     void (async () => {
       try {
         const file = await compressImage(rawFile, { maxDimension: 1280, quality: 0.72 });
         const insId = await ensureInspection();
-        const path = `${userId}/${insId}/${vueId}.jpg`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("inspection-photos")
-          .upload(path, file, { upsert: true, contentType: "image/jpeg" });
-        if (uploadError) throw uploadError;
-
-        await supabase.from("inspection_photos").upsert({
-          inspection_id: insId,
-          vue_type: vueId,
-          url_photo: path,
-        }, { onConflict: "inspection_id,vue_type" });
-      } catch (err) {
-        console.error("Upload error:", err);
-        setPhotos((prev) => {
-          const { [vueId]: _, ...rest } = prev;
-          return rest;
+        // Race guard : la photo a-t-elle été reprise entre temps ?
+        let stillCurrent = false;
+        setCaptureIds((prev) => {
+          stillCurrent = prev[vueId] === captureId;
+          return prev;
         });
-      } finally {
+        if (!stillCurrent) return;
+
+        const path = `${userId}/${insId}/${vueId}.jpg`;
+        await enqueueUpload({
+          key: `${insId}:${vueId}`,
+          inspectionId: insId,
+          vueType: vueId,
+          path,
+          blob: file,
+          contentType: "image/jpeg",
+          captureId,
+        });
+      } catch (err) {
+        console.error("Enqueue error:", err);
+        setSyncState((prev) => ({ ...prev, [vueId]: "failed" }));
         setPendingUploads((prev) => {
           const { [vueId]: _, ...rest } = prev;
           return rest;
@@ -178,6 +218,8 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   };
 
   const hasCurrentPhoto = !!photos[currentVue.id];
+  const pendingSyncCount = Object.values(syncState).filter((s) => s === "pending").length;
+  const failedSyncCount = Object.values(syncState).filter((s) => s === "failed").length;
 
   // Transition classes
   const slideClass = isTransitioning
@@ -185,6 +227,18 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
       ? "opacity-0 translate-x-8"
       : "opacity-0 -translate-x-8"
     : "opacity-100 translate-x-0";
+
+  const syncBadge = (!online || pendingSyncCount > 0 || failedSyncCount > 0) ? (
+    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] ${
+      !online ? "border-amber-400/40 text-amber-300 bg-amber-500/10"
+      : failedSyncCount > 0 ? "border-destructive/40 text-destructive bg-destructive/10"
+      : "border-primary/30 text-primary bg-primary/10"
+    }`}>
+      {!online ? <><CloudOff size={10} /> Hors ligne</>
+        : failedSyncCount > 0 ? <><AlertCircle size={10} /> {failedSyncCount} en attente</>
+        : <><CloudUpload size={10} /> Envoi {pendingSyncCount}</>}
+    </div>
+  ) : null;
 
   // ─── RECAP VIEW ───
   if (viewMode === "recap") {
@@ -198,7 +252,10 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           <h2 className="font-heading text-sm text-primary uppercase tracking-wider">
             Récapitulatif
           </h2>
-          <span className="text-cream/50 text-xs">{Object.keys(photos).length}/{VUE_TYPES.length}</span>
+          <div className="flex items-center gap-2">
+            {syncBadge}
+            <span className="text-cream/50 text-xs">{Object.keys(photos).length}/{VUE_TYPES.length}</span>
+          </div>
         </div>
 
         {/* Content */}
@@ -231,8 +288,16 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
                   {hasPhoto ? (
                     <>
                       <img src={photos[v.id]} alt={v.label} className="w-full h-full object-cover" />
-                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                        <Check size={12} className="text-white" />
+                      <div className={`absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center ${
+                        syncState[v.id] === "failed" ? "bg-destructive"
+                        : syncState[v.id] === "pending" ? "bg-amber-500"
+                        : "bg-green-500"
+                      }`}>
+                        {syncState[v.id] === "pending"
+                          ? <Loader2 size={11} className="text-white animate-spin" />
+                          : syncState[v.id] === "failed"
+                          ? <AlertCircle size={11} className="text-white" />
+                          : <Check size={12} className="text-white" />}
                       </div>
                     </>
                   ) : (
@@ -287,7 +352,10 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
         <h2 className="font-heading text-sm text-primary uppercase tracking-wider">
           État des lieux {type === "depart" ? "départ" : "arrivée"}
         </h2>
-        <span className="text-cream/50 text-xs">{currentStep + 1}/{VUE_TYPES.length}</span>
+        <div className="flex items-center gap-2">
+          {syncBadge}
+          <span className="text-cream/50 text-xs">{currentStep + 1}/{VUE_TYPES.length}</span>
+        </div>
       </div>
 
       {/* Progress bar */}
