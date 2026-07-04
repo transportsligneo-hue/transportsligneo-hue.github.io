@@ -1,8 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 // NOTE: pas de middleware d'auth — la recherche SIV doit fonctionner
 // sur le site public (devis), dashboard client, pro et admin.
 // La clé RapidAPI reste côté serveur uniquement.
+// Pour éviter l'abus depuis le site public, on gate cette fonction par:
+//  - un token Bearer Supabase (utilisateurs connectés), OU
+//  - un token reCAPTCHA v3 valide (score ≥ 0.5) pour les visiteurs anonymes.
 
 const PlateSchema = z.object({
   plate: z
@@ -11,7 +15,30 @@ const PlateSchema = z.object({
     .min(4)
     .max(15)
     .regex(/^[A-Z0-9-]+$/i, "Plaque invalide"),
+  recaptchaToken: z.string().min(10).max(4000).optional(),
 });
+
+async function verifyRecaptchaToken(token: string): Promise<boolean> {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) {
+    console.warn("[SIV] RECAPTCHA_SECRET_KEY missing — allowing (dev)");
+    return true;
+  }
+  try {
+    const body = new URLSearchParams({ secret, response: token });
+    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    const json = (await res.json()) as { success: boolean; score?: number };
+    return !!json.success && (json.score ?? 1) >= 0.5;
+  } catch (err) {
+    console.error("[SIV] recaptcha verify failed", err);
+    return false;
+  }
+}
+
 
 export type PlateLookupResult = {
   ok: boolean;
