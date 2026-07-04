@@ -50,7 +50,7 @@ export const createQuoteFromDemande = createServerFn({ method: "POST" })
         distance_km: demande.distance_km,
         marque: demande.vehicule_marque ?? demande.marque,
         modele: demande.vehicule_modele ?? demande.modele,
-        immatriculation: demande.vehicule_immatriculation ?? demande.immatriculation,
+        vin: demande.vehicule_vin ?? null,
         prix_estime: prix,
         statut: "envoye",
         origine: "demande_client",
