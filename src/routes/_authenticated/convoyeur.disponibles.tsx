@@ -434,6 +434,54 @@ function ConvoyeurDisponibles() {
                     </div>
                   )}
 
+                  {offre?.admin_counter_offer != null && offre.statut === "en_attente" && (
+                    <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">
+                      <p className="font-medium text-amber-900">
+                        Contre-proposition de l'admin : <strong>{offre.admin_counter_offer} €</strong>
+                      </p>
+                      {offre.admin_counter_at && (
+                        <p className="text-xs text-amber-700">
+                          Reçue le {new Date(offre.admin_counter_at).toLocaleString("fr-FR")}
+                        </p>
+                      )}
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={async () => {
+                            const { error } = await supabase
+                              .from("mission_offres" as never)
+                              .update({
+                                prix_propose: offre.admin_counter_offer,
+                                admin_counter_offer: null,
+                                admin_counter_at: null,
+                              } as never)
+                              .eq("id" as never, offre.id as never);
+                            if (error) toast.error("Impossible d'accepter la contre-proposition.");
+                            else {
+                              toast.success("Contre-proposition acceptée.");
+                              fetchData();
+                            }
+                          }}
+                          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+                        >
+                          Accepter {offre.admin_counter_offer} €
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await supabase
+                              .from("mission_offres" as never)
+                              .update({ admin_counter_offer: null, admin_counter_at: null } as never)
+                              .eq("id" as never, offre.id as never);
+                            toast.info("Contre-proposition refusée, votre prix initial est maintenu.");
+                            fetchData();
+                          }}
+                          className="rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100"
+                        >
+                          Refuser
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Actions */}
                   {!offre || offre.statut === "retiree" || offre.statut === "refusee" ? (
                     !open ? (
