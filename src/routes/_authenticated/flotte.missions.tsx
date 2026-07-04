@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 
 export const Route = createFileRoute("/_authenticated/flotte/missions")({
   component: FlotteMissions,
