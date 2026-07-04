@@ -91,12 +91,12 @@ export default function HeroDesktop() {
               </Link>
             </div>
 
-            {/* Trust pills dorées */}
+            {/* Trust pills bleu électrique */}
             <ul className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
               {trustPills.map(({ icon: Icon, label }) => (
                 <li key={label} className="flex items-center gap-2.5">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-[rgba(231,199,106,0.35)] bg-[rgba(231,199,106,0.08)]">
-                    <Icon size={13} className="text-[#e7c76a]" strokeWidth={2.2} />
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-[#60a5fa]/35 bg-[#60a5fa]/10">
+                    <Icon size={13} className="text-[#60a5fa]" strokeWidth={2.2} />
                   </span>
                   <span className="text-cream/85 text-[12.5px] tracking-[0.04em]">
                     {label}
