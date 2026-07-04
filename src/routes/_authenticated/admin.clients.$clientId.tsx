@@ -148,7 +148,7 @@ function AdminClientDetail() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: p }, { data: role }, { data: m }] = await Promise.all([
+    const [{ data: p }, { data: role }, { data: m }, { data: d }, { data: f }] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", clientId).maybeSingle(),
       supabase
         .from("user_roles")
@@ -162,11 +162,25 @@ function AdminClientDetail() {
         .eq("user_id", clientId)
         .order("date_prise_en_charge", { ascending: false })
         .limit(100),
+      supabase
+        .from("devis")
+        .select("id, numero, depart, arrivee, prix_estime, statut, created_at")
+        .eq("user_id", clientId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("factures")
+        .select("id, numero, montant_ttc, statut, created_at")
+        .eq("user_id", clientId)
+        .order("created_at", { ascending: false })
+        .limit(50),
     ]);
     const prof = p as Profile | null;
     setProfile(prof);
     setActif((role as { actif?: boolean } | null)?.actif ?? true);
     setMissions((m as MissionItem[]) ?? []);
+    setDevisList((d as DevisItem[] | null) ?? []);
+    setFactures((f as FactureItem[] | null) ?? []);
     if (prof) {
       const init: Editable = {
         prenom: prof.prenom ?? "",
