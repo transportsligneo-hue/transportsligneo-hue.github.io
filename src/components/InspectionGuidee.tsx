@@ -33,12 +33,15 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   const [currentStep, setCurrentStep] = useState(0);
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [pendingUploads, setPendingUploads] = useState<Record<string, boolean>>({});
+  const [syncState, setSyncState] = useState<Record<string, "pending" | "sent" | "failed">>({});
+  const [captureIds, setCaptureIds] = useState<Record<string, string>>({});
   const [completing, setCompleting] = useState(false);
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("capture");
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const online = useOnlineStatus();
 
   const currentVue = VUE_TYPES[currentStep];
   const progress = Object.keys(photos).length / VUE_TYPES.length * 100;
