@@ -143,10 +143,14 @@ export type Database = {
           etape_courante: string | null
           id: string
           is_public: boolean
+          mode: string
           numero_mission: string | null
           options_completion: Json
           pdf_share_client: boolean
+          refus_motif: string | null
+          repondu_at: string | null
           statut: string
+          statut_convoyeur: string
           trajet_id: string
           updated_at: string
         }
@@ -156,10 +160,14 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           is_public?: boolean
+          mode?: string
           numero_mission?: string | null
           options_completion?: Json
           pdf_share_client?: boolean
+          refus_motif?: string | null
+          repondu_at?: string | null
           statut?: string
+          statut_convoyeur?: string
           trajet_id: string
           updated_at?: string
         }
@@ -169,10 +177,14 @@ export type Database = {
           etape_courante?: string | null
           id?: string
           is_public?: boolean
+          mode?: string
           numero_mission?: string | null
           options_completion?: Json
           pdf_share_client?: boolean
+          refus_motif?: string | null
+          repondu_at?: string | null
           statut?: string
+          statut_convoyeur?: string
           trajet_id?: string
           updated_at?: string
         }
@@ -808,6 +820,8 @@ export type Database = {
           default_address_id: string | null
           depart: string
           depart_retour: string | null
+          devis_genere_at: string | null
+          devis_id: string | null
           distance_km: number | null
           email: string
           heure_retour: string | null
@@ -865,6 +879,8 @@ export type Database = {
           default_address_id?: string | null
           depart: string
           depart_retour?: string | null
+          devis_genere_at?: string | null
+          devis_id?: string | null
           distance_km?: number | null
           email: string
           heure_retour?: string | null
@@ -922,6 +938,8 @@ export type Database = {
           default_address_id?: string | null
           depart?: string
           depart_retour?: string | null
+          devis_genere_at?: string | null
+          devis_id?: string | null
           distance_km?: number | null
           email?: string
           heure_retour?: string | null
@@ -960,7 +978,15 @@ export type Database = {
           vehicule_vin?: string | null
           vin_retour?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "demandes_convoyage_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devis: {
         Row: {
@@ -985,6 +1011,7 @@ export type Database = {
           created_at: string
           date_retour: string | null
           date_souhaitee: string | null
+          demande_id: string | null
           depart: string
           depart_retour: string | null
           distance_km: number | null
@@ -1007,6 +1034,7 @@ export type Database = {
           nom: string
           numero: string
           option_trajet: string | null
+          origine: string
           paid_at: string | null
           pdf_url: string | null
           prenom: string
@@ -1056,6 +1084,7 @@ export type Database = {
           created_at?: string
           date_retour?: string | null
           date_souhaitee?: string | null
+          demande_id?: string | null
           depart: string
           depart_retour?: string | null
           distance_km?: number | null
@@ -1078,6 +1107,7 @@ export type Database = {
           nom: string
           numero?: string
           option_trajet?: string | null
+          origine?: string
           paid_at?: string | null
           pdf_url?: string | null
           prenom: string
@@ -1127,6 +1157,7 @@ export type Database = {
           created_at?: string
           date_retour?: string | null
           date_souhaitee?: string | null
+          demande_id?: string | null
           depart?: string
           depart_retour?: string | null
           distance_km?: number | null
@@ -1149,6 +1180,7 @@ export type Database = {
           nom?: string
           numero?: string
           option_trajet?: string | null
+          origine?: string
           paid_at?: string | null
           pdf_url?: string | null
           prenom?: string
@@ -1176,7 +1208,15 @@ export type Database = {
           vin?: string | null
           vin_retour?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "devis_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devis_acceptations: {
         Row: {
@@ -1917,7 +1957,11 @@ export type Database = {
       }
       mission_offres: {
         Row: {
+          admin_counter_at: string | null
+          admin_counter_by: string | null
+          admin_counter_offer: number | null
           bid_round: number
+          commentaire_convoyeur: string | null
           convoyeur_id: string
           created_at: string
           id: string
@@ -1931,7 +1975,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_counter_at?: string | null
+          admin_counter_by?: string | null
+          admin_counter_offer?: number | null
           bid_round?: number
+          commentaire_convoyeur?: string | null
           convoyeur_id: string
           created_at?: string
           id?: string
@@ -1945,7 +1993,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_counter_at?: string | null
+          admin_counter_by?: string | null
+          admin_counter_offer?: number | null
           bid_round?: number
+          commentaire_convoyeur?: string | null
           convoyeur_id?: string
           created_at?: string
           id?: string
