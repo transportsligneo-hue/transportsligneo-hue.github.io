@@ -22,7 +22,7 @@ function B2BPage() {
 
       {/* === HERO navy premium === */}
       <section className="relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32"
-        style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}>
         {/* halo doré discret */}
         <div aria-hidden className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%)" }} />
@@ -136,7 +136,7 @@ function B2BPage() {
 
       {/* === Bandeau valeurs — navy premium === */}
       <section className="relative px-4 py-20 lg:py-24"
-        style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}>
         <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">

@@ -34,7 +34,7 @@ function TarifsPage() {
         {/* === HERO NAVY PREMIUM (même rythme que l'accueil) === */}
         <section
           className="relative overflow-hidden pt-32 pb-40 lg:pt-40 lg:pb-48"
-          style={{ background: "linear-gradient(180deg, #0b1026 0%, #111a3d 100%)" }}
+          style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
         >
           {/* halo doré + électrique discret */}
           <div
