@@ -542,18 +542,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           // VARIANTE HERO-CARD — layout vertical compact (maquette)
           // Mêmes états, mêmes setters, mêmes calculs. Seul l'agencement change.
           // ============================================================
-          <div className="relative z-30 rounded-[26px] border border-[#e7c76a]/35 bg-gradient-to-b from-[#0e1535]/95 to-[#080d22]/95 backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(231,199,106,0.10)_inset] p-7 lg:p-8">
-            {/* Filet doré supérieur */}
-            <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/70 to-transparent" />
+          <div className="relative z-30 rounded-[26px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-7 lg:p-8">
+            {/* Filet bleu électrique supérieur */}
+            <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#60a5fa]/70 to-transparent" />
 
             {/* Titre intégré */}
             <div className="mb-6">
-              <h3 className="font-heading text-cream text-[26px] lg:text-[28px] leading-[1.15] tracking-[0.01em]">
+              <h3 className="font-heading text-white text-[26px] lg:text-[28px] leading-[1.15] tracking-[0.01em]">
                 Obtenez votre tarif
                 <br />
-                en <span className="text-[#e7c76a]">quelques secondes</span>
+                en <span className="text-[#60a5fa]">quelques secondes</span>
               </h3>
-              <p className="text-cream/65 text-[13px] leading-relaxed mt-3">
+              <p className="text-white/75 text-[13px] leading-relaxed mt-3">
                 Renseignez votre trajet et recevez un tarif immédiat, sans engagement.
               </p>
             </div>
