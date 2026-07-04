@@ -13,6 +13,7 @@
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, ScanLine, RotateCw, Check, Loader2, Camera as CameraIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   onCancel: () => void;

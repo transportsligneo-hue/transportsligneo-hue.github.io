@@ -21,6 +21,8 @@ import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge 
 import { Button } from "@/components/ui/button";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
   component: AdminClients,

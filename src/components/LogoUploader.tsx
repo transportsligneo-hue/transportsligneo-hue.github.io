@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, Trash2, Loader2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_BYTES = 2 * 1024 * 1024; // 2MB

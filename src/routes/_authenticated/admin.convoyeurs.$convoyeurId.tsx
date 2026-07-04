@@ -25,6 +25,7 @@ import {
   AdminEmpty,
 } from "@/components/admin/ui";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,

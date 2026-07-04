@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
+import { confirmToast } from "@/lib/confirm-toast";
   Car, Plus, Search, Loader2, Pencil, Trash2, X, Save, AlertCircle, CheckCircle2,
 } from "lucide-react";
 

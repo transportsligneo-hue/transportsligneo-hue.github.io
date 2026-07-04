@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, RefreshCw, Trash2, MessageSquare, Mail, Phone, Building2 } from "lucide-react";
 import {
+import { confirmToast } from "@/lib/confirm-toast";
   PageHeader,
   Card,
   Badge,

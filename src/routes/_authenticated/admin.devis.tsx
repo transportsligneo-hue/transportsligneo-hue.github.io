@@ -19,6 +19,7 @@ import {
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,

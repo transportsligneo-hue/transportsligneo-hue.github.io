@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Banknote, Gavel, Save, Info, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button, FormField, TextInput, Select, Card, Badge } from "./AdminUI";
+import { toast } from "sonner";
 
 export interface PricingModeBlockProps {
   trajetId: string;

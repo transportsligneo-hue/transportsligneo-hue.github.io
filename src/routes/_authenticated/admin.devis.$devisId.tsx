@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
+import { confirmToast } from "@/lib/confirm-toast";
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
 

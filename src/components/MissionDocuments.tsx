@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { FileText, Upload, Trash2, Download, Loader2, Eye, FileCheck2, FilePenLine, CarFront, MoreHorizontal, PenLine, X, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 const DOC_TYPES = [
   { value: "pv_livraison", label: "PV de livraison / restitution", short: "PV", icon: FileCheck2 },

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, CheckCircle2, Building2, User, Send, Star } from "lucide-react";
 import { Modal, Button, FormField, SearchInput, Badge } from "./AdminUI";
+import { confirmToast } from "@/lib/confirm-toast";
 
 interface Convoyeur {
   id: string;

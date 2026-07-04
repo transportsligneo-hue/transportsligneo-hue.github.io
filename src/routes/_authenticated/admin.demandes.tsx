@@ -13,6 +13,7 @@ import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { Button } from "@/components/ui/button";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,

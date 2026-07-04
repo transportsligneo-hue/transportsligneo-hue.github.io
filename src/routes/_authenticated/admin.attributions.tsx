@@ -25,6 +25,7 @@ import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf } from "@/lib/mission-number";
 import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,

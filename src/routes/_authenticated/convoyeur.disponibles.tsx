@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
+import { toast } from "sonner";
   MapPin,
   Calendar,
   Car,

@@ -19,6 +19,7 @@ import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/compone
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { confirmToast } from "@/lib/confirm-toast";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
