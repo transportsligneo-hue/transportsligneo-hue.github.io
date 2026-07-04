@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User } from "lucide-react";
 import {
   AdminPageHeader,
@@ -13,6 +12,7 @@ import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({

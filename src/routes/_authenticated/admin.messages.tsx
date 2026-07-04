@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, RefreshCw, Trash2, MessageSquare, Mail, Phone, Building2 } from "lucide-react";
 import {
-import { confirmToast } from "@/lib/confirm-toast";
   PageHeader,
   Card,
   Badge,
@@ -19,6 +18,7 @@ import { confirmToast } from "@/lib/confirm-toast";
   IconButton,
   Select,
 } from "@/components/admin/AdminUI";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
   component: AdminMessages,

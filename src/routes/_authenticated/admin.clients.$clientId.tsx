@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import {
   ArrowLeft,
   Ban,
@@ -31,6 +30,7 @@ import {
 import { LogoUploader } from "@/components/LogoUploader";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 

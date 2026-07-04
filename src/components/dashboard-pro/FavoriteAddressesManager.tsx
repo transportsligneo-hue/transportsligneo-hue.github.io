@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Star, StarOff, ToggleLeft, ToggleRight, Pencil, X } from "lucide-react";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export interface FavoriteAddressRow {

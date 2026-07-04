@@ -5,7 +5,6 @@ import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText,
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
-import { toast } from "sonner";
   PageHeader,
   Card,
   Badge,
@@ -23,6 +22,7 @@ import { toast } from "sonner";
   FormField,
   convoyeurStatutTone,
 } from "@/components/admin/AdminUI";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,

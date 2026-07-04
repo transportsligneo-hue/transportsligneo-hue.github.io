@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * MissionWorkflow — parcours étape par étape pour le convoyeur sur le terrain.
  *
@@ -17,7 +18,6 @@ import {
 } from "lucide-react";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 import { useMissionGates } from "@/hooks/useMissionGates";
-import { toast } from "sonner";
 
 export type EtapeKey =
   | "assignee" | "acceptee" | "en_route" | "sur_place"

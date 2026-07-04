@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import {
   ArrowLeft,
   CheckCircle,
@@ -25,6 +24,7 @@ import {
   AdminEmpty,
 } from "@/components/admin/ui";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({

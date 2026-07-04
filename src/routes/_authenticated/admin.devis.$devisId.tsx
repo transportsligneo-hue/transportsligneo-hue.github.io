@@ -5,12 +5,12 @@ import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye,
 } from "lucide-react";
-import { toast } from "sonner";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
-import { confirmToast } from "@/lib/confirm-toast";
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
+import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,

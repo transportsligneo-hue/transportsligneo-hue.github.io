@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, Ban } from "lucide-react";
-import { toast } from "sonner";
 import {
   PageHeader,
   Card,
@@ -24,6 +23,7 @@ import {
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({

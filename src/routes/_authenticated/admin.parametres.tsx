@@ -14,11 +14,11 @@ import {
   Save,
   AlertTriangle,
 } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({

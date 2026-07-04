@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * DocumentScanner — capture + recadrage 4 coins + correction de perspective
  * pour scanner proprement un document (PV de livraison, carte grise…).
@@ -13,7 +14,6 @@
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, ScanLine, RotateCw, Check, Loader2, Camera as CameraIcon } from "lucide-react";
-import { toast } from "sonner";
 
 interface Props {
   onCancel: () => void;
