@@ -48,6 +48,13 @@ export default function HeroDesktop() {
         />
       </div>
 
+      {/* Cyber ambient (au-dessus de l'image, sous le contenu) */}
+      <div aria-hidden className="cyber-aurora" />
+      <div aria-hidden className="cyber-grid opacity-50" />
+      <div aria-hidden className="cyber-scanline" />
+
+
+
       {/* Contenu hero */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 xl:px-14 pt-10 pb-40 lg:pb-48">
         <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_minmax(420px,1fr)] gap-10 lg:gap-12 xl:gap-16 items-center min-h-[72vh]">
@@ -64,8 +71,9 @@ export default function HeroDesktop() {
             <h1 className="font-heading text-white text-5xl xl:text-6xl 2xl:text-[68px] tracking-wide leading-[1.05]">
               LA TRANQUILLITÉ
               <br />
-              SUR <span className="text-[#60a5fa]">TOUTE LA LIGNE.</span>
+              SUR <span className="cyber-title-accent">TOUTE LA LIGNE.</span>
             </h1>
+
 
             <p className="text-cream/85 text-base xl:text-lg leading-relaxed mt-8 max-w-xl">
               Transports Ligneo, spécialiste du convoyage automobile. Nous

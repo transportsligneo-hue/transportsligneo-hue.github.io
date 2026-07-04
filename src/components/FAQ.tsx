@@ -21,11 +21,15 @@ export default function FAQ() {
       style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
     >
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
-      <div className="max-w-3xl mx-auto px-6">
+      <div aria-hidden className="cyber-aurora" />
+      <div aria-hidden className="cyber-grid opacity-60" />
+      <div aria-hidden className="cyber-scanline" />
+      <div className="relative max-w-3xl mx-auto px-6">
         <div className="text-center mb-14">
-          <span className="text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">FAQ</span>
-          <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-3">Questions fréquentes</h2>
+          <span className="cyber-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] font-heading">FAQ</span>
+          <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-3">Questions <span className="cyber-title-accent">fréquentes</span></h2>
         </div>
+
 
         <div className="space-y-3">
           {faqs.map((faq, i) => {

@@ -31,6 +31,11 @@ export default function CommentCaMarche() {
           "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
       }}
     >
+      {/* Cyber ambient */}
+      <div aria-hidden className="cyber-aurora" />
+      <div aria-hidden className="cyber-grid opacity-70" />
+      <div aria-hidden className="cyber-scanline" />
+
       {/* Halos discrets */}
       <div
         aria-hidden
@@ -43,6 +48,7 @@ export default function CommentCaMarche() {
         style={{ background: "radial-gradient(closest-side, #60a5fa, transparent 70%)" }}
       />
 
+
       <div className="relative max-w-6xl mx-auto px-6">
         <div className="text-center mb-16 lg:mb-20">
           <span className="font-heading text-[10px] tracking-[0.42em] uppercase text-[#e7c76a]">
@@ -50,7 +56,8 @@ export default function CommentCaMarche() {
           </span>
           <h2 className="font-heading text-cream text-3xl md:text-4xl lg:text-[42px] mt-3 tracking-[0.01em] leading-[1.15]">
             Un service simple,{" "}
-            <span className="gold-gradient-text">rapide et sécurisé</span>.
+            <span className="cyber-title-accent">rapide et sécurisé</span>.
+
           </h2>
           <div className="gold-divider-short mt-6" />
         </div>
