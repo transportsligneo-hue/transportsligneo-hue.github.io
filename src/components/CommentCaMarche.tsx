@@ -56,7 +56,8 @@ export default function CommentCaMarche() {
           </span>
           <h2 className="font-heading text-cream text-3xl md:text-4xl lg:text-[42px] mt-3 tracking-[0.01em] leading-[1.15]">
             Un service simple,{" "}
-            <span className="gold-gradient-text">rapide et sécurisé</span>.
+            <span className="cyber-title-accent">rapide et sécurisé</span>.
+
           </h2>
           <div className="gold-divider-short mt-6" />
         </div>
