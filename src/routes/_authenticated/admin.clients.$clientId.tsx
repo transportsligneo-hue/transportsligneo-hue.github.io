@@ -680,6 +680,70 @@ function AdminClientDetail() {
             )}
           </AdminSection>
 
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <AdminSection title="Devis" description={`${devisList.length} devis`}>
+              {devisList.length === 0 ? (
+                <AdminEmpty icon={Receipt} title="Aucun devis" description="Aucun devis pour ce client." />
+              ) : (
+                <div className="overflow-x-auto -mx-1">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>N°</th>
+                        <th className="hidden sm:table-cell">Trajet</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {devisList.slice(0, 15).map((dv) => (
+                        <tr key={dv.id} className="admin-row-link" onClick={() => navigate({ to: "/admin/devis/$devisId", params: { devisId: dv.id } })}>
+                          <td className="font-mono text-xs">{dv.numero ?? dv.id.slice(0, 8)}</td>
+                          <td className="hidden sm:table-cell text-xs">
+                            {dv.depart ?? "?"} → {dv.arrivee ?? "?"}
+                          </td>
+                          <td className="admin-value">{dv.prix_estime ? `${dv.prix_estime.toLocaleString("fr-FR")} €` : "—"}</td>
+                          <td><AdminBadge label={dv.statut.replace(/_/g, " ")} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </AdminSection>
+
+            <AdminSection title="Factures" description={`${factures.length} facture${factures.length > 1 ? "s" : ""}`}>
+              {factures.length === 0 ? (
+                <AdminEmpty icon={Receipt} title="Aucune facture" description="Aucune facture émise." />
+              ) : (
+                <div className="overflow-x-auto -mx-1">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>N°</th>
+                        <th className="hidden sm:table-cell">Date</th>
+                        <th>Montant TTC</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {factures.slice(0, 15).map((fc) => (
+                        <tr key={fc.id}>
+                          <td className="font-mono text-xs">{fc.numero ?? fc.id.slice(0, 8)}</td>
+                          <td className="hidden sm:table-cell text-xs">
+                            {new Date(fc.created_at).toLocaleDateString("fr-FR")}
+                          </td>
+                          <td className="admin-value">{fc.montant_ttc ? `${fc.montant_ttc.toLocaleString("fr-FR")} €` : "—"}</td>
+                          <td><AdminBadge label={fc.statut.replace(/_/g, " ")} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </AdminSection>
+          </div>
+
           {profile.email && (
             <div className="mt-6 space-y-6">
               <div id="adresses" className="scroll-mt-24">
