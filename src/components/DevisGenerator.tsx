@@ -654,7 +654,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {[
                 { v: "aller-simple", l: "Aller simple" },
                 { v: "aller-retour", l: "Aller-retour" },
-                { v: "express", l: "Express +20%" },
               ].map((o) => (
                 <button
                   key={o.v}
@@ -680,11 +679,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Type de prestation */}
             <div className="mb-5">
               <p className="text-[10px] uppercase tracking-[0.22em] text-cream/55 font-heading mb-2">Type de prestation</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
                   { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
-                  { v: "express", l: "Express", s: "Urgent · +20%" },
                 ].map((o) => (
                   <button
                     key={o.v}
