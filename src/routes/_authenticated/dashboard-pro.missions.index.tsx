@@ -285,6 +285,8 @@ function ProMissionsIndex() {
                   <tr
                     key={m.id}
                     className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer"
+                    onMouseEnter={() => prefetchMissionTracking(m.numero, m.id)}
+                    onFocus={() => prefetchMissionTracking(m.numero, m.id)}
                     onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
                   >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
