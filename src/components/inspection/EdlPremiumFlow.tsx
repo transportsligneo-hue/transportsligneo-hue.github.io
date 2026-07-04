@@ -1984,11 +1984,13 @@ function ChecklistArea({
     extincteur: false,
     kit_securite: false,
     cable_charge: false,
+    tapis_sol: false,
     roue: null,
   };
   const [extincteur, setExtincteur] = useState<boolean>(initial.extincteur);
   const [kitSec, setKitSec] = useState<boolean>(initial.kit_securite);
   const [cable, setCable] = useState<boolean>(initial.cable_charge);
+  const [tapisSol, setTapisSol] = useState<boolean>(initial.tapis_sol ?? false);
   const [roue, setRoue] = useState<NonNullable<StepState["equipements"]>["roue"]>(initial.roue);
 
   const isSaved = state?.status === "success";
