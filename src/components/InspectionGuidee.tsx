@@ -74,7 +74,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0];
     if (!rawFile || !currentVue) return;
     const vueId = currentVue.id;
@@ -82,39 +82,51 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     // Reset input immediately so user can re-pick same file later
     if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // 1) Local preview + activate "Suivant" button instantly (optimistic)
+    // 1) Local preview instant — révoque l'ancien blob pour éviter les fuites mémoire
     const previewUrl = URL.createObjectURL(rawFile);
-    setPhotos((prev) => ({ ...prev, [vueId]: previewUrl }));
-    setUploading(true);
+    setPhotos((prev) => {
+      const old = prev[vueId];
+      if (old && old.startsWith("blob:")) {
+        try { URL.revokeObjectURL(old); } catch { /* noop */ }
+      }
+      return { ...prev, [vueId]: previewUrl };
+    });
+    setPendingUploads((prev) => ({ ...prev, [vueId]: true }));
 
-    // 2) Compress + upload in background — does not block UI
-    try {
-      const file = await compressImage(rawFile);
-      const insId = await ensureInspection();
-      const path = `${userId}/${insId}/${vueId}.jpg`;
+    // 2) Compress + upload en arrière-plan — TOTALEMENT non-bloquant.
+    //    L'utilisateur peut immédiatement passer à la vue suivante et prendre
+    //    une autre photo pendant que l'upload précédent finit.
+    void (async () => {
+      try {
+        const file = await compressImage(rawFile, { maxDimension: 1280, quality: 0.72 });
+        const insId = await ensureInspection();
+        const path = `${userId}/${insId}/${vueId}.jpg`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("inspection-photos")
-        .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+        const { error: uploadError } = await supabase.storage
+          .from("inspection-photos")
+          .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+        if (uploadError) throw uploadError;
 
-      if (uploadError) throw uploadError;
-
-      await supabase.from("inspection_photos").upsert({
-        inspection_id: insId,
-        vue_type: vueId,
-        url_photo: path,
-      }, { onConflict: "inspection_id,vue_type" });
-    } catch (err) {
-      console.error("Upload error:", err);
-      // Rollback local preview on failure so user can retry
-      setPhotos((prev) => {
-        const { [vueId]: _, ...rest } = prev;
-        return rest;
-      });
-    } finally {
-      setUploading(false);
-    }
+        await supabase.from("inspection_photos").upsert({
+          inspection_id: insId,
+          vue_type: vueId,
+          url_photo: path,
+        }, { onConflict: "inspection_id,vue_type" });
+      } catch (err) {
+        console.error("Upload error:", err);
+        setPhotos((prev) => {
+          const { [vueId]: _, ...rest } = prev;
+          return rest;
+        });
+      } finally {
+        setPendingUploads((prev) => {
+          const { [vueId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+    })();
   };
+
 
   const handleRetake = () => {
     const { [currentVue.id]: _, ...rest } = photos;
