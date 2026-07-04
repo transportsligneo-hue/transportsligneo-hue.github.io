@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
-  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, Rocket,
+  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,7 +65,6 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
   { key: "plein_essence", label: "Plein d'essence", desc: "Faire le plein avant livraison", Icon: Fuel },
   { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
-  { key: "express", label: "Convoyage express", desc: "Sous 24h", Icon: Rocket },
 ];
 
 const VAT_RATE = 0.20;
@@ -491,11 +490,10 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
           <Sparkles size={14} className="text-pro-accent" /> Type de prestation
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
             { v: "aller-simple", label: "Aller simple", desc: "Livraison à destination" },
             { v: "aller-retour", label: "Aller-retour", desc: "Livraison + restitution" },
-            { v: "express", label: "Express", desc: "Sous 24h" },
           ].map((opt) => {
             const active = tripType === (opt.v as TripOption);
             return (

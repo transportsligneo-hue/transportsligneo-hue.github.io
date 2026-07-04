@@ -469,11 +469,10 @@ export default function MobileDevisGenerator() {
             {/* Type trajet — segmented control premium */}
             <div className="mt-5">
               <p className={labelCls}>Type de trajet</p>
-              <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl border border-[rgba(212,175,55,0.18)] bg-[rgba(11,16,38,0.45)]">
+              <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl border border-[rgba(212,175,55,0.18)] bg-[rgba(11,16,38,0.45)]">
                 {[
                   { value: "aller-simple", label: "Simple" },
                   { value: "aller-retour", label: "Retour" },
-                  { value: "express", label: "Express" },
                 ].map(o => {
                   const active = option === o.value;
                   return (
