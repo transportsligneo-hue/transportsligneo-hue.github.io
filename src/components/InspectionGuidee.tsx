@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
@@ -30,7 +30,7 @@ type ViewMode = "capture" | "recap";
 export function InspectionGuidee({ attributionId, type, userId, onComplete, onCancel }: InspectionGuideeProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [photos, setPhotos] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<Record<string, boolean>>({});
   const [completing, setCompleting] = useState(false);
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("capture");
@@ -60,6 +60,25 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     return data.id;
   }, [attributionId, type, inspectionId]);
 
+  // Crée l'inspection en amont pour que le 1er upload n'attende pas l'INSERT
+  useEffect(() => {
+    void ensureInspection().catch(() => { /* réessai au 1er upload */ });
+  }, [ensureInspection]);
+
+  // Libère les blob URLs à la fermeture
+  useEffect(() => {
+    return () => {
+      Object.values(photos).forEach((url) => {
+        if (url?.startsWith("blob:")) {
+          try { URL.revokeObjectURL(url); } catch { /* noop */ }
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+
   const animateStep = (newStep: number) => {
     const direction = newStep > currentStep ? "right" : "left";
     setSlideDirection(direction);
@@ -74,7 +93,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0];
     if (!rawFile || !currentVue) return;
     const vueId = currentVue.id;
@@ -82,39 +101,51 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     // Reset input immediately so user can re-pick same file later
     if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // 1) Local preview + activate "Suivant" button instantly (optimistic)
+    // 1) Local preview instant — révoque l'ancien blob pour éviter les fuites mémoire
     const previewUrl = URL.createObjectURL(rawFile);
-    setPhotos((prev) => ({ ...prev, [vueId]: previewUrl }));
-    setUploading(true);
+    setPhotos((prev) => {
+      const old = prev[vueId];
+      if (old && old.startsWith("blob:")) {
+        try { URL.revokeObjectURL(old); } catch { /* noop */ }
+      }
+      return { ...prev, [vueId]: previewUrl };
+    });
+    setPendingUploads((prev) => ({ ...prev, [vueId]: true }));
 
-    // 2) Compress + upload in background — does not block UI
-    try {
-      const file = await compressImage(rawFile);
-      const insId = await ensureInspection();
-      const path = `${userId}/${insId}/${vueId}.jpg`;
+    // 2) Compress + upload en arrière-plan — TOTALEMENT non-bloquant.
+    //    L'utilisateur peut immédiatement passer à la vue suivante et prendre
+    //    une autre photo pendant que l'upload précédent finit.
+    void (async () => {
+      try {
+        const file = await compressImage(rawFile, { maxDimension: 1280, quality: 0.72 });
+        const insId = await ensureInspection();
+        const path = `${userId}/${insId}/${vueId}.jpg`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("inspection-photos")
-        .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+        const { error: uploadError } = await supabase.storage
+          .from("inspection-photos")
+          .upload(path, file, { upsert: true, contentType: "image/jpeg" });
+        if (uploadError) throw uploadError;
 
-      if (uploadError) throw uploadError;
-
-      await supabase.from("inspection_photos").upsert({
-        inspection_id: insId,
-        vue_type: vueId,
-        url_photo: path,
-      }, { onConflict: "inspection_id,vue_type" });
-    } catch (err) {
-      console.error("Upload error:", err);
-      // Rollback local preview on failure so user can retry
-      setPhotos((prev) => {
-        const { [vueId]: _, ...rest } = prev;
-        return rest;
-      });
-    } finally {
-      setUploading(false);
-    }
+        await supabase.from("inspection_photos").upsert({
+          inspection_id: insId,
+          vue_type: vueId,
+          url_photo: path,
+        }, { onConflict: "inspection_id,vue_type" });
+      } catch (err) {
+        console.error("Upload error:", err);
+        setPhotos((prev) => {
+          const { [vueId]: _, ...rest } = prev;
+          return rest;
+        });
+      } finally {
+        setPendingUploads((prev) => {
+          const { [vueId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+    })();
   };
+
 
   const handleRetake = () => {
     const { [currentVue.id]: _, ...rest } = photos;
@@ -291,7 +322,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
                 </div>
               </>
             )}
-            {uploading && (
+            {pendingUploads[currentVue.id] && (
               <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-navy/80 border border-primary/30 flex items-center gap-1.5">
                 <Loader2 className="animate-spin text-primary" size={12} />
                 <span className="text-primary text-[10px] uppercase tracking-wider">Envoi…</span>
@@ -333,8 +364,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
         {!hasCurrentPhoto ? (
           <button
             onClick={handleCapture}
-            disabled={uploading}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-wider uppercase disabled:opacity-50 transition-opacity"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-wider uppercase transition-opacity"
           >
             <Camera size={18} /> Prendre la photo
           </button>
