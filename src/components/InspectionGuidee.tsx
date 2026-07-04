@@ -60,6 +60,25 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     return data.id;
   }, [attributionId, type, inspectionId]);
 
+  // Crée l'inspection en amont pour que le 1er upload n'attende pas l'INSERT
+  useEffect(() => {
+    void ensureInspection().catch(() => { /* réessai au 1er upload */ });
+  }, [ensureInspection]);
+
+  // Libère les blob URLs à la fermeture
+  useEffect(() => {
+    return () => {
+      Object.values(photos).forEach((url) => {
+        if (url?.startsWith("blob:")) {
+          try { URL.revokeObjectURL(url); } catch { /* noop */ }
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+
   const animateStep = (newStep: number) => {
     const direction = newStep > currentStep ? "right" : "left";
     setSlideDirection(direction);
