@@ -29,8 +29,7 @@ self.onmessage = async (e: MessageEvent<CompressRequest>) => {
     const w = Math.max(1, Math.round(width * scale));
     const h = Math.max(1, Math.round(height * scale));
 
-    // @ts-expect-error OffscreenCanvas typed globally on workers
-    const canvas: OffscreenCanvas = new OffscreenCanvas(w, h);
+    const canvas = new OffscreenCanvas(w, h);
     const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D | null;
     if (!ctx) throw new Error("no-2d-context");
     ctx.drawImage(bitmap, 0, 0, w, h);
