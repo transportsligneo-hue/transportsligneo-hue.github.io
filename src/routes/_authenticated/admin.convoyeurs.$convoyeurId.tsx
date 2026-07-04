@@ -177,7 +177,7 @@ function AdminConvoyeurDetail() {
         })
         .filter(Boolean);
       if (issues.length) {
-        window.alert(`Validation impossible :\n\n• ${issues.join("\n• ")}`);
+        toast.error(`Validation impossible :\n\n• ${issues.join("\n• ")}`);
         return;
       }
     }
