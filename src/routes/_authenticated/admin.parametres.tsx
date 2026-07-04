@@ -20,6 +20,7 @@ import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
