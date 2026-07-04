@@ -48,6 +48,13 @@ export default function HeroDesktop() {
         />
       </div>
 
+      {/* Cyber ambient (au-dessus de l'image, sous le contenu) */}
+      <div aria-hidden className="cyber-aurora" />
+      <div aria-hidden className="cyber-grid opacity-50" />
+      <div aria-hidden className="cyber-scanline" />
+
+
+
       {/* Contenu hero */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 xl:px-14 pt-10 pb-40 lg:pb-48">
         <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_minmax(420px,1fr)] gap-10 lg:gap-12 xl:gap-16 items-center min-h-[72vh]">
