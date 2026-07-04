@@ -400,9 +400,21 @@ export function DashboardHeader({
                   })}
                 </ul>
               )}
+              <Link
+                to="/notifications"
+                onClick={() => setNotifOpen(false)}
+                className={`block px-4 py-2.5 text-center text-xs font-semibold border-t ${
+                  isDark
+                    ? "border-primary/15 text-primary hover:bg-primary/10"
+                    : "border-pro-border text-pro-accent hover:bg-pro-bg-soft"
+                }`}
+              >
+                Voir toutes les notifications →
+              </Link>
             </div>
           )}
         </div>
+
 
         {/* === Profil === */}
         <div ref={profileRef} className="relative">
