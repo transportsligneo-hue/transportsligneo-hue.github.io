@@ -59,27 +59,38 @@ export default function CommentCaMarcheTimeline() {
   const rootRef = useReveal();
 
   return (
-    <div ref={rootRef}>
+    <div ref={rootRef} className="ccm-root">
       {/* ============ HERO ============ */}
       <section
-        className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28"
-        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
+        className="ccm-hero relative overflow-hidden pt-24 pb-24 lg:pt-32 lg:pb-32"
       >
+        {/* Aurora animée */}
+        <div aria-hidden className="ccm-aurora" />
+        {/* Grille technique */}
+        <div aria-hidden className="ccm-grid" />
+        {/* Scanning beam horizontal */}
+        <div aria-hidden className="ccm-scanline" />
+        {/* Halo central */}
         <div aria-hidden className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(96,165,250,0.18), transparent 70%)" }} />
-        <div aria-hidden className="absolute inset-0 pointer-events-none opacity-40"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+          style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(96,165,250,0.22), transparent 70%)" }} />
+
         <div className="relative max-w-3xl mx-auto px-5 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-blue-200 font-heading">
-            <Sparkles size={12} /> Notre process
+          <span className="ccm-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.3em] font-heading">
+            <Sparkles size={12} className="text-blue-300" /> Notre process
           </span>
-          <h1 className="font-heading text-[34px] sm:text-4xl lg:text-6xl tracking-wide text-cream mt-5 leading-[1.08]">
-            Comment <span className="gold-gradient-text">ça marche</span>
+          <h1 className="ccm-title font-heading text-[36px] sm:text-5xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.05]">
+            Comment <span className="ccm-title-accent">ça marche</span>
           </h1>
-          <p className="text-cream/75 mt-4 text-[15px] lg:text-lg leading-relaxed">
-            De la création de compte à la facture : <strong className="text-white">12 étapes</strong> claires, traçables et 100 % digitalisées.
+          <p className="text-cream/75 mt-5 text-[15px] lg:text-lg leading-relaxed">
+            De la création de compte à la facture&nbsp;: <strong className="text-white">12 étapes</strong> claires, traçables et 100 % digitalisées.
           </p>
+          <div className="mt-6 inline-flex items-center gap-3 text-cream/60 text-[11px] tracking-[0.22em] uppercase font-heading">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-blue-300/60" />
+            Plateforme digitale nouvelle génération
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-blue-300/60" />
+          </div>
         </div>
+
         <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "80px" }}>
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full block">
             <path d="M0,80 C320,20 760,5 1080,30 C1240,42 1360,70 1440,55 L1440,120 L0,120 Z" fill="var(--surface-cream, #faf7ef)" />
@@ -91,10 +102,10 @@ export default function CommentCaMarcheTimeline() {
       <section className="py-14 lg:py-20" style={{ background: "var(--surface-cream, #faf7ef)" }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="relative">
-            {/* Ligne centrale animée */}
+            {/* Ligne centrale : bleu électrique + doré */}
             <div
               aria-hidden
-              className="ccm-rail absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-0 md:-translate-x-1/2"
+              className="ccm-rail absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[2px] md:-translate-x-1/2"
             />
 
             <ol className="space-y-4 md:space-y-6">
@@ -121,10 +132,10 @@ export default function CommentCaMarcheTimeline() {
                         isLeft ? "md:pr-12 md:text-right" : "md:col-start-2 md:pl-12"
                       }`}
                     >
-                      <article className="ccm-card group relative rounded-2xl bg-white p-5 sm:p-6 border border-[#0b1026]/[0.06] shadow-[0_1px_2px_rgba(11,16,38,0.04),0_10px_30px_-15px_rgba(11,16,38,0.15)] hover:shadow-[0_2px_4px_rgba(11,16,38,0.05),0_25px_45px_-20px_rgba(11,16,38,0.25)] hover:-translate-y-0.5 transition-all duration-300">
+                      <article className="ccm-card group relative rounded-2xl p-5 sm:p-6 transition-all duration-300">
                         <div className={`flex items-center gap-2 mb-2 ${isLeft ? "md:justify-end" : ""}`}>
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#e7c76a]/15 to-[#d4af37]/10 border border-[#d4af37]/30 px-2.5 py-0.5">
-                            <span className="text-[#b8860b] text-[10px] font-heading tracking-[0.24em] uppercase">
+                          <span className="ccm-step-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5">
+                            <span className="text-[10px] font-heading tracking-[0.24em] uppercase">
                               Étape {step.n}
                             </span>
                           </span>
@@ -135,8 +146,8 @@ export default function CommentCaMarcheTimeline() {
                         <p className="text-[#0b1026]/65 text-[13.5px] leading-relaxed">
                           {step.desc}
                         </p>
-                        {/* Filet doré au hover */}
-                        <span aria-hidden className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4af37]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {/* Filet iridescent au hover */}
+                        <span aria-hidden className="ccm-card-underline pointer-events-none absolute inset-x-4 bottom-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" />
                       </article>
                     </div>
 
@@ -150,23 +161,20 @@ export default function CommentCaMarcheTimeline() {
       </section>
 
       {/* ============ GÉRER SA FLOTTE ============ */}
-      <section
-        className="relative py-16 lg:py-24 overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
-      >
-        <div aria-hidden className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(80% 60% at 50% 0%, rgba(96,165,250,0.16), transparent 70%)" }} />
+      <section className="ccm-hero relative py-16 lg:py-24 overflow-hidden">
+        <div aria-hidden className="ccm-aurora" />
+        <div aria-hidden className="ccm-grid opacity-60" />
 
         <div className="relative max-w-6xl mx-auto px-5 sm:px-6">
           <div className="text-center mb-10 lg:mb-14" data-reveal>
-            <span className="ccm-reveal inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] backdrop-blur px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-blue-200 font-heading">
-              <Truck size={12} /> Plateforme complète
+            <span className="ccm-reveal ccm-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.3em] font-heading">
+              <Truck size={12} className="text-blue-300" /> Plateforme complète
             </span>
             <h2 className="font-heading text-[28px] sm:text-4xl lg:text-5xl text-cream mt-5 leading-[1.1]">
-              🚗 Gérez votre flotte <span className="gold-gradient-text">en toute simplicité</span>
+              Gérez votre flotte <span className="ccm-title-accent">en toute simplicité</span>
             </h2>
             <p className="text-cream/70 mt-4 text-[15px] lg:text-base max-w-2xl mx-auto leading-relaxed">
-              Bien plus qu'un service de convoyage : une véritable plateforme digitale pour piloter votre parc, vos missions et vos documents depuis un seul espace.
+              Bien plus qu'un service de convoyage&nbsp;: une véritable plateforme digitale pour piloter votre parc, vos missions et vos documents depuis un seul espace.
             </p>
           </div>
 
@@ -179,13 +187,14 @@ export default function CommentCaMarcheTimeline() {
                   key={i}
                   data-reveal
                   style={{ transitionDelay: `${i * 60}ms` }}
-                  className="ccm-reveal ccm-glass group relative rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1"
+                  className="ccm-reveal ccm-fleet-card group relative rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1"
                 >
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400/25 to-blue-600/15 border border-blue-300/25 text-blue-100 mb-4 group-hover:scale-110 transition-transform">
+                  <div className="ccm-fleet-icon inline-flex h-11 w-11 items-center justify-center rounded-xl mb-4 transition-transform duration-500 group-hover:scale-110">
                     <Icon size={20} strokeWidth={2.1} />
                   </div>
                   <h3 className="font-heading text-cream text-[17px] tracking-wide mb-1.5">{f.title}</h3>
                   <p className="text-cream/65 text-[13.5px] leading-relaxed">{f.desc}</p>
+                  <span aria-hidden className="ccm-fleet-corner" />
                 </article>
               );
             })}
@@ -198,9 +207,9 @@ export default function CommentCaMarcheTimeline() {
               { v: "7j/7", l: "Disponible" },
               { v: "0", l: "Annulation" },
             ].map((k, i) => (
-              <div key={i} className="ccm-reveal text-center rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur px-3 py-5">
-                <p className="font-heading text-[26px] sm:text-3xl text-cream">
-                  <span className="gold-gradient-text">{k.v}</span>
+              <div key={i} className="ccm-reveal ccm-kpi text-center rounded-2xl px-3 py-5">
+                <p className="font-heading text-[26px] sm:text-3xl">
+                  <span className="ccm-kpi-value">{k.v}</span>
                 </p>
                 <p className="text-cream/60 text-[10.5px] uppercase tracking-[0.22em] mt-1">{k.l}</p>
               </div>
@@ -229,13 +238,13 @@ export default function CommentCaMarcheTimeline() {
             <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <Link
                 to="/tarifs"
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11.5px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-12px_rgba(231,199,106,0.55)] transition-all duration-300"
+                className="ccm-btn-primary group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-heading text-[11.5px] tracking-[0.24em] uppercase transition-all duration-300"
               >
                 <Car size={15} /> Demander un devis
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl border border-[#0b1026]/20 bg-white text-[#0b1026] font-heading text-[11.5px] tracking-[0.24em] uppercase hover:border-[#0b1026]/60 hover:bg-[#0b1026] hover:text-[#e7c76a] transition-all duration-300"
+                className="ccm-btn-ghost inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-heading text-[11.5px] tracking-[0.24em] uppercase transition-all duration-300"
               >
                 <Phone size={15} /> Contacter un conseiller
               </Link>
@@ -245,12 +254,10 @@ export default function CommentCaMarcheTimeline() {
       </section>
 
       {/* ============ Réassurance ============ */}
-      <section
-        className="relative py-14 lg:py-16"
-        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
-      >
-        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
-        <div className="max-w-4xl mx-auto px-5">
+      <section className="ccm-hero relative py-14 lg:py-16 overflow-hidden">
+        <div aria-hidden className="ccm-aurora opacity-70" />
+        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/50 to-transparent" />
+        <div className="relative max-w-4xl mx-auto px-5">
           <div className="grid grid-cols-3 gap-3 sm:gap-5">
             {[
               { icon: ShieldCheck, label: "Assurance incluse" },
@@ -261,9 +268,9 @@ export default function CommentCaMarcheTimeline() {
                 key={i}
                 data-reveal
                 style={{ transitionDelay: `${i * 80}ms` }}
-                className="ccm-reveal group p-4 sm:p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm text-center hover:border-[#e7c76a]/40 transition-all duration-500"
+                className="ccm-reveal ccm-reass group p-4 sm:p-5 rounded-2xl text-center transition-all duration-500"
               >
-                <div className="mx-auto mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a]">
+                <div className="ccm-reass-icon mx-auto mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full">
                   <r.icon size={18} />
                 </div>
                 <p className="text-cream/85 text-[10.5px] sm:text-[11.5px] font-heading tracking-[0.18em] uppercase leading-tight">{r.label}</p>
@@ -282,8 +289,76 @@ export default function CommentCaMarcheTimeline() {
         </div>
       </section>
 
-      {/* ==== Styles scoped à la page ==== */}
+      {/* ==== Styles scoped ==== */}
       <style>{`
+        .ccm-root { --ccm-blue-1: #061238; --ccm-blue-2: #0a1f5c; --ccm-blue-3: #0f2d80; --ccm-electric: #3b82f6; --ccm-cyan: #38bdf8; --ccm-gold: #d4af37; --ccm-gold-light: #e7c76a; }
+
+        /* ---------- HERO / SECTIONS SOMBRES ---------- */
+        .ccm-hero {
+          background:
+            radial-gradient(120% 80% at 50% 0%, rgba(59,130,246,0.20), transparent 60%),
+            linear-gradient(160deg, var(--ccm-blue-1) 0%, var(--ccm-blue-2) 50%, var(--ccm-blue-3) 100%);
+          isolation: isolate;
+        }
+        .ccm-aurora {
+          position: absolute; inset: -20%;
+          background:
+            radial-gradient(35% 35% at 20% 30%, rgba(56,189,248,0.18), transparent 60%),
+            radial-gradient(30% 30% at 80% 20%, rgba(99,102,241,0.20), transparent 60%),
+            radial-gradient(45% 45% at 60% 90%, rgba(59,130,246,0.22), transparent 60%);
+          filter: blur(20px);
+          animation: ccm-aurora 22s ease-in-out infinite alternate;
+          pointer-events: none;
+          z-index: 0;
+        }
+        @keyframes ccm-aurora {
+          0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+          50%  { transform: translate3d(3%, 2%, 0) scale(1.05); }
+          100% { transform: translate3d(-1%, 3%, 0) scale(1.02); }
+        }
+        .ccm-grid {
+          position: absolute; inset: 0; pointer-events: none; z-index: 0;
+          background-image:
+            linear-gradient(to right, rgba(147,197,253,0.07) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(147,197,253,0.07) 1px, transparent 1px);
+          background-size: 56px 56px;
+          mask-image: radial-gradient(ellipse at 50% 40%, black 40%, transparent 80%);
+          -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 40%, transparent 80%);
+        }
+        .ccm-scanline {
+          position: absolute; left: 0; right: 0; top: 0; height: 1px; z-index: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(147,197,253,0.75) 50%, transparent 100%);
+          box-shadow: 0 0 22px rgba(96,165,250,0.6);
+          animation: ccm-scan 6s linear infinite;
+        }
+        @keyframes ccm-scan {
+          0%   { transform: translateY(0); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(90vh); opacity: 0; }
+        }
+
+        /* ---------- CHIP HOLOGRAPHIQUE ---------- */
+        .ccm-chip {
+          color: #dbeafe;
+          background: linear-gradient(135deg, rgba(59,130,246,0.14), rgba(56,189,248,0.06));
+          border: 1px solid rgba(147,197,253,0.28);
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 8px 28px -12px rgba(59,130,246,0.55);
+          backdrop-filter: blur(10px) saturate(140%);
+          position: relative;
+        }
+
+        /* ---------- TITRE ---------- */
+        .ccm-title { text-shadow: 0 6px 40px rgba(59,130,246,0.35); }
+        .ccm-title-accent {
+          background: linear-gradient(90deg, #e7c76a 0%, #fff2c2 30%, #d4af37 55%, #e7c76a 80%, #fff2c2 100%);
+          background-size: 200% 100%;
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+          animation: ccm-shine 6s linear infinite;
+        }
+        @keyframes ccm-shine { to { background-position: 200% 0; } }
+
+        /* ---------- REVEAL ---------- */
         .ccm-reveal {
           opacity: 0;
           transform: translateY(14px);
@@ -294,46 +369,170 @@ export default function CommentCaMarcheTimeline() {
         [data-reveal].is-revealed .ccm-reveal { opacity: 1; transform: none; }
         [data-reveal].is-revealed { opacity: 1; }
         [data-reveal] > .ccm-reveal { opacity: 1; transform: none; }
-        li[data-reveal].is-revealed { }
         li[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity .55s cubic-bezier(.2,.7,.2,1), transform .55s cubic-bezier(.2,.7,.2,1); }
         li[data-reveal].is-revealed { opacity: 1; transform: none; }
 
+        /* ---------- TIMELINE ---------- */
         .ccm-rail {
           background: linear-gradient(180deg,
-            rgba(212,175,55,0) 0%,
-            rgba(212,175,55,0.45) 12%,
-            rgba(231,199,106,0.7) 50%,
-            rgba(212,175,55,0.45) 88%,
-            rgba(212,175,55,0) 100%);
-          box-shadow: 0 0 12px rgba(231,199,106,0.25);
+            rgba(59,130,246,0) 0%,
+            rgba(59,130,246,0.55) 12%,
+            rgba(231,199,106,0.85) 50%,
+            rgba(59,130,246,0.55) 88%,
+            rgba(59,130,246,0) 100%);
+          box-shadow: 0 0 16px rgba(59,130,246,0.35), 0 0 22px rgba(231,199,106,0.20);
         }
         .ccm-node {
           background: linear-gradient(135deg, #e7c76a 0%, #d4af37 100%);
           box-shadow:
-            0 8px 22px -6px rgba(212,175,55,0.55),
             0 0 0 4px rgba(250, 247, 239, 0.9),
-            0 0 0 5px rgba(212,175,55,0.25);
+            0 0 0 5px rgba(59,130,246,0.35),
+            0 10px 28px -6px rgba(59,130,246,0.55),
+            0 8px 22px -6px rgba(212,175,55,0.45);
           transition: transform .3s ease, box-shadow .3s ease;
         }
         li:hover .ccm-node {
-          transform: scale(1.08);
+          transform: scale(1.1) rotate(-3deg);
           box-shadow:
-            0 10px 28px -6px rgba(212,175,55,0.7),
-            0 0 0 4px rgba(250, 247, 239, 0.9),
-            0 0 0 6px rgba(212,175,55,0.4);
+            0 0 0 4px rgba(250, 247, 239, 0.95),
+            0 0 0 6px rgba(59,130,246,0.55),
+            0 14px 34px -6px rgba(59,130,246,0.7),
+            0 10px 26px -6px rgba(231,199,106,0.5);
         }
-        .ccm-glass {
-          background: rgba(255,255,255,0.04);
+
+        /* ---------- CARTE ÉTAPE ---------- */
+        .ccm-card {
+          background: linear-gradient(180deg, #ffffff 0%, #fbfaf6 100%);
+          border: 1px solid rgba(11,16,38,0.06);
+          box-shadow:
+            0 1px 2px rgba(11,16,38,0.04),
+            0 10px 30px -18px rgba(11,16,38,0.18);
+          position: relative;
+          overflow: hidden;
+        }
+        .ccm-card::before {
+          content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+          background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(231,199,106,0.4));
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: 0; transition: opacity .35s ease; pointer-events: none;
+        }
+        .ccm-card:hover {
+          transform: translateY(-3px);
+          box-shadow:
+            0 2px 4px rgba(11,16,38,0.05),
+            0 30px 55px -22px rgba(59,130,246,0.28),
+            0 20px 40px -22px rgba(212,175,55,0.22);
+        }
+        .ccm-card:hover::before { opacity: 1; }
+        .ccm-step-chip {
+          background: linear-gradient(90deg, rgba(59,130,246,0.10), rgba(231,199,106,0.16));
+          border: 1px solid rgba(212,175,55,0.35);
+          color: #7a5a10;
+        }
+        .ccm-card-underline {
+          background: linear-gradient(90deg, transparent, rgba(59,130,246,0.7), rgba(231,199,106,0.8), rgba(59,130,246,0.7), transparent);
+        }
+
+        /* ---------- FLEET CARDS ---------- */
+        .ccm-fleet-card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
           border: 1px solid rgba(255,255,255,0.09);
-          backdrop-filter: blur(14px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+          position: relative; overflow: hidden;
         }
-        .ccm-glass:hover {
-          background: rgba(255,255,255,0.07);
-          border-color: rgba(147, 197, 253, 0.25);
-          box-shadow: 0 20px 45px -20px rgba(59,130,246,0.35);
+        .ccm-fleet-card::before {
+          content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+          background: conic-gradient(from 120deg, rgba(59,130,246,0), rgba(59,130,246,0.55), rgba(56,189,248,0.5), rgba(231,199,106,0.5), rgba(59,130,246,0));
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: 0; transition: opacity .5s ease; pointer-events: none;
         }
+        .ccm-fleet-card:hover {
+          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+          border-color: rgba(147,197,253,0.25);
+          box-shadow: 0 30px 60px -25px rgba(59,130,246,0.55);
+        }
+        .ccm-fleet-card:hover::before { opacity: 1; }
+        .ccm-fleet-icon {
+          background: linear-gradient(135deg, rgba(59,130,246,0.30), rgba(56,189,248,0.14));
+          border: 1px solid rgba(147,197,253,0.35);
+          color: #dbeafe;
+          box-shadow: 0 0 22px -6px rgba(59,130,246,0.55), inset 0 0 12px rgba(255,255,255,0.06);
+        }
+        .ccm-fleet-corner {
+          position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
+          border-top: 1px solid rgba(231,199,106,0.5);
+          border-right: 1px solid rgba(231,199,106,0.5);
+          opacity: 0.55;
+        }
+
+        /* ---------- KPI ---------- */
+        .ccm-kpi {
+          background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+          border: 1px solid rgba(255,255,255,0.09);
+          backdrop-filter: blur(14px);
+          position: relative;
+        }
+        .ccm-kpi::after {
+          content: ""; position: absolute; inset: auto 20% -1px 20%; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(231,199,106,0.6), transparent);
+        }
+        .ccm-kpi-value {
+          background: linear-gradient(90deg, #e7c76a, #fff2c2, #d4af37);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+          text-shadow: 0 0 30px rgba(231,199,106,0.25);
+        }
+
+        /* ---------- CTA ---------- */
+        .ccm-btn-primary {
+          color: #0b1026;
+          background: linear-gradient(90deg, #e7c76a, #d4af37, #e7c76a);
+          background-size: 200% 100%;
+          border: 1px solid rgba(212,175,55,0.55);
+          box-shadow:
+            0 18px 40px -12px rgba(231,199,106,0.55),
+            0 0 0 1px rgba(255,255,255,0.6) inset;
+          position: relative; overflow: hidden;
+        }
+        .ccm-btn-primary::after {
+          content: ""; position: absolute; inset: -1px; border-radius: inherit;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+          transform: translateX(-120%); transition: transform .8s ease;
+        }
+        .ccm-btn-primary:hover { background-position: 100% 0; transform: translateY(-1px); }
+        .ccm-btn-primary:hover::after { transform: translateX(120%); }
+        .ccm-btn-ghost {
+          background: #fff; color: #0b1026;
+          border: 1px solid rgba(11,16,38,0.15);
+        }
+        .ccm-btn-ghost:hover {
+          background: #0b1026; color: #e7c76a; border-color: #0b1026;
+          box-shadow: 0 18px 40px -14px rgba(11,16,38,0.5);
+          transform: translateY(-1px);
+        }
+
+        /* ---------- RÉASSURANCE ---------- */
+        .ccm-reass {
+          background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+          border: 1px solid rgba(255,255,255,0.09);
+          backdrop-filter: blur(12px);
+        }
+        .ccm-reass:hover {
+          border-color: rgba(231,199,106,0.45);
+          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+          box-shadow: 0 22px 45px -22px rgba(59,130,246,0.4);
+        }
+        .ccm-reass-icon {
+          background: radial-gradient(circle at 30% 30%, rgba(231,199,106,0.25), rgba(231,199,106,0.05));
+          border: 1px solid rgba(231,199,106,0.45);
+          color: #e7c76a;
+          box-shadow: 0 0 18px -4px rgba(231,199,106,0.4);
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .ccm-reveal, li[data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+          .ccm-aurora, .ccm-scanline, .ccm-title-accent { animation: none !important; }
         }
       `}</style>
     </div>
