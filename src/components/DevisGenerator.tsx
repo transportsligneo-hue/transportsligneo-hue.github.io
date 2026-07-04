@@ -1322,7 +1322,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
               {savedDevis && (
                 <button onClick={handleDownloadPdf}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#e7c76a] to-[#d4af37] text-[#0b1026] font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
                   <Download size={13} /> Télécharger le PDF
                 </button>
               )}
