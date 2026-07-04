@@ -104,26 +104,24 @@ export default function MobileHomeScreen() {
             : "bg-transparent"
         }`}
       >
-        <Link to="/" className="flex items-center gap-3 tap-scale min-w-0" aria-label="Accueil">
+        <Link to="/" className="flex items-center gap-2.5 tap-scale min-w-0" aria-label="Accueil">
           <span
             className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center border border-white/15 bg-white/[0.05] overflow-hidden"
             style={{ boxShadow: "0 0 24px -8px rgba(96,165,250,0.5)" }}
           >
             <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
           </span>
-          <div className="min-w-0 flex items-center">
-            <p className="font-heading text-white text-[15px] leading-tight tracking-wide truncate">
-              Transports Ligneo
-            </p>
-          </div>
+          <span className="hidden sm:inline-block font-heading text-white text-[13px] leading-tight tracking-[0.18em] uppercase truncate">
+            Ligneo
+          </span>
         </Link>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={goEspace}
             aria-label={espaceLabel}
-            className="h-11 pl-1.5 pr-3 rounded-2xl border border-[#e7c76a]/50 flex items-center gap-2 tap-scale active:scale-95 transition-transform"
+            className="h-11 w-11 rounded-2xl border border-[#e7c76a]/50 flex items-center justify-center tap-scale active:scale-95 transition-transform"
             style={{
-              background: "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(212,175,55,0.08) 100%)",
+              background: "linear-gradient(135deg, rgba(231,199,106,0.22) 0%, rgba(212,175,55,0.08) 100%)",
               boxShadow: "0 8px 22px -10px rgba(231,199,106,0.55)",
             }}
           >
@@ -132,9 +130,6 @@ export default function MobileHomeScreen() {
               style={{ background: "linear-gradient(135deg, #e7c76a, #d4af37)" }}
             >
               {isAuthenticated && userInitial ? userInitial : <User size={15} />}
-            </span>
-            <span className="font-heading text-[11px] tracking-[0.18em] uppercase text-[#f4e7bf]">
-              {isAuthenticated ? "Espace" : "Connexion"}
             </span>
           </button>
           <button
@@ -146,6 +141,7 @@ export default function MobileHomeScreen() {
             <Menu size={18} className="text-white/85" />
           </button>
         </div>
+
       </header>
 
       {/* === DRAWER MENU === */}
@@ -237,32 +233,34 @@ export default function MobileHomeScreen() {
           </button>
         </Reveal>
 
-        {/* === Accès rapides === */}
+        {/* === Accès rapides — bento premium === */}
         <Reveal delay={100}>
           <div className="grid grid-cols-2 gap-3">
             <QuickTile
-              icon={<FileText size={18} />}
+              icon={<FileText size={20} />}
               label="Mes devis"
+              sublabel="Historique & suivi"
               onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
             />
             <QuickTile
-              icon={<Truck size={18} />}
+              icon={<Truck size={20} />}
               label="Mes missions"
+              sublabel="Trajets en cours"
               onClick={() =>
                 navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })
               }
             />
             <QuickTile
-              icon={isAuthenticated && userInitial ? <span className="font-heading text-[13px]">{userInitial}</span> : <LogIn size={18} />}
+              icon={isAuthenticated && userInitial ? <span className="font-heading text-[15px]">{userInitial}</span> : <LogIn size={20} />}
               label={espaceLabel}
-              sublabel={isAuthenticated ? "Tableau de bord" : "Accéder à mon compte"}
+              sublabel={isAuthenticated ? "Tableau de bord" : "Mon compte"}
               onClick={goEspace}
               highlight
             />
-
             <QuickTile
-              icon={<Phone size={18} />}
+              icon={<Phone size={20} />}
               label="Contact"
+              sublabel="Équipe 7j/7"
               onClick={() => navigate({ to: "/contact" })}
             />
           </div>
@@ -272,7 +270,7 @@ export default function MobileHomeScreen() {
         <Reveal delay={140}>
           <section
             id="mobile-devis"
-            className="scroll-mt-20 rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden"
+            className="scroll-mt-20 rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden"
             style={{
               boxShadow:
                 "0 24px 60px -22px rgba(59,130,246,0.30), 0 0 0 1px rgba(255,255,255,0.04) inset",
@@ -333,9 +331,9 @@ export default function MobileHomeScreen() {
           </div>
         </Reveal>
 
-        {/* === Points forts === */}
+        {/* === Points forts — pills === */}
         <Reveal delay={220}>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex flex-wrap gap-2">
             {[
               { icon: Zap, label: "Réponse immédiate" },
               { icon: Euro, label: "Tarif transparent" },
@@ -344,14 +342,17 @@ export default function MobileHomeScreen() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl border border-white/10 bg-white/[0.04]"
+                className="flex items-center gap-1.5 pl-2 pr-3.5 py-1.5 rounded-full border border-white/12 bg-white/[0.04]"
               >
-                <Icon size={14} className="text-[#93c5fd] shrink-0" />
-                <span className="text-white/85 text-[11.5px]">{label}</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center border border-[#60a5fa]/30 bg-[#60a5fa]/10">
+                  <Icon size={11} className="text-[#93c5fd]" />
+                </span>
+                <span className="text-white/85 text-[11.5px] tracking-wide">{label}</span>
               </div>
             ))}
           </div>
         </Reveal>
+
 
         {/* === Comment ça marche === */}
         <Reveal delay={260}>
@@ -502,54 +503,77 @@ function QuickTile({
   return (
     <button
       onClick={onClick}
-      className={`rounded-2xl p-4 border flex items-center gap-3 active:scale-[0.97] transition-transform text-left ${
-        highlight
-          ? "border-[#e7c76a]/55"
-          : "border-white/10 bg-white/[0.04]"
+      className={`group relative rounded-[26px] p-4 pb-4 border overflow-hidden active:scale-[0.97] transition-transform text-left min-h-[124px] flex flex-col justify-between ${
+        highlight ? "border-[#e7c76a]/55" : "border-white/10"
       }`}
       style={
         highlight
           ? {
               background:
-                "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(15,45,128,0.55) 100%)",
+                "linear-gradient(155deg, rgba(231,199,106,0.22) 0%, rgba(15,45,128,0.75) 55%, rgba(11,16,38,0.9) 100%)",
               boxShadow:
-                "0 18px 40px -18px rgba(231,199,106,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
+                "0 22px 50px -22px rgba(231,199,106,0.55), 0 0 0 1px rgba(255,255,255,0.05) inset",
             }
-          : undefined
+          : {
+              background:
+                "linear-gradient(155deg, rgba(255,255,255,0.06) 0%, rgba(15,45,128,0.35) 60%, rgba(11,16,38,0.55) 100%)",
+              boxShadow:
+                "0 18px 42px -22px rgba(59,130,246,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset",
+            }
       }
     >
+      {/* Halo décoratif */}
       <span
-        className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${
-          highlight
-            ? "text-[#0b1026]"
-            : "border border-[#60a5fa]/30 text-[#93c5fd]"
+        aria-hidden
+        className={`pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl ${
+          highlight ? "bg-[#e7c76a]/25" : "bg-[#60a5fa]/25"
+        }`}
+      />
+      <span
+        className={`relative w-11 h-11 rounded-2xl flex items-center justify-center ${
+          highlight ? "text-[#0b1026]" : "text-[#93c5fd] border border-[#60a5fa]/35"
         }`}
         style={
           highlight
-            ? { background: "linear-gradient(135deg, #e7c76a, #d4af37)" }
-            : { background: "rgba(96,165,250,0.12)" }
+            ? {
+                background: "linear-gradient(135deg, #e7c76a, #d4af37)",
+                boxShadow: "0 10px 24px -8px rgba(231,199,106,0.65)",
+              }
+            : {
+                background:
+                  "linear-gradient(135deg, rgba(96,165,250,0.22) 0%, rgba(59,130,246,0.08) 100%)",
+                boxShadow: "0 8px 22px -10px rgba(96,165,250,0.5)",
+              }
         }
       >
         {icon}
       </span>
-      <span className="flex-1 min-w-0">
-        <span
-          className={`block text-[13px] font-heading tracking-wide ${
-            highlight ? "text-[#f4e7bf]" : "text-white"
-          }`}
-        >
-          {label}
-        </span>
+      <div className="relative mt-3">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`block text-[14px] font-heading tracking-wide ${
+              highlight ? "text-[#f4e7bf]" : "text-white"
+            }`}
+          >
+            {label}
+          </span>
+          <ChevronRight
+            size={13}
+            className={`shrink-0 translate-x-0 group-active:translate-x-0.5 transition-transform ${
+              highlight ? "text-[#e7c76a]/80" : "text-white/40"
+            }`}
+          />
+        </div>
         {sublabel && (
-          <span className="block text-[11px] text-white/55 mt-0.5 truncate">
+          <span className="block text-[10.5px] text-white/55 mt-1 tracking-wide truncate">
             {sublabel}
           </span>
         )}
-      </span>
-      {highlight && <ChevronRight size={16} className="text-[#e7c76a]/70 shrink-0" />}
+      </div>
     </button>
   );
 }
+
 
 /* ==== Drawer menu mobile ==== */
 function MobileMenuDrawer({
@@ -710,14 +734,25 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl p-4 border border-white/10 bg-white/[0.04]">
-      <div className="flex items-center gap-1.5 mb-2">
+    <div
+      className="relative rounded-[22px] p-4 border border-white/10 overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(155deg, rgba(255,255,255,0.05) 0%, rgba(15,45,128,0.28) 60%, rgba(11,16,38,0.45) 100%)",
+        boxShadow: "0 14px 30px -18px rgba(59,130,246,0.35)",
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-8 -right-8 w-20 h-20 rounded-full blur-2xl bg-[#60a5fa]/20"
+      />
+      <div className="relative flex items-center gap-1.5 mb-2">
         {icon}
-        <span className="text-[9px] tracking-[0.24em] uppercase text-white/50 font-heading">
+        <span className="text-[9px] tracking-[0.24em] uppercase text-white/55 font-heading">
           {label}
         </span>
       </div>
-      <p className="font-heading text-[24px] leading-none text-white">{value}</p>
+      <p className="relative font-heading text-[24px] leading-none text-white">{value}</p>
     </div>
   );
 }
