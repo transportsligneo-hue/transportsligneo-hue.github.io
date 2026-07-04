@@ -734,14 +734,25 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl p-4 border border-white/10 bg-white/[0.04]">
-      <div className="flex items-center gap-1.5 mb-2">
+    <div
+      className="relative rounded-[22px] p-4 border border-white/10 overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(155deg, rgba(255,255,255,0.05) 0%, rgba(15,45,128,0.28) 60%, rgba(11,16,38,0.45) 100%)",
+        boxShadow: "0 14px 30px -18px rgba(59,130,246,0.35)",
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-8 -right-8 w-20 h-20 rounded-full blur-2xl bg-[#60a5fa]/20"
+      />
+      <div className="relative flex items-center gap-1.5 mb-2">
         {icon}
-        <span className="text-[9px] tracking-[0.24em] uppercase text-white/50 font-heading">
+        <span className="text-[9px] tracking-[0.24em] uppercase text-white/55 font-heading">
           {label}
         </span>
       </div>
-      <p className="font-heading text-[24px] leading-none text-white">{value}</p>
+      <p className="relative font-heading text-[24px] leading-none text-white">{value}</p>
     </div>
   );
 }
