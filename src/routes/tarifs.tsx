@@ -110,7 +110,15 @@ function TarifsPage() {
                   "radial-gradient(closest-side, rgba(231,199,106,0.22), transparent 70%)",
               }}
             />
-            <div className="relative">
+            <div
+              className="relative rounded-[28px] p-2 lg:p-3"
+              style={{
+                background:
+                  "linear-gradient(160deg, #0b1026 0%, #111a3d 60%, #0b1026 100%)",
+                boxShadow:
+                  "0 40px 90px -30px rgba(11,16,38,0.55), 0 0 0 1px rgba(231,199,106,0.18) inset",
+              }}
+            >
               <div className="hidden md:block">
                 <DevisGenerator variant="hero-card" />
               </div>
