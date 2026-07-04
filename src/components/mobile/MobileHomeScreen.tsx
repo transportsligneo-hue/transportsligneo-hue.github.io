@@ -253,10 +253,13 @@ export default function MobileHomeScreen() {
               }
             />
             <QuickTile
-              icon={<User size={18} />}
-              label="Mon espace"
+              icon={isAuthenticated && userInitial ? <span className="font-heading text-[13px]">{userInitial}</span> : <LogIn size={18} />}
+              label={espaceLabel}
+              sublabel={isAuthenticated ? "Tableau de bord" : "Accéder à mon compte"}
               onClick={goEspace}
+              highlight
             />
+
             <QuickTile
               icon={<Phone size={18} />}
               label="Contact"
