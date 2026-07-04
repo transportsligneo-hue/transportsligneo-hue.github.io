@@ -592,22 +592,28 @@ function AdminTrajets() {
         }
       />
 
-      <Card className="mb-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-medium text-pro-text">La liste Trajets n'affiche plus les demandes de partenariat.</p>
-            <p className="text-xs text-pro-muted mt-1">
-              Les demandes de partenariat sont désormais suivies dans la section dédiée.
-            </p>
+      {typeof window !== "undefined" && localStorage.getItem("admin.trajets.dismissB2BBanner") !== "1" && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-pro-border/60 bg-pro-bg-soft/40 px-3 py-2 text-xs">
+          <div className="flex-1">
+            <span className="text-pro-text">Les demandes de partenariat sont suivies dans leur section dédiée.</span>{" "}
+            <Link to="/admin/b2b-leads" className="font-medium text-pro-accent hover:underline">
+              Ouvrir
+            </Link>
           </div>
-          <Link
-            to="/admin/b2b-leads"
-            className="inline-flex items-center justify-center rounded-md bg-pro-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-pro-accent-hover"
+          <button
+            aria-label="Masquer"
+            onClick={() => {
+              localStorage.setItem("admin.trajets.dismissB2BBanner", "1");
+              // Force re-render
+              window.dispatchEvent(new Event("storage"));
+              setTimeout(() => window.location.reload(), 50);
+            }}
+            className="text-pro-muted hover:text-pro-text"
           >
-            Ouvrir les demandes de partenariat
-          </Link>
+            ×
+          </button>
         </div>
-      </Card>
+      )}
 
       {trajets.length === 0 ? (
         <EmptyState icon={RouteIcon} title="Aucun trajet" description="Créez un trajet ou convertissez une demande." />
