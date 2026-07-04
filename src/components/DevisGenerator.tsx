@@ -1282,7 +1282,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       {/* === Confirmation === */}
       {submitted && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-xl rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
             <div className="w-16 h-16 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="text-[#e7c76a]" size={30} />
             </div>
