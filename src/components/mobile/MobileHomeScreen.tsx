@@ -84,23 +84,10 @@ export default function MobileHomeScreen() {
           >
             <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex items-center">
             <p className="font-heading text-white text-[15px] leading-tight tracking-wide truncate">
               Transports Ligneo
             </p>
-            <span
-              className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] tracking-[0.24em] uppercase font-heading"
-              style={{
-                background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
-                color: "#061238",
-              }}
-            >
-              {role === "convoyeur"
-                ? "Driver"
-                : role === "admin" || role === "super_admin"
-                ? "Admin"
-                : "Client"}
-            </span>
           </div>
         </Link>
         <div className="flex items-center gap-2 shrink-0">
