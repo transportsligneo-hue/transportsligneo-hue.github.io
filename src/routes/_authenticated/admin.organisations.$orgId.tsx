@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
+import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
@@ -49,6 +50,23 @@ function OrgDetail() {
       setOrg(orgRes.data);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
       const memberRows = membersRes.data ?? [];
+      // Hydrate members with profile info
+      const memberIds = memberRows.map((r: any) => r.user_id);
+      if (memberIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, prenom, nom, email")
+          .in("user_id", memberIds);
+        const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+        memberRows.forEach((r: any) => {
+          const p = map.get(r.user_id) as any;
+          if (p) {
+            r.prenom = p.prenom;
+            r.nom = p.nom;
+            r.email = p.email;
+          }
+        });
+      }
       setMembers(memberRows);
       setMissions(missionsRes.data ?? []);
       setB2bRequests(b2bRes.data ?? []);
@@ -201,15 +219,21 @@ function OrgDetail() {
         <TabsContent value="members" className="bg-white border border-pro-border rounded-xl p-4">
           {members.length === 0 ? <Empty icon={Users} text="Aucun membre" /> : (
             <div className="divide-y">
-              {members.map((m) => (
-                <div key={m.user_id} className="py-2 flex justify-between text-sm">
-                  <span className="font-mono text-xs">{m.user_id.slice(0, 8)}…</span>
-                  <div className="flex gap-2">
-                    <Badge variant="outline">{m.member_role}</Badge>
-                    <Badge variant="outline">{m.status}</Badge>
+              {members.map((m) => {
+                const fullName = [m.prenom, m.nom].filter(Boolean).join(" ") || null;
+                return (
+                  <div key={m.user_id} className="py-2 flex items-center justify-between text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-pro-text truncate">{fullName ?? m.user_id.slice(0, 8) + "…"}</p>
+                      {m.email && <p className="text-xs text-pro-muted truncate">{m.email}</p>}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Badge variant="outline">{m.member_role}</Badge>
+                      <Badge variant="outline">{m.status}</Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
@@ -237,11 +261,14 @@ function OrgDetail() {
             <div className="divide-y">
               {activity.map((a) => (
                 <div key={a.id} className="py-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{a.action}</span>
-                    <span className="text-xs text-pro-muted">{new Date(a.created_at).toLocaleString("fr-FR")}</span>
+                  <div className="flex justify-between gap-3">
+                    <p className="text-pro-text leading-snug">
+                      <span className="font-medium">{actorLabel(a)}</span>{" "}
+                      {humanizeAction(a.action, a.entity_type, a.metadata)}
+                    </p>
+                    <span className="text-xs text-pro-muted shrink-0">{new Date(a.created_at).toLocaleString("fr-FR")}</span>
                   </div>
-                  <div className="text-xs text-pro-muted">{a.entity_type} · {a.actor_label ?? "système"}</div>
+                  <p className="text-[11px] text-pro-muted mt-0.5 capitalize">{a.entity_type} · <span className="font-mono">{a.action}</span></p>
                 </div>
               ))}
             </div>
