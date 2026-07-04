@@ -288,8 +288,16 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
                   {hasPhoto ? (
                     <>
                       <img src={photos[v.id]} alt={v.label} className="w-full h-full object-cover" />
-                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                        <Check size={12} className="text-white" />
+                      <div className={`absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center ${
+                        syncState[v.id] === "failed" ? "bg-destructive"
+                        : syncState[v.id] === "pending" ? "bg-amber-500"
+                        : "bg-green-500"
+                      }`}>
+                        {syncState[v.id] === "pending"
+                          ? <Loader2 size={11} className="text-white animate-spin" />
+                          : syncState[v.id] === "failed"
+                          ? <AlertCircle size={11} className="text-white" />
+                          : <Check size={12} className="text-white" />}
                       </div>
                     </>
                   ) : (
