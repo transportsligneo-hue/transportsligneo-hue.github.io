@@ -56,34 +56,45 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
       setLoading(true);
       const next: Record<string, SlotData> = {};
 
-      // 1) mission_documents : type_document = pv_signature_*
-      const { data: docData } = await supabase
-        .from("mission_documents")
-        .select("type_document, url_fichier, created_at")
-        .eq("attribution_id", attributionId)
-        .in("type_document", SLOTS)
-        .order("created_at", { ascending: false });
-      for (const row of docData ?? []) {
-        if (next[row.type_document]) continue;
-        const { data: signed } = await supabase.storage
-          .from("mission-documents")
-          .createSignedUrl(row.url_fichier, 3600);
-        next[row.type_document] = { signedAt: row.created_at, url: signed?.signedUrl };
+      // Parallélise les deux requêtes racine
+      const [docsRes, sigsRes] = await Promise.all([
+        supabase
+          .from("mission_documents")
+          .select("type_document, url_fichier, created_at")
+          .eq("attribution_id", attributionId)
+          .in("type_document", SLOTS)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("mission_signatures")
+          .select("kind, signature_data, signed_at, created_at")
+          .eq("attribution_id", attributionId),
+      ]);
+
+      // 1) mission_documents : garde le plus récent par type + signe en LOT
+      const docRows = (docsRes.data as Array<{ type_document: string; url_fichier: string; created_at: string }> | null) ?? [];
+      const uniqueDocs: Array<{ type_document: string; url_fichier: string; created_at: string }> = [];
+      const seenTypes = new Set<string>();
+      for (const row of docRows) {
+        if (seenTypes.has(row.type_document)) continue;
+        seenTypes.add(row.type_document);
+        uniqueDocs.push(row);
+      }
+      if (uniqueDocs.length) {
+        const paths = uniqueDocs.map(d => d.url_fichier);
+        const { data: signedList } = await supabase.storage.from("mission-documents").createSignedUrls(paths, 3600);
+        uniqueDocs.forEach((d, i) => {
+          next[d.type_document] = { signedAt: d.created_at, url: signedList?.[i]?.signedUrl };
+        });
       }
 
       // 2) mission_signatures : signature_data (base64 data URL)
-      // kind : driver_start, client_start, driver_end, client_end
       const KIND_TO_SLOT: Record<string, SlotKey> = {
         driver_start: "pv_signature_depart_convoyeur",
         client_start: "pv_signature_depart_client",
         driver_end: "pv_signature_arrivee_convoyeur",
         client_end: "pv_signature_arrivee_client",
       };
-      const { data: sigData } = await supabase
-        .from("mission_signatures")
-        .select("kind, signature_data, signed_at, created_at")
-        .eq("attribution_id", attributionId);
-      for (const row of (sigData as Array<{ kind: string; signature_data: string | null; signed_at: string | null; created_at: string }> | null) ?? []) {
+      for (const row of (sigsRes.data as Array<{ kind: string; signature_data: string | null; signed_at: string | null; created_at: string }> | null) ?? []) {
         const slotKey = KIND_TO_SLOT[row.kind];
         if (!slotKey || next[slotKey]) continue;
         if (row.signature_data) {
