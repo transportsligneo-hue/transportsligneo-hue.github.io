@@ -199,20 +199,23 @@ export function EdlPremiumFlow({
     return () => { cancelled = true; };
   }, [attributionId]);
 
-  const isElectric = /electr|hybr/.test(vehicleCarburant ?? "");
+  // Électrique OU hybride rechargeable (PHEV). Un simple "hybride" (non
+  // rechargeable) n'a pas de câble et ne déclenche donc pas l'étape.
+  const isElectric = /electr|hybride?\s*rechargeable|phev|plug.?in/i.test(vehicleCarburant ?? "");
 
   const STEPS = useMemo(() => {
     // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).
-    // ARRIVÉE : photos + scans uniquement — signatures gérées par ArriveeSignatureSheet
-    //           déclenchée par le cockpit après finalisation de l'EDL arrivée.
-    // Étape électrique masquée si véhicule non électrique.
+    // ARRIVÉE : mêmes étapes photos + scans + checklist que le départ pour
+    //           garantir un dossier de restitution symétrique. Les signatures
+    //           d'arrivée restent gérées par ArriveeSignatureSheet (déclenchée
+    //           par le cockpit après finalisation de l'EDL arrivée).
+    // Étape électrique masquée si véhicule ni électrique ni hybride rechargeable.
     const base = EDL_PREMIUM_SEQUENCE.filter((step) => {
       if (step.kind === "selfie") return false;
       if (type === "arrivee" && step.kind === "signature") return false;
       if (step.electricOnly && !isElectric) return false;
-      // Filtre phase : équipements et km départ uniquement au départ,
-      // km arrivée uniquement à l'arrivée.
-      if (step.id === "equipements_check" && type !== "depart") return false;
+      // Kilométrages restent phase-spécifiques ; la checklist équipements
+      // s'affiche aux deux phases (contrôle départ + contrôle restitution).
       if (step.id === "kilometrage_depart" && type !== "depart") return false;
       if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
