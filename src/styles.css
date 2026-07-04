@@ -1396,9 +1396,9 @@
   }
   .btn-ghost-light:hover { border-color: var(--ink-navy); background: #f7f8fc; }
 
-  /* Filet doré bas de navbar */
+  /* Filet bleu électrique bas de navbar */
   .navbar-hairline {
-    box-shadow: 0 1px 0 rgba(212,175,55,0.35), 0 6px 24px -10px rgba(0,0,0,0.45);
+    box-shadow: 0 1px 0 rgba(96,165,250,0.35), 0 6px 24px -10px rgba(0,0,0,0.45);
   }
 
   /* ============================================================
