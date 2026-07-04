@@ -71,6 +71,24 @@ interface MissionItem {
   prix_total: number | null;
 }
 
+interface DevisItem {
+  id: string;
+  numero: string | null;
+  depart: string | null;
+  arrivee: string | null;
+  prix_estime: number | null;
+  statut: string;
+  created_at: string;
+}
+
+interface FactureItem {
+  id: string;
+  numero: string | null;
+  montant_ttc: number | null;
+  statut: string;
+  created_at: string;
+}
+
 interface AccountStatus {
   email_confirmed_at: string | null;
   invited_at: string | null;
