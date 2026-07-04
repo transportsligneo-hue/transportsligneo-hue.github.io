@@ -489,27 +489,216 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 function QuickTile({
   icon,
   label,
+  sublabel,
   onClick,
+  highlight = false,
 }: {
   icon: React.ReactNode;
   label: string;
+  sublabel?: string;
   onClick: () => void;
+  highlight?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className="rounded-2xl p-4 border border-white/10 bg-white/[0.04] flex items-center gap-3 active:scale-[0.97] transition-transform text-left"
+      className={`rounded-2xl p-4 border flex items-center gap-3 active:scale-[0.97] transition-transform text-left ${
+        highlight
+          ? "border-[#e7c76a]/55"
+          : "border-white/10 bg-white/[0.04]"
+      }`}
+      style={
+        highlight
+          ? {
+              background:
+                "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(15,45,128,0.55) 100%)",
+              boxShadow:
+                "0 18px 40px -18px rgba(231,199,106,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
+            }
+          : undefined
+      }
     >
       <span
-        className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center border border-[#60a5fa]/30 text-[#93c5fd]"
-        style={{ background: "rgba(96,165,250,0.12)" }}
+        className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${
+          highlight
+            ? "text-[#0b1026]"
+            : "border border-[#60a5fa]/30 text-[#93c5fd]"
+        }`}
+        style={
+          highlight
+            ? { background: "linear-gradient(135deg, #e7c76a, #d4af37)" }
+            : { background: "rgba(96,165,250,0.12)" }
+        }
       >
         {icon}
       </span>
-      <span className="text-white text-[13px] font-heading tracking-wide">{label}</span>
+      <span className="flex-1 min-w-0">
+        <span
+          className={`block text-[13px] font-heading tracking-wide ${
+            highlight ? "text-[#f4e7bf]" : "text-white"
+          }`}
+        >
+          {label}
+        </span>
+        {sublabel && (
+          <span className="block text-[11px] text-white/55 mt-0.5 truncate">
+            {sublabel}
+          </span>
+        )}
+      </span>
+      {highlight && <ChevronRight size={16} className="text-[#e7c76a]/70 shrink-0" />}
     </button>
   );
 }
+
+/* ==== Drawer menu mobile ==== */
+function MobileMenuDrawer({
+  open,
+  onClose,
+  isAuthenticated,
+  userEmail,
+  onEspace,
+  onLogout,
+}: {
+  open: boolean;
+  onClose: () => void;
+  isAuthenticated: boolean;
+  userEmail: string | null;
+  onEspace: () => void;
+  onLogout: () => void;
+}) {
+  const links: { to: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+    { to: "/", label: "Accueil", icon: Home },
+    { to: "/tarifs", label: "Tarifs", icon: Tag },
+    { to: "/services", label: "Nos services", icon: Briefcase },
+    { to: "/comment-ca-marche", label: "Comment ça marche", icon: Info },
+    { to: "/a-propos", label: "À propos", icon: Award },
+    { to: "/b2b", label: "Solutions pros", icon: ShieldCheck },
+    { to: "/contact", label: "Contact", icon: MessageSquare },
+  ];
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        aria-hidden
+        onClick={onClose}
+        className={`md:hidden fixed inset-0 z-[60] bg-[#040820]/70 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      />
+      {/* Drawer */}
+      <aside
+        role="dialog"
+        aria-label="Menu principal"
+        aria-hidden={!open}
+        className={`md:hidden fixed top-0 right-0 z-[61] h-full w-[86%] max-w-[380px] safe-top pt-3 pb-8 px-5 flex flex-col transition-transform duration-300 ease-out ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{
+          background:
+            "linear-gradient(180deg, #061238 0%, #0a1f5c 60%, #0f2d80 100%)",
+          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "-24px 0 60px -20px rgba(0,0,0,0.6)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <span className="font-heading text-[11px] tracking-[0.28em] uppercase text-[#e7c76a]">
+            Menu
+          </span>
+          <button
+            onClick={onClose}
+            aria-label="Fermer le menu"
+            className="w-10 h-10 rounded-2xl border border-white/15 bg-white/[0.05] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <X size={18} className="text-white/85" />
+          </button>
+        </div>
+
+        {/* Carte espace */}
+        <button
+          onClick={onEspace}
+          className="rounded-2xl p-4 flex items-center gap-3 border border-[#e7c76a]/50 active:scale-[0.98] transition-transform text-left mb-5"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(231,199,106,0.20) 0%, rgba(15,45,128,0.65) 100%)",
+            boxShadow: "0 18px 40px -18px rgba(231,199,106,0.55)",
+          }}
+        >
+          <span
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-[#0b1026] font-heading"
+            style={{ background: "linear-gradient(135deg, #e7c76a, #d4af37)" }}
+          >
+            {isAuthenticated && userEmail ? userEmail[0]?.toUpperCase() : <LogIn size={18} />}
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block font-heading text-[14px] text-[#f4e7bf] tracking-wide">
+              {isAuthenticated ? "Mon espace" : "Se connecter"}
+            </span>
+            <span className="block text-white/60 text-[11.5px] mt-0.5 truncate">
+              {isAuthenticated ? (userEmail ?? "Tableau de bord") : "Accéder à mon compte"}
+            </span>
+          </span>
+          <ChevronRight size={16} className="text-[#e7c76a]/70" />
+        </button>
+
+        {/* Liens de navigation */}
+        <nav className="flex-1 overflow-y-auto -mx-1 px-1">
+          <ul className="space-y-1">
+            {links.map(({ to, label, icon: Icon }) => (
+              <li key={to}>
+                <Link
+                  to={to}
+                  onClick={onClose}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 border border-transparent hover:border-white/10 hover:bg-white/[0.03] active:scale-[0.98] transition-all"
+                >
+                  <span className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#60a5fa]/30 bg-[#60a5fa]/10">
+                    <Icon size={16} className="text-[#93c5fd]" />
+                  </span>
+                  <span className="flex-1 text-white text-[14px] font-heading tracking-wide">{label}</span>
+                  <ChevronRight size={14} className="text-white/30" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {isAuthenticated && (
+            <>
+              <div className="my-4 h-px bg-white/10" />
+              <button
+                onClick={onLogout}
+                className="w-full flex items-center gap-3 rounded-2xl px-3 py-3 border border-white/10 bg-white/[0.03] active:scale-[0.98] transition-all"
+              >
+                <span className="w-9 h-9 rounded-xl flex items-center justify-center border border-red-400/30 bg-red-400/10">
+                  <LogOut size={16} className="text-red-300" />
+                </span>
+                <span className="flex-1 text-white/85 text-[13.5px] font-heading tracking-wide text-left">
+                  Se déconnecter
+                </span>
+              </button>
+            </>
+          )}
+        </nav>
+
+        {/* Contact bloc */}
+        <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+          <a
+            href="tel:0782456181"
+            className="flex items-center gap-3 rounded-2xl px-3 py-2.5 border border-[#60a5fa]/30"
+            style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(15,45,128,0.5))" }}
+          >
+            <Phone size={15} className="text-[#93c5fd]" />
+            <span className="text-white text-[12.5px] font-heading tracking-wide">07 82 45 61 81</span>
+          </a>
+          <p className="text-center text-white/40 text-[10px] tracking-widest uppercase">
+            Disponible 7j/7
+          </p>
+        </div>
+      </aside>
+    </>
+  );
+}
+
 
 function StatCard({
   icon,
