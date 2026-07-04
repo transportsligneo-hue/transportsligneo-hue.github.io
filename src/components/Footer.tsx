@@ -38,7 +38,7 @@ export default function Footer() {
                 <li key={l}>
                   <a
                     href={`#${l.toLowerCase()}`}
-                    className="text-cream/50 hover:text-primary transition-colors"
+                    className="text-cream/50 hover:text-[#60a5fa] transition-colors"
                   >
                     {l}
                   </a>
