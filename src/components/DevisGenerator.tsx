@@ -857,9 +857,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       {/* === MODAL MULTI-ÉTAPES === */}
       {step > 0 && !submitted && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#5fb6ff]/25 bg-gradient-to-br from-[#0b1026] via-[#0d1530] to-black shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
             {/* Stepper */}
-            <div className="sticky top-0 z-10 bg-gradient-to-b from-[#0b1026] to-[#0b1026]/95 backdrop-blur px-6 md:px-10 pt-6 pb-4 border-b border-white/5">
+            <div className="sticky top-0 z-10 bg-gradient-to-b from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 pt-6 pb-4 border-b border-white/5">
               <div className="flex items-center justify-between mb-4">
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
                   <Sparkles size={11} /> Demande de devis
