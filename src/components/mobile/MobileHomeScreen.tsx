@@ -170,6 +170,8 @@ export default function MobileHomeScreen() {
               alt="Convoyage automobile premium Ligneo"
               className="w-full h-[260px] object-cover"
               loading="eager"
+              decoding="async"
+              fetchPriority="high"
             />
             <div
               aria-hidden
