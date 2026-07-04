@@ -36,6 +36,9 @@ export default function HeroDesktop() {
           className="w-full h-full object-cover object-[center_30%] lg:object-[35%_center]"
           width={1920}
           height={1080}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
         {/* Overlay dégradé navy → léger droite pour lisibilité texte + carte */}
         <div
