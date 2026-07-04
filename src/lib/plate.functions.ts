@@ -89,7 +89,7 @@ function pick(flat: Record<string, any>, keys: string[]): string | undefined {
 
 // Validator that NEVER throws — returns a sentinel that the handler converts to a clean error response.
 // This avoids letting TanStack/seroval try to serialize a ZodError (which fails with "Seroval Error step: 3").
-type ValidInput = { __ok: true; plate: string };
+type ValidInput = { __ok: true; plate: string; recaptchaToken?: string };
 type InvalidInput = { __ok: false; error: string };
 
 export const lookupPlate = createServerFn({ method: "POST" })
@@ -98,13 +98,28 @@ export const lookupPlate = createServerFn({ method: "POST" })
     if (!parsed.success) {
       return { __ok: false, error: "Plaque invalide" };
     }
-    return { __ok: true, plate: parsed.data.plate };
+    return { __ok: true, plate: parsed.data.plate, recaptchaToken: parsed.data.recaptchaToken };
   })
   .handler(async ({ data }): Promise<PlateLookupResult> => {
     try {
       if (!data.__ok) {
         return { ok: false, error: data.error };
       }
+
+      // Anti-abuse gate: authenticated users (Bearer token) OR valid reCAPTCHA v3.
+      const authHeader = getRequestHeader("authorization");
+      const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+      if (!hasBearer) {
+        if (!data.recaptchaToken) {
+          return { ok: false, error: "Vérification anti-robot requise" };
+        }
+        const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
+        if (!captchaOk) {
+          return { ok: false, error: "Vérification anti-robot échouée" };
+        }
+      }
+
+
 
       const apiKey = process.env.RAPIDAPI_KEY;
       if (!apiKey) {
