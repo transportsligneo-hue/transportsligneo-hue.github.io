@@ -78,6 +78,7 @@ const VUE_LABELS: Record<string, string> = {
   siege_avant: "Intérieur avant",
   siege_arriere: "Intérieur arrière",
   compteur: "Compteur",
+  photos_cles: "Clés du véhicule",
   kit_securite: "Kit sécurité",
   pv_livraison: "PV livraison",
   carte_grise: "Carte grise",

@@ -75,6 +75,7 @@ interface StepState {
     kit_securite: boolean;
     cable_charge: boolean;
     tapis_sol: boolean;
+    doubles_cles: boolean;
     roue: "secours" | "kit" | "aucun" | null;
   };
   /** Kilométrage saisi */
@@ -199,20 +200,23 @@ export function EdlPremiumFlow({
     return () => { cancelled = true; };
   }, [attributionId]);
 
-  const isElectric = /electr|hybr/.test(vehicleCarburant ?? "");
+  // Électrique OU hybride rechargeable (PHEV). Un simple "hybride" (non
+  // rechargeable) n'a pas de câble et ne déclenche donc pas l'étape.
+  const isElectric = /electr|hybride?\s*rechargeable|phev|plug.?in/i.test(vehicleCarburant ?? "");
 
   const STEPS = useMemo(() => {
     // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).
-    // ARRIVÉE : photos + scans uniquement — signatures gérées par ArriveeSignatureSheet
-    //           déclenchée par le cockpit après finalisation de l'EDL arrivée.
-    // Étape électrique masquée si véhicule non électrique.
+    // ARRIVÉE : mêmes étapes photos + scans + checklist que le départ pour
+    //           garantir un dossier de restitution symétrique. Les signatures
+    //           d'arrivée restent gérées par ArriveeSignatureSheet (déclenchée
+    //           par le cockpit après finalisation de l'EDL arrivée).
+    // Étape électrique masquée si véhicule ni électrique ni hybride rechargeable.
     const base = EDL_PREMIUM_SEQUENCE.filter((step) => {
       if (step.kind === "selfie") return false;
       if (type === "arrivee" && step.kind === "signature") return false;
       if (step.electricOnly && !isElectric) return false;
-      // Filtre phase : équipements et km départ uniquement au départ,
-      // km arrivée uniquement à l'arrivée.
-      if (step.id === "equipements_check" && type !== "depart") return false;
+      // Kilométrages restent phase-spécifiques ; la checklist équipements
+      // s'affiche aux deux phases (contrôle départ + contrôle restitution).
       if (step.id === "kilometrage_depart" && type !== "depart") return false;
       if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
@@ -1985,12 +1989,14 @@ function ChecklistArea({
     kit_securite: false,
     cable_charge: false,
     tapis_sol: false,
+    doubles_cles: false,
     roue: null,
   };
   const [extincteur, setExtincteur] = useState<boolean>(initial.extincteur);
   const [kitSec, setKitSec] = useState<boolean>(initial.kit_securite);
   const [cable, setCable] = useState<boolean>(initial.cable_charge);
   const [tapisSol, setTapisSol] = useState<boolean>(initial.tapis_sol ?? false);
+  const [doublesCles, setDoublesCles] = useState<boolean>(initial.doubles_cles ?? false);
   const [roue, setRoue] = useState<NonNullable<StepState["equipements"]>["roue"]>(initial.roue);
 
   const isSaved = state?.status === "success";
@@ -2020,6 +2026,10 @@ function ChecklistArea({
         Cochez la présence de chaque équipement avant de continuer.
       </p>
 
+      <button type="button" onClick={() => setDoublesCles(v => !v)} style={itemStyle(doublesCles)}>
+        <span style={{ fontSize: 22 }}>{doublesCles ? "✅" : "⬜"}</span>
+        <span>Double des clés remis</span>
+      </button>
       <button type="button" onClick={() => setExtincteur(v => !v)} style={itemStyle(extincteur)}>
         <span style={{ fontSize: 22 }}>{extincteur ? "✅" : "⬜"}</span>
         <span>Extincteur</span>
@@ -2073,7 +2083,7 @@ function ChecklistArea({
         type="button"
         disabled={!canValidate || isSaving}
         onClick={() =>
-          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, roue })
+          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, doubles_cles: doublesCles, roue })
         }
         style={{
           marginTop: 8,

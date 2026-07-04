@@ -68,7 +68,7 @@ const vueLabels: Record<string, string> = {
   trois_quart_arriere_gauche: "3/4 arrière gauche", jante_arriere_gauche: "Jante arrière gauche",
   trois_quart_avant_gauche: "3/4 avant gauche", jante_avant_gauche: "Jante avant gauche",
   siege_avant: "Sièges avant", siege_arriere: "Sièges arrière", cables: "Câbles",
-  roue_secours: "Roue de secours / kit", compteur: "Compteur", kit_securite: "Kit sécurité",
+  roue_secours: "Roue de secours / kit", compteur: "Compteur", photos_cles: "Clés du véhicule", kit_securite: "Kit sécurité",
   pv_livraison: "PV livraison / restitution", carte_grise: "Carte grise",
   avant: "Avant", avant_droit: "Avant droit 3/4", arriere: "Arrière",
 };

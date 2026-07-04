@@ -31,6 +31,7 @@ const vueLabel = (k: string) => {
     siege_avant: "Sièges avant",
     siege_arriere: "Sièges arrière",
     compteur: "Compteur",
+    photos_cles: "Clés du véhicule",
     kit_securite: "Kit sécurité",
     roue_secours: "Roue de secours",
     jante_avant_gauche: "Jante avant gauche",
