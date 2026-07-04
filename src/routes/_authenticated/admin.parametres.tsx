@@ -367,7 +367,7 @@ function ResetOperationalCard() {
       toast.error(`Tapez exactement "${REQUIRED}" pour confirmer.`);
       return;
     }
-    if (!confirm("Dernière confirmation : effacer toutes les missions, trajets, attributions et l'historique driver ?")) return;
+    if (!(await confirmToast("Dernière confirmation : effacer toutes les missions, trajets, attributions et l'historique driver ?"))) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc("admin_reset_operational_data" as never);

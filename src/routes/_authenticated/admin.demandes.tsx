@@ -401,7 +401,7 @@ function AdminDemandes() {
         onConvert={(d) => { void convertToTrajet(d); setSelected(null); }}
         onChanged={(updated) => { setSelected(updated); fetchDemandes(); }}
         onDelete={async (id) => {
-          if (!window.confirm("Supprimer cette demande ?")) return;
+          if (!(await confirmToast("Supprimer cette demande ?"))) return;
           await supabase.from("demandes_convoyage").delete().eq("id", id);
           setSelected(null);
           fetchDemandes();

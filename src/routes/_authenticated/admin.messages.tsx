@@ -101,7 +101,7 @@ function AdminMessages() {
   };
 
   const deleteMessage = async (id: string) => {
-    if (!confirm("Supprimer ce message ?")) return;
+    if (!(await confirmToast("Supprimer ce message ?"))) return;
     await supabase.from("contact_messages").delete().eq("id", id);
     setSelected(null);
     fetchMessages();

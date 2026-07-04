@@ -165,7 +165,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
   };
 
   const remove = async (r: Rule) => {
-    if (!window.confirm("Supprimer ce tarif personnalisé ?")) return;
+    if (!(await confirmToast("Supprimer ce tarif personnalisé ?"))) return;
     await supabase.from("client_pricing_rules" as never).delete().eq("id", r.id);
     load();
   };

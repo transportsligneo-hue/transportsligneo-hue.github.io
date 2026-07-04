@@ -234,7 +234,7 @@ function AdminTrajets() {
 
   const validerOffre = async (offre: Offre) => {
     if (!selected) return;
-    if (!confirm(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`)) return;
+    if (!(await confirmToast(`Valider ${offre.convoyeur?.prenom} ${offre.convoyeur?.nom} à ${offre.prix_propose} € ?`))) return;
 
     // 1) Récupérer toutes les autres offres en attente pour les notifier
     const { data: autresOffres } = await supabase
@@ -502,7 +502,7 @@ function AdminTrajets() {
 
   const cancelTrajet = async (t: Trajet) => {
     if (t.statut === "annule") return;
-    if (!confirm(`Annuler la mission ${t.depart} → ${t.arrivee} ?`)) return;
+    if (!(await confirmToast(`Annuler la mission ${t.depart} → ${t.arrivee} ?`))) return;
     await updateStatut(t.id, "annule");
     if (selected?.id === t.id) {
       setSelected({ ...selected, statut: "annule", statut_publication: "brouillon" });

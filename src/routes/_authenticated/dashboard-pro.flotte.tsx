@@ -148,7 +148,7 @@ function FleetPage() {
   };
 
   const archive = async (v: Vehicle) => {
-    if (!confirm(`Archiver le véhicule ${v.immatriculation || v.vin || "?"} ?`)) return;
+    if (!(await confirmToast(`Archiver le véhicule ${v.immatriculation || v.vin || "?"} ?`))) return;
     await supabase.from("vehicles")
       .update({ statut: "archive", archived_at: new Date().toISOString() })
       .eq("id", v.id);

@@ -405,7 +405,7 @@ function AdminAttributions() {
 
     if (!["annule", "validee", "termine"].includes(attribution.statut)) {
       buttons.push({ key: "cancel", label: "Annuler", icon: XCircle, variant: "danger", onClick: () => {
-        if (!confirm("Annuler définitivement cette mission ?")) return;
+        if (!(await confirmToast("Annuler définitivement cette mission ?"))) return;
         void updateStatut(attribution, "annule", { note: "Mission annulée par l'admin" });
       } });
     }

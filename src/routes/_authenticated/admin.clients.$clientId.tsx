@@ -211,7 +211,7 @@ function AdminClientDetail() {
 
   const toggleActif = async () => {
     const next = !actif;
-    if (!next && !window.confirm("Suspendre ce client ? Il ne pourra plus se connecter.")) return;
+    if (!next && !(await confirmToast("Suspendre ce client ? Il ne pourra plus se connecter."))) return;
     await supabase
       .from("user_roles")
       .update({ actif: next })
@@ -243,7 +243,7 @@ function AdminClientDetail() {
       profile?.email ?? "",
     );
     if (!newEmail || newEmail === profile?.email) return;
-    if (!window.confirm(`Changer l'email pour ${newEmail} ?\nLe client devra utiliser cet email pour se connecter.`)) return;
+    if (!(await confirmToast(`Changer l'email pour ${newEmail} ?\nLe client devra utiliser cet email pour se connecter.`))) return;
     setBusy("email");
     const { data, error } = await supabase.functions.invoke("admin-user-actions", {
       body: { action: "change_email", user_id: clientId, email: newEmail },

@@ -71,7 +71,7 @@ export function LogoUploader({
 
   const handleRemove = async () => {
     if (!value) return;
-    if (!window.confirm("Supprimer le logo ?")) return;
+    if (!(await confirmToast("Supprimer le logo ?"))) return;
     setUploading(true);
     try {
       // Extract storage path from public URL (after /company-logos/)

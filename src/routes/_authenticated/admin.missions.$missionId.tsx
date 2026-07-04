@@ -925,7 +925,7 @@ function AdminMissionDetail() {
                               <button
                                 type="button"
                                 onClick={async () => {
-                                  if (!window.confirm(`Supprimer la photo "${vueLabelFor(p.vue_type)}" ? Le conducteur pourra la reprendre.`)) return;
+                                  if (!(await confirmToast(`Supprimer la photo "${vueLabelFor(p.vue_type)}" ? Le conducteur pourra la reprendre.`))) return;
                                   try {
                                     if (p.storage_path) {
                                       await supabase.storage.from("inspection-photos").remove([p.storage_path]);

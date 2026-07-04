@@ -176,7 +176,7 @@ export function FavoriteAddressesManager({ clientUserId, clientEmail, variant = 
   };
 
   const remove = async (a: FavoriteAddressRow) => {
-    if (!window.confirm("Supprimer cette adresse ?")) return;
+    if (!(await confirmToast("Supprimer cette adresse ?"))) return;
     await supabase.from("client_default_addresses" as never).delete().eq("id", a.id);
     load();
   };

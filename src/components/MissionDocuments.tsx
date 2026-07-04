@@ -140,7 +140,7 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
   };
 
   const handleDelete = async (doc: MissionDocument) => {
-    if (!confirm(`Supprimer "${doc.nom_fichier}" ?`)) return;
+    if (!(await confirmToast(`Supprimer "${doc.nom_fichier}" ?`))) return;
     await supabase.storage.from("mission-documents").remove([doc.url_fichier]);
     await supabase.from("mission_documents").delete().eq("id", doc.id);
     fetchDocuments();

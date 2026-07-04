@@ -134,7 +134,7 @@ function AdminClients() {
   const toggleActif = async (userId: string, nextActif: boolean) => {
     if (
       !nextActif &&
-      !window.confirm("Suspendre ce client ? Il ne pourra plus se connecter à son espace.")
+      !(await confirmToast("Suspendre ce client ? Il ne pourra plus se connecter à son espace."))
     )
       return;
     await supabase

@@ -157,9 +157,9 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
     if (tab === "convoyeur") {
       const c = convoyeurs.find((x) => x.id === selected);
       if (c && c.statut !== "valide" && c.statut !== "actif") {
-        const ok = window.confirm(
+        const ok = (await confirmToast(
           `Attention : ${c.prenom} ${c.nom} n'a pas encore tous ses documents validés (statut : ${c.statut}).\n\nVoulez-vous quand même lui assigner cette mission ?`
-        );
+        ));
         if (!ok) return;
       }
     }
