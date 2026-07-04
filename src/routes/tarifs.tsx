@@ -45,6 +45,9 @@ function TarifsPage() {
                 "radial-gradient(50% 50% at 30% 0%, rgba(95,182,255,0.10), transparent 70%), radial-gradient(50% 60% at 70% 0%, rgba(231,199,106,0.10), transparent 70%)",
             }}
           />
+          <div aria-hidden className="cyber-aurora" />
+          <div aria-hidden className="cyber-grid opacity-60" />
+          <div aria-hidden className="cyber-scanline" />
 
           <div className="relative mx-auto max-w-4xl px-5 text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
@@ -59,8 +62,9 @@ function TarifsPage() {
             <h1 className="font-heading text-cream text-4xl lg:text-6xl tracking-wide leading-[1.08]">
               Tarifs transparents,
               <br />
-              <span className="gold-gradient-text">prix instantané.</span>
+              <span className="cyber-title-accent">prix instantané.</span>
             </h1>
+
 
             <p className="mx-auto mt-7 max-w-2xl text-cream/75 text-base lg:text-lg leading-relaxed">
               Estimez votre trajet en quelques secondes. Péages, carburant et assurance tout
