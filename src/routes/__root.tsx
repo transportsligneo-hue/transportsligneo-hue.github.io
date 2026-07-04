@@ -61,6 +61,30 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/icon-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icons/icon-512.png" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Transports Ligneo",
+          url: "https://transportsligneo.fr",
+          logo: "https://transportsligneo.fr/logo-ligneo.png",
+          description:
+            "Convoyage automobile premium pour particuliers et professionnels. Livraison de véhicules 7j/7 partout en France, au départ de Tours.",
+          telephone: "+33 6 12 34 56 78",
+          areaServed: "FR",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Tours",
+            addressCountry: "FR",
+          },
+          sameAs: [
+            "https://www.transportsligneo.fr",
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReserverRouteImport } from './routes/reserver'
@@ -130,6 +131,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TarifsRoute = TarifsRouteImport.update({
   id: '/tarifs',
   path: '/tarifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -771,6 +777,7 @@ export interface FileRoutesByFullPath {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -884,6 +891,7 @@ export interface FileRoutesByTo {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -992,6 +1000,7 @@ export interface FileRoutesById {
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -1107,6 +1116,7 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
+    | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
     | '/admin'
@@ -1220,6 +1230,7 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
+    | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
     | '/notifications'
@@ -1327,6 +1338,7 @@ export interface FileRouteTypes {
     | '/reserver'
     | '/reset-password'
     | '/services'
+    | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
     | '/_authenticated/admin'
@@ -1442,6 +1454,7 @@ export interface RootRouteChildren {
   ReserverRoute: typeof ReserverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
@@ -1476,6 +1489,13 @@ declare module '@tanstack/react-router' {
       path: '/tarifs'
       fullPath: '/tarifs'
       preLoaderRoute: typeof TarifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -2620,6 +2640,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReserverRoute: ReserverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
