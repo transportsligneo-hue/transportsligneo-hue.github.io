@@ -108,13 +108,13 @@ export default function HeroDesktop() {
 
           {/* Colonne droite : Simulateur en carte premium sombre */}
           <div id="devis" className="relative scroll-mt-32">
-            {/* Halo doré + électrique derrière la carte */}
+            {/* Halo bleu électrique derrière la carte */}
             <div
               aria-hidden
               className="pointer-events-none absolute -inset-6 rounded-[36px] opacity-70 blur-3xl"
               style={{
                 background:
-                  "radial-gradient(closest-side, rgba(231,199,106,0.28), transparent 70%), radial-gradient(closest-side at 80% 90%, rgba(95,182,255,0.30), transparent 70%)",
+                  "radial-gradient(closest-side, rgba(59,130,246,0.35), transparent 70%), radial-gradient(closest-side at 80% 90%, rgba(96,165,250,0.30), transparent 70%)",
               }}
             />
             <div className="relative">
