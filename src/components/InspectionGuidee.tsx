@@ -352,7 +352,10 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
         <h2 className="font-heading text-sm text-primary uppercase tracking-wider">
           État des lieux {type === "depart" ? "départ" : "arrivée"}
         </h2>
-        <span className="text-cream/50 text-xs">{currentStep + 1}/{VUE_TYPES.length}</span>
+        <div className="flex items-center gap-2">
+          {syncBadge}
+          <span className="text-cream/50 text-xs">{currentStep + 1}/{VUE_TYPES.length}</span>
+        </div>
       </div>
 
       {/* Progress bar */}
