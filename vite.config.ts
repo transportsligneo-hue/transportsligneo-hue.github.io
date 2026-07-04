@@ -12,6 +12,10 @@ Object.assign(process.env, serverEnv);
 
 export default defineConfig({
   vite: {
+    esbuild: {
+      // Strip console.* and debugger in production builds
+      drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
+    },
     resolve: {
       alias: {
         "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
