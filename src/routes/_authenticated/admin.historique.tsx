@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 
 export const Route = createFileRoute("/_authenticated/admin/historique")({
   component: AdminHistorique,
