@@ -13,7 +13,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, AlertCircle, ShieldCheck, Loader2, PenTool, Download } from "lucide-react";
+import { Check, AlertCircle, ShieldCheck, PenTool, Download } from "lucide-react";
 
 interface Props {
   attributionId: string;
