@@ -50,6 +50,8 @@ interface MyOffre {
   statut: string;
   type_offre: string;
   message: string | null;
+  admin_counter_offer?: number | null;
+  admin_counter_at?: string | null;
 }
 
 const offreStatutLabel: Record<string, string> = {
