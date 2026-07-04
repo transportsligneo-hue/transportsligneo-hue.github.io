@@ -466,6 +466,25 @@ function DemandeDrawer({
               <ArrowRightCircle size={12} className="mr-1" /> Convertir en trajet
             </Button>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                const { createQuoteFromDemande } = await import("@/lib/quote-from-demande.functions");
+                const res = await createQuoteFromDemande({ data: { demandeId: demande.id } });
+                if (res.created) toast.success(`Devis ${res.devis.numero} généré`);
+                else toast.info(`Devis déjà existant : ${res.devis.numero}`);
+              } catch (e) {
+                toast.error("Impossible de générer le devis", {
+                  description: e instanceof Error ? e.message : "Erreur inconnue",
+                });
+              }
+            }}
+            className="text-xs"
+          >
+            <FileText size={12} className="mr-1" /> Générer devis
+          </Button>
           <select
             value={demande.statut}
             onChange={(e) => updateStatut(e.target.value)}
