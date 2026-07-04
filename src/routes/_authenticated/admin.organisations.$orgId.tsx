@@ -219,15 +219,21 @@ function OrgDetail() {
         <TabsContent value="members" className="bg-white border border-pro-border rounded-xl p-4">
           {members.length === 0 ? <Empty icon={Users} text="Aucun membre" /> : (
             <div className="divide-y">
-              {members.map((m) => (
-                <div key={m.user_id} className="py-2 flex justify-between text-sm">
-                  <span className="font-mono text-xs">{m.user_id.slice(0, 8)}…</span>
-                  <div className="flex gap-2">
-                    <Badge variant="outline">{m.member_role}</Badge>
-                    <Badge variant="outline">{m.status}</Badge>
+              {members.map((m) => {
+                const fullName = [m.prenom, m.nom].filter(Boolean).join(" ") || null;
+                return (
+                  <div key={m.user_id} className="py-2 flex items-center justify-between text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-pro-text truncate">{fullName ?? m.user_id.slice(0, 8) + "…"}</p>
+                      {m.email && <p className="text-xs text-pro-muted truncate">{m.email}</p>}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Badge variant="outline">{m.member_role}</Badge>
+                      <Badge variant="outline">{m.status}</Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
