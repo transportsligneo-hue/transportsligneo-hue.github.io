@@ -120,19 +120,44 @@ export default function MobileHomeScreen() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={goEspace}
-            aria-label="Mon espace"
-            className="w-11 h-11 rounded-2xl border border-white/15 bg-white/[0.05] flex items-center justify-center tap-scale active:scale-95 transition-transform"
+            aria-label={espaceLabel}
+            className="h-11 pl-1.5 pr-3 rounded-2xl border border-[#e7c76a]/50 flex items-center gap-2 tap-scale active:scale-95 transition-transform"
+            style={{
+              background: "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(212,175,55,0.08) 100%)",
+              boxShadow: "0 8px 22px -10px rgba(231,199,106,0.55)",
+            }}
           >
-            <ShieldCheck size={17} className="text-[#93c5fd]" />
+            <span
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-[#0b1026] font-heading text-[13px]"
+              style={{ background: "linear-gradient(135deg, #e7c76a, #d4af37)" }}
+            >
+              {isAuthenticated && userInitial ? userInitial : <User size={15} />}
+            </span>
+            <span className="font-heading text-[11px] tracking-[0.18em] uppercase text-[#f4e7bf]">
+              {isAuthenticated ? "Espace" : "Connexion"}
+            </span>
           </button>
           <button
-            aria-label="Menu"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Ouvrir le menu"
+            aria-expanded={menuOpen}
             className="w-11 h-11 rounded-2xl border border-white/15 bg-white/[0.05] flex items-center justify-center tap-scale active:scale-95 transition-transform"
           >
             <Menu size={18} className="text-white/85" />
           </button>
         </div>
       </header>
+
+      {/* === DRAWER MENU === */}
+      <MobileMenuDrawer
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        isAuthenticated={isAuthenticated}
+        userEmail={user?.email ?? null}
+        onEspace={goEspace}
+        onLogout={handleLogout}
+      />
+
 
       <main className="relative z-10 px-4 pt-4 space-y-5">
         {/* === Hero image + Greeting === */}
