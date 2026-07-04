@@ -142,16 +142,16 @@ function AdminHistorique() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className="text-[10px]">{r.action}</Badge>
-                          <span className="text-xs text-pro-muted">{r.entity_type}</span>
+                          <Badge variant="outline" className="text-[10px] capitalize">{r.entity_type}</Badge>
+                          <span className="text-[11px] text-pro-muted font-mono">{r.action}</span>
                         </div>
-                        <p className="text-sm text-pro-text mt-1">
-                          {r.actor_label ?? r.actor_user_id?.slice(0, 8) ?? "système"}
-                          {r.metadata?.email && <span className="text-pro-muted"> · {r.metadata.email}</span>}
+                        <p className="text-sm text-pro-text mt-1 leading-snug">
+                          <span className="font-medium">{actorLabel(r)}</span>{" "}
+                          {humanizeAction(r.action, r.entity_type, r.metadata)}
+                          {r.metadata?.email && !String(humanizeAction(r.action, r.entity_type, r.metadata)).includes(r.metadata.email) && (
+                            <span className="text-pro-muted"> · {r.metadata.email}</span>
+                          )}
                         </p>
-                        {r.metadata && Object.keys(r.metadata).length > 0 && (
-                          <p className="text-[11px] text-pro-muted truncate mt-0.5">{JSON.stringify(r.metadata)}</p>
-                        )}
                       </div>
                       <span className="text-[11px] text-pro-muted shrink-0">
                         {new Date(r.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
