@@ -782,7 +782,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={!isComplete}
-                className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(231,199,106,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
+                className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
               >
                 <Send size={14} /> Obtenir mon prix
               </button>
