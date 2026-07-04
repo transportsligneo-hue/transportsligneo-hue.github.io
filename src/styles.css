@@ -969,13 +969,12 @@
 
   /* === Transition fluide entre étapes EDL === */
   @keyframes edl-step-enter {
-    0%   { opacity: 0; transform: translateY(8px) scale(0.985); filter: blur(4px); }
-    60%  { opacity: 1; filter: blur(0); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    0%   { opacity: 0.88; transform: translateY(2px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   .edl-step-enter {
-    animation: edl-step-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    will-change: transform, opacity, filter;
+    animation: edl-step-enter 110ms ease-out both;
+    will-change: transform, opacity;
   }
   @media (prefers-reduced-motion: reduce) {
     .edl-step-enter { animation: none; }
