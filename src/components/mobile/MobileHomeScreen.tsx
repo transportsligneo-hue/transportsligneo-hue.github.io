@@ -149,7 +149,7 @@ export default function MobileHomeScreen() {
                 Accueil
               </p>
               <h1 className="font-heading text-[26px] leading-[1.1] text-white mt-1.5">
-                Bonjour 👋
+                Transports Ligneo
               </h1>
               <p className="text-white/75 text-[13px] mt-1.5 leading-relaxed">
                 Estimez, réservez et suivez votre convoyage automobile.
