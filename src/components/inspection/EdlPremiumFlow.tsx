@@ -2032,6 +2032,11 @@ function ChecklistArea({
         <span style={{ fontSize: 22 }}>{cable ? "✅" : "⬜"}</span>
         <span>Câble de recharge (si électrique)</span>
       </button>
+      <button type="button" onClick={() => setTapisSol(v => !v)} style={itemStyle(tapisSol)}>
+        <span style={{ fontSize: 22 }}>{tapisSol ? "✅" : "⬜"}</span>
+        <span>Tapis de sol</span>
+      </button>
+
 
       <div style={{ marginTop: 4 }}>
         <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>
