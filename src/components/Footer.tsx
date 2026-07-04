@@ -21,7 +21,7 @@ export default function Footer() {
                 loading="lazy"
               />
             </Link>
-            <p className="font-heading text-primary tracking-[0.2em] uppercase text-base mb-2">
+            <p className="font-heading text-[#60a5fa] tracking-[0.2em] uppercase text-base mb-2">
               Transports Ligneo
             </p>
             <p className="text-cream/50 text-sm leading-relaxed">
