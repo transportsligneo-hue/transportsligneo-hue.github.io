@@ -145,22 +145,31 @@ function AdminAttributions() {
 
   useEffect(() => {
     if (!selectedAttr) { setAttrDetail(null); return; }
+    let cancelled = false;
     (async () => {
-      const { data: t } = await supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle();
-      const { data: a } = await supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle();
+      const [{ data: t }, { data: a }] = await Promise.all([
+        supabase.from("trajets").select("vin, carte_grise_recto_url, carte_grise_verso_url, marque, modele, immatriculation, client_email, client_telephone, prix").eq("id", selectedAttr.trajet_id).maybeSingle(),
+        supabase.from("attributions").select("numero_mission, etape_courante").eq("id", selectedAttr.id).maybeSingle(),
+      ]);
       const sign = async (path: string | null | undefined) => {
         if (!path) return null;
         if (/^https?:\/\//.test(path)) return path;
         const { data } = await supabase.storage.from("cartes-grises").createSignedUrl(path, 3600);
         return data?.signedUrl ?? null;
       };
+      const [cgRectoSigned, cgVersoSigned] = await Promise.all([
+        sign(t?.carte_grise_recto_url),
+        sign(t?.carte_grise_verso_url),
+      ]);
+      if (cancelled) return;
       setAttrDetail({
         ...(t ?? {}),
         ...(a ?? {}),
-        cgRectoSigned: await sign(t?.carte_grise_recto_url),
-        cgVersoSigned: await sign(t?.carte_grise_verso_url),
+        cgRectoSigned,
+        cgVersoSigned,
       });
     })();
+    return () => { cancelled = true; };
   }, [selectedAttr]);
 
   const handleEmitFacture = async (a: Attribution) => {
