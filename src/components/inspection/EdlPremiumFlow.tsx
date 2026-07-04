@@ -52,6 +52,8 @@ interface Props {
 
 interface StepState {
   status: "idle" | "uploading" | "success" | "error";
+  /** Identifiant local de capture pour protéger les uploads arrière-plan contre les reprises. */
+  captureId?: string;
   previewUrl?: string;
   storagePath?: string;
   error?: string;
@@ -162,6 +164,13 @@ async function prepareCapturedImage(raw: File) {
 function revokeBlobUrl(url?: string) {
   if (!url?.startsWith("blob:")) return;
   try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+}
+
+function newCaptureId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 export function EdlPremiumFlow({
@@ -762,6 +771,7 @@ export function EdlPremiumFlow({
   const processPhotoFile = (raw: File) => {
     const stepId = currentStep.id;
     const isScan = currentStep.kind === "scan";
+    const captureId = newCaptureId();
     let previewUrl: string | undefined;
 
     // 1) ACTIVATION IMMÉDIATE du bouton "Photo suivante" :
@@ -774,6 +784,7 @@ export function EdlPremiumFlow({
       previewUrl = URL.createObjectURL(raw);
       setState(stepId, {
         status: "success",
+        captureId,
         previewUrl,
         ocr: isScan ? { status: "pending" } : undefined,
       });
@@ -814,7 +825,7 @@ export function EdlPremiumFlow({
           // Mise à jour avec le storagePath confirmé (status reste success).
           setStates((prev) => {
             const cur = prev[stepId];
-            if (!cur || cur.previewUrl !== previewUrl) return prev; // étape déjà retaken/supprimée
+            if (!cur || cur.captureId !== captureId) return prev; // étape déjà retaken/supprimée
             return { ...prev, [stepId]: { ...cur, status: "success", storagePath: path } };
           });
 
@@ -860,7 +871,7 @@ export function EdlPremiumFlow({
           // Rollback : repasse l'étape en erreur si l'aperçu local est toujours actif.
           setStates((prev) => {
             const cur = prev[stepId];
-            if (!cur || cur.previewUrl !== previewUrl) return prev;
+            if (!cur || cur.captureId !== captureId) return prev;
             return {
               ...prev,
               [stepId]: {
