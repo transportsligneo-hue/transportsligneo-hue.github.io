@@ -1,6 +1,6 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
-import { LogoLoader } from "@/components/brand/LogoLoader";
+
 
 function DefaultErrorComponent({
   error,
@@ -63,12 +63,6 @@ function DefaultErrorComponent({
   );
 }
 
-/** Loader plein écran affiché pendant les transitions de route (>200ms).
- *  Sous 200ms : aucun écran intermédiaire — l'écran précédent reste visible. */
-function DefaultPendingComponent() {
-  return <LogoLoader fullScreen label="Chargement…" />;
-}
-
 export const getRouter = () => {
   const router = createRouter({
     routeTree,
@@ -77,11 +71,11 @@ export const getRouter = () => {
     // Préchargement à l'intention (hover/focus) → navigation perçue instantanée
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
-    // Garde l'ancien écran visible 200ms avant d'afficher le loader → pas de flash blanc
-    defaultPendingMs: 200,
-    defaultPendingMinMs: 300,
+    // Pas d'écran de chargement intermédiaire — l'écran précédent reste visible
+    // jusqu'à ce que la nouvelle route soit prête (sensation d'app native).
+    defaultPendingMs: 10_000,
+    defaultPendingMinMs: 0,
     defaultErrorComponent: DefaultErrorComponent,
-    defaultPendingComponent: DefaultPendingComponent,
   });
 
   return router;
