@@ -233,32 +233,34 @@ export default function MobileHomeScreen() {
           </button>
         </Reveal>
 
-        {/* === Accès rapides === */}
+        {/* === Accès rapides — bento premium === */}
         <Reveal delay={100}>
           <div className="grid grid-cols-2 gap-3">
             <QuickTile
-              icon={<FileText size={18} />}
+              icon={<FileText size={20} />}
               label="Mes devis"
+              sublabel="Historique & suivi"
               onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
             />
             <QuickTile
-              icon={<Truck size={18} />}
+              icon={<Truck size={20} />}
               label="Mes missions"
+              sublabel="Trajets en cours"
               onClick={() =>
                 navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })
               }
             />
             <QuickTile
-              icon={isAuthenticated && userInitial ? <span className="font-heading text-[13px]">{userInitial}</span> : <LogIn size={18} />}
+              icon={isAuthenticated && userInitial ? <span className="font-heading text-[15px]">{userInitial}</span> : <LogIn size={20} />}
               label={espaceLabel}
-              sublabel={isAuthenticated ? "Tableau de bord" : "Accéder à mon compte"}
+              sublabel={isAuthenticated ? "Tableau de bord" : "Mon compte"}
               onClick={goEspace}
               highlight
             />
-
             <QuickTile
-              icon={<Phone size={18} />}
+              icon={<Phone size={20} />}
               label="Contact"
+              sublabel="Équipe 7j/7"
               onClick={() => navigate({ to: "/contact" })}
             />
           </div>
@@ -268,7 +270,7 @@ export default function MobileHomeScreen() {
         <Reveal delay={140}>
           <section
             id="mobile-devis"
-            className="scroll-mt-20 rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden"
+            className="scroll-mt-20 rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden"
             style={{
               boxShadow:
                 "0 24px 60px -22px rgba(59,130,246,0.30), 0 0 0 1px rgba(255,255,255,0.04) inset",
@@ -329,9 +331,9 @@ export default function MobileHomeScreen() {
           </div>
         </Reveal>
 
-        {/* === Points forts === */}
+        {/* === Points forts — pills === */}
         <Reveal delay={220}>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex flex-wrap gap-2">
             {[
               { icon: Zap, label: "Réponse immédiate" },
               { icon: Euro, label: "Tarif transparent" },
@@ -340,14 +342,17 @@ export default function MobileHomeScreen() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl border border-white/10 bg-white/[0.04]"
+                className="flex items-center gap-1.5 pl-2 pr-3.5 py-1.5 rounded-full border border-white/12 bg-white/[0.04]"
               >
-                <Icon size={14} className="text-[#93c5fd] shrink-0" />
-                <span className="text-white/85 text-[11.5px]">{label}</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center border border-[#60a5fa]/30 bg-[#60a5fa]/10">
+                  <Icon size={11} className="text-[#93c5fd]" />
+                </span>
+                <span className="text-white/85 text-[11.5px] tracking-wide">{label}</span>
               </div>
             ))}
           </div>
         </Reveal>
+
 
         {/* === Comment ça marche === */}
         <Reveal delay={260}>
