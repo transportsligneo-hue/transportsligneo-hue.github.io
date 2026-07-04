@@ -101,13 +101,17 @@ ${form.message}`;
       >
         <div aria-hidden className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%)" }} />
+        <div aria-hidden className="cyber-aurora" />
+        <div aria-hidden className="cyber-grid opacity-60" />
+        <div aria-hidden className="cyber-scanline" />
         <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/[0.08] px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
+          <span className="cyber-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] font-heading">
             Contact
           </span>
           <h1 className="font-heading text-4xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.1]">
-            Parlons de votre <span className="gold-gradient-text">trajet.</span>
+            Parlons de votre <span className="cyber-title-accent">trajet.</span>
           </h1>
+
           <p className="text-cream/70 mt-6 text-base lg:text-lg leading-relaxed">
             Une question, un devis, un partenariat : notre équipe vous répond sous 24h.
           </p>
