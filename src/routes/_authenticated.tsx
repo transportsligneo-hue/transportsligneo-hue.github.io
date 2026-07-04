@@ -3,12 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
-    // Browser-side gate: blocks the auth shell from rendering before
-    // the Supabase session is hydrated. Edge/RLS still enforces real auth
-    // for any data access; this prevents flashes of authenticated UI.
+    // Gate UX instantané : lit la session locale au lieu d'appeler le réseau.
+    // Les accès réels restent protégés côté backend/RLS ; ici on évite surtout
+    // le spinner blanc au retour de l'appareil photo mobile pendant l'EDL.
     if (typeof window === "undefined") return;
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session?.user) {
       throw redirect({
         to: "/login",
         search: { redirect: location.href } as never,
