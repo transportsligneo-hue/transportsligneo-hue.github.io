@@ -137,6 +137,8 @@ function AdminClientDetail() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [actif, setActif] = useState(true);
   const [missions, setMissions] = useState<MissionItem[]>([]);
+  const [devisList, setDevisList] = useState<DevisItem[]>([]);
+  const [factures, setFactures] = useState<FactureItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Editable>(EMPTY);
