@@ -179,7 +179,13 @@ function AdminClientDetail() {
     setActif((role as { actif?: boolean } | null)?.actif ?? true);
     setMissions((m as MissionItem[]) ?? []);
     setDevisList((d as DevisItem[] | null) ?? []);
-    setFactures((f as FactureItem[] | null) ?? []);
+    const factRows = (f as (FactureItem & { client_email?: string | null })[] | null) ?? [];
+    const clientEmailLc = (prof?.email ?? "").toLowerCase();
+    setFactures(
+      clientEmailLc
+        ? factRows.filter((row) => (row.client_email ?? "").toLowerCase() === clientEmailLc)
+        : [],
+    );
     if (prof) {
       const init: Editable = {
         prenom: prof.prenom ?? "",
