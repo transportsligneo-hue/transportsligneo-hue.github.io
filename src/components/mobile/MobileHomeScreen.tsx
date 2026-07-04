@@ -148,7 +148,7 @@ export default function MobileHomeScreen() {
               <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
                 Accueil
               </p>
-              <h1 className="font-heading text-[26px] leading-[1.1] text-white mt-1.5">
+              <h1 className="font-heading text-[26px] leading-[1.1] mt-1.5 uppercase tracking-[0.08em] text-gold-luxe">
                 Transports Ligneo
               </h1>
               <p className="text-white/75 text-[13px] mt-1.5 leading-relaxed">
@@ -238,7 +238,7 @@ export default function MobileHomeScreen() {
           >
             <div className="flex items-end justify-between px-5 pt-5 pb-3">
               <div>
-                <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-gold-luxe font-heading">
                   Estimation
                 </p>
                 <h2 className="font-heading text-white text-[19px] tracking-wide mt-1">
@@ -263,7 +263,7 @@ export default function MobileHomeScreen() {
         {/* === Stats compactes === */}
         <Reveal delay={180}>
           <div>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading mb-3">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gold-luxe font-heading mb-3">
               Vue d'ensemble
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -317,7 +317,7 @@ export default function MobileHomeScreen() {
             className="rounded-3xl p-5 border border-white/10 bg-white/[0.04] backdrop-blur-xl"
           >
             <div className="flex items-end justify-between mb-5">
-              <h3 className="font-heading text-white text-[18px] tracking-wide">
+              <h3 className="font-heading text-[18px] tracking-wide text-gold-luxe">
                 Comment ça marche
               </h3>
               <Link
@@ -349,7 +349,7 @@ export default function MobileHomeScreen() {
                 <Phone size={20} className="text-[#93c5fd]" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-heading text-white text-[16px]">Une question ?</p>
+                <p className="font-heading text-[16px] text-gold-luxe">Une question ?</p>
                 <p className="text-white/60 text-[12px] mt-0.5">
                   Devis personnalisé, urgences, flottes.
                 </p>
