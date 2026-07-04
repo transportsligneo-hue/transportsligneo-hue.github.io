@@ -1989,12 +1989,14 @@ function ChecklistArea({
     kit_securite: false,
     cable_charge: false,
     tapis_sol: false,
+    doubles_cles: false,
     roue: null,
   };
   const [extincteur, setExtincteur] = useState<boolean>(initial.extincteur);
   const [kitSec, setKitSec] = useState<boolean>(initial.kit_securite);
   const [cable, setCable] = useState<boolean>(initial.cable_charge);
   const [tapisSol, setTapisSol] = useState<boolean>(initial.tapis_sol ?? false);
+  const [doublesCles, setDoublesCles] = useState<boolean>(initial.doubles_cles ?? false);
   const [roue, setRoue] = useState<NonNullable<StepState["equipements"]>["roue"]>(initial.roue);
 
   const isSaved = state?.status === "success";
@@ -2024,6 +2026,10 @@ function ChecklistArea({
         Cochez la présence de chaque équipement avant de continuer.
       </p>
 
+      <button type="button" onClick={() => setDoublesCles(v => !v)} style={itemStyle(doublesCles)}>
+        <span style={{ fontSize: 22 }}>{doublesCles ? "✅" : "⬜"}</span>
+        <span>Double des clés remis</span>
+      </button>
       <button type="button" onClick={() => setExtincteur(v => !v)} style={itemStyle(extincteur)}>
         <span style={{ fontSize: 22 }}>{extincteur ? "✅" : "⬜"}</span>
         <span>Extincteur</span>
@@ -2077,7 +2083,7 @@ function ChecklistArea({
         type="button"
         disabled={!canValidate || isSaving}
         onClick={() =>
-          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, roue })
+          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, doubles_cles: doublesCles, roue })
         }
         style={{
           marginTop: 8,
