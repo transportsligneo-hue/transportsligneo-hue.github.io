@@ -82,6 +82,37 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Écoute la file de synchro pour mettre à jour le statut par vignette.
+  useEffect(() => {
+    const unsub = subscribeQueue((key, state) => {
+      const [insId, vueType] = key.split(":");
+      if (!inspectionId || insId !== inspectionId) return;
+      setSyncState((prev) => ({ ...prev, [vueType]: state }));
+      if (state === "sent") {
+        setPendingUploads((prev) => {
+          const { [vueType]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+    });
+    return () => { unsub(); };
+  }, [inspectionId]);
+
+  // Au montage, si des uploads sont encore en file pour cette inspection,
+  // marque leur statut "pending" et relance la file.
+  useEffect(() => {
+    if (!inspectionId) return;
+    void pendingKeysForInspection(inspectionId).then((keys) => {
+      if (keys.length === 0) return;
+      setSyncState((prev) => {
+        const next = { ...prev };
+        keys.forEach((k) => { next[k.split(":")[1]] = "pending"; });
+        return next;
+      });
+      kickQueue();
+    });
+  }, [inspectionId]);
+
 
 
   const animateStep = (newStep: number) => {
