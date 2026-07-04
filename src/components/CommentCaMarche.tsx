@@ -65,14 +65,14 @@ export default function CommentCaMarche() {
           {steps.map((s, i) => (
             <div
               key={i}
-              className="relative rounded-2xl border border-[#e7c76a]/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-md p-8 lg:p-9 transition-all duration-300 hover:border-[#e7c76a]/45 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(231,199,106,0.35)]"
+              className="relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md p-8 lg:p-9 transition-all duration-300 hover:border-[#60a5fa]/50 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(59,130,246,0.35)]"
             >
               {/* Numéro géant doré en arrière-plan */}
               <span
                 aria-hidden
                 className="absolute top-3 right-5 font-heading text-[64px] lg:text-[72px] leading-none select-none pointer-events-none"
                 style={{
-                  background: "linear-gradient(180deg, rgba(231,199,106,0.18), rgba(231,199,106,0.02))",
+                  background: "linear-gradient(180deg, rgba(96,165,250,0.18), rgba(96,165,250,0.02))",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -81,9 +81,9 @@ export default function CommentCaMarche() {
                 {s.step}
               </span>
 
-              {/* Icône cercle doré */}
-              <div className="relative w-14 h-14 rounded-xl border border-[#e7c76a]/40 bg-gradient-to-br from-[#e7c76a]/15 to-[#e7c76a]/0 grid place-items-center mb-6">
-                <s.icon className="text-[#e7c76a]" size={22} strokeWidth={1.7} />
+              {/* Icône cercle bleu électrique */}
+              <div className="relative w-14 h-14 rounded-xl border border-[#60a5fa]/40 bg-gradient-to-br from-[#60a5fa]/15 to-[#60a5fa]/0 grid place-items-center mb-6">
+                <s.icon className="text-[#60a5fa]" size={22} strokeWidth={1.7} />
               </div>
 
               <h3 className="font-heading text-cream text-[18px] tracking-[0.02em] mb-3">
