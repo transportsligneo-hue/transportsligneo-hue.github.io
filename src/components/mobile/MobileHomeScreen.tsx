@@ -503,54 +503,77 @@ function QuickTile({
   return (
     <button
       onClick={onClick}
-      className={`rounded-2xl p-4 border flex items-center gap-3 active:scale-[0.97] transition-transform text-left ${
-        highlight
-          ? "border-[#e7c76a]/55"
-          : "border-white/10 bg-white/[0.04]"
+      className={`group relative rounded-[26px] p-4 pb-4 border overflow-hidden active:scale-[0.97] transition-transform text-left min-h-[124px] flex flex-col justify-between ${
+        highlight ? "border-[#e7c76a]/55" : "border-white/10"
       }`}
       style={
         highlight
           ? {
               background:
-                "linear-gradient(135deg, rgba(231,199,106,0.18) 0%, rgba(15,45,128,0.55) 100%)",
+                "linear-gradient(155deg, rgba(231,199,106,0.22) 0%, rgba(15,45,128,0.75) 55%, rgba(11,16,38,0.9) 100%)",
               boxShadow:
-                "0 18px 40px -18px rgba(231,199,106,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
+                "0 22px 50px -22px rgba(231,199,106,0.55), 0 0 0 1px rgba(255,255,255,0.05) inset",
             }
-          : undefined
+          : {
+              background:
+                "linear-gradient(155deg, rgba(255,255,255,0.06) 0%, rgba(15,45,128,0.35) 60%, rgba(11,16,38,0.55) 100%)",
+              boxShadow:
+                "0 18px 42px -22px rgba(59,130,246,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset",
+            }
       }
     >
+      {/* Halo décoratif */}
       <span
-        className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${
-          highlight
-            ? "text-[#0b1026]"
-            : "border border-[#60a5fa]/30 text-[#93c5fd]"
+        aria-hidden
+        className={`pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl ${
+          highlight ? "bg-[#e7c76a]/25" : "bg-[#60a5fa]/25"
+        }`}
+      />
+      <span
+        className={`relative w-11 h-11 rounded-2xl flex items-center justify-center ${
+          highlight ? "text-[#0b1026]" : "text-[#93c5fd] border border-[#60a5fa]/35"
         }`}
         style={
           highlight
-            ? { background: "linear-gradient(135deg, #e7c76a, #d4af37)" }
-            : { background: "rgba(96,165,250,0.12)" }
+            ? {
+                background: "linear-gradient(135deg, #e7c76a, #d4af37)",
+                boxShadow: "0 10px 24px -8px rgba(231,199,106,0.65)",
+              }
+            : {
+                background:
+                  "linear-gradient(135deg, rgba(96,165,250,0.22) 0%, rgba(59,130,246,0.08) 100%)",
+                boxShadow: "0 8px 22px -10px rgba(96,165,250,0.5)",
+              }
         }
       >
         {icon}
       </span>
-      <span className="flex-1 min-w-0">
-        <span
-          className={`block text-[13px] font-heading tracking-wide ${
-            highlight ? "text-[#f4e7bf]" : "text-white"
-          }`}
-        >
-          {label}
-        </span>
+      <div className="relative mt-3">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`block text-[14px] font-heading tracking-wide ${
+              highlight ? "text-[#f4e7bf]" : "text-white"
+            }`}
+          >
+            {label}
+          </span>
+          <ChevronRight
+            size={13}
+            className={`shrink-0 translate-x-0 group-active:translate-x-0.5 transition-transform ${
+              highlight ? "text-[#e7c76a]/80" : "text-white/40"
+            }`}
+          />
+        </div>
         {sublabel && (
-          <span className="block text-[11px] text-white/55 mt-0.5 truncate">
+          <span className="block text-[10.5px] text-white/55 mt-1 tracking-wide truncate">
             {sublabel}
           </span>
         )}
-      </span>
-      {highlight && <ChevronRight size={16} className="text-[#e7c76a]/70 shrink-0" />}
+      </div>
     </button>
   );
 }
+
 
 /* ==== Drawer menu mobile ==== */
 function MobileMenuDrawer({
