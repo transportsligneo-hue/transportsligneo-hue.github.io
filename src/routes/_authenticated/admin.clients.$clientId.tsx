@@ -170,10 +170,9 @@ function AdminClientDetail() {
         .limit(50),
       supabase
         .from("factures")
-        .select("id, numero, montant_ttc, statut, created_at")
-        .eq("user_id", clientId)
+        .select("id, numero, montant_ttc, statut, created_at, client_email")
         .order("created_at", { ascending: false })
-        .limit(50),
+        .limit(200),
     ]);
     const prof = p as Profile | null;
     setProfile(prof);
