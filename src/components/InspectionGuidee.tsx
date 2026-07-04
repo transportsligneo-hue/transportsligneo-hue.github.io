@@ -30,7 +30,7 @@ type ViewMode = "capture" | "recap";
 export function InspectionGuidee({ attributionId, type, userId, onComplete, onCancel }: InspectionGuideeProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [photos, setPhotos] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<Record<string, boolean>>({});
   const [completing, setCompleting] = useState(false);
   const [inspectionId, setInspectionId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("capture");
