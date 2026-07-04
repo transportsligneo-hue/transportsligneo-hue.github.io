@@ -8,9 +8,9 @@ export const Route = createFileRoute("/comment-ca-marche")({
   head: () => ({
     meta: [
       { title: "Comment ça marche — Transports Ligneo" },
-      { name: "description", content: "Réservation, prise en charge, livraison : découvrez les 3 étapes simples du convoyage Transports Ligneo." },
+      { name: "description", content: "12 étapes 100% digitalisées + plateforme de gestion de flotte : suivi GPS, EDL, documents et facturation centralisés." },
       { property: "og:title", content: "Comment ça marche — Transports Ligneo" },
-      { property: "og:description", content: "Le processus de convoyage Transports Ligneo en 3 étapes claires." },
+      { property: "og:description", content: "12 étapes claires et une véritable gestion de flotte : dashboard, historique, suivi temps réel et documents centralisés." },
     ],
   }),
 });
