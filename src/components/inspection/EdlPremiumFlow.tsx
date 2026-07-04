@@ -2073,7 +2073,7 @@ function ChecklistArea({
         type="button"
         disabled={!canValidate || isSaving}
         onClick={() =>
-          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, roue })
+          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, roue })
         }
         style={{
           marginTop: 8,
