@@ -111,7 +111,7 @@ export default function MobileHomeScreen() {
           >
             <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
           </span>
-          <span className="hidden xs:inline-block font-heading text-white text-[13px] leading-tight tracking-[0.18em] uppercase truncate">
+          <span className="hidden sm:inline-block font-heading text-white text-[13px] leading-tight tracking-[0.18em] uppercase truncate">
             Ligneo
           </span>
         </Link>
