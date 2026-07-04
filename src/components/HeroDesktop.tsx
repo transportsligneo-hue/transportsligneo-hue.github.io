@@ -22,7 +22,11 @@ export default function HeroDesktop() {
   return (
     <section
       id="accueil"
-      className="relative overflow-hidden pt-24 bg-[#0b1026]"
+      className="relative overflow-hidden pt-24"
+      style={{
+        background:
+          "linear-gradient(180deg, #061238 0%, #0a1f5c 35%, #0f2d80 100%)",
+      }}
     >
       {/* Image de fond */}
       <div className="absolute inset-0">
@@ -39,7 +43,7 @@ export default function HeroDesktop() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(11,16,38,0.94) 0%, rgba(11,16,38,0.78) 35%, rgba(11,16,38,0.55) 65%, rgba(11,16,38,0.65) 100%)",
+              "linear-gradient(90deg, rgba(6,18,56,0.94) 0%, rgba(6,18,56,0.78) 35%, rgba(6,18,56,0.55) 65%, rgba(6,18,56,0.65) 100%)",
           }}
         />
       </div>
