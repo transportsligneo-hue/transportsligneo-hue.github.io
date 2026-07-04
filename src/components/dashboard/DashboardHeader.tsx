@@ -53,38 +53,51 @@ export function DashboardHeader({
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [autoNotifs, setAutoNotifs] = useState<Notification[]>([]);
+  const [unreadAuto, setUnreadAuto] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const isDark = variant === "dark";
 
-  // === Notifs auto (fallback générique : 5 dernières demandes pour admin) ===
+  // === Notifs auto : user_notifications de l'utilisateur courant + realtime ===
   useEffect(() => {
     if (notifications) return;
-    if (!enableGlobalSearch) return;
-    supabase
-      .from("demandes_convoyage")
-      .select("id, prenom, nom, depart, arrivee, created_at, statut")
-      .eq("statut", "nouvelle")
-      .order("created_at", { ascending: false })
-      .limit(5)
-      .then(({ data }) => {
-        if (!data) return;
-        setAutoNotifs(
-          data.map((d) => ({
-            id: d.id,
-            title: `Nouvelle demande — ${d.prenom} ${d.nom}`,
-            description: `${d.depart} → ${d.arrivee}`,
-            date: d.created_at,
-            to: "/admin/demandes",
-          }))
-        );
-      });
-  }, [notifications, enableGlobalSearch]);
+    if (!user?.id) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("user_notifications" as never)
+        .select("id, titre, message, link, lu, created_at")
+        .eq("user_id" as never, user.id as never)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      const rows = (data as unknown as Array<{ id: string; titre: string; message: string | null; link: string | null; lu: boolean; created_at: string }>) ?? [];
+      setAutoNotifs(
+        rows.map((r) => ({
+          id: r.id,
+          title: r.titre,
+          description: r.message ?? undefined,
+          date: r.created_at,
+          to: r.link && r.link.startsWith("/") ? r.link : "/notifications",
+        }))
+      );
+      setUnreadAuto(rows.filter((r) => !r.lu).length);
+    };
+    load();
+    const channel = supabase
+      .channel(`hdr-notif-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
+        load
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [notifications, user?.id]);
 
   const finalNotifs = notifications ?? autoNotifs;
-  const unreadCount = finalNotifs.length;
+  const unreadCount = notifications ? notifications.length : unreadAuto;
+
 
   // === Recherche globale (debounce léger) ===
   useEffect(() => {
