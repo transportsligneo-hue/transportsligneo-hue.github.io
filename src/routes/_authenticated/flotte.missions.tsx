@@ -66,7 +66,12 @@ function FlotteMissions() {
             ) : rows.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-pro-muted">Aucune mission assignée</TableCell></TableRow>
             ) : rows.map((r) => (
-              <TableRow key={r.id} className="cursor-pointer hover:bg-pro-bg-soft">
+              <TableRow
+                key={r.id}
+                className="cursor-pointer hover:bg-pro-bg-soft"
+                onMouseEnter={() => prefetchMissionTracking(r.numero, r.id)}
+                onFocus={() => prefetchMissionTracking(r.numero, r.id)}
+              >
                 <TableCell className="font-mono text-xs">
                   <Link to="/flotte/missions/$missionId" params={{ missionId: r.id }} className="text-pro-accent hover:underline">
                     {r.numero}
