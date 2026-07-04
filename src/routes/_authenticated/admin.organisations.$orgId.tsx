@@ -50,6 +50,23 @@ function OrgDetail() {
       setOrg(orgRes.data);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
       const memberRows = membersRes.data ?? [];
+      // Hydrate members with profile info
+      const memberIds = memberRows.map((r: any) => r.user_id);
+      if (memberIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, prenom, nom, email")
+          .in("user_id", memberIds);
+        const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+        memberRows.forEach((r: any) => {
+          const p = map.get(r.user_id) as any;
+          if (p) {
+            r.prenom = p.prenom;
+            r.nom = p.nom;
+            r.email = p.email;
+          }
+        });
+      }
       setMembers(memberRows);
       setMissions(missionsRes.data ?? []);
       setB2bRequests(b2bRes.data ?? []);
