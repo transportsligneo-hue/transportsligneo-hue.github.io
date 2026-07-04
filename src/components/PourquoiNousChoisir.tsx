@@ -42,8 +42,8 @@ export default function PourquoiNousChoisir() {
 
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="font-heading text-[10px] tracking-[0.35em] uppercase text-primary/80">Notre signature</span>
-          <h2 className="font-heading text-3xl md:text-4xl text-navy mt-3 tracking-[0.02em]">
+          <span className="font-heading text-[10px] tracking-[0.35em] uppercase text-[#3b82f6]/80">Notre signature</span>
+          <h2 className="font-heading text-3xl md:text-4xl text-[#061238] mt-3 tracking-[0.02em]">
             Pourquoi nous <span className="gold-gradient-text">choisir</span>
           </h2>
           <div className="gold-divider-short mt-5" />
@@ -58,10 +58,10 @@ export default function PourquoiNousChoisir() {
               key={i}
               className="card-premium-light p-7 group"
             >
-              <div className="w-11 h-11 rounded-lg border border-primary/35 flex items-center justify-center mb-5 bg-gradient-to-br from-primary/12 to-primary/4 group-hover:border-primary/60 transition-colors">
-                <r.icon className="text-primary" size={20} strokeWidth={1.75} />
+              <div className="w-11 h-11 rounded-lg border border-[#60a5fa]/35 flex items-center justify-center mb-5 bg-gradient-to-br from-[#60a5fa]/12 to-[#60a5fa]/4 group-hover:border-[#60a5fa]/60 transition-colors">
+                <r.icon className="text-[#3b82f6]" size={20} strokeWidth={1.75} />
               </div>
-              <h3 className="font-heading text-navy text-base tracking-wide mb-2">
+              <h3 className="font-heading text-[#061238] text-base tracking-wide mb-2">
                 {r.title}
               </h3>
               <p className="text-[#5b6485] text-[13px] leading-relaxed">{r.desc}</p>
