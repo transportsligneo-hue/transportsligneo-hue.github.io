@@ -74,6 +74,7 @@ interface StepState {
     extincteur: boolean;
     kit_securite: boolean;
     cable_charge: boolean;
+    tapis_sol: boolean;
     roue: "secours" | "kit" | "aucun" | null;
   };
   /** Kilométrage saisi */
@@ -1983,11 +1984,13 @@ function ChecklistArea({
     extincteur: false,
     kit_securite: false,
     cable_charge: false,
+    tapis_sol: false,
     roue: null,
   };
   const [extincteur, setExtincteur] = useState<boolean>(initial.extincteur);
   const [kitSec, setKitSec] = useState<boolean>(initial.kit_securite);
   const [cable, setCable] = useState<boolean>(initial.cable_charge);
+  const [tapisSol, setTapisSol] = useState<boolean>(initial.tapis_sol ?? false);
   const [roue, setRoue] = useState<NonNullable<StepState["equipements"]>["roue"]>(initial.roue);
 
   const isSaved = state?.status === "success";
@@ -2029,6 +2032,11 @@ function ChecklistArea({
         <span style={{ fontSize: 22 }}>{cable ? "✅" : "⬜"}</span>
         <span>Câble de recharge (si électrique)</span>
       </button>
+      <button type="button" onClick={() => setTapisSol(v => !v)} style={itemStyle(tapisSol)}>
+        <span style={{ fontSize: 22 }}>{tapisSol ? "✅" : "⬜"}</span>
+        <span>Tapis de sol</span>
+      </button>
+
 
       <div style={{ marginTop: 4 }}>
         <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>
@@ -2065,7 +2073,7 @@ function ChecklistArea({
         type="button"
         disabled={!canValidate || isSaving}
         onClick={() =>
-          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, roue })
+          onValidate({ extincteur, kit_securite: kitSec, cable_charge: cable, tapis_sol: tapisSol, roue })
         }
         style={{
           marginTop: 8,

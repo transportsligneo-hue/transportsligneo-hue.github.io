@@ -2259,6 +2259,36 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          category: string
+          channel: string
+          created_at: string
+          enabled: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          channel: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          channel?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -2967,34 +2997,52 @@ export type Database = {
       }
       user_notifications: {
         Row: {
+          category: string
           created_at: string
+          dedup_key: string | null
+          deep_link: string | null
+          entity_id: string | null
+          entity_type: string | null
           id: string
           link: string | null
           lu: boolean
           message: string | null
           metadata: Json
+          priority: string
           titre: string
           type: string
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
+          dedup_key?: string | null
+          deep_link?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           link?: string | null
           lu?: boolean
           message?: string | null
           metadata?: Json
+          priority?: string
           titre: string
           type: string
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string
+          dedup_key?: string | null
+          deep_link?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           link?: string | null
           lu?: boolean
           message?: string | null
           metadata?: Json
+          priority?: string
           titre?: string
           type?: string
           user_id?: string
@@ -3436,6 +3484,22 @@ export type Database = {
           id: string
           numero: string
         }[]
+      }
+      create_user_notification: {
+        Args: {
+          _category?: string
+          _dedup_key?: string
+          _entity_id?: string
+          _entity_type?: string
+          _link?: string
+          _message?: string
+          _metadata?: Json
+          _priority?: string
+          _titre: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
