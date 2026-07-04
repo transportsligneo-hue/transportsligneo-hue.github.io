@@ -133,6 +133,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     const rawFile = e.target.files?.[0];
     if (!rawFile || !currentVue) return;
     const vueId = currentVue.id;
+    const captureId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     // Reset input immediately so user can re-pick same file later
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -146,34 +147,37 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
       }
       return { ...prev, [vueId]: previewUrl };
     });
+    setCaptureIds((prev) => ({ ...prev, [vueId]: captureId }));
     setPendingUploads((prev) => ({ ...prev, [vueId]: true }));
+    setSyncState((prev) => ({ ...prev, [vueId]: "pending" }));
 
-    // 2) Compress + upload en arrière-plan — TOTALEMENT non-bloquant.
-    //    L'utilisateur peut immédiatement passer à la vue suivante et prendre
-    //    une autre photo pendant que l'upload précédent finit.
+    // 2) Compression + mise en file offline en arrière-plan.
+    //    L'utilisateur peut immédiatement passer à la vue suivante.
     void (async () => {
       try {
         const file = await compressImage(rawFile, { maxDimension: 1280, quality: 0.72 });
         const insId = await ensureInspection();
-        const path = `${userId}/${insId}/${vueId}.jpg`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("inspection-photos")
-          .upload(path, file, { upsert: true, contentType: "image/jpeg" });
-        if (uploadError) throw uploadError;
-
-        await supabase.from("inspection_photos").upsert({
-          inspection_id: insId,
-          vue_type: vueId,
-          url_photo: path,
-        }, { onConflict: "inspection_id,vue_type" });
-      } catch (err) {
-        console.error("Upload error:", err);
-        setPhotos((prev) => {
-          const { [vueId]: _, ...rest } = prev;
-          return rest;
+        // Race guard : la photo a-t-elle été reprise entre temps ?
+        let stillCurrent = false;
+        setCaptureIds((prev) => {
+          stillCurrent = prev[vueId] === captureId;
+          return prev;
         });
-      } finally {
+        if (!stillCurrent) return;
+
+        const path = `${userId}/${insId}/${vueId}.jpg`;
+        await enqueueUpload({
+          key: `${insId}:${vueId}`,
+          inspectionId: insId,
+          vueType: vueId,
+          path,
+          blob: file,
+          contentType: "image/jpeg",
+          captureId,
+        });
+      } catch (err) {
+        console.error("Enqueue error:", err);
+        setSyncState((prev) => ({ ...prev, [vueId]: "failed" }));
         setPendingUploads((prev) => {
           const { [vueId]: _, ...rest } = prev;
           return rest;
