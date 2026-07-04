@@ -104,7 +104,7 @@ function AdminConvoyeurs() {
           else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
         }
         if (issues.length > 0) {
-          window.alert(
+          toast.error(
             `Activation impossible — ce convoyeur indépendant doit avoir tous ses documents approuvés.\n\n• ${issues.join("\n• ")}`,
           );
           return;

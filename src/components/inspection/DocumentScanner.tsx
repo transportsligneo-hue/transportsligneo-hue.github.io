@@ -279,7 +279,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
       await Promise.resolve(onScanned(file));
     } catch (err) {
       console.error("[DocumentScanner]", err);
-      alert("Recadrage impossible. Réessayez en élargissant les coins.");
+      toast.error("Recadrage impossible. Réessayez en élargissant les coins.");
     } finally {
       setProcessing(false);
     }

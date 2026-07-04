@@ -273,7 +273,7 @@ function AdminClients() {
                     body: { action: "change_email", user_id: selected.user_id, email: next.trim() },
                   });
                   if (error || (data as any)?.error) {
-                    window.alert(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
+                    toast.error(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
                     return;
                   }
                   setSelected({ ...selected, email: next.trim() });

@@ -111,7 +111,7 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
       } as PricingModeBlockProps["initial"]);
       setTimeout(() => setSavedAt(null), 2500);
     } else {
-      alert("Erreur de sauvegarde");
+      toast.error("Erreur de sauvegarde");
     }
   };
 

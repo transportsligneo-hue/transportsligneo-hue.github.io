@@ -160,7 +160,7 @@ function AdminTrajets() {
     if (!selected) return;
     const pct = parseFloat(pctInput);
     if (isNaN(pct) || pct < 0 || pct > 100) {
-      alert("Pourcentage invalide (0-100)");
+      toast.error("Pourcentage invalide (0-100)");
       return;
     }
     setSavingCommission(true);

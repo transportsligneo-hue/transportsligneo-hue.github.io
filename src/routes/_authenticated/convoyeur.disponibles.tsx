@@ -201,7 +201,7 @@ function ConvoyeurDisponibles() {
 
   const accepterPrixSuggere = async (trajet: TrajetDispo) => {
     if (!isValidated) {
-      alert("Vos documents doivent être validés avant d'accepter une mission.");
+      toast.error("Vos documents doivent être validés avant d'accepter une mission.");
       return;
     }
 
@@ -215,7 +215,7 @@ function ConvoyeurDisponibles() {
         _trajet_id: trajet.id,
       } as never);
       if (error) {
-        alert(error.message || "Cette mission n'est plus disponible.");
+        toast.error(error.message || "Cette mission n'est plus disponible.");
         setSubmitting(false);
         fetchData();
         return;
@@ -244,23 +244,23 @@ function ConvoyeurDisponibles() {
 
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
     if (!isValidated) {
-      alert("Vos documents doivent être validés avant de proposer un prix.");
+      toast.error("Vos documents doivent être validés avant de proposer un prix.");
       return;
     }
 
     if (trajet.pricing_mode === "fixe") {
-      alert("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
+      toast.error("Cette mission est en prix fixe, vous ne pouvez pas proposer un autre prix.");
       return;
     }
     if (!convoyeurId || !contrePrix) return;
     const prix = parseFloat(contrePrix);
     if (isNaN(prix) || prix <= 0) return;
     if (trajet.prix_convoyeur_min != null && prix < trajet.prix_convoyeur_min) {
-      alert(`Votre prix doit être au moins ${trajet.prix_convoyeur_min} €.`);
+      toast.error(`Votre prix doit être au moins ${trajet.prix_convoyeur_min} €.`);
       return;
     }
     if (trajet.prix_convoyeur_max != null && prix > trajet.prix_convoyeur_max) {
-      alert(`Votre prix doit être au maximum ${trajet.prix_convoyeur_max} €.`);
+      toast.error(`Votre prix doit être au maximum ${trajet.prix_convoyeur_max} €.`);
       return;
     }
     setSubmitting(true);

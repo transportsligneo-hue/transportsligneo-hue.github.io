@@ -88,7 +88,7 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
   const uploadFile = async (file: File, forcedType?: string) => {
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert("Fichier trop volumineux (max 10 Mo)");
+      toast.error("Fichier trop volumineux (max 10 Mo)");
       return;
     }
 
