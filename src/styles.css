@@ -179,7 +179,7 @@
   .tap-scale:active { transform: scale(0.94); }
 
   .glass-bar {
-    background: rgba(11, 16, 38, 0.78);
+    background: rgba(6, 18, 56, 0.78);
     backdrop-filter: saturate(160%) blur(16px);
     -webkit-backdrop-filter: saturate(160%) blur(16px);
   }
