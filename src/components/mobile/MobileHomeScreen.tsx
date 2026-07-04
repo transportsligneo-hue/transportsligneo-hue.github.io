@@ -38,9 +38,10 @@ import { useAuth } from "@/hooks/useAuth";
  * Style app, direct, sans emphase marketing.
  */
 export default function MobileHomeScreen() {
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role, user, logout } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -48,17 +49,33 @@ export default function MobileHomeScreen() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
   const goEspace = () => {
+    setMenuOpen(false);
     if (!isAuthenticated) return navigate({ to: "/login" });
     if (role === "admin" || role === "super_admin") return navigate({ to: "/admin" });
     if (role === "convoyeur") return navigate({ to: "/convoyeur" });
     return navigate({ to: "/dashboard-client" });
   };
 
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    try { await logout(); } catch {}
+    navigate({ to: "/" });
+  };
+
   const handleScrollToDevis = () => {
     const el = document.getElementById("mobile-devis");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const espaceLabel = isAuthenticated ? "Mon espace" : "Se connecter";
+  const userInitial = user?.email?.[0]?.toUpperCase() ?? "";
+
 
   return (
     <div className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-bottom-nav"
