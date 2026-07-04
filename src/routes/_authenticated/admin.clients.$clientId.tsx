@@ -71,6 +71,24 @@ interface MissionItem {
   prix_total: number | null;
 }
 
+interface DevisItem {
+  id: string;
+  numero: string | null;
+  depart: string | null;
+  arrivee: string | null;
+  prix_estime: number | null;
+  statut: string;
+  created_at: string;
+}
+
+interface FactureItem {
+  id: string;
+  numero: string | null;
+  montant_ttc: number | null;
+  statut: string;
+  created_at: string;
+}
+
 interface AccountStatus {
   email_confirmed_at: string | null;
   invited_at: string | null;
@@ -119,6 +137,8 @@ function AdminClientDetail() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [actif, setActif] = useState(true);
   const [missions, setMissions] = useState<MissionItem[]>([]);
+  const [devisList, setDevisList] = useState<DevisItem[]>([]);
+  const [factures, setFactures] = useState<FactureItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Editable>(EMPTY);
@@ -128,7 +148,7 @@ function AdminClientDetail() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: p }, { data: role }, { data: m }] = await Promise.all([
+    const [{ data: p }, { data: role }, { data: m }, { data: d }, { data: f }] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", clientId).maybeSingle(),
       supabase
         .from("user_roles")
@@ -142,11 +162,30 @@ function AdminClientDetail() {
         .eq("user_id", clientId)
         .order("date_prise_en_charge", { ascending: false })
         .limit(100),
+      supabase
+        .from("devis")
+        .select("id, numero, depart, arrivee, prix_estime, statut, created_at")
+        .eq("user_id", clientId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("factures")
+        .select("id, numero, montant_ttc, statut, created_at, client_email")
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
     const prof = p as Profile | null;
     setProfile(prof);
     setActif((role as { actif?: boolean } | null)?.actif ?? true);
     setMissions((m as MissionItem[]) ?? []);
+    setDevisList((d as DevisItem[] | null) ?? []);
+    const factRows = (f as (FactureItem & { client_email?: string | null })[] | null) ?? [];
+    const clientEmailLc = (prof?.email ?? "").toLowerCase();
+    setFactures(
+      clientEmailLc
+        ? factRows.filter((row) => (row.client_email ?? "").toLowerCase() === clientEmailLc)
+        : [],
+    );
     if (prof) {
       const init: Editable = {
         prenom: prof.prenom ?? "",
@@ -640,6 +679,70 @@ function AdminClientDetail() {
               </div>
             )}
           </AdminSection>
+
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <AdminSection title="Devis" description={`${devisList.length} devis`}>
+              {devisList.length === 0 ? (
+                <AdminEmpty icon={Receipt} title="Aucun devis" description="Aucun devis pour ce client." />
+              ) : (
+                <div className="overflow-x-auto -mx-1">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>N°</th>
+                        <th className="hidden sm:table-cell">Trajet</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {devisList.slice(0, 15).map((dv) => (
+                        <tr key={dv.id} className="admin-row-link" onClick={() => navigate({ to: "/admin/devis/$devisId", params: { devisId: dv.id } })}>
+                          <td className="font-mono text-xs">{dv.numero ?? dv.id.slice(0, 8)}</td>
+                          <td className="hidden sm:table-cell text-xs">
+                            {dv.depart ?? "?"} → {dv.arrivee ?? "?"}
+                          </td>
+                          <td className="admin-value">{dv.prix_estime ? `${dv.prix_estime.toLocaleString("fr-FR")} €` : "—"}</td>
+                          <td><AdminBadge label={dv.statut.replace(/_/g, " ")} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </AdminSection>
+
+            <AdminSection title="Factures" description={`${factures.length} facture${factures.length > 1 ? "s" : ""}`}>
+              {factures.length === 0 ? (
+                <AdminEmpty icon={Receipt} title="Aucune facture" description="Aucune facture émise." />
+              ) : (
+                <div className="overflow-x-auto -mx-1">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>N°</th>
+                        <th className="hidden sm:table-cell">Date</th>
+                        <th>Montant TTC</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {factures.slice(0, 15).map((fc) => (
+                        <tr key={fc.id}>
+                          <td className="font-mono text-xs">{fc.numero ?? fc.id.slice(0, 8)}</td>
+                          <td className="hidden sm:table-cell text-xs">
+                            {new Date(fc.created_at).toLocaleDateString("fr-FR")}
+                          </td>
+                          <td className="admin-value">{fc.montant_ttc ? `${fc.montant_ttc.toLocaleString("fr-FR")} €` : "—"}</td>
+                          <td><AdminBadge label={fc.statut.replace(/_/g, " ")} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </AdminSection>
+          </div>
 
           {profile.email && (
             <div className="mt-6 space-y-6">
