@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
-  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, Rocket,
+  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
