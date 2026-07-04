@@ -1,99 +1,73 @@
 /**
- * Compress an image client-side before upload.
- * Targets ~1600px max dimension and JPEG quality 0.78 (~150-300KB per photo).
+ * Compression image côté client — main-thread, robuste sur mobile.
  *
- * Stratégie perf :
- *  - Compression dans un Web Worker (OffscreenCanvas) → ne bloque pas le thread UI.
- *  - Fallback main-thread (createImageBitmap + canvas) si Worker / OffscreenCanvas indisponible.
- *  - Fallback final : fichier original retourné tel quel.
- *
- * Worker partagé et lazy (créé au premier appel, réutilisé ensuite).
+ * NB: on a essayé un Web Worker + OffscreenCanvas mais certains navigateurs
+ * mobiles (Samsung Internet, WebViews Android, Safari < 17) plantent
+ * silencieusement au milieu d'une séquence de photos (freeze après ~6-8 clichés).
+ * On repasse donc en main-thread avec :
+ *  - timeout dur (8s) pour ne jamais bloquer le flow EDL
+ *  - queue mono-thread (1 compression à la fois) pour éviter les pics mémoire
+ *  - libération immédiate du bitmap et du canvas
  */
 
-let _worker: Worker | null = null;
-let _workerBroken = false;
-let _reqId = 0;
-const _pending = new Map<number, (msg: { ok: boolean; blob?: Blob; reason?: string }) => void>();
+const MAX_TIMEOUT_MS = 8000;
 
-function getWorker(): Worker | null {
-  if (_workerBroken) return null;
-  if (_worker) return _worker;
-  if (typeof Worker === "undefined") return null;
-  try {
-    _worker = new Worker(new URL("./image-compression.worker.ts", import.meta.url), {
-      type: "module",
-    });
-    _worker.onmessage = (e: MessageEvent<{ id: number; ok: boolean; blob?: Blob; reason?: string }>) => {
-      const cb = _pending.get(e.data.id);
-      if (cb) {
-        _pending.delete(e.data.id);
-        cb(e.data);
-      }
-    };
-    _worker.onerror = () => {
-      _workerBroken = true;
-      _worker?.terminate();
-      _worker = null;
-    };
-    return _worker;
-  } catch {
-    _workerBroken = true;
-    return null;
-  }
-}
+let _queue: Promise<unknown> = Promise.resolve();
 
-function compressInWorker(
-  file: File,
-  maxDimension: number,
-  quality: number,
-  mimeType: string
-): Promise<Blob | null> {
-  const worker = getWorker();
-  if (!worker) return Promise.resolve(null);
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   return new Promise((resolve) => {
-    const id = ++_reqId;
-    const timeout = setTimeout(() => {
-      _pending.delete(id);
-      resolve(null);
-    }, 15000);
-    _pending.set(id, (msg) => {
-      clearTimeout(timeout);
-      resolve(msg.ok && msg.blob ? msg.blob : null);
-    });
-    try {
-      worker.postMessage({ id, file, maxDimension, quality, mimeType });
-    } catch {
-      _pending.delete(id);
-      clearTimeout(timeout);
-      resolve(null);
-    }
+    const t = setTimeout(() => resolve(null), ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      () => {
+        clearTimeout(t);
+        resolve(null);
+      }
+    );
   });
 }
 
-async function compressOnMainThread(
+async function doCompress(
   file: File,
   maxDimension: number,
   quality: number,
   mimeType: string
 ): Promise<Blob | null> {
+  let bitmap: ImageBitmap | null = null;
+  let canvas: HTMLCanvasElement | null = null;
   try {
-    const bitmap = await createImageBitmap(file);
+    bitmap = await createImageBitmap(file);
     const { width, height } = bitmap;
     const scale = Math.min(1, maxDimension / Math.max(width, height));
-    const w = Math.round(width * scale);
-    const h = Math.round(height * scale);
-    const canvas = document.createElement("canvas");
+    const w = Math.max(1, Math.round(width * scale));
+    const h = Math.max(1, Math.round(height * scale));
+    canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close?.();
-    return await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, mimeType, quality)
+    bitmap = null;
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas!.toBlob(resolve, mimeType, quality)
     );
+    return blob;
   } catch {
     return null;
+  } finally {
+    try {
+      bitmap?.close?.();
+    } catch {
+      /* noop */
+    }
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
   }
 }
 
@@ -104,19 +78,21 @@ export async function compressImage(
   const { maxDimension = 1600, quality = 0.78, mimeType = "image/jpeg" } = opts;
   if (!file.type.startsWith("image/")) return file;
 
-  try {
-    // 1) Tentative Worker (non bloquant pour l'UI)
-    let blob = await compressInWorker(file, maxDimension, quality, mimeType);
-    // 2) Fallback main-thread si Worker indispo
-    if (!blob) blob = await compressOnMainThread(file, maxDimension, quality, mimeType);
-    if (!blob) return file;
-    // 3) Si compression a grossi le fichier, garder l'original
-    if (blob.size >= file.size) return file;
+  // Queue mono-thread : une seule compression à la fois pour éviter les pics
+  // mémoire (chaque bitmap plein-format ~= 20-40 Mo sur un téléphone récent).
+  const run = _queue.then(() =>
+    withTimeout(doCompress(file, maxDimension, quality, mimeType), MAX_TIMEOUT_MS)
+  );
+  _queue = run.catch(() => undefined);
 
+  try {
+    const blob = await run;
+    if (!blob) return file;
+    if (blob.size >= file.size) return file;
     const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
     return new File([blob], newName, { type: mimeType, lastModified: Date.now() });
   } catch (err) {
-    console.warn("Image compression failed, using original", err);
+    console.warn("[image-compression] fallback original:", err);
     return file;
   }
 }
