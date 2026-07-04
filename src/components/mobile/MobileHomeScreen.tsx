@@ -18,6 +18,7 @@ import {
   Menu,
 } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import heroBg from "@/assets/hero-ligneo-night.jpg";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -120,20 +121,43 @@ export default function MobileHomeScreen() {
       </header>
 
       <main className="relative z-10 px-4 pt-4 space-y-5">
-        {/* === Greeting === */}
+        {/* === Hero image + Greeting === */}
         <Reveal>
-          <div>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
-              Accueil
-            </p>
-            <h1 className="font-heading text-[30px] leading-[1.1] text-white mt-2">
-              Bonjour 👋
-            </h1>
-            <p className="text-white/65 text-[13.5px] mt-2 leading-relaxed">
-              Estimez, réservez et suivez votre convoyage automobile.
-            </p>
+          <div
+            className="relative rounded-3xl overflow-hidden border border-white/10"
+            style={{
+              boxShadow:
+                "0 24px 60px -22px rgba(59,130,246,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset",
+            }}
+          >
+            <img
+              src={heroBg}
+              alt="Convoyage automobile premium Ligneo"
+              className="w-full h-[260px] object-cover"
+              loading="eager"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(6,18,56,0.15) 0%, rgba(6,18,56,0.55) 55%, rgba(6,18,56,0.95) 100%)",
+              }}
+            />
+            <div className="absolute inset-x-0 bottom-0 p-5">
+              <p className="text-[10px] tracking-[0.3em] uppercase text-[#93c5fd] font-heading">
+                Accueil
+              </p>
+              <h1 className="font-heading text-[26px] leading-[1.1] text-white mt-1.5">
+                Bonjour 👋
+              </h1>
+              <p className="text-white/75 text-[13px] mt-1.5 leading-relaxed">
+                Estimez, réservez et suivez votre convoyage automobile.
+              </p>
+            </div>
           </div>
         </Reveal>
+
 
         {/* === CTA principal === */}
         <Reveal delay={60}>
