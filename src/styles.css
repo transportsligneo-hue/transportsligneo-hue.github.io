@@ -196,6 +196,20 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .text-gold-luxe {
+    background: linear-gradient(90deg, #d4af37 0%, #e7c76a 20%, #f5d88a 40%, #e7c76a 60%, #d4af37 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
+    animation: gold-luxe-shimmer 2600ms linear infinite;
+  }
+  @keyframes gold-luxe-shimmer {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
   .gold-border {
     border: 1px solid rgba(212, 175, 55, 0.3);
   }
