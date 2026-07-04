@@ -20,6 +20,7 @@ import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -175,6 +176,8 @@ function AdminParametres() {
 
         {/* === FACTURATION === */}
         <TabsContent value="facturation" className="mt-0 space-y-4">
+          <RegimeFacturationCard />
+
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField label="TVA appliquée (%)">
@@ -212,6 +215,7 @@ function AdminParametres() {
           <FactureMentionCard />
           <RelancesCard />
         </TabsContent>
+
 
 
         {/* === TEMPLATES EMAILS === */}
@@ -351,11 +355,12 @@ function AdminParametres() {
       </Tabs>
 
       <p className="text-xs text-pro-muted mt-6 flex items-center gap-1.5">
-        <SettingsIcon size={12} /> Les paramètres entreprise &amp; facturation sont stockés localement pour l'instant — branchés sur la DB lors d'un prochain incrément.
+        <SettingsIcon size={12} /> Le régime de facturation et les taux de TVA sont désormais persistés en base et propagés à toute la plateforme. Les autres paramètres restent locaux.
       </p>
     </div>
   );
 }
+
 
 function ResetOperationalCard() {
   const [confirmText, setConfirmText] = useState("");
