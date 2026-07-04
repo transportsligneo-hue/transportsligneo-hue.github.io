@@ -303,7 +303,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
                 </div>
               </>
             )}
-            {uploading && (
+            {pendingUploads[currentVue.id] && (
               <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-navy/80 border border-primary/30 flex items-center gap-1.5">
                 <Loader2 className="animate-spin text-primary" size={12} />
                 <span className="text-primary text-[10px] uppercase tracking-wider">Envoi…</span>
