@@ -134,7 +134,10 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Compteur", hint: "Kilométrage + niveau carburant lisibles",
     example: compteur },
 
-  { num: 17, id: "kit_securite", kind: "photo", section: "interieur", phase: "depart",
+  { num: 17, id: "photos_cles", kind: "photo", section: "interieur", phase: "depart",
+    label: "Clés du véhicule", hint: "Photo des clés fournies (double compris si présent)" },
+
+  { num: 18, id: "kit_securite", kind: "photo", section: "interieur", phase: "depart",
     label: "Kit de sécurité", hint: "Gilet jaune + triangle de signalisation",
     example: kit_securite },
 
