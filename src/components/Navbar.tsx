@@ -48,9 +48,13 @@ export default function Navbar() {
       <nav
         className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-navy/95 backdrop-blur-md navbar-hairline"
+            ? "navbar-hairline"
             : "bg-transparent"
         }`}
+        style={scrolled ? {
+          background: "linear-gradient(180deg, rgba(6,18,56,0.95) 0%, rgba(10,31,92,0.95) 100%)",
+          backdropFilter: "blur(16px) saturate(160%)",
+        } : undefined}
       >
         <div className="max-w-7xl mx-auto pl-10 pr-6 py-4 flex items-center justify-between gap-8">
           <Link to="/" className="flex items-center gap-3 mr-4 shrink-0" aria-label="Accueil — Transports Ligneo">
