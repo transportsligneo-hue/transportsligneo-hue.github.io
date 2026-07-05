@@ -26,8 +26,21 @@ const ACTION_TEMPLATES: Record<string, (m: Meta) => string> = {
     return `a créé un compte ${roleLabel(role)}${email ? ` (${email})` : ""}`;
   },
   "admin.delete_user": (m) => `a supprimé un compte${m?.email ? ` (${m.email})` : ""}`,
+  "admin.delete": (m) => `a supprimé un compte${m?.email ? ` (${m.email})` : ""}`,
   "admin.role_assigned": (m) => `a attribué le rôle ${roleLabel((m?.role as string) ?? "")}`,
   "admin.role_revoked": (m) => `a retiré le rôle ${roleLabel((m?.role as string) ?? "")}`,
+  "admin.change_role": (m) => `a modifié le rôle en ${roleLabel((m?.role as string) ?? "")}`,
+  "admin.activate_role": (m) => `a réactivé le rôle ${roleLabel((m?.role as string) ?? "")}`,
+  "admin.deactivate_role": (m) => `a suspendu le rôle ${roleLabel((m?.role as string) ?? "")}`,
+  "admin.change_type_client": (m) => {
+    const t = (m?.type_client as string) ?? "";
+    const label = t === "b2b" ? "B2B" : t === "flotte" ? "Flotte" : t === "particulier" ? "Particulier" : t;
+    return `a défini le type de client sur ${label || "—"}`;
+  },
+  "admin.reset_password": () => `a envoyé un lien de réinitialisation de mot de passe`,
+  "admin.change_email": (m) => `a modifié l'email${m?.email ? ` en ${m.email}` : ""}`,
+  "admin.suspend": () => `a suspendu le compte`,
+  "admin.reactivate": () => `a réactivé le compte`,
   "devis.created": (m) => `a créé ${numeroLabel(m, "le devis")}`,
   "devis.sent": (m) => `a envoyé ${numeroLabel(m, "le devis")} au client`,
   "devis.accepted": (m) => `a accepté ${numeroLabel(m, "le devis")}`,
@@ -47,6 +60,20 @@ const ACTION_TEMPLATES: Record<string, (m: Meta) => string> = {
   "incident.reported": () => `a signalé un incident`,
   "settings.updated": (m) =>
     `a mis à jour les paramètres${m?.field ? ` (${m.field})` : ""}`,
+};
+
+const ACTION_FALLBACKS: Record<string, string> = {
+  activate_role: "a réactivé un rôle utilisateur",
+  deactivate_role: "a suspendu un rôle utilisateur",
+  change_role: "a modifié le rôle d'un utilisateur",
+  change_type_client: "a modifié le type d'un client",
+  reset_password: "a envoyé une réinitialisation de mot de passe",
+  change_email: "a modifié l'email d'un utilisateur",
+  create_user: "a créé un compte",
+  delete_user: "a supprimé un compte",
+  delete: "a supprimé un compte",
+  suspend: "a suspendu un compte",
+  reactivate: "a réactivé un compte",
 };
 
 function roleLabel(role: string): string {
@@ -80,12 +107,15 @@ export function humanizeAction(
 ): string {
   const tpl = ACTION_TEMPLATES[action];
   if (tpl) return tpl(metadata ?? null);
-  const [verb, ...rest] = action.split(".");
+  const [, ...rest] = action.split(".");
+  const suffix = rest.join(".");
+  if (suffix && ACTION_FALLBACKS[suffix]) return ACTION_FALLBACKS[suffix];
   const label = ENTITY_LABEL[entity_type] ?? "un élément";
-  if (rest.length > 0) {
-    return `a effectué "${rest.join(".")}" sur ${label}`;
-  }
-  return `a effectué l'action "${verb}" sur ${label}`;
+  // Dernier recours : phrase française neutre, sans jargon technique.
+  const pretty = suffix
+    ? suffix.replace(/_/g, " ")
+    : action.replace(/_/g, " ");
+  return `a effectué « ${pretty} » sur ${label}`;
 }
 
 export function actorLabel(row: {

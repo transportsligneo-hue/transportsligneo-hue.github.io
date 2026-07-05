@@ -307,16 +307,19 @@ function AdminClients() {
 
           <DrawerSection title={`Historique missions (${missions.length})`} icon={<Truck size={12} />}>
             {missions.length === 0 ? (
-              <p className="text-sm text-white/50 text-center py-4">Aucune mission.</p>
+              <p className="text-sm text-slate-500 text-center py-4">Aucune mission.</p>
             ) : (
               <div className="space-y-2">
                 {missions.map((m) => (
-                  <div key={m.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+                  <div key={m.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex items-center justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white flex items-center gap-2"><MapPin size={12} />{m.ville_depart ?? "?"} → {m.ville_arrivee ?? "?"}</p>
-                      <p className="text-xs text-white/50 font-mono">{m.numero ?? "—"} · {m.statut}</p>
+                      <p className="text-sm font-medium text-slate-900 flex items-center gap-2"><MapPin size={12} className="text-slate-500" />{m.ville_depart ?? "?"} → {m.ville_arrivee ?? "?"}</p>
+                      <p className="text-xs text-slate-500 font-mono mt-0.5">{m.numero ?? "—"} · {m.statut}</p>
+                      {m.date_prise_en_charge && (
+                        <p className="text-[11px] text-slate-400 mt-0.5">{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</p>
+                      )}
                     </div>
-                    <p className="text-sm font-semibold text-white shrink-0 ml-3">{m.prix_total ? `${Number(m.prix_total).toLocaleString("fr-FR")} €` : "—"}</p>
+                    <p className="text-sm font-semibold text-slate-900 shrink-0 ml-3">{m.prix_total ? `${Number(m.prix_total).toLocaleString("fr-FR")} €` : "—"}</p>
                   </div>
                 ))}
               </div>
