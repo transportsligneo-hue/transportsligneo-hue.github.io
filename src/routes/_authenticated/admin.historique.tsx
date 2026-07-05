@@ -159,7 +159,15 @@ function AdminHistorique() {
                           <span className="text-[11px] text-pro-muted font-mono">{r.action}</span>
                         </div>
                         <p className="text-sm text-pro-text mt-1 leading-snug">
-                          <span className="font-medium">{actorLabel(r)}</span>{" "}
+                          <span className="font-medium">{(() => {
+                            const prof = r.actor_user_id ? actors[r.actor_user_id] : undefined;
+                            if (prof) {
+                              const name = `${prof.prenom ?? ""} ${prof.nom ?? ""}`.trim();
+                              if (name) return name;
+                              if (prof.email) return prof.email;
+                            }
+                            return actorLabel(r);
+                          })()}</span>{" "}
                           {humanizeAction(r.action, r.entity_type, r.metadata)}
                           {r.metadata?.email && !String(humanizeAction(r.action, r.entity_type, r.metadata)).includes(r.metadata.email) && (
                             <span className="text-pro-muted"> · {r.metadata.email}</span>
