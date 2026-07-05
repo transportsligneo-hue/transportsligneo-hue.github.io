@@ -1956,10 +1956,13 @@
   0%   { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1.04); }
 }
-@keyframes pwaSplashMark {
-  0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
-  60%  { opacity: 1; }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes pwaSplashLogoSettle {
+  /* Le splash natif Android affiche le logo grand, centré. On part de cette
+     taille exacte, puis on rétrécit doucement vers la taille "app" pour
+     laisser apparaître le wordmark en-dessous. */
+  0%   { transform: scale(1.35); }
+  55%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 @keyframes pwaSplashPulse {
   0%, 100% { transform: scale(1); filter: drop-shadow(0 12px 40px rgba(212,175,55,0.35)); }
