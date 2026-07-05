@@ -3,6 +3,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
+import PwaSplash from "@/components/pwa/PwaSplash";
 import { PricingProvider } from "@/lib/pricing";
 
 import appCss from "../styles.css?url";
