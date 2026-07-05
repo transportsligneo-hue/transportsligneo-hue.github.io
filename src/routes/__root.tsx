@@ -121,6 +121,7 @@ function RootComponent() {
         <Outlet />
         <MobileBottomNav />
         <PwaProvider />
+        <PwaSplash />
       </PricingProvider>
     </AuthProvider>
   );
