@@ -46,6 +46,7 @@ function iconFor(entity: string) {
 
 function AdminHistorique() {
   const [rows, setRows] = useState<LogRow[]>([]);
+  const [actors, setActors] = useState<Record<string, { prenom: string | null; nom: string | null; email: string | null }>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [entityFilter, setEntityFilter] = useState("all");
@@ -60,7 +61,19 @@ function AdminHistorique() {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(500);
-      setRows((data as LogRow[]) ?? []);
+      const logs = (data as LogRow[]) ?? [];
+      setRows(logs);
+      // Résout les noms des acteurs (au lieu d'afficher des UUID tronqués).
+      const ids = Array.from(new Set(logs.map((r) => r.actor_user_id).filter(Boolean))) as string[];
+      if (ids.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, prenom, nom, email")
+          .in("user_id", ids);
+        const map: Record<string, { prenom: string | null; nom: string | null; email: string | null }> = {};
+        (profs ?? []).forEach((p: any) => { map[p.user_id] = { prenom: p.prenom, nom: p.nom, email: p.email }; });
+        setActors(map);
+      }
     } finally { setLoading(false); }
   }
 
@@ -146,7 +159,15 @@ function AdminHistorique() {
                           <span className="text-[11px] text-pro-muted font-mono">{r.action}</span>
                         </div>
                         <p className="text-sm text-pro-text mt-1 leading-snug">
-                          <span className="font-medium">{actorLabel(r)}</span>{" "}
+                          <span className="font-medium">{(() => {
+                            const prof = r.actor_user_id ? actors[r.actor_user_id] : undefined;
+                            if (prof) {
+                              const name = `${prof.prenom ?? ""} ${prof.nom ?? ""}`.trim();
+                              if (name) return name;
+                              if (prof.email) return prof.email;
+                            }
+                            return actorLabel(r);
+                          })()}</span>{" "}
                           {humanizeAction(r.action, r.entity_type, r.metadata)}
                           {r.metadata?.email && !String(humanizeAction(r.action, r.entity_type, r.metadata)).includes(r.metadata.email) && (
                             <span className="text-pro-muted"> · {r.metadata.email}</span>
