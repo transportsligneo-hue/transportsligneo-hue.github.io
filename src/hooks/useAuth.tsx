@@ -152,11 +152,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    // 1) S'abonner AVANT de charger la session pour ne rater aucun event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    // 1) S'abonner AVANT de charger la session pour ne rater aucun event.
+    //    On ne réhydrate que sur les transitions d'identité (SIGNED_IN / SIGNED_OUT / USER_UPDATED).
+    //    Sinon TOKEN_REFRESHED (~1×/h) et INITIAL_SESSION (à chaque montage) rejoueraient
+    //    toutes les requêtes de profil et feraient clignoter les spinners partout dans l'app.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      // hydrate de manière non bloquante
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      const nextUserId = newSession?.user?.id ?? null;
+      if (nextUserId === currentUserIdRef.current) return; // même identité → pas de re-hydratation
       void hydrateForUser(newSession?.user ?? null);
     });
 
