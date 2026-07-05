@@ -365,7 +365,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             option_trajet: tripType === "aller-retour" ? "aller_retour" : tripType === "express" ? "express" : "aller_simple",
             prix_estime: prixTtc,
             statut: "envoye",
-            origine: "demande_pro",
+            origine: "demande_client",
             message: message || null,
           } as never)
           .select("id, numero")
