@@ -127,8 +127,16 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
-        // Non-admins can only use templates with a fixed `to` recipient.
-        if (!isAdmin && !template.to) {
+        // Non-admins can only use templates with a fixed `to` recipient,
+        // OR send a template to their OWN authenticated email address.
+        // This lets a signed-in client trigger their own devis / confirmation
+        // emails without being able to email arbitrary recipients.
+        const userEmail = (user.email || '').toLowerCase()
+        const targetsSelf =
+          !template.to &&
+          !!userEmail &&
+          effectiveRecipient.toLowerCase() === userEmail
+        if (!isAdmin && !template.to && !targetsSelf) {
           return Response.json({ error: 'Forbidden' }, { status: 403 })
         }
 
