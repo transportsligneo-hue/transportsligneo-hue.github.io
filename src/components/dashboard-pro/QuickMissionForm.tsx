@@ -339,6 +339,45 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       });
       if (autreNote.trim()) optionsMeta.autre_note = autreNote.trim();
 
+      const prixTtc = priceView?.ttc ?? null;
+
+      // 1) Crée d'abord un DEVIS (statut "envoye") pour que le client reçoive
+      //    immédiatement son estimation par email et le retrouve dans son espace.
+      let devisId: string | null = null;
+      let devisNumero: string | null = null;
+      if (prixTtc && prixTtc > 0) {
+        const { data: devisRow, error: devisErr } = await supabase
+          .from("devis")
+          .insert({
+            user_id: user.id,
+            nom: profile.nom || "Client",
+            prenom: profile.prenom || "",
+            email: profile.email,
+            telephone: profile.telephone || "",
+            depart,
+            arrivee,
+            date_souhaitee: date || null,
+            heure_souhaitee: heure || null,
+            marque: marque || null,
+            modele: modele || null,
+            vin: vin || null,
+            carburant: energie || null,
+            option_trajet: tripType === "aller-retour" ? "aller_retour" : tripType === "express" ? "express" : "aller_simple",
+            prix_estime: prixTtc,
+            statut: "envoye",
+            origine: "demande_client",
+            message: message || null,
+          } as never)
+          .select("id, numero")
+          .single();
+        if (devisErr) {
+          console.warn("[QuickMissionForm] devis insert failed", devisErr);
+        } else {
+          devisId = (devisRow as { id: string } | null)?.id ?? null;
+          devisNumero = (devisRow as { numero: string } | null)?.numero ?? null;
+        }
+      }
+
       const payload = {
         user_id: user.id,
         nom: profile.nom || "Client",
@@ -356,7 +395,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         options: tripType,
         options_meta: optionsMeta,
         statut: "nouvelle",
-        prix_estime: priceView?.ttc ?? null,
+        prix_estime: prixTtc,
         pricing_display_mode: profile.pricing_display_mode,
         default_address_id: defaultAddressId,
         contact_depart_nom: contactDepartNom || null,
@@ -380,6 +419,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         marque: marque || "",
         modele: modele || "",
         carburant: energie || "",
+        // Lien vers le devis auto-généré
+        ...(devisId ? { devis_id: devisId, devis_genere_at: new Date().toISOString() } : {}),
         // Restitution (Aller-retour)
         ...(tripType === "aller-retour"
           ? {
@@ -406,35 +447,57 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       if (insErr) throw insErr;
 
       const demandeId = inserted?.id;
-      const numero = demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "";
+      const numero = devisNumero ?? (demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "");
       const clientLabel = profile.societe || `${profile.prenom} ${profile.nom}`.trim() || profile.email;
+
+      // Lier la demande au devis côté devis également (best-effort)
+      if (devisId && demandeId) {
+        void supabase.from("devis").update({ demande_id: demandeId }).eq("id", devisId);
+      }
 
       // Notification admin (in-app + push web)
       notifyAdmin({
         type: "client_action",
         titre: `Nouvelle demande — ${clientLabel}`,
-        message: `${depart} → ${arrivee}${priceView ? ` · ${priceView.ttc.toFixed(0)} €` : ""}`,
-        link: "/admin/demandes",
-        entityType: "demande",
-        entityId: demandeId,
+        message: `${depart} → ${arrivee}${prixTtc ? ` · ${prixTtc.toFixed(0)} €` : ""}${devisNumero ? ` · Devis ${devisNumero}` : ""}`,
+        link: devisId ? "/admin/devis" : "/admin/demandes",
+        entityType: devisId ? "devis" : "demande",
+        entityId: devisId ?? demandeId,
       }).catch(() => {});
 
-      // Emails transactionnels (client + admin) — non bloquants
+      // Emails transactionnels : devis client + notif admin — non bloquants
       void Promise.allSettled([
+        devisId
+          ? sendTransactionalEmail({
+              templateName: "devis-client",
+              recipientEmail: profile.email,
+              idempotencyKey: `devis-${devisId}`,
+              templateData: {
+                prenom: profile.prenom,
+                nom: profile.nom,
+                numero,
+                depart,
+                arrivee,
+                prix: prixTtc,
+                optionTrajet: tripType,
+              },
+            })
+          : sendTransactionalEmail({
+              templateName: "demande-confirmation",
+              recipientEmail: profile.email,
+              idempotencyKey: demandeId ? `demande-confirm-${demandeId}` : undefined,
+              templateData: {
+                prenom: profile.prenom,
+                nom: profile.nom,
+                depart,
+                arrivee,
+              },
+            }),
         sendTransactionalEmail({
-          templateName: "demande-confirmation",
-          recipientEmail: profile.email,
-          idempotencyKey: demandeId ? `demande-confirm-${demandeId}` : undefined,
-          templateData: {
-            prenom: profile.prenom,
-            nom: profile.nom,
-            depart,
-            arrivee,
-          },
-        }),
-        sendTransactionalEmail({
-          templateName: "nouvelle-demande-admin",
-          idempotencyKey: demandeId ? `admin-demande-${demandeId}` : undefined,
+          templateName: devisId ? "devis-cree-admin" : "nouvelle-demande-admin",
+          idempotencyKey: devisId
+            ? `admin-devis-${devisId}`
+            : (demandeId ? `admin-demande-${demandeId}` : undefined),
           templateData: {
             prenom: profile.prenom,
             nom: profile.nom,
@@ -443,12 +506,14 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             depart,
             arrivee,
             date: date || "—",
-            prix: priceView?.ttc ?? null,
+            prix: prixTtc,
             numero,
             type: tripType,
           },
         }),
-      ]).catch(() => {});
+      ]).then(() => {
+        if (devisId) void supabase.from("devis").update({ email_envoye: true }).eq("id", devisId);
+      }).catch(() => {});
 
 
       setSuccess(true);
