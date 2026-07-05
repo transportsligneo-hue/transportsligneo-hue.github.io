@@ -88,12 +88,16 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                 }
               }
 
-              // 4. Auto-create facture (payée)
+              // 4. Auto-create facture (payée) — numéro aligné sur le devis (DEV-TLG-YYYY-### → FAC-TLG-YYYY-###)
               if (devis) {
                 const prixTtc = Number(devis.prix_estime ?? 0);
                 const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
                 const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
+                const factureNumero = /^DEV-TLG-\d{4}-\d{3}$/.test(devis.numero ?? "")
+                  ? (devis.numero as string).replace("DEV-TLG", "FAC-TLG")
+                  : undefined;
                 await supabaseAdmin.from("factures").insert({
+                  ...(factureNumero && { numero: factureNumero }),
                   mission_id: missionId,
                   client_email: devis.email,
                   client_nom: devis.nom,
@@ -108,6 +112,18 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                   mode_paiement: "carte",
                   date_paiement: new Date().toISOString().slice(0, 10),
                 } as any);
+
+                // Aligner la séquence FAC-TLG pour éviter les collisions futures
+                if (factureNumero) {
+                  const suffix = parseInt(factureNumero.slice(-3), 10);
+                  const year = parseInt(factureNumero.split("-")[2], 10);
+                  await supabaseAdmin
+                    .from("mission_sequences")
+                    .update({ current_value: suffix, updated_at: new Date().toISOString() })
+                    .eq("prefix", "FAC-TLG")
+                    .eq("year", year)
+                    .lt("current_value", suffix);
+                }
               }
 
               // 5. Enqueue confirmation email
