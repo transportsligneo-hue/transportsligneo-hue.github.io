@@ -61,11 +61,15 @@ function FleetPage() {
         .from("organization_members")
         .select("organization_id, member_role")
         .eq("user_id", user.id)
+        .eq("status", "active")
         .limit(1);
       const row = (mems ?? [])[0] as { organization_id: string; member_role: string } | undefined;
       if (row) {
         setOrgId(row.organization_id);
         setOrgRole(row.member_role);
+      } else {
+        // Pas d'organisation → on arrête le chargement pour afficher l'état vide.
+        setLoading(false);
       }
     })();
   }, [user]);
@@ -78,7 +82,11 @@ function FleetPage() {
       .select("*")
       .eq("organization_id", orgId)
       .order("created_at", { ascending: false });
-    if (!error && data) setVehicles(data as Vehicle[]);
+    if (error) {
+      setErr(error.message);
+    } else if (data) {
+      setVehicles(data as Vehicle[]);
+    }
     setLoading(false);
   }, [orgId]);
 
