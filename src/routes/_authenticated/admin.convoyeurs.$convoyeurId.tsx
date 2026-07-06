@@ -112,6 +112,8 @@ function AdminConvoyeurDetail() {
   const [conv, setConv] = useState<Convoyeur | null>(null);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [attribs, setAttribs] = useState<AttribItem[]>([]);
+  const [dispos, setDispos] = useState<DispoRow[]>([]);
+  const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Editable>(EMPTY);
   const [original, setOriginal] = useState<Editable>(EMPTY);
