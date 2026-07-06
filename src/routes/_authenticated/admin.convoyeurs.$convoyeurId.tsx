@@ -551,39 +551,10 @@ function AdminConvoyeurDetail() {
                 </button>
               </div>
             )}
-          </div>
-        </AdminSection>
-
-        <div className="lg:col-span-2 space-y-6">
-          <AdminSection title="Documents" description={`${docs.length} document${docs.length > 1 ? "s" : ""}`}>
-            {docs.length === 0 ? (
-              <AdminEmpty icon={FileBadge} title="Aucun document" />
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {["permis", "identite", "domicile", "rib", "kbis", "assurance"].map((type) => {
-                  const d = docs.find((x) => x.type_document === type);
-                  const tone =
-                    d?.statut_validation === "approuve"
-                      ? "success"
-                      : d?.statut_validation === "refuse"
-                      ? "danger"
-                      : d
-                      ? "warning"
-                      : "neutral";
-                  return (
-                    <div key={type} className="admin-card-flat p-3 flex flex-col gap-1.5">
-                      <p className="admin-label">{docLabels[type]}</p>
-                      <AdminBadge
-                        label={d ? d.statut_validation ?? "en attente" : "manquant"}
-                        tone={tone}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </AdminSection>
+        </TabsContent>
 
+        <TabsContent value="missions" className="mt-6">
           <AdminSection title="Historique missions" description={`${attribs.length} attribution${attribs.length > 1 ? "s" : ""}`}>
             {attribs.length === 0 ? (
               <AdminEmpty icon={Truck} title="Aucune mission attribuée" />
@@ -620,8 +591,79 @@ function AdminConvoyeurDetail() {
               </div>
             )}
           </AdminSection>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-6">
+          <AdminSection title="Documents" description={`${docsApprouves} / 6 approuvés`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {["permis", "identite", "domicile", "rib", "kbis", "assurance"].map((type) => {
+                const d = docs.find((x) => x.type_document === type);
+                const tone =
+                  d?.statut_validation === "approuve" ? "success"
+                  : d?.statut_validation === "refuse" ? "danger"
+                  : d ? "warning" : "neutral";
+                return (
+                  <div key={type} className="admin-card-flat p-3 flex flex-col gap-1.5">
+                    <p className="admin-label">{docLabels[type]}</p>
+                    <AdminBadge label={d ? d.statut_validation ?? "en attente" : "manquant"} tone={tone} />
+                    {d && (
+                      <p className="text-[10px] text-slate-400">
+                        Déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="dispos" className="mt-6">
+          <AdminSection title="Disponibilités à venir" description={`${dispos.length} entrée${dispos.length > 1 ? "s" : ""}`}>
+            {dispos.length === 0 ? (
+              <AdminEmpty icon={CalendarDays} title="Aucune disponibilité déclarée" />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {dispos.map((d) => {
+                  const tone = d.statut === "disponible" ? "success" : d.statut === "indisponible" ? "danger" : "warning";
+                  return (
+                    <div key={d.id} className="admin-card-flat p-3 flex flex-col gap-1">
+                      <p className="text-sm font-medium text-slate-800">
+                        {new Date(d.date_dispo).toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" })}
+                      </p>
+                      <AdminBadge label={d.statut} tone={tone} />
+                      {d.notes && <p className="text-[11px] text-slate-500 line-clamp-2">{d.notes}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-6">
+          <AdminSection title="Journal d'activité" description={`${logs.length} événement${logs.length > 1 ? "s" : ""} récent${logs.length > 1 ? "s" : ""}`}>
+            {logs.length === 0 ? (
+              <AdminEmpty icon={Activity} title="Aucune activité enregistrée" />
+            ) : (
+              <ol className="relative border-l border-slate-200 ml-2 space-y-4">
+                {logs.map((l) => (
+                  <li key={l.id} className="ml-4">
+                    <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-[color:var(--admin-accent)] ring-4 ring-white" />
+                    <p className="text-sm text-slate-800">
+                      <span className="font-medium">{l.actor_label ?? "Système"}</span>{" "}
+                      {humanizeAction(l.action, l.entity_type, l.metadata)}
+                    </p>
+                    <time className="text-[11px] text-slate-400">
+                      {new Date(l.created_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
+                    </time>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </AdminSection>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
