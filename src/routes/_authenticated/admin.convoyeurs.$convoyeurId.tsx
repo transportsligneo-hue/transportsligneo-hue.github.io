@@ -443,7 +443,7 @@ function AdminConvoyeurDetail() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminStatCard label="Missions totales" value={attribs.length} icon={Truck} />
         <AdminStatCard label="Terminées" value={terminees} icon={CheckCircle} accent="success" />
         <AdminStatCard
@@ -452,12 +452,24 @@ function AdminConvoyeurDetail() {
           icon={FileBadge}
           accent={docsApprouves === 6 ? "success" : "warning"}
         />
-        <AdminStatCard label="Statut" value={statutLabels[conv.statut] ?? conv.statut} accent={statutTone === "success" ? "success" : statutTone === "danger" ? "danger" : "warning"} />
+        {conv.type_convoyeur === "independant" && (
+          <AdminStatCard label="Revenus générés" value={`${revenus.toFixed(0)} €`} icon={Euro} accent="success" />
+        )}
+        <AdminStatCard label="Jours dispo (à venir)" value={prochainesDispos} icon={CalendarDays} />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
-          <div className="space-y-4">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-slate-100/70 p-1 rounded-xl">
+          <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/6)</TabsTrigger>
+          <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
+          <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
+            <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
