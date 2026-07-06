@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -14,7 +14,13 @@ import {
   KeyRound,
   Send,
   Ban,
+  Euro,
+  Activity,
+  CalendarDays,
+  User,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { humanizeAction } from "@/lib/activity-humanizer";
 import {
   AdminPageHeader,
   AdminSection,
