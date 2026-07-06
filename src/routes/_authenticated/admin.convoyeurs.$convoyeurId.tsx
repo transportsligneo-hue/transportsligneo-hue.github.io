@@ -551,6 +551,7 @@ function AdminConvoyeurDetail() {
                 </button>
               </div>
             )}
+            </div>
           </AdminSection>
         </TabsContent>
 
