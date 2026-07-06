@@ -379,6 +379,10 @@ function AdminConvoyeurDetail() {
   const fullName = `${conv.prenom} ${conv.nom}`.trim();
   const terminees = attribs.filter((a) => ["terminee", "livree"].includes(a.statut)).length;
   const docsApprouves = docs.filter((d) => d.statut_validation === "approuve").length;
+  const revenus = attribs
+    .filter((a) => ["terminee", "livree"].includes(a.statut))
+    .reduce((sum, a) => sum + (a.trajet?.tarif_convoyeur ?? 0), 0);
+  const prochainesDispos = dispos.filter((d) => d.statut === "disponible").length;
 
   const statutTone =
     conv.statut === "valide" ? "success" : conv.statut === "en_attente" ? "warning" : conv.statut === "refuse" || conv.statut === "suspendu" ? "danger" : "neutral";
