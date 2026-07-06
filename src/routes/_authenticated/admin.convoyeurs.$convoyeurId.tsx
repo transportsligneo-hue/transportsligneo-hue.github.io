@@ -469,6 +469,7 @@ function AdminConvoyeurDetail() {
 
         <TabsContent value="overview" className="mt-6">
           <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
+            <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
