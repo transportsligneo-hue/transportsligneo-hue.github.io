@@ -139,7 +139,8 @@ function AdminConvoyeurDetail() {
       setForm(init);
       setOriginal(init);
 
-      const [{ data: d }, { data: a }] = await Promise.all([
+      const today = new Date().toISOString().slice(0, 10);
+      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }] = await Promise.all([
         supabase
           .from("documents_convoyeurs")
           .select("id, type_document, statut_validation, created_at")
@@ -150,9 +151,26 @@ function AdminConvoyeurDetail() {
           .eq("convoyeur_id", convoyeurId)
           .order("created_at", { ascending: false })
           .limit(50),
+        supabase
+          .from("disponibilites_convoyeurs")
+          .select("id, date_dispo, statut, notes")
+          .eq("convoyeur_id", convoyeurId)
+          .gte("date_dispo", today)
+          .order("date_dispo", { ascending: true })
+          .limit(60),
+        cv.user_id
+          ? supabase
+              .from("activity_logs")
+              .select("id, action, entity_type, created_at, metadata, actor_label")
+              .or(`actor_user_id.eq.${cv.user_id},entity_id.eq.${convoyeurId}`)
+              .order("created_at", { ascending: false })
+              .limit(30)
+          : Promise.resolve({ data: [] as LogRow[] }),
       ]);
       setDocs((d as DocItem[]) ?? []);
       setAttribs((a as unknown as AttribItem[]) ?? []);
+      setDispos((dispo as DispoRow[]) ?? []);
+      setLogs((lg as LogRow[]) ?? []);
 
       if (cv.user_id) {
         try {
