@@ -74,6 +74,9 @@ interface AccountStatus {
   last_sign_in_at: string | null;
 }
 
+interface DispoRow { id: string; date_dispo: string; statut: string; notes: string | null; }
+interface LogRow { id: string; action: string; entity_type: string; created_at: string; metadata: Record<string, unknown> | null; actor_label: string | null; }
+
 type Editable = {
   prenom: string;
   nom: string;
