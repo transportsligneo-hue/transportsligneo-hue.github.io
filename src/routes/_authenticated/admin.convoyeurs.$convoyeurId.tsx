@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -14,7 +14,13 @@ import {
   KeyRound,
   Send,
   Ban,
+  Euro,
+  Activity,
+  CalendarDays,
+  User,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { humanizeAction } from "@/lib/activity-humanizer";
 import {
   AdminPageHeader,
   AdminSection,
@@ -68,6 +74,9 @@ interface AccountStatus {
   last_sign_in_at: string | null;
 }
 
+interface DispoRow { id: string; date_dispo: string; statut: string; notes: string | null; }
+interface LogRow { id: string; action: string; entity_type: string; created_at: string; metadata: Record<string, unknown> | null; actor_label: string | null; }
+
 type Editable = {
   prenom: string;
   nom: string;
@@ -103,6 +112,8 @@ function AdminConvoyeurDetail() {
   const [conv, setConv] = useState<Convoyeur | null>(null);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [attribs, setAttribs] = useState<AttribItem[]>([]);
+  const [dispos, setDispos] = useState<DispoRow[]>([]);
+  const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Editable>(EMPTY);
   const [original, setOriginal] = useState<Editable>(EMPTY);
@@ -128,7 +139,8 @@ function AdminConvoyeurDetail() {
       setForm(init);
       setOriginal(init);
 
-      const [{ data: d }, { data: a }] = await Promise.all([
+      const today = new Date().toISOString().slice(0, 10);
+      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }] = await Promise.all([
         supabase
           .from("documents_convoyeurs")
           .select("id, type_document, statut_validation, created_at")
@@ -139,9 +151,26 @@ function AdminConvoyeurDetail() {
           .eq("convoyeur_id", convoyeurId)
           .order("created_at", { ascending: false })
           .limit(50),
+        supabase
+          .from("disponibilites_convoyeurs")
+          .select("id, date_dispo, statut, notes")
+          .eq("convoyeur_id", convoyeurId)
+          .gte("date_dispo", today)
+          .order("date_dispo", { ascending: true })
+          .limit(60),
+        cv.user_id
+          ? supabase
+              .from("activity_logs")
+              .select("id, action, entity_type, created_at, metadata, actor_label")
+              .or(`actor_user_id.eq.${cv.user_id},entity_id.eq.${convoyeurId}`)
+              .order("created_at", { ascending: false })
+              .limit(30)
+          : Promise.resolve({ data: [] as LogRow[] }),
       ]);
       setDocs((d as DocItem[]) ?? []);
       setAttribs((a as unknown as AttribItem[]) ?? []);
+      setDispos((dispo as DispoRow[]) ?? []);
+      setLogs((lg as LogRow[]) ?? []);
 
       if (cv.user_id) {
         try {
@@ -350,6 +379,10 @@ function AdminConvoyeurDetail() {
   const fullName = `${conv.prenom} ${conv.nom}`.trim();
   const terminees = attribs.filter((a) => ["terminee", "livree"].includes(a.statut)).length;
   const docsApprouves = docs.filter((d) => d.statut_validation === "approuve").length;
+  const revenus = attribs
+    .filter((a) => ["terminee", "livree"].includes(a.statut))
+    .reduce((sum, a) => sum + (a.trajet?.tarif_convoyeur ?? 0), 0);
+  const prochainesDispos = dispos.filter((d) => d.statut === "disponible").length;
 
   const statutTone =
     conv.statut === "valide" ? "success" : conv.statut === "en_attente" ? "warning" : conv.statut === "refuse" || conv.statut === "suspendu" ? "danger" : "neutral";
@@ -410,7 +443,7 @@ function AdminConvoyeurDetail() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminStatCard label="Missions totales" value={attribs.length} icon={Truck} />
         <AdminStatCard label="Terminées" value={terminees} icon={CheckCircle} accent="success" />
         <AdminStatCard
@@ -419,12 +452,24 @@ function AdminConvoyeurDetail() {
           icon={FileBadge}
           accent={docsApprouves === 6 ? "success" : "warning"}
         />
-        <AdminStatCard label="Statut" value={statutLabels[conv.statut] ?? conv.statut} accent={statutTone === "success" ? "success" : statutTone === "danger" ? "danger" : "warning"} />
+        {conv.type_convoyeur === "independant" && (
+          <AdminStatCard label="Revenus générés" value={`${revenus.toFixed(0)} €`} icon={Euro} accent="success" />
+        )}
+        <AdminStatCard label="Jours dispo (à venir)" value={prochainesDispos} icon={CalendarDays} />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
-          <div className="space-y-4">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-slate-100/70 p-1 rounded-xl">
+          <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/6)</TabsTrigger>
+          <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
+          <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
+            <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
@@ -506,39 +551,11 @@ function AdminConvoyeurDetail() {
                 </button>
               </div>
             )}
-          </div>
-        </AdminSection>
-
-        <div className="lg:col-span-2 space-y-6">
-          <AdminSection title="Documents" description={`${docs.length} document${docs.length > 1 ? "s" : ""}`}>
-            {docs.length === 0 ? (
-              <AdminEmpty icon={FileBadge} title="Aucun document" />
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {["permis", "identite", "domicile", "rib", "kbis", "assurance"].map((type) => {
-                  const d = docs.find((x) => x.type_document === type);
-                  const tone =
-                    d?.statut_validation === "approuve"
-                      ? "success"
-                      : d?.statut_validation === "refuse"
-                      ? "danger"
-                      : d
-                      ? "warning"
-                      : "neutral";
-                  return (
-                    <div key={type} className="admin-card-flat p-3 flex flex-col gap-1.5">
-                      <p className="admin-label">{docLabels[type]}</p>
-                      <AdminBadge
-                        label={d ? d.statut_validation ?? "en attente" : "manquant"}
-                        tone={tone}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            </div>
           </AdminSection>
+        </TabsContent>
 
+        <TabsContent value="missions" className="mt-6">
           <AdminSection title="Historique missions" description={`${attribs.length} attribution${attribs.length > 1 ? "s" : ""}`}>
             {attribs.length === 0 ? (
               <AdminEmpty icon={Truck} title="Aucune mission attribuée" />
@@ -575,8 +592,79 @@ function AdminConvoyeurDetail() {
               </div>
             )}
           </AdminSection>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-6">
+          <AdminSection title="Documents" description={`${docsApprouves} / 6 approuvés`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {["permis", "identite", "domicile", "rib", "kbis", "assurance"].map((type) => {
+                const d = docs.find((x) => x.type_document === type);
+                const tone =
+                  d?.statut_validation === "approuve" ? "success"
+                  : d?.statut_validation === "refuse" ? "danger"
+                  : d ? "warning" : "neutral";
+                return (
+                  <div key={type} className="admin-card-flat p-3 flex flex-col gap-1.5">
+                    <p className="admin-label">{docLabels[type]}</p>
+                    <AdminBadge label={d ? d.statut_validation ?? "en attente" : "manquant"} tone={tone} />
+                    {d && (
+                      <p className="text-[10px] text-slate-400">
+                        Déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="dispos" className="mt-6">
+          <AdminSection title="Disponibilités à venir" description={`${dispos.length} entrée${dispos.length > 1 ? "s" : ""}`}>
+            {dispos.length === 0 ? (
+              <AdminEmpty icon={CalendarDays} title="Aucune disponibilité déclarée" />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {dispos.map((d) => {
+                  const tone = d.statut === "disponible" ? "success" : d.statut === "indisponible" ? "danger" : "warning";
+                  return (
+                    <div key={d.id} className="admin-card-flat p-3 flex flex-col gap-1">
+                      <p className="text-sm font-medium text-slate-800">
+                        {new Date(d.date_dispo).toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" })}
+                      </p>
+                      <AdminBadge label={d.statut} tone={tone} />
+                      {d.notes && <p className="text-[11px] text-slate-500 line-clamp-2">{d.notes}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-6">
+          <AdminSection title="Journal d'activité" description={`${logs.length} événement${logs.length > 1 ? "s" : ""} récent${logs.length > 1 ? "s" : ""}`}>
+            {logs.length === 0 ? (
+              <AdminEmpty icon={Activity} title="Aucune activité enregistrée" />
+            ) : (
+              <ol className="relative border-l border-slate-200 ml-2 space-y-4">
+                {logs.map((l) => (
+                  <li key={l.id} className="ml-4">
+                    <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-[color:var(--admin-accent)] ring-4 ring-white" />
+                    <p className="text-sm text-slate-800">
+                      <span className="font-medium">{l.actor_label ?? "Système"}</span>{" "}
+                      {humanizeAction(l.action, l.entity_type, l.metadata)}
+                    </p>
+                    <time className="text-[11px] text-slate-400">
+                      {new Date(l.created_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
+                    </time>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </AdminSection>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
