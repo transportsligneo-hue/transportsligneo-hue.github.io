@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Truck, Clock, CheckCircle, Calendar, ArrowUpRight, PlusCircle,
   Loader2, MapPin, Building2, FolderOpen, ChevronRight, Sparkles,
+  Car, Wrench, AlertTriangle, Receipt, FileText, Activity, TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,42 @@ interface MissionRow {
   date_prise_en_charge: string;
   statut: string;
   prix_total: number;
+  created_at: string;
+}
+
+interface VehicleRow {
+  id: string;
+  marque: string | null;
+  modele: string | null;
+  immatriculation: string | null;
+  statut: "actif" | "en_mission" | "indispo" | "archive" | string;
+}
+
+interface DevisRow {
+  id: string;
+  numero: string;
+  depart: string;
+  arrivee: string;
+  prix_estime: number | null;
+  statut: string;
+  created_at: string;
+  paid_at: string | null;
+}
+
+interface FactureRow {
+  id: string;
+  numero: string;
+  prix_ttc: number | null;
+  statut: string;
+  date_facture: string | null;
+  created_at: string;
+}
+
+interface ActivityRow {
+  id: string;
+  action: string;
+  entity_type: string;
+  actor_label: string | null;
   created_at: string;
 }
 
@@ -42,16 +79,21 @@ function ProDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate({ from: Route.fullPath });
   const [missions, setMissions] = useState<MissionRow[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
+  const [devis, setDevis] = useState<DevisRow[]>([]);
+  const [factures, setFactures] = useState<FactureRow[]>([]);
+  const [activity, setActivity] = useState<ActivityRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
 
-    const loadMissionRows = async () => {
+    const load = async () => {
       const email = user.email ?? "";
       const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
-      const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
+
+      const [{ data: directRows }, { data: profile }, { data: memberships }, { data: devisData }, { data: facturesData }] = await Promise.all([
         supabase
           .from("missions")
           .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
@@ -59,6 +101,14 @@ function ProDashboard() {
           .order("created_at", { ascending: false }),
         supabase.from("profiles").select("organization_id").eq("user_id", user.id).maybeSingle(),
         supabase.from("organization_members").select("organization_id").eq("user_id", user.id).eq("status", "active"),
+        supabase.from("devis")
+          .select("id, numero, depart, arrivee, prix_estime, statut, created_at, paid_at")
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase.from("factures")
+          .select("id, numero, prix_ttc, statut, date_facture, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5),
       ]);
 
       const orgIds = Array.from(new Set([
@@ -67,30 +117,69 @@ function ProDashboard() {
       ].filter(Boolean))) as string[];
 
       let orgRows: MissionRow[] = [];
+      let vehicleRows: VehicleRow[] = [];
+      let activityRows: ActivityRow[] = [];
+
       if (orgIds.length > 0) {
-        const { data } = await supabase
-          .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
-          .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
-          .order("created_at", { ascending: false });
-        orgRows = (data ?? []) as MissionRow[];
+        const [{ data: mData }, { data: vData }] = await Promise.all([
+          supabase
+            .from("missions")
+            .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
+            .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("vehicles")
+            .select("id, marque, modele, immatriculation, statut")
+            .in("organization_id", orgIds),
+        ]);
+        orgRows = (mData ?? []) as MissionRow[];
+        vehicleRows = (vData ?? []) as VehicleRow[];
       }
 
+      // Activity logs filtered by user id — best-effort (RLS applies)
+      const { data: aData } = await supabase
+        .from("activity_logs")
+        .select("id, action, entity_type, actor_label, created_at")
+        .eq("actor_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(6);
+      activityRows = (aData ?? []) as ActivityRow[];
+
       const merged = [...((directRows ?? []) as MissionRow[]), ...orgRows];
-      return Array.from(new Map(merged.map((row) => [row.id, row])).values())
+      const uniqueMissions = Array.from(new Map(merged.map((row) => [row.id, row])).values())
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    };
 
-    void loadMissionRows().then((rows) => {
       if (cancelled) return;
-      setMissions(rows);
+      setMissions(uniqueMissions);
+      setVehicles(vehicleRows);
+      setDevis((devisData ?? []) as DevisRow[]);
+      setFactures((facturesData ?? []) as FactureRow[]);
+      setActivity(activityRows);
       setLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
     };
+
+    void load();
+    return () => { cancelled = true; };
   }, [user]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const enAttente = missions.filter(m => m.statut === "en_attente").length;
+  const enCours = missions.filter(m => m.statut === "en_cours").length;
+  const aVenir = missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length;
+  const terminees = missions.filter(m => m.statut === "livree" || m.statut === "terminee").length;
+
+  const vehicleStats = useMemo(() => {
+    const active = vehicles.filter(v => v.statut !== "archive");
+    return {
+      total: active.length,
+      dispo: active.filter(v => v.statut === "actif").length,
+      enMission: active.filter(v => v.statut === "en_mission").length,
+      indispo: active.filter(v => v.statut === "indispo").length,
+    };
+  }, [vehicles]);
+
+  const facturesImpayees = factures.filter(f => f.statut !== "payee" && f.statut !== "paid").length;
+  const devisEnAttente = devis.filter(d => d.statut === "envoye" || d.statut === "en_attente").length;
 
   if (loading) {
     return (
@@ -100,18 +189,13 @@ function ProDashboard() {
     );
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const enCours = missions.filter(m => m.statut === "en_cours").length;
-  const aVenir = missions.filter(m => m.statut === "confirmee" && m.date_prise_en_charge >= today).length;
-  const terminees = missions.filter(m => m.statut === "livree" || m.statut === "terminee").length;
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-pro-text">Espace Pro</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Accès rapide à vos outils de convoyage</p>
+          <p className="text-pro-muted text-sm mt-0.5">Vue d'ensemble de votre flotte et de vos missions</p>
         </div>
         <Link
           to="/dashboard-pro/nouvelle-demande"
@@ -121,24 +205,80 @@ function ProDashboard() {
         </Link>
       </div>
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
-        <KpiCard icon={Clock} label="En cours" value={enCours} tone="amber" />
-        <KpiCard icon={Calendar} label="À venir" value={aVenir} tone="blue" />
-        <KpiCard icon={CheckCircle} label="Livrées" value={terminees} tone="emerald" />
+      {/* Alerts row */}
+      {(facturesImpayees > 0 || devisEnAttente > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {facturesImpayees > 0 && (
+            <Link to="/dashboard-pro/documents" className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100/60 transition-colors">
+              <div className="w-8 h-8 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <AlertTriangle size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-amber-900">
+                  {facturesImpayees} facture{facturesImpayees > 1 ? "s" : ""} à régler
+                </p>
+                <p className="text-xs text-amber-700/80">Consultez vos documents pour régulariser</p>
+              </div>
+              <ChevronRight size={16} className="text-amber-700 shrink-0" />
+            </Link>
+          )}
+          {devisEnAttente > 0 && (
+            <Link to="/dashboard-pro/documents" className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100/60 transition-colors">
+              <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                <FileText size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-blue-900">
+                  {devisEnAttente} devis en attente d'action
+                </p>
+                <p className="text-xs text-blue-700/80">À valider ou payer</p>
+              </div>
+              <ChevronRight size={16} className="text-blue-700 shrink-0" />
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Missions KPIs */}
+      <div>
+        <p className="text-[11px] uppercase tracking-wider text-pro-muted font-medium mb-2">Missions</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <KpiCard icon={Clock} label="En attente" value={enAttente} tone="amber" />
+          <KpiCard icon={Truck} label="En cours" value={enCours} tone="blue" />
+          <KpiCard icon={Calendar} label="À venir" value={aVenir} tone="violet" />
+          <KpiCard icon={CheckCircle} label="Terminées" value={terminees} tone="emerald" />
+        </div>
       </div>
+
+      {/* Fleet KPIs */}
+      {vehicleStats.total > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] uppercase tracking-wider text-pro-muted font-medium">Flotte</p>
+            <Link to="/dashboard-pro/flotte" className="text-xs text-pro-accent hover:underline inline-flex items-center gap-1">
+              Gérer la flotte <ArrowUpRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <KpiCard icon={Car} label="Véhicules" value={vehicleStats.total} tone="blue" />
+            <KpiCard icon={CheckCircle} label="Disponibles" value={vehicleStats.dispo} tone="emerald" />
+            <KpiCard icon={Truck} label="En convoyage" value={vehicleStats.enMission} tone="violet" />
+            <KpiCard icon={Wrench} label="Immobilisés" value={vehicleStats.indispo} tone="amber" />
+          </div>
+        </div>
+      )}
 
       {/* Hub navigation cards */}
       <div>
         <h2 className="text-pro-text font-semibold text-sm mb-3 flex items-center gap-1.5">
           <Sparkles size={14} className="text-pro-accent" /> Accès rapide
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <HubCard
             to="/dashboard-pro/nouvelle-demande"
             icon={PlusCircle}
             title="Nouvelle demande"
-            description="Créer une mission de convoyage en quelques clics"
+            description="Créer une mission en quelques clics"
             tone="emerald"
             featured
           />
@@ -146,22 +286,23 @@ function ProDashboard() {
             to="/dashboard-pro/missions"
             icon={Truck}
             title="Mes missions"
-            description="Suivre l'état de vos demandes en cours"
+            description="Suivre l'état de vos demandes"
             badge={enCours > 0 ? `${enCours} active${enCours > 1 ? "s" : ""}` : undefined}
             tone="blue"
           />
           <HubCard
-            to="/dashboard-pro/societe"
-            icon={Building2}
-            title="Ma société"
-            description="Coordonnées, SIRET et facturation"
+            to="/dashboard-pro/flotte"
+            icon={Car}
+            title="Ma flotte"
+            description="Véhicules, statuts et historique"
+            badge={vehicleStats.total > 0 ? `${vehicleStats.total} véh.` : undefined}
             tone="violet"
           />
           <HubCard
             to="/dashboard-pro/documents"
             icon={FolderOpen}
             title="Documents"
-            description="Factures, bons de commande et CGV"
+            description="Factures, devis et bons de commande"
             tone="amber"
           />
         </div>
@@ -236,7 +377,7 @@ function ProDashboard() {
                           params={{ missionId: m.id }}
                           className="inline-flex items-center gap-1 text-pro-accent text-[11px] uppercase tracking-wider hover:underline"
                         >
-                          Voir le suivi <ArrowUpRight size={12} />
+                          Voir <ArrowUpRight size={12} />
                         </Link>
                       </div>
                     </td>
@@ -247,6 +388,123 @@ function ProDashboard() {
           </div>
         )}
       </div>
+
+      {/* Recent devis & factures */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <MiniListPanel
+          title="Derniers devis"
+          icon={FileText}
+          linkTo="/dashboard-pro/documents"
+          emptyLabel="Aucun devis récent"
+        >
+          {devis.slice(0, 5).map((d) => (
+            <Link
+              key={d.id}
+              to="/dashboard-pro/documents"
+              className="flex items-center justify-between px-4 py-2.5 border-t border-pro-border hover:bg-pro-bg-soft/50 transition-colors first:border-t-0"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-pro-text truncate">{d.numero}</p>
+                <p className="text-xs text-pro-muted truncate">{d.depart} → {d.arrivee}</p>
+              </div>
+              <div className="text-right shrink-0 ml-3">
+                <p className="text-sm font-semibold text-pro-text">
+                  {d.prix_estime != null ? `${Number(d.prix_estime).toFixed(0)} €` : "—"}
+                </p>
+                <p className="text-[10px] uppercase tracking-wide text-pro-muted">{d.statut}</p>
+              </div>
+            </Link>
+          ))}
+        </MiniListPanel>
+
+        <MiniListPanel
+          title="Dernières factures"
+          icon={Receipt}
+          linkTo="/dashboard-pro/documents"
+          emptyLabel="Aucune facture récente"
+        >
+          {factures.slice(0, 5).map((f) => (
+            <Link
+              key={f.id}
+              to="/dashboard-pro/documents"
+              className="flex items-center justify-between px-4 py-2.5 border-t border-pro-border hover:bg-pro-bg-soft/50 transition-colors first:border-t-0"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-pro-text truncate">{f.numero}</p>
+                <p className="text-xs text-pro-muted">
+                  {f.date_facture ? new Date(f.date_facture).toLocaleDateString("fr-FR") : new Date(f.created_at).toLocaleDateString("fr-FR")}
+                </p>
+              </div>
+              <div className="text-right shrink-0 ml-3">
+                <p className="text-sm font-semibold text-pro-text">
+                  {f.prix_ttc != null ? `${Number(f.prix_ttc).toFixed(2)} €` : "—"}
+                </p>
+                <p className={`text-[10px] uppercase tracking-wide font-medium ${
+                  f.statut === "payee" || f.statut === "paid" ? "text-emerald-600" : "text-amber-600"
+                }`}>
+                  {f.statut === "payee" || f.statut === "paid" ? "Payée" : f.statut}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </MiniListPanel>
+      </div>
+
+      {/* Recent activity */}
+      {activity.length > 0 && (
+        <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-pro-border flex items-center gap-2">
+            <Activity size={16} className="text-pro-accent" />
+            <h2 className="font-semibold text-pro-text text-sm">Activité récente</h2>
+          </div>
+          <ul className="divide-y divide-pro-border">
+            {activity.map((a) => (
+              <li key={a.id} className="px-5 py-3 flex items-start gap-3">
+                <div className="w-2 h-2 rounded-full bg-pro-accent mt-1.5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-pro-text">
+                    {`${(a.actor_label ?? "Système")} · ${a.action.replace(/_/g, " ")} · ${a.entity_type}`}
+                  </p>
+                  <p className="text-xs text-pro-muted mt-0.5">
+                    {new Date(a.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MiniListPanel({
+  title, icon: Icon, linkTo, emptyLabel, children,
+}: {
+  title: string;
+  icon: LucideIcon;
+  linkTo: string;
+  emptyLabel: string;
+  children: React.ReactNode;
+}) {
+  const arr = Array.isArray(children) ? children : [children];
+  const isEmpty = arr.filter(Boolean).length === 0;
+  return (
+    <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
+      <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon size={16} className="text-pro-accent" />
+          <h2 className="font-semibold text-pro-text text-sm">{title}</h2>
+        </div>
+        <Link to={linkTo} className="text-pro-accent text-xs font-medium hover:underline inline-flex items-center gap-1">
+          Tout voir <ArrowUpRight size={12} />
+        </Link>
+      </div>
+      {isEmpty ? (
+        <div className="px-5 py-10 text-center text-pro-muted text-sm">{emptyLabel}</div>
+      ) : (
+        <div>{children}</div>
+      )}
     </div>
   );
 }
@@ -300,7 +558,7 @@ function HubCard({
 function KpiCard({
   icon: Icon, label, value, tone,
 }: {
-  icon: typeof Truck; label: string; value: number | string;
+  icon: LucideIcon; label: string; value: number | string;
   tone: "amber" | "blue" | "emerald" | "violet";
 }) {
   const tones = {

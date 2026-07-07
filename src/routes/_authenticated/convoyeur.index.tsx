@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
   Truck, Clock, CheckCircle, AlertCircle, ArrowRight,
-  Calendar, MapPin, Navigation, Phone, FileText, Loader2,
+  Calendar, MapPin, Navigation, Phone, FileText, Loader2, TrendingUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/")({
@@ -32,6 +32,7 @@ interface TodayMission {
 function ConvoyeurDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ proposed: 0, accepted: 0, inProgress: 0, completed: 0, total: 0 });
+  const [revenueMonth, setRevenueMonth] = useState(0);
   const [convoyeurName, setConvoyeurName] = useState("");
   const [todayMission, setTodayMission] = useState<TodayMission | null>(null);
   const [nextMission, setNextMission] = useState<TodayMission | null>(null);
@@ -73,6 +74,26 @@ function ConvoyeurDashboard() {
         .from("attributions")
         .select("id, statut, trajet_id")
         .eq("convoyeur_id", conv.id);
+
+      // Revenu du mois courant (missions terminées, calculé côté trajets)
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const termineIds = (attrs ?? [])
+        .filter((a) => a.statut === "termine")
+        .map((a) => a.trajet_id)
+        .filter(Boolean) as string[];
+      if (termineIds.length > 0) {
+        const { data: trs } = await supabase
+          .from("trajets")
+          .select("tarif_convoyeur, updated_at")
+          .in("id", termineIds)
+          .gte("updated_at", firstOfMonth);
+        const revenue = (trs ?? []).reduce(
+          (s, t) => s + Number((t as { tarif_convoyeur: number | null }).tarif_convoyeur ?? 0),
+          0,
+        );
+        setRevenueMonth(revenue);
+      }
 
       if (attrs && attrs.length > 0) {
         setStats({
@@ -131,13 +152,24 @@ function ConvoyeurDashboard() {
   return (
     <div className="space-y-6 pb-6">
       {/* Greeting */}
-      <div>
-        <p className="brex-label-xs">Tableau de bord</p>
-        <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--driver-text)] mt-1">
-          Bonjour, {convoyeurName || "Convoyeur"}
-        </h1>
-        <p className="text-[13px] text-[var(--driver-text-soft)] mt-1">Vos missions, en un coup d'œil.</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="brex-label-xs">Tableau de bord</p>
+          <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--driver-text)] mt-1">
+            Bonjour, {convoyeurName || "Convoyeur"}
+          </h1>
+          <p className="text-[13px] text-[var(--driver-text-soft)] mt-1">Vos missions, en un coup d'œil.</p>
+        </div>
+        <div className="brex-card px-4 py-3 min-w-[180px]">
+          <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[var(--driver-muted)]">
+            <TrendingUp size={12} /> Revenus du mois
+          </p>
+          <p className="text-[22px] font-semibold text-[#e7c76a] mt-0.5 tabular-nums">
+            {revenueMonth.toFixed(0)} €
+          </p>
+        </div>
       </div>
+
 
       {/* Bandeau "Nouvelles missions disponibles" — realtime */}
       {availableCount > 0 && (

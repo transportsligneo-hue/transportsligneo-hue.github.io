@@ -201,7 +201,7 @@ function ClientDashboard() {
           <h1 className="font-heading text-2xl md:text-3xl text-cream tracking-wide">
             {prenom ? `Bonjour, ${prenom}` : "Bonjour"}
           </h1>
-          <p className="text-cream/50 text-sm mt-2">Voici un aperçu de vos convoyages.</p>
+          <p className="text-cream/70 text-sm mt-2">Voici un aperçu de vos convoyages.</p>
           <Link
             to="/dashboard-client/nouvelle-reservation"
             className="inline-flex items-center gap-2 mt-5 px-6 py-3 bg-primary text-navy font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
@@ -237,7 +237,7 @@ function ClientDashboard() {
           >
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-cream/40 text-xs uppercase tracking-wider">{lastMission.numero}</p>
+                <p className="text-cream/60 text-xs uppercase tracking-wider">{lastMission.numero}</p>
                 <p className="text-cream font-heading text-base mt-1 flex items-center gap-2">
                   <MapPin size={14} className="text-primary" />
                   {lastMission.ville_depart} → {lastMission.ville_arrivee}
@@ -247,7 +247,7 @@ function ClientDashboard() {
                 {missionStatusLabel(lastMission.statut)}
               </StatusBadge>
             </div>
-            <div className="flex items-center justify-between text-xs text-cream/50">
+            <div className="flex items-center justify-between text-xs text-cream/70">
               <span className="flex items-center gap-1">
                 <Calendar size={12} />
                 {new Date(lastMission.date_prise_en_charge).toLocaleDateString("fr-FR")}
@@ -276,7 +276,7 @@ function ClientDashboard() {
         ) : (
           <div className="card-premium p-8 rounded text-center">
             <Truck className="text-cream/20 mx-auto mb-3" size={32} />
-            <p className="text-cream/50 text-sm">Aucune mission pour le moment.</p>
+            <p className="text-cream/70 text-sm">Aucune mission pour le moment.</p>
             <Link
               to="/dashboard-client/nouvelle-reservation"
               className="inline-block mt-4 text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
@@ -308,16 +308,16 @@ function ClientDashboard() {
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-cream/40 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <p className="text-cream/60 text-xs uppercase tracking-wider flex items-center gap-1.5">
                       <FileText size={12} className="text-primary" /> {it.numero}
                     </p>
                     <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${it.status.cls}`}>
                       {it.status.label}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider text-cream/40">· {it.trajetType}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-cream/60">· {it.trajetType}</span>
                   </div>
                   <p className="text-cream font-heading text-sm mt-1.5 truncate">{it.depart} → {it.arrivee}</p>
-                  <p className="text-cream/50 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                  <p className="text-cream/70 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
                     <span>
                       <Calendar size={11} className="inline mr-1" />
                       {new Date(it.created_at).toLocaleDateString("fr-FR")}
@@ -333,7 +333,7 @@ function ClientDashboard() {
                   {it.prix != null ? (
                     <p className="font-heading text-primary text-xl">{it.prix.toFixed(0)} €</p>
                   ) : (
-                    <p className="text-cream/40 text-[11px] uppercase tracking-wider">Prix à venir</p>
+                    <p className="text-cream/60 text-[11px] uppercase tracking-wider">Prix à venir</p>
                   )}
                   <ArrowRight size={14} className="text-cream/30 hidden sm:inline mt-1" />
                 </div>
@@ -386,7 +386,7 @@ function StatCard({ icon: Icon, label, value, accent }: { icon: typeof Truck; la
     <div className="card-premium p-4 md:p-5 rounded">
       <Icon className={`${accent} opacity-70 mb-2`} size={20} />
       <p className={`font-heading text-2xl md:text-3xl ${accent}`}>{value}</p>
-      <p className="text-cream/50 text-[10px] md:text-xs uppercase tracking-wider mt-1">{label}</p>
+      <p className="text-cream/70 text-[10px] md:text-xs uppercase tracking-wider mt-1">{label}</p>
     </div>
   );
 }
