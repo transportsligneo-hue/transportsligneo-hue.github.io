@@ -1114,7 +1114,9 @@
     --admin-accent: #2563eb;
     --admin-accent-strong: #1d4ed8;
     --admin-accent-soft: #dbeafe;
-    --admin-accent-glow: rgba(37, 99, 235, 0.18);
+    --admin-accent-glow: rgba(59, 130, 246, 0.28);
+    --admin-accent-electric: #3b82f6;
+    --admin-accent-neon: #60a5fa;
     --admin-success: #16a34a;
     --admin-success-soft: #dcfce7;
     --admin-warning: #d97706;
@@ -1125,8 +1127,8 @@
     --admin-info-soft: #e0f2fe;
 
     background:
-      radial-gradient(1200px 700px at -10% -10%, rgba(37,99,235,0.06), transparent 60%),
-      radial-gradient(900px 600px at 110% 0%, rgba(14,165,233,0.05), transparent 60%),
+      radial-gradient(1200px 700px at -10% -10%, rgba(59,130,246,0.10), transparent 60%),
+      radial-gradient(900px 600px at 110% 0%, rgba(96,165,250,0.08), transparent 60%),
       var(--admin-bg);
     color: var(--admin-text);
   }
