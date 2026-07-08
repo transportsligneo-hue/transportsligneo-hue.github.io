@@ -64,4 +64,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'devis-paye': devisPaye,
   'mission-demarree-client': missionDemarreeClient,
   'mission-livree-client': missionLivreeClient,
+  'convoyeur-refuse': convoyeurRefuse,
+  'convoyeur-suspendu': convoyeurSuspendu,
 }
