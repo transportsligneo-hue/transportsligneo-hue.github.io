@@ -23,6 +23,7 @@ import {
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
+import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -954,6 +955,14 @@ function AdminTrajets() {
                         </Button>
                       )}
                     </div>
+                    {selected.statut_publication !== "attribue" && (
+                      <div className="pt-2 border-t border-pro-border">
+                        <p className="text-[11px] text-pro-muted mb-2">
+                          Ou publiez la mission au <strong>catalogue public</strong> pour que tous les convoyeurs validés puissent postuler.
+                        </p>
+                        <PublishToCatalogueButton trajetId={selected.id} onDone={fetchTrajets} />
+                      </div>
+                    )}
                   </div>
                 </Card>
               )}
