@@ -46,7 +46,7 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
   const [templateData, setTemplateData] = useState<Record<string, string>>({})
   const [sendingEmail, setSendingEmail] = useState(false)
 
-  const [pushTarget, setPushTarget] = useState<'single' | 'convoyeurs' | 'clients' | 'all'>(recipient?.userId ? 'single' : 'convoyeurs')
+  const [pushTarget, setPushTarget] = useState<'single' | 'convoyeurs' | 'clients' | 'all'>(recipient ? 'single' : 'convoyeurs')
   const [selectedUserId, setSelectedUserId] = useState(recipient?.userId ?? '')
   const [pushTitle, setPushTitle] = useState('Message Transports Ligneo')
   const [pushBody, setPushBody] = useState('')
