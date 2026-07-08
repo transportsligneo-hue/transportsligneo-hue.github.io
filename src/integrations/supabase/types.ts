@@ -3728,6 +3728,14 @@ export type Database = {
         }
         Returns: string
       }
+      get_public_pricing_display: {
+        Args: never
+        Returns: {
+          currency: string
+          default_vat_rate: number
+          regime: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
