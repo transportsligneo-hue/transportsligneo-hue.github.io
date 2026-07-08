@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
+import { LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
