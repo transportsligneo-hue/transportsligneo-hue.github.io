@@ -1,52 +1,34 @@
 import * as React from 'react'
-import { Body, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailHeader } from './_ligneo-header'
+import { LigneoEmailShell, RecapCard } from './_ligneo-header'
 
-interface Props {
-  prenom?: string; numero?: string; depart?: string; arrivee?: string
-  convoyeurPrenom?: string; convoyeurTel?: string
-}
+interface Props { prenom?: string; numero?: string; convoyeur?: string; heureDepart?: string; eta?: string }
 
-const Email = (p: Props) => (
-  <Html lang="fr" dir="ltr">
-    <Head />
-    <Preview>Votre véhicule est en route — {p.numero ?? 'Transports Ligneo'}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile" />
-        <Hr style={divider} />
-        <Heading style={h1}>{p.prenom ? `${p.prenom},` : ''} votre mission a démarré</Heading>
-        <Text style={text}>
-          Bonne nouvelle : votre convoyeur a pris la route. Vous pouvez suivre la
-          progression en direct depuis votre espace client.
-        </Text>
-        <Section style={card}>
-          <Text style={cardLine}><strong>N° mission :</strong> {p.numero ?? '—'}</Text>
-          <Text style={cardLine}><strong>Trajet :</strong> {p.depart ?? '—'} → {p.arrivee ?? '—'}</Text>
-          {p.convoyeurPrenom ? <Text style={cardLine}><strong>Convoyeur :</strong> {p.convoyeurPrenom}{p.convoyeurTel ? ` — ${p.convoyeurTel}` : ''}</Text> : null}
-        </Section>
-        <Text style={text}>
-          Suivi en temps réel : <strong>www.transportsligneo.fr</strong> → Espace client
-        </Text>
-        <Text style={footer}>L'équipe Transports Ligneo — 07 82 45 61 81</Text>
-      </Container>
-    </Body>
-  </Html>
+const Email = ({ prenom, numero, convoyeur, heureDepart, eta }: Props) => (
+  <LigneoEmailShell
+    preview="Départ effectué — Suivi en temps réel"
+    tagline="En cours de convoyage"
+    icon="🚗"
+    title="Départ effectué"
+    greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
+    intro="Le départ de votre véhicule vient d'être effectué. Vous pouvez suivre la mission en temps réel depuis votre espace client."
+    primaryCta={{ label: 'Suivre en temps réel', href: 'https://transportsligneo.fr/dashboard-client/missions' }}
+  >
+    <RecapCard
+      rows={[
+        { label: 'Statut', value: 'En cours de convoyage' },
+        convoyeur && { label: 'Convoyeur', value: convoyeur },
+        heureDepart && { label: 'Heure de départ', value: heureDepart },
+        eta && { label: 'Heure estimée d\'arrivée', value: eta },
+        numero && { label: 'N° de mission', value: numero },
+      ].filter(Boolean) as any}
+    />
+  </LigneoEmailShell>
 )
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `Véhicule en route — ${d?.numero ?? 'Transports Ligneo'}`,
+  subject: (d: Record<string, any>) => `Départ effectué${d.numero ? ` — ${d.numero}` : ''} — Transports Ligneo`,
   displayName: 'Mission démarrée (client)',
-  previewData: { prenom: 'Jean', numero: 'MIS-2026-001', depart: 'Tours', arrivee: 'Paris', convoyeurPrenom: 'Marc', convoyeurTel: '06 12 34 56 78' },
+  previewData: { prenom: 'Jean', numero: 'MIS-2026-0001', convoyeur: 'Thomas D.', heureDepart: '20/06/2026 09:15', eta: '20/06/2026 12:45' },
 } satisfies TemplateEntry
-
-const main = { backgroundColor: '#ffffff', fontFamily: "'Playfair Display', Georgia, serif" }
-const container = { padding: '30px 25px', maxWidth: '560px', margin: '0 auto' }
-const divider = { borderColor: '#d4af37', margin: '20px 0' }
-const h1 = { fontSize: '20px', fontWeight: 'bold' as const, color: '#0b1026', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: '#333', lineHeight: '1.6', margin: '0 0 20px' }
-const card = { backgroundColor: '#0b1026', padding: '20px', borderRadius: '6px', margin: '20px 0' }
-const cardLine = { fontSize: '13px', color: '#f5f1e8', margin: '6px 0', lineHeight: '1.5' }
-const footer = { fontSize: '12px', color: '#999', margin: '30px 0 0' }
