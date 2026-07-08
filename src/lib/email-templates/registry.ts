@@ -33,6 +33,8 @@ import { template as devisAccepteAdmin } from './devis-accepte-admin'
 import { template as devisPaye } from './devis-paye'
 import { template as missionDemarreeClient } from './mission-demarree-client'
 import { template as missionLivreeClient } from './mission-livree-client'
+import { template as convoyeurRefuse } from './convoyeur-refuse'
+import { template as convoyeurSuspendu } from './convoyeur-suspendu'
 
 
 
