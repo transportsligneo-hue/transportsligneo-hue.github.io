@@ -832,6 +832,7 @@ export type Database = {
           marque: string | null
           marque_retour: string | null
           message: string | null
+          mission_group_id: string | null
           modele: string | null
           modele_retour: string | null
           nom: string
@@ -891,6 +892,7 @@ export type Database = {
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           modele_retour?: string | null
           nom: string
@@ -950,6 +952,7 @@ export type Database = {
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
+          mission_group_id?: string | null
           modele?: string | null
           modele_retour?: string | null
           nom?: string
@@ -1027,6 +1030,7 @@ export type Database = {
           marque: string | null
           marque_retour: string | null
           message: string | null
+          mission_group_id: string | null
           mission_id: string | null
           modele: string | null
           modele_retour: string | null
@@ -1039,8 +1043,10 @@ export type Database = {
           pdf_url: string | null
           prenom: string
           prestation: string | null
+          prix_aller: number | null
           prix_base: number | null
           prix_estime: number
+          prix_retour: number | null
           recuperation_retour_identique: boolean
           refused_at: string | null
           regime_snapshot: string | null
@@ -1100,6 +1106,7 @@ export type Database = {
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
+          mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
           modele_retour?: string | null
@@ -1112,8 +1119,10 @@ export type Database = {
           pdf_url?: string | null
           prenom: string
           prestation?: string | null
+          prix_aller?: number | null
           prix_base?: number | null
           prix_estime: number
+          prix_retour?: number | null
           recuperation_retour_identique?: boolean
           refused_at?: string | null
           regime_snapshot?: string | null
@@ -1173,6 +1182,7 @@ export type Database = {
           marque?: string | null
           marque_retour?: string | null
           message?: string | null
+          mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
           modele_retour?: string | null
@@ -1185,8 +1195,10 @@ export type Database = {
           pdf_url?: string | null
           prenom?: string
           prestation?: string | null
+          prix_aller?: number | null
           prix_base?: number | null
           prix_estime?: number
+          prix_retour?: number | null
           recuperation_retour_identique?: boolean
           refused_at?: string | null
           regime_snapshot?: string | null
@@ -3744,6 +3756,21 @@ export type Database = {
         Returns: {
           prix_ttc: number
           rule_id: string
+        }[]
+      }
+      resolve_client_pricing_split: {
+        Args: {
+          _arrivee: string
+          _depart: string
+          _depart_retour: string
+          _email: string
+          _user_id: string
+        }
+        Returns: {
+          prix_aller: number
+          prix_retour: number
+          rule_id_aller: string
+          rule_id_retour: string
         }[]
       }
       show_limit: { Args: never; Returns: number }
