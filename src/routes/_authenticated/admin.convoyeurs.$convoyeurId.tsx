@@ -32,6 +32,8 @@ import {
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { DocumentsValidationCenter } from "@/components/admin/convoyeur/DocumentsValidationCenter";
+import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,
