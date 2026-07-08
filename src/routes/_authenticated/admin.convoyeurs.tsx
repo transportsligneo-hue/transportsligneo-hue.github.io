@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, Phone, MapPin } from "lucide-react";
+import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, MapPin } from "lucide-react";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
@@ -20,8 +20,8 @@ import {
   Select,
   TextInput,
   FormField,
-  convoyeurStatutTone,
 } from "@/components/admin/AdminUI";
+import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
@@ -253,9 +253,7 @@ function AdminConvoyeurs() {
                 </TD>
                 <TD className="hidden md:table-cell text-pro-text-soft">{c.ville || "—"}</TD>
                 <TD>
-                  <Badge tone={convoyeurStatutTone[c.statut] ?? "neutral"}>
-                    {statutLabels[c.statut] ?? c.statut}
-                  </Badge>
+                  <StatutConvoyeurBadge statut={resolveStatutConvoyeur(c.statut)} />
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
