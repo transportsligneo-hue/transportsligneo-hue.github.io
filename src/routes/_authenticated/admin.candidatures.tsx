@@ -125,8 +125,8 @@ function AdminCandidatures() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-pro-text">Candidatures des convoyeurs</h1>
-        <p className="text-sm text-pro-text-soft mt-1">Offres et contre-offres reçues sur les missions publiées.</p>
+        <h1 className="text-2xl font-bold text-pro-text">Marketplace Missions</h1>
+        <p className="text-sm text-pro-text-soft mt-1">Offres et contre-offres reçues sur les missions publiées à la marketplace.</p>
       </div>
 
       {/* KPIs */}
