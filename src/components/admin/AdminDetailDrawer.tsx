@@ -127,19 +127,21 @@ export function DrawerBadge({
   tone = "blue",
 }: {
   children: ReactNode;
-  tone?: "blue" | "green" | "amber" | "red" | "slate";
+  tone?: "blue" | "green" | "amber" | "red" | "slate" | "purple";
 }) {
+  // Badges à contraste renforcé — lecture nette sur fond blanc, aspect professionnel.
   const tones: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
-    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    amber: "bg-amber-50 text-amber-700 border-amber-200",
-    red: "bg-red-50 text-red-700 border-red-200",
-    slate: "bg-slate-100 text-slate-600 border-slate-200",
+    blue:   "bg-blue-600 text-white border-blue-700 shadow-sm",
+    green:  "bg-emerald-600 text-white border-emerald-700 shadow-sm",
+    amber:  "bg-amber-500 text-white border-amber-600 shadow-sm",
+    red:    "bg-red-600 text-white border-red-700 shadow-sm",
+    slate:  "bg-slate-800 text-white border-slate-900 shadow-sm",
+    purple: "bg-violet-600 text-white border-violet-700 shadow-sm",
   };
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
+        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
         tones[tone],
       )}
     >
@@ -147,3 +149,4 @@ export function DrawerBadge({
     </span>
   );
 }
+
