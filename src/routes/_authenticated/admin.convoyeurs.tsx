@@ -1,12 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, MapPin } from "lucide-react";
+import {
+  RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, MapPin,
+  Ban, RotateCcw, AlertTriangle, Clock, ShieldCheck, Search as SearchIcon,
+} from "lucide-react";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyAdmin } from "@/lib/admin-notifications";
 import {
   PageHeader,
-  Card,
+  KpiCard,
   Badge,
   Table,
   THead,
@@ -21,8 +25,13 @@ import {
   TextInput,
   FormField,
 } from "@/components/admin/AdminUI";
-import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
+import {
+  StatutConvoyeurBadge,
+  resolveStatutConvoyeur,
+  type StatutConvoyeur,
+} from "@/components/admin/StatutConvoyeurBadge";
 import { toast } from "sonner";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,
@@ -42,18 +51,27 @@ interface Convoyeur {
   statut: string;
   type_convoyeur: string;
   created_at: string;
+  account_status?: string | null;
 }
 
-const statuts = ["en_attente", "valide", "refuse", "suspendu"];
-const statutLabels: Record<string, string> = {
-  en_attente: "En attente",
-  valide: "Validé",
-  refuse: "Refusé",
-  suspendu: "Suspendu",
-};
+interface DocLite { convoyeur_id: string; type_document: string; statut_validation: string | null }
+
+const STATUT_FILTERS: Array<{ value: string; label: string }> = [
+  { value: "all",        label: "Tous les statuts" },
+  { value: "en_attente", label: "En attente" },
+  { value: "en_verif",   label: "En vérification" },
+  { value: "a_corriger", label: "À corriger" },
+  { value: "valide",     label: "Validés" },
+  { value: "refuse",     label: "Refusés" },
+  { value: "suspendu",   label: "Suspendus" },
+];
+
 function AdminConvoyeurs() {
+  const navigate = useNavigate();
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
-  const [filterStatut, setFilterStatut] = useState("all");
+  const [allDocs, setAllDocs] = useState<DocLite[]>([]);
+  const [filterStatut, setFilterStatut] = useState<string>("all");
+  const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
@@ -61,6 +79,7 @@ function AdminConvoyeurs() {
   const [selected, setSelected] = useState<Convoyeur | null>(null);
   const [docs, setDocs] = useState<Array<{ type_document: string; nom_fichier: string; url_fichier: string; statut_validation: string }>>([]);
   const [missionsCount, setMissionsCount] = useState<number>(0);
+  const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selected) { setDocs([]); setMissionsCount(0); return; }
@@ -68,75 +87,196 @@ function AdminConvoyeurs() {
     supabase.from("attributions").select("id", { count: "exact", head: true }).eq("convoyeur_id", selected.id).then(({ count }) => setMissionsCount(count ?? 0));
   }, [selected]);
 
-  const fetchConvoyeurs = useCallback(async () => {
-    let query = supabase.from("convoyeurs").select("*").order("created_at", { ascending: false });
-    if (filterStatut !== "all") query = query.eq("statut", filterStatut);
-    const { data } = await query;
-    if (data) setConvoyeurs(data as Convoyeur[]);
-  }, [filterStatut]);
+  const fetchAll = useCallback(async () => {
+    const [{ data: convs }, { data: docsData }] = await Promise.all([
+      supabase.from("convoyeurs").select("*").order("created_at", { ascending: false }),
+      supabase.from("documents_convoyeurs").select("convoyeur_id, type_document, statut_validation"),
+    ]);
+    if (convs) setConvoyeurs(convs as Convoyeur[]);
+    if (docsData) setAllDocs(docsData as DocLite[]);
+  }, []);
 
-  useEffect(() => {
-    fetchConvoyeurs();
-  }, [fetchConvoyeurs]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  const updateStatut = async (id: string, statut: string) => {
-    if (statut === "valide") {
-      const target = convoyeurs.find((c) => c.id === id) ?? null;
-      if (target?.type_convoyeur === "independant") {
-        const { data: docs } = await supabase
-          .from("documents_convoyeurs")
-          .select("type_document, statut_validation" as never)
-          .eq("convoyeur_id", id);
-        const required = ["permis", "identite", "domicile", "rib", "kbis", "assurance"];
-        const labels: Record<string, string> = {
-          permis: "Permis",
-          identite: "CNI",
-          domicile: "Domicile",
-          rib: "RIB",
-          kbis: "KBIS",
-          assurance: "Assurance",
-        };
-        const issues: string[] = [];
-        for (const r of required) {
-          const d = (docs as Array<{ type_document: string; statut_validation?: string }> | null)?.find(
-            (x) => x.type_document === r,
-          );
-          if (!d) issues.push(`${labels[r]} manquant`);
-          else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
-        }
-        if (issues.length > 0) {
-          toast.error(
-            `Activation impossible — ce convoyeur indépendant doit avoir tous ses documents approuvés.\n\n• ${issues.join("\n• ")}`,
-          );
-          return;
-        }
+  // Compute unified statut for each convoyeur (memo)
+  const enriched = useMemo(() => {
+    const byConv = new Map<string, DocLite[]>();
+    for (const d of allDocs) {
+      const arr = byConv.get(d.convoyeur_id) ?? [];
+      arr.push(d);
+      byConv.set(d.convoyeur_id, arr);
+    }
+    return convoyeurs.map((c) => ({
+      ...c,
+      statutUnifie: resolveStatutConvoyeur(c.statut, byConv.get(c.id) ?? []),
+      docsCount: (byConv.get(c.id) ?? []).length,
+      docsApprouves: (byConv.get(c.id) ?? []).filter((d) => d.statut_validation === "approuve").length,
+    }));
+  }, [convoyeurs, allDocs]);
+
+  // KPIs
+  const kpis = useMemo(() => {
+    const counts: Record<StatutConvoyeur, number> = {
+      valide: 0, en_attente: 0, a_corriger: 0, en_verif: 0, refuse: 0, suspendu: 0,
+    };
+    for (const c of enriched) counts[c.statutUnifie]++;
+    const docsAValider = allDocs.filter((d) => (d.statut_validation ?? "en_attente") === "en_attente").length;
+    const aVerifier = counts.en_attente + counts.en_verif + counts.a_corriger;
+    return { total: enriched.length, aVerifier, docsAValider, validated: counts.valide, suspendus: counts.suspendu, refuses: counts.refuse };
+  }, [enriched, allDocs]);
+
+  // Filtrage
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return enriched.filter((c) => {
+      if (filterStatut !== "all" && c.statutUnifie !== filterStatut) return false;
+      if (!q) return true;
+      return (
+        c.nom?.toLowerCase().includes(q) ||
+        c.prenom?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        (c.ville ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [enriched, filterStatut, search]);
+
+  const updateStatut = async (id: string, statut: string, motif?: string) => {
+    const previous = convoyeurs.find((c) => c.id === id) ?? null;
+    if (!previous) return;
+
+    if (statut === "valide" && previous.type_convoyeur === "independant") {
+      const convDocs = allDocs.filter((d) => d.convoyeur_id === id);
+      const required = ["permis", "identite", "domicile", "rib", "kbis", "assurance"];
+      const labels: Record<string, string> = {
+        permis: "Permis", identite: "CNI", domicile: "Domicile", rib: "RIB", kbis: "KBIS", assurance: "Assurance",
+      };
+      const issues: string[] = [];
+      for (const r of required) {
+        const d = convDocs.find((x) => x.type_document === r);
+        if (!d) issues.push(`${labels[r]} manquant`);
+        else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
+      }
+      if (issues.length > 0) {
+        toast.error(`Activation impossible — documents non conformes :\n• ${issues.join("\n• ")}`);
+        return;
       }
     }
-    const previous = convoyeurs.find((c) => c.id === id) ?? null;
-    const wasNotValid = previous?.statut !== "valide";
 
+    const wasNotValid = previous.statut !== "valide";
     await supabase.from("convoyeurs").update({ statut }).eq("id", id);
 
-    if (statut === "valide" && previous?.user_id) {
+    if (statut === "valide" && previous.user_id) {
       await supabase.functions.invoke("admin-user-actions", {
         body: { action: "activate_role", user_id: previous.user_id, role: "convoyeur" },
       });
     }
 
-    if (statut === "valide" && wasNotValid && previous) {
-      try {
+    // Emails + notif in-app
+    try {
+      if (statut === "valide" && wasNotValid) {
         await sendTransactionalEmail({
           templateName: "convoyeur-validation",
           recipientEmail: previous.email,
           idempotencyKey: `convoyeur-validation-${previous.id}`,
           templateData: { prenom: previous.prenom, nom: previous.nom },
         });
-      } catch (err) {
-        console.error("[admin.convoyeurs] envoi email validation échoué", err);
+        await notifyAdmin({
+          type: "driver_action",
+          titre: `Convoyeur validé : ${previous.prenom} ${previous.nom}`,
+          message: previous.email,
+          entityType: "convoyeur",
+          entityId: previous.id,
+          link: `/admin/convoyeurs/${previous.id}`,
+        });
+      } else if (statut === "refuse") {
+        await sendTransactionalEmail({
+          templateName: "convoyeur-refuse",
+          recipientEmail: previous.email,
+          idempotencyKey: `convoyeur-refuse-${previous.id}-${Date.now()}`,
+          templateData: { prenom: previous.prenom, nom: previous.nom, motif },
+        });
+        await notifyAdmin({
+          type: "driver_action",
+          titre: `Candidature refusée : ${previous.prenom} ${previous.nom}`,
+          message: motif || previous.email,
+          entityType: "convoyeur",
+          entityId: previous.id,
+          link: `/admin/convoyeurs/${previous.id}`,
+        });
       }
+    } catch (err) {
+      console.error("[admin.convoyeurs] notification échouée", err);
     }
 
-    fetchConvoyeurs();
+    fetchAll();
+  };
+
+  const suspendConvoyeur = async (c: Convoyeur) => {
+    if (!c.user_id) return toast.error("Aucun compte associé");
+    if (!(await confirmToast(`Suspendre ${c.prenom} ${c.nom} ? Il ne pourra plus se connecter.`))) return;
+    setBusy(c.id);
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: { action: "suspend", user_id: c.user_id },
+    });
+    if (error || data?.error) {
+      setBusy(null);
+      return toast.error(data?.error ?? "Erreur");
+    }
+    await supabase.from("convoyeurs").update({ statut: "suspendu" }).eq("id", c.id);
+    try {
+      await sendTransactionalEmail({
+        templateName: "convoyeur-suspendu",
+        recipientEmail: c.email,
+        idempotencyKey: `convoyeur-suspendu-${c.id}-${Date.now()}`,
+        templateData: { prenom: c.prenom, nom: c.nom, reactive: false },
+      });
+      await notifyAdmin({
+        type: "driver_action",
+        titre: `Convoyeur suspendu : ${c.prenom} ${c.nom}`,
+        message: c.email,
+        entityType: "convoyeur",
+        entityId: c.id,
+        link: `/admin/convoyeurs/${c.id}`,
+      });
+    } catch (err) {
+      console.error("[admin.convoyeurs] notif suspend échouée", err);
+    }
+    setBusy(null);
+    toast.success("Compte suspendu");
+    fetchAll();
+  };
+
+  const reactivateConvoyeur = async (c: Convoyeur) => {
+    if (!c.user_id) return toast.error("Aucun compte associé");
+    setBusy(c.id);
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+      body: { action: "reactivate", user_id: c.user_id },
+    });
+    if (error || data?.error) {
+      setBusy(null);
+      return toast.error(data?.error ?? "Erreur");
+    }
+    try {
+      await sendTransactionalEmail({
+        templateName: "convoyeur-suspendu",
+        recipientEmail: c.email,
+        idempotencyKey: `convoyeur-reactivate-${c.id}-${Date.now()}`,
+        templateData: { prenom: c.prenom, nom: c.nom, reactive: true },
+      });
+      await notifyAdmin({
+        type: "driver_action",
+        titre: `Convoyeur réactivé : ${c.prenom} ${c.nom}`,
+        message: c.email,
+        entityType: "convoyeur",
+        entityId: c.id,
+        link: `/admin/convoyeurs/${c.id}`,
+      });
+    } catch (err) {
+      console.error("[admin.convoyeurs] notif reactivate échouée", err);
+    }
+    setBusy(null);
+    toast.success("Compte réactivé");
+    fetchAll();
   };
 
   const createConvoyeur = async () => {
@@ -147,8 +287,6 @@ function AdminConvoyeurs() {
     setCreating(true);
     setCreateError("");
     try {
-      // Use the admin-create-account edge function so the admin session is
-      // never replaced and the server-side admin role check is enforced.
       const { data, error } = await supabase.functions.invoke("admin-create-account", {
         body: {
           email: form.email,
@@ -179,56 +317,93 @@ function AdminConvoyeurs() {
       }
       setForm({ nom: "", prenom: "", email: "", telephone: "", password: "" });
       setShowCreate(false);
-      fetchConvoyeurs();
+      fetchAll();
     } finally {
       setCreating(false);
     }
   };
 
-  const pendingCount = convoyeurs.filter((c) => c.statut === "en_attente").length;
-
   return (
     <div>
       <PageHeader
         title="Convoyeurs"
-        subtitle={`${convoyeurs.length} convoyeur${convoyeurs.length > 1 ? "s" : ""}${
-          pendingCount > 0 && filterStatut === "all" ? ` · ${pendingCount} en attente` : ""
-        }`}
+        subtitle={`${enriched.length} convoyeur${enriched.length > 1 ? "s" : ""} · ${kpis.aVerifier} à vérifier`}
         actions={
           <>
-            <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
-              <option value="all">Tous</option>
-              {statuts.map((s) => (
-                <option key={s} value={s}>
-                  {statutLabels[s]}
-                </option>
-              ))}
-            </Select>
             <Button icon={<UserPlus size={14} />} onClick={() => setShowCreate(true)}>
               Ajouter
             </Button>
-            <IconButton onClick={fetchConvoyeurs} title="Actualiser">
+            <IconButton onClick={fetchAll} title="Actualiser">
               <RefreshCw size={15} />
             </IconButton>
           </>
         }
       />
 
-      {convoyeurs.length === 0 ? (
-        <EmptyState icon={IdCard} title="Aucun convoyeur" description="Les inscriptions apparaîtront ici." />
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <KpiCard
+          label="À vérifier"
+          value={kpis.aVerifier}
+          icon={Clock}
+          tone={kpis.aVerifier > 0 ? "warning" : "default"}
+          hint="En attente / en vérif. / à corriger"
+        />
+        <KpiCard
+          label="Documents à valider"
+          value={kpis.docsAValider}
+          icon={FileText}
+          tone={kpis.docsAValider > 0 ? "info" : "default"}
+          hint="Documents en attente"
+        />
+        <KpiCard
+          label="Convoyeurs validés"
+          value={kpis.validated}
+          icon={ShieldCheck}
+          tone="success"
+        />
+        <KpiCard
+          label="Suspendus / refusés"
+          value={kpis.suspendus + kpis.refuses}
+          icon={AlertTriangle}
+          tone={kpis.suspendus + kpis.refuses > 0 ? "danger" : "default"}
+          hint={`${kpis.suspendus} suspendu(s) · ${kpis.refuses} refusé(s)`}
+        />
+      </div>
+
+      {/* Filtres */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="relative flex-1">
+          <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
+          <TextInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher nom, email, ville…"
+            className="!pl-9"
+          />
+        </div>
+        <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)} className="sm:w-56">
+          {STATUT_FILTERS.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </Select>
+      </div>
+
+      {filtered.length === 0 ? (
+        <EmptyState icon={IdCard} title="Aucun convoyeur" description="Aucun résultat pour ce filtre." />
       ) : (
         <Table>
           <THead>
             <TH>Convoyeur</TH>
             <TH className="hidden sm:table-cell">Contact</TH>
             <TH className="hidden md:table-cell">Type</TH>
-            <TH className="hidden md:table-cell">Ville</TH>
+            <TH className="hidden lg:table-cell">Docs</TH>
             <TH>Statut</TH>
             <TH className="text-right">Actions</TH>
           </THead>
           <tbody>
-            {convoyeurs.map((c) => (
-              <TR key={c.id} onClick={() => setSelected(c)} className="cursor-pointer">
+            {filtered.map((c) => (
+              <TR key={c.id} onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: c.id } })} className="cursor-pointer">
                 <TD>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
@@ -251,16 +426,20 @@ function AdminConvoyeurs() {
                     {c.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}
                   </Badge>
                 </TD>
-                <TD className="hidden md:table-cell text-pro-text-soft">{c.ville || "—"}</TD>
+                <TD className="hidden lg:table-cell">
+                  <span className="text-xs text-pro-text-soft tabular-nums">
+                    {c.docsApprouves}<span className="text-pro-muted">/{c.type_convoyeur === "independant" ? 6 : c.docsCount || 0}</span>
+                  </span>
+                </TD>
                 <TD>
-                  <StatutConvoyeurBadge statut={resolveStatutConvoyeur(c.statut)} />
+                  <StatutConvoyeurBadge statut={c.statutUnifie} />
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(c)} title="Voir la fiche" tone="neutral">
+                    <IconButton onClick={() => setSelected(c)} title="Aperçu rapide" tone="neutral">
                       <Eye size={15} />
                     </IconButton>
-                    {c.statut === "en_attente" && (
+                    {(c.statutUnifie === "en_attente" || c.statutUnifie === "en_verif" || c.statutUnifie === "a_corriger") && (
                       <>
                         <IconButton
                           onClick={() => updateStatut(c.id, "valide")}
@@ -270,13 +449,37 @@ function AdminConvoyeurs() {
                           <CheckCircle size={15} />
                         </IconButton>
                         <IconButton
-                          onClick={() => updateStatut(c.id, "refuse")}
+                          onClick={async () => {
+                            const motif = window.prompt("Motif du refus (optionnel) :") ?? undefined;
+                            if (motif === null) return;
+                            await updateStatut(c.id, "refuse", motif || undefined);
+                          }}
                           title="Refuser"
                           tone="danger"
                         >
                           <XCircle size={15} />
                         </IconButton>
                       </>
+                    )}
+                    {c.statutUnifie !== "suspendu" && c.user_id && (
+                      <IconButton
+                        onClick={() => suspendConvoyeur(c)}
+                        title="Suspendre"
+                        tone="danger"
+                        disabled={busy === c.id}
+                      >
+                        <Ban size={15} />
+                      </IconButton>
+                    )}
+                    {c.statutUnifie === "suspendu" && c.user_id && (
+                      <IconButton
+                        onClick={() => reactivateConvoyeur(c)}
+                        title="Réactiver"
+                        tone="success"
+                        disabled={busy === c.id}
+                      >
+                        <RotateCcw size={15} />
+                      </IconButton>
                     )}
                   </div>
                 </TD>
@@ -287,7 +490,7 @@ function AdminConvoyeurs() {
       )}
 
 
-      {/* Drawer bleu — fiche convoyeur */}
+      {/* Drawer bleu — aperçu rapide */}
       {selected && (
         <AdminDetailDrawer
           open={!!selected}
@@ -296,19 +499,44 @@ function AdminConvoyeurs() {
           subtitle={selected.email}
           badge={
             <div className="flex flex-wrap gap-2">
-              <DrawerBadge tone={selected.statut === "valide" ? "green" : selected.statut === "en_attente" ? "amber" : "red"}>
-                {statutLabels[selected.statut] ?? selected.statut}
-              </DrawerBadge>
+              <StatutConvoyeurBadge statut={resolveStatutConvoyeur(selected.statut, docs)} />
               <DrawerBadge tone="slate">{selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}</DrawerBadge>
             </div>
           }
           footer={
-            selected.statut === "en_attente" ? (
-              <div className="flex gap-2">
-                <Button onClick={() => { updateStatut(selected.id, "valide"); setSelected(null); }} className="bg-emerald-500 hover:bg-emerald-600 text-white" icon={<CheckCircle size={14} />}>Valider</Button>
-                <Button onClick={() => { updateStatut(selected.id, "refuse"); setSelected(null); }} className="bg-red-500 hover:bg-red-600 text-white" icon={<XCircle size={14} />}>Refuser</Button>
-              </div>
-            ) : null
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: selected.id } })}
+                className="bg-pro-accent hover:bg-pro-accent/90 text-white"
+              >
+                Ouvrir la fiche complète
+              </Button>
+              {(resolveStatutConvoyeur(selected.statut, docs) === "en_attente" ||
+                resolveStatutConvoyeur(selected.statut, docs) === "en_verif" ||
+                resolveStatutConvoyeur(selected.statut, docs) === "a_corriger") && (
+                <>
+                  <Button
+                    onClick={() => { updateStatut(selected.id, "valide"); setSelected(null); }}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                    icon={<CheckCircle size={14} />}
+                  >
+                    Valider
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      const motif = window.prompt("Motif du refus (optionnel) :") ?? undefined;
+                      if (motif === null) return;
+                      await updateStatut(selected.id, "refuse", motif || undefined);
+                      setSelected(null);
+                    }}
+                    className="bg-red-500 hover:bg-red-600 text-white"
+                    icon={<XCircle size={14} />}
+                  >
+                    Refuser
+                  </Button>
+                </>
+              )}
+            </div>
           }
         >
           <DrawerSection title="Contact" icon={<User size={12} />}>
