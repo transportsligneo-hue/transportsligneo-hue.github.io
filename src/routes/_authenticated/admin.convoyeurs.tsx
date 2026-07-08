@@ -506,7 +506,11 @@ function AdminConvoyeurs() {
           footer={
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: selected.id } })}
+                onClick={() => {
+                  const id = selected.id;
+                  setSelected(null);
+                  navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: id } });
+                }}
                 className="bg-pro-accent hover:bg-pro-accent/90 text-white"
               >
                 Ouvrir la fiche complète
