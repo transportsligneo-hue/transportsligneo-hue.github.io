@@ -386,8 +386,7 @@ function AdminConvoyeurDetail() {
     .reduce((sum, a) => sum + (a.trajet?.tarif_convoyeur ?? 0), 0);
   const prochainesDispos = dispos.filter((d) => d.statut === "disponible").length;
 
-  const statutTone =
-    conv.statut === "valide" ? "success" : conv.statut === "en_attente" ? "warning" : conv.statut === "refuse" || conv.statut === "suspendu" ? "danger" : "neutral";
+  const statutUnifie = resolveStatutConvoyeur(conv.statut, docs);
 
   const accountState = (() => {
     if (!status) return { label: "—", tone: "neutral" as const };
@@ -412,7 +411,7 @@ function AdminConvoyeurDetail() {
         subtitle={conv.email}
         status={
           <div className="flex flex-wrap items-center gap-2">
-            <AdminBadge label={statutLabels[conv.statut] ?? conv.statut} tone={statutTone} />
+            <StatutConvoyeurBadge statut={statutUnifie} size="md" />
             <AdminBadge label={accountState.label} tone={accountState.tone} />
             {conv.ville && <AdminBadge label={conv.ville} tone="info" />}
           </div>
