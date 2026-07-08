@@ -1,84 +1,47 @@
 import * as React from 'react'
-import {
-  Body, Container, Head, Heading, Hr, Html, Preview, Section, Text,
-} from '@react-email/components'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailHeader } from './_ligneo-header'
+import { LigneoEmailShell, RecapCard } from './_ligneo-header'
 
-const SITE_NAME = "Transports Ligneo"
-
-interface MissionConfirmationProps {
+interface Props {
   prenom?: string
   numero?: string
-  villeDepart?: string
-  villeArrivee?: string
+  depart?: string
+  arrivee?: string
   date?: string
-  prixTotal?: number
-  typeTrajet?: string
+  prestation?: string
+  prix?: number | string
 }
 
-const MissionConfirmationEmail = ({
-  prenom, numero, villeDepart, villeArrivee, date, prixTotal, typeTrajet,
-}: MissionConfirmationProps) => (
-  <Html lang="fr" dir="ltr">
-    <Head />
-    <Preview>Réservation confirmée — {numero ?? 'Transports Ligneo'}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <LigneoEmailHeader tagline="Convoyage automobile" />
-        <Hr style={divider} />
-        <Heading style={h1}>
-          {prenom ? `Merci ${prenom},` : 'Merci !'} votre réservation est enregistrée
-        </Heading>
-        <Text style={text}>
-          Votre demande de convoyage a bien été reçue. Voici le récapitulatif :
-        </Text>
-
-        <Section style={card}>
-          <Text style={cardLine}><strong>N° de mission :</strong> {numero ?? '—'}</Text>
-          <Text style={cardLine}><strong>Trajet :</strong> {villeDepart ?? '—'} → {villeArrivee ?? '—'}</Text>
-          <Text style={cardLine}><strong>Date :</strong> {date ?? '—'}</Text>
-          <Text style={cardLine}><strong>Type :</strong> {typeTrajet ?? '—'}</Text>
-          <Text style={cardPrice}><strong>Prix total TTC :</strong> {prixTotal != null ? `${prixTotal.toFixed(2)} €` : '—'}</Text>
-        </Section>
-
-        <Text style={text}>
-          Notre équipe va valider votre mission et vous recontactera très rapidement.
-          Pour toute question, contactez-nous au <strong>07 82 45 61 81</strong> ou
-          à <strong>contact@transportsligneo.fr</strong>.
-        </Text>
-
-        <Text style={footer}>Cordialement, L'équipe {SITE_NAME}</Text>
-      </Container>
-    </Body>
-  </Html>
+const Email = ({ prenom, numero, depart, arrivee, date, prestation, prix }: Props) => (
+  <LigneoEmailShell
+    preview={`Mission créée — ${numero ?? ''}`}
+    tagline="Mission créée"
+    icon="🚗"
+    title="Mission créée"
+    greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
+    intro="Votre mission a été créée avec succès. Notre équipe se charge dès à présent de l'organisation."
+    primaryCta={{ label: 'Voir la mission', href: 'https://transportsligneo.fr/dashboard-client/missions' }}
+  >
+    <RecapCard
+      title="Récapitulatif de la mission"
+      rows={[
+        numero && { label: 'N° de mission', value: numero },
+        depart && { label: 'Départ', value: depart },
+        arrivee && { label: 'Arrivée', value: arrivee },
+        date && { label: 'Date', value: date },
+        prestation && { label: 'Prestation', value: prestation },
+        prix && { label: 'Montant TTC', value: `${prix} €` },
+      ].filter(Boolean) as any}
+    />
+  </LigneoEmailShell>
 )
 
 export const template = {
-  component: MissionConfirmationEmail,
-  subject: (data: Record<string, any>) =>
-    `Réservation confirmée — ${data?.numero ?? 'Transports Ligneo'}`,
-  displayName: 'Confirmation de réservation',
+  component: Email,
+  subject: (d: Record<string, any>) => `Mission créée${d.numero ? ` — ${d.numero}` : ''} — Transports Ligneo`,
+  displayName: 'Mission — confirmation',
   previewData: {
-    prenom: 'Jean',
-    numero: 'MIS-20260419-ABC123',
-    villeDepart: 'Tours',
-    villeArrivee: 'Paris',
-    date: '25/04/2026',
-    prixTotal: 237,
-    typeTrajet: 'Aller simple',
+    prenom: 'Jean', numero: 'MIS-2026-0001', depart: 'TOURS (37)', arrivee: 'LE MANS (72)',
+    date: '20/06/2026', prestation: 'Aller / Retour', prix: 180,
   },
 } satisfies TemplateEntry
-
-const main = { backgroundColor: '#ffffff', fontFamily: "'Playfair Display', Georgia, serif" }
-const container = { padding: '30px 25px', maxWidth: '560px', margin: '0 auto' }
-const header = { textAlign: 'center' as const, padding: '20px 0' }
-const brand = { fontSize: '18px', fontWeight: 'bold' as const, color: '#d4af37', letterSpacing: '3px', margin: '0' }
-const subtitle = { fontSize: '11px', color: '#0b1026', letterSpacing: '2px', margin: '5px 0 0', textTransform: 'uppercase' as const }
-const divider = { borderColor: '#d4af37', margin: '20px 0' }
-const h1 = { fontSize: '20px', fontWeight: 'bold' as const, color: '#0b1026', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: '#333', lineHeight: '1.6', margin: '0 0 20px' }
-const card = { backgroundColor: '#0b1026', padding: '20px', borderRadius: '6px', margin: '20px 0' }
-const cardLine = { fontSize: '13px', color: '#f5f1e8', margin: '6px 0', lineHeight: '1.5' }
-const cardPrice = { fontSize: '15px', color: '#d4af37', margin: '14px 0 0', borderTop: '1px solid rgba(212,175,55,0.3)', paddingTop: '12px' }
-const footer = { fontSize: '12px', color: '#999', margin: '30px 0 0' }
