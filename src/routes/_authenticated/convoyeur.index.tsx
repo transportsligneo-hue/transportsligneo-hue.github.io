@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { PendingProposalsBanner } from "@/components/convoyeur/PendingProposalsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -151,6 +152,7 @@ function ConvoyeurDashboard() {
 
   return (
     <div className="space-y-6 pb-6">
+      <PendingProposalsBanner />
       {/* Greeting */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
