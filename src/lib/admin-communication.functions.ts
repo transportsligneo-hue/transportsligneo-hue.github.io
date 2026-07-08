@@ -104,7 +104,7 @@ export const sendAdminPushNotification = createServerFn({ method: 'POST' })
     if (data.target.mode === 'user') {
       userIds = [data.target.userId]
     } else {
-      const roles = data.target.mode === 'all' ? ['convoyeur', 'client'] : [data.target.role]
+      const roles: Array<'convoyeur' | 'client'> = data.target.mode === 'all' ? ['convoyeur', 'client'] : [data.target.role]
       const { data: rows, error } = await supabaseAdmin
         .from('user_roles')
         .select('user_id')

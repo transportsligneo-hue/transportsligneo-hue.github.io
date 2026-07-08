@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -68,6 +68,7 @@ const STATUT_FILTERS: Array<{ value: string; label: string }> = [
 
 function AdminConvoyeurs() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [allDocs, setAllDocs] = useState<DocLite[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
@@ -80,6 +81,10 @@ function AdminConvoyeurs() {
   const [docs, setDocs] = useState<Array<{ type_document: string; nom_fichier: string; url_fichier: string; statut_validation: string }>>([]);
   const [missionsCount, setMissionsCount] = useState<number>(0);
   const [busy, setBusy] = useState<string | null>(null);
+
+  if (location.pathname !== "/admin/convoyeurs") {
+    return <Outlet />;
+  }
 
   useEffect(() => {
     if (!selected) { setDocs([]); setMissionsCount(0); return; }

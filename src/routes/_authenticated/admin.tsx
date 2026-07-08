@@ -19,6 +19,7 @@ import {
   UserRound,
   PenLine,
   Radar,
+  Megaphone,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -74,6 +75,7 @@ function AdminLayout() {
         ? <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
         : undefined,
     },
+    { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
 
     // Comptes
     { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Comptes" },

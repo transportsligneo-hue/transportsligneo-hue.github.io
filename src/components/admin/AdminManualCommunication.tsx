@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { BellRing, Loader2, Mail, Send } from 'lucide-react'
 import { toast } from 'sonner'
@@ -146,7 +146,7 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
     const multiline = ['message', 'motif', 'commentaire', 'notes', 'instructions', 'intro'].some((k) => lower.includes(k))
     const common = {
       value: templateData[field] ?? '',
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
         setTemplateData((prev) => ({ ...prev, [field]: e.target.value })),
       className: 'w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/25',
       placeholder: field,

@@ -18,6 +18,7 @@ import {
   Activity,
   CalendarDays,
   User,
+  Megaphone,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { humanizeAction } from "@/lib/activity-humanizer";
@@ -34,6 +35,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { DocumentsValidationCenter } from "@/components/admin/convoyeur/DocumentsValidationCenter";
 import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
+import { AdminManualCommunication } from "@/components/admin/AdminManualCommunication";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,
@@ -464,6 +466,7 @@ function AdminConvoyeurDetail() {
           <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/6)</TabsTrigger>
+          <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
           <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
         </TabsList>
@@ -607,6 +610,21 @@ function AdminConvoyeurDetail() {
               convoyeurNom={conv.nom}
               typeConvoyeur={conv.type_convoyeur}
               onChanged={load}
+            />
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="communication" className="mt-6">
+          <AdminSection title="Communication convoyeur" description="Envoyer un email templatisé rempli manuellement ou une notification visible dans l'espace convoyeur.">
+            <AdminManualCommunication
+              recipient={{
+                userId: conv.user_id,
+                email: conv.email,
+                label: fullName,
+                prenom: conv.prenom,
+                nom: conv.nom,
+                role: "convoyeur",
+              }}
             />
           </AdminSection>
         </TabsContent>
