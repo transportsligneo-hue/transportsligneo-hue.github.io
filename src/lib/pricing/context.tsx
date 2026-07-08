@@ -29,14 +29,15 @@ export function PricingProvider({ children }: { children: ReactNode }) {
   const refresh = async () => {
     try {
       const [settingsRes, ratesRes] = await Promise.all([
-        supabase.from("pricing_settings").select("regime, default_vat_rate, currency").maybeSingle(),
+        supabase.rpc("get_public_pricing_display"),
         supabase.from("vat_rates").select("*").order("sort_order", { ascending: true }),
       ]);
-      if (settingsRes.data) {
+      const settingsRow = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
+      if (settingsRow) {
         setSettings({
-          regime: (settingsRes.data.regime === "societe" ? "societe" : "micro"),
-          defaultVatRate: Number(settingsRes.data.default_vat_rate ?? 20),
-          currency: settingsRes.data.currency ?? "EUR",
+          regime: (settingsRow.regime === "societe" ? "societe" : "micro"),
+          defaultVatRate: Number(settingsRow.default_vat_rate ?? 20),
+          currency: settingsRow.currency ?? "EUR",
         });
       }
       if (ratesRes.data) {
