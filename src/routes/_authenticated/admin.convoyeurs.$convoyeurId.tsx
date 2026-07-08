@@ -596,27 +596,18 @@ function AdminConvoyeurDetail() {
         </TabsContent>
 
         <TabsContent value="documents" className="mt-6">
-          <AdminSection title="Documents" description={`${docsApprouves} / 6 approuvés`}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {["permis", "identite", "domicile", "rib", "kbis", "assurance"].map((type) => {
-                const d = docs.find((x) => x.type_document === type);
-                const tone =
-                  d?.statut_validation === "approuve" ? "success"
-                  : d?.statut_validation === "refuse" ? "danger"
-                  : d ? "warning" : "neutral";
-                return (
-                  <div key={type} className="admin-card-flat p-3 flex flex-col gap-1.5">
-                    <p className="admin-label">{docLabels[type]}</p>
-                    <AdminBadge label={d ? d.statut_validation ?? "en attente" : "manquant"} tone={tone} />
-                    {d && (
-                      <p className="text-[10px] text-slate-400">
-                        Déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          <AdminSection
+            title="Centre de validation des documents"
+            description="Ouvrir, zoomer, télécharger, approuver, refuser, demander un nouveau document."
+          >
+            <DocumentsValidationCenter
+              convoyeurId={conv.id}
+              convoyeurEmail={conv.email}
+              convoyeurPrenom={conv.prenom}
+              convoyeurNom={conv.nom}
+              typeConvoyeur={conv.type_convoyeur}
+              onChanged={load}
+            />
           </AdminSection>
         </TabsContent>
 
