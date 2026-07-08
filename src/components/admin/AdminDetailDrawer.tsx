@@ -44,15 +44,16 @@ export function AdminDetailDrawer({
         )}
       >
         {/* Header premium — la croix de fermeture est fournie par SheetContent (shadcn) pour éviter tout doublon */}
-        <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.98))]">
-          {badge ? <div className="mb-2">{badge}</div> : null}
-          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight pr-10 text-slate-950">
+        <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,#ffffff,#f8fafc)]">
+          {badge ? <div className="mb-3 flex flex-wrap gap-2">{badge}</div> : null}
+          <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight pr-10 text-slate-900 leading-tight">
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+            <p className="mt-1.5 text-sm text-slate-500 font-medium">{subtitle}</p>
           ) : null}
         </div>
+
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] [scrollbar-color:rgba(148,163,184,0.6)_transparent]">
