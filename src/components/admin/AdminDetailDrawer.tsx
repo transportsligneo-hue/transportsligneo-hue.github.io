@@ -44,15 +44,16 @@ export function AdminDetailDrawer({
         )}
       >
         {/* Header premium — la croix de fermeture est fournie par SheetContent (shadcn) pour éviter tout doublon */}
-        <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.98))]">
-          {badge ? <div className="mb-2">{badge}</div> : null}
-          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight pr-10 text-slate-950">
+        <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,#ffffff,#f8fafc)]">
+          {badge ? <div className="mb-3 flex flex-wrap gap-2">{badge}</div> : null}
+          <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight pr-10 text-slate-900 leading-tight">
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+            <p className="mt-1.5 text-sm text-slate-500 font-medium">{subtitle}</p>
           ) : null}
         </div>
+
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] [scrollbar-color:rgba(148,163,184,0.6)_transparent]">
@@ -127,19 +128,21 @@ export function DrawerBadge({
   tone = "blue",
 }: {
   children: ReactNode;
-  tone?: "blue" | "green" | "amber" | "red" | "slate";
+  tone?: "blue" | "green" | "amber" | "red" | "slate" | "purple";
 }) {
+  // Badges à contraste renforcé — lecture nette sur fond blanc, aspect professionnel.
   const tones: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
-    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    amber: "bg-amber-50 text-amber-700 border-amber-200",
-    red: "bg-red-50 text-red-700 border-red-200",
-    slate: "bg-slate-100 text-slate-600 border-slate-200",
+    blue:   "bg-blue-600 text-white border-blue-700 shadow-sm",
+    green:  "bg-emerald-600 text-white border-emerald-700 shadow-sm",
+    amber:  "bg-amber-500 text-white border-amber-600 shadow-sm",
+    red:    "bg-red-600 text-white border-red-700 shadow-sm",
+    slate:  "bg-slate-800 text-white border-slate-900 shadow-sm",
+    purple: "bg-violet-600 text-white border-violet-700 shadow-sm",
   };
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
+        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
         tones[tone],
       )}
     >
@@ -147,3 +150,4 @@ export function DrawerBadge({
     </span>
   );
 }
+

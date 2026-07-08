@@ -488,7 +488,7 @@ function DemandeDrawer({
           <select
             value={demande.statut}
             onChange={(e) => updateStatut(e.target.value)}
-            className="text-xs bg-white/10 text-white border border-white/20 rounded px-2 py-1.5"
+            className="text-xs bg-white text-slate-800 border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           >
             {statuts.map((s) => (
               <option key={s} value={s} className="text-black">{statutLabels[s]}</option>
