@@ -253,9 +253,7 @@ function AdminConvoyeurs() {
                 </TD>
                 <TD className="hidden md:table-cell text-pro-text-soft">{c.ville || "—"}</TD>
                 <TD>
-                  <Badge tone={convoyeurStatutTone[c.statut] ?? "neutral"}>
-                    {statutLabels[c.statut] ?? c.statut}
-                  </Badge>
+                  <StatutConvoyeurBadge statut={resolveStatutConvoyeur(c.statut)} />
                 </TD>
                 <TD onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
