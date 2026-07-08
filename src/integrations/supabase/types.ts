@@ -2847,6 +2847,7 @@ export type Database = {
       }
       trajets: {
         Row: {
+          allow_counter_offer: boolean
           archived_at: string | null
           arrivee: string
           arrivee_contact_instructions: string | null
@@ -2855,6 +2856,7 @@ export type Database = {
           arrivee_contact_societe: string | null
           arrivee_contact_telephone: string | null
           arrivee_contact_telephone2: string | null
+          attribution_mode: string
           bidding_enabled: boolean
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
@@ -2893,6 +2895,7 @@ export type Database = {
           prix_convoyeur_min: number | null
           prix_societe: number | null
           prix_suggere: number | null
+          proposal_expires_at: string | null
           published_at: string | null
           statut: string
           statut_publication: string
@@ -2909,6 +2912,7 @@ export type Database = {
           vin: string | null
         }
         Insert: {
+          allow_counter_offer?: boolean
           archived_at?: string | null
           arrivee: string
           arrivee_contact_instructions?: string | null
@@ -2917,6 +2921,7 @@ export type Database = {
           arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
+          attribution_mode?: string
           bidding_enabled?: boolean
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -2955,6 +2960,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
           statut_publication?: string
@@ -2971,6 +2977,7 @@ export type Database = {
           vin?: string | null
         }
         Update: {
+          allow_counter_offer?: boolean
           archived_at?: string | null
           arrivee?: string
           arrivee_contact_instructions?: string | null
@@ -2979,6 +2986,7 @@ export type Database = {
           arrivee_contact_societe?: string | null
           arrivee_contact_telephone?: string | null
           arrivee_contact_telephone2?: string | null
+          attribution_mode?: string
           bidding_enabled?: boolean
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -3017,6 +3025,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
           statut_publication?: string
@@ -3598,6 +3607,31 @@ export type Database = {
     }
     Functions: {
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
+      admin_award_offer: { Args: { _offre_id: string }; Returns: string }
+      admin_counter_offer: {
+        Args: { _counter_price: number; _message?: string; _offre_id: string }
+        Returns: undefined
+      }
+      admin_propose_mission_to_convoyeur: {
+        Args: {
+          _convoyeur_id: string
+          _expires_in_hours?: number
+          _trajet_id: string
+        }
+        Returns: string
+      }
+      admin_publish_to_catalogue: {
+        Args: {
+          _allow_counter_offer?: boolean
+          _expires_in_hours?: number
+          _trajet_id: string
+        }
+        Returns: undefined
+      }
+      admin_reject_offer: {
+        Args: { _offre_id: string; _reason?: string }
+        Returns: undefined
+      }
       admin_reset_operational_data: { Args: never; Returns: Json }
       auto_archive_old_records: { Args: never; Returns: undefined }
       can_driver_update_attribution: {
@@ -3662,11 +3696,24 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      driver_apply_to_mission: {
+        Args: {
+          _message?: string
+          _proposed_price?: number
+          _trajet_id: string
+        }
+        Returns: string
+      }
+      driver_respond_to_proposal: {
+        Args: { _accept: boolean; _attribution_id: string; _reason?: string }
+        Returns: undefined
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      expire_stale_proposals: { Args: never; Returns: undefined }
       find_or_create_company: {
         Args: {
           _contact_email: string
