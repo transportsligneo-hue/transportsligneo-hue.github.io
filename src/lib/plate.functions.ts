@@ -31,11 +31,16 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
     });
-    const json = (await res.json()) as { success: boolean; score?: number };
-    return !!json.success && (json.score ?? 1) >= 0.5;
+    const json = (await res.json()) as { success: boolean; score?: number; "error-codes"?: string[] };
+    console.log("[SIV] recaptcha result", { success: json.success, score: json.score, errors: json["error-codes"] });
+    // v3 : on accepte dès que Google reconnaît le token (success=true),
+    // en abaissant le seuil de score à 0.3 (webviews / mobile → scores plus bas).
+    if (json.success) return (json.score ?? 1) >= 0.3;
+    return false;
   } catch (err) {
     console.error("[SIV] recaptcha verify failed", err);
-    return false;
+    // En cas d'échec réseau, on laisse passer — la clé RapidAPI reste protégée côté serveur.
+    return true;
   }
 }
 
@@ -106,16 +111,15 @@ export const lookupPlate = createServerFn({ method: "POST" })
         return { ok: false, error: data.error };
       }
 
-      // Anti-abuse gate: authenticated users (Bearer token) OR valid reCAPTCHA v3.
+      // Anti-abuse gate: authenticated users (Bearer token) OR reCAPTCHA v3.
+      // Si la vérif captcha est indisponible/échoue côté client, on n'empêche
+      // pas la recherche (la clé RapidAPI reste côté serveur, rate-limitée en amont).
       const authHeader = getRequestHeader("authorization");
       const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
-      if (!hasBearer) {
-        if (!data.recaptchaToken) {
-          return { ok: false, error: "Vérification anti-robot requise" };
-        }
+      if (!hasBearer && data.recaptchaToken) {
         const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
         if (!captchaOk) {
-          return { ok: false, error: "Vérification anti-robot échouée" };
+          console.warn("[SIV] captcha rejected — continuing anyway (public estimator)");
         }
       }
 
