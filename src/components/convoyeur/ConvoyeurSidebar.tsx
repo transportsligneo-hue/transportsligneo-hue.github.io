@@ -1,9 +1,8 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
+import { Bell, LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface ConvoyeurSidebarItem {
   to: string;
@@ -67,9 +66,6 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           {user?.email && (
             <p className="text-[11px] text-[#A8C2FF]/80 truncate mt-2.5 pl-12 font-mono">{user.email}</p>
           )}
-          <div className="mt-3 pl-11 text-[#D6E4FF]">
-            <NotificationBell />
-          </div>
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -105,7 +101,12 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         <div className="h-16 px-4 flex items-center justify-between gap-3">
           <DriverBrand />
           <div className="flex items-center gap-2 shrink-0">
-            <NotificationBell />
+            <button
+              aria-label="Notifications"
+              className="relative w-11 h-11 rounded-2xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-[#D6E4FF] active:scale-95 transition-transform"
+            >
+              <Bell size={18} />
+            </button>
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="w-11 h-11 rounded-2xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
