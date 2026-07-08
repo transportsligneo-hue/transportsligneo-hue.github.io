@@ -82,10 +82,6 @@ function AdminConvoyeurs() {
   const [missionsCount, setMissionsCount] = useState<number>(0);
   const [busy, setBusy] = useState<string | null>(null);
 
-  if (location.pathname !== "/admin/convoyeurs") {
-    return <Outlet />;
-  }
-
   useEffect(() => {
     if (!selected) { setDocs([]); setMissionsCount(0); return; }
     supabase.from("documents_convoyeurs").select("type_document, nom_fichier, url_fichier, statut_validation").eq("convoyeur_id", selected.id).then(({ data }) => setDocs(data ?? []));
@@ -144,6 +140,10 @@ function AdminConvoyeurs() {
       );
     });
   }, [enriched, filterStatut, search]);
+
+  if (location.pathname !== "/admin/convoyeurs") {
+    return <Outlet />;
+  }
 
   const updateStatut = async (id: string, statut: string, motif?: string) => {
     const previous = convoyeurs.find((c) => c.id === id) ?? null;
