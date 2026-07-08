@@ -506,7 +506,11 @@ function AdminConvoyeurs() {
           footer={
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: selected.id } })}
+                onClick={() => {
+                  const id = selected.id;
+                  setSelected(null);
+                  navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: id } });
+                }}
                 className="bg-pro-accent hover:bg-pro-accent/90 text-white"
               >
                 Ouvrir la fiche complète
@@ -560,14 +564,14 @@ function AdminConvoyeurs() {
 
           <DrawerSection title={`Documents (${docs.length})`} icon={<FileText size={12} />}>
             {docs.length === 0 ? (
-              <p className="text-sm text-white/50">Aucun document fourni.</p>
+              <p className="text-sm text-slate-500">Aucun document fourni.</p>
             ) : (
               <div className="space-y-2">
                 {docs.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between gap-3 p-2 rounded-lg bg-white/[0.03] border border-white/10">
+                  <div key={i} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-white/95 capitalize">{d.type_document}</p>
-                      <p className="text-[11px] text-white/40 truncate">{d.nom_fichier}</p>
+                      <p className="text-sm text-slate-900 font-medium capitalize">{d.type_document}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{d.nom_fichier}</p>
                     </div>
                     <DrawerBadge tone={d.statut_validation === "approuve" ? "green" : d.statut_validation === "refuse" ? "red" : "amber"}>
                       {d.statut_validation}
@@ -580,7 +584,7 @@ function AdminConvoyeurs() {
 
           {selected.message && (
             <DrawerSection title="Message d'inscription" icon={<Mail size={12} />}>
-              <p className="text-sm text-white/85 whitespace-pre-wrap">{selected.message}</p>
+              <p className="text-sm text-slate-800 whitespace-pre-wrap">{selected.message}</p>
             </DrawerSection>
           )}
         </AdminDetailDrawer>

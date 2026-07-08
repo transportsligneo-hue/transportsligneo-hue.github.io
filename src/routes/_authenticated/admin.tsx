@@ -93,7 +93,7 @@ function AdminLayout() {
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
     { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
     { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
-    { to: "/admin/candidatures", label: "Candidatures", icon: Handshake, group: "Opérations" },
+    { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
 
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
