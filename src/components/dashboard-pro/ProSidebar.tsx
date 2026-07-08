@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface ProSidebarItem {
   to: string;
@@ -80,13 +81,16 @@ export function ProSidebar({ societe, items, children }: Props) {
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
           <LigneoBrand role="partner" variant="light" compact />
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
-            aria-label="Menu"
-          >
-            <Menu size={18} />
-          </button>
+          <div className="flex items-center gap-2 text-pro-text-soft">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
+              aria-label="Menu"
+            >
+              <Menu size={18} />
+            </button>
+          </div>
         </div>
       </header>
 

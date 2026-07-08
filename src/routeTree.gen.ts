@@ -98,6 +98,7 @@ import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
@@ -618,6 +619,12 @@ const AuthenticatedAdminConvoyeursRoute =
     path: '/convoyeurs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCommunicationRoute =
+  AuthenticatedAdminCommunicationRouteImport.update({
+    id: '/communication',
+    path: '/communication',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminClientsRoute =
   AuthenticatedAdminClientsRouteImport.update({
     id: '/clients',
@@ -812,6 +819,7 @@ export interface FileRoutesByFullPath {
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
+  '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -922,6 +930,7 @@ export interface FileRoutesByTo {
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
+  '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1039,6 +1048,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
+  '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1157,6 +1167,7 @@ export interface FileRouteTypes {
     | '/admin/b2b-leads'
     | '/admin/candidatures'
     | '/admin/clients'
+    | '/admin/communication'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1267,6 +1278,7 @@ export interface FileRouteTypes {
     | '/admin/b2b-leads'
     | '/admin/candidatures'
     | '/admin/clients'
+    | '/admin/communication'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1383,6 +1395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/b2b-leads'
     | '/_authenticated/admin/candidatures'
     | '/_authenticated/admin/clients'
+    | '/_authenticated/admin/communication'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
@@ -2126,6 +2139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/communication': {
+      id: '/_authenticated/admin/communication'
+      path: '/communication'
+      fullPath: '/admin/communication'
+      preLoaderRoute: typeof AuthenticatedAdminCommunicationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/clients': {
       id: '/_authenticated/admin/clients'
       path: '/clients'
@@ -2377,6 +2397,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
+  AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRouteWithChildren
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
@@ -2402,6 +2423,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
+  AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,
   AuthenticatedAdminConvoyeursRoute:
     AuthenticatedAdminConvoyeursRouteWithChildren,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,

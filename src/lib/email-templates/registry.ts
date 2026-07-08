@@ -35,6 +35,7 @@ import { template as missionDemarreeClient } from './mission-demarree-client'
 import { template as missionLivreeClient } from './mission-livree-client'
 import { template as convoyeurRefuse } from './convoyeur-refuse'
 import { template as convoyeurSuspendu } from './convoyeur-suspendu'
+import { template as messageManuel } from './message-manuel'
 
 
 
@@ -66,4 +67,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-livree-client': missionLivreeClient,
   'convoyeur-refuse': convoyeurRefuse,
   'convoyeur-suspendu': convoyeurSuspendu,
+  'message-manuel': messageManuel,
 }

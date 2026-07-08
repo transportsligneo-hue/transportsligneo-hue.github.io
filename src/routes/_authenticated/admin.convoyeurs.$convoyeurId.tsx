@@ -18,6 +18,9 @@ import {
   Activity,
   CalendarDays,
   User,
+  Megaphone,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { humanizeAction } from "@/lib/activity-humanizer";
@@ -34,6 +37,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { DocumentsValidationCenter } from "@/components/admin/convoyeur/DocumentsValidationCenter";
 import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
+import { AdminManualCommunication } from "@/components/admin/AdminManualCommunication";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,
@@ -122,6 +126,10 @@ function AdminConvoyeurDetail() {
   const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [status, setStatus] = useState<AccountStatus | null>(null);
+  const [neighborNav, setNeighborNav] = useState<{
+    previous?: { id: string; label: string };
+    next?: { id: string; label: string };
+  }>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -142,7 +150,7 @@ function AdminConvoyeurDetail() {
       setOriginal(init);
 
       const today = new Date().toISOString().slice(0, 10);
-      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }] = await Promise.all([
+      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }, { data: navRows }] = await Promise.all([
         supabase
           .from("documents_convoyeurs")
           .select("id, type_document, statut_validation, created_at")
@@ -168,11 +176,23 @@ function AdminConvoyeurDetail() {
               .order("created_at", { ascending: false })
               .limit(30)
           : Promise.resolve({ data: [] as LogRow[] }),
+        supabase
+          .from("convoyeurs")
+          .select("id, prenom, nom")
+          .order("created_at", { ascending: false })
+          .limit(500),
       ]);
       setDocs((d as DocItem[]) ?? []);
       setAttribs((a as unknown as AttribItem[]) ?? []);
       setDispos((dispo as DispoRow[]) ?? []);
       setLogs((lg as LogRow[]) ?? []);
+      const ordered = ((navRows as Array<{ id: string; prenom: string | null; nom: string | null }> | null) ?? [])
+        .map((row) => ({ id: row.id, label: `${row.prenom ?? ""} ${row.nom ?? ""}`.trim() || "Convoyeur" }));
+      const currentIndex = ordered.findIndex((row) => row.id === convoyeurId);
+      setNeighborNav({
+        previous: currentIndex > 0 ? ordered[currentIndex - 1] : undefined,
+        next: currentIndex >= 0 && currentIndex < ordered.length - 1 ? ordered[currentIndex + 1] : undefined,
+      });
 
       if (cv.user_id) {
         try {
@@ -421,6 +441,26 @@ function AdminConvoyeurDetail() {
             <Link to="/admin/convoyeurs" className="admin-btn-ghost inline-flex items-center gap-2">
               <ArrowLeft size={14} /> Retour
             </Link>
+            {neighborNav.previous && (
+              <Link
+                to="/admin/convoyeurs/$convoyeurId"
+                params={{ convoyeurId: neighborNav.previous.id }}
+                className="admin-btn-ghost inline-flex items-center gap-1.5"
+                title={neighborNav.previous.label}
+              >
+                <ChevronLeft size={14} /> Précédent
+              </Link>
+            )}
+            {neighborNav.next && (
+              <Link
+                to="/admin/convoyeurs/$convoyeurId"
+                params={{ convoyeurId: neighborNav.next.id }}
+                className="admin-btn-ghost inline-flex items-center gap-1.5"
+                title={neighborNav.next.label}
+              >
+                Suivant <ChevronRight size={14} />
+              </Link>
+            )}
             {conv.statut !== "valide" && conv.statut !== "suspendu" && (
               <button onClick={() => updateStatut("valide")} className="admin-btn-primary inline-flex items-center gap-2">
                 <CheckCircle size={14} /> Valider
@@ -464,6 +504,7 @@ function AdminConvoyeurDetail() {
           <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/6)</TabsTrigger>
+          <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
           <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
         </TabsList>
@@ -607,6 +648,21 @@ function AdminConvoyeurDetail() {
               convoyeurNom={conv.nom}
               typeConvoyeur={conv.type_convoyeur}
               onChanged={load}
+            />
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="communication" className="mt-6">
+          <AdminSection title="Communication convoyeur" description="Envoyer un email templatisé rempli manuellement ou une notification visible dans l'espace convoyeur.">
+            <AdminManualCommunication
+              recipient={{
+                userId: conv.user_id,
+                email: conv.email,
+                label: fullName,
+                prenom: conv.prenom,
+                nom: conv.nom,
+                role: "convoyeur",
+              }}
             />
           </AdminSection>
         </TabsContent>
