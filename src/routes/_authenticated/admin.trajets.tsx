@@ -23,6 +23,7 @@ import {
   trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
+import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
