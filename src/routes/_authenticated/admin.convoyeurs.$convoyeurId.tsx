@@ -19,6 +19,8 @@ import {
   CalendarDays,
   User,
   Megaphone,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { humanizeAction } from "@/lib/activity-humanizer";
@@ -124,6 +126,10 @@ function AdminConvoyeurDetail() {
   const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [status, setStatus] = useState<AccountStatus | null>(null);
+  const [neighborNav, setNeighborNav] = useState<{
+    previous?: { id: string; label: string };
+    next?: { id: string; label: string };
+  }>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -144,7 +150,7 @@ function AdminConvoyeurDetail() {
       setOriginal(init);
 
       const today = new Date().toISOString().slice(0, 10);
-      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }] = await Promise.all([
+      const [{ data: d }, { data: a }, { data: dispo }, { data: lg }, { data: navRows }] = await Promise.all([
         supabase
           .from("documents_convoyeurs")
           .select("id, type_document, statut_validation, created_at")
@@ -170,11 +176,23 @@ function AdminConvoyeurDetail() {
               .order("created_at", { ascending: false })
               .limit(30)
           : Promise.resolve({ data: [] as LogRow[] }),
+        supabase
+          .from("convoyeurs")
+          .select("id, prenom, nom")
+          .order("created_at", { ascending: false })
+          .limit(500),
       ]);
       setDocs((d as DocItem[]) ?? []);
       setAttribs((a as unknown as AttribItem[]) ?? []);
       setDispos((dispo as DispoRow[]) ?? []);
       setLogs((lg as LogRow[]) ?? []);
+      const ordered = ((navRows as Array<{ id: string; prenom: string | null; nom: string | null }> | null) ?? [])
+        .map((row) => ({ id: row.id, label: `${row.prenom ?? ""} ${row.nom ?? ""}`.trim() || "Convoyeur" }));
+      const currentIndex = ordered.findIndex((row) => row.id === convoyeurId);
+      setNeighborNav({
+        previous: currentIndex > 0 ? ordered[currentIndex - 1] : undefined,
+        next: currentIndex >= 0 && currentIndex < ordered.length - 1 ? ordered[currentIndex + 1] : undefined,
+      });
 
       if (cv.user_id) {
         try {
@@ -423,6 +441,26 @@ function AdminConvoyeurDetail() {
             <Link to="/admin/convoyeurs" className="admin-btn-ghost inline-flex items-center gap-2">
               <ArrowLeft size={14} /> Retour
             </Link>
+            {neighborNav.previous && (
+              <Link
+                to="/admin/convoyeurs/$convoyeurId"
+                params={{ convoyeurId: neighborNav.previous.id }}
+                className="admin-btn-ghost inline-flex items-center gap-1.5"
+                title={neighborNav.previous.label}
+              >
+                <ChevronLeft size={14} /> Précédent
+              </Link>
+            )}
+            {neighborNav.next && (
+              <Link
+                to="/admin/convoyeurs/$convoyeurId"
+                params={{ convoyeurId: neighborNav.next.id }}
+                className="admin-btn-ghost inline-flex items-center gap-1.5"
+                title={neighborNav.next.label}
+              >
+                Suivant <ChevronRight size={14} />
+              </Link>
+            )}
             {conv.statut !== "valide" && conv.statut !== "suspendu" && (
               <button onClick={() => updateStatut("valide")} className="admin-btn-primary inline-flex items-center gap-2">
                 <CheckCircle size={14} /> Valider
