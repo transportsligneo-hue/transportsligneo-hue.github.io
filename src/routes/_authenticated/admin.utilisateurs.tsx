@@ -456,26 +456,26 @@ function UserDetailDrawer({
         </div>
       }
       footer={
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {suspended ? (
-            <Button size="sm" disabled={busy} onClick={() => callAction({ action: "reactivate", user_id: user.user_id })} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+            <Button size="sm" disabled={busy} onClick={() => callAction({ action: "reactivate", user_id: user.user_id })} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
               <CheckCircle2 size={14} className="mr-1" /> Réactiver
             </Button>
           ) : (
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "suspend", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "suspend", user_id: user.user_id })} className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-red-600 hover:border-red-300">
               <Ban size={14} className="mr-1" /> Suspendre
             </Button>
           )}
-          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id, role: user.role })} className="bg-emerald-500/90 hover:bg-emerald-500 text-white" title="Réactive le rôle métier du compte sans activer les anciens rôles inactifs">
+          <Button size="sm" disabled={busy} onClick={() => callAction({ action: "activate_role", user_id: user.user_id, role: user.role })} className="bg-[color:var(--admin-accent,#2563eb)] hover:bg-[color:var(--admin-accent,#2563eb)]/90 text-white shadow-sm" title="Réactive le rôle métier du compte sans activer les anciens rôles inactifs">
             <CheckCircle2 size={14} className="mr-1" /> Activer le rôle
           </Button>
-          <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => callAction({ action: "reset_password", user_id: user.user_id })} className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50">
             <KeyRound size={14} className="mr-1" /> Reset MDP
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" disabled={busy} className="bg-white/10 border-white/20 text-white hover:bg-white/20"><UserCog size={14} className="mr-1" /> Rôle</Button>
+              <Button size="sm" variant="outline" disabled={busy} className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"><UserCog size={14} className="mr-1" /> Rôle</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Changer le rôle</DropdownMenuLabel>
@@ -489,7 +489,7 @@ function UserDetailDrawer({
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" disabled={busy} className="bg-white/10 border-white/20 text-white hover:bg-white/20"><Building2 size={14} className="mr-1" /> Type</Button>
+              <Button size="sm" variant="outline" disabled={busy} className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"><Building2 size={14} className="mr-1" /> Type</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Type de client</DropdownMenuLabel>
@@ -501,20 +501,21 @@ function UserDetailDrawer({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" variant="destructive" disabled={busy} onClick={() => setConfirmDelete(true)} className="ml-auto">
+          <Button size="sm" variant="destructive" disabled={busy} onClick={() => setConfirmDelete(true)} className="ml-auto bg-red-600 hover:bg-red-700 text-white shadow-sm">
             <Trash2 size={14} className="mr-1" /> Supprimer
           </Button>
         </div>
       }
     >
       <Tabs defaultValue="profil" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full bg-white/10">
-          <TabsTrigger value="profil" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Profil</TabsTrigger>
-          <TabsTrigger value="devis" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Devis ({devis.length})</TabsTrigger>
-          <TabsTrigger value="missions" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Missions ({missions.length})</TabsTrigger>
-          <TabsTrigger value="factures" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Factures ({factures.length})</TabsTrigger>
-          <TabsTrigger value="logs" className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-white text-white/70">Logs</TabsTrigger>
+        <TabsList className="grid grid-cols-5 w-full bg-slate-100 p-1 rounded-lg">
+          <TabsTrigger value="profil" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Profil</TabsTrigger>
+          <TabsTrigger value="devis" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Devis ({devis.length})</TabsTrigger>
+          <TabsTrigger value="missions" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Missions ({missions.length})</TabsTrigger>
+          <TabsTrigger value="factures" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Factures ({factures.length})</TabsTrigger>
+          <TabsTrigger value="logs" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Logs</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="profil" className="mt-4 space-y-4">
           <DrawerSection title="Identité" icon={<UserRound size={12} />}>
