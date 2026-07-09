@@ -4,7 +4,6 @@
  * À placer dans les headers admin / client / convoyeur.
  */
 import { useEffect, useState, useCallback } from "react";
-import { Link } from "@tanstack/react-router";
 import { Bell, Check, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -164,8 +163,8 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                     return (
                       <li key={n.id}>
                         {target ? (
-                          <Link
-                            to={target}
+                          <a
+                            href={target}
                             onClick={() => {
                               markRead(n.id);
                               setOpen(false);
@@ -173,7 +172,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                             className="block"
                           >
                             {body}
-                          </Link>
+                          </a>
                         ) : (
                           <button onClick={() => markRead(n.id)} className="block w-full">
                             {body}
@@ -186,13 +185,13 @@ export function NotificationBell({ className = "" }: { className?: string }) {
               )}
             </div>
 
-            <Link
-              to="/notifications"
+            <a
+              href="/notifications"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-1 px-4 py-3 text-xs font-semibold text-slate-700 border-t border-slate-100 hover:bg-slate-50 transition"
             >
               Voir toutes les notifications <ExternalLink size={12} />
-            </Link>
+            </a>
           </div>
         </>
       )}
