@@ -2,7 +2,7 @@
  * Centre de notifications — historique complet pour tous les rôles.
  * Filtres, recherche, marquer lu, tout marquer, suppression, deep-link.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -257,13 +257,13 @@ function NotificationsCenter() {
                   {n.message && <p className="text-sm text-slate-600 mt-1">{n.message}</p>}
                   <div className="flex items-center gap-3 mt-2">
                     {target && (
-                      <Link
-                        to={target}
+                      <a
+                        href={target}
                         onClick={() => markRead([n.id])}
                         className="text-xs font-semibold text-blue-600 hover:underline"
                       >
                         Voir le détail →
-                      </Link>
+                      </a>
                     )}
                     {!n.lu && (
                       <button

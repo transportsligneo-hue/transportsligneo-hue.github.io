@@ -2,7 +2,7 @@
  * Admin notifications — feed centralisé des actions plateforme.
  * Filtre par type, marquage lu/non-lu, lien direct vers l'entité.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -174,9 +174,9 @@ function AdminNotifications() {
                   {n.message && <p className="text-sm text-pro-text-soft mt-1 line-clamp-2">{n.message}</p>}
                   <div className="flex items-center gap-2 mt-2">
                     {n.link && n.link.startsWith("/") && (
-                      <Link to={n.link} className="text-xs font-semibold text-pro-gold hover:underline">
+                      <a href={n.link} className="text-xs font-semibold text-pro-gold hover:underline">
                         Voir le détail →
-                      </Link>
+                      </a>
                     )}
                     {!n.lu && (
                       <button onClick={() => markRead(n.id)} className="text-xs text-pro-muted hover:text-pro-text">

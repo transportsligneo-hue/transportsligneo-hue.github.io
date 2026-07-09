@@ -389,9 +389,9 @@ export function DashboardHeader({
                     return (
                       <li key={n.id}>
                         {n.to ? (
-                          <Link to={n.to} onClick={() => setNotifOpen(false)} className="block">
+                          <a href={n.to} onClick={() => setNotifOpen(false)} className="block">
                             {content}
-                          </Link>
+                          </a>
                         ) : (
                           content
                         )}
@@ -400,8 +400,8 @@ export function DashboardHeader({
                   })}
                 </ul>
               )}
-              <Link
-                to="/notifications"
+              <a
+                href="/notifications"
                 onClick={() => setNotifOpen(false)}
                 className={`block px-4 py-2.5 text-center text-xs font-semibold border-t ${
                   isDark
@@ -410,7 +410,7 @@ export function DashboardHeader({
                 }`}
               >
                 Voir toutes les notifications →
-              </Link>
+              </a>
             </div>
           )}
         </div>
