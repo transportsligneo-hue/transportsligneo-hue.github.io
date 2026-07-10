@@ -1,5 +1,43 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { routeTree } from "./routeTree.gen";
+
+const AUTO_RECOVERY_KEY = "ligneo:auto-recovered-route-error";
+
+function isRecoverableClientLoadError(error: Error) {
+  const text = `${error.name ?? ""} ${error.message ?? ""} ${error.stack ?? ""}`.toLowerCase();
+  return [
+    "failed to fetch dynamically imported module",
+    "error loading dynamically imported module",
+    "importing a module script failed",
+    "unable to preload css",
+    "chunkloaderror",
+    "loading chunk",
+    "modulepreload",
+  ].some((needle) => text.includes(needle));
+}
+
+async function clearAppRuntimeCache() {
+  if (typeof window === "undefined") return;
+
+  try {
+    if ("caches" in window) {
+      const keys = await window.caches.keys();
+      await Promise.all(keys.map((key) => window.caches.delete(key)));
+    }
+  } catch {
+    // Best-effort cache cleanup only.
+  }
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.update().catch(() => undefined)));
+    }
+  } catch {
+    // Best-effort service worker refresh only.
+  }
+}
 
 
 function DefaultErrorComponent({
@@ -10,6 +48,24 @@ function DefaultErrorComponent({
   reset: () => void;
 }) {
   const router = useRouter();
+  const recoverableClientLoadError = isRecoverableClientLoadError(error);
+
+  useEffect(() => {
+    if (!recoverableClientLoadError || typeof window === "undefined") return;
+
+    const currentPath = window.location.pathname;
+    if (window.sessionStorage.getItem(AUTO_RECOVERY_KEY) === currentPath) return;
+
+    window.sessionStorage.setItem(AUTO_RECOVERY_KEY, currentPath);
+    void clearAppRuntimeCache().finally(() => window.location.reload());
+  }, [recoverableClientLoadError]);
+
+  const repairAndReload = async () => {
+    if (typeof window === "undefined") return;
+    window.sessionStorage.removeItem(AUTO_RECOVERY_KEY);
+    await clearAppRuntimeCache();
+    window.location.reload();
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -31,10 +87,12 @@ function DefaultErrorComponent({
           </svg>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Something went wrong
+          {recoverableClientLoadError ? "Mise à jour de l’application" : "Une erreur est survenue"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          An unexpected error occurred. Please try again.
+          {recoverableClientLoadError
+            ? "Nous rechargeons la dernière version pour corriger l’accès à votre espace."
+            : "Un problème inattendu est survenu. Vous pouvez réessayer."}
         </p>
         {import.meta.env.DEV && error.message && (
           <pre className="mt-4 max-h-40 overflow-auto rounded-md bg-muted p-3 text-left font-mono text-xs text-destructive">
@@ -57,6 +115,12 @@ function DefaultErrorComponent({
           >
             Go home
           </a>
+          <button
+            onClick={repairAndReload}
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Réparer
+          </button>
         </div>
       </div>
     </div>
