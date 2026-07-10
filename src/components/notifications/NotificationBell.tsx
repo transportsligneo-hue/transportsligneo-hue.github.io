@@ -3,7 +3,7 @@
  * Affiche compteur non-lues, dropdown avec 10 dernières, lien vers /notifications.
  * À placer dans les headers admin / client / convoyeur.
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useId } from "react";
 import { Bell, Check, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +31,7 @@ const CATEGORY_DOT: Record<string, string> = {
 
 export function NotificationBell({ className = "" }: { className?: string }) {
   const { user } = useAuth();
+  const channelId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<UserNotif[]>([]);
   const [unread, setUnread] = useState(0);
@@ -61,7 +62,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
   useEffect(() => {
     if (!user?.id) return;
     const channel = supabase
-      .channel(`notif-bell-${user.id}`)
+      .channel(`notif-bell-${user.id}-${channelId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
@@ -71,7 +72,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, fetchLatest]);
+  }, [user?.id, fetchLatest, channelId]);
 
   const markRead = async (id: string) => {
     await supabase
