@@ -40,11 +40,11 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
         className={
           variant === "button"
-            ? "px-3 py-1.5 rounded-lg bg-gradient-to-r from-pro-brand-strip to-pro-brand-strip/90 text-white text-xs font-semibold flex items-center gap-1.5 hover:opacity-90"
+            ? "w-full px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:opacity-90 shadow-sm"
             : "text-xs text-pro-gold hover:underline flex items-center gap-1"
         }
       >
-        <Sparkles size={12} /> {label}
+        <Sparkles size={14} /> {label}
       </button>
 
       {open && (

@@ -898,12 +898,12 @@ function AdminTrajets() {
               />
             </div>
 
-            {/* === SECTION ENCHÈRES === */}
+            {/* === SECTION DIFFUSION === */}
             <div className="mt-5 pt-5 border-t border-pro-border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-pro-text flex items-center gap-2">
                   <Gavel size={16} className="text-pro-accent" />
-                  Publication & offres convoyeurs
+                  Diffusion & attribution
                 </h3>
                 <Badge
                   tone={
@@ -933,36 +933,40 @@ function AdminTrajets() {
                         placeholder="ex: 250"
                       />
                     </FormField>
-                    <div className="flex gap-2">
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {/* PRIMARY : Catalogue public (visible par tous les convoyeurs validés) */}
+                      <PublishToCatalogueButton
+                        trajetId={selected.id}
+                        onDone={() => { fetchTrajets(); setSelected({ ...selected, statut_publication: "publie" }); }}
+                        variant="button"
+                        label="Publier au catalogue public"
+                      />
+
+                      {/* SECONDARY : Attribution restreinte (ancien "Publier aux convoyeurs" — cercle admin uniquement) */}
                       {selected.statut_publication !== "publie" ? (
                         <Button
-                          variant="success"
+                          variant="secondary"
                           onClick={() => togglePublication(true)}
                           disabled={savingPub || !prixSuggereInput}
                           icon={<Send size={14} />}
-                          className="flex-1"
                         >
-                          Publier aux convoyeurs
+                          Diffusion restreinte
                         </Button>
                       ) : (
                         <Button
                           variant="danger"
                           onClick={() => togglePublication(false)}
                           disabled={savingPub}
-                          className="flex-1"
                         >
                           Dépublier
                         </Button>
                       )}
                     </div>
-                    {selected.statut_publication !== "attribue" && (
-                      <div className="pt-2 border-t border-pro-border">
-                        <p className="text-[11px] text-pro-muted mb-2">
-                          Ou publiez la mission au <strong>catalogue public</strong> pour que tous les convoyeurs validés puissent postuler.
-                        </p>
-                        <PublishToCatalogueButton trajetId={selected.id} onDone={fetchTrajets} />
-                      </div>
-                    )}
+                    <p className="text-[11px] text-pro-muted leading-relaxed">
+                      <strong>Catalogue public</strong> : la mission apparaît instantanément dans l'onglet Catalogue de tous les convoyeurs validés (avec ou sans contre-offres).<br />
+                      <strong>Diffusion restreinte</strong> : les convoyeurs de votre cercle interne reçoivent une notification.
+                    </p>
                   </div>
                 </Card>
               )}
