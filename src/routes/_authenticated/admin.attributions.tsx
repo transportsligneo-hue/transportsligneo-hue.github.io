@@ -21,6 +21,7 @@ import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPa
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
+import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf } from "@/lib/mission-number";
