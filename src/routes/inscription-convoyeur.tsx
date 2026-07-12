@@ -3,7 +3,10 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
-import { Loader2, CheckCircle, User, Mail, Phone, MapPin, Calendar, FileText, Lock, Upload, BadgeCheck } from "lucide-react";
+import {
+  Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
+  Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
+} from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 
@@ -12,13 +15,24 @@ export const Route = createFileRoute("/inscription-convoyeur")({
   head: () => ({
     meta: [
       { title: "Devenir convoyeur — Transports Ligneo" },
-      { name: "description", content: "Rejoignez l'équipe Transports Ligneo en tant que convoyeur automobile. Inscription rapide, validation par notre équipe." },
+      { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription premium en 4 étapes, validation par notre équipe sous 24 h." },
     ],
   }),
 });
 
+const STEPS = [
+  { id: 1, label: "Identité", icon: User },
+  { id: 2, label: "Permis", icon: BadgeCheck },
+  { id: 3, label: "Documents", icon: FileText },
+  { id: 4, label: "Récap", icon: ShieldCheck },
+] as const;
+
+const inputClass =
+  "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
+
 function InscriptionConvoyeur() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
@@ -46,22 +60,34 @@ function InscriptionConvoyeur() {
     setError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!form.nom || !form.prenom || !form.email || !form.telephone || !form.password) {
-      setError("Veuillez remplir tous les champs obligatoires.");
-      return;
+  const validateStep = (s: number): string | null => {
+    if (s === 1) {
+      if (!form.prenom || !form.nom) return "Prénom et nom obligatoires.";
+      if (!form.email) return "Email obligatoire.";
+      if (!form.telephone) return "Téléphone obligatoire.";
+      if (form.password.length < 8) return "Mot de passe : minimum 8 caractères.";
     }
-    if (!form.permis_numero || !form.annees_experience) {
-      setError("Le numéro de permis et les années d'expérience sont obligatoires.");
-      return;
+    if (s === 2) {
+      if (!form.permis_numero) return "Numéro de permis obligatoire.";
+      if (!form.annees_experience) return "Années d'expérience obligatoires.";
     }
-    if (form.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
-      return;
-    }
+    return null;
+  };
 
+  const next = () => {
+    const err = validateStep(step);
+    if (err) { setError(err); return; }
+    setError("");
+    setStep((s) => Math.min(4, s + 1));
+  };
+  const prev = () => { setError(""); setStep((s) => Math.max(1, s - 1)); };
+
+  const handleSubmit = async () => {
+    setError("");
+    for (let s = 1; s <= 3; s++) {
+      const err = validateStep(s);
+      if (err) { setStep(s); setError(err); return; }
+    }
     setLoading(true);
     try {
       try {
@@ -71,7 +97,7 @@ function InscriptionConvoyeur() {
           if (!r.ok && !r.skipped) console.warn("[signup_convoyeur] recaptcha low score", r);
         }
       } catch (e) { console.warn("[signup_convoyeur] recaptcha error", e); }
-      console.log("[inscription-convoyeur] signUp →", form.email);
+
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -79,13 +105,9 @@ function InscriptionConvoyeur() {
           emailRedirectTo: `${window.location.origin}/auth/email-confirmation`,
           data: {
             role: "convoyeur",
-            nom: form.nom,
-            prenom: form.prenom,
-            telephone: form.telephone,
-            ville: form.ville,
-            disponibilite: form.disponibilite,
-            permis: form.permis,
-            message: form.message,
+            nom: form.nom, prenom: form.prenom, telephone: form.telephone,
+            ville: form.ville, disponibilite: form.disponibilite,
+            permis: form.permis, message: form.message,
             permis_numero: form.permis_numero,
             annees_experience: form.annees_experience,
           },
@@ -93,7 +115,6 @@ function InscriptionConvoyeur() {
       });
 
       if (signUpError) {
-        console.error("[inscription-convoyeur] signUp error:", signUpError);
         const msg = signUpError.message || "";
         if (msg.includes("already registered") || msg.includes("already been registered")) {
           setError("Cette adresse email est déjà utilisée.");
@@ -115,37 +136,26 @@ function InscriptionConvoyeur() {
       const userId = authData.user.id;
       let permisPhotoUrl: string | null = null;
 
-      // Upload permis (optionnel — n'empêche pas l'inscription si échoue)
       if (permisFile && authData.session) {
         try {
           const ext = permisFile.name.split(".").pop() || "jpg";
           const filePath = `${userId}/permis-${Date.now()}.${ext}`;
           const { error: uploadError } = await supabase.storage
-            .from("convoyeur-permis")
-            .upload(filePath, permisFile, { upsert: true });
-          if (uploadError) {
-            console.warn("[inscription-convoyeur] upload permis failed:", uploadError);
-          } else {
-            permisPhotoUrl = filePath;
-          }
-        } catch (uploadErr) {
-          console.warn("[inscription-convoyeur] upload exception:", uploadErr);
-        }
+            .from("convoyeur-permis").upload(filePath, permisFile, { upsert: true });
+          if (!uploadError) permisPhotoUrl = filePath;
+        } catch (e) { console.warn("[inscription] upload permis:", e); }
       }
 
       const { data: convoyeurRow } = authData.session
         ? await supabase.from("convoyeurs").update({
-            ville: form.ville,
-            disponibilite: form.disponibilite,
-            permis: form.permis,
-            message: form.message,
+            ville: form.ville, disponibilite: form.disponibilite,
+            permis: form.permis, message: form.message,
             permis_numero: form.permis_numero,
             annees_experience: parseInt(form.annees_experience, 10) || 0,
             permis_photo_url: permisPhotoUrl,
           }).eq("user_id", userId).select("id").maybeSingle()
         : { data: null };
 
-      // Upload documents complémentaires (CNI / Kbis / RC pro) — best-effort
       const convoyeurId = convoyeurRow?.id ?? null;
       if (convoyeurId && authData.session) {
         const uploadDoc = async (file: File | null, type: string) => {
@@ -154,12 +164,8 @@ function InscriptionConvoyeur() {
             const ext = file.name.split(".").pop() || "jpg";
             const path = `${userId}/${type}-${Date.now()}.${ext}`;
             const { error: upErr } = await supabase.storage
-              .from("convoyeur-documents")
-              .upload(path, file, { upsert: true });
-            if (upErr) {
-              console.warn(`[inscription-convoyeur] upload ${type} failed:`, upErr);
-              return;
-            }
+              .from("convoyeur-documents").upload(path, file, { upsert: true });
+            if (upErr) return;
             await supabase.from("documents_convoyeurs").insert({
               convoyeur_id: convoyeurId,
               type_document: type,
@@ -167,9 +173,7 @@ function InscriptionConvoyeur() {
               url_fichier: path,
               statut_validation: "en_attente",
             });
-          } catch (e) {
-            console.warn(`[inscription-convoyeur] doc ${type} exception:`, e);
-          }
+          } catch (e) { console.warn(`[inscription] doc ${type}:`, e); }
         };
         await Promise.all([
           uploadDoc(cniFile, "cni"),
@@ -178,7 +182,6 @@ function InscriptionConvoyeur() {
         ]);
       }
 
-      // Notification email (best-effort)
       try {
         await sendTransactionalEmail({
           templateName: "inscription-convoyeur",
@@ -189,9 +192,7 @@ function InscriptionConvoyeur() {
             telephone: form.telephone, ville: form.ville,
           },
         });
-      } catch (emailErr) {
-        console.warn("[inscription-convoyeur] email notification failed:", emailErr);
-      }
+      } catch (e) { console.warn("[inscription] email:", e); }
 
       void notifyAdmin({
         type: "driver_action",
@@ -202,9 +203,6 @@ function InscriptionConvoyeur() {
         entityId: userId,
       });
 
-      // Si on a une session active (auto-confirm), on amène le convoyeur vers son espace d'attente.
-      // Sinon, on affiche un écran "vérifiez votre email" — l'inscription reste valide tant que l'email
-      // n'est pas confirmé : la création du compte est complète côté admin (notification envoyée).
       if (authData.session) {
         await supabase.auth.signOut();
         navigate({ to: "/attente-validation" });
@@ -213,13 +211,10 @@ function InscriptionConvoyeur() {
         setLoading(false);
       }
     } catch (err) {
-      console.error("[inscription-convoyeur] unexpected error:", err);
       setError(err instanceof Error ? `Erreur : ${err.message}` : "Une erreur inattendue est survenue.");
       setLoading(false);
     }
   };
-
-  const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
   if (submittedEmail) {
     return (
@@ -229,16 +224,14 @@ function InscriptionConvoyeur() {
           <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
             <Mail className="text-primary" size={28} />
           </div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">
-            Vérifiez votre email
-          </h1>
+          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Vérifiez votre email</h1>
           <p className="text-cream/70 text-sm leading-relaxed">
             Nous venons d'envoyer un lien de confirmation à <span className="text-primary font-medium">{submittedEmail}</span>.
-            Cliquez dessus pour activer votre compte. Une fois validé, vous accéderez à votre espace d'attente de validation des documents.
+            Cliquez dessus pour activer votre compte.
           </p>
           <div className="text-cream/40 text-xs space-y-1 pt-2 border-t border-primary/10">
             <p>Pas reçu ? Vérifiez vos spams.</p>
-            <p>Notre équipe traite votre dossier sous 24-48h ouvrées.</p>
+            <p>Notre équipe traite votre dossier sous 24-48 h ouvrées.</p>
           </div>
           <Link to="/login" className="inline-block text-primary text-sm hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
             Aller à la connexion →
@@ -248,170 +241,211 @@ function InscriptionConvoyeur() {
     );
   }
 
+  const FileUpload = ({ label, file, onChange, hint }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string }) => (
+    <div>
+      <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+        <Upload size={12} className="inline mr-1" /> {label}
+      </label>
+      <input
+        type="file" accept="image/*,application/pdf" onChange={onChange}
+        className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
+      />
+      {file
+        ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name}</p>
+        : hint && <p className="text-cream/30 text-[10px] mt-1">{hint}</p>}
+    </div>
+  );
+
   return (
     <div className="min-h-screen section-bg flex items-center justify-center px-4 py-12">
-      <div className="max-w-lg w-full">
-
+      <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
           <div className="gold-divider-short mb-4" />
-          <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">
-            Devenir convoyeur
-          </h1>
-          <p className="text-cream/50 text-sm mt-2">
-            Rejoignez notre réseau de convoyeurs professionnels
-          </p>
+          <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">Devenir convoyeur</h1>
+          <p className="text-cream/50 text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="card-premium p-6 md:p-8 rounded space-y-5">
-          {/* Identité */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <User size={12} className="inline mr-1" /> Prénom *
-              </label>
-              <input type="text" value={form.prenom} onChange={update("prenom")} className={inputClass} required />
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <User size={12} className="inline mr-1" /> Nom *
-              </label>
-              <input type="text" value={form.nom} onChange={update("nom")} className={inputClass} required />
-            </div>
-          </div>
+        {/* Stepper */}
+        <div className="flex items-center justify-between mb-8 max-w-lg mx-auto">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            const active = step === s.id;
+            const done = step > s.id;
+            return (
+              <div key={s.id} className="flex-1 flex items-center">
+                <div className="flex flex-col items-center flex-1">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
+                    done ? "bg-primary/20 border-primary text-primary"
+                    : active ? "bg-primary text-primary-foreground border-primary shadow-[0_0_18px_rgba(212,175,55,0.35)]"
+                    : "bg-navy/60 border-primary/20 text-cream/40"
+                  }`}>
+                    {done ? <Check size={16} /> : <Icon size={15} />}
+                  </div>
+                  <span className={`text-[10px] uppercase tracking-[0.15em] mt-2 ${active || done ? "text-primary" : "text-cream/40"}`}>{s.label}</span>
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={`h-px flex-1 mx-1 -mt-6 ${step > s.id ? "bg-primary/60" : "bg-primary/10"}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-          {/* Contact */}
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Mail size={12} className="inline mr-1" /> Email *
-            </label>
-            <input type="email" value={form.email} onChange={update("email")} className={inputClass} required />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Phone size={12} className="inline mr-1" /> Téléphone *
-              </label>
-              <input type="tel" value={form.telephone} onChange={update("telephone")} className={inputClass} required />
+        <div className="card-premium p-6 md:p-8 rounded space-y-5">
+          {/* STEP 1 : Identité */}
+          {step === 1 && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <User size={12} className="inline mr-1" /> Prénom *
+                  </label>
+                  <input type="text" value={form.prenom} onChange={update("prenom")} className={inputClass} required />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <User size={12} className="inline mr-1" /> Nom *
+                  </label>
+                  <input type="text" value={form.nom} onChange={update("nom")} className={inputClass} required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <Mail size={12} className="inline mr-1" /> Email *
+                </label>
+                <input type="email" value={form.email} onChange={update("email")} className={inputClass} required />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <Phone size={12} className="inline mr-1" /> Téléphone *
+                  </label>
+                  <input type="tel" value={form.telephone} onChange={update("telephone")} className={inputClass} required />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <MapPin size={12} className="inline mr-1" /> Ville
+                  </label>
+                  <input type="text" value={form.ville} onChange={update("ville")} className={inputClass} placeholder="Ex: Tours" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <Lock size={12} className="inline mr-1" /> Mot de passe *
+                </label>
+                <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <MapPin size={12} className="inline mr-1" /> Ville
-              </label>
-              <input type="text" value={form.ville} onChange={update("ville")} className={inputClass} placeholder="Ex: Tours" />
+          )}
+
+          {/* STEP 2 : Permis */}
+          {step === 2 && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <BadgeCheck size={12} className="inline mr-1" /> N° permis *
+                  </label>
+                  <input type="text" value={form.permis_numero} onChange={update("permis_numero")} className={inputClass} required placeholder="Ex: 1234567890123" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                    <Calendar size={12} className="inline mr-1" /> Années d'expérience *
+                  </label>
+                  <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
+                </div>
+              </div>
+              <FileUpload label="Photo du permis (recto/verso)" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="Format JPG, PNG ou PDF — 5 Mo max." />
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <FileText size={12} className="inline mr-1" /> Catégories additionnelles
+                </label>
+                <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B + EB" />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <Calendar size={12} className="inline mr-1" /> Disponibilité
+                </label>
+                <select value={form.disponibilite} onChange={update("disponibilite")} className={inputClass}>
+                  <option value="">Non précisé</option>
+                  <option value="temps_plein">Temps plein</option>
+                  <option value="temps_partiel">Temps partiel</option>
+                  <option value="weekend">Weekends</option>
+                  <option value="ponctuel">Ponctuel</option>
+                </select>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Mot de passe */}
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-              <Lock size={12} className="inline mr-1" /> Mot de passe *
-            </label>
-            <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
-          </div>
-
-          {/* Permis officiel */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <BadgeCheck size={12} className="inline mr-1" /> N° permis *
-              </label>
-              <input type="text" value={form.permis_numero} onChange={update("permis_numero")} className={inputClass} required placeholder="Ex: 1234567890123" />
+          {/* STEP 3 : Documents */}
+          {step === 3 && (
+            <div className="space-y-4">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
+              <FileUpload label="CNI (recto/verso)" file={cniFile} onChange={makeFileHandler(setCniFile)} hint="Recommandé pour accélérer la validation." />
+              <FileUpload label="Kbis (si auto-entrepreneur / société)" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
+              <FileUpload label="Attestation RC Pro" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
+                <textarea value={form.message} onChange={update("message")} rows={3} className={`${inputClass} resize-none`} placeholder="Présentez-vous brièvement..." />
+              </div>
+              <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF — 5 Mo max par document.</p>
             </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Calendar size={12} className="inline mr-1" /> Années d'expérience *
-              </label>
-              <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
+          )}
+
+          {/* STEP 4 : Récap */}
+          {step === 4 && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <RecapRow label="Prénom" value={form.prenom} />
+                <RecapRow label="Nom" value={form.nom} />
+                <RecapRow label="Email" value={form.email} />
+                <RecapRow label="Téléphone" value={form.telephone} />
+                <RecapRow label="Ville" value={form.ville || "—"} />
+                <RecapRow label="Disponibilité" value={form.disponibilite || "—"} />
+                <RecapRow label="N° permis" value={form.permis_numero} />
+                <RecapRow label="Années d'expérience" value={form.annees_experience} />
+              </div>
+              <div className="pt-4 border-t border-primary/10 space-y-1 text-xs text-cream/60">
+                <p className="flex items-center gap-2">{permisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Photo permis {permisFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} CNI {cniFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Kbis {kbisFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{rcProFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} RC Pro {rcProFile ? "✓" : "(non fournie)"}</p>
+              </div>
+              <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
+                <ShieldCheck size={14} className="inline text-primary mr-1" />
+                Votre inscription sera validée par notre équipe sous 24-48 h ouvrées. Vous recevrez un email de confirmation.
+              </div>
             </div>
-          </div>
-
-          {/* Documents officiels (optionnels mais recommandés) */}
-          <div className="space-y-3 pt-2 border-t border-primary/10">
-            <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Upload size={12} className="inline mr-1" /> Photo du permis
-              </label>
-              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setPermisFile)}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
-              {permisFile && <p className="text-primary text-xs mt-1">✓ {permisFile.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Upload size={12} className="inline mr-1" /> CNI (recto/verso)
-              </label>
-              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setCniFile)}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
-              {cniFile && <p className="text-primary text-xs mt-1">✓ {cniFile.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Upload size={12} className="inline mr-1" /> Kbis (si auto-entrepreneur / société)
-              </label>
-              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setKbisFile)}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
-              {kbisFile && <p className="text-primary text-xs mt-1">✓ {kbisFile.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Upload size={12} className="inline mr-1" /> Attestation RC Pro
-              </label>
-              <input type="file" accept="image/*,application/pdf" onChange={makeFileHandler(setRcProFile)}
-                className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light" />
-              {rcProFile && <p className="text-primary text-xs mt-1">✓ {rcProFile.name}</p>}
-            </div>
-
-            <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF — 5 Mo max par document. Ces pièces accélèrent la validation par notre équipe.</p>
-          </div>
-
-          {/* Infos complémentaires */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <FileText size={12} className="inline mr-1" /> Infos complémentaires
-              </label>
-              <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B + EB" />
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
-                <Calendar size={12} className="inline mr-1" /> Disponibilité
-              </label>
-              <select value={form.disponibilite} onChange={update("disponibilite")} className={inputClass}>
-                <option value="">Non précisé</option>
-                <option value="temps_plein">Temps plein</option>
-                <option value="temps_partiel">Temps partiel</option>
-                <option value="weekend">Weekends</option>
-                <option value="ponctuel">Ponctuel</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
-            <textarea
-              value={form.message} onChange={update("message")}
-              rows={3} className={`${inputClass} resize-none`}
-              placeholder="Présentez-vous brièvement..."
-            />
-          </div>
+          )}
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <button type="submit" disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors disabled:opacity-50">
-            {loading ? <Loader2 className="animate-spin" size={16} /> : null}
-            {loading ? "Envoi en cours..." : "S'inscrire comme convoyeur"}
-          </button>
-
-          <p className="text-cream/30 text-xs text-center">
-            Votre inscription sera soumise à validation par notre équipe.
-          </p>
-        </form>
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button" onClick={prev} disabled={step === 1 || loading}
+              className="flex items-center gap-1 px-4 py-2 text-cream/60 hover:text-primary text-sm uppercase tracking-[0.1em] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={14} /> Retour
+            </button>
+            {step < 4 ? (
+              <button
+                type="button" onClick={next}
+                className="flex items-center gap-1 px-6 py-2.5 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors"
+              >
+                Continuer <ChevronRight size={14} />
+              </button>
+            ) : (
+              <button
+                type="button" onClick={handleSubmit} disabled={loading}
+                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
+                {loading ? "Envoi..." : "Valider mon inscription"}
+              </button>
+            )}
+          </div>
+        </div>
 
         <div className="text-center mt-6 space-y-3">
           <p className="text-[10px] leading-relaxed text-cream/40 px-2">
@@ -429,6 +463,15 @@ function InscriptionConvoyeur() {
           </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+function RecapRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-navy/40 border border-primary/10 rounded px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-cream/40">{label}</p>
+      <p className="text-cream text-sm mt-0.5 truncate">{value || "—"}</p>
     </div>
   );
 }

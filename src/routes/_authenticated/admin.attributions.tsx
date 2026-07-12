@@ -21,6 +21,7 @@ import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPa
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
+import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf } from "@/lib/mission-number";
@@ -633,24 +634,39 @@ function AdminAttributions() {
             <p className="text-sm text-pro-muted text-center py-6">Aucun trajet en attente.</p>
           ) : (
             trajetsDisponibles.map((t) => (
-              <button
+              <div
                 key={t.id}
-                onClick={() => {
-                  setAssignTrajet(t);
-                  setShowCreate(false);
-                }}
-                className="w-full text-left p-3 rounded-xl border border-pro-border hover:border-pro-gold/40 hover:bg-pro-bg-soft/50 transition-all"
+                className="w-full p-3 rounded-xl border border-pro-border hover:border-pro-gold/40 hover:bg-pro-bg-soft/50 transition-all flex items-center gap-3"
               >
-                <p className="font-medium text-pro-text">
-                  {t.depart} → {t.arrivee}
-                </p>
-                <p className="text-xs text-pro-text-soft mt-0.5">
-                  {t.date_trajet
-                    ? new Date(t.date_trajet).toLocaleDateString("fr-FR")
-                    : "Date à définir"}{" "}
-                  · {statutLabels[t.statut] ?? t.statut}
-                </p>
-              </button>
+                <button
+                  onClick={() => {
+                    setAssignTrajet(t);
+                    setShowCreate(false);
+                  }}
+                  className="flex-1 text-left"
+                >
+                  <p className="font-medium text-pro-text">
+                    {t.depart} → {t.arrivee}
+                  </p>
+                  <p className="text-xs text-pro-text-soft mt-0.5">
+                    {t.date_trajet
+                      ? new Date(t.date_trajet).toLocaleDateString("fr-FR")
+                      : "Date à définir"}{" "}
+                    · {statutLabels[t.statut] ?? t.statut}
+                  </p>
+                </button>
+                <div className="shrink-0 w-44" onClick={(e) => e.stopPropagation()}>
+                  <PublishToCatalogueButton
+                    trajetId={t.id}
+                    label="Catalogue"
+                    onDone={() => {
+                      toast.success("Mission publiée au catalogue");
+                      setShowCreate(false);
+                      fetchOptions();
+                    }}
+                  />
+                </div>
+              </div>
             ))
           )}
         </div>
