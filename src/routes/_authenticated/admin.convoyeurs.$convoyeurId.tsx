@@ -38,6 +38,12 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { DocumentsValidationCenter } from "@/components/admin/convoyeur/DocumentsValidationCenter";
 import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
 import { AdminManualCommunication } from "@/components/admin/AdminManualCommunication";
+import {
+  getConvoyeurDocLabel,
+  getRequiredConvoyeurDocTypes,
+  isConvoyeurDocApproved,
+  normalizeConvoyeurDocType,
+} from "@/lib/convoyeur-documents";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs/$convoyeurId")({
   component: AdminConvoyeurDetail,
@@ -103,15 +109,6 @@ const statutLabels: Record<string, string> = {
   refuse: "Refusé",
   suspendu: "Suspendu",
 };
-const docLabels: Record<string, string> = {
-  permis: "Permis",
-  identite: "CNI",
-  domicile: "Domicile",
-  rib: "RIB",
-  kbis: "KBIS",
-  assurance: "Assurance",
-};
-
 function AdminConvoyeurDetail() {
   const { convoyeurId } = Route.useParams();
   const navigate = useNavigate();
@@ -218,13 +215,13 @@ function AdminConvoyeurDetail() {
 
   const updateStatut = async (statut: string) => {
     if (!conv) return;
-    if (statut === "valide" && conv.type_convoyeur === "independant") {
-      const required = ["permis", "identite", "domicile", "rib", "kbis", "assurance"];
+    if (statut === "valide") {
+      const required = getRequiredConvoyeurDocTypes(conv.type_convoyeur).map((doc) => doc.key);
       const issues = required
         .map((r) => {
-          const doc = docs.find((d) => d.type_document === r);
-          if (!doc) return `${docLabels[r]} manquant`;
-          if (doc.statut_validation !== "approuve") return `${docLabels[r]} non approuvé`;
+          const doc = docs.find((d) => normalizeConvoyeurDocType(d.type_document) === r);
+          if (!doc) return `${getConvoyeurDocLabel(r)} manquant`;
+          if (!isConvoyeurDocApproved(doc.statut_validation)) return `${getConvoyeurDocLabel(r)} non approuvé`;
           return null;
         })
         .filter(Boolean);
@@ -335,7 +332,7 @@ function AdminConvoyeurDetail() {
         action: "invite_account",
         user_id: conv.user_id,
         email: conv.email,
-        redirect_to: `${window.location.origin}/convoyeur`,
+          redirect_to: `${window.location.origin}/reset-password`,
       },
     });
     setBusy(null);
@@ -343,7 +340,7 @@ function AdminConvoyeurDetail() {
       toast.error(data?.error ?? "Erreur");
       return;
     }
-    toast.success("Invitation envoyée");
+    toast.success(data?.fallback === "reset_password" ? "Lien d'accès envoyé" : "Invitation envoyée");
     load();
   };
 
@@ -400,7 +397,10 @@ function AdminConvoyeurDetail() {
 
   const fullName = `${conv.prenom} ${conv.nom}`.trim();
   const terminees = attribs.filter((a) => ["terminee", "livree"].includes(a.statut)).length;
-  const docsApprouves = docs.filter((d) => d.statut_validation === "approuve").length;
+  const requiredDocs = getRequiredConvoyeurDocTypes(conv.type_convoyeur);
+  const docsApprouves = requiredDocs.filter((spec) =>
+    docs.some((doc) => normalizeConvoyeurDocType(doc.type_document) === spec.key && isConvoyeurDocApproved(doc.statut_validation)),
+  ).length;
   const revenus = attribs
     .filter((a) => ["terminee", "livree"].includes(a.statut))
     .reduce((sum, a) => sum + (a.trajet?.tarif_convoyeur ?? 0), 0);
@@ -489,9 +489,9 @@ function AdminConvoyeurDetail() {
         <AdminStatCard label="Terminées" value={terminees} icon={CheckCircle} accent="success" />
         <AdminStatCard
           label="Documents approuvés"
-          value={`${docsApprouves} / 6`}
+          value={`${docsApprouves} / ${requiredDocs.length}`}
           icon={FileBadge}
-          accent={docsApprouves === 6 ? "success" : "warning"}
+          accent={docsApprouves === requiredDocs.length ? "success" : "warning"}
         />
         {conv.type_convoyeur === "independant" && (
           <AdminStatCard label="Revenus générés" value={`${revenus.toFixed(0)} €`} icon={Euro} accent="success" />
@@ -503,7 +503,7 @@ function AdminConvoyeurDetail() {
         <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-slate-100/70 p-1 rounded-xl">
           <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/6)</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/{requiredDocs.length})</TabsTrigger>
           <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
           <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>

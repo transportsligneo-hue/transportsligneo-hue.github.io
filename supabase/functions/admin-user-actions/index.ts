@@ -206,7 +206,16 @@ Deno.serve(async (req) => {
         const { error } = await admin.auth.admin.inviteUserByEmail(email, {
           redirectTo: body.redirect_to,
         });
-        if (error) return json({ error: error.message }, 400);
+        if (error) {
+          // inviteUserByEmail peut refuser un compte déjà créé/confirmé.
+          // Dans ce cas, on renvoie un lien de définition/réinitialisation du mot de passe,
+          // ce qui correspond au besoin admin : redonner un accès au convoyeur.
+          const { error: resetErr } = await admin.auth.resetPasswordForEmail(email, {
+            redirectTo: body.redirect_to,
+          });
+          if (resetErr) return json({ error: resetErr.message }, 400);
+          result = { fallback: "reset_password" };
+        }
         break;
       }
       case "get_account_status": {

@@ -3,7 +3,7 @@
  * convoyeurs. À utiliser dans le drawer / fiche convoyeur.
  *
  * Fonctions couvertes :
- *  - grille des 6 documents attendus (permis, identité, domicile, RIB, KBIS, assurance) ;
+ *  - grille des documents attendus (permis, identité, RIB, assurance, KBIS si indépendant, autres) ;
  *  - aperçu inline (image ou PDF via <iframe>) + modale plein écran zoomable ;
  *  - téléchargement ;
  *  - validation / refus / demande de nouveau document, chacun avec commentaire ;
@@ -33,6 +33,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import {
+  CONVOYEUR_DOC_TYPES,
+  getConvoyeurDocLabel,
+  getVisibleConvoyeurDocTypes,
+  isConvoyeurDocApproved,
+  normalizeConvoyeurDocType,
+} from "@/lib/convoyeur-documents";
 
 export interface DocRow {
   id: string;
@@ -55,15 +62,6 @@ interface Props {
   typeConvoyeur: string;
   onChanged?: () => void;
 }
-
-const DOC_TYPES: Array<{ key: string; label: string; independantOnly?: boolean }> = [
-  { key: "permis", label: "Permis de conduire" },
-  { key: "identite", label: "Pièce d'identité" },
-  { key: "domicile", label: "Justificatif de domicile" },
-  { key: "rib", label: "RIB" },
-  { key: "kbis", label: "KBIS", independantOnly: true },
-  { key: "assurance", label: "Assurance RC pro", independantOnly: true },
-];
 
 type Statut = "approuve" | "refuse" | "a_renvoyer" | "en_attente";
 
@@ -141,21 +139,25 @@ export function DocumentsValidationCenter({
   }, [docs]);
 
   const requiredTypes = useMemo(
-    () => DOC_TYPES.filter((t) => !t.independantOnly || typeConvoyeur === "independant"),
+    () => getVisibleConvoyeurDocTypes(typeConvoyeur),
     [typeConvoyeur],
   );
 
   const byType = useMemo(() => {
     const m: Record<string, DocRow | undefined> = {};
-    for (const d of docs) if (!m[d.type_document]) m[d.type_document] = d;
+    for (const d of docs) {
+      const normalized = normalizeConvoyeurDocType(d.type_document);
+      if (!m[normalized]) m[normalized] = d;
+    }
     return m;
   }, [docs]);
 
   const stats = useMemo(() => {
-    const total = requiredTypes.length;
-    const approuves = requiredTypes.filter((t) => byType[t.key]?.statut_validation === "approuve").length;
-    const refuses = requiredTypes.filter((t) => byType[t.key]?.statut_validation === "refuse").length;
-    const manquants = requiredTypes.filter((t) => !byType[t.key]).length;
+    const required = requiredTypes.filter((t) => t.required);
+    const total = required.length;
+    const approuves = required.filter((t) => isConvoyeurDocApproved(byType[t.key]?.statut_validation)).length;
+    const refuses = required.filter((t) => byType[t.key]?.statut_validation === "refuse").length;
+    const manquants = required.filter((t) => !byType[t.key]).length;
     return { total, approuves, refuses, manquants };
   }, [requiredTypes, byType]);
 
@@ -179,7 +181,7 @@ export function DocumentsValidationCenter({
     }
 
     // Trace + email best-effort (non bloquant).
-    const typeLabel = DOC_TYPES.find((t) => t.key === doc.type_document)?.label ?? doc.type_document;
+    const typeLabel = getConvoyeurDocLabel(doc.type_document);
     try {
       await supabase.rpc("log_activity" as never, {
         _action:
@@ -375,7 +377,7 @@ export function DocumentsValidationCenter({
                       </p>
                       {doc.valide_le && (
                         <p>
-                          {doc.statut_validation === "approuve" ? "Validé" : "Traité"} le{" "}
+                          {isConvoyeurDocApproved(doc.statut_validation) ? "Validé" : "Traité"} le{" "}
                           {new Date(doc.valide_le).toLocaleDateString("fr-FR")}
                         </p>
                       )}
@@ -406,7 +408,7 @@ export function DocumentsValidationCenter({
                       <Download size={12} /> Télécharger
                     </button>
                     <button
-                      disabled={busyId === doc.id || doc.statut_validation === "approuve"}
+                      disabled={busyId === doc.id || isConvoyeurDocApproved(doc.statut_validation)}
                       onClick={() => updateStatut(doc, "approuve")}
                       className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-40"
                     >
@@ -561,7 +563,7 @@ function BypassPanel({ convoyeurId, onDone }: { convoyeurId: string; onDone: () 
               className="rounded-md border border-amber-300 bg-white px-2 py-1.5 text-xs"
             >
               <option value="">Type de document…</option>
-              {DOC_TYPES.map((t) => (
+              {CONVOYEUR_DOC_TYPES.map((t) => (
                 <option key={t.key} value={t.key}>{t.label}</option>
               ))}
             </select>

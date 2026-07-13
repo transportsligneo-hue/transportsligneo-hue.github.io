@@ -36,10 +36,11 @@ function InscriptionConvoyeur() {
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
-    permis_numero: "", annees_experience: "",
+    permis_numero: "", annees_experience: "", type_convoyeur: "salarie",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
   const [cniFile, setCniFile] = useState<File | null>(null);
+  const [ribFile, setRibFile] = useState<File | null>(null);
   const [kbisFile, setKbisFile] = useState<File | null>(null);
   const [rcProFile, setRcProFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,13 @@ function InscriptionConvoyeur() {
     if (s === 2) {
       if (!form.permis_numero) return "Numéro de permis obligatoire.";
       if (!form.annees_experience) return "Années d'expérience obligatoires.";
+    }
+    if (s === 3) {
+      if (!permisFile) return "Ajoutez le permis de conduire.";
+      if (!cniFile) return "Ajoutez la pièce d'identité.";
+      if (!ribFile) return "Ajoutez le RIB.";
+      if (!rcProFile) return "Ajoutez l'attestation RC Pro.";
+      if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le KBIS pour un convoyeur indépendant.";
     }
     return null;
   };
@@ -110,6 +118,7 @@ function InscriptionConvoyeur() {
             permis: form.permis, message: form.message,
             permis_numero: form.permis_numero,
             annees_experience: form.annees_experience,
+            type_convoyeur: form.type_convoyeur,
           },
         },
       });
@@ -153,6 +162,7 @@ function InscriptionConvoyeur() {
             permis_numero: form.permis_numero,
             annees_experience: parseInt(form.annees_experience, 10) || 0,
             permis_photo_url: permisPhotoUrl,
+            type_convoyeur: form.type_convoyeur,
           }).eq("user_id", userId).select("id").maybeSingle()
         : { data: null };
 
@@ -176,9 +186,11 @@ function InscriptionConvoyeur() {
           } catch (e) { console.warn(`[inscription] doc ${type}:`, e); }
         };
         await Promise.all([
-          uploadDoc(cniFile, "cni"),
+          uploadDoc(permisFile, "permis"),
+          uploadDoc(cniFile, "identite"),
+          uploadDoc(ribFile, "rib"),
           uploadDoc(kbisFile, "kbis"),
-          uploadDoc(rcProFile, "rc_pro"),
+          uploadDoc(rcProFile, "assurance"),
         ]);
       }
 
@@ -335,6 +347,15 @@ function InscriptionConvoyeur() {
                 </label>
                 <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
               </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <ShieldCheck size={12} className="inline mr-1" /> Statut professionnel
+                </label>
+                <select value={form.type_convoyeur} onChange={update("type_convoyeur")} className={inputClass}>
+                  <option value="salarie">Convoyeur salarié</option>
+                  <option value="independant">Convoyeur indépendant</option>
+                </select>
+              </div>
             </div>
           )}
 
@@ -381,9 +402,12 @@ function InscriptionConvoyeur() {
           {step === 3 && (
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
-              <FileUpload label="CNI (recto/verso)" file={cniFile} onChange={makeFileHandler(setCniFile)} hint="Recommandé pour accélérer la validation." />
-              <FileUpload label="Kbis (si auto-entrepreneur / société)" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
-              <FileUpload label="Attestation RC Pro" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+              <FileUpload label="Pièce d'identité *" file={cniFile} onChange={makeFileHandler(setCniFile)} />
+              <FileUpload label="RIB *" file={ribFile} onChange={makeFileHandler(setRibFile)} />
+              <FileUpload label="Attestation RC Pro *" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+              {form.type_convoyeur === "independant" && (
+                <FileUpload label="KBIS *" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
+              )}
               <div>
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
                 <textarea value={form.message} onChange={update("message")} rows={3} className={`${inputClass} resize-none`} placeholder="Présentez-vous brièvement..." />
@@ -401,14 +425,16 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Email" value={form.email} />
                 <RecapRow label="Téléphone" value={form.telephone} />
                 <RecapRow label="Ville" value={form.ville || "—"} />
+                <RecapRow label="Statut" value={form.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} />
                 <RecapRow label="Disponibilité" value={form.disponibilite || "—"} />
                 <RecapRow label="N° permis" value={form.permis_numero} />
                 <RecapRow label="Années d'expérience" value={form.annees_experience} />
               </div>
               <div className="pt-4 border-t border-primary/10 space-y-1 text-xs text-cream/60">
                 <p className="flex items-center gap-2">{permisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Photo permis {permisFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} CNI {cniFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Kbis {kbisFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Pièce d'identité {cniFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{ribFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} RIB {ribFile ? "✓" : "(non fourni)"}</p>
+                {form.type_convoyeur === "independant" && <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} KBIS {kbisFile ? "✓" : "(non fourni)"}</p>}
                 <p className="flex items-center gap-2">{rcProFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} RC Pro {rcProFile ? "✓" : "(non fournie)"}</p>
               </div>
               <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
