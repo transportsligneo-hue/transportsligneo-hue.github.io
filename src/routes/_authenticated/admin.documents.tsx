@@ -23,6 +23,12 @@ import {
   IconButton,
   Select,
 } from "@/components/admin/AdminUI";
+import {
+  getConvoyeurDocLabel,
+  getRequiredConvoyeurDocTypes,
+  isConvoyeurDocApproved,
+  normalizeConvoyeurDocType,
+} from "@/lib/convoyeur-documents";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
   component: AdminDocuments,
@@ -47,19 +53,6 @@ interface Document {
   statut_validation?: string;
   motif_refus?: string | null;
 }
-
-const DOC_LABELS: Record<string, string> = {
-  permis: "Permis de conduire",
-  identite: "Pièce d'identité",
-  domicile: "Justificatif de domicile",
-  rib: "RIB",
-  kbis: "KBIS",
-  assurance: "Assurance RC pro",
-  autre: "Autre",
-};
-
-const REQUIRED_BASE = ["permis", "identite", "domicile", "rib"];
-const REQUIRED_INDEP = ["kbis", "assurance"];
 
 function AdminDocuments() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
@@ -95,22 +88,19 @@ function AdminDocuments() {
   }, [fetchAll]);
 
   const getMissingDocs = (c: Convoyeur): string[] => {
-    const owned = new Set((docsByConvoyeur[c.id] || []).map((d) => d.type_document));
-    const required =
-      c.type_convoyeur === "independant" ? [...REQUIRED_BASE, ...REQUIRED_INDEP] : REQUIRED_BASE;
-    return required.filter((r) => !owned.has(r));
+    const owned = new Set((docsByConvoyeur[c.id] || []).map((d) => normalizeConvoyeurDocType(d.type_document)));
+    return getRequiredConvoyeurDocTypes(c.type_convoyeur).map((d) => d.key).filter((r) => !owned.has(r));
   };
 
   const getBlockingIssues = (c: Convoyeur): string[] => {
     const docs = docsByConvoyeur[c.id] || [];
-    const required =
-      c.type_convoyeur === "independant" ? [...REQUIRED_BASE, ...REQUIRED_INDEP] : REQUIRED_BASE;
+    const required = getRequiredConvoyeurDocTypes(c.type_convoyeur).map((d) => d.key);
     const issues: string[] = [];
     for (const r of required) {
-      const doc = docs.find((d) => d.type_document === r);
-      if (!doc) issues.push(`${DOC_LABELS[r]} manquant`);
-      else if (doc.statut_validation === "refuse") issues.push(`${DOC_LABELS[r]} refusé`);
-      else if (doc.statut_validation !== "approuve") issues.push(`${DOC_LABELS[r]} non validé`);
+      const doc = docs.find((d) => normalizeConvoyeurDocType(d.type_document) === r);
+      if (!doc) issues.push(`${getConvoyeurDocLabel(r)} manquant`);
+      else if (doc.statut_validation === "refuse") issues.push(`${getConvoyeurDocLabel(r)} refusé`);
+      else if (!isConvoyeurDocApproved(doc.statut_validation)) issues.push(`${getConvoyeurDocLabel(r)} non validé`);
     }
     return issues;
   };
@@ -230,7 +220,7 @@ function AdminDocuments() {
                     )}
                     {!isIndependant && missing.length > 0 && (
                       <div className="p-2.5 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-700">
-                        Manquants : {missing.map((m) => DOC_LABELS[m] || m).join(", ")}
+                        Manquants : {missing.map((m) => getConvoyeurDocLabel(m)).join(", ")}
                       </div>
                     )}
                     {docs.length === 0 ? (
@@ -264,7 +254,7 @@ function AdminDocuments() {
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <Badge tone="primary">{DOC_LABELS[d.type_document] || d.type_document}</Badge>
+                                    <Badge tone="primary">{getConvoyeurDocLabel(d.type_document)}</Badge>
                                     <Badge tone={tone} icon={icon}>
                                       {statutLabel}
                                     </Badge>

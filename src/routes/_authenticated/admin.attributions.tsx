@@ -50,6 +50,8 @@ interface Trajet {
   arrivee: string;
   date_trajet: string | null;
   statut: string;
+  statut_publication?: string | null;
+  attribution_mode?: string | null;
   client_nom?: string | null;
   marque?: string | null;
   modele?: string | null;
@@ -323,13 +325,17 @@ function AdminAttributions() {
     // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut, client_nom, marque, modele, prix_client")
+      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client")
       .in("statut", ["en_attente", "attribue"])
       .order("date_trajet", { ascending: true, nullsFirst: false });
     if (!trajets) return;
 
+    const assignableTrajets = trajets.filter(
+      (t) => !(t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "")),
+    );
+
     // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
-    const ids = trajets.map((t) => t.id);
+    const ids = assignableTrajets.map((t) => t.id);
     if (ids.length === 0) { setTrajetsDisponibles([]); return; }
     const { data: existing } = await supabase
       .from("attributions")
@@ -338,7 +344,7 @@ function AdminAttributions() {
     const busy = new Set((existing ?? [])
       .filter((a) => !["annule", "refusee", "refuse"].includes(a.statut))
       .map((a) => a.trajet_id));
-    setTrajetsDisponibles(trajets.filter((t) => !busy.has(t.id)) as Trajet[]);
+    setTrajetsDisponibles(assignableTrajets.filter((t) => !busy.has(t.id)) as Trajet[]);
   }, []);
 
   useEffect(() => {

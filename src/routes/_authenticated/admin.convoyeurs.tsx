@@ -32,6 +32,12 @@ import {
 } from "@/components/admin/StatutConvoyeurBadge";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import {
+  getConvoyeurDocLabel,
+  getRequiredConvoyeurDocTypes,
+  isConvoyeurDocApproved,
+  normalizeConvoyeurDocType,
+} from "@/lib/convoyeur-documents";
 
 export const Route = createFileRoute("/_authenticated/admin/convoyeurs")({
   component: AdminConvoyeurs,
@@ -149,17 +155,14 @@ function AdminConvoyeurs() {
     const previous = convoyeurs.find((c) => c.id === id) ?? null;
     if (!previous) return;
 
-    if (statut === "valide" && previous.type_convoyeur === "independant") {
+    if (statut === "valide") {
       const convDocs = allDocs.filter((d) => d.convoyeur_id === id);
-      const required = ["permis", "identite", "domicile", "rib", "kbis", "assurance"];
-      const labels: Record<string, string> = {
-        permis: "Permis", identite: "CNI", domicile: "Domicile", rib: "RIB", kbis: "KBIS", assurance: "Assurance",
-      };
+      const required = getRequiredConvoyeurDocTypes(previous.type_convoyeur).map((doc) => doc.key);
       const issues: string[] = [];
       for (const r of required) {
-        const d = convDocs.find((x) => x.type_document === r);
-        if (!d) issues.push(`${labels[r]} manquant`);
-        else if (d.statut_validation !== "approuve") issues.push(`${labels[r]} non approuvé`);
+        const d = convDocs.find((x) => normalizeConvoyeurDocType(x.type_document) === r);
+        if (!d) issues.push(`${getConvoyeurDocLabel(r)} manquant`);
+        else if (!isConvoyeurDocApproved(d.statut_validation)) issues.push(`${getConvoyeurDocLabel(r)} non approuvé`);
       }
       if (issues.length > 0) {
         toast.error(`Activation impossible — documents non conformes :\n• ${issues.join("\n• ")}`);

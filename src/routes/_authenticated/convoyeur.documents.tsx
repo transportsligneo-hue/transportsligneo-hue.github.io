@@ -6,31 +6,15 @@ import {
   Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye, RotateCcw,
   User as UserIcon, Camera,
 } from "lucide-react";
+import {
+  getVisibleConvoyeurDocTypes,
+  isConvoyeurDocApproved,
+  normalizeConvoyeurDocType,
+} from "@/lib/convoyeur-documents";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/documents")({
   component: ConvoyeurDocuments,
 });
-
-interface DocSpec {
-  key: string;
-  label: string;
-  hint?: string;
-  required: boolean;
-  forIndependant?: boolean; // si true => requis seulement pour independants
-}
-
-const DOCS: DocSpec[] = [
-  { key: "cni_recto", label: "Carte d'identité — recto", required: true },
-  { key: "cni_verso", label: "Carte d'identité — verso", required: true },
-  { key: "permis_recto", label: "Permis de conduire — recto", required: true },
-  { key: "permis_verso", label: "Permis de conduire — verso", required: true },
-  { key: "rib", label: "RIB", required: true },
-  { key: "contrat", label: "Contrat signé", hint: "Fourni par Transports Ligneo", required: false },
-  { key: "rc_pro", label: "Assurance RC Pro", hint: "Responsabilité Civile Professionnelle (obligatoire)", required: true },
-  { key: "kbis", label: "Extrait Kbis", required: false, forIndependant: true },
-  { key: "vigilance", label: "Attestation de vigilance URSSAF", required: false, forIndependant: true },
-  { key: "w_garage", label: "Plaque W Garage", hint: "Si applicable", required: false },
-];
 
 interface DocRow {
   id: string;
@@ -43,7 +27,7 @@ interface DocRow {
 }
 
 function statutBadge(s: string) {
-  if (s === "valide") return { label: "Validé", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle };
+  if (isConvoyeurDocApproved(s)) return { label: "Approuvé", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle };
   if (s === "refuse") return { label: "Refusé", cls: "bg-red-50 text-red-700 border-red-200", icon: AlertCircle };
   return { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200", icon: Loader2 };
 }
@@ -69,7 +53,8 @@ function ConvoyeurDocuments() {
     const map: Record<string, DocRow> = {};
     (data || []).forEach((d: DocRow) => {
       // garde le plus récent par type
-      if (!map[d.type_document]) map[d.type_document] = d;
+      const normalized = normalizeConvoyeurDocType(d.type_document);
+      if (!map[normalized]) map[normalized] = d;
     });
     setDocs(map);
   }, []);
@@ -96,7 +81,7 @@ function ConvoyeurDocuments() {
     })();
   }, [user, reload]);
 
-  const handleUpload = async (spec: DocSpec, file: File) => {
+  const handleUpload = async (spec: { key: string }, file: File) => {
     if (!convoyeurId || !user) return;
     setUploadingKey(spec.key);
     const path = `${user.id}/${spec.key}_${Date.now()}_${file.name}`;
@@ -138,9 +123,9 @@ function ConvoyeurDocuments() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
 
-  const visibleDocs = DOCS.filter(d => !d.forIndependant || typeConvoyeur === "independant");
+  const visibleDocs = getVisibleConvoyeurDocTypes(typeConvoyeur);
   const requiredCount = visibleDocs.filter(d => d.required).length;
-  const validatedCount = visibleDocs.filter(d => d.required && docs[d.key]?.statut_validation === "valide").length;
+  const validatedCount = visibleDocs.filter(d => d.required && isConvoyeurDocApproved(docs[d.key]?.statut_validation)).length;
 
   return (
     <div className="space-y-5 pb-6">
