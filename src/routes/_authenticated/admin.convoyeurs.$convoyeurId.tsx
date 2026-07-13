@@ -332,7 +332,7 @@ function AdminConvoyeurDetail() {
         action: "invite_account",
         user_id: conv.user_id,
         email: conv.email,
-        redirect_to: `${window.location.origin}/convoyeur`,
+          redirect_to: `${window.location.origin}/reset-password`,
       },
     });
     setBusy(null);
@@ -340,7 +340,7 @@ function AdminConvoyeurDetail() {
       toast.error(data?.error ?? "Erreur");
       return;
     }
-    toast.success("Invitation envoyée");
+    toast.success(data?.fallback === "reset_password" ? "Lien d'accès envoyé" : "Invitation envoyée");
     load();
   };
 
