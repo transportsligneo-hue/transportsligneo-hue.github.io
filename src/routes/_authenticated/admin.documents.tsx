@@ -203,10 +203,10 @@ function AdminDocuments() {
 
                 {isOpen && (
                   <div className="border-t border-pro-border p-4 space-y-3">
-                    {isIndependant && blocking.length > 0 && (
+                    {blocking.length > 0 && (
                       <div className="p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-700">
                         <div className="font-semibold mb-1 inline-flex items-center gap-1">
-                          <XCircle size={12} /> Activation indépendant bloquée
+                          <XCircle size={12} /> Activation bloquée
                         </div>
                         <ul className="list-disc list-inside space-y-0.5 opacity-90">
                           {blocking.map((b, i) => (
@@ -215,7 +215,7 @@ function AdminDocuments() {
                         </ul>
                       </div>
                     )}
-                    {!isIndependant && missing.length > 0 && (
+                    {missing.length > 0 && (
                       <div className="p-2.5 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-700">
                         Manquants : {missing.map((m) => getConvoyeurDocLabel(m)).join(", ")}
                       </div>
