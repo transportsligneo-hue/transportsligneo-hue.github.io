@@ -324,6 +324,23 @@ function AdminDocuments() {
                                 >
                                   Refuser
                                 </Button>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  className="flex-1"
+                                  onClick={() => requestRenewal(d)}
+                                  icon={<Clock size={12} />}
+                                >
+                                  Renouveler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => deleteDoc(d)}
+                                  icon={<XCircle size={12} />}
+                                >
+                                  Supprimer
+                                </Button>
                               </div>
                             </div>
                           );
