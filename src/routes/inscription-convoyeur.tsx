@@ -36,7 +36,7 @@ function InscriptionConvoyeur() {
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
-    permis_numero: "", annees_experience: "", type_convoyeur: "salarie",
+    permis_numero: "", annees_experience: "", type_convoyeur: "independant",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
   const [cniFile, setCniFile] = useState<File | null>(null);
@@ -351,10 +351,8 @@ function InscriptionConvoyeur() {
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
                   <ShieldCheck size={12} className="inline mr-1" /> Statut professionnel
                 </label>
-                <select value={form.type_convoyeur} onChange={update("type_convoyeur")} className={inputClass}>
-                  <option value="salarie">Convoyeur salarié</option>
-                  <option value="independant">Convoyeur indépendant</option>
-                </select>
+                <div className={`${inputClass} flex items-center gap-2 opacity-90`}>Convoyeur indépendant</div>
+                <p className="text-[10px] text-cream/50 mt-1">Ligneo travaille exclusivement avec des convoyeurs indépendants.</p>
               </div>
             </div>
           )}

@@ -18,7 +18,7 @@ function ConvoyeurProfil() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
   const [statut, setStatut] = useState<string>("en_attente");
-  const [typeConv, setTypeConv] = useState<string>("salarie");
+  const [typeConv, setTypeConv] = useState<string>("independant");
 
   const [form, setForm] = useState({
     prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "",
@@ -41,7 +41,7 @@ function ConvoyeurProfil() {
       if (data) {
         setConvoyeurId(data.id);
         setStatut(data.statut ?? "en_attente");
-        setTypeConv(data.type_convoyeur ?? "salarie");
+        setTypeConv(data.type_convoyeur ?? "independant");
         setForm({
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",

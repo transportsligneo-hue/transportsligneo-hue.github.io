@@ -35,7 +35,7 @@ const ROLES = [
   { key: "super_admin", label: "Super Admin", level: "Système", desc: "Accès total, gestion des admins et permissions système." },
   { key: "admin", label: "Admin", level: "Système", desc: "Gestion opérationnelle complète (clients, missions, finance)." },
   { key: "manager", label: "Manager", level: "Organisation", desc: "Gestion d'une organisation (membres, missions internes)." },
-  { key: "convoyeur", label: "Convoyeur", level: "Utilisateur", desc: "Convoyeur indépendant ou salarié." },
+  { key: "convoyeur", label: "Convoyeur", level: "Utilisateur", desc: "Convoyeur indépendant." },
   { key: "sous_traitant", label: "Sous-traitant", level: "Utilisateur", desc: "Convoyeur externe partenaire." },
   { key: "client", label: "Client", level: "Utilisateur", desc: "Espace client particulier." },
 ];

@@ -112,18 +112,33 @@ function AdminDocuments() {
     return true;
   });
 
-  const validateDoc = async (docId: string, statut: "approuve" | "refuse", motif?: string) => {
+  const validateDoc = async (docId: string, statut: "approuve" | "refuse" | "a_renvoyer", motif?: string) => {
     const { data: u } = await supabase.auth.getUser();
     await supabase
       .from("documents_convoyeurs")
       .update({
         statut_validation: statut,
-        motif_refus: statut === "refuse" ? motif || null : null,
+        motif_refus: statut === "approuve" ? null : motif || null,
         valide_par: u.user?.id,
         valide_le: new Date().toISOString(),
       } as never)
       .eq("id", docId);
     await fetchAll();
+  };
+
+  const deleteDoc = async (doc: Document) => {
+    if (!window.confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
+    if (doc.url_fichier && !doc.url_fichier.startsWith("http")) {
+      await supabase.storage.from("convoyeur-documents").remove([doc.url_fichier]);
+    }
+    await supabase.from("documents_convoyeurs").delete().eq("id", doc.id);
+    await fetchAll();
+  };
+
+  const requestRenewal = async (doc: Document) => {
+    const motif = window.prompt("Message au convoyeur (obligatoire) :") ?? "";
+    if (!motif.trim()) return;
+    await validateDoc(doc.id, "a_renvoyer", motif.trim());
   };
 
   const openDoc = async (path: string) => {
@@ -168,7 +183,6 @@ function AdminDocuments() {
             const missing = getMissingDocs(c);
             const blocking = getBlockingIssues(c);
             const isOpen = expanded === c.id;
-            const isIndependant = c.type_convoyeur === "independant";
             return (
               <Card key={c.id} padded={false}>
                 <button
@@ -180,12 +194,10 @@ function AdminDocuments() {
                       <span className="font-medium text-pro-text">
                         {c.prenom} {c.nom}
                       </span>
-                      <Badge tone={isIndependant ? "purple" : "info"}>
-                        {isIndependant ? "Indépendant" : "Salarié"}
-                      </Badge>
+                      <Badge tone="purple">Indépendant</Badge>
                       {blocking.length > 0 ? (
                         <Badge tone="warning" icon={<AlertCircle size={10} />}>
-                          {isIndependant ? "Activation bloquée" : `${blocking.length} à valider`}
+                          Activation bloquée
                         </Badge>
                       ) : (
                         <Badge tone="success" icon={<CheckCircle2 size={10} />}>
@@ -206,10 +218,10 @@ function AdminDocuments() {
 
                 {isOpen && (
                   <div className="border-t border-pro-border p-4 space-y-3">
-                    {isIndependant && blocking.length > 0 && (
+                    {blocking.length > 0 && (
                       <div className="p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-700">
                         <div className="font-semibold mb-1 inline-flex items-center gap-1">
-                          <XCircle size={12} /> Activation indépendant bloquée
+                          <XCircle size={12} /> Activation bloquée
                         </div>
                         <ul className="list-disc list-inside space-y-0.5 opacity-90">
                           {blocking.map((b, i) => (
@@ -218,7 +230,7 @@ function AdminDocuments() {
                         </ul>
                       </div>
                     )}
-                    {!isIndependant && missing.length > 0 && (
+                    {missing.length > 0 && (
                       <div className="p-2.5 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-700">
                         Manquants : {missing.map((m) => getConvoyeurDocLabel(m)).join(", ")}
                       </div>
@@ -311,6 +323,23 @@ function AdminDocuments() {
                                   icon={<XCircle size={12} />}
                                 >
                                   Refuser
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  className="flex-1"
+                                  onClick={() => requestRenewal(d)}
+                                  icon={<Clock size={12} />}
+                                >
+                                  Renouveler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => deleteDoc(d)}
+                                  icon={<XCircle size={12} />}
+                                >
+                                  Supprimer
                                 </Button>
                               </div>
                             </div>

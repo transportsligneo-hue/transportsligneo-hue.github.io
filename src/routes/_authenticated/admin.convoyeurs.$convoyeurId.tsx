@@ -426,7 +426,7 @@ function AdminConvoyeurDetail() {
           { label: "Convoyeurs", to: "/admin/convoyeurs" },
           { label: fullName },
         ]}
-        eyebrow={conv.type_convoyeur === "independant" ? "Convoyeur indépendant" : "Convoyeur salarié"}
+        eyebrow="Convoyeur indépendant"
         title={fullName}
         subtitle={conv.email}
         status={

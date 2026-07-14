@@ -91,7 +91,7 @@ function ConvoyeurMissions() {
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
-  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
+  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
   const [filter, setFilter] = useState<FilterKey>("today");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
@@ -141,7 +141,7 @@ function ConvoyeurMissions() {
     }
 
     if (!conv) { setLoading(false); return; }
-    setTypeConvoyeur(conv.type_convoyeur || "salarie");
+    setTypeConvoyeur(conv.type_convoyeur || "independant");
     setActiveMissionId((prev) => (prev && prev !== "" ? prev : null));
 
     const { data, error } = await supabase
@@ -388,7 +388,21 @@ function ConvoyeurMissions() {
         m.trajet?.marque?.toLowerCase().includes(q),
       );
     }
-    return list;
+    // Tri : en cours d'abord, puis à venir (date asc), puis terminées (date desc).
+    const doneStatuts = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
+    const bucket = (m: typeof missions[number]) => {
+      if (m.statut === "en_cours") return 0;
+      if (doneStatuts.has(m.statut)) return 2;
+      return 1;
+    };
+    return [...list].sort((a, b) => {
+      const ba = bucket(a), bb = bucket(b);
+      if (ba !== bb) return ba - bb;
+      const da = `${a.trajet?.date_trajet ?? ""} ${a.trajet?.heure_trajet ?? ""}`;
+      const db = `${b.trajet?.date_trajet ?? ""} ${b.trajet?.heure_trajet ?? ""}`;
+      // Terminées : plus récentes en haut. Autres : plus proches en haut.
+      return ba === 2 ? (db > da ? 1 : -1) : (da > db ? 1 : -1);
+    });
   }, [missions, filter, search]);
 
   const closeInspection = useCallback(() => setInspection(null), []);
