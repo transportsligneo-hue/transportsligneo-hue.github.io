@@ -168,7 +168,6 @@ function AdminDocuments() {
             const missing = getMissingDocs(c);
             const blocking = getBlockingIssues(c);
             const isOpen = expanded === c.id;
-            const isIndependant = c.type_convoyeur === "independant";
             return (
               <Card key={c.id} padded={false}>
                 <button
@@ -180,12 +179,10 @@ function AdminDocuments() {
                       <span className="font-medium text-pro-text">
                         {c.prenom} {c.nom}
                       </span>
-                      <Badge tone={isIndependant ? "purple" : "info"}>
-                        {isIndependant ? "Indépendant" : "Salarié"}
-                      </Badge>
+                      <Badge tone="purple">Indépendant</Badge>
                       {blocking.length > 0 ? (
                         <Badge tone="warning" icon={<AlertCircle size={10} />}>
-                          {isIndependant ? "Activation bloquée" : `${blocking.length} à valider`}
+                          Activation bloquée
                         </Badge>
                       ) : (
                         <Badge tone="success" icon={<CheckCircle2 size={10} />}>

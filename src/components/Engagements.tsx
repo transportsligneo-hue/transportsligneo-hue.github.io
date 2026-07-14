@@ -7,7 +7,7 @@ const engagements = [
   { icon: Eye, title: "Transparence", text: "Tarifs clairs, péages et carburant inclus. Suivi en temps réel." },
   { icon: Award, title: "Expérience", text: "Plus de 6 ans d'expertise dans le convoyage automobile." },
   { icon: Globe, title: "Couverture nationale", text: "Intervention en France entière et partout en Europe." },
-  { icon: GraduationCap, title: "Professionnalisme", text: "Convoyeurs salariés, formés en continu, tenue professionnelle." },
+  { icon: GraduationCap, title: "Professionnalisme", text: "Convoyeurs professionnels, formés en continu, tenue professionnelle." },
 ];
 
 export default function Engagements() {
