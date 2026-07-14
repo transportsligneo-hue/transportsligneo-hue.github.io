@@ -112,18 +112,33 @@ function AdminDocuments() {
     return true;
   });
 
-  const validateDoc = async (docId: string, statut: "approuve" | "refuse", motif?: string) => {
+  const validateDoc = async (docId: string, statut: "approuve" | "refuse" | "a_renvoyer", motif?: string) => {
     const { data: u } = await supabase.auth.getUser();
     await supabase
       .from("documents_convoyeurs")
       .update({
         statut_validation: statut,
-        motif_refus: statut === "refuse" ? motif || null : null,
+        motif_refus: statut === "approuve" ? null : motif || null,
         valide_par: u.user?.id,
         valide_le: new Date().toISOString(),
       } as never)
       .eq("id", docId);
     await fetchAll();
+  };
+
+  const deleteDoc = async (doc: Document) => {
+    if (!window.confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
+    if (doc.url_fichier && !doc.url_fichier.startsWith("http")) {
+      await supabase.storage.from("convoyeur-documents").remove([doc.url_fichier]);
+    }
+    await supabase.from("documents_convoyeurs").delete().eq("id", doc.id);
+    await fetchAll();
+  };
+
+  const requestRenewal = async (doc: Document) => {
+    const motif = window.prompt("Message au convoyeur (obligatoire) :") ?? "";
+    if (!motif.trim()) return;
+    await validateDoc(doc.id, "a_renvoyer", motif.trim());
   };
 
   const openDoc = async (path: string) => {
