@@ -35,7 +35,7 @@ function statutBadge(s: string) {
 function ConvoyeurDocuments() {
   const { user } = useAuth();
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
-  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
+  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
   const [docs, setDocs] = useState<Record<string, DocRow>>({});
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ function ConvoyeurDocuments() {
         .maybeSingle();
       if (!conv) { setLoading(false); return; }
       setConvoyeurId(conv.id);
-      setTypeConvoyeur(conv.type_convoyeur || "salarie");
+      setTypeConvoyeur(conv.type_convoyeur || "independant");
       await reload(conv.id);
       const { data: prof } = await supabase
         .from("profiles")

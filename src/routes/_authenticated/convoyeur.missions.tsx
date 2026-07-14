@@ -91,7 +91,7 @@ function ConvoyeurMissions() {
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
-  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("salarie");
+  const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
   const [filter, setFilter] = useState<FilterKey>("today");
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
@@ -141,7 +141,7 @@ function ConvoyeurMissions() {
     }
 
     if (!conv) { setLoading(false); return; }
-    setTypeConvoyeur(conv.type_convoyeur || "salarie");
+    setTypeConvoyeur(conv.type_convoyeur || "independant");
     setActiveMissionId((prev) => (prev && prev !== "" ? prev : null));
 
     const { data, error } = await supabase

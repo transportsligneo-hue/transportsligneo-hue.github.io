@@ -318,11 +318,7 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
                           <p className="font-medium text-pro-text">
                             {c.prenom} {c.nom}
                           </p>
-                          {c.type_convoyeur === "salarie" ? (
-                            <Badge tone="info">Salarié</Badge>
-                          ) : (
-                            <Badge tone="neutral">Indépendant</Badge>
-                          )}
+                          <Badge tone="neutral">Indépendant</Badge>
                           {c.statut === "valide" || c.statut === "actif" ? (
                             <Badge tone="success">Validé</Badge>
                           ) : c.statut === "en_attente" ? (
