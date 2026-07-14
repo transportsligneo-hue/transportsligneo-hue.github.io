@@ -388,7 +388,21 @@ function ConvoyeurMissions() {
         m.trajet?.marque?.toLowerCase().includes(q),
       );
     }
-    return list;
+    // Tri : en cours d'abord, puis à venir (date asc), puis terminées (date desc).
+    const doneStatuts = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
+    const bucket = (m: typeof missions[number]) => {
+      if (m.statut === "en_cours") return 0;
+      if (doneStatuts.has(m.statut)) return 2;
+      return 1;
+    };
+    return [...list].sort((a, b) => {
+      const ba = bucket(a), bb = bucket(b);
+      if (ba !== bb) return ba - bb;
+      const da = `${a.trajet?.date_trajet ?? ""} ${a.trajet?.heure_trajet ?? ""}`;
+      const db = `${b.trajet?.date_trajet ?? ""} ${b.trajet?.heure_trajet ?? ""}`;
+      // Terminées : plus récentes en haut. Autres : plus proches en haut.
+      return ba === 2 ? (db > da ? 1 : -1) : (da > db ? 1 : -1);
+    });
   }, [missions, filter, search]);
 
   const closeInspection = useCallback(() => setInspection(null), []);
