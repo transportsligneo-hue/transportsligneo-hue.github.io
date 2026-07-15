@@ -413,10 +413,10 @@ function ExamView({ exam, convoyeurId, onBack, onDone }: { exam: Exam; convoyeur
           <p className="text-xs text-pro-muted mt-2">Seuil de réussite : {exam.minimum_score}% · Barème : 2 points par question</p>
         </div>
 
-        {!result.passed && (
+        {!result.passed && result.questions.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-pro-text">Questions à revoir ({questions.filter((q, i) => answers[i] !== q.answer).length}) :</p>
-            {questions.map((q, qi) => answers[qi] !== q.answer && (
+            <p className="text-sm font-semibold text-pro-text">Questions à revoir ({result.questions.filter((q, i) => q.answer != null && answers[i] !== q.answer).length}) :</p>
+            {result.questions.map((q, qi) => q.answer != null && answers[qi] !== q.answer && (
               <div key={qi} className="rounded-lg border border-red-200 bg-white p-4 text-sm">
                 <p className="font-semibold text-pro-text">Q{qi + 1}. {q.question}</p>
                 <p className="text-red-700 mt-2">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "— (non répondue)"}</p>
