@@ -73,11 +73,10 @@ function ConvoyeurCatalogue() {
   const fetchData = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("trajets")
-      .select("id,depart,arrivee,date_trajet,heure_trajet,marque,modele,distance_km,duree_estimee_min,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,urgence,leg_type,mission_group_id,created_at,published_at")
-      .in("attribution_mode", ["catalogue", "mixte"])
-      .eq("statut_publication", "publie")
-      .order("published_at", { ascending: false })
+      .from("trajets_publies_safe" as never)
+      .select("id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,created_at,published_at" as never)
+      .in("attribution_mode" as never, ["catalogue", "mixte"] as never)
+      .order("published_at" as never, { ascending: false })
       .limit(200);
     if (!error && data) setTrajets(data as unknown as CatalogTrajet[]);
 
