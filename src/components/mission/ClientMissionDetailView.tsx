@@ -21,7 +21,11 @@ interface Mission {
   modele: string | null;
   immatriculation: string | null;
   carburant: string | null;
+  vin: string | null;
+  carte_grise_recto_url: string | null;
+  carte_grise_verso_url: string | null;
   remarques: string | null;
+
   options: unknown;
   nom: string;
   prenom: string;
