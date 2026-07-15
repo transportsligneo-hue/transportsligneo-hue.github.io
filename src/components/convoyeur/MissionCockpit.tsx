@@ -441,6 +441,20 @@ export function MissionCockpit({
 
           .mv3-glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px);
             border: 1px solid rgba(120,180,255,0.12); border-radius: 20px; padding: 16px; position: relative; overflow: hidden; }
+          .mv3-card-row { display: flex; align-items: center; justify-content: space-between; }
+          .mv3-card-title { font-size: 13px; font-weight: 700; }
+          .mv3-pill-count { font-size: 10px; font-weight: 800; color: #2FD8FF; background: rgba(47,216,255,0.1);
+            padding: 3px 9px; border-radius: 20px; border: 1px solid rgba(47,216,255,0.25); }
+          .mv3-checklist { margin-top: 12px; width: 100%; display: flex; align-items: center; gap: 10px;
+            background: rgba(47,216,255,0.07); border: 1px solid rgba(47,216,255,0.26); border-radius: 14px;
+            padding: 13px; color: #F3F5F9; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; text-align: left; }
+          .mv3-checklist.done { background: rgba(52,232,176,0.1); border-color: rgba(52,232,176,0.4); }
+          .mv3-checklist .mv3-check-icon { color: #2FD8FF; flex-shrink: 0; }
+          .mv3-check-box { width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center; color: #34E8B0; flex-shrink: 0; }
+          .mv3-checklist.done .mv3-check-box { background: #34E8B0; border-color: #34E8B0; color: #06070C; }
+          .mv3-meta-row { display: flex; gap: 18px; margin-top: 12px; font-size: 11px; color: #7C859C; }
+          .mv3-meta-row b { color: #C7CCDA; }
           .mv3-next-glow { position: absolute; top: -50px; right: -50px; width: 160px; height: 160px; border-radius: 50%;
             background: radial-gradient(circle, rgba(47,216,255,0.18), transparent 70%); }
           .mv3-badge-ring { position: relative; flex-shrink: 0; }
