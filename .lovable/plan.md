@@ -1,76 +1,117 @@
 
-# Formation obligatoire convoyeur — plan de mise à niveau
+# Refonte système de notifications — expérience native premium
 
-Base déjà en place : tables `formation_modules`, `formation_progress`, `formation_quiz_attempts`, colonnes `has_completed_training` / `training_status`, gate SQL sur `accept_mission_fixe` et `driver_apply_to_mission`, écran `/convoyeur/formation`. On étend sans casser l'existant.
+Périmètre strictement front / présentation. Aucune modification de la logique métier, des tables, des edge functions push, du service worker FCM, des permissions ou des workflows existants. Rétrocompatible : chaque `toast(...)`, `create_user_notification`, push web continue de fonctionner tel quel.
 
-## 1. Schéma DB (migration additive)
+## 1. Toaster (bandeau in-app) — refonte totale
 
-Nouvelles colonnes / tables — aucun DROP, aucune modification de logique existante :
+Fichier `src/components/ui/sonner.tsx` réécrit autour de `sonner` (déjà installé, aucun changement de dépendance).
 
-- `formation_modules` : ajouter `sections jsonb` (blocs riches : texte, image, vidéo, checklist, callout), `passing_time_seconds int`, `is_required bool default true`, `category text` (metier, securite, app, rgpd…).
-- `formation_exams` : examen final unique et versionné (`id`, `title`, `question_count`, `time_limit_minutes`, `minimum_score`, `is_active`, `questions jsonb` — pool de 40-60 questions dans lesquelles on tire N aléatoirement).
-- `formation_exam_attempts` : `convoyeur_id`, `exam_id`, `score`, `passed`, `duration_seconds`, `answers jsonb`, `started_at`, `finished_at`.
-- `formation_certificates` : `convoyeur_id`, `certificate_number` (format `LIGNEO-CERT-YYYY-XXXX`), `issued_at`, `full_name`, `verification_token`, `pdf_url` (nullable).
-- Étendre `refresh_convoyeur_training_status` pour exiger : tous les modules `is_required=true` complétés **ET** un `formation_exam_attempts.passed=true` existant. `has_completed_training` reste la source de vérité utilisée par les gates SQL (aucun changement API).
-- Trigger : à l'insert d'un `formation_exam_attempts` passed, appeler `refresh_convoyeur_training_status` + créer la ligne `formation_certificates` (numéro auto via séquence), + `create_user_notification` "Certificat disponible" et "Missions débloquées".
-- RLS : mêmes patterns que l'existant (convoyeur voit le sien, admin/super_admin tout).
-- Route publique de vérif certificat : lecture par `verification_token` via server fn (pas d'auth requise).
+- **Fond opaque** premium (plus jamais transparent) : navy profond `#0b1026` / cream `#fdfcf8` selon type. Effet glassmorphism léger (backdrop-blur discret) via `backdrop-blur-xl` Tailwind + fallback opaque.
+- **Coins arrondis** 18 px, **ombre portée** douce et colorée selon type, bordure fine 1 px `border-white/10`.
+- **Icône typée** à gauche (cercle 40 px accent), **titre** semi-bold + **message** court + **timestamp** ("à l'instant", "il y a 2 min") + **action rapide** optionnelle (bouton Voir / Ouvrir).
+- **Barre d'accent verticale** 3 px à gauche, couleur selon type.
+- **Animations** : slide-in-down (mobile) / slide-in-right (desktop), fade-out + scale, 60 FPS via `transform`/`opacity` uniquement (CSS Tailwind, jamais framer-motion — contrainte projet).
+- **Swipe-to-dismiss** (activé nativement par sonner sur mobile, on l'expose).
+- **Positionnement responsive** : `top-center` en < 768 px, `top-right` en desktop, `expand` pour empilement propre, `visibleToasts: 4`, `gap: 12`.
+- **Vibration légère** (`navigator.vibrate([10, 30, 10])`) déclenchée pour types `warning` / `error` / `nouvelle_mission` si `matchMedia('(pointer:coarse)')` ET permission ok — silencieux côté desktop.
+- **Son discret** optionnel : petit `<audio>` préchargé, jouable si l'utilisateur a activé la préférence (nouveau flag `sound` dans `notification_preferences` déjà présent en DB, réutilisé).
 
-## 2. Espace convoyeur — parcours e-learning
+### Helper unifié `notify`
 
-Refonte `/convoyeur/formation` (sans casser l'URL) :
+Nouveau `src/lib/notify.ts` — enveloppe fine autour de sonner exposant :
 
-- Vue d'ensemble : progression globale, temps estimé restant, statut certificat, CTA "Reprendre".
-- Liste de modules groupés par catégorie, badges (Non commencé / En cours / Validé), barre de progression par module.
-- Lecteur de module : rendu des `sections` (paragraphes, images, vidéos YouTube/MP4, checklists, callouts) + scroll tracking → auto-marque `in_progress`, sauvegarde `last_seen_at` toutes les 5 s, reprise au dernier bloc lu (localStorage + DB).
-- QCM module : questions tirées aléatoirement dans le pool, feedback par question après soumission, ≥ 80 % pour valider, sinon rejeu illimité avec explication des erreurs.
-- Écran examen final : verrouillé tant que tous les modules requis ne sont pas validés. Timer visible, autosave des réponses, soumission auto à l'échéance, écran de résultat (score, questions ratées avec bonne réponse). Rejeu illimité de l'examen seul en cas d'échec.
-- Écran certificat : aperçu HTML (identité + n° certificat + date + QR vers URL publique de vérif + signature Ligneo), bouton "Télécharger PDF" (génération client via `jspdf` déjà présent dans le projet si dispo, sinon `@react-pdf/renderer` léger — à confirmer selon deps existantes).
-- Bandeau global convoyeur (déjà présent dans le layout) : "Formation à compléter — missions verrouillées" tant que `has_completed_training = false`. Les routes `/convoyeur/catalogue`, `/convoyeur/disponibles`, `/convoyeur/missions` continuent d'afficher leur alerte existante (aucun changement de logique).
+```ts
+notify.info(titre, opts?)
+notify.success(titre, opts?)
+notify.warning(titre, opts?)
+notify.error(titre, opts?)
+notify.mission(titre, opts?)      // 🟣 nouvelle mission
+notify.convoyage(titre, opts?)    // 🚗
+notify.document(titre, opts?)     // 📄
+notify.paiement(titre, opts?)     // 💳
+notify.avis(titre, opts?)         // ⭐
+notify.rappel(titre, opts?)       // 🔔
+```
 
-## 3. Espace admin — CMS formation
+`opts` : `{ description?, action?: { label, onClick | href }, duration?, priority? }`.
 
-Nouvelle section `/admin/formation` avec onglets :
+Les appels existants `toast.success(...)` / `toast.error(...)` **continuent de fonctionner** (sonner reste la lib) — le nouveau helper est adopté progressivement sans casse.
 
-- **Modules** : liste triable par `sort_order`, CRUD complet (titre, description, catégorie, durée estimée, score min, actif, obligatoire). Éditeur de sections en blocs (ajouter/réordonner texte, image URL, vidéo URL, checklist, callout). Éditeur de pool QCM avec import/export JSON.
-- **Examen final** : édition du pool de questions, nombre de questions tirées, durée, score min, activation.
-- **Résultats** : tableau des convoyeurs (statut formation, % avancement, dernier module, tentatives QCM, tentatives examen, temps total, date de certification). Filtres + export CSV. Vue détail par convoyeur : timeline des tentatives, réponses, possibilité de **réinitialiser** un module ou l'examen, bouton **certifier manuellement** (bypass admin déjà supporté via `has_completed_training`).
-- **Certificats** : liste, téléchargement PDF, révocation (soft — `revoked_at`), lien de vérification.
-- **Tableau de bord** : compteurs (certifiés, en cours, non commencés), taux de réussite examen, temps moyen, derniers certificats — cards Tailwind, cohérent avec le style admin existant.
+## 2. Cloche & dropdown — refonte visuelle
 
-## 4. Notifications
+`src/components/notifications/NotificationBell.tsx` :
 
-Via `create_user_notification` (in-app) + queue email + push existants :
+- Panneau dropdown en **glass premium navy** (plus le fond blanc actuel) cohérent avec la charte : `bg-[#0b1026]/95 backdrop-blur-xl border-white/10`, cream pour les lignes non lues, tokens dorés pour badges.
+- Icônes par catégorie (Truck, CreditCard, FileText, MessageSquare, Star, Bell) dans une pastille 36 px avec couleur d'accent typée.
+- Timestamp relatif ("à l'instant", "il y a 5 min", puis date courte).
+- Ligne non lue : liseré doré gauche + point néon.
+- Animation ouverture `scale-in` + `fade-in`, focus-trap léger, fermeture ESC.
+- Aucune régression realtime : le hook `useEffect` + channel Supabase reste identique.
 
-- Formation disponible (à la validation des documents).
-- Module validé, QCM échoué (avec conseils), examen réussi/échoué.
-- Certificat délivré + "Missions désormais accessibles".
+## 3. Centre de notifications `/notifications`
 
-Templates email légers réutilisant `LigneoEmailShell` (`formation-disponible`, `formation-certifie`, `formation-examen-echoue`).
+`src/routes/_authenticated/notifications.tsx` :
 
-## 5. Gate & compatibilité
+- Cartes redessinées façon Revolut : icône typée, accent gauche coloré, chip catégorie, chip priorité, timestamp relatif, actions (Voir / Marquer / Supprimer) en boutons pilules discrets.
+- Filtres restylés : onglets pilules dans une barre glass, compteur non lues par onglet.
+- Recherche debounced (300 ms) avec icône, focus-ring accent bleu néon.
+- Sélection multiple : cases custom, barre d'actions flottante en bas quand sélection ≥ 1 (Marquer / Supprimer / Annuler).
+- Empty state illustré (icône Bell XXL + texte encourageant).
+- Regroupement par date : "Aujourd'hui", "Hier", "Cette semaine", "Plus ancien".
+- Les mutations (mark read / delete / mark all) restent inchangées.
 
-- Les fonctions SQL `accept_mission_fixe`, `driver_apply_to_mission` restent inchangées (elles vérifient déjà `has_completed_training`).
-- Aucun changement des API existantes (attributions, missions, documents).
-- Le hook front continue d'utiliser `has_completed_training` — la seule évolution est que ce flag n'est mis à `true` qu'après examen réussi.
-- Un utilitaire de migration one-shot marque `has_completed_training = true` pour les convoyeurs déjà `valide` et actifs afin de ne pas verrouiller les comptes existants (opt-in via flag SQL, à confirmer avec toi).
+## 4. Bridge push web → toast
 
-## 6. Séquencement de livraison (3 tours agent)
+Dans `src/lib/push/client.ts` (si présent), on écoute déjà les messages FCM en foreground ; on ajoute simplement un `notify.<type>()` selon `data.category` reçu du push, pour que les notifications reçues quand l'onglet est ouvert apparaissent aussi comme bannières in-app cohérentes (au lieu d'être silencieuses). Le service worker `firebase-messaging-sw.js` (background) reste **strictement intact** — contrainte PWA.
 
-1. **Migration DB** (schéma étendu, examen, certificats, trigger, seeds pool QCM ≥ 50 questions couvrant les 20 thèmes demandés).
-2. **Espace convoyeur** (lecteur riche, QCM amélioré, examen, écran certificat + PDF, notifications in-app).
-3. **Espace admin CMS + dashboard + templates email**.
+## 5. Design tokens
 
-## Détails techniques
+Dans `src/styles.css`, ajout de tokens dédiés (ne remplace rien) :
 
-- Stack : TanStack Start + Supabase, Tailwind, pas de framer-motion (contrainte projet).
-- PDF certificat : utilisation prioritaire d'une lib déjà présente ; sinon `@react-pdf/renderer` (client only) importé dynamiquement dans le composant certificat.
-- QR code : `qrcode` (léger, side-effect free) ou rendu SVG local.
-- Sécurité : RLS strictes, `verification_token` en `gen_random_uuid()`, URL de vérif publique en `/verify-certificat/$token` avec fetch server fn `TO anon` renvoyant uniquement nom/prénom/date/numéro.
-- Design : tokens existants (`.card-premium-light`, navy/cream/gold), pas de couleurs hors palette.
+```css
+--notif-info: oklch(...);      /* bleu électrique */
+--notif-success: oklch(...);   /* vert */
+--notif-warning: oklch(...);   /* ambre */
+--notif-error: oklch(...);     /* rouge */
+--notif-mission: oklch(...);   /* violet */
+--notif-convoyage: oklch(...); /* néon bleu */
+--notif-document: oklch(...);
+--notif-paiement: oklch(...);
+--notif-avis: oklch(...);
+--notif-rappel: oklch(...);
+--shadow-notif: 0 20px 40px -20px rgb(0 0 0 / 0.35);
+```
+
+Palette conforme à la mémoire projet : navy dominant, cream pour surfaces claires, doré/néon bleu pour accents. Jamais de blanc pur, jamais de purple générique.
+
+## 6. Accessibilité & perf
+
+- Contraste AA vérifié sur chaque type (texte cream sur navy + accent).
+- `role="status"` pour info/success, `role="alert"` pour warning/error.
+- Animations en `transform`/`opacity` uniquement, `will-change` ciblé.
+- Respect de `prefers-reduced-motion` : bascule sur fade court sans slide.
+- `aria-live="polite"` géré par sonner.
+
+## 7. Compatibilité stricte
+
+- Toutes les tables (`user_notifications`, `notification_preferences`, `push_subscriptions`) intactes.
+- Toutes les server fns (`notify.functions.ts`, `push.functions.ts`, `push/notify.functions.ts`) intactes.
+- Aucune modification RLS, aucun trigger touché.
+- Le service worker FCM et les hooks push existants ne sont pas modifiés.
+- Toute la centaine d'appels `toast.*(...)` existants continuent d'afficher un toast — visuellement amélioré automatiquement.
+
+## Livraison
+
+1. Tokens CSS + réécriture `sonner.tsx` (bandeau premium, config responsive, vibration, son opt-in).
+2. Helper `src/lib/notify.ts` (10 types typés).
+3. Refonte `NotificationBell.tsx` (glass navy premium, timestamps relatifs, icônes typées).
+4. Refonte `/notifications` (cartes premium, groupement date, sélection multiple, empty state).
+5. Bridge push foreground → `notify.*`.
+6. Vérif build + parcours visuel rapide (bell, centre, toast test dans MobileHomeScreen).
 
 ## Question avant lancement
 
-Aucune si tu valides ; sinon dis-moi si :
-- (a) on active le bypass pour les convoyeurs actuellement `valide` (recommandé pour ne bloquer personne), ou
-- (b) tout le monde repasse la nouvelle formation.
+Aucune si tu valides — la logique métier ne bouge pas. Dis-moi juste si tu veux :
+- (a) **son + vibration activés par défaut** (opt-out dans `notification_preferences`), ou
+- (b) **désactivés par défaut** (opt-in explicite depuis le centre de notifications).
