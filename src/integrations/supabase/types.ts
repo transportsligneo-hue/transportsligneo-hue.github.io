@@ -3854,7 +3854,9 @@ export type Database = {
       }
       trajets_publies_safe: {
         Row: {
+          allow_counter_offer: boolean | null
           arrivee: string | null
+          attribution_mode: string | null
           bidding_enabled: boolean | null
           created_at: string | null
           date_trajet: string | null
@@ -3866,14 +3868,19 @@ export type Database = {
           mission_group_id: string | null
           modele: string | null
           pricing_mode: string | null
+          prix_convoyeur: number | null
           prix_convoyeur_fixe: number | null
           prix_convoyeur_max: number | null
           prix_convoyeur_min: number | null
           prix_suggere: number | null
+          proposal_expires_at: string | null
+          published_at: string | null
           statut_publication: string | null
         }
         Insert: {
+          allow_counter_offer?: boolean | null
           arrivee?: string | null
+          attribution_mode?: string | null
           bidding_enabled?: never
           created_at?: string | null
           date_trajet?: string | null
@@ -3885,14 +3892,19 @@ export type Database = {
           mission_group_id?: string | null
           modele?: string | null
           pricing_mode?: string | null
+          prix_convoyeur?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
           prix_suggere?: number | null
+          proposal_expires_at?: string | null
+          published_at?: string | null
           statut_publication?: string | null
         }
         Update: {
+          allow_counter_offer?: boolean | null
           arrivee?: string | null
+          attribution_mode?: string | null
           bidding_enabled?: never
           created_at?: string | null
           date_trajet?: string | null
@@ -3904,10 +3916,13 @@ export type Database = {
           mission_group_id?: string | null
           modele?: string | null
           pricing_mode?: string | null
+          prix_convoyeur?: number | null
           prix_convoyeur_fixe?: number | null
           prix_convoyeur_max?: number | null
           prix_convoyeur_min?: number | null
           prix_suggere?: number | null
+          proposal_expires_at?: string | null
+          published_at?: string | null
           statut_publication?: string | null
         }
         Relationships: []
@@ -4146,6 +4161,15 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      verify_certificate: {
+        Args: { _token: string }
+        Returns: {
+          certificate_number: string
+          full_name: string
+          issued_at: string
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role:
