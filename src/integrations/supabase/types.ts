@@ -1661,8 +1661,152 @@ export type Database = {
           },
         ]
       }
+      formation_certificates: {
+        Row: {
+          certificate_number: string
+          convoyeur_id: string
+          created_at: string
+          full_name: string
+          id: string
+          issued_at: string
+          metadata: Json
+          revoked_at: string | null
+          updated_at: string
+          verification_token: string
+        }
+        Insert: {
+          certificate_number: string
+          convoyeur_id: string
+          created_at?: string
+          full_name: string
+          id?: string
+          issued_at?: string
+          metadata?: Json
+          revoked_at?: string | null
+          updated_at?: string
+          verification_token?: string
+        }
+        Update: {
+          certificate_number?: string
+          convoyeur_id?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          issued_at?: string
+          metadata?: Json
+          revoked_at?: string | null
+          updated_at?: string
+          verification_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_certificates_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_exam_attempts: {
+        Row: {
+          answers: Json
+          convoyeur_id: string
+          created_at: string
+          duration_seconds: number | null
+          exam_id: string
+          finished_at: string
+          id: string
+          passed: boolean
+          questions: Json
+          score: number
+          started_at: string
+        }
+        Insert: {
+          answers?: Json
+          convoyeur_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          exam_id: string
+          finished_at?: string
+          id?: string
+          passed?: boolean
+          questions?: Json
+          score: number
+          started_at?: string
+        }
+        Update: {
+          answers?: Json
+          convoyeur_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          exam_id?: string
+          finished_at?: string
+          id?: string
+          passed?: boolean
+          questions?: Json
+          score?: number
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_exam_attempts_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "formation_exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_exams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          minimum_score: number
+          question_count: number
+          question_pool: Json
+          time_limit_minutes: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          minimum_score?: number
+          question_count?: number
+          question_pool?: Json
+          time_limit_minutes?: number
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          minimum_score?: number
+          question_count?: number
+          question_pool?: Json
+          time_limit_minutes?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       formation_modules: {
         Row: {
+          category: string
           content_body: string | null
           content_type: string
           content_url: string | null
@@ -1671,14 +1815,17 @@ export type Database = {
           estimated_minutes: number
           id: string
           is_active: boolean
+          is_required: boolean
           minimum_score: number
           quiz_questions: Json
+          sections: Json
           slug: string
           sort_order: number
           title: string
           updated_at: string
         }
         Insert: {
+          category?: string
           content_body?: string | null
           content_type?: string
           content_url?: string | null
@@ -1687,14 +1834,17 @@ export type Database = {
           estimated_minutes?: number
           id?: string
           is_active?: boolean
+          is_required?: boolean
           minimum_score?: number
           quiz_questions?: Json
+          sections?: Json
           slug: string
           sort_order?: number
           title: string
           updated_at?: string
         }
         Update: {
+          category?: string
           content_body?: string | null
           content_type?: string
           content_url?: string | null
@@ -1703,8 +1853,10 @@ export type Database = {
           estimated_minutes?: number
           id?: string
           is_active?: boolean
+          is_required?: boolean
           minimum_score?: number
           quiz_questions?: Json
+          sections?: Json
           slug?: string
           sort_order?: number
           title?: string
