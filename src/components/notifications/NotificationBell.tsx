@@ -36,6 +36,7 @@ const CATEGORY_META: Record<string, { Icon: LucideIcon; bg: string; text: string
 
 export function NotificationBell({ className = "" }: { className?: string }) {
   const { user } = useAuth();
+  const router = useRouter();
   const channelId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<UserNotif[]>([]);
