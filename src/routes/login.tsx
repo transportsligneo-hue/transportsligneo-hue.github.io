@@ -11,6 +11,9 @@ type Tab = "client" | "pro";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Connexion — Transports Ligneo" },
@@ -41,8 +44,12 @@ function LoginPage() {
   const justLoggedInRef = useRef(false);
   const submittedTabRef = useRef<Tab>("client");
 
+  const { next } = Route.useSearch();
+
   useEffect(() => {
     if (isInitializing || isLoading || !isAuthenticated) return;
+    // If the user came from an OAuth consent (or similar) URL, always send them back there.
+    if (next) { window.location.href = next; return; }
     if (!justLoggedInRef.current) { navigate({ to: homeRoute }); return; }
     const usedTab = submittedTabRef.current;
     justLoggedInRef.current = false;
@@ -65,7 +72,7 @@ function LoginPage() {
     }
     if (typeClient === "b2b") navigate({ to: "/dashboard-pro" });
     else navigate({ to: "/dashboard-client" });
-  }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
+  }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout, next]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
