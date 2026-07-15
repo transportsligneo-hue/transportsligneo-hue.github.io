@@ -6,6 +6,7 @@ import { notifyAdmin } from "@/lib/admin-notifications";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
   Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
+  Eye, EyeOff,
 } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
