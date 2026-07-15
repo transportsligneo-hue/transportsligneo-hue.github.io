@@ -165,6 +165,47 @@ function ProDocuments() {
     ? `${window.location.origin}/dashboard-pro/documents?paye=1`
     : "/";
 
+  const canBeClosed = (d: DevisRow) =>
+    !d.paid_at &&
+    !d.accepted_at &&
+    !d.locked_at &&
+    !d.mission_id &&
+    !d.converted_at &&
+    !d.refused_at &&
+    d.statut !== "annule" &&
+    d.statut !== "converti" &&
+    d.statut !== "convertit" &&
+    d.statut !== "refuse" &&
+    d.statut !== "expire" &&
+    d.statut !== "accepte";
+
+  const handleConfirmClose = async () => {
+    if (!closingDevis) return;
+    const reason = closingReason.trim();
+    if (reason.length < 3) {
+      toast.error("Merci d'indiquer un motif (3 caractères min).");
+      return;
+    }
+    setClosingSubmitting(true);
+    try {
+      await markProcessed({ data: { devisId: closingDevis.id, reason } });
+      toast.success(`Devis ${closingDevis.numero} clôturé.`);
+      setDevis(prev => prev.map(d => d.id === closingDevis.id
+        ? { ...d, statut: "annule", refused_at: new Date().toISOString() }
+        : d
+      ));
+      setClosingDevis(null);
+      setClosingReason("");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Impossible de clôturer ce devis.";
+      toast.error(msg);
+    } finally {
+      setClosingSubmitting(false);
+    }
+  };
+
+
+
   const handleDownloadFacture = async (f: FactureRow) => {
     setDownloadingId(f.id);
     try {
