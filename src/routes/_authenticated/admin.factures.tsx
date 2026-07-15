@@ -318,7 +318,7 @@ function AdminFacturesPage() {
           footer={
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => handleDownload(selected)} icon={<Download size={12} />}>Télécharger PDF</Button>
-              <Button size="sm" variant="outline" onClick={() => handlePaymentMode(selected.id, selected.mode_paiement === "Virement différé" ? "Carte bancaire" : "Virement différé")}>Basculer paiement</Button>
+              <Button size="sm" variant="secondary" onClick={() => handlePaymentMode(selected.id, selected.mode_paiement === "Virement différé" ? "Carte bancaire" : "Virement différé")}>Basculer paiement</Button>
               {selected.statut !== "payee" && (
                 <Button size="sm" onClick={() => { handleStatut(selected.id, "payee"); setSelected({ ...selected, statut: "payee" }); }} className="bg-emerald-500 hover:bg-emerald-600 text-white" icon={<CheckCircle2 size={12} />}>Marquer payée</Button>
               )}
