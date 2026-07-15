@@ -188,13 +188,13 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                     return (
                       <li key={n.id}>
                         {target ? (
-                          <a
-                            href={target}
+                          <Link
+                            to={target}
                             onClick={() => { markRead(n.id); setOpen(false); }}
                             className="block"
                           >
                             {body}
-                          </a>
+                          </Link>
                         ) : (
                           <button onClick={() => markRead(n.id)} className="block w-full">
                             {body}
@@ -207,13 +207,13 @@ export function NotificationBell({ className = "" }: { className?: string }) {
               )}
             </div>
 
-            <a
-              href="/notifications"
+            <Link
+              to="/notifications"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-1.5 px-4 py-3 text-[12px] font-semibold text-[#e7c76a] hover:text-[#f0d78c] border-t border-white/10 hover:bg-white/5 transition"
             >
               Voir toutes les notifications <ExternalLink size={12} />
-            </a>
+            </Link>
           </div>
         </>
       )}
