@@ -16,7 +16,6 @@ import {
   Navigation,
   KeyRound,
   ClipboardCheck,
-  Zap,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -422,43 +421,55 @@ function ConvoyeurDisponibles() {
             </a>
           )}
 
-          {/* === FLASH INFO — bandeau animé sans image === */}
-          <div className="ligneo-flash-shell p-5 sm:p-6">
-            {/* particules et lignes */}
-            <div aria-hidden className="absolute inset-0 pointer-events-none">
-              <div className="ligneo-flash-line" style={{ top: "22%", left: 0, right: 0, animationDelay: "0s" }} />
-              <div className="ligneo-flash-line" style={{ top: "58%", left: 0, right: 0, animationDelay: "1.4s" }} />
-              <div className="ligneo-flash-line" style={{ top: "82%", left: 0, right: 0, animationDelay: "2.6s" }} />
-              <span className="ligneo-particle" style={{ top: "20%", left: "12%", animationDelay: "0s" }} />
-              <span className="ligneo-particle" style={{ top: "48%", left: "78%", animationDelay: "1.2s" }} />
-              <span className="ligneo-particle" style={{ top: "72%", left: "22%", animationDelay: "2.1s" }} />
-              <span className="ligneo-particle" style={{ top: "35%", left: "62%", animationDelay: ".6s" }} />
-              <div className="absolute -top-16 -right-10 w-48 h-48 rounded-full blur-3xl bg-[#3b82f6]/40" />
-              <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full blur-3xl bg-[#60a5fa]/25" />
-            </div>
-
-            <div className="relative flex items-start gap-4">
-              <span
-                className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center border border-white/20"
-                style={{
-                  background: "linear-gradient(135deg, rgba(59,130,246,0.5), rgba(29,78,216,0.35))",
-                  boxShadow: "0 0 24px rgba(59,130,246,0.65), inset 0 1px 0 rgba(255,255,255,0.25)",
-                }}
-                aria-hidden
-              >
-                <Zap size={22} className="text-white" strokeWidth={2} />
-              </span>
-              <div className="flex-1 min-w-0">
-                <span className="ligneo-badge-neon">Flash info</span>
-                <h3 className="mt-2 text-white text-[17px] font-bold tracking-tight">
-                  Nouvelles missions publiées en direct
-                </h3>
-                <p className="text-white/70 text-[13px] mt-1 leading-relaxed">
-                  Le flux se met à jour en temps réel. Acceptez une mission au prix fixe ou proposez le vôtre en enchère.
-                </p>
+          {/* === MES ENCHÈRES EN COURS === */}
+          {(() => {
+            const offresList = Object.values(myOffres).filter(
+              (o) => o.statut === "en_attente" || o.statut === "acceptee",
+            );
+            if (offresList.length === 0) return null;
+            return (
+              <div className="ligneo-neon-card p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="ligneo-icon-orb shrink-0" aria-hidden>
+                    <Euro size={18} strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] tracking-[0.28em] uppercase text-[#60a5fa] font-bold">
+                      Mes enchères
+                    </p>
+                    <h3 className="text-white font-bold text-[15px]">
+                      {offresList.length} offre{offresList.length > 1 ? "s" : ""} en cours
+                    </h3>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {offresList.map((o) => {
+                    const t = trajets.find((x) => x.id === o.trajet_id);
+                    return (
+                      <li
+                        key={o.id}
+                        className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/[0.03]"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-white text-[13px] font-semibold truncate">
+                            {t ? `${t.depart} → ${t.arrivee}` : "Mission"}
+                          </p>
+                          <p className="text-white/60 text-[11.5px] mt-0.5 tabular-nums">
+                            {o.prix_propose} € · {offreStatutLabel[o.statut]}
+                          </p>
+                        </div>
+                        <span
+                          className={`ligneo-badge-neon ${o.statut === "acceptee" ? "ligneo-badge-neon--emerald" : "ligneo-badge-neon--amber"}`}
+                        >
+                          {o.statut === "acceptee" ? "Acceptée" : "En attente"}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* === LISTE === */}
           {trajets.length === 0 ? (
