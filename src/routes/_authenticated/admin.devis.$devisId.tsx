@@ -113,6 +113,28 @@ function AdminDevisDetailPage() {
       setAcceptation(null);
     }
 
+    // Historique (statuts) + envois OTP — non bloquant
+    try {
+      const [{ data: hist }, { data: otp }] = await Promise.all([
+        supabase
+          .from("devis_status_history")
+          .select("id, old_statut, new_statut, note, created_at")
+          .eq("devis_id", enriched.id)
+          .order("created_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("devis_otp_challenges")
+          .select("id, email, method, attempts, expires_at, consumed_at, created_at, ip_address")
+          .eq("devis_id", enriched.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
+      setHistory(hist ?? []);
+      setOtpEvents(otp ?? []);
+    } catch {
+      setHistory([]); setOtpEvents([]);
+    }
+
     setLoading(false);
     try {
       const blob = await generateDevisPdf(buildDevisData(enriched));
