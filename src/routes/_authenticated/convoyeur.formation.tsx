@@ -295,12 +295,12 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
               <p className={`text-2xl font-bold ${result.passed ? "text-emerald-700" : "text-red-700"}`}>{result.score}%</p>
               <p className={`text-sm ${result.passed ? "text-emerald-800" : "text-red-800"} mt-1`}>{result.passed ? "Module validé !" : `Score insuffisant — minimum ${mod.minimum_score}%. Revoyez le contenu et recommencez.`}</p>
             </div>
-            {!result.passed && (
+            {!result.passed && result.review.length > 0 && (
               <div className="space-y-3">
-                {questions.map((q, qi) => answers[qi] !== q.answer && (
+                {result.review.map((q, qi) => q.answer != null && answers[qi] !== q.answer && (
                   <div key={qi} className="rounded-lg border border-red-200 bg-white p-3 text-sm">
                     <p className="font-semibold text-pro-text">{q.question}</p>
-                    <p className="text-red-700 mt-1">Votre réponse : {q.choices[answers[qi]]}</p>
+                    <p className="text-red-700 mt-1">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "— (non répondue)"}</p>
                     <p className="text-emerald-700 mt-0.5">Bonne réponse : {q.choices[q.answer]}</p>
                     {q.explanation && <p className="text-pro-text-soft mt-1 text-xs">{q.explanation}</p>}
                   </div>
