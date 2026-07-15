@@ -220,7 +220,7 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
   const [phase, setPhase] = useState<"content" | "quiz" | "result">(prog?.status === "completed" ? "content" : "content");
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; review: QuizQ[] } | null>(null);
   const questions = mod.quiz_questions ?? [];
 
   useEffect(() => {
@@ -232,16 +232,12 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
   const submitQuiz = async () => {
     if (questions.some((_, i) => answers[i] == null)) { toast.error("Répondez à toutes les questions."); return; }
     setSaving(true);
-    const correct = questions.filter((q, i) => answers[i] === q.answer).length;
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= mod.minimum_score;
-    await supabase.from("formation_quiz_attempts" as never).insert({ convoyeur_id: convoyeurId, module_id: mod.id, score, passed, answers } as never);
-    if (passed) {
-      await supabase.from("formation_progress" as never).upsert({ convoyeur_id: convoyeurId, module_id: mod.id, status: "completed", score, completed_at: new Date().toISOString(), last_seen_at: new Date().toISOString() } as never, { onConflict: "convoyeur_id,module_id" } as never);
-    }
-    setResult({ score, passed });
-    setPhase("result");
+    const { data, error } = await supabase.rpc("submit_module_quiz" as never, { _module_id: mod.id, _answers: answers } as never);
     setSaving(false);
+    if (error || !data) { toast.error("Erreur lors de la soumission du QCM."); return; }
+    const r = data as unknown as { score: number; passed: boolean; review: QuizQ[] };
+    setResult({ score: r.score, passed: r.passed, review: Array.isArray(r.review) ? r.review : [] });
+    setPhase("result");
   };
 
   const markTextDone = async () => {
