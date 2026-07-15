@@ -445,7 +445,87 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
     }
   }
 
+  // Cartouche "Signature électronique" (OTP e-mail) — nouvelle page dédiée
+  if (d.otpProof) {
+    doc.addPage();
+    const cpageW = doc.internal.pageSize.getWidth();
+    const cpageH = doc.internal.pageSize.getHeight();
 
+    // Bandeau supérieur navy
+    doc.setFillColor(...NAVY);
+    doc.rect(0, 0, cpageW, 28, "F");
+    doc.setTextColor(...GOLD);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("SIGNATURE ELECTRONIQUE — PREUVE DE VALIDATION", cpageW / 2, 12, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...GOLD_SOFT);
+    doc.text("Conforme eIDAS — signature electronique simple", cpageW / 2, 20, { align: "center" });
+
+    // Cadre principal
+    const boxX = 18;
+    const boxY = 40;
+    const boxW = cpageW - 36;
+    doc.setDrawColor(...GOLD);
+    doc.setLineWidth(0.6);
+    doc.setFillColor(255, 253, 248);
+    doc.roundedRect(boxX, boxY, boxW, 130, 3, 3, "FD");
+
+    const rows: [string, string][] = [
+      ["Devis", `${d.numero}${d.version && d.version > 1 ? ` (v${d.version})` : ""}`],
+      ["Signataire", `${d.prenom} ${d.nom}`.trim() || "-"],
+      ["E-mail verifie", d.otpProof.email],
+      ["Methode", d.otpProof.method],
+      ["Date et heure de signature", d.otpProof.acceptedAtLabel],
+      ["Montant TTC accepte", `${d.prix_estime.toFixed(2)} €`],
+      ["Adresse IP", d.otpProof.ipAddress ?? "-"],
+      ["Navigateur", (d.otpProof.userAgent ?? "-").slice(0, 90)],
+      ["Version des CGV acceptees", d.otpProof.cgvVersion ?? "-"],
+      ["Empreinte SHA-256 du devis", d.otpProof.pdfHash ?? "(voir document)"],
+    ];
+
+    let ry = boxY + 10;
+    rows.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...MUTED);
+      doc.text(label.toUpperCase(), boxX + 6, ry);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...TEXT);
+      const wrapped = doc.splitTextToSize(String(value ?? "-"), boxW - 12);
+      doc.text(wrapped, boxX + 6, ry + 5);
+      ry += 5 + (wrapped.length * 4.2) + 3.5;
+    });
+
+    // Bandeau de validation
+    const bY = boxY + 138;
+    doc.setFillColor(...NAVY);
+    doc.roundedRect(boxX, bY, boxW, 26, 2, 2, "F");
+    doc.setTextColor(...GOLD);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("✓ DEVIS SIGNE ET VERROUILLE", cpageW / 2, bY + 10, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...WHITE);
+    doc.text(
+      "Ce devis a ete accepte via un code de validation unique envoye par e-mail au signataire.",
+      cpageW / 2,
+      bY + 17,
+      { align: "center" },
+    );
+    doc.text(
+      "La preuve est conservee dans nos systemes pendant toute la duree legale.",
+      cpageW / 2,
+      bY + 22,
+      { align: "center" },
+    );
+
+    drawFooter(doc, cpageW, cpageH);
+    return doc.output("blob");
+  }
 
   // Société block + footer (placé juste au-dessus du footer pour éviter tout chevauchement)
   drawSocietyBlock(doc, pageW, pageH - 40);
