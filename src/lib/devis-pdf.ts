@@ -42,6 +42,16 @@ export interface DevisData {
   clientSignatureDataUrl?: string | null;
   /** Libellé de la date d'acceptation, ex "11/06/2026 à 14:32" */
   acceptedAtLabel?: string | null;
+  /** Preuve de signature électronique par code OTP e-mail (cartouche dédié) */
+  otpProof?: {
+    email: string;
+    method: string; // ex "Code de validation par e-mail (OTP 6 chiffres)"
+    acceptedAtLabel: string;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+    cgvVersion?: string | null;
+    pdfHash?: string | null;
+  } | null;
 }
 
 const NAVY: [number, number, number] = [11, 16, 38];
