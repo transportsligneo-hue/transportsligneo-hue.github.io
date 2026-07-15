@@ -23,12 +23,12 @@ const inputSchema = z.object({
   dedupKey: z.string().max(200).optional().nullable(),
   entityType: z.string().max(50).optional().nullable(),
   entityId: z.string().uuid().optional().nullable(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   push: z.boolean().default(true),
   email: z
     .object({
       template: z.string().min(1),
-      data: z.record(z.any()).optional(),
+      data: z.record(z.string(), z.any()).optional(),
       recipient: z.string().email().optional(),
     })
     .optional()

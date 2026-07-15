@@ -20,14 +20,10 @@ function VerifyCertificat() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("formation_certificates" as never)
-        .select("certificate_number, full_name, issued_at, revoked_at" as never)
-        .eq("verification_token" as never, token as never)
-        .maybeSingle();
-      const cert = data as unknown as Cert | null;
-      if (!cert || cert.revoked_at) setState({ ok: false });
-      else setState({ ok: true, cert });
+      const { data, error } = await (supabase as any).rpc("verify_certificate", { _token: token });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (error || !row || row.valid === false) setState({ ok: false });
+      else setState({ ok: true, cert: { certificate_number: row.certificate_number, full_name: row.full_name, issued_at: row.issued_at, revoked_at: null } });
     })();
   }, [token]);
 
