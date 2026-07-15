@@ -550,6 +550,73 @@ function ProDocuments() {
           </div>
         </div>
       )}
+
+      {closingDevis && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => { if (!closingSubmitting) { setClosingDevis(null); setClosingReason(""); } }}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-lg text-pro-text">Clôturer ce devis ?</h2>
+                <p className="text-pro-muted text-sm mt-1">
+                  Devis <span className="font-mono">{closingDevis.numero}</span> — {closingDevis.depart} → {closingDevis.arrivee}
+                </p>
+                <p className="text-pro-muted text-xs mt-2">
+                  Cette action est définitive. Le devis passera au statut « Clôturé » et
+                  sera retiré des devis en attente. Un enregistrement d'audit sera créé.
+                </p>
+              </div>
+            </div>
+
+            <label className="block text-sm font-medium text-pro-text mb-1.5" htmlFor="close-reason">
+              Motif de clôture <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="close-reason"
+              value={closingReason}
+              onChange={(e) => setClosingReason(e.target.value)}
+              placeholder="Ex. Doublon, client injoignable, remplacé par un autre devis…"
+              maxLength={500}
+              rows={3}
+              disabled={closingSubmitting}
+              className="w-full px-3 py-2 rounded-md border border-pro-border bg-white text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-1 focus:ring-pro-accent resize-none"
+            />
+            <p className="text-[11px] text-pro-muted mt-1 text-right">
+              {closingReason.trim().length}/500
+            </p>
+
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => { setClosingDevis(null); setClosingReason(""); }}
+                disabled={closingSubmitting}
+                className="px-4 py-2 rounded-md text-sm font-medium text-pro-text-soft hover:bg-pro-bg-soft transition-colors disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClose}
+                disabled={closingSubmitting || closingReason.trim().length < 3}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-pro-text text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {closingSubmitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                Confirmer la clôture
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
 }
