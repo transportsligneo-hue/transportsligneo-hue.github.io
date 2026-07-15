@@ -4,7 +4,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { verifyCertificate } from "@/lib/certificate.functions";
 import { ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/verify-certificat/$token")({
@@ -20,10 +20,13 @@ function VerifyCertificat() {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await (supabase as any).rpc("verify_certificate", { _token: token });
-      const row = Array.isArray(data) ? data[0] : data;
-      if (error || !row || row.valid === false) setState({ ok: false });
-      else setState({ ok: true, cert: { certificate_number: row.certificate_number, full_name: row.full_name, issued_at: row.issued_at, revoked_at: null } });
+      try {
+        const res = await verifyCertificate({ data: { token } });
+        if (!res.valid) setState({ ok: false });
+        else setState({ ok: true, cert: { certificate_number: res.certificate_number, full_name: res.full_name, issued_at: res.issued_at, revoked_at: null } });
+      } catch {
+        setState({ ok: false });
+      }
     })();
   }, [token]);
 
