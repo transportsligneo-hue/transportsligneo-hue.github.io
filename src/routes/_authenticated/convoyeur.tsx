@@ -8,7 +8,6 @@ import {
   History,
   UserRound,
   Loader2,
-  Gavel,
   Sparkles,
   GraduationCap,
 } from "lucide-react";
