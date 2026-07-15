@@ -111,6 +111,7 @@ export function MissionCockpit({
   const [openIncident, setOpenIncident] = useState(false);
   const [openSignatureArrivee, setOpenSignatureArrivee] = useState(false);
   const [signaturesArriveeDone, setSignaturesArriveeDone] = useState(false);
+  const [checklistDone, setChecklistDone] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
