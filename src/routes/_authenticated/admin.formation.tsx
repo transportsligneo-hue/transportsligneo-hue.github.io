@@ -11,7 +11,7 @@ import { uploadFormationImage } from "@/lib/formation-images.functions";
 import {
   GraduationCap, Loader2, Plus, Save, Trash2, Award, BarChart3,
   BookOpen, Trophy, Users, RefreshCw, ShieldCheck, XCircle, CheckCircle2,
-  GripVertical, ImageIcon, Type, ListChecks, AlertTriangle, Info, Upload,
+  ImageIcon, Type, ListChecks, AlertTriangle, Info, Upload,
   ChevronDown, ChevronUp, PlusCircle,
 } from "lucide-react";
 
