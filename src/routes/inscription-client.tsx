@@ -191,7 +191,12 @@ function InscriptionClient() {
             <label className="auth-label">Mot de passe *</label>
             <div className="auth-field">
               <Lock size={16} className="auth-field-icon" />
-              <input type="password" value={form.password} onChange={update("password")} className="auth-input" required minLength={8} placeholder="Minimum 8 caractères" />
+              <input type={showPwd ? "text" : "password"} value={form.password} onChange={update("password")} className="auth-input pr-11" required minLength={8} placeholder="Minimum 8 caractères" />
+              <button type="button" onClick={() => setShowPwd(v => !v)} aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"} tabIndex={-1} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors">
+                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
             </div>
           </div>
 
