@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { FileCheck2, ShieldCheck, X, PenLine, ArrowLeft } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { acceptDevis } from "@/lib/devis-acceptation.functions";
-import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import {
+  requestDevisOtp,
+  verifyDevisOtp,
+  attachSignedDevisPdf,
+  refuseDevis,
+} from "@/lib/devis-signature-otp.functions";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -25,7 +29,7 @@ const CGV_TEXT = `Article 1 — Objet
 Les présentes Conditions Générales de Vente régissent les prestations de convoyage automobile fournies par Transports Ligneo.
 
 Article 2 — Acceptation du devis
-Le devis devient ferme et définitif après acceptation expresse par le client (case à cocher et signature électronique). Le montant accepté est ferme et ne peut être modifié sans nouvelle acceptation.
+Le devis devient ferme et définitif après acceptation expresse par le client (case à cocher et validation par code de signature unique reçu par e-mail). Le montant accepté est ferme et ne peut être modifié sans nouvelle acceptation.
 
 Article 3 — Prix
 Les prix indiqués sont en euros TTC, péages et carburant inclus, sauf mention contraire.
@@ -40,19 +44,26 @@ Article 6 — Responsabilité
 Transports Ligneo souscrit une assurance professionnelle couvrant le véhicule pendant le trajet.
 
 Article 7 — Données personnelles
-Les données sont traitées conformément à notre politique de confidentialité. La preuve d'acceptation (horodatage, adresse IP, signature) est conservée à des fins légales.
+Les données sont traitées conformément à notre politique de confidentialité. La preuve de signature (horodatage, adresse IP, code OTP vérifié) est conservée à des fins légales.
 
 Article 8 — Litiges
 Tout litige relève des tribunaux compétents de Tours.`;
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onloadend = () => resolve(r.result as string);
-    r.onerror = () => reject(new Error("Lecture de la signature impossible"));
-    r.readAsDataURL(file);
-  });
+async function sha256HexOfBlob(blob: Blob): Promise<string> {
+  const buf = await blob.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
+
+type Phase =
+  | "consent"
+  | "otp"
+  | "processing"
+  | "refuse"
+  | "refused"
+  | "success";
 
 export function DevisAcceptationStep({
   devisId,
@@ -66,70 +77,159 @@ export function DevisAcceptationStep({
   onCancel,
 }: Props) {
   const [checked, setChecked] = useState(false);
-  const [phase, setPhase] = useState<"consent" | "signature" | "processing">("consent");
+  const [phase, setPhase] = useState<Phase>("consent");
   const [showCgv, setShowCgv] = useState(false);
-  const accept = useServerFn(acceptDevis);
 
-  const handleSign = async (file: File) => {
+  // OTP state
+  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [maskedEmail, setMaskedEmail] = useState<string>("");
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [resendAt, setResendAt] = useState<number>(0);
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [refusMotif, setRefusMotif] = useState("");
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  const requestOtp = useServerFn(requestDevisOtp);
+  const verifyOtp = useServerFn(verifyDevisOtp);
+  const attachPdf = useServerFn(attachSignedDevisPdf);
+  const refuse = useServerFn(refuseDevis);
+
+  // Ticker pour compte à rebours
+  useEffect(() => {
+    if (phase !== "otp") return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [phase]);
+
+  const secondsLeft = useMemo(() => {
+    if (!expiresAt) return 0;
+    return Math.max(0, Math.floor((expiresAt - now) / 1000));
+  }, [expiresAt, now]);
+  const canResend = phase === "otp" && !sending && now >= resendAt;
+
+  const focusIndex = (idx: number) => {
+    const el = inputsRef.current[idx];
+    if (el) el.focus();
+  };
+
+  const handleDigit = (idx: number, raw: string) => {
+    const v = raw.replace(/\D/g, "");
+    if (!v) {
+      const next = [...digits];
+      next[idx] = "";
+      setDigits(next);
+      return;
+    }
+    // Collage 6 chiffres d'un coup
+    if (v.length >= 6) {
+      const arr = v.slice(0, 6).split("");
+      setDigits(arr);
+      focusIndex(5);
+      return;
+    }
+    const next = [...digits];
+    next[idx] = v[0];
+    setDigits(next);
+    if (idx < 5) focusIndex(idx + 1);
+  };
+
+  const handleKey = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      focusIndex(idx - 1);
+    } else if (e.key === "ArrowLeft" && idx > 0) {
+      focusIndex(idx - 1);
+    } else if (e.key === "ArrowRight" && idx < 5) {
+      focusIndex(idx + 1);
+    }
+  };
+
+  const sendCode = async (isResend = false) => {
+    setSending(true);
+    try {
+      const res = await requestOtp({ data: { devisId } });
+      setMaskedEmail(res.maskedEmail);
+      setExpiresAt(new Date(res.expiresAt).getTime());
+      setResendAt(Date.now() + 60_000); // 60 s avant renvoi
+      setDigits(["", "", "", "", "", ""]);
+      setPhase("otp");
+      toast.success(isResend ? "Nouveau code envoyé" : "Code envoyé par e-mail", {
+        description: `Un code à 6 chiffres a été envoyé à ${res.maskedEmail}.`,
+      });
+      setTimeout(() => focusIndex(0), 60);
+    } catch (e) {
+      toast.error("Envoi du code impossible", { description: (e as Error).message });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const submitCode = async () => {
+    const code = digits.join("");
+    if (code.length !== 6) {
+      toast.error("Code incomplet", { description: "Saisissez les 6 chiffres reçus." });
+      return;
+    }
+    setVerifying(true);
     setPhase("processing");
     try {
+      // 1. Vérifie l'OTP + signe côté serveur
+      const res = await verifyOtp({ data: { devisId, code } });
+
+      // 2. Charge le devis complet pour générer le PDF
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) throw new Error("Session expirée — reconnectez-vous.");
+      if (!uid) throw new Error("Session expirée");
 
-      // 1. Données complètes du devis pour le PDF figé
       const { data: devisRow, error: dErr } = await supabase
-        .from("devis")
-        .select("*")
-        .eq("id", devisId)
-        .single();
+        .from("devis").select("*").eq("id", devisId).single();
       if (dErr || !devisRow) throw new Error("Devis introuvable");
-
       const version = (devisRow as { version?: number }).version ?? 1;
-      const signatureDataUrl = await fileToDataUrl(file);
-      const now = new Date();
-      const acceptedAtLabel = `${now.toLocaleDateString("fr-FR")} à ${now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      const acceptedAtDate = res.acceptedAt ? new Date(res.acceptedAt) : new Date();
+      const acceptedAtLabel = `${acceptedAtDate.toLocaleDateString("fr-FR")} à ${acceptedAtDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
 
-      // 2. PDF figé incluant la signature manuscrite
-      const pdfBlob = await generateDevisPdf({
+      // 3. Hash du PDF non signé (pour empreinte)
+      const rawPdf = await generateDevisPdf({
         ...(devisRow as unknown as DevisData),
         version,
-        clientSignatureDataUrl: signatureDataUrl,
+      });
+      const pdfHash = await sha256HexOfBlob(rawPdf);
+
+      // 4. PDF signé (cartouche OTP)
+      const email = (devisRow as { email?: string }).email ?? userData.user?.email ?? "";
+      const signedPdf = await generateDevisPdf({
+        ...(devisRow as unknown as DevisData),
+        version,
         acceptedAtLabel,
+        otpProof: {
+          email,
+          method: "Code de validation par e-mail (OTP 6 chiffres)",
+          acceptedAtLabel,
+          ipAddress: (res as any).ipAddress ?? null,
+          userAgent: (res as any).userAgent ?? null,
+          cgvVersion: "v1-2026-01",
+          pdfHash,
+        },
       });
 
-      // 3. Upload signature + PDF dans le bucket sécurisé
-      const basePath = `${uid}/${devisId}`;
-      const signaturePath = `${basePath}/v${version}-signature.png`;
-      const pdfPath = `${basePath}/v${version}-devis-signe.pdf`;
+      // 5. Upload + attach
+      const pdfPath = `${uid}/${devisId}/v${version}-devis-signe.pdf`;
+      const up = await supabase.storage.from("devis-acceptes")
+        .upload(pdfPath, signedPdf, { upsert: true, contentType: "application/pdf" });
+      if (up.error) throw new Error(`Archivage du PDF impossible : ${up.error.message}`);
+      await attachPdf({ data: { devisId, pdfPath } });
 
-      const [sigUp, pdfUp] = await Promise.all([
-        supabase.storage.from("devis-acceptes").upload(signaturePath, file, { upsert: true, contentType: "image/png" }),
-        supabase.storage.from("devis-acceptes").upload(pdfPath, pdfBlob, { upsert: true, contentType: "application/pdf" }),
-      ]);
-      if (sigUp.error) throw new Error(`Envoi de la signature impossible : ${sigUp.error.message}`);
-      if (pdfUp.error) throw new Error(`Archivage du PDF impossible : ${pdfUp.error.message}`);
-
-      // 4. Preuve d'acceptation côté serveur (IP, user-agent, verrouillage)
-      await accept({ data: { devisId, signaturePath, pdfPath } });
-
-      // 5. Email de confirmation client + admin (best-effort, parallèle)
+      // 6. E-mails confirmation client + admin (best-effort)
       try {
-        const email = (devisRow as { email?: string }).email ?? userData.user?.email;
         const prenom = (devisRow as { prenom?: string }).prenom ?? "";
         const nom = (devisRow as { nom?: string }).nom ?? "";
         const sends: Promise<unknown>[] = [
           sendTransactionalEmail({
             templateName: "devis-accepte-admin",
             idempotencyKey: `admin-devis-accepte-${devisId}-v${version}`,
-            templateData: { prenom, nom, email: email ?? "", numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
+            templateData: { prenom, nom, email, numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
           }),
-          import("@/lib/push/notify.functions").then(m => m.pushToAdmins({ data: { payload: {
-            title: "Devis signé",
-            body: `${prenom} ${nom} • ${numero} • ${prixTtc.toFixed(2)} €`,
-            url: "/admin/devis",
-            tag: `devis-signe-${devisId}`,
-          } } })).catch(() => {}),
         ];
         if (email) {
           sends.unshift(sendTransactionalEmail({
@@ -140,25 +240,96 @@ export function DevisAcceptationStep({
           }));
         }
         await Promise.allSettled(sends);
-      } catch {
-        // l'email ne doit jamais bloquer l'acceptation
-      }
+      } catch { /* best-effort */ }
 
-
-      toast.success("Devis signé et accepté", {
-        description: "Le PDF signé est archivé dans votre espace. Vous pouvez poursuivre.",
-      });
-      onAccepted();
+      setPhase("success");
+      toast.success("Devis signé", { description: "Signature validée et archivée." });
+      setTimeout(() => onAccepted(), 900);
     } catch (e) {
-      toast.error("Acceptation impossible", { description: (e as Error).message });
-      setPhase("signature");
+      toast.error("Signature impossible", { description: (e as Error).message });
+      setPhase("otp");
+    } finally {
+      setVerifying(false);
     }
   };
+
+  const submitRefus = async () => {
+    setPhase("processing");
+    try {
+      await refuse({ data: { devisId, motif: refusMotif.trim() || undefined } });
+      setPhase("refused");
+      toast.success("Devis refusé", { description: "Nous avons enregistré votre refus." });
+    } catch (e) {
+      toast.error("Refus impossible", { description: (e as Error).message });
+      setPhase("refuse");
+    }
+  };
+
+  // Téléchargement du PDF signé depuis storage
+  const downloadSignedPdf = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Session expirée");
+      const { data: devisRow } = await supabase.from("devis").select("version").eq("id", devisId).single();
+      const version = (devisRow as { version?: number } | null)?.version ?? 1;
+      const path = `${uid}/${devisId}/v${version}-devis-signe.pdf`;
+      const { data, error } = await supabase.storage.from("devis-acceptes").createSignedUrl(path, 3600);
+      if (error || !data) throw new Error("Téléchargement indisponible");
+      window.open(data.signedUrl, "_blank", "noopener");
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    }
+  };
+
+  /* ------------------------------ RENDER ---------------------------------- */
 
   if (phase === "processing") {
     return (
       <div className="py-10">
-        <LogoLoader label="Signature en cours d'enregistrement…" />
+        <LogoLoader label={verifying ? "Vérification du code…" : "Enregistrement en cours…"} />
+      </div>
+    );
+  }
+
+  if (phase === "success") {
+    return (
+      <div className="space-y-4 text-center py-6">
+        <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center">
+          <CheckCircle2 className="text-emerald-400" size={30} />
+        </div>
+        <div>
+          <p className="font-heading text-lg text-cream">Devis {numero} signé</p>
+          <p className="text-xs text-cream/70 mt-1">Un PDF signé a été archivé dans votre espace.</p>
+        </div>
+        <button
+          onClick={downloadSignedPdf}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded border border-primary/40 text-primary text-xs uppercase tracking-wider hover:bg-primary/10"
+        >
+          <FileCheck2 size={14} /> Télécharger le devis signé
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "refused") {
+    return (
+      <div className="space-y-4 text-center py-6">
+        <div className="mx-auto w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center">
+          <XCircle className="text-red-400" size={30} />
+        </div>
+        <div>
+          <p className="font-heading text-lg text-cream">Devis refusé</p>
+          <p className="text-xs text-cream/70 mt-1">
+            Merci pour votre retour. Nous restons à votre disposition si vous souhaitez un nouveau devis.
+          </p>
+        </div>
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 rounded border border-cream/20 text-cream/80 text-xs uppercase tracking-wider hover:text-cream"
+        >
+          Retour
+        </button>
       </div>
     );
   }
@@ -168,15 +339,16 @@ export function DevisAcceptationStep({
       <div className="flex items-start gap-3 p-4 rounded border border-primary/30 bg-primary/5">
         <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
         <div className="text-sm text-cream">
-          <p className="font-semibold text-cream">Acceptation et signature du devis</p>
+          <p className="font-semibold text-cream">Signature électronique par code e-mail</p>
           <p className="text-cream/85 mt-1 text-xs leading-relaxed">
-            Vérifiez le récapitulatif, acceptez les Conditions Générales de Vente puis signez
-            électroniquement. Une preuve d'acceptation horodatée (IP, signature, montant) sera
-            conservée et un PDF figé sera archivé.
+            Vérifiez le récapitulatif, acceptez les CGV puis validez votre devis avec un
+            code à 6 chiffres reçu par e-mail. Horodatage, adresse IP et vérification du
+            code sont archivés comme preuve légale.
           </p>
         </div>
       </div>
 
+      {/* Récapitulatif */}
       <div className="card-premium-light rounded p-4 space-y-3 text-navy">
         <div className="flex items-center justify-between">
           <div>
@@ -232,28 +404,34 @@ export function DevisAcceptationStep({
 
           <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end">
             <button
+              onClick={() => setPhase("refuse")}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-red-500/40 text-red-300 hover:bg-red-500/10 text-xs uppercase tracking-wider"
+            >
+              <XCircle size={14} /> Refuser le devis
+            </button>
+            <button
               onClick={onCancel}
               className="px-4 py-2.5 text-xs uppercase tracking-wider text-cream/70 hover:text-cream rounded border border-cream/20"
             >
               Annuler
             </button>
             <button
-              onClick={() => checked && setPhase("signature")}
-              disabled={!checked}
+              onClick={() => checked && sendCode(false)}
+              disabled={!checked || sending}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <PenLine size={14} />
-              Continuer vers la signature
+              <Mail size={14} />
+              {sending ? "Envoi…" : "Accepter et signer"}
             </button>
           </div>
         </>
       )}
 
-      {phase === "signature" && (
-        <div className="space-y-3">
+      {phase === "otp" && (
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
-              <PenLine size={13} className="text-primary" /> Signez dans le cadre ci-dessous
+              <KeyRound size={13} className="text-primary" /> Saisissez le code reçu
             </p>
             <button
               onClick={() => setPhase("consent")}
@@ -262,14 +440,97 @@ export function DevisAcceptationStep({
               <ArrowLeft size={12} /> Retour
             </button>
           </div>
-          <div className="h-44 rounded overflow-hidden border border-primary/30 bg-white">
-            <SignatureCanvas onValidate={handleSign} />
-          </div>
-          <p className="text-[10px] text-cream/60 leading-relaxed flex items-start gap-1.5">
-            <FileCheck2 size={12} className="text-primary shrink-0 mt-0.5" />
-            En validant votre signature, le devis {numero} sera définitivement accepté pour un montant
-            de {prixTtc.toFixed(2)} € TTC. Date, heure, adresse IP et signature seront archivées comme preuve.
+          <p className="text-xs text-cream/70">
+            Un code à 6 chiffres vient d'être envoyé à <span className="text-cream font-medium">{maskedEmail}</span>.
+            Valable {Math.floor(secondsLeft / 60)} min {String(secondsLeft % 60).padStart(2, "0")}s.
           </p>
+
+          <div className="flex justify-center gap-2 sm:gap-3">
+            {digits.map((d, i) => (
+              <input
+                key={i}
+                ref={(el) => { inputsRef.current[i] = el; }}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete={i === 0 ? "one-time-code" : "off"}
+                maxLength={6}
+                value={d}
+                onChange={(e) => handleDigit(i, e.target.value)}
+                onKeyDown={(e) => handleKey(i, e)}
+                onFocus={(e) => e.target.select()}
+                className="w-11 h-14 sm:w-12 sm:h-16 text-center font-heading text-2xl bg-navy-dark/60 border border-primary/40 rounded text-cream focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            <button
+              onClick={() => sendCode(true)}
+              disabled={!canResend}
+              className="inline-flex items-center gap-1 text-primary hover:text-gold-light disabled:text-cream/40 disabled:cursor-not-allowed"
+            >
+              <RotateCw size={12} />
+              {canResend
+                ? "Renvoyer le code"
+                : `Renvoyer dans ${Math.max(0, Math.ceil((resendAt - now) / 1000))}s`}
+            </button>
+            <span className="text-cream/50">Le code expire dans {secondsLeft}s</span>
+          </div>
+
+          <button
+            onClick={submitCode}
+            disabled={digits.join("").length !== 6}
+            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ShieldCheck size={14} /> Valider et signer le devis
+          </button>
+
+          <p className="text-[10px] text-cream/55 leading-relaxed flex items-start gap-1.5">
+            <FileCheck2 size={12} className="text-primary shrink-0 mt-0.5" />
+            En validant, le devis {numero} sera définitivement accepté pour un montant de {prixTtc.toFixed(2)} € TTC.
+            Adresse IP, date/heure et code OTP vérifié seront archivés comme preuve.
+          </p>
+        </div>
+      )}
+
+      {phase === "refuse" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
+              <XCircle size={13} className="text-red-400" /> Refuser le devis
+            </p>
+            <button
+              onClick={() => setPhase("consent")}
+              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+            >
+              <ArrowLeft size={12} /> Retour
+            </button>
+          </div>
+          <label className="block text-xs text-cream/70">
+            Motif (facultatif, 500 caractères max)
+            <textarea
+              value={refusMotif}
+              maxLength={500}
+              onChange={(e) => setRefusMotif(e.target.value)}
+              rows={3}
+              placeholder="Ex : prix, délai, choix d'un autre prestataire…"
+              className="mt-1 w-full rounded border border-cream/20 bg-navy-dark/60 text-cream text-sm p-2 focus:outline-none focus:border-primary"
+            />
+          </label>
+          <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end">
+            <button
+              onClick={() => setPhase("consent")}
+              className="px-4 py-2 rounded border border-cream/20 text-cream/70 hover:text-cream text-xs uppercase tracking-wider"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={submitRefus}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-red-500/90 text-white text-xs uppercase tracking-wider hover:bg-red-500"
+            >
+              <XCircle size={14} /> Confirmer le refus
+            </button>
+          </div>
         </div>
       )}
 

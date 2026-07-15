@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
-  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye,
+  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
@@ -28,6 +28,8 @@ function AdminDevisDetailPage() {
   const navigate = useNavigate();
   const [devis, setDevis] = useState<any | null>(null);
   const [acceptation, setAcceptation] = useState<any | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [otpEvents, setOtpEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -109,6 +111,28 @@ function AdminDevisDetailPage() {
       }
     } else {
       setAcceptation(null);
+    }
+
+    // Historique (statuts) + envois OTP — non bloquant
+    try {
+      const [{ data: hist }, { data: otp }] = await Promise.all([
+        supabase
+          .from("devis_status_history")
+          .select("id, old_statut, new_statut, note, created_at")
+          .eq("devis_id", enriched.id)
+          .order("created_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("devis_otp_challenges")
+          .select("id, email, method, attempts, expires_at, consumed_at, created_at, ip_address")
+          .eq("devis_id", enriched.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
+      setHistory(hist ?? []);
+      setOtpEvents(otp ?? []);
+    } catch {
+      setHistory([]); setOtpEvents([]);
     }
 
     setLoading(false);
@@ -258,17 +282,30 @@ function AdminDevisDetailPage() {
           {acceptation && (
             <Card>
               <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3 flex items-center gap-2">
-                <PenLine size={12} /> Signature client
+                <ShieldCheck size={12} /> Preuves de signature
               </p>
               <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck size={14} className="text-green-500" />
-                <span className="text-sm text-pro-text">Devis signé électroniquement</span>
+                <Badge tone="success">Signé</Badge>
+                {acceptation.validation_method === "email_otp" ? (
+                  <Badge tone="info"><KeyRound size={10} className="inline mr-1" />Code e-mail</Badge>
+                ) : (
+                  <Badge tone="neutral"><PenLine size={10} className="inline mr-1" />Signature manuscrite</Badge>
+                )}
               </div>
-              <div className="space-y-1 text-xs text-pro-text-soft mb-3">
-                <p>Le {new Date(acceptation.accepted_at).toLocaleString("fr-FR")}</p>
-                <p>IP : {acceptation.ip_address || "—"}</p>
-                <p>CGV : {acceptation.cgv_version || "—"}</p>
-              </div>
+              <dl className="space-y-1.5 text-xs text-pro-text-soft mb-3">
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">Date</dt><dd className="text-pro-text text-right">{new Date(acceptation.accepted_at).toLocaleString("fr-FR")}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">E-mail vérifié</dt><dd className="text-pro-text text-right break-all">{acceptation.client_email || "—"}</dd></div>
+                {acceptation.otp_sent_at && (
+                  <div className="flex justify-between gap-3"><dt className="text-pro-muted">Code envoyé</dt><dd className="text-pro-text text-right">{new Date(acceptation.otp_sent_at).toLocaleString("fr-FR")}</dd></div>
+                )}
+                {acceptation.otp_verified_at && (
+                  <div className="flex justify-between gap-3"><dt className="text-pro-muted">Code vérifié</dt><dd className="text-pro-text text-right">{new Date(acceptation.otp_verified_at).toLocaleString("fr-FR")}</dd></div>
+                )}
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">Adresse IP</dt><dd className="text-pro-text text-right font-mono">{acceptation.ip_address || "—"}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">Navigateur</dt><dd className="text-pro-text text-right truncate max-w-[180px]" title={acceptation.user_agent ?? undefined}>{acceptation.user_agent ? acceptation.user_agent.slice(0, 40) + (acceptation.user_agent.length > 40 ? "…" : "") : "—"}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">Montant accepté</dt><dd className="text-pro-text text-right">{Number(acceptation.montant_accepte).toFixed(2)} €</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-pro-muted">CGV</dt><dd className="text-pro-text text-right">{acceptation.cgv_version || "—"}</dd></div>
+              </dl>
               {acceptation._signedUrls?.signature && (
                 <img src={acceptation._signedUrls.signature} alt="Signature client" className="max-h-24 mb-3 border border-pro-border rounded" />
               )}
@@ -284,6 +321,56 @@ function AdminDevisDetailPage() {
                   </Button>
                 )}
               </div>
+            </Card>
+          )}
+
+          {devis.statut === "refuse" && (
+            <Card>
+              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3 flex items-center gap-2">
+                <XCircle size={12} className="text-red-500" /> Devis refusé
+              </p>
+              <div className="space-y-1.5 text-xs text-pro-text-soft">
+                {devis.refused_at && (
+                  <p><span className="text-pro-muted">Refusé le </span><span className="text-pro-text">{new Date(devis.refused_at).toLocaleString("fr-FR")}</span></p>
+                )}
+                {devis.refus_motif ? (
+                  <p className="italic text-pro-text mt-2 p-2 rounded bg-red-500/5 border border-red-500/20">"{devis.refus_motif}"</p>
+                ) : (
+                  <p className="text-pro-muted">Aucun motif communiqué.</p>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {(otpEvents.length > 0 || history.length > 0) && (
+            <Card>
+              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3 flex items-center gap-2">
+                <Clock size={12} /> Historique
+              </p>
+              <ul className="space-y-2 text-xs">
+                {history.map((h) => (
+                  <li key={`h-${h.id}`} className="flex items-start gap-2">
+                    <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-pro-accent shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-pro-text">Statut : <span className="font-medium">{h.new_statut}</span>{h.old_statut ? ` (depuis ${h.old_statut})` : ""}</p>
+                      <p className="text-pro-muted">{new Date(h.created_at).toLocaleString("fr-FR")}</p>
+                      {h.note && <p className="italic text-pro-text-soft mt-0.5">"{h.note}"</p>}
+                    </div>
+                  </li>
+                ))}
+                {otpEvents.map((o) => (
+                  <li key={`o-${o.id}`} className="flex items-start gap-2">
+                    <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-pro-text">
+                        Code {o.method} envoyé à <span className="font-mono">{o.email}</span>
+                        {o.consumed_at ? " · vérifié" : o.attempts > 0 ? ` · ${o.attempts} tentative(s)` : ""}
+                      </p>
+                      <p className="text-pro-muted">{new Date(o.created_at).toLocaleString("fr-FR")}{o.ip_address ? ` · ${o.ip_address}` : ""}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </Card>
           )}
 

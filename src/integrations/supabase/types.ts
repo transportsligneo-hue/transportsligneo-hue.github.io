@@ -1057,6 +1057,7 @@ export type Database = {
           prix_estime: number
           prix_retour: number | null
           recuperation_retour_identique: boolean
+          refus_motif: string | null
           refused_at: string | null
           regime_snapshot: string | null
           sent_at: string | null
@@ -1133,6 +1134,7 @@ export type Database = {
           prix_estime: number
           prix_retour?: number | null
           recuperation_retour_identique?: boolean
+          refus_motif?: string | null
           refused_at?: string | null
           regime_snapshot?: string | null
           sent_at?: string | null
@@ -1209,6 +1211,7 @@ export type Database = {
           prix_estime?: number
           prix_retour?: number | null
           recuperation_retour_identique?: boolean
+          refus_motif?: string | null
           refused_at?: string | null
           regime_snapshot?: string | null
           sent_at?: string | null
@@ -1252,10 +1255,13 @@ export type Database = {
           ip_address: string | null
           metadata: Json
           montant_accepte: number
+          otp_sent_at: string | null
+          otp_verified_at: string | null
           pdf_url: string | null
           signature_url: string | null
           statut: string
           user_agent: string | null
+          validation_method: string
         }
         Insert: {
           accepted_at?: string
@@ -1269,10 +1275,13 @@ export type Database = {
           ip_address?: string | null
           metadata?: Json
           montant_accepte: number
+          otp_sent_at?: string | null
+          otp_verified_at?: string | null
           pdf_url?: string | null
           signature_url?: string | null
           statut?: string
           user_agent?: string | null
+          validation_method?: string
         }
         Update: {
           accepted_at?: string
@@ -1286,14 +1295,73 @@ export type Database = {
           ip_address?: string | null
           metadata?: Json
           montant_accepte?: number
+          otp_sent_at?: string | null
+          otp_verified_at?: string | null
           pdf_url?: string | null
           signature_url?: string | null
           statut?: string
           user_agent?: string | null
+          validation_method?: string
         }
         Relationships: [
           {
             foreignKeyName: "devis_acceptations_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_otp_challenges: {
+        Row: {
+          attempts: number
+          client_user_id: string
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          devis_id: string
+          email: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          max_attempts: number
+          method: string
+          user_agent: string | null
+        }
+        Insert: {
+          attempts?: number
+          client_user_id: string
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          devis_id: string
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          max_attempts?: number
+          method?: string
+          user_agent?: string | null
+        }
+        Update: {
+          attempts?: number
+          client_user_id?: string
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          devis_id?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          max_attempts?: number
+          method?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_otp_challenges_devis_id_fkey"
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
