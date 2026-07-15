@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Client sees own OTP challenges" ON public.devis_otp_challenges;
