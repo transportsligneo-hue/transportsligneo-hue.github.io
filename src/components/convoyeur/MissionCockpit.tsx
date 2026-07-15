@@ -22,6 +22,8 @@ import {
   AlertTriangle,
   Lock,
   Send,
+  Zap,
+  Fuel,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
@@ -80,6 +82,9 @@ interface Props {
   onUpdated: () => Promise<void> | void;
   forceOpenSelfie?: boolean;
   onSelfieModalStateChange?: (open: boolean) => void;
+  missionNumber?: string | null;
+  vehiculeEnergie?: string | null;
+  vehiculeType?: string | null;
 }
 
 export function MissionCockpit({
@@ -96,6 +101,9 @@ export function MissionCockpit({
   onUpdated,
   forceOpenSelfie = false,
   onSelfieModalStateChange,
+  missionNumber,
+  vehiculeEnergie,
+  vehiculeType,
 }: Props) {
   const gates = useMissionGates(attributionId);
   const [busy, setBusy] = useState(false);
@@ -103,6 +111,7 @@ export function MissionCockpit({
   const [openIncident, setOpenIncident] = useState(false);
   const [openSignatureArrivee, setOpenSignatureArrivee] = useState(false);
   const [signaturesArriveeDone, setSignaturesArriveeDone] = useState(false);
+  const [checklistDone, setChecklistDone] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
@@ -432,6 +441,20 @@ export function MissionCockpit({
 
           .mv3-glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px);
             border: 1px solid rgba(120,180,255,0.12); border-radius: 20px; padding: 16px; position: relative; overflow: hidden; }
+          .mv3-card-row { display: flex; align-items: center; justify-content: space-between; }
+          .mv3-card-title { font-size: 13px; font-weight: 700; }
+          .mv3-pill-count { font-size: 10px; font-weight: 800; color: #2FD8FF; background: rgba(47,216,255,0.1);
+            padding: 3px 9px; border-radius: 20px; border: 1px solid rgba(47,216,255,0.25); }
+          .mv3-checklist { margin-top: 12px; width: 100%; display: flex; align-items: center; gap: 10px;
+            background: rgba(47,216,255,0.07); border: 1px solid rgba(47,216,255,0.26); border-radius: 14px;
+            padding: 13px; color: #F3F5F9; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; text-align: left; }
+          .mv3-checklist.done { background: rgba(52,232,176,0.1); border-color: rgba(52,232,176,0.4); }
+          .mv3-checklist .mv3-check-icon { color: #2FD8FF; flex-shrink: 0; }
+          .mv3-check-box { width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center; color: #34E8B0; flex-shrink: 0; }
+          .mv3-checklist.done .mv3-check-box { background: #34E8B0; border-color: #34E8B0; color: #06070C; }
+          .mv3-meta-row { display: flex; gap: 18px; margin-top: 12px; font-size: 11px; color: #7C859C; }
+          .mv3-meta-row b { color: #C7CCDA; }
           .mv3-next-glow { position: absolute; top: -50px; right: -50px; width: 160px; height: 160px; border-radius: 50%;
             background: radial-gradient(circle, rgba(47,216,255,0.18), transparent 70%); }
           .mv3-badge-ring { position: relative; flex-shrink: 0; }
@@ -495,7 +518,7 @@ export function MissionCockpit({
         <div className="mv3-hero">
           <div className="mv3-hero-mesh" />
           <div className="mv3-hero-head">
-            <div className="mv3-eyebrow">Mission convoyeur</div>
+            <div className="mv3-eyebrow">Mission convoyeur · {missionNumber ?? "—"}</div>
             <div className="mv3-live-pill">
               <span className="mv3-live-dot" />
               {isDone ? "Envoyée" : currentDef.short}
@@ -549,8 +572,36 @@ export function MissionCockpit({
           </svg>
         </div>
 
-        {/* PANE : next-card avec CTA = libellé étape */}
+        {/* PANE : À faire (checklist énergie) + next-card avec CTA = libellé étape */}
         <div className="mv3-pane">
+          {!isDone && (() => {
+            const energie = (vehiculeEnergie ?? "").toLowerCase();
+            const isElectric = energie.includes("élect") || energie.includes("elect") || energie.includes("hybr");
+            const taskLabel = isElectric ? "Brancher pour le trajet" : "Vérifier le niveau de carburant";
+            const TaskIcon = isElectric ? Zap : Fuel;
+            return (
+              <div className="mv3-glass">
+                <div className="mv3-card-row">
+                  <span className="mv3-card-title">À faire sur cette mission</span>
+                  <span className="mv3-pill-count">{checklistDone ? 1 : 0}/1</span>
+                </div>
+                <button
+                  type="button"
+                  className={`mv3-checklist ${checklistDone ? "done" : ""}`}
+                  onClick={() => setChecklistDone((v) => !v)}
+                >
+                  <span className="mv3-check-box">{checklistDone && <Check size={13} strokeWidth={3} />}</span>
+                  <TaskIcon size={15} className="mv3-check-icon" />
+                  <span>{taskLabel}</span>
+                </button>
+                <div className="mv3-meta-row">
+                  {vehiculeType && <span>Type <b>{vehiculeType}</b></span>}
+                  {vehiculeEnergie && <span>Énergie <b>{vehiculeEnergie}</b></span>}
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="mv3-glass" style={{ paddingTop: 16 }}>
             <div className="mv3-next-glow" />
 
