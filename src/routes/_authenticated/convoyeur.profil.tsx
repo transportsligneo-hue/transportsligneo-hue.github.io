@@ -18,7 +18,6 @@ function ConvoyeurProfil() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
   const [statut, setStatut] = useState<string>("en_attente");
-  const [typeConv, setTypeConv] = useState<string>("independant");
 
   const [form, setForm] = useState({
     prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "",
@@ -34,14 +33,13 @@ function ConvoyeurProfil() {
     (async () => {
       const { data } = await supabase
         .from("convoyeurs")
-        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut, type_convoyeur")
+        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
       if (data) {
         setConvoyeurId(data.id);
         setStatut(data.statut ?? "en_attente");
-        setTypeConv(data.type_convoyeur ?? "independant");
         setForm({
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
@@ -109,7 +107,7 @@ function ConvoyeurProfil() {
             {statutLabel[statut] ?? statut}
           </span>
           <span className="text-pro-muted text-[10px] uppercase tracking-wider font-medium">
-            {typeConv === "independant" ? "Indépendant" : "Salarié"}
+            Indépendant
           </span>
           <PushNotificationToggle />
         </div>

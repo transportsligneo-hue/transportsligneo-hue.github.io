@@ -10,15 +10,15 @@ Ce chantier est très large (12 blocs fonctionnels majeurs). Pour tenir la règl
 - Composant scanner mobile : détection bords + correction perspective + amélioration luminosité (via `scanner`/wasm côté client).
 
 ## Lot 2 — Centre de validation admin
-- Refonte de `admin.convoyeurs.$convoyeurId` : vue dossier complet avec onglets (Identité, Documents, Formation, Missions, Avis, Historique).
-- Actions par document : zoom, télécharger, comparer versions, valider/refuser + motif, redemander, historique des versions.
-- Validation globale du profil + bypass manuel par étape.
+- En cours : `admin.convoyeurs.$convoyeurId` est structuré en onglets avec dossier complet, documents, missions, disponibilité, activité et formation.
+- En cours : actions documentaires déjà disponibles dans le centre de validation ; ajout du suivi formation et du bypass manuel.
+- À poursuivre : historique de versions documentaire avancé et comparaison visuelle.
 - Sur validation : email + notif in-app + push + (SMS si activé).
 
 ## Lot 3 — Formation obligatoire
-- Nouvelle table `formation_modules`, `formation_progress`, `formation_quiz_attempts`.
-- Écran `/convoyeur/formation` avec modules (vidéo/texte/quiz), score minimum 80 %.
-- Gate : `has_completed_training` bloque la prise de mission (catalogue + attribution directe).
+- Livré : tables `formation_modules`, `formation_progress`, `formation_quiz_attempts`.
+- Livré : écran `/convoyeur/formation` avec modules et quiz à 80 % minimum.
+- Livré : gate `has_completed_training` côté catalogue, enchères et fonctions d'acceptation.
 
 ## Lot 4 — Niveaux & avis clients
 - Système Débutant/Confirmé/Expert calculé depuis missions, ponctualité, avis, incidents.

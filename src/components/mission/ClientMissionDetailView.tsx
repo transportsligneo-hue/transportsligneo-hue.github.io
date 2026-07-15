@@ -150,7 +150,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
       const { data: fact } = await supabase
         .from("factures")
-        .select("id, numero, prix_ttc, statut, pdf_url, date_facture")
+        .select("id, numero, prix_ttc, statut, pdf_url, date_facture, mode_paiement")
         .eq("mission_id", missionId)
         .order("created_at", { ascending: false })
         .maybeSingle();
@@ -464,7 +464,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
                 {facture.date_facture ? new Date(facture.date_facture).toLocaleDateString("fr-FR") : "—"}
                 {" · "}
                 <span className={facture.statut === "payee" ? "text-[#22C55E] font-semibold" : "text-[#F59E0B] font-semibold"}>
-                  {facture.statut === "payee" ? "Payée" : "À régler"}
+                  {facture.statut === "payee" ? "Payée" : /virement|diff[ée]r|30|60|90/i.test((facture as { mode_paiement?: string | null }).mode_paiement ?? "") ? "Virement différé" : "À régler"}
                 </span>
               </p>
             </div>

@@ -69,6 +69,8 @@ const factureStatutPill: Record<string, { label: string; cls: string }> = {
   annulee: { label: "Annulée", cls: "bg-slate-100 text-slate-500" },
 };
 
+const isDeferredPayment = (mode?: string | null) => /virement|diff[ée]r|30|60|90/i.test(mode ?? "");
+
 function ProDocuments() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"devis" | "factures">("devis");
@@ -373,7 +375,8 @@ function ProDocuments() {
                   </thead>
                   <tbody>
                     {filteredFactures.map((f) => {
-                      const st = factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
+                      const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
+                      const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
@@ -397,7 +400,7 @@ function ProDocuments() {
                           </td>
                           <td className="px-5 py-3 text-right">
                             <div className="inline-flex items-center gap-1.5 justify-end">
-                              {(f.statut === "emise" || f.statut === "en_retard") && (
+                              {(f.statut === "emise" || f.statut === "en_retard") && !deferred && (
                                 <button
                                   onClick={() => setPayingFactureId(f.id)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"

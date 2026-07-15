@@ -733,6 +733,7 @@ export type Database = {
           created_at: string
           disponibilite: string | null
           email: string
+          has_completed_training: boolean
           id: string
           message: string | null
           nom: string
@@ -743,6 +744,8 @@ export type Database = {
           prenom: string
           statut: string
           telephone: string
+          training_completed_at: string | null
+          training_status: string
           type_convoyeur: string
           updated_at: string
           user_id: string
@@ -754,6 +757,7 @@ export type Database = {
           created_at?: string
           disponibilite?: string | null
           email: string
+          has_completed_training?: boolean
           id?: string
           message?: string | null
           nom: string
@@ -764,6 +768,8 @@ export type Database = {
           prenom: string
           statut?: string
           telephone: string
+          training_completed_at?: string | null
+          training_status?: string
           type_convoyeur?: string
           updated_at?: string
           user_id: string
@@ -775,6 +781,7 @@ export type Database = {
           created_at?: string
           disponibilite?: string | null
           email?: string
+          has_completed_training?: boolean
           id?: string
           message?: string | null
           nom?: string
@@ -785,6 +792,8 @@ export type Database = {
           prenom?: string
           statut?: string
           telephone?: string
+          training_completed_at?: string | null
+          training_status?: string
           type_convoyeur?: string
           updated_at?: string
           user_id?: string
@@ -1648,6 +1657,153 @@ export type Database = {
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_modules: {
+        Row: {
+          content_body: string | null
+          content_type: string
+          content_url: string | null
+          created_at: string
+          description: string | null
+          estimated_minutes: number
+          id: string
+          is_active: boolean
+          minimum_score: number
+          quiz_questions: Json
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_body?: string | null
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_active?: boolean
+          minimum_score?: number
+          quiz_questions?: Json
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_body?: string | null
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          is_active?: boolean
+          minimum_score?: number
+          quiz_questions?: Json
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      formation_progress: {
+        Row: {
+          completed_at: string | null
+          convoyeur_id: string
+          created_at: string
+          id: string
+          last_seen_at: string
+          module_id: string
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          convoyeur_id: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          module_id: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          convoyeur_id?: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          module_id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_progress_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "formation_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_quiz_attempts: {
+        Row: {
+          answers: Json
+          convoyeur_id: string
+          created_at: string
+          id: string
+          module_id: string
+          passed: boolean
+          score: number
+        }
+        Insert: {
+          answers?: Json
+          convoyeur_id: string
+          created_at?: string
+          id?: string
+          module_id: string
+          passed?: boolean
+          score: number
+        }
+        Update: {
+          answers?: Json
+          convoyeur_id?: string
+          created_at?: string
+          id?: string
+          module_id?: string
+          passed?: boolean
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_quiz_attempts_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_quiz_attempts_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "formation_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -3736,6 +3892,10 @@ export type Database = {
           regime: string
         }[]
       }
+      has_completed_driver_training: {
+        Args: { _user_id?: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3798,6 +3958,10 @@ export type Database = {
       }
       recalculate_company_score: {
         Args: { _company_id: string }
+        Returns: undefined
+      }
+      refresh_convoyeur_training_status: {
+        Args: { _convoyeur_id: string }
         Returns: undefined
       }
       resolve_client_pricing_rule: {

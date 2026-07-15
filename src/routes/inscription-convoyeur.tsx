@@ -423,7 +423,7 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Email" value={form.email} />
                 <RecapRow label="Téléphone" value={form.telephone} />
                 <RecapRow label="Ville" value={form.ville || "—"} />
-                <RecapRow label="Statut" value={form.type_convoyeur === "independant" ? "Indépendant" : "Salarié"} />
+                <RecapRow label="Statut" value="Indépendant" />
                 <RecapRow label="Disponibilité" value={form.disponibilite || "—"} />
                 <RecapRow label="N° permis" value={form.permis_numero} />
                 <RecapRow label="Années d'expérience" value={form.annees_experience} />

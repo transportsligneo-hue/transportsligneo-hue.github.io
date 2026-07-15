@@ -46,6 +46,7 @@ function isRecent(iso: string | null) { return iso ? Date.now() - new Date(iso).
 function ConvoyeurCatalogue() {
   const { user, convoyeurStatut } = useAuth();
   const validated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
+  const [hasTraining, setHasTraining] = useState(false);
   const [trajets, setTrajets] = useState<CatalogTrajet[]>([]);
   const [myOffers, setMyOffers] = useState<Record<string, MyOffer>>({});
   const [loading, setLoading] = useState(true);
@@ -61,8 +62,12 @@ function ConvoyeurCatalogue() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle()
-      .then(({ data }) => setConvoyeurId((data as { id?: string } | null)?.id ?? null));
+    supabase.from("convoyeurs").select("id, has_completed_training").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => {
+        const row = data as { id?: string; has_completed_training?: boolean } | null;
+        setConvoyeurId(row?.id ?? null);
+        setHasTraining(Boolean(row?.has_completed_training));
+      });
   }, [user]);
 
   const fetchData = async () => {
@@ -131,6 +136,10 @@ function ConvoyeurCatalogue() {
     if (!openId) return;
     const t = trajets.find((x) => x.id === openId);
     if (!t) return;
+    if (!hasTraining) {
+      toast.error("Formation obligatoire à terminer avant de candidater.");
+      return;
+    }
     const suggested = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
     const val = prix ? Number(prix) : suggested;
     if (!Number.isFinite(val) || val <= 0) { toast.error("Prix invalide"); return; }
@@ -160,6 +169,8 @@ function ConvoyeurCatalogue() {
     );
   }
 
+  const canApply = validated && hasTraining;
+
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -171,6 +182,14 @@ function ConvoyeurCatalogue() {
             Missions publiques disponibles. Postulez au tarif proposé ou faites une contre-offre.
           </p>
         </div>
+        {!hasTraining && (
+          <Link
+            to="/convoyeur/formation"
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 hover:bg-amber-100 transition-colors"
+          >
+            <strong>Formation obligatoire à finaliser.</strong> Terminez les modules avant de postuler aux missions.
+          </Link>
+        )}
         <div className="text-xs text-pro-muted flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Temps réel
         </div>
@@ -260,8 +279,10 @@ function ConvoyeurCatalogue() {
                       <div className="text-[10px] text-pro-muted mt-1">{mine.prix_propose.toFixed(0)} €</div>
                     </div>
                   ) : (
-                    <button onClick={() => openMission(t)}
-                      className="px-4 py-2 rounded-lg bg-pro-brand-strip text-white text-sm font-semibold hover:opacity-90 flex items-center gap-1.5">
+                    <button onClick={() => canApply ? openMission(t) : toast.error("Formation obligatoire à terminer avant de candidater.")}
+                      className="px-4 py-2 rounded-lg bg-pro-brand-strip text-white text-sm font-semibold hover:opacity-90 flex items-center gap-1.5 disabled:opacity-50"
+                      disabled={!canApply}
+                      title={!canApply ? "Formation obligatoire" : undefined}>
                       <Send size={14} /> Postuler
                     </button>
                   )}

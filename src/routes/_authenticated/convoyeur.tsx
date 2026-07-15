@@ -10,6 +10,7 @@ import {
   Loader2,
   Gavel,
   Sparkles,
+  GraduationCap,
 } from "lucide-react";
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur")({
 
 const navItems: ConvoyeurSidebarItem[] = [
   { to: "/convoyeur", label: "Tableau de bord", shortLabel: "Accueil", icon: LayoutDashboard, exact: true },
+  { to: "/convoyeur/formation", label: "Formation", shortLabel: "Formation", icon: GraduationCap },
   { to: "/convoyeur/catalogue", label: "Catalogue missions", shortLabel: "Catalogue", icon: Sparkles },
   { to: "/convoyeur/disponibles", label: "Enchères / dispo", shortLabel: "Enchères", icon: Gavel },
   { to: "/convoyeur/missions", label: "Mes missions", shortLabel: "Mes missions", icon: Truck },

@@ -93,8 +93,8 @@ export default function Tarifs() {
             <div className="space-y-3 text-sm">
               {[
                 ["Livraison hors horaires / week-end / express (24h)", "+20 %"],
-                ["Lavage intérieur", "29,90 €"],
-                ["Lavage intérieur + extérieur", "79,90 €"],
+                ["Lavage intérieur", "Sur devis"],
+                ["Lavage intérieur + extérieur", "Sur devis"],
               ].map(([label, price], i) => (
                 <div key={i} className="flex justify-between items-center border-b border-primary/10 pb-2 last:border-0">
                   <span className="text-cream/75">{label}</span>
@@ -113,8 +113,7 @@ export default function Tarifs() {
               <li>Péages et carburant inclus pour le transport</li>
               <li>Possibilité d'effectuer le plein (voir option)</li>
               <li>Lavage extérieur offert pour toute livraison de plus de 200 kilomètres</li>
-              <li>Stockage de vos véhicules : <span className="text-primary">5,90 €/jour</span></li>
-              <li>À partir de 3 jours : <span className="text-primary">3 €/jour</span> supplémentaire (hors utilitaires et poids lourds)</li>
+              <li>Stockage de vos véhicules : <span className="text-primary">Sur devis</span></li>
             </ul>
           </div>
         </div>
