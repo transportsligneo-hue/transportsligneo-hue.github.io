@@ -347,19 +347,32 @@ function ProDocuments() {
                           )}
                         </td>
                         <td className="px-5 py-3 text-right">
-                          {d.statut === "accepte" && !d.paid_at ? (
-                            <button
-                              onClick={() => setPayingId(d.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
-                            >
-                              <CreditCard size={13} /> Payer
-                            </button>
-                          ) : d.paid_at ? (
-                            <span className="text-emerald-600 text-xs font-medium">Payé</span>
-                          ) : (
-                            <span className="text-pro-muted text-xs">—</span>
-                          )}
+                          <div className="inline-flex items-center gap-2 justify-end">
+                            {d.statut === "accepte" && !d.paid_at ? (
+                              <button
+                                onClick={() => setPayingId(d.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                              >
+                                <CreditCard size={13} /> Payer
+                              </button>
+                            ) : d.paid_at ? (
+                              <span className="text-emerald-600 text-xs font-medium">Payé</span>
+                            ) : null}
+                            {canBeClosed(d) && (
+                              <button
+                                onClick={() => { setClosingDevis(d); setClosingReason(""); }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-pro-border text-pro-text-soft text-xs font-medium rounded hover:bg-pro-bg-soft transition-colors"
+                                title="Clôturer ce devis obsolète"
+                              >
+                                <CheckCircle2 size={13} /> Marquer comme traité
+                              </button>
+                            )}
+                            {!canBeClosed(d) && !d.paid_at && d.statut !== "accepte" && (
+                              <span className="text-pro-muted text-xs">—</span>
+                            )}
+                          </div>
                         </td>
+
                       </tr>
                     );
                   })}
