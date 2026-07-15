@@ -14,7 +14,14 @@ self.addEventListener('push', (event) => {
     data: { url: payload.url || '/', ...(payload.data || {}) },
     requireInteraction: !!payload.requireInteraction,
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil((async () => {
+    await self.registration.showNotification(title, options);
+    // Diffuse aux onglets ouverts pour l'affichage du bandeau in-app
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clients) {
+      try { c.postMessage({ type: 'push', title, body: options.body, url: options.data.url }); } catch {}
+    }
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
