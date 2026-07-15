@@ -189,13 +189,17 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                     return (
                       <li key={n.id}>
                         {target ? (
-                          <Link
-                            to={target as string}
-                            onClick={() => { markRead(n.id); setOpen(false); }}
-                            className="block"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              markRead(n.id);
+                              setOpen(false);
+                              router.navigate({ to: target as string });
+                            }}
+                            className="block w-full text-left"
                           >
                             {body}
-                          </Link>
+                          </button>
                         ) : (
                           <button onClick={() => markRead(n.id)} className="block w-full">
                             {body}
