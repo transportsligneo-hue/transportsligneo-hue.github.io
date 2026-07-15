@@ -24,7 +24,13 @@ interface DevisRow {
   pdf_url: string | null;
   created_at: string;
   paid_at: string | null;
+  accepted_at: string | null;
+  locked_at: string | null;
+  mission_id: string | null;
+  converted_at: string | null;
+  refused_at: string | null;
 }
+
 
 interface FactureRow {
   id: string;
