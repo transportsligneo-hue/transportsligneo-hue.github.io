@@ -8,6 +8,10 @@ import {
   Truck, CreditCard, FileText, MessageSquare, UserCircle, Settings,
   type LucideIcon,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { formatRelativeTime } from "@/lib/notify";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelativeTime } from "@/lib/notify";
