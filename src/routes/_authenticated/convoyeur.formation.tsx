@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation")({
   component: ConvoyeurFormation,
 });
 
-type QuizQ = { question: string; choices: string[]; answer: number; explanation?: string };
+type QuizQ = { question: string; choices: string[]; answer?: number; explanation?: string };
 type Section =
   | { type: "text"; content: string }
   | { type: "image"; url: string; alt?: string; caption?: string }
@@ -59,20 +59,21 @@ function ConvoyeurFormation() {
     setConvoyeur(conv as Convoyeur);
 
     const [mods, prog, exams, atts, certs] = await Promise.all([
-      supabase.from("formation_modules" as never).select("*" as never).eq("is_active" as never, true as never).order("sort_order" as never, { ascending: true }),
+      supabase.rpc("get_formation_modules_for_driver" as never),
       supabase.from("formation_progress" as never).select("id, module_id, status, score, completed_at" as never).eq("convoyeur_id" as never, conv.id as never),
-      supabase.from("formation_exams" as never).select("*" as never).eq("is_active" as never, true as never).limit(1),
+      supabase.rpc("get_formation_exam_for_driver" as never),
       supabase.from("formation_exam_attempts" as never).select("id, score, passed, finished_at" as never).eq("convoyeur_id" as never, conv.id as never).order("finished_at" as never, { ascending: false }),
       supabase.from("formation_certificates" as never).select("id, certificate_number, full_name, issued_at, verification_token" as never).eq("convoyeur_id" as never, conv.id as never).is("revoked_at" as never, null as never).limit(1),
     ]);
 
-    setModules(((mods.data ?? []) as unknown as Module[]).map(m => ({
+    const modsArr = Array.isArray(mods.data) ? (mods.data as unknown as Module[]) : [];
+    setModules(modsArr.map(m => ({
       ...m,
       quiz_questions: Array.isArray(m.quiz_questions) ? m.quiz_questions : [],
       sections: Array.isArray(m.sections) ? m.sections : [],
     })));
     setProgress((prog.data ?? []) as unknown as Progress[]);
-    setExam(((exams.data ?? [])[0] ?? null) as unknown as Exam | null);
+    setExam((exams.data ?? null) as unknown as Exam | null);
     setAttempts((atts.data ?? []) as unknown as ExamAttempt[]);
     setCertificate((((certs.data ?? [])[0]) ?? null) as unknown as Certificate | null);
     setLoading(false);
@@ -219,7 +220,7 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
   const [phase, setPhase] = useState<"content" | "quiz" | "result">(prog?.status === "completed" ? "content" : "content");
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; review: QuizQ[] } | null>(null);
   const questions = mod.quiz_questions ?? [];
 
   useEffect(() => {
@@ -231,16 +232,12 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
   const submitQuiz = async () => {
     if (questions.some((_, i) => answers[i] == null)) { toast.error("Répondez à toutes les questions."); return; }
     setSaving(true);
-    const correct = questions.filter((q, i) => answers[i] === q.answer).length;
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= mod.minimum_score;
-    await supabase.from("formation_quiz_attempts" as never).insert({ convoyeur_id: convoyeurId, module_id: mod.id, score, passed, answers } as never);
-    if (passed) {
-      await supabase.from("formation_progress" as never).upsert({ convoyeur_id: convoyeurId, module_id: mod.id, status: "completed", score, completed_at: new Date().toISOString(), last_seen_at: new Date().toISOString() } as never, { onConflict: "convoyeur_id,module_id" } as never);
-    }
-    setResult({ score, passed });
-    setPhase("result");
+    const { data, error } = await supabase.rpc("submit_module_quiz" as never, { _module_id: mod.id, _answers: answers } as never);
     setSaving(false);
+    if (error || !data) { toast.error("Erreur lors de la soumission du QCM."); return; }
+    const r = data as unknown as { score: number; passed: boolean; review: QuizQ[] };
+    setResult({ score: r.score, passed: r.passed, review: Array.isArray(r.review) ? r.review : [] });
+    setPhase("result");
   };
 
   const markTextDone = async () => {
@@ -298,12 +295,12 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
               <p className={`text-2xl font-bold ${result.passed ? "text-emerald-700" : "text-red-700"}`}>{result.score}%</p>
               <p className={`text-sm ${result.passed ? "text-emerald-800" : "text-red-800"} mt-1`}>{result.passed ? "Module validé !" : `Score insuffisant — minimum ${mod.minimum_score}%. Revoyez le contenu et recommencez.`}</p>
             </div>
-            {!result.passed && (
+            {!result.passed && result.review.length > 0 && (
               <div className="space-y-3">
-                {questions.map((q, qi) => answers[qi] !== q.answer && (
+                {result.review.map((q, qi) => q.answer != null && answers[qi] !== q.answer && (
                   <div key={qi} className="rounded-lg border border-red-200 bg-white p-3 text-sm">
                     <p className="font-semibold text-pro-text">{q.question}</p>
-                    <p className="text-red-700 mt-1">Votre réponse : {q.choices[answers[qi]]}</p>
+                    <p className="text-red-700 mt-1">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "— (non répondue)"}</p>
                     <p className="text-emerald-700 mt-0.5">Bonne réponse : {q.choices[q.answer]}</p>
                     {q.explanation && <p className="text-pro-text-soft mt-1 text-xs">{q.explanation}</p>}
                   </div>
@@ -328,32 +325,37 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
 /* ============ EXAM VIEW ============ */
 
 function ExamView({ exam, convoyeurId, onBack, onDone }: { exam: Exam; convoyeurId: string; onBack: () => void; onDone: () => void }) {
-  const [questions] = useState(() => shuffle(exam.question_pool).slice(0, exam.question_count));
+  const [selection] = useState(() => {
+    const idxs = Array.from({ length: exam.question_pool.length }, (_, i) => i);
+    return shuffle(idxs).slice(0, exam.question_count);
+  });
+  const questions = useMemo(() => selection.map(i => exam.question_pool[i]), [selection, exam.question_pool]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const startedAt = useRef(Date.now());
   const [remaining, setRemaining] = useState(exam.time_limit_minutes * 60);
   const [phase, setPhase] = useState<"exam" | "result">("exam");
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; questions: QuizQ[] } | null>(null);
+  // Silence unused warning; convoyeurId is authoritative server-side via auth.uid()
+  void convoyeurId;
 
   const submit = async (auto = false) => {
     if (!auto && questions.some((_, i) => answers[i] == null)) {
       if (!confirm("Certaines questions n'ont pas de réponse. Soumettre quand même ?")) return;
     }
     setSaving(true);
-    const correct = questions.filter((q, i) => answers[i] === q.answer).length;
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= exam.minimum_score;
-    const duration = Math.round((Date.now() - startedAt.current) / 1000);
-    await supabase.from("formation_exam_attempts" as never).insert({
-      convoyeur_id: convoyeurId, exam_id: exam.id, score, passed,
-      duration_seconds: duration, questions, answers,
-      started_at: new Date(startedAt.current).toISOString(), finished_at: new Date().toISOString(),
+    const { data, error } = await supabase.rpc("submit_formation_exam" as never, {
+      _exam_id: exam.id,
+      _question_indexes: selection,
+      _answers: answers,
+      _started_at: new Date(startedAt.current).toISOString(),
     } as never);
-    setResult({ score, passed });
-    setPhase("result");
     setSaving(false);
-    if (passed) toast.success("Examen réussi — certificat en cours de délivrance");
+    if (error || !data) { toast.error("Erreur lors de la soumission de l'examen."); return; }
+    const r = data as unknown as { score: number; passed: boolean; questions: QuizQ[] };
+    setResult({ score: r.score, passed: r.passed, questions: Array.isArray(r.questions) ? r.questions : [] });
+    setPhase("result");
+    if (r.passed) toast.success("Examen réussi — certificat en cours de délivrance");
   };
 
   useEffect(() => {
@@ -411,10 +413,10 @@ function ExamView({ exam, convoyeurId, onBack, onDone }: { exam: Exam; convoyeur
           <p className="text-xs text-pro-muted mt-2">Seuil de réussite : {exam.minimum_score}% · Barème : 2 points par question</p>
         </div>
 
-        {!result.passed && (
+        {!result.passed && result.questions.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-pro-text">Questions à revoir ({questions.filter((q, i) => answers[i] !== q.answer).length}) :</p>
-            {questions.map((q, qi) => answers[qi] !== q.answer && (
+            <p className="text-sm font-semibold text-pro-text">Questions à revoir ({result.questions.filter((q, i) => q.answer != null && answers[i] !== q.answer).length}) :</p>
+            {result.questions.map((q, qi) => q.answer != null && answers[qi] !== q.answer && (
               <div key={qi} className="rounded-lg border border-red-200 bg-white p-4 text-sm">
                 <p className="font-semibold text-pro-text">Q{qi + 1}. {q.question}</p>
                 <p className="text-red-700 mt-2">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "— (non répondue)"}</p>

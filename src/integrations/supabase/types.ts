@@ -4051,6 +4051,8 @@ export type Database = {
         }
         Returns: string
       }
+      get_formation_exam_for_driver: { Args: never; Returns: Json }
+      get_formation_modules_for_driver: { Args: never; Returns: Json }
       get_public_pricing_display: {
         Args: never
         Returns: {
@@ -4161,6 +4163,19 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      submit_formation_exam: {
+        Args: {
+          _answers: Json
+          _exam_id: string
+          _question_indexes: number[]
+          _started_at: string
+        }
+        Returns: Json
+      }
+      submit_module_quiz: {
+        Args: { _answers: Json; _module_id: string }
+        Returns: Json
+      }
       verify_certificate: {
         Args: { _token: string }
         Returns: {
