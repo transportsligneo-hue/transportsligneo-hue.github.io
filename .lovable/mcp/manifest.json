@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://gmqsabqwxfsvbnkyzjhk.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "transports-ligneo-mcp",
+      "version": "0.1.0",
+      "title": "Transports Ligneo"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Qui suis-je ?",
+        "description": "Retourne l'identité de l'utilisateur connecté (email, rôle, statut convoyeur/client) sur la plateforme Transports Ligneo.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_missions",
+        "title": "Mes missions",
+        "description": "Liste les missions (attributions) visibles par l'utilisateur connecté. Un convoyeur voit ses missions attribuées ; un client voit celles de ses commandes. Filtre optionnel par statut.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "statut": {
+              "description": "Filtre optionnel sur le statut de la mission (ex. 'en_cours', 'terminee', 'attribuee').",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Nombre max de missions (défaut 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_devis",
+        "title": "Mes devis",
+        "description": "Liste les devis visibles par l'utilisateur connecté (côté client). Filtre optionnel par statut (brouillon, envoye, accepte, refuse, expire).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "statut": {
+              "description": "Filtre optionnel sur le statut du devis.",
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_catalogue",
+        "title": "Catalogue des missions disponibles",
+        "description": "Consulte le catalogue public des missions ouvertes aux convoyeurs indépendants validés. Renvoie les offres visibles selon les règles de la plateforme.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "ville": {
+              "description": "Ville de départ ou d'arrivée (recherche partielle).",
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
