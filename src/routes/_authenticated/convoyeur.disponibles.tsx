@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { NotificationBanner } from "@/components/NotificationBanner";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/disponibles")({
   component: ConvoyeurDisponibles,
@@ -420,6 +421,10 @@ function ConvoyeurDisponibles() {
               <ArrowRight size={16} className="ml-auto self-center text-[#60a5fa]" />
             </a>
           )}
+
+          {/* === BANDEAU NOTIFICATION (push in-app) === */}
+          <NotificationBanner />
+
 
           {/* === MES ENCHÈRES EN COURS === */}
           {(() => {
