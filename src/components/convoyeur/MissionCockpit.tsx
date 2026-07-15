@@ -22,6 +22,8 @@ import {
   AlertTriangle,
   Lock,
   Send,
+  Zap,
+  Fuel,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
