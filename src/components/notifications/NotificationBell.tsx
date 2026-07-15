@@ -124,7 +124,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
           <div
             role="dialog"
             aria-label="Panneau des notifications"
-            className="absolute right-0 top-12 z-50 w-[380px] max-w-[94vw] rounded-2xl border border-white/10 bg-[#0b1230]/95 backdrop-blur-xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden motion-safe:animate-[scale-in_0.18s_ease-out]"
+            className="fixed left-2 right-2 top-16 z-50 w-auto max-w-none sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[380px] sm:max-w-[94vw] rounded-2xl border border-white/10 bg-[#0b1230]/95 backdrop-blur-xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden motion-safe:animate-[scale-in_0.18s_ease-out]"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
               <div className="flex items-center gap-2">
