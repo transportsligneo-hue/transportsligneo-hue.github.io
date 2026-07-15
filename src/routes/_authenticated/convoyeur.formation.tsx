@@ -59,20 +59,21 @@ function ConvoyeurFormation() {
     setConvoyeur(conv as Convoyeur);
 
     const [mods, prog, exams, atts, certs] = await Promise.all([
-      supabase.from("formation_modules" as never).select("*" as never).eq("is_active" as never, true as never).order("sort_order" as never, { ascending: true }),
+      supabase.rpc("get_formation_modules_for_driver" as never),
       supabase.from("formation_progress" as never).select("id, module_id, status, score, completed_at" as never).eq("convoyeur_id" as never, conv.id as never),
-      supabase.from("formation_exams" as never).select("*" as never).eq("is_active" as never, true as never).limit(1),
+      supabase.rpc("get_formation_exam_for_driver" as never),
       supabase.from("formation_exam_attempts" as never).select("id, score, passed, finished_at" as never).eq("convoyeur_id" as never, conv.id as never).order("finished_at" as never, { ascending: false }),
       supabase.from("formation_certificates" as never).select("id, certificate_number, full_name, issued_at, verification_token" as never).eq("convoyeur_id" as never, conv.id as never).is("revoked_at" as never, null as never).limit(1),
     ]);
 
-    setModules(((mods.data ?? []) as unknown as Module[]).map(m => ({
+    const modsArr = Array.isArray(mods.data) ? (mods.data as unknown as Module[]) : [];
+    setModules(modsArr.map(m => ({
       ...m,
       quiz_questions: Array.isArray(m.quiz_questions) ? m.quiz_questions : [],
       sections: Array.isArray(m.sections) ? m.sections : [],
     })));
     setProgress((prog.data ?? []) as unknown as Progress[]);
-    setExam(((exams.data ?? [])[0] ?? null) as unknown as Exam | null);
+    setExam((exams.data ?? null) as unknown as Exam | null);
     setAttempts((atts.data ?? []) as unknown as ExamAttempt[]);
     setCertificate((((certs.data ?? [])[0]) ?? null) as unknown as Certificate | null);
     setLoading(false);
