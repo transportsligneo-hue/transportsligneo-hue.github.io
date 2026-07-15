@@ -8,6 +8,7 @@ import {
   Truck, CreditCard, FileText, MessageSquare, UserCircle, Settings,
   type LucideIcon,
 } from "lucide-react";
+import { Link, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelativeTime } from "@/lib/notify";
@@ -35,6 +36,7 @@ const CATEGORY_META: Record<string, { Icon: LucideIcon; bg: string; text: string
 
 export function NotificationBell({ className = "" }: { className?: string }) {
   const { user } = useAuth();
+  const router = useRouter();
   const channelId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<UserNotif[]>([]);
@@ -123,7 +125,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
           <div
             role="dialog"
             aria-label="Panneau des notifications"
-            className="absolute right-0 top-12 z-50 w-[380px] max-w-[94vw] rounded-2xl border border-white/10 bg-[#0b1230]/95 backdrop-blur-xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden motion-safe:animate-[scale-in_0.18s_ease-out]"
+            className="fixed left-2 right-2 top-16 z-50 w-auto max-w-none sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[380px] sm:max-w-[94vw] rounded-2xl border border-white/10 bg-[#0b1230]/95 backdrop-blur-xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden motion-safe:animate-[scale-in_0.18s_ease-out]"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
               <div className="flex items-center gap-2">
@@ -187,13 +189,17 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                     return (
                       <li key={n.id}>
                         {target ? (
-                          <a
-                            href={target}
-                            onClick={() => { markRead(n.id); setOpen(false); }}
-                            className="block"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              markRead(n.id);
+                              setOpen(false);
+                              router.navigate({ to: target as string });
+                            }}
+                            className="block w-full text-left"
                           >
                             {body}
-                          </a>
+                          </button>
                         ) : (
                           <button onClick={() => markRead(n.id)} className="block w-full">
                             {body}
@@ -206,13 +212,13 @@ export function NotificationBell({ className = "" }: { className?: string }) {
               )}
             </div>
 
-            <a
-              href="/notifications"
+            <Link
+              to="/notifications"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-1.5 px-4 py-3 text-[12px] font-semibold text-[#e7c76a] hover:text-[#f0d78c] border-t border-white/10 hover:bg-white/5 transition"
             >
               Voir toutes les notifications <ExternalLink size={12} />
-            </a>
+            </Link>
           </div>
         </>
       )}

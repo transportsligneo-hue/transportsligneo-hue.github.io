@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface NotificationPayload {
   title: string;
@@ -21,6 +23,7 @@ interface Props {
  * Se cache automatiquement quand aucune notification n'est active.
  */
 export function NotificationBanner({ notification, label = "Notification" }: Props) {
+  const { user } = useAuth();
   const [live, setLive] = useState<NotificationPayload | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -41,8 +44,32 @@ export function NotificationBanner({ notification, label = "Notification" }: Pro
     return () => navigator.serviceWorker.removeEventListener("message", handler);
   }, []);
 
+  // Realtime : nouvelle notification in-app => affiche le bandeau.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`notif-banner-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const row: any = payload.new;
+          if (!row) return;
+          setLive({
+            title: String(row.titre ?? "Notification"),
+            body: row.message ? String(row.message) : undefined,
+            url: row.link ? String(row.link) : undefined,
+          });
+          setDismissed(false);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
   const current = notification ?? live;
   if (!current || dismissed) return null;
+
 
   return (
     <div className="ligneo-flash-shell p-5 sm:p-6 relative">
