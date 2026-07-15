@@ -6,7 +6,7 @@
  * uniquement une couche typée + effets natifs (vibration douce, son opt-in).
  */
 import { toast, type ExternalToast } from "sonner";
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import {
   Info,
   CheckCircle2,
@@ -157,10 +157,7 @@ function fireMetier(
   triggerSound();
   return toast(title, {
     ...ext,
-    icon: (
-      // sonner injecte automatiquement data-icon via classNames.icon
-      <Icon size={18} strokeWidth={2.2} />
-    ),
+    icon: React.createElement(Icon, { size: 18, strokeWidth: 2.2 }),
     className: METIER_STYLE[type],
   });
 }
