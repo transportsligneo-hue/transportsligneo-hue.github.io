@@ -782,6 +782,9 @@ function ConvoyeurMissions() {
                 setResumeSelfieMissionId(null);
               }
             }}
+            missionNumber={openMission.numero_mission ?? null}
+            vehiculeEnergie={(t as { vehicule_energie?: string | null } | null)?.vehicule_energie ?? null}
+            vehiculeType={(t as { vehicule_type?: string | null } | null)?.vehicule_type ?? null}
           />
         )}
 
