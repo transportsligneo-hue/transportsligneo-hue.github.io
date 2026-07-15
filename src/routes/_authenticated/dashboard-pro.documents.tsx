@@ -3,8 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt, CreditCard, X } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { markDevisAsProcessed } from "@/lib/devis-mark-processed.functions";
+
 import { FactureEmbeddedCheckout } from "@/components/facture/FactureEmbeddedCheckout";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 
@@ -24,7 +27,13 @@ interface DevisRow {
   pdf_url: string | null;
   created_at: string;
   paid_at: string | null;
+  accepted_at: string | null;
+  locked_at: string | null;
+  mission_id: string | null;
+  converted_at: string | null;
+  refused_at: string | null;
 }
+
 
 interface FactureRow {
   id: string;
@@ -55,11 +64,15 @@ interface FactureRow {
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
   envoye: { label: "Envoyé", cls: "bg-blue-50 text-blue-700" },
+  en_attente: { label: "En attente", cls: "bg-blue-50 text-blue-700" },
   accepte: { label: "À régler", cls: "bg-amber-50 text-amber-700" },
   convertit: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
+  converti: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
   refuse: { label: "Refusé", cls: "bg-red-50 text-red-700" },
+  annule: { label: "Clôturé", cls: "bg-slate-100 text-slate-600" },
   expire: { label: "Expiré", cls: "bg-slate-100 text-slate-700" },
 };
+
 
 const factureStatutPill: Record<string, { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
@@ -83,6 +96,11 @@ function ProDocuments() {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("ht");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [statutFilter, setStatutFilter] = useState<string>("all");
+  const [closingDevis, setClosingDevis] = useState<DevisRow | null>(null);
+  const [closingReason, setClosingReason] = useState<string>("");
+  const [closingSubmitting, setClosingSubmitting] = useState<boolean>(false);
+  const markProcessed = useServerFn(markDevisAsProcessed);
+
 
   useEffect(() => {
     if (!user) return;
@@ -104,7 +122,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
@@ -146,6 +164,47 @@ function ProDocuments() {
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/dashboard-pro/documents?paye=1`
     : "/";
+
+  const canBeClosed = (d: DevisRow) =>
+    !d.paid_at &&
+    !d.accepted_at &&
+    !d.locked_at &&
+    !d.mission_id &&
+    !d.converted_at &&
+    !d.refused_at &&
+    d.statut !== "annule" &&
+    d.statut !== "converti" &&
+    d.statut !== "convertit" &&
+    d.statut !== "refuse" &&
+    d.statut !== "expire" &&
+    d.statut !== "accepte";
+
+  const handleConfirmClose = async () => {
+    if (!closingDevis) return;
+    const reason = closingReason.trim();
+    if (reason.length < 3) {
+      toast.error("Merci d'indiquer un motif (3 caractères min).");
+      return;
+    }
+    setClosingSubmitting(true);
+    try {
+      await markProcessed({ data: { devisId: closingDevis.id, reason } });
+      toast.success(`Devis ${closingDevis.numero} clôturé.`);
+      setDevis(prev => prev.map(d => d.id === closingDevis.id
+        ? { ...d, statut: "annule", refused_at: new Date().toISOString() }
+        : d
+      ));
+      setClosingDevis(null);
+      setClosingReason("");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Impossible de clôturer ce devis.";
+      toast.error(msg);
+    } finally {
+      setClosingSubmitting(false);
+    }
+  };
+
+
 
   const handleDownloadFacture = async (f: FactureRow) => {
     setDownloadingId(f.id);
@@ -288,19 +347,32 @@ function ProDocuments() {
                           )}
                         </td>
                         <td className="px-5 py-3 text-right">
-                          {d.statut === "accepte" && !d.paid_at ? (
-                            <button
-                              onClick={() => setPayingId(d.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
-                            >
-                              <CreditCard size={13} /> Payer
-                            </button>
-                          ) : d.paid_at ? (
-                            <span className="text-emerald-600 text-xs font-medium">Payé</span>
-                          ) : (
-                            <span className="text-pro-muted text-xs">—</span>
-                          )}
+                          <div className="inline-flex items-center gap-2 justify-end">
+                            {d.statut === "accepte" && !d.paid_at ? (
+                              <button
+                                onClick={() => setPayingId(d.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                              >
+                                <CreditCard size={13} /> Payer
+                              </button>
+                            ) : d.paid_at ? (
+                              <span className="text-emerald-600 text-xs font-medium">Payé</span>
+                            ) : null}
+                            {canBeClosed(d) && (
+                              <button
+                                onClick={() => { setClosingDevis(d); setClosingReason(""); }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-pro-border text-pro-text-soft text-xs font-medium rounded hover:bg-pro-bg-soft transition-colors"
+                                title="Clôturer ce devis obsolète"
+                              >
+                                <CheckCircle2 size={13} /> Marquer comme traité
+                              </button>
+                            )}
+                            {!canBeClosed(d) && !d.paid_at && d.statut !== "accepte" && (
+                              <span className="text-pro-muted text-xs">—</span>
+                            )}
+                          </div>
                         </td>
+
                       </tr>
                     );
                   })}
@@ -478,6 +550,73 @@ function ProDocuments() {
           </div>
         </div>
       )}
+
+      {closingDevis && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 my-8 relative shadow-2xl">
+            <button
+              onClick={() => { if (!closingSubmitting) { setClosingDevis(null); setClosingReason(""); } }}
+              className="absolute top-4 right-4 text-pro-muted hover:text-pro-text transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-lg text-pro-text">Clôturer ce devis ?</h2>
+                <p className="text-pro-muted text-sm mt-1">
+                  Devis <span className="font-mono">{closingDevis.numero}</span> — {closingDevis.depart} → {closingDevis.arrivee}
+                </p>
+                <p className="text-pro-muted text-xs mt-2">
+                  Cette action est définitive. Le devis passera au statut « Clôturé » et
+                  sera retiré des devis en attente. Un enregistrement d'audit sera créé.
+                </p>
+              </div>
+            </div>
+
+            <label className="block text-sm font-medium text-pro-text mb-1.5" htmlFor="close-reason">
+              Motif de clôture <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="close-reason"
+              value={closingReason}
+              onChange={(e) => setClosingReason(e.target.value)}
+              placeholder="Ex. Doublon, client injoignable, remplacé par un autre devis…"
+              maxLength={500}
+              rows={3}
+              disabled={closingSubmitting}
+              className="w-full px-3 py-2 rounded-md border border-pro-border bg-white text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-1 focus:ring-pro-accent resize-none"
+            />
+            <p className="text-[11px] text-pro-muted mt-1 text-right">
+              {closingReason.trim().length}/500
+            </p>
+
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => { setClosingDevis(null); setClosingReason(""); }}
+                disabled={closingSubmitting}
+                className="px-4 py-2 rounded-md text-sm font-medium text-pro-text-soft hover:bg-pro-bg-soft transition-colors disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClose}
+                disabled={closingSubmitting || closingReason.trim().length < 3}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-pro-text text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {closingSubmitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                Confirmer la clôture
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
 }
