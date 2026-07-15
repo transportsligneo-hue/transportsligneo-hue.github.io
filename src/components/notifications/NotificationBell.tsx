@@ -189,7 +189,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
                       <li key={n.id}>
                         {target ? (
                           <Link
-                            to={target}
+                            to={target as string}
                             onClick={() => { markRead(n.id); setOpen(false); }}
                             className="block"
                           >
