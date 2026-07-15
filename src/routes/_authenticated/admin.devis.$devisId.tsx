@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
-  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye,
+  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import {
@@ -28,6 +28,8 @@ function AdminDevisDetailPage() {
   const navigate = useNavigate();
   const [devis, setDevis] = useState<any | null>(null);
   const [acceptation, setAcceptation] = useState<any | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [otpEvents, setOtpEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
