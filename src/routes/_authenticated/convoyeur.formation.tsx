@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation")({
   component: ConvoyeurFormation,
 });
 
-type QuizQ = { question: string; choices: string[]; answer: number; explanation?: string };
+type QuizQ = { question: string; choices: string[]; answer?: number; explanation?: string };
 type Section =
   | { type: "text"; content: string }
   | { type: "image"; url: string; alt?: string; caption?: string }
