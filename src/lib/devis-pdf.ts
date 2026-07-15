@@ -447,6 +447,9 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
 
   // Cartouche "Signature électronique" (OTP e-mail) — nouvelle page dédiée
   if (d.otpProof) {
+    // Termine d'abord la page courante (société + footer)
+    drawSocietyBlock(doc, pageW, pageH - 40);
+    drawFooter(doc, pageW, pageH);
     doc.addPage();
     const cpageW = doc.internal.pageSize.getWidth();
     const cpageH = doc.internal.pageSize.getHeight();
