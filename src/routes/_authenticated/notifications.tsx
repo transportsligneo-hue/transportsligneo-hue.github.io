@@ -1,14 +1,16 @@
 /**
- * Centre de notifications — historique complet pour tous les rôles.
- * Filtres, recherche, marquer lu, tout marquer, suppression, deep-link.
+ * Centre de notifications premium — historique complet, filtres, recherche,
+ * regroupement par date, actions groupées, timestamps relatifs.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { formatRelativeTime } from "@/lib/notify";
 import {
   Bell, Check, CheckCheck, Trash2, Search, Filter,
   Truck, CreditCard, FileText, MessageSquare, Settings, UserCircle,
+  type LucideIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
@@ -28,23 +30,44 @@ interface Notif {
 }
 
 const CATEGORIES = [
-  { key: "all", label: "Toutes", Icon: Bell },
-  { key: "mission", label: "Missions", Icon: Truck },
+  { key: "all",      label: "Toutes",    Icon: Bell },
+  { key: "mission",  label: "Missions",  Icon: Truck },
   { key: "paiement", label: "Paiements", Icon: CreditCard },
   { key: "document", label: "Documents", Icon: FileText },
-  { key: "message", label: "Messages", Icon: MessageSquare },
-  { key: "compte", label: "Compte", Icon: UserCircle },
-  { key: "systeme", label: "Système", Icon: Settings },
+  { key: "message",  label: "Messages",  Icon: MessageSquare },
+  { key: "compte",   label: "Compte",    Icon: UserCircle },
+  { key: "systeme",  label: "Système",   Icon: Settings },
 ] as const;
 
-const CATEGORY_META: Record<string, { color: string; Icon: typeof Bell }> = {
-  mission: { color: "bg-blue-100 text-blue-700", Icon: Truck },
-  paiement: { color: "bg-emerald-100 text-emerald-700", Icon: CreditCard },
-  document: { color: "bg-amber-100 text-amber-700", Icon: FileText },
-  message: { color: "bg-purple-100 text-purple-700", Icon: MessageSquare },
-  compte: { color: "bg-sky-100 text-sky-700", Icon: UserCircle },
-  systeme: { color: "bg-slate-100 text-slate-700", Icon: Settings },
+const CATEGORY_META: Record<string, { Icon: LucideIcon; bg: string; text: string; border: string }> = {
+  mission:  { Icon: Truck,         bg: "bg-[#38bdf8]/12", text: "text-[#38bdf8]", border: "border-[#38bdf8]/30" },
+  paiement: { Icon: CreditCard,    bg: "bg-[#3dd68c]/12", text: "text-[#3dd68c]", border: "border-[#3dd68c]/30" },
+  document: { Icon: FileText,      bg: "bg-[#f5b544]/12", text: "text-[#f5b544]", border: "border-[#f5b544]/30" },
+  message:  { Icon: MessageSquare, bg: "bg-[#c084fc]/12", text: "text-[#c084fc]", border: "border-[#c084fc]/30" },
+  compte:   { Icon: UserCircle,    bg: "bg-[#4d9aff]/12", text: "text-[#4d9aff]", border: "border-[#4d9aff]/30" },
+  systeme:  { Icon: Settings,      bg: "bg-slate-500/12", text: "text-slate-400", border: "border-slate-400/30" },
 };
+
+function groupByBucket(items: Notif[]): Array<[string, Notif[]]> {
+  const buckets: Record<string, Notif[]> = {
+    "Aujourd'hui": [],
+    "Hier": [],
+    "Cette semaine": [],
+    "Plus ancien": [],
+  };
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startYesterday = startToday - 86_400_000;
+  const startWeek = startToday - 6 * 86_400_000;
+  for (const n of items) {
+    const t = new Date(n.created_at).getTime();
+    if (t >= startToday) buckets["Aujourd'hui"].push(n);
+    else if (t >= startYesterday) buckets["Hier"].push(n);
+    else if (t >= startWeek) buckets["Cette semaine"].push(n);
+    else buckets["Plus ancien"].push(n);
+  }
+  return Object.entries(buckets).filter(([, v]) => v.length > 0);
+}
 
 function NotificationsCenter() {
   const { user } = useAuth();
@@ -52,8 +75,14 @@ function NotificationsCenter() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showRead, setShowRead] = useState(true);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 250);
+    return () => clearTimeout(id);
+  }, [query]);
 
   const fetchData = useCallback(async () => {
     if (!user?.id) return;
@@ -80,21 +109,22 @@ function NotificationsCenter() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
-        fetchData
+        fetchData,
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, fetchData]);
 
   const filtered = useMemo(() => {
-    if (!query.trim()) return items;
-    const q = query.toLowerCase();
+    if (!debouncedQuery.trim()) return items;
+    const q = debouncedQuery.toLowerCase();
     return items.filter(n =>
       n.titre.toLowerCase().includes(q) ||
-      (n.message ?? "").toLowerCase().includes(q)
+      (n.message ?? "").toLowerCase().includes(q),
     );
-  }, [items, query]);
+  }, [items, debouncedQuery]);
 
+  const grouped = useMemo(() => groupByBucket(filtered), [filtered]);
   const unreadCount = items.filter(n => !n.lu).length;
 
   const toggleSelect = (id: string) => {
@@ -132,159 +162,192 @@ function NotificationsCenter() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
-            <Bell size={22} /> Notifications
-            {unreadCount > 0 && (
-              <span className="text-xs bg-red-500 text-white rounded-full px-2 py-0.5 font-bold">
-                {unreadCount} non lues
+    <div className="min-h-screen bg-gradient-to-b from-[#061238] via-[#061238] to-[#0b1a4a] pb-24">
+      <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-serif text-[#faf7ef] flex items-center gap-3">
+              <span className="w-11 h-11 rounded-xl bg-[#e7c76a]/15 border border-[#e7c76a]/30 flex items-center justify-center">
+                <Bell size={20} className="text-[#e7c76a]" />
               </span>
-            )}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">Historique complet de vos notifications.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {selected.size > 0 && (
-            <>
-              <button
-                onClick={() => markRead(Array.from(selected))}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-800 transition"
-              >
-                <Check size={14} /> Marquer lu ({selected.size})
-              </button>
-              <button
-                onClick={() => deleteItems(Array.from(selected))}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-red-50 hover:bg-red-100 text-red-700 transition"
-              >
-                <Trash2 size={14} /> Supprimer ({selected.size})
-              </button>
-            </>
-          )}
+              Notifications
+              {unreadCount > 0 && (
+                <span className="text-[11px] bg-[#ef4a4a] text-white rounded-full px-2 py-0.5 font-bold">
+                  {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                </span>
+              )}
+            </h1>
+            <p className="text-sm text-[#c7cde0] mt-2 ml-14">Historique complet de vos notifications.</p>
+          </div>
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-900 text-white transition"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#e7c76a] hover:bg-[#f0d78c] text-[#061238] transition shadow-[0_10px_25px_-10px_rgba(231,199,106,0.5)]"
             >
-              <CheckCheck size={14} /> Tout marquer comme lu
+              <CheckCheck size={14} /> Tout marquer lu
             </button>
           )}
         </div>
-      </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Filter size={14} className="text-slate-500 ml-1" />
-          {CATEGORIES.map(c => (
-            <button
-              key={c.key}
-              onClick={() => setCategory(c.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                category === c.key
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              <c.Icon size={12} /> {c.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher…"
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            />
-          </div>
-          <label className="flex items-center gap-2 text-xs text-slate-600 px-2 whitespace-nowrap cursor-pointer">
-            <input type="checkbox" checked={showRead} onChange={(e) => setShowRead(e.target.checked)} />
-            Inclure les lues
-          </label>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-16 text-slate-400 text-sm">Chargement…</div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
-          <Bell size={32} className="mx-auto text-slate-300 mb-3" />
-          <p className="text-slate-500 text-sm">Aucune notification.</p>
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {filtered.map(n => {
-            const meta = CATEGORY_META[n.category] ?? CATEGORY_META.systeme;
-            const target = n.link && n.link.startsWith("/") ? n.link : null;
-            const isChecked = selected.has(n.id);
-            return (
-              <li
-                key={n.id}
-                className={`bg-white border rounded-xl p-3 flex items-start gap-3 transition ${
-                  isChecked ? "border-slate-800 ring-1 ring-slate-800" :
-                  n.lu ? "border-slate-200 opacity-80" : "border-blue-200 bg-blue-50/30"
+        {/* Filtres */}
+        <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-3 space-y-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter size={14} className="text-[#c7cde0] ml-1" />
+            {CATEGORIES.map(c => (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  category === c.key
+                    ? "bg-[#e7c76a] text-[#061238] shadow-[0_6px_16px_-6px_rgba(231,199,106,0.6)]"
+                    : "text-[#c7cde0] hover:bg-white/10 hover:text-[#faf7ef]"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => toggleSelect(n.id)}
-                  className="mt-1.5 cursor-pointer"
-                />
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${meta.color}`}>
-                  <meta.Icon size={16} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
-                      {CATEGORIES.find(c => c.key === n.category)?.label ?? n.category}
-                    </span>
-                    {n.priority === "urgent" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500 text-white font-bold">URGENT</span>
-                    )}
-                    {!n.lu && <span className="w-2 h-2 rounded-full bg-blue-500" />}
-                    <span className="text-[10px] text-slate-400 ml-auto">
-                      {new Date(n.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
-                    </span>
-                  </div>
-                  <p className={`text-sm mt-0.5 ${n.lu ? "text-slate-700" : "font-semibold text-slate-900"}`}>
-                    {n.titre}
-                  </p>
-                  {n.message && <p className="text-sm text-slate-600 mt-1">{n.message}</p>}
-                  <div className="flex items-center gap-3 mt-2">
-                    {target && (
-                      <a
-                        href={target}
-                        onClick={() => markRead([n.id])}
-                        className="text-xs font-semibold text-blue-600 hover:underline"
+                <c.Icon size={12} /> {c.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#c7cde0]/60" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Rechercher…"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-white/10 bg-white/[0.04] text-[#faf7ef] placeholder:text-[#c7cde0]/50 focus:outline-none focus:ring-2 focus:ring-[#4d9aff]/60"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-[#c7cde0] px-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" checked={showRead} onChange={(e) => setShowRead(e.target.checked)} className="accent-[#e7c76a]" />
+              Inclure les lues
+            </label>
+          </div>
+        </div>
+
+        {/* Liste */}
+        {loading ? (
+          <div className="text-center py-16 text-[#c7cde0]/60 text-sm">Chargement…</div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-14 text-center">
+            <Bell size={40} className="mx-auto text-[#c7cde0]/30 mb-4" />
+            <p className="text-[#c7cde0] text-sm font-medium">Aucune notification.</p>
+            <p className="text-[#c7cde0]/60 text-xs mt-1">Vous serez alerté ici dès qu'il y aura du nouveau.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {grouped.map(([bucket, list]) => (
+              <div key={bucket} className="space-y-2">
+                <h2 className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#e7c76a]/80 px-1">
+                  {bucket}
+                </h2>
+                <ul className="space-y-2">
+                  {list.map(n => {
+                    const meta = CATEGORY_META[n.category] ?? CATEGORY_META.systeme;
+                    const target = n.link && n.link.startsWith("/") ? n.link : null;
+                    const isChecked = selected.has(n.id);
+                    return (
+                      <li
+                        key={n.id}
+                        className={`relative rounded-2xl border p-3 pl-4 flex items-start gap-3 transition ${
+                          isChecked
+                            ? "border-[#e7c76a]/60 bg-[#e7c76a]/[0.06] shadow-[0_10px_25px_-15px_rgba(231,199,106,0.4)]"
+                            : n.lu
+                              ? "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]"
+                              : "border-white/10 bg-white/[0.06] hover:bg-white/[0.09]"
+                        }`}
                       >
-                        Voir le détail →
-                      </a>
-                    )}
-                    {!n.lu && (
-                      <button
-                        onClick={() => markRead([n.id])}
-                        className="text-xs text-slate-500 hover:text-slate-800"
-                      >
-                        Marquer comme lu
-                      </button>
-                    )}
-                    <button
-                      onClick={() => deleteItems([n.id])}
-                      className="text-xs text-red-500 hover:text-red-700 ml-auto"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                        {!n.lu && !isChecked && (
+                          <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[#e7c76a]" />
+                        )}
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleSelect(n.id)}
+                          className="mt-1.5 cursor-pointer accent-[#e7c76a]"
+                          aria-label="Sélectionner"
+                        />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${meta.bg} ${meta.text} ${meta.border}`}>
+                          <meta.Icon size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-[#c7cde0]/70">
+                              {CATEGORIES.find(c => c.key === n.category)?.label ?? n.category}
+                            </span>
+                            {n.priority === "urgent" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#ef4a4a] text-white font-bold">URGENT</span>
+                            )}
+                            {!n.lu && <span className="w-2 h-2 rounded-full bg-[#4d9aff] shadow-[0_0_8px_rgba(77,154,255,0.9)]" />}
+                            <span className="text-[10px] text-[#c7cde0]/60 ml-auto">
+                              {formatRelativeTime(n.created_at)}
+                            </span>
+                          </div>
+                          <p className={`text-sm mt-1 leading-snug ${n.lu ? "text-[#c7cde0]" : "font-semibold text-[#faf7ef]"}`}>
+                            {n.titre}
+                          </p>
+                          {n.message && <p className="text-sm text-[#c7cde0]/80 mt-1 leading-snug">{n.message}</p>}
+                          <div className="flex items-center gap-3 mt-2">
+                            {target && (
+                              <a
+                                href={target}
+                                onClick={() => markRead([n.id])}
+                                className="text-xs font-semibold text-[#e7c76a] hover:text-[#f0d78c]"
+                              >
+                                Voir le détail →
+                              </a>
+                            )}
+                            {!n.lu && (
+                              <button
+                                onClick={() => markRead([n.id])}
+                                className="text-xs text-[#c7cde0] hover:text-[#faf7ef]"
+                              >
+                                Marquer comme lu
+                              </button>
+                            )}
+                            <button
+                              onClick={() => deleteItems([n.id])}
+                              className="text-xs text-[#ff8a8a] hover:text-[#ffb0b0] ml-auto"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Barre flottante d'actions groupées */}
+      {selected.size > 0 && (
+        <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#0b1230]/95 backdrop-blur-xl border border-white/15 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] motion-safe:animate-[fade-in_0.2s_ease-out]">
+          <span className="text-xs text-[#c7cde0] pl-1">{selected.size} sélectionnée{selected.size > 1 ? "s" : ""}</span>
+          <button
+            onClick={() => markRead(Array.from(selected))}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-[#faf7ef] transition"
+          >
+            <Check size={13} /> Marquer lu
+          </button>
+          <button
+            onClick={() => deleteItems(Array.from(selected))}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#ef4a4a]/20 hover:bg-[#ef4a4a]/30 text-[#ff8a8a] transition"
+          >
+            <Trash2 size={13} /> Supprimer
+          </button>
+          <button
+            onClick={() => setSelected(new Set())}
+            className="flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-[#c7cde0] hover:text-[#faf7ef] transition"
+          >
+            Annuler
+          </button>
+        </div>
       )}
     </div>
   );
