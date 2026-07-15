@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
+import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { notifyAdmin } from "@/lib/admin-notifications";
