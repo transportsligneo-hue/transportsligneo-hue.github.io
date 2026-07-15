@@ -18,6 +18,7 @@ import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
 import { Route as InscriptionFlotteRouteImport } from './routes/inscription-flotte'
@@ -47,6 +48,8 @@ import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authent
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedFlotteIndexRouteImport } from './routes/_authenticated/flotte.index'
 import { Route as AuthenticatedEntrepriseIndexRouteImport } from './routes/_authenticated/entreprise.index'
 import { Route as AuthenticatedDashboardProIndexRouteImport } from './routes/_authenticated/dashboard-pro.index'
@@ -108,6 +111,8 @@ import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -172,6 +177,11 @@ const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
   path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -321,6 +331,18 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedFlotteIndexRoute =
   AuthenticatedFlotteIndexRouteImport.update({
     id: '/',
@@ -681,6 +703,17 @@ const AuthenticatedAdminAcceptationsRoute =
     path: '/acceptations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardProMissionsIndexRoute =
   AuthenticatedDashboardProMissionsIndexRouteImport.update({
     id: '/',
@@ -812,6 +845,7 @@ export interface FileRoutesByFullPath {
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -821,6 +855,8 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -834,6 +870,8 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -932,6 +970,7 @@ export interface FileRoutesByTo {
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -941,6 +980,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
@@ -948,6 +989,8 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -1047,6 +1090,7 @@ export interface FileRoutesById {
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -1056,6 +1100,8 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -1069,6 +1115,8 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -1169,6 +1217,7 @@ export interface FileRouteTypes {
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/mcp'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -1178,6 +1227,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
@@ -1191,6 +1242,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/verify-certificat/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/acceptations'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
@@ -1289,6 +1342,7 @@ export interface FileRouteTypes {
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/mcp'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -1298,6 +1352,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/notifications'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
@@ -1305,6 +1361,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/verify-certificat/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/acceptations'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
@@ -1403,6 +1461,7 @@ export interface FileRouteTypes {
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/mcp'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -1412,6 +1471,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tarifs'
     | '/unsubscribe'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
@@ -1425,6 +1486,8 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/verify-certificat/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
@@ -1525,6 +1588,7 @@ export interface RootRouteChildren {
   InscriptionFlotteRoute: typeof InscriptionFlotteRoute
   InscriptionProRoute: typeof InscriptionProRoute
   LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ProRoute: typeof ProRoute
@@ -1534,9 +1598,13 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
@@ -1616,6 +1684,13 @@ declare module '@tanstack/react-router' {
       path: '/mentions-legales'
       fullPath: '/mentions-legales'
       preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1820,6 +1895,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/flotte/': {
       id: '/_authenticated/flotte/'
@@ -2247,6 +2336,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/acceptations'
       preLoaderRoute: typeof AuthenticatedAdminAcceptationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard-pro/missions/': {
       id: '/_authenticated/dashboard-pro/missions/'
@@ -2764,6 +2867,7 @@ const rootRouteChildren: RootRouteChildren = {
   InscriptionFlotteRoute: InscriptionFlotteRoute,
   InscriptionProRoute: InscriptionProRoute,
   LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   ProRoute: ProRoute,
@@ -2773,9 +2877,14 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
