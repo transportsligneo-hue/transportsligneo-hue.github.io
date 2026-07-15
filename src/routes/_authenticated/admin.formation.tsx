@@ -1,28 +1,42 @@
 /**
- * Admin — CMS Formation Convoyeurs.
+ * Admin — CMS Académie Ligneo.
  * Onglets : Tableau de bord, Modules, Examen final, Résultats, Certificats.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { uploadFormationImage } from "@/lib/formation-images.functions";
 import {
   GraduationCap, Loader2, Plus, Save, Trash2, Award, BarChart3,
   BookOpen, Trophy, Users, RefreshCw, ShieldCheck, XCircle, CheckCircle2,
+  ImageIcon, Type, ListChecks, AlertTriangle, Info, Upload,
+  ChevronDown, ChevronUp, PlusCircle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/formation")({
   component: AdminFormation,
 });
 
+type Section =
+  | { type: "text"; content: string }
+  | { type: "image"; url: string; alt?: string; caption?: string }
+  | { type: "video"; url: string }
+  | { type: "checklist"; items: string[] }
+  | { type: "callout"; tone?: "info" | "warning" | "success"; content: string };
+
+type QuizQ = { question: string; choices: string[]; answer?: number; explanation?: string };
+
 type Module = {
   id: string; slug: string; title: string; description: string | null; category: string;
   content_type: string; content_url: string | null; content_body: string | null;
-  quiz_questions: unknown; sections: unknown;
+  quiz_questions: QuizQ[]; sections: Section[];
   minimum_score: number; estimated_minutes: number; sort_order: number;
   is_active: boolean; is_required: boolean;
 };
-type Exam = { id: string; title: string; description: string | null; question_pool: unknown; question_count: number; time_limit_minutes: number; minimum_score: number; is_active: boolean };
+
+type Exam = { id: string; title: string; description: string | null; question_pool: QuizQ[]; question_count: number; time_limit_minutes: number; minimum_score: number; is_active: boolean };
 type Convoyeur = { id: string; nom: string | null; prenom: string | null; email: string | null; statut: string; has_completed_training: boolean; training_status: string; training_completed_at: string | null };
 type ExamAttempt = { id: string; convoyeur_id: string; score: number; passed: boolean; finished_at: string; duration_seconds: number | null };
 type Progress = { convoyeur_id: string; module_id: string; status: string };
@@ -37,7 +51,7 @@ function AdminFormation() {
     <div className="space-y-5">
       <div className="rounded-2xl border border-pro-border bg-white p-5 shadow-pro-card">
         <p className="text-[11px] uppercase tracking-wider text-pro-muted font-semibold">Administration</p>
-        <h1 className="text-2xl font-semibold text-pro-text mt-1 flex items-center gap-2"><GraduationCap size={22} className="text-pro-accent" /> Formation convoyeurs</h1>
+        <h1 className="text-2xl font-semibold text-pro-text mt-1 flex items-center gap-2"><GraduationCap size={22} className="text-pro-accent" /> Académie Ligneo</h1>
       </div>
       <div className="flex gap-1 border-b border-pro-border overflow-x-auto">
         {([
@@ -181,14 +195,15 @@ function ModuleEditor({ module: m, isOpen, onToggle, onSaved, onDelete }: { modu
     minimum_score: m.minimum_score, estimated_minutes: m.estimated_minutes, sort_order: m.sort_order,
     is_active: m.is_active, is_required: m.is_required,
     quiz_json: JSON.stringify(m.quiz_questions ?? [], null, 2),
-    sections_json: JSON.stringify(m.sections ?? [], null, 2),
   });
+  const [sections, setSections] = useState<Section[]>(Array.isArray(m.sections) ? m.sections : []);
   const [saving, setSaving] = useState(false);
+  const uploadImageFn = useServerFn(uploadFormationImage);
 
   const save = async () => {
-    let quiz, sections;
-    try { quiz = JSON.parse(form.quiz_json); sections = JSON.parse(form.sections_json); }
-    catch { return toast.error("JSON invalide dans les questions ou les sections"); }
+    let quiz;
+    try { quiz = JSON.parse(form.quiz_json); if (!Array.isArray(quiz)) throw new Error(); }
+    catch { return toast.error("JSON de questions invalide"); }
     setSaving(true);
     const { error } = await supabase.from("formation_modules" as never).update({
       title: form.title, description: form.description, category: form.category,
@@ -202,6 +217,50 @@ function ModuleEditor({ module: m, isOpen, onToggle, onSaved, onDelete }: { modu
     onSaved();
   };
 
+  const addSection = (type: Section["type"]) => {
+    const base: Record<string, Section> = {
+      text: { type: "text", content: "" },
+      image: { type: "image", url: "", alt: "", caption: "" },
+      video: { type: "video", url: "" },
+      checklist: { type: "checklist", items: [""] },
+      callout: { type: "callout", tone: "info", content: "" },
+    };
+    setSections((prev) => [...prev, base[type]]);
+  };
+
+  const updateSection = (index: number, patch: Partial<Section>) => {
+    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } as Section : s)));
+  };
+
+  const moveSection = (index: number, dir: -1 | 1) => {
+    setSections((prev) => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const removeSection = (index: number) => {
+    setSections((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleImageUpload = async (index: number, file: File) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await uploadImageFn({ data: { fileBase64: base64, fileName: file.name, contentType: file.type } });
+        updateSection(index, { url: res.signedUrl });
+        toast.success("Image uploadée");
+      };
+    } catch (e) {
+      toast.error("Échec de l'upload");
+    }
+  };
+
   return (
     <div className="rounded-xl border border-pro-border bg-white">
       <button onClick={onToggle} className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-pro-bg-soft">
@@ -213,9 +272,10 @@ function ModuleEditor({ module: m, isOpen, onToggle, onSaved, onDelete }: { modu
           </div>
           <p className="text-xs text-pro-muted mt-1">Ordre {m.sort_order} · {m.estimated_minutes} min · {m.category}</p>
         </div>
+        {isOpen ? <ChevronUp size={18} className="text-pro-muted" /> : <ChevronDown size={18} className="text-pro-muted" />}
       </button>
       {isOpen && (
-        <div className="border-t border-pro-border p-4 space-y-3">
+        <div className="border-t border-pro-border p-4 space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Titre"><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
             <Field label="Catégorie"><input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
@@ -229,12 +289,82 @@ function ModuleEditor({ module: m, isOpen, onToggle, onSaved, onDelete }: { modu
             </Field>
           </div>
           <Field label="Description"><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
-          <Field label="URL support (optionnel)"><input value={form.content_url} onChange={e => setForm(f => ({ ...f, content_url: e.target.value }))} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
-          <Field label="Contenu texte brut (optionnel)"><textarea value={form.content_body} onChange={e => setForm(f => ({ ...f, content_body: e.target.value }))} rows={4} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
-          <Field label='Sections (JSON — blocs riches) — [{"type":"text","content":"..."},{"type":"image","url":"..."},{"type":"video","url":"..."},{"type":"checklist","items":[]},{"type":"callout","tone":"info","content":"..."}]'>
-            <textarea value={form.sections_json} onChange={e => setForm(f => ({ ...f, sections_json: e.target.value }))} rows={8} className="w-full rounded-lg border border-pro-border px-3 py-2 text-xs font-mono" />
-          </Field>
-          <Field label='Questions QCM (JSON) — [{"question":"...","choices":["A","B","C"],"answer":0}]'>
+
+          {/* Sections editor */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-pro-text">Contenu pédagogique</p>
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={() => addSection("text")} className="inline-flex items-center gap-1 rounded-lg border border-pro-border px-2 py-1.5 text-xs hover:bg-pro-bg-soft"><Type size={12} /> Texte</button>
+                <button onClick={() => addSection("image")} className="inline-flex items-center gap-1 rounded-lg border border-pro-border px-2 py-1.5 text-xs hover:bg-pro-bg-soft"><ImageIcon size={12} /> Image</button>
+                <button onClick={() => addSection("checklist")} className="inline-flex items-center gap-1 rounded-lg border border-pro-border px-2 py-1.5 text-xs hover:bg-pro-bg-soft"><ListChecks size={12} /> Checklist</button>
+                <button onClick={() => addSection("callout")} className="inline-flex items-center gap-1 rounded-lg border border-pro-border px-2 py-1.5 text-xs hover:bg-pro-bg-soft"><Info size={12} /> Encadré</button>
+              </div>
+            </div>
+            {sections.map((s, i) => (
+              <div key={i} className="rounded-xl border border-pro-border bg-pro-bg-soft/50 p-3 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-pro-muted uppercase flex items-center gap-1">
+                    {s.type === "text" && <Type size={12} />}
+                    {s.type === "image" && <ImageIcon size={12} />}
+                    {s.type === "video" && <Info size={12} />}
+                    {s.type === "checklist" && <ListChecks size={12} />}
+                    {s.type === "callout" && <AlertTriangle size={12} />}
+                    {s.type}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => moveSection(i, -1)} disabled={i === 0} className="p-1 rounded hover:bg-pro-bg-soft disabled:opacity-30"><ChevronUp size={14} className="text-pro-muted" /></button>
+                    <button onClick={() => moveSection(i, 1)} disabled={i === sections.length - 1} className="p-1 rounded hover:bg-pro-bg-soft disabled:opacity-30"><ChevronDown size={14} className="text-pro-muted" /></button>
+                    <button onClick={() => removeSection(i)} className="p-1 rounded hover:bg-red-50 text-red-600"><Trash2 size={14} /></button>
+                  </div>
+                </div>
+                {s.type === "text" && <textarea value={s.content} onChange={e => updateSection(i, { content: e.target.value })} rows={4} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="Contenu texte..." />}
+                {s.type === "callout" && (
+                  <>
+                    <select value={s.tone ?? "info"} onChange={e => updateSection(i, { tone: e.target.value as "info" | "warning" | "success" })} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm mb-2">
+                      <option value="info">Info</option><option value="warning">Avertissement</option><option value="success">Succès</option>
+                    </select>
+                    <textarea value={s.content} onChange={e => updateSection(i, { content: e.target.value })} rows={3} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="Contenu de l'encadré..." />
+                  </>
+                )}
+                {s.type === "image" && (
+                  <div className="space-y-2">
+                    <input value={s.url} onChange={e => updateSection(i, { url: e.target.value })} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="URL de l'image ou upload..." />
+                    <div className="flex items-center gap-2">
+                      <label className="inline-flex items-center gap-1.5 rounded-lg bg-pro-accent px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 cursor-pointer">
+                        <Upload size={12} /> Upload
+                        <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleImageUpload(i, e.target.files[0])} />
+                      </label>
+                      {s.url && <img src={s.url} alt={s.alt} className="h-12 w-12 rounded object-cover border border-pro-border" />}
+                    </div>
+                    <input value={s.alt ?? ""} onChange={e => updateSection(i, { alt: e.target.value })} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="Texte alternatif" />
+                    <input value={s.caption ?? ""} onChange={e => updateSection(i, { caption: e.target.value })} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="Légende" />
+                  </div>
+                )}
+                {s.type === "video" && <input value={s.url} onChange={e => updateSection(i, { url: e.target.value })} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="URL vidéo ou YouTube" />}
+                {s.type === "checklist" && (
+                  <div className="space-y-2">
+                    {s.items.map((item, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input value={item} onChange={e => {
+                          const next = [...s.items];
+                          next[idx] = e.target.value;
+                          updateSection(i, { items: next });
+                        }} className="flex-1 rounded-lg border border-pro-border px-3 py-2 text-sm" placeholder="Élément de checklist" />
+                        <button onClick={() => {
+                          const next = s.items.filter((_, ii) => ii !== idx);
+                          updateSection(i, { items: next });
+                        }} className="text-red-600 hover:bg-red-50 p-2 rounded"><Trash2 size={14} /></button>
+                      </div>
+                    ))}
+                    <button onClick={() => updateSection(i, { items: [...s.items, ""] })} className="inline-flex items-center gap-1 text-xs text-pro-accent hover:underline"><PlusCircle size={12} /> Ajouter un élément</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <Field label='Questions QCM (JSON) — [{"question":"...","choices":["A","B","C"],"answer":0,"explanation":"..."}]'>
             <textarea value={form.quiz_json} onChange={e => setForm(f => ({ ...f, quiz_json: e.target.value }))} rows={8} className="w-full rounded-lg border border-pro-border px-3 py-2 text-xs font-mono" />
           </Field>
           <div className="flex gap-4">
@@ -259,7 +389,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function ExamTab() {
   const [exam, setExam] = useState<Exam | null>(null);
-  const [form, setForm] = useState<{ title: string; description: string; question_count: number; time_limit_minutes: number; minimum_score: number; is_active: boolean; pool_json: string }>({ title: "", description: "", question_count: 20, time_limit_minutes: 20, minimum_score: 80, is_active: true, pool_json: "[]" });
+  const [form, setForm] = useState<{ title: string; description: string; question_count: number; time_limit_minutes: number; minimum_score: number; is_active: boolean; pool_json: string }>({ title: "", description: "", question_count: 50, time_limit_minutes: 50, minimum_score: 80, is_active: true, pool_json: "[]" });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -299,7 +429,7 @@ function ExamTab() {
         <Field label="Score min (%)"><input type="number" min={0} max={100} value={form.minimum_score} onChange={e => setForm(f => ({ ...f, minimum_score: +e.target.value }))} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
       </div>
       <Field label="Description"><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full rounded-lg border border-pro-border px-3 py-2 text-sm" /></Field>
-      <Field label='Pool de questions (JSON) — [{"question":"...","choices":["A","B","C"],"answer":0}]'>
+      <Field label={`Pool de questions (JSON) — ${form.question_count} questions tirées parmi ${(() => { try { return JSON.parse(form.pool_json).length; } catch { return "?"; } })()} disponibles`}>
         <textarea value={form.pool_json} onChange={e => setForm(f => ({ ...f, pool_json: e.target.value }))} rows={16} className="w-full rounded-lg border border-pro-border px-3 py-2 text-xs font-mono" />
       </Field>
       <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} /> Actif</label>
