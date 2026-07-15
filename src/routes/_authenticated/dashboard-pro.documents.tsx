@@ -61,11 +61,15 @@ interface FactureRow {
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
   envoye: { label: "Envoyé", cls: "bg-blue-50 text-blue-700" },
+  en_attente: { label: "En attente", cls: "bg-blue-50 text-blue-700" },
   accepte: { label: "À régler", cls: "bg-amber-50 text-amber-700" },
   convertit: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
+  converti: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
   refuse: { label: "Refusé", cls: "bg-red-50 text-red-700" },
+  annule: { label: "Clôturé", cls: "bg-slate-100 text-slate-600" },
   expire: { label: "Expiré", cls: "bg-slate-100 text-slate-700" },
 };
+
 
 const factureStatutPill: Record<string, { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
