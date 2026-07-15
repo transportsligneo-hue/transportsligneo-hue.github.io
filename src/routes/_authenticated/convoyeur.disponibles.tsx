@@ -421,6 +421,10 @@ function ConvoyeurDisponibles() {
             </a>
           )}
 
+          {/* === BANDEAU NOTIFICATION (push in-app) === */}
+          <NotificationBanner />
+
+
           {/* === MES ENCHÈRES EN COURS === */}
           {(() => {
             const offresList = Object.values(myOffres).filter(
