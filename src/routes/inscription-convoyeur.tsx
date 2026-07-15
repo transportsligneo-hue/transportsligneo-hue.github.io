@@ -47,6 +47,7 @@ function InscriptionConvoyeur() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
