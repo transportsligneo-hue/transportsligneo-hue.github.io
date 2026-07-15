@@ -325,32 +325,37 @@ function ModuleView({ module: mod, progress: prog, convoyeurId, onBack, onDone }
 /* ============ EXAM VIEW ============ */
 
 function ExamView({ exam, convoyeurId, onBack, onDone }: { exam: Exam; convoyeurId: string; onBack: () => void; onDone: () => void }) {
-  const [questions] = useState(() => shuffle(exam.question_pool).slice(0, exam.question_count));
+  const [selection] = useState(() => {
+    const idxs = Array.from({ length: exam.question_pool.length }, (_, i) => i);
+    return shuffle(idxs).slice(0, exam.question_count);
+  });
+  const questions = useMemo(() => selection.map(i => exam.question_pool[i]), [selection, exam.question_pool]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const startedAt = useRef(Date.now());
   const [remaining, setRemaining] = useState(exam.time_limit_minutes * 60);
   const [phase, setPhase] = useState<"exam" | "result">("exam");
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; questions: QuizQ[] } | null>(null);
+  // Silence unused warning; convoyeurId is authoritative server-side via auth.uid()
+  void convoyeurId;
 
   const submit = async (auto = false) => {
     if (!auto && questions.some((_, i) => answers[i] == null)) {
       if (!confirm("Certaines questions n'ont pas de réponse. Soumettre quand même ?")) return;
     }
     setSaving(true);
-    const correct = questions.filter((q, i) => answers[i] === q.answer).length;
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= exam.minimum_score;
-    const duration = Math.round((Date.now() - startedAt.current) / 1000);
-    await supabase.from("formation_exam_attempts" as never).insert({
-      convoyeur_id: convoyeurId, exam_id: exam.id, score, passed,
-      duration_seconds: duration, questions, answers,
-      started_at: new Date(startedAt.current).toISOString(), finished_at: new Date().toISOString(),
+    const { data, error } = await supabase.rpc("submit_formation_exam" as never, {
+      _exam_id: exam.id,
+      _question_indexes: selection,
+      _answers: answers,
+      _started_at: new Date(startedAt.current).toISOString(),
     } as never);
-    setResult({ score, passed });
-    setPhase("result");
     setSaving(false);
-    if (passed) toast.success("Examen réussi — certificat en cours de délivrance");
+    if (error || !data) { toast.error("Erreur lors de la soumission de l'examen."); return; }
+    const r = data as unknown as { score: number; passed: boolean; questions: QuizQ[] };
+    setResult({ score: r.score, passed: r.passed, questions: Array.isArray(r.questions) ? r.questions : [] });
+    setPhase("result");
+    if (r.passed) toast.success("Examen réussi — certificat en cours de délivrance");
   };
 
   useEffect(() => {
