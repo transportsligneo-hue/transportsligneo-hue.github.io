@@ -101,6 +101,9 @@ export function MissionCockpit({
   onUpdated,
   forceOpenSelfie = false,
   onSelfieModalStateChange,
+  missionNumber,
+  vehiculeEnergie,
+  vehiculeType,
 }: Props) {
   const gates = useMissionGates(attributionId);
   const [busy, setBusy] = useState(false);
