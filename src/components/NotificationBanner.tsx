@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface NotificationPayload {
   title: string;
