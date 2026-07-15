@@ -369,26 +369,79 @@ function ExamView({ exam, convoyeurId, onBack, onDone }: { exam: Exam; convoyeur
   const secs = remaining % 60;
 
   if (phase === "result" && result) {
+    const points = result.score * 2 * questions.length / 100; // total points (2 per Q on the shown set)
+    const totalPoints = questions.length * 2;
+    // Certification tier — based on the raw percent score
+    const tier = result.score >= 90
+      ? { label: "Convoyeur confirmé", tone: "gold" as const, msg: "Excellence : maîtrise complète des procédures Ligneo. Votre certificat est délivré." }
+      : result.score >= 80
+      ? { label: "Certification validée", tone: "success" as const, msg: "Certification obtenue. Votre certificat officiel est délivré, les missions sont débloquées." }
+      : result.score >= 70
+      ? { label: "Nouvelle tentative obligatoire après révision", tone: "warning" as const, msg: "Vous êtes proche du seuil. Révisez les modules ciblés puis repassez l'examen." }
+      : { label: "Formation complémentaire obligatoire", tone: "danger" as const, msg: "Score insuffisant. Reprenez l'ensemble des modules avant une nouvelle tentative." };
+
+    const toneCard =
+      tier.tone === "gold" ? "border-amber-300 bg-gradient-to-br from-amber-50 to-white"
+      : tier.tone === "success" ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white"
+      : tier.tone === "warning" ? "border-orange-200 bg-orange-50"
+      : "border-red-200 bg-red-50";
+    const toneText =
+      tier.tone === "gold" ? "text-amber-800"
+      : tier.tone === "success" ? "text-emerald-700"
+      : tier.tone === "warning" ? "text-orange-700"
+      : "text-red-700";
+
     return (
       <div className="space-y-5">
-        <div className={`rounded-2xl p-6 border shadow-pro-card ${result.passed ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white" : "border-red-200 bg-red-50"}`}>
-          <p className={`text-[11px] uppercase tracking-wider font-semibold ${result.passed ? "text-emerald-700" : "text-red-700"}`}>Résultat examen</p>
-          <p className={`text-5xl font-bold mt-2 ${result.passed ? "text-emerald-700" : "text-red-700"}`}>{result.score}%</p>
-          <p className={`text-sm mt-2 ${result.passed ? "text-emerald-800" : "text-red-800"}`}>{result.passed ? "Félicitations, vous êtes désormais Convoyeur certifié Transports Ligneo !" : `Score insuffisant — minimum ${exam.minimum_score}%. Vous pouvez recommencer l'examen.`}</p>
+        <div className={`rounded-2xl p-6 border shadow-pro-card ${toneCard}`}>
+          <p className={`text-[11px] uppercase tracking-wider font-semibold ${toneText}`}>Bilan de certification</p>
+          <div className="mt-2 flex items-baseline gap-3 flex-wrap">
+            <p className={`text-5xl font-bold ${toneText}`}>{points}<span className="text-2xl opacity-70">/{totalPoints}</span></p>
+            <p className={`text-lg font-semibold ${toneText}`}>({result.score} %)</p>
+          </div>
+          <p className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+            tier.tone === "gold" ? "bg-amber-100 text-amber-800 border border-amber-300"
+            : tier.tone === "success" ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+            : tier.tone === "warning" ? "bg-orange-100 text-orange-800 border border-orange-200"
+            : "bg-red-100 text-red-800 border border-red-200"
+          }`}>
+            {result.passed ? <Award size={13} /> : <RotateCcw size={13} />} {tier.label}
+          </p>
+          <p className={`text-sm mt-3 ${toneText}`}>{tier.msg}</p>
+          <p className="text-xs text-pro-muted mt-2">Seuil de réussite : {exam.minimum_score}% · Barème : 2 points par question</p>
         </div>
+
         {!result.passed && (
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-pro-text">Questions à revoir :</p>
+            <p className="text-sm font-semibold text-pro-text">Questions à revoir ({questions.filter((q, i) => answers[i] !== q.answer).length}) :</p>
             {questions.map((q, qi) => answers[qi] !== q.answer && (
-              <div key={qi} className="rounded-lg border border-red-200 bg-white p-3 text-sm">
-                <p className="font-semibold text-pro-text">{q.question}</p>
-                <p className="text-red-700 mt-1">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "—"}</p>
+              <div key={qi} className="rounded-lg border border-red-200 bg-white p-4 text-sm">
+                <p className="font-semibold text-pro-text">Q{qi + 1}. {q.question}</p>
+                <p className="text-red-700 mt-2">Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "— (non répondue)"}</p>
                 <p className="text-emerald-700 mt-0.5">Bonne réponse : {q.choices[q.answer]}</p>
+                {q.explanation && <p className="text-pro-text-soft mt-2 text-xs italic border-l-2 border-emerald-200 pl-2">{q.explanation}</p>}
               </div>
             ))}
           </div>
         )}
-        <button onClick={onDone} className="inline-flex items-center gap-2 rounded-lg bg-pro-accent px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">Retour à la formation <ArrowRight size={15} /></button>
+
+        <div className="flex gap-2 flex-wrap">
+          {result.passed ? (
+            <button onClick={onDone} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
+              <Award size={15} /> Voir mon certificat
+            </button>
+          ) : (
+            <button
+              onClick={() => { setAnswers({}); setResult(null); setPhase("exam"); setRemaining(exam.time_limit_minutes * 60); startedAt.current = Date.now(); }}
+              className="inline-flex items-center gap-2 rounded-lg bg-pro-accent px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              <RotateCcw size={15} /> Repasser l'examen
+            </button>
+          )}
+          <button onClick={onDone} className="inline-flex items-center gap-2 rounded-lg border border-pro-border px-4 py-2.5 text-sm text-pro-text hover:bg-pro-bg-soft">
+            Retour à la formation <ArrowRight size={15} />
+          </button>
+        </div>
       </div>
     );
   }
