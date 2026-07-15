@@ -38,7 +38,18 @@ const inputSchema = z.object({
 export const notifyUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    // Authorization: caller may only notify themselves, unless they are admin/super_admin.
+    if (data.userId !== context.userId) {
+      const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
+        context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+        context.supabase.rpc("has_role", { _user_id: context.userId, _role: "super_admin" }),
+      ]);
+      if (!isAdmin && !isSuper) {
+        throw new Response("Forbidden", { status: 403 });
+      }
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // 1) Vérifier préférence in_app (par défaut activée)
