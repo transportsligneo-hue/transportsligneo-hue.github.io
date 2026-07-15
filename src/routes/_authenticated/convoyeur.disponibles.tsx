@@ -4,16 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import {
-  MapPin,
   Calendar,
-  Car,
+  CarFront,
   Euro,
   CheckCircle2,
   Send,
   Clock,
   XCircle,
   Loader2,
-  Gavel,
+  Radar,
+  Navigation,
+  KeyRound,
+  ClipboardCheck,
+  Zap,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
