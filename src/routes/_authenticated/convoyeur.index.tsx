@@ -183,23 +183,23 @@ function ConvoyeurDashboard() {
       </div>
 
       {/* 4 stat cards */}
-      <div className="grid grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-4 gap-2">
         {statCards.map((c) => (
           <div
             key={c.label}
-            className="relative rounded-[20px] border border-[rgba(96,165,250,0.15)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]"
+            className="relative min-w-0 rounded-[18px] border border-[rgba(96,165,250,0.15)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-2.5 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)] transition-transform active:scale-[0.97]"
           >
-            <div className="flex items-start justify-between mb-2">
-              <div className={`w-9 h-9 rounded-xl border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center`}>
-                <c.icon size={16} className={c.iconColor} strokeWidth={2.2} />
+            <div className="flex items-start justify-between mb-1.5">
+              <div className={`w-8 h-8 rounded-lg border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center`}>
+                <c.icon size={14} className={c.iconColor} strokeWidth={2.4} />
               </div>
-              <ChevronRight size={14} className="text-[#5a6b93] mt-1" />
+              <ChevronRight size={12} className="text-[#5a6b93] mt-1" />
             </div>
-            <p className="text-[10px] uppercase tracking-[0.12em] text-[#8fa3cc] font-semibold">{c.label}</p>
-            <p className="text-[26px] font-bold text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
-            <div className="mt-2.5 inline-flex items-center gap-1">
-              <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor}`} />
-              <span className={`text-[10px] font-medium ${c.pillColor}`}>{c.pill}</span>
+            <p className="text-[9px] uppercase tracking-[0.14em] text-[#8fa3cc] font-extrabold truncate">{c.label}</p>
+            <p className="text-[20px] font-black text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
+            <div className="mt-2 flex items-center gap-1 min-w-0">
+              <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor} shrink-0`} />
+              <span className={`text-[9.5px] font-bold ${c.pillColor} truncate`}>{c.pill}</span>
             </div>
           </div>
         ))}
