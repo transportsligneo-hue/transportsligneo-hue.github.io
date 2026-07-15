@@ -319,285 +319,392 @@ function ConvoyeurDisponibles() {
   }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-pro-text flex items-center gap-2">
-          <Gavel size={22} className="text-emerald-600" /> Missions disponibles
-        </h1>
-        <p className="text-pro-muted text-sm mt-1">
-          {trajets.length === 0
-            ? "Aucune mission disponible pour le moment."
-            : `${trajets.length} mission${trajets.length > 1 ? "s" : ""} ouverte${trajets.length > 1 ? "s" : ""} aux propositions.`}
-        </p>
-      </div>
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
+      <style>{`
+        @keyframes ligneo-sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(220%); } }
+        @keyframes ligneo-pulse-ring { 0%, 100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+        @keyframes ligneo-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes ligneo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes ligneo-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } 50% { box-shadow: 0 0 24px 2px rgba(59,130,246,0.35); } }
+        .ligneo-neon-card { position: relative; background: linear-gradient(180deg, rgba(15,26,64,0.55) 0%, rgba(8,14,36,0.75) 100%); border: 1px solid rgba(96,165,250,0.18); border-radius: 22px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 20px 50px -24px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.05); transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+        .ligneo-neon-card:hover { transform: translateY(-2px); border-color: rgba(96,165,250,0.35); box-shadow: 0 30px 70px -24px rgba(59,130,246,0.55), 0 0 0 1px rgba(96,165,250,0.15) inset; }
+        .ligneo-neon-card::before { content: ""; position: absolute; inset: 0; border-radius: 22px; padding: 1px; background: linear-gradient(135deg, rgba(96,165,250,0.45), rgba(37,99,235,0) 40%, rgba(96,165,250,0) 60%, rgba(147,197,253,0.35)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; opacity: .8; }
+        .ligneo-badge-neon { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; background: rgba(59,130,246,0.12); border: 1px solid rgba(96,165,250,0.4); color: #bfdbfe; text-shadow: 0 0 8px rgba(96,165,250,0.5); }
+        .ligneo-badge-neon--amber { background: rgba(245,158,11,0.10); border-color: rgba(251,191,36,0.45); color: #fcd34d; text-shadow: 0 0 8px rgba(251,191,36,0.4); }
+        .ligneo-badge-neon--indigo { background: rgba(99,102,241,0.12); border-color: rgba(129,140,248,0.45); color: #c7d2fe; text-shadow: 0 0 8px rgba(129,140,248,0.4); }
+        .ligneo-badge-neon--emerald { background: rgba(16,185,129,0.10); border-color: rgba(52,211,153,0.45); color: #6ee7b7; text-shadow: 0 0 8px rgba(52,211,153,0.4); }
+        .ligneo-btn-neon { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 14px; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 55%, #1d4ed8 100%); box-shadow: 0 14px 30px -10px rgba(59,130,246,0.65), inset 0 1px 0 rgba(255,255,255,0.2); transition: transform .2s ease, box-shadow .3s ease; overflow: hidden; }
+        .ligneo-btn-neon:hover { box-shadow: 0 20px 40px -10px rgba(59,130,246,0.85), 0 0 0 1px rgba(147,197,253,0.4) inset; }
+        .ligneo-btn-neon:active { transform: scale(.97); }
+        .ligneo-btn-neon:disabled { opacity: .45; cursor: not-allowed; }
+        .ligneo-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 14px; font-size: 13px; font-weight: 600; color: #bfdbfe; background: rgba(59,130,246,0.06); border: 1px solid rgba(96,165,250,0.3); transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+        .ligneo-btn-ghost:hover:not(:disabled) { background: rgba(59,130,246,0.14); border-color: rgba(96,165,250,0.55); }
+        .ligneo-btn-ghost:active { transform: scale(.97); }
+        .ligneo-btn-ghost:disabled { opacity: .45; cursor: not-allowed; }
+        .ligneo-icon-orb { position: relative; width: 40px; height: 40px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 30%, rgba(96,165,250,0.28), rgba(8,14,36,0.6) 70%); border: 1px solid rgba(96,165,250,0.35); color: #bfdbfe; box-shadow: inset 0 0 12px rgba(59,130,246,0.35), 0 0 18px -6px rgba(59,130,246,0.4); }
+        .ligneo-dot-live { width: 8px; height: 8px; border-radius: 999px; background: #60a5fa; box-shadow: 0 0 0 4px rgba(96,165,250,0.18), 0 0 12px rgba(96,165,250,0.9); animation: ligneo-pulse-ring 1.8s ease-in-out infinite; }
+        .ligneo-flash-shell { position: relative; overflow: hidden; border-radius: 26px; background: linear-gradient(135deg, rgba(37,99,235,0.32) 0%, rgba(10,22,56,0.85) 55%, rgba(5,11,29,0.95) 100%); border: 1px solid rgba(96,165,250,0.3); box-shadow: 0 30px 80px -30px rgba(59,130,246,0.55), inset 0 0 0 1px rgba(147,197,253,0.08); }
+        .ligneo-flash-shell::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%); background-size: 220% 100%; animation: ligneo-shimmer 5s linear infinite; pointer-events: none; }
+        .ligneo-flash-line { position: absolute; height: 1px; background: linear-gradient(90deg, transparent, rgba(147,197,253,0.9), transparent); opacity: .8; animation: ligneo-sweep 4.5s ease-in-out infinite; }
+        .ligneo-particle { position: absolute; width: 3px; height: 3px; border-radius: 999px; background: #93c5fd; box-shadow: 0 0 8px #60a5fa, 0 0 16px #3b82f6; animation: ligneo-float 4s ease-in-out infinite; }
+        .ligneo-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #cbd5f5; background: rgba(15,26,64,0.6); border: 1px solid rgba(96,165,250,0.2); }
+        .ligneo-price-orb { position: relative; padding: 10px 16px; border-radius: 16px; background: linear-gradient(135deg, rgba(59,130,246,0.16), rgba(29,78,216,0.08)); border: 1px solid rgba(96,165,250,0.45); color: #dbeafe; box-shadow: inset 0 0 14px rgba(59,130,246,0.35), 0 8px 22px -8px rgba(59,130,246,0.5); }
+        .ligneo-route-node { width: 12px; height: 12px; border-radius: 999px; background: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,0.18), 0 0 12px rgba(96,165,250,0.9); }
+        .ligneo-route-node--end { background: #34d399; box-shadow: 0 0 0 3px rgba(52,211,153,0.18), 0 0 12px rgba(52,211,153,0.9); }
+        .ligneo-route-line { width: 2px; flex: 1; background: linear-gradient(180deg, rgba(96,165,250,0.9), rgba(52,211,153,0.9)); border-radius: 2px; opacity: .55; }
+        .ligneo-input-neon { width: 100%; padding: 12px 14px; border-radius: 14px; background: rgba(8,14,36,0.6); border: 1px solid rgba(96,165,250,0.28); color: #e0e7ff; font-size: 14px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+        .ligneo-input-neon:focus { border-color: rgba(147,197,253,0.65); box-shadow: 0 0 0 3px rgba(59,130,246,0.25); }
+      `}</style>
 
-      {!isValidated && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <p className="font-semibold">Validation des documents requise</p>
-          <p className="text-amber-800/90 mt-0.5">
-            Vous pourrez accepter des missions disponibles lorsque vos documents seront validés par notre équipe.
-          </p>
-        </div>
-      )}
+      <div
+        className="relative min-h-[calc(100vh-2rem)] px-4 sm:px-6 lg:px-8 pt-6 pb-24 text-white overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% 0%, #0b1a44 0%, #060e28 55%, #030814 100%)",
+        }}
+      >
+        {/* halos ambiants */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-16 w-[360px] h-[360px] rounded-full blur-[120px] opacity-60"
+          style={{ background: "radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute top-1/3 -left-24 w-[300px] h-[300px] rounded-full blur-[110px] opacity-40"
+          style={{ background: "radial-gradient(circle, rgba(56,189,248,0.35) 0%, transparent 70%)" }} />
 
-      {isValidated && !hasTraining && (
-        <a href="/convoyeur/formation" className="block rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 hover:bg-amber-100 transition-colors">
-          <p className="font-semibold">Formation obligatoire requise</p>
-          <p className="text-amber-800/90 mt-0.5">Terminez la formation avant d'accepter une mission ou de proposer un prix.</p>
-        </a>
-      )}
+        <div className="relative z-10 space-y-6 max-w-4xl mx-auto">
+          {/* === TITRE === */}
+          <div className="flex items-start gap-3">
+            <span className="ligneo-icon-orb shrink-0" aria-hidden>
+              <Radar size={20} strokeWidth={1.75} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] tracking-[0.32em] uppercase text-[#60a5fa] font-bold">
+                Convoyage · Missions
+              </p>
+              <h1 className="mt-1 text-[26px] sm:text-[30px] font-black leading-tight tracking-tight text-white">
+                Missions <span className="text-[#3b82f6]">disponibles</span>
+                <span className="text-[#60a5fa]">.</span>
+              </h1>
+              <p className="text-white/60 text-sm mt-1.5 flex items-center gap-2">
+                <span className="ligneo-dot-live" aria-hidden />
+                {trajets.length === 0
+                  ? "Aucune mission ouverte pour le moment."
+                  : `${trajets.length} mission${trajets.length > 1 ? "s" : ""} ouverte${trajets.length > 1 ? "s" : ""} aux propositions.`}
+              </p>
+            </div>
+          </div>
 
+          {/* === Alerts (préservées, restylées) === */}
+          {!isValidated && (
+            <div className="ligneo-neon-card p-4 flex items-start gap-3">
+              <span className="ligneo-icon-orb shrink-0" aria-hidden>
+                <ClipboardCheck size={18} />
+              </span>
+              <div>
+                <p className="font-bold text-white">Validation des documents requise</p>
+                <p className="text-white/65 text-sm mt-0.5">
+                  Vous pourrez accepter des missions dès que vos documents seront validés par notre équipe.
+                </p>
+              </div>
+            </div>
+          )}
 
+          {isValidated && !hasTraining && (
+            <a href="/convoyeur/formation" className="ligneo-neon-card p-4 flex items-start gap-3 block hover:no-underline">
+              <span className="ligneo-icon-orb shrink-0" aria-hidden>
+                <Sparkles size={18} />
+              </span>
+              <div>
+                <p className="font-bold text-white">Formation obligatoire</p>
+                <p className="text-white/65 text-sm mt-0.5">
+                  Terminez la formation avant d'accepter une mission ou de proposer un prix.
+                </p>
+              </div>
+              <ArrowRight size={16} className="ml-auto self-center text-[#60a5fa]" />
+            </a>
+          )}
 
-      {trajets.length === 0 ? (
-        <div className="bg-white border border-pro-border rounded-xl p-10 text-center">
-          <Gavel className="mx-auto text-pro-muted mb-3" size={32} />
-          <p className="text-pro-text-soft">Revenez plus tard, de nouvelles missions sont publiées régulièrement.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {trajets.map((t) => {
-            const offre = myOffres[t.id];
-            const open = openTrajetId === t.id;
-            return (
-              <div
-                key={t.id}
-                className="bg-white border border-pro-border rounded-xl overflow-hidden"
+          {/* === FLASH INFO — bandeau animé sans image === */}
+          <div className="ligneo-flash-shell p-5 sm:p-6">
+            {/* particules et lignes */}
+            <div aria-hidden className="absolute inset-0 pointer-events-none">
+              <div className="ligneo-flash-line" style={{ top: "22%", left: 0, right: 0, animationDelay: "0s" }} />
+              <div className="ligneo-flash-line" style={{ top: "58%", left: 0, right: 0, animationDelay: "1.4s" }} />
+              <div className="ligneo-flash-line" style={{ top: "82%", left: 0, right: 0, animationDelay: "2.6s" }} />
+              <span className="ligneo-particle" style={{ top: "20%", left: "12%", animationDelay: "0s" }} />
+              <span className="ligneo-particle" style={{ top: "48%", left: "78%", animationDelay: "1.2s" }} />
+              <span className="ligneo-particle" style={{ top: "72%", left: "22%", animationDelay: "2.1s" }} />
+              <span className="ligneo-particle" style={{ top: "35%", left: "62%", animationDelay: ".6s" }} />
+              <div className="absolute -top-16 -right-10 w-48 h-48 rounded-full blur-3xl bg-[#3b82f6]/40" />
+              <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full blur-3xl bg-[#60a5fa]/25" />
+            </div>
+
+            <div className="relative flex items-start gap-4">
+              <span
+                className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center border border-white/20"
+                style={{
+                  background: "linear-gradient(135deg, rgba(59,130,246,0.5), rgba(29,78,216,0.35))",
+                  boxShadow: "0 0 24px rgba(59,130,246,0.65), inset 0 1px 0 rgba(255,255,255,0.25)",
+                }}
+                aria-hidden
               >
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 text-pro-text font-semibold text-base">
-                        <MapPin size={15} className="text-emerald-600 shrink-0" />
-                        <span className="truncate">{t.depart}</span>
-                        <span className="text-pro-muted">→</span>
-                        <span className="truncate">{t.arrivee}</span>
+                <Zap size={22} className="text-white" strokeWidth={2} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <span className="ligneo-badge-neon">Flash info</span>
+                <h3 className="mt-2 text-white text-[17px] font-bold tracking-tight">
+                  Nouvelles missions publiées en direct
+                </h3>
+                <p className="text-white/70 text-[13px] mt-1 leading-relaxed">
+                  Le flux se met à jour en temps réel. Acceptez une mission au prix fixe ou proposez le vôtre en enchère.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* === LISTE === */}
+          {trajets.length === 0 ? (
+            <div className="ligneo-neon-card p-10 text-center">
+              <span className="ligneo-icon-orb mx-auto mb-3" aria-hidden>
+                <Radar size={20} />
+              </span>
+              <p className="text-white/70">Revenez plus tard, de nouvelles missions sont publiées régulièrement.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {trajets.map((t) => {
+                const offre = myOffres[t.id];
+                const open = openTrajetId === t.id;
+                const prixAffiche = prixDriverEffectif(t);
+                const isFixe = t.pricing_mode === "fixe";
+                return (
+                  <article key={t.id} className="ligneo-neon-card p-5">
+                    {/* Header : badges + date */}
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <span className={`ligneo-badge-neon ${isFixe ? "" : "ligneo-badge-neon--amber"}`}>
+                          {isFixe ? "Prix fixe" : "Enchère"}
+                        </span>
                         {(t.leg_type === "aller" || t.leg_type === "retour") && (
-                          <span
-                            className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                              t.leg_type === "aller"
-                                ? "bg-sky-100 text-sky-700"
-                                : "bg-indigo-100 text-indigo-700"
-                            }`}
-                            title="Mission liée à un aller-retour"
-                          >
+                          <span className={`ligneo-badge-neon ${t.leg_type === "aller" ? "" : "ligneo-badge-neon--indigo"}`}>
                             {t.leg_type === "aller" ? "Aller" : "Retour"}
                           </span>
                         )}
-                        {t.bidding_enabled && (
-                          <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
-                            Enchère
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-pro-text-soft">
-                        {t.date_trajet && (
-                          <span className="inline-flex items-center gap-1">
-                            <Calendar size={12} />
-                            {new Date(t.date_trajet).toLocaleDateString("fr-FR")}
-                            {t.heure_trajet && ` · ${t.heure_trajet}`}
-                          </span>
-                        )}
                         {(t.marque || t.modele) && (
-                          <span className="inline-flex items-center gap-1">
-                            <Car size={12} />
+                          <span className="ligneo-badge-neon ligneo-badge-neon--emerald inline-flex items-center gap-1.5">
+                            <CarFront size={11} strokeWidth={1.75} />
                             {[t.marque, t.modele].filter(Boolean).join(" ")}
                           </span>
                         )}
                       </div>
-                    </div>
-                    {(() => {
-                      const prixAffiche = prixDriverEffectif(t);
-                      const isFixe = t.pricing_mode === "fixe";
-                      return prixAffiche != null ? (
-                        <div className="text-right shrink-0">
-                          <p className="text-pro-muted text-[10px] uppercase tracking-wider">
-                            {isFixe ? "Prix fixe" : "À partir de"}
-                          </p>
-                          <p className="text-emerald-700 font-bold text-lg leading-tight">{prixAffiche} €</p>
-                          <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                            isFixe ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
-                          }`}>
-                            {isFixe ? "Fixe" : "Enchère"}
+                      {t.date_trajet && (
+                        <span className="ligneo-chip shrink-0">
+                          <Calendar size={12} strokeWidth={1.75} className="text-[#93c5fd]" />
+                          <span className="tabular-nums">
+                            {new Date(t.date_trajet).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}
+                            {t.heure_trajet && ` · ${t.heure_trajet}`}
                           </span>
-                        </div>
-                      ) : null;
-                    })()}
-                  </div>
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Statut de mon offre */}
-                  {offre && (
-                    <div
-                      className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs mb-3 ${
-                        offre.statut === "acceptee"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : offre.statut === "refusee"
-                          ? "bg-red-50 text-red-700"
-                          : offre.statut === "retiree"
-                          ? "bg-slate-50 text-slate-600"
-                          : "bg-amber-50 text-amber-700"
-                      }`}
-                    >
-                      <span className="inline-flex items-center gap-1.5 font-medium">
-                        {offre.statut === "acceptee" ? (
-                          <CheckCircle2 size={14} />
-                        ) : offre.statut === "refusee" ? (
-                          <XCircle size={14} />
-                        ) : (
-                          <Clock size={14} />
+                    {/* Trajet illustré */}
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center pt-1.5">
+                        <span className="ligneo-route-node" aria-hidden />
+                        <span className="ligneo-route-line my-1" style={{ minHeight: 30 }} aria-hidden />
+                        <span className="ligneo-route-node ligneo-route-node--end" aria-hidden />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div>
+                          <p className="text-[9.5px] tracking-[0.22em] uppercase font-bold text-[#60a5fa]/85">Départ</p>
+                          <p className="text-white font-semibold text-[15px] truncate mt-0.5">{t.depart}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9.5px] tracking-[0.22em] uppercase font-bold text-[#6ee7b7]/85">Arrivée</p>
+                          <p className="text-white font-semibold text-[15px] truncate mt-0.5">{t.arrivee}</p>
+                        </div>
+                      </div>
+
+                      {prixAffiche != null && (
+                        <div className="ligneo-price-orb text-right shrink-0 self-start">
+                          <p className="text-[9px] tracking-[0.22em] uppercase text-[#93c5fd] font-bold">
+                            {isFixe ? "Prix fixe" : "Dès"}
+                          </p>
+                          <p className="text-white text-[20px] font-black leading-tight tabular-nums mt-0.5">
+                            {prixAffiche} €
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Statut de mon offre */}
+                    {offre && (
+                      <div
+                        className="mt-4 flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl text-[12.5px] border"
+                        style={
+                          offre.statut === "acceptee"
+                            ? { background: "rgba(16,185,129,0.10)", borderColor: "rgba(52,211,153,0.4)", color: "#6ee7b7" }
+                            : offre.statut === "refusee"
+                            ? { background: "rgba(239,68,68,0.10)", borderColor: "rgba(248,113,113,0.4)", color: "#fca5a5" }
+                            : offre.statut === "retiree"
+                            ? { background: "rgba(148,163,184,0.10)", borderColor: "rgba(148,163,184,0.35)", color: "#cbd5f5" }
+                            : { background: "rgba(245,158,11,0.10)", borderColor: "rgba(251,191,36,0.4)", color: "#fcd34d" }
+                        }
+                      >
+                        <span className="inline-flex items-center gap-1.5 font-semibold">
+                          {offre.statut === "acceptee" ? <CheckCircle2 size={14} /> :
+                            offre.statut === "refusee" ? <XCircle size={14} /> : <Clock size={14} />}
+                          Votre offre : <strong className="tabular-nums">{offre.prix_propose} €</strong> · {offreStatutLabel[offre.statut]}
+                        </span>
+                        {offre.statut === "en_attente" && (
+                          <button
+                            onClick={() => retirerOffre(offre.id)}
+                            className="text-[#fca5a5] hover:text-white font-semibold underline underline-offset-2"
+                          >
+                            Retirer
+                          </button>
                         )}
-                        Votre offre : <strong>{offre.prix_propose} €</strong> · {offreStatutLabel[offre.statut]}
-                      </span>
-                      {offre.statut === "en_attente" && (
-                        <button
-                          onClick={() => retirerOffre(offre.id)}
-                          className="text-red-600 hover:underline font-medium"
-                        >
-                          Retirer
-                        </button>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
 
-                  {offre?.admin_counter_offer != null && offre.statut === "en_attente" && (
-                    <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">
-                      <p className="font-medium text-amber-900">
-                        Contre-proposition de l'admin : <strong>{offre.admin_counter_offer} €</strong>
-                      </p>
-                      {offre.admin_counter_at && (
-                        <p className="text-xs text-amber-700">
-                          Reçue le {new Date(offre.admin_counter_at).toLocaleString("fr-FR")}
+                    {offre?.admin_counter_offer != null && offre.statut === "en_attente" && (
+                      <div
+                        className="mt-3 rounded-xl border p-3.5 text-sm"
+                        style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(251,191,36,0.4)", color: "#fde68a" }}
+                      >
+                        <p className="font-semibold">
+                          Contre-proposition admin : <strong className="tabular-nums text-white">{offre.admin_counter_offer} €</strong>
                         </p>
-                      )}
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={async () => {
-                            const { error } = await supabase
-                              .from("mission_offres" as never)
-                              .update({
-                                prix_propose: offre.admin_counter_offer,
-                                admin_counter_offer: null,
-                                admin_counter_at: null,
-                              } as never)
-                              .eq("id" as never, offre.id as never);
-                            if (error) toast.error("Impossible d'accepter la contre-proposition.");
-                            else {
-                              toast.success("Contre-proposition acceptée.");
-                              fetchData();
-                            }
-                          }}
-                          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
-                        >
-                          Accepter {offre.admin_counter_offer} €
-                        </button>
-                        <button
-                          onClick={async () => {
-                            await supabase
-                              .from("mission_offres" as never)
-                              .update({ admin_counter_offer: null, admin_counter_at: null } as never)
-                              .eq("id" as never, offre.id as never);
-                            toast.info("Contre-proposition refusée, votre prix initial est maintenu.");
-                            fetchData();
-                          }}
-                          className="rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100"
-                        >
-                          Refuser
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  {!offre || offre.statut === "retiree" || offre.statut === "refusee" ? (
-                    !open ? (
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        {(() => {
-                          const prixAcc = prixDriverEffectif(t);
-                          const isFixe = t.pricing_mode === "fixe";
-                          return (
-                            <>
-                              {prixAcc != null && (
-                                <button
-                                  onClick={() => accepterPrixSuggere(t)}
-                                  disabled={submitting || !isValidated || !hasTraining}
-                                  title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <CheckCircle2 size={15} />
-                                  {isFixe ? `Accepter à ${prixAcc} €` : `Accepter à ${prixAcc} €`}
-                                </button>
-                              )}
-                              {!isFixe && (
-                                <button
-                                  onClick={() => {
-                                    if (!isValidated || !hasTraining) return;
-                                    setOpenTrajetId(t.id);
-                                    setContrePrix(prixAcc?.toString() ?? "");
-                                    setContreMessage("");
-                                  }}
-                                  disabled={!isValidated || !hasTraining}
-                                  title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
-                                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <Euro size={15} />
-                                  {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
-                                    ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
-                                    : "Proposer un autre prix"}
-                                </button>
-
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    ) : (
-                      <div className="space-y-2 border-t border-pro-border pt-3">
-                        <label className="block text-xs font-medium text-pro-text-soft">
-                          Votre prix (€)
-                        </label>
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          value={contrePrix}
-                          onChange={(e) => setContrePrix(e.target.value)}
-                          placeholder="ex: 250"
-                          className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-                        <label className="block text-xs font-medium text-pro-text-soft pt-1">
-                          Message (optionnel)
-                        </label>
-                        <textarea
-                          value={contreMessage}
-                          onChange={(e) => setContreMessage(e.target.value)}
-                          rows={2}
-                          placeholder="Justification, conditions, disponibilité..."
-                          className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                        />
-                        <div className="flex gap-2 pt-1">
+                        {offre.admin_counter_at && (
+                          <p className="text-xs opacity-80 mt-0.5">
+                            Reçue le {new Date(offre.admin_counter_at).toLocaleString("fr-FR")}
+                          </p>
+                        )}
+                        <div className="mt-3 flex gap-2">
                           <button
-                            onClick={() => setOpenTrajetId(null)}
-                            className="flex-1 px-3 py-2 bg-pro-bg-soft text-pro-text-soft rounded-lg text-sm font-medium hover:bg-slate-200"
+                            onClick={async () => {
+                              const { error } = await supabase
+                                .from("mission_offres" as never)
+                                .update({
+                                  prix_propose: offre.admin_counter_offer,
+                                  admin_counter_offer: null,
+                                  admin_counter_at: null,
+                                } as never)
+                                .eq("id" as never, offre.id as never);
+                              if (error) toast.error("Impossible d'accepter la contre-proposition.");
+                              else {
+                                toast.success("Contre-proposition acceptée.");
+                                fetchData();
+                              }
+                            }}
+                            className="ligneo-btn-neon !py-2 !px-3 text-xs"
                           >
-                            Annuler
+                            <CheckCircle2 size={13} />
+                            Accepter {offre.admin_counter_offer} €
                           </button>
                           <button
-                            onClick={() => envoyerContreProposition(t)}
-                            disabled={submitting || !contrePrix}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+                            onClick={async () => {
+                              await supabase
+                                .from("mission_offres" as never)
+                                .update({ admin_counter_offer: null, admin_counter_at: null } as never)
+                                .eq("id" as never, offre.id as never);
+                              toast.info("Contre-proposition refusée, votre prix initial est maintenu.");
+                              fetchData();
+                            }}
+                            className="ligneo-btn-ghost !py-2 !px-3 text-xs"
                           >
-                            <Send size={14} />
-                            Envoyer
+                            Refuser
                           </button>
                         </div>
                       </div>
-                    )
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+                    )}
+
+                    {/* Actions */}
+                    {!offre || offre.statut === "retiree" || offre.statut === "refusee" ? (
+                      !open ? (
+                        <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
+                          {prixAffiche != null && (
+                            <button
+                              onClick={() => accepterPrixSuggere(t)}
+                              disabled={submitting || !isValidated || !hasTraining}
+                              title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
+                              className="ligneo-btn-neon flex-1"
+                            >
+                              <KeyRound size={15} strokeWidth={2} />
+                              Accepter à {prixAffiche} €
+                            </button>
+                          )}
+                          {!isFixe && (
+                            <button
+                              onClick={() => {
+                                if (!isValidated || !hasTraining) return;
+                                setOpenTrajetId(t.id);
+                                setContrePrix(prixAffiche?.toString() ?? "");
+                                setContreMessage("");
+                              }}
+                              disabled={!isValidated || !hasTraining}
+                              title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
+                              className="ligneo-btn-ghost flex-1"
+                            >
+                              <Euro size={15} strokeWidth={2} />
+                              {t.prix_convoyeur_min != null || t.prix_convoyeur_max != null
+                                ? `Proposer (${t.prix_convoyeur_min ?? "—"}–${t.prix_convoyeur_max ?? "—"} €)`
+                                : "Proposer mon prix"}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="mt-4 space-y-2.5 pt-4 border-t border-white/[0.08]">
+                          <label className="block text-[11px] font-bold tracking-[0.18em] uppercase text-[#60a5fa]">
+                            Votre prix (€)
+                          </label>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            value={contrePrix}
+                            onChange={(e) => setContrePrix(e.target.value)}
+                            placeholder="ex: 250"
+                            className="ligneo-input-neon"
+                          />
+                          <label className="block text-[11px] font-bold tracking-[0.18em] uppercase text-[#60a5fa] pt-1">
+                            Message (optionnel)
+                          </label>
+                          <textarea
+                            value={contreMessage}
+                            onChange={(e) => setContreMessage(e.target.value)}
+                            rows={2}
+                            placeholder="Justification, conditions, disponibilité..."
+                            className="ligneo-input-neon resize-none"
+                          />
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              onClick={() => setOpenTrajetId(null)}
+                              className="ligneo-btn-ghost flex-1"
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              onClick={() => envoyerContreProposition(t)}
+                              disabled={submitting || !contrePrix}
+                              className="ligneo-btn-neon flex-1"
+                            >
+                              <Send size={14} />
+                              Envoyer
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+
+// Utilitaire visuel : icône chevron discrète pour navigation
+function _NavArrow() { return <Navigation size={14} />; }
+
