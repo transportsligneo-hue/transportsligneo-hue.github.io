@@ -185,7 +185,16 @@ function ProDashboard() {
   const facturesImpayees = factures.filter(f => f.statut !== "payee" && f.statut !== "paid").length;
   const isDeferredInvoice = (mode?: string | null) => /virement|diff[ée]r|30|60|90/i.test(mode ?? "");
   const facturesARegler = factures.filter(f => f.statut !== "payee" && f.statut !== "paid" && !isDeferredInvoice(f.mode_paiement)).length;
-  const devisEnAttente = devis.filter(d => !d.paid_at && !d.accepted_at && !d.locked_at && !d.mission_id && (d.statut === "envoye" || d.statut === "en_attente")).length;
+  const devisEnAttente = devis.filter(d => {
+    if (d.paid_at || d.accepted_at || d.locked_at || d.mission_id) return false;
+    // Exclure aussi les devis convertis, refusés, annulés
+    if ((d as { converted_at?: string | null }).converted_at) return false;
+    if ((d as { refused_at?: string | null }).refused_at) return false;
+    const terminal = ["accepte", "paye", "converti", "refuse", "annule", "expire"];
+    if (terminal.includes(d.statut ?? "")) return false;
+    return d.statut === "envoye" || d.statut === "en_attente";
+  }).length;
+
 
   if (loading) {
     return (
