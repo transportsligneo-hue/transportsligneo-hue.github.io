@@ -4,9 +4,10 @@ import { PendingProposalsBanner } from "@/components/convoyeur/PendingProposalsB
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
-  Truck, Clock, CheckCircle, AlertCircle, ArrowRight,
-  Calendar, MapPin, Navigation, Phone, FileText, Loader2, TrendingUp,
+  Truck, Clock, CheckCircle2, CheckSquare, ChevronRight, ArrowRight, ArrowUpRight,
+  Calendar, TrendingUp, FileText, Loader2,
 } from "lucide-react";
+import heroCar from "@/assets/driver-hero-supercar.jpg";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/")({
   component: ConvoyeurDashboard,
@@ -23,41 +24,18 @@ interface TodayMission {
     marque: string | null;
     modele: string | null;
     immatriculation: string | null;
-    contact_depart_tel: string | null;
-    contact_depart_nom: string | null;
-    contact_arrivee_tel: string | null;
-    contact_arrivee_nom: string | null;
   } | null;
 }
 
 function ConvoyeurDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ proposed: 0, accepted: 0, inProgress: 0, completed: 0, total: 0 });
+  const [stats, setStats] = useState({ proposed: 0, accepted: 0, inProgress: 0, completed: 0 });
   const [revenueMonth, setRevenueMonth] = useState(0);
+  const [revenueDelta, setRevenueDelta] = useState<number | null>(null);
   const [convoyeurName, setConvoyeurName] = useState("");
   const [todayMission, setTodayMission] = useState<TodayMission | null>(null);
   const [nextMission, setNextMission] = useState<TodayMission | null>(null);
-  const [availableCount, setAvailableCount] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  // Compte des missions publiées (prix fixe ou enchère) disponibles
-  useEffect(() => {
-    let cancelled = false;
-    const fetchAvail = async () => {
-      const { count } = await supabase
-        .from("trajets_publies_safe")
-        .select("id", { count: "exact", head: true })
-        .eq("statut_publication", "publie");
-      if (!cancelled) setAvailableCount(count ?? 0);
-    };
-    fetchAvail();
-    // Poll instead of Realtime to avoid broadcasting client PII via CDC payloads.
-    const interval = setInterval(fetchAvail, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -76,9 +54,9 @@ function ConvoyeurDashboard() {
         .select("id, statut, trajet_id")
         .eq("convoyeur_id", conv.id);
 
-      // Revenu du mois courant (missions terminées, calculé côté trajets)
       const now = new Date();
       const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const firstOfLast = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
       const termineIds = (attrs ?? [])
         .filter((a) => a.statut === "termine")
         .map((a) => a.trajet_id)
@@ -88,12 +66,18 @@ function ConvoyeurDashboard() {
           .from("trajets")
           .select("tarif_convoyeur, updated_at")
           .in("id", termineIds)
-          .gte("updated_at", firstOfMonth);
-        const revenue = (trs ?? []).reduce(
-          (s, t) => s + Number((t as { tarif_convoyeur: number | null }).tarif_convoyeur ?? 0),
-          0,
-        );
-        setRevenueMonth(revenue);
+          .gte("updated_at", firstOfLast);
+        const cur = (trs ?? [])
+          .filter((t) => (t as { updated_at: string }).updated_at >= firstOfMonth)
+          .reduce((s, t) => s + Number((t as { tarif_convoyeur: number | null }).tarif_convoyeur ?? 0), 0);
+        const prev = (trs ?? [])
+          .filter((t) => {
+            const u = (t as { updated_at: string }).updated_at;
+            return u >= firstOfLast && u < firstOfMonth;
+          })
+          .reduce((s, t) => s + Number((t as { tarif_convoyeur: number | null }).tarif_convoyeur ?? 0), 0);
+        setRevenueMonth(cur);
+        if (prev > 0) setRevenueDelta(Math.round(((cur - prev) / prev) * 100));
       }
 
       if (attrs && attrs.length > 0) {
@@ -102,23 +86,20 @@ function ConvoyeurDashboard() {
           accepted: attrs.filter((a) => a.statut === "accepte").length,
           inProgress: attrs.filter((a) => a.statut === "en_cours").length,
           completed: attrs.filter((a) => a.statut === "termine").length,
-          total: attrs.length,
         });
 
-        // Hydrate today/next missions
         const today = new Date().toISOString().split("T")[0];
         const enriched: TodayMission[] = [];
         for (const a of attrs) {
           if (a.statut === "termine") continue;
           const { data: t } = await supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, contact_depart_tel, contact_depart_nom, contact_arrivee_tel, contact_arrivee_nom")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
             .eq("id", a.trajet_id)
             .maybeSingle();
           enriched.push({ id: a.id, statut: a.statut, trajet: (t as unknown as TodayMission["trajet"]) ?? null });
         }
 
-        // Priority: in_progress > today's > next upcoming
         const inProg = enriched.find(m => m.statut === "en_cours");
         const todayM = enriched.find(m => m.trajet?.date_trajet === today && m.statut !== "en_cours");
         const upcoming = enriched
@@ -126,262 +107,193 @@ function ConvoyeurDashboard() {
           .sort((a, b) => (a.trajet!.date_trajet! > b.trajet!.date_trajet! ? 1 : -1))[0];
 
         setTodayMission(inProg ?? todayM ?? null);
-        setNextMission(!inProg && !todayM ? upcoming ?? null : upcoming ?? null);
+        setNextMission(upcoming ?? null);
       }
       setLoading(false);
     })();
   }, [user]);
 
-  const cards = [
-    { label: "Proposées", value: stats.proposed, icon: Clock, tone: "amber" as const },
-    { label: "Acceptées", value: stats.accepted, icon: AlertCircle, tone: "blue" as const },
-    { label: "En cours", value: stats.inProgress, icon: Truck, tone: "green" as const, live: stats.inProgress > 0 },
-    { label: "Terminées", value: stats.completed, icon: CheckCircle, tone: "muted" as const },
+  const statCards = [
+    { label: "Proposées", value: stats.proposed, icon: Clock, pill: "En attente",
+      iconBg: "from-[#3d2a10] to-[#2a1d0b]", iconBorder: "border-[rgba(234,179,8,0.35)]", iconColor: "text-[#f59e0b]",
+      dotColor: "bg-[#f59e0b]", pillColor: "text-[#fbbf24]" },
+    { label: "Acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
+      iconBg: "from-[#0d1f4d] to-[#0a1638]", iconBorder: "border-[rgba(96,165,250,0.35)]", iconColor: "text-[#60a5fa]",
+      dotColor: "bg-[#60a5fa]", pillColor: "text-[#93c5fd]" },
+    { label: "En cours", value: stats.inProgress, icon: Truck, pill: "Actives",
+      iconBg: "from-[#0f2e28] to-[#0a1f1a]", iconBorder: "border-[rgba(52,211,153,0.35)]", iconColor: "text-[#34d399]",
+      dotColor: "bg-[#34d399]", pillColor: "text-[#6ee7b7]" },
+    { label: "Terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
+      iconBg: "from-[#26183d] to-[#1a1128]", iconBorder: "border-[rgba(167,139,250,0.35)]", iconColor: "text-[#a78bfa]",
+      dotColor: "bg-[#a78bfa]", pillColor: "text-[#c4b5fd]" },
   ];
 
   if (loading) {
-    return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#e7c76a]" size={24} /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
   }
 
-  const heroStatus = todayMission?.statut;
-  const heroTone: "green" | "blue" | "amber" =
-    heroStatus === "en_cours" ? "green" : heroStatus === "accepte" ? "blue" : "amber";
-  const heroLabel =
-    heroStatus === "en_cours" ? "En cours" :
-    heroStatus === "accepte" ? "À démarrer" : "À accepter";
-
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-5 pb-4">
       <PendingProposalsBanner />
-      {/* Greeting */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <p className="brex-label-xs">Tableau de bord</p>
-          <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--driver-text)] mt-1">
-            Bonjour, {convoyeurName || "Convoyeur"}
+
+      {/* Greeting + Revenue */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-start">
+        <div className="min-w-0">
+          <h1 className="text-[34px] leading-[1.05] font-bold tracking-tight text-white">
+            Bonjour,
           </h1>
-          <p className="text-[13px] text-[var(--driver-text-soft)] mt-1">Vos missions, en un coup d'œil.</p>
+          <h1 className="text-[28px] leading-[1.1] font-bold tracking-tight text-white mt-0.5 truncate">
+            {convoyeurName || "Convoyeur"}
+          </h1>
+          <p className="text-[13.5px] text-[#8fa3cc] mt-2">Vos missions, en un coup d'œil.</p>
         </div>
-        <div className="brex-card px-4 py-3 min-w-[180px]">
-          <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[var(--driver-muted)]">
-            <TrendingUp size={12} /> Revenus du mois
-          </p>
-          <p className="text-[22px] font-semibold text-[#e7c76a] mt-0.5 tabular-nums">
+
+        {/* Revenue card */}
+        <div className="relative overflow-hidden rounded-[22px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] px-4 py-3.5 min-w-[170px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)]">
+          {/* mini chart bg */}
+          <svg className="absolute right-0 bottom-0 opacity-40 pointer-events-none" width="120" height="55" viewBox="0 0 120 55" fill="none">
+            <path d="M0 40 Q20 35 35 30 T70 20 T105 8 L120 5 L120 55 L0 55 Z" fill="url(#g1)" />
+            <path d="M0 40 Q20 35 35 30 T70 20 T105 8 L120 5" stroke="#4EA8FF" strokeWidth="1.5" fill="none" />
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#4EA8FF" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#4EA8FF" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="relative flex items-start justify-between gap-2">
+            <p className="text-[12px] text-[#c9d6f2]">Revenus du mois</p>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2F7DFF] to-[#1a5ad6] flex items-center justify-center shadow-[0_0_12px_rgba(78,168,255,0.5)]">
+              <TrendingUp size={14} className="text-white" />
+            </div>
+          </div>
+          <p className="relative text-[30px] font-bold text-[#f5b940] mt-1 tabular-nums leading-none tracking-tight">
             {revenueMonth.toFixed(0)} €
           </p>
-        </div>
-      </div>
-
-
-      {/* Bandeau "Nouvelles missions disponibles" — realtime */}
-      {availableCount > 0 && (
-        <Link
-          to="/convoyeur/disponibles"
-          className="brex-card flex items-center justify-between p-4 border border-[rgba(212,175,55,0.40)] bg-[rgba(212,175,55,0.06)] hover:bg-[rgba(212,175,55,0.10)] transition"
-        >
-          <div className="flex items-center gap-3">
-            <span className="brex-pill brex-pill--amber brex-pill--live">
-              <span className="brex-pill-dot" />
-              Nouveau
-            </span>
-            <div>
-              <p className="text-[14px] font-semibold text-[var(--driver-text)]">
-                {availableCount} mission{availableCount > 1 ? "s" : ""} disponible{availableCount > 1 ? "s" : ""}
-              </p>
-              <p className="text-[12px] text-[var(--driver-text-soft)] mt-0.5">
-                À accepter ou enchérir maintenant
-              </p>
-            </div>
-          </div>
-          <ArrowRight size={16} className="text-[#e7c76a] shrink-0" />
-        </Link>
-      )}
-
-      {/* Hero : mission active */}
-      {todayMission && todayMission.trajet && (
-        <Link
-          to="/convoyeur/missions"
-          className="brex-card block p-6 hover:no-underline"
-        >
-          <div className="flex items-center justify-between mb-5">
-            <span className={`brex-pill brex-pill--${heroTone} ${heroStatus === "en_cours" ? "brex-pill--live" : ""}`}>
-              <span className="brex-pill-dot" />
-              {heroLabel}
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px] text-[var(--driver-muted)]">
-              Ouvrir <ArrowRight size={13} />
-            </span>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <div className="flex flex-col items-center gap-1 pt-2 shrink-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#e7c76a] ring-2 ring-[rgba(212,175,55,0.20)]" />
-              <div className="w-px h-10 bg-[rgba(255,255,255,0.12)]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#93c5fd] ring-2 ring-[rgba(59,130,246,0.20)]" />
-            </div>
-            <div className="flex-1 min-w-0 space-y-3">
-              <div>
-                <p className="brex-label-xs">Départ</p>
-                <p className="text-[15px] font-medium text-[var(--driver-text)] truncate mt-0.5">{todayMission.trajet.depart}</p>
-              </div>
-              <div>
-                <p className="brex-label-xs">Arrivée</p>
-                <p className="text-[15px] font-medium text-[var(--driver-text)] truncate mt-0.5">{todayMission.trajet.arrivee}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="brex-divider mt-5 pt-4 flex items-center justify-between text-[12px] text-[var(--driver-text-soft)]">
-            <span className="flex items-center gap-1.5 tabular-nums">
-              <Calendar size={12} className="text-[var(--driver-muted)]" />
-              {todayMission.trajet.date_trajet
-                ? new Date(todayMission.trajet.date_trajet).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })
-                : "Date à définir"}
-              {todayMission.trajet.heure_trajet && <span> · {todayMission.trajet.heure_trajet}</span>}
-            </span>
-            {todayMission.trajet.immatriculation && (
-              <span className="font-mono text-[11px] text-[var(--driver-text-soft)] px-2 py-0.5 rounded border border-[rgba(255,255,255,0.10)] bg-white/[0.03]">
-                {todayMission.trajet.immatriculation}
+          {revenueDelta !== null && (
+            <p className="relative flex items-center gap-1 text-[11px] mt-3 text-[#8fa3cc]">
+              <ArrowUpRight size={12} className={revenueDelta >= 0 ? "text-[#34d399]" : "text-[#34d399] rotate-90"} />
+              <span className={revenueDelta >= 0 ? "text-[#34d399] font-semibold" : "text-[#34d399] font-semibold"}>
+                {revenueDelta > 0 ? "+" : ""}{revenueDelta}%
               </span>
-            )}
-          </div>
-        </Link>
-      )}
-
-      {/* Quick actions */}
-      {todayMission && todayMission.trajet && (
-        <div className="grid grid-cols-3 gap-2">
-          <a
-            href={todayMission.trajet.depart ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(todayMission.trajet.depart)}` : "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="brex-action flex-col py-3.5"
-          >
-            <Navigation size={16} />
-            <span className="text-[11px] mt-0.5">Itinéraire</span>
-          </a>
-          <a
-            href={todayMission.trajet.contact_depart_tel ? `tel:${todayMission.trajet.contact_depart_tel}` : "#"}
-            className={`brex-action flex-col py-3.5 ${!todayMission.trajet.contact_depart_tel ? "opacity-40 pointer-events-none" : ""}`}
-          >
-            <Phone size={16} />
-            <span className="text-[11px] mt-0.5">Appeler</span>
-          </a>
-          <Link
-            to="/convoyeur/missions"
-            className="brex-action brex-action--primary flex-col py-3.5"
-          >
-            <FileText size={16} />
-            <span className="text-[11px] mt-0.5">Détails</span>
-          </Link>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!todayMission && (
-        <div className="brex-card p-8 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.08)] mb-3">
-            <Truck size={20} className="text-[#e7c76a]" />
-          </div>
-          <p className="text-[var(--driver-text)] font-medium text-[14px]">Aucune mission active aujourd'hui</p>
-          <p className="text-[var(--driver-text-soft)] text-[12.5px] mt-1">Consultez les missions disponibles ou attendez une attribution.</p>
-          <Link
-            to="/convoyeur/disponibles"
-            className="brex-action brex-action--primary inline-flex mt-5 px-5 py-2.5"
-          >
-            Voir les missions disponibles <ArrowRight size={14} />
-          </Link>
-        </div>
-      )}
-
-      {/* Stats — Brex KPI tiles */}
-      <div>
-        <p className="brex-label-xs mb-3">Vue d'ensemble</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {cards.map((c) => (
-            <div key={c.label} className="brex-tile">
-              <p className="brex-tile-label">
-                <c.icon size={13} className="opacity-70" />
-                {c.label}
-              </p>
-              <p className="brex-tile-value">{c.value}</p>
-              <p className="brex-tile-delta">
-                <span className={`brex-pill brex-pill--${c.tone} ${c.tone === "green" && c.live ? "brex-pill--live" : ""}`}>
-                  <span className="brex-pill-dot" />
-                  {c.tone === "green" ? "Actives" : c.tone === "muted" ? "Archivées" : c.tone === "blue" ? "Planifiées" : "En attente"}
-                </span>
-              </p>
-            </div>
-          ))}
+              <span>vs mois dernier</span>
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Quick alert */}
-      {stats.proposed > 0 && (
-        <Link
-          to="/convoyeur/missions"
-          className="brex-card flex items-center justify-between p-4"
-        >
-          <div className="flex items-center gap-3">
-            <span className="brex-pill brex-pill--amber">
-              <span className="brex-pill-dot" />
-              Action requise
-            </span>
-            <div>
-              <p className="text-[13.5px] font-medium text-[var(--driver-text)]">
-                {stats.proposed} mission{stats.proposed > 1 ? "s" : ""} en attente de réponse
-              </p>
-              <p className="text-[11.5px] text-[var(--driver-text-soft)] mt-0.5">Acceptez ou refusez vos missions proposées</p>
+      {/* 4 stat cards */}
+      <div className="grid grid-cols-4 gap-2.5">
+        {statCards.map((c) => (
+          <div
+            key={c.label}
+            className="relative rounded-[20px] border border-[rgba(96,165,250,0.15)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]"
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div className={`w-9 h-9 rounded-xl border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center`}>
+                <c.icon size={16} className={c.iconColor} strokeWidth={2.2} />
+              </div>
+              <ChevronRight size={14} className="text-[#5a6b93] mt-1" />
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.12em] text-[#8fa3cc] font-semibold">{c.label}</p>
+            <p className="text-[26px] font-bold text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
+            <div className="mt-2.5 inline-flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor}`} />
+              <span className={`text-[10px] font-medium ${c.pillColor}`}>{c.pill}</span>
             </div>
           </div>
-          <ArrowRight size={16} className="text-[var(--driver-muted)] shrink-0" />
+        ))}
+      </div>
+
+      {/* Hero mission card */}
+      {todayMission && todayMission.trajet ? (
+        <Link
+          to="/convoyeur/missions"
+          className="relative block overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
+        >
+          <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
+          <div className="relative">
+            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Mission active</p>
+            <h2 className="text-[22px] font-bold text-white mt-2 leading-tight max-w-[60%]">
+              {todayMission.trajet.depart}
+            </h2>
+            <p className="text-[13px] text-[#c9d6f2] mt-2 max-w-[55%]">
+              → {todayMission.trajet.arrivee}
+            </p>
+            <button className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]">
+              Ouvrir la mission <ArrowRight size={16} />
+            </button>
+          </div>
         </Link>
+      ) : (
+        <div className="relative overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] min-h-[240px]">
+          <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-70 pointer-events-none" width={1536} height={1024} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
+          <div className="relative max-w-[60%]">
+            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Missions actives</p>
+            <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
+              Aucune mission active aujourd'hui
+            </h2>
+            <p className="text-[12.5px] text-[#c9d6f2] mt-2 leading-relaxed">
+              Consultez les missions disponibles ou attendez une attribution.
+            </p>
+            <Link
+              to="/convoyeur/disponibles"
+              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]"
+            >
+              Voir les missions disponibles <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
       )}
 
-      {/* Next mission */}
-      {nextMission && nextMission.trajet && nextMission.id !== todayMission?.id && (
-        <div>
-          <p className="brex-label-xs mb-3">Prochaine mission</p>
-          <Link
-            to="/convoyeur/missions"
-            className="brex-card flex items-start gap-3 p-4"
-          >
-            <div className="w-10 h-10 rounded-xl border border-[rgba(59,130,246,0.30)] bg-[rgba(59,130,246,0.08)] flex items-center justify-center shrink-0">
-              <Calendar size={16} className="text-[#93c5fd]" />
+      {/* Prochaine mission */}
+      {nextMission && nextMission.trajet && (
+        <Link
+          to="/convoyeur/missions"
+          className="block rounded-[22px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-4 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]"
+        >
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF] mb-3">Prochaine mission</p>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl border border-[rgba(96,165,250,0.30)] bg-gradient-to-br from-[#0d1f4d] to-[#0a1638] flex items-center justify-center shrink-0">
+              <Calendar size={18} className="text-[#60a5fa]" strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13.5px] font-medium text-[var(--driver-text)] truncate">
-                {nextMission.trajet.depart} → {nextMission.trajet.arrivee}
-              </p>
-              <p className="text-[11.5px] text-[var(--driver-text-soft)] mt-0.5 tabular-nums">
+              <p className="text-[14.5px] font-semibold text-white truncate">{nextMission.trajet.depart}</p>
+              <p className="text-[12px] text-[#8fa3cc] mt-0.5 tabular-nums capitalize">
                 {nextMission.trajet.date_trajet && new Date(nextMission.trajet.date_trajet).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                {nextMission.trajet.heure_trajet && ` · ${nextMission.trajet.heure_trajet}`}
+                {nextMission.trajet.heure_trajet && ` • ${nextMission.trajet.heure_trajet}`}
               </p>
             </div>
-            <ArrowRight size={16} className="text-[var(--driver-muted)] shrink-0 mt-2" />
-          </Link>
-        </div>
-      )}
-
-      {/* Quick links */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <Link to="/convoyeur/disponibles" className="brex-card flex items-center gap-3 p-4">
-          <div className="w-10 h-10 rounded-xl border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.08)] flex items-center justify-center">
-            <Truck size={16} className="text-[#e7c76a]" />
-          </div>
-          <div>
-            <p className="text-[13.5px] font-medium text-[var(--driver-text)]">Missions dispo</p>
-            <p className="text-[11.5px] text-[var(--driver-muted)]">Voir le catalogue</p>
+            <div className="w-10 h-10 rounded-xl border border-[rgba(96,165,250,0.22)] bg-white/[0.03] flex items-center justify-center shrink-0">
+              <ArrowRight size={16} className="text-[#8fa3cc]" />
+            </div>
           </div>
         </Link>
-        <Link to="/convoyeur/documents" className="brex-card flex items-center gap-3 p-4">
-          <div className="w-10 h-10 rounded-xl border border-[rgba(59,130,246,0.30)] bg-[rgba(59,130,246,0.08)] flex items-center justify-center">
-            <FileText size={16} className="text-[#93c5fd]" />
+      )}
+
+      {/* Two bottom quick links */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link to="/convoyeur/catalogue" className="rounded-[22px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3.5 flex items-center gap-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]">
+          <div className="w-11 h-11 rounded-xl border border-[rgba(234,179,8,0.35)] bg-gradient-to-br from-[#3d2a10] to-[#2a1d0b] flex items-center justify-center shrink-0">
+            <Truck size={18} className="text-[#f59e0b]" strokeWidth={2.2} />
           </div>
-          <div>
-            <p className="text-[13.5px] font-medium text-[var(--driver-text)]">Mes documents</p>
-            <p className="text-[11.5px] text-[var(--driver-muted)]">Permis, RIB, KBIS…</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13.5px] font-semibold text-white truncate">Missions dispo</p>
+            <p className="text-[11px] text-[#8fa3cc] mt-0.5">Voir le catalogue</p>
           </div>
+          <ChevronRight size={16} className="text-[#5a6b93] shrink-0" />
+        </Link>
+        <Link to="/convoyeur/documents" className="rounded-[22px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3.5 flex items-center gap-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]">
+          <div className="w-11 h-11 rounded-xl border border-[rgba(96,165,250,0.35)] bg-gradient-to-br from-[#0d1f4d] to-[#0a1638] flex items-center justify-center shrink-0">
+            <FileText size={18} className="text-[#60a5fa]" strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13.5px] font-semibold text-white truncate">Mes documents</p>
+            <p className="text-[11px] text-[#8fa3cc] mt-0.5">Permis, RIB, KBis…</p>
+          </div>
+          <ChevronRight size={16} className="text-[#5a6b93] shrink-0" />
         </Link>
       </div>
     </div>
