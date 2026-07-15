@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
+import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { notifyAdmin } from "@/lib/admin-notifications";
@@ -26,6 +26,7 @@ function InscriptionClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [field]: e.target.value });
@@ -190,7 +191,10 @@ function InscriptionClient() {
             <label className="auth-label">Mot de passe *</label>
             <div className="auth-field">
               <Lock size={16} className="auth-field-icon" />
-              <input type="password" value={form.password} onChange={update("password")} className="auth-input" required minLength={8} placeholder="Minimum 8 caractères" />
+              <input type={showPwd ? "text" : "password"} value={form.password} onChange={update("password")} className="auth-input pr-11" required minLength={8} placeholder="Minimum 8 caractères" />
+              <button type="button" onClick={() => setShowPwd(v => !v)} aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"} tabIndex={-1} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors">
+                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 

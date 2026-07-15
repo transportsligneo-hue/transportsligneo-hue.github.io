@@ -6,6 +6,7 @@ import { notifyAdmin } from "@/lib/admin-notifications";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
   Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
+  Eye, EyeOff,
 } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
@@ -46,6 +47,7 @@ function InscriptionConvoyeur() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
@@ -345,7 +347,12 @@ function InscriptionConvoyeur() {
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
                   <Lock size={12} className="inline mr-1" /> Mot de passe *
                 </label>
-                <input type="password" value={form.password} onChange={update("password")} className={inputClass} required minLength={8} placeholder="Minimum 8 caractères" />
+                <div className="relative">
+                  <input type={showPwd ? "text" : "password"} value={form.password} onChange={update("password")} className={`${inputClass} pr-11`} required minLength={8} placeholder="Minimum 8 caractères" />
+                  <button type="button" onClick={() => setShowPwd(v => !v)} aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"} tabIndex={-1} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/50 hover:text-cream transition-colors">
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
