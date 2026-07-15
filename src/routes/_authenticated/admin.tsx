@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -26,8 +26,17 @@ import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { verifyAdminAccess } from "@/lib/admin-guard.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async () => {
+    try {
+      await verifyAdminAccess();
+    } catch {
+      // Not an admin — redirect to the public home before rendering any admin UI.
+      throw redirect({ to: "/" });
+    }
+  },
   component: AdminLayout,
 });
 
