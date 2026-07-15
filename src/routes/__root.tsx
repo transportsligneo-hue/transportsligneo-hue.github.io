@@ -114,13 +114,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function PublicMobileBottomNav() {
+  const { user } = useAuth();
+  if (user) return null;
+  return <MobileBottomNav />;
+}
+
 function RootComponent() {
   return (
     <AuthProvider>
       <PricingProvider>
         <CursorSpotlight />
         <Outlet />
-        <MobileBottomNav />
+        <PublicMobileBottomNav />
         <PwaProvider />
         <PwaSplash />
         <Toaster />
@@ -128,3 +134,4 @@ function RootComponent() {
     </AuthProvider>
   );
 }
+
