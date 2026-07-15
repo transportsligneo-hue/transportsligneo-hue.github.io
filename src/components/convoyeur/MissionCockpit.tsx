@@ -504,7 +504,7 @@ export function MissionCockpit({
         <div className="mv3-hero">
           <div className="mv3-hero-mesh" />
           <div className="mv3-hero-head">
-            <div className="mv3-eyebrow">Mission convoyeur</div>
+            <div className="mv3-eyebrow">Mission convoyeur · {missionNumber ?? "—"}</div>
             <div className="mv3-live-pill">
               <span className="mv3-live-dot" />
               {isDone ? "Envoyée" : currentDef.short}
