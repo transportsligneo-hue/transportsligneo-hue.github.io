@@ -49,7 +49,7 @@ const Email = ({ prenom, numero, code, depart, arrivee, prix, validite = 10 }: P
       <HighlightBox
         label="Validité"
         value={`Ce code expire dans ${validite} minutes.`}
-        tone="warning"
+        tone="gold"
       />
       {(numero || depart || arrivee || prix) && (
         <RecapCard
