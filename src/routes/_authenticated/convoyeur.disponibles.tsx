@@ -16,7 +16,6 @@ import {
   Navigation,
   KeyRound,
   ClipboardCheck,
-  Zap,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
