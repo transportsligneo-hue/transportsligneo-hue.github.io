@@ -197,8 +197,6 @@ function InscriptionClient() {
               </button>
             </div>
           </div>
-            </div>
-          </div>
 
           {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
