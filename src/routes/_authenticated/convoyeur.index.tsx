@@ -195,8 +195,8 @@ function ConvoyeurDashboard() {
               </div>
               <ChevronRight size={12} className="text-[#5a6b93] mt-1" />
             </div>
-            <p className="text-[10px] uppercase tracking-[0.1em] text-[#8fa3cc] font-black leading-tight">{c.label}</p>
-            <p className="text-[17px] font-black text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
+            <p className="text-[10px] uppercase tracking-[0.08em] text-[#8fa3cc] font-black leading-tight">{c.label}</p>
+            <p className="text-[17px] font-normal text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
             <div className="mt-1.5 flex items-center gap-1 min-w-0">
               <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor} shrink-0`} />
               <span className={`text-[10px] font-bold ${c.pillColor} leading-tight`}>{c.pill}</span>
