@@ -1,77 +1,88 @@
-# Plan — Académie de formation convoyeur Transports Ligneo
-
-## Décisions retenues (réponses utilisateur)
-- **Rédaction** : Lovable rédige les 10 modules à partir du contenu détaillé fourni dans le prompt.
-- **Illustrations** : placeholders `[IMAGE: description]` dans le contenu + upload admin pour remplacer par les vraies photos.
-- **Modules existants** : reset complet — purge des progressions, tentatives et certificats, réinitialisation du statut des convoyeurs.
 
 ## Objectif
-Transformer le parcours actuel en une véritable académie e-learning : navigation fluide, contenu pédagogique structuré, quiz de fin de module, examen final professionnel 50 questions, certificat et déblocage des missions.
 
-## Phase 1 — Reset et fondation (base de données)
-1. Créer une migration SQL de reset :
-   - `TRUNCATE` de `formation_progress`, `formation_exam_attempts`, `formation_certificates` (ou marquage `revoked_at`).
-   - Réinitialisation de tous les `convoyeurs` : `has_completed_training = false`, `training_status = 'not_started'`, `training_completed_at = NULL`.
-2. Vider `formation_modules` et `formation_exams` pour insérer le nouveau contenu.
-3. Vérifier que les fonctions/triggers existants (`refresh_convoyeur_training_status`, `handle_exam_attempt`, `submit_module_quiz`, `submit_formation_exam`) restent compatibles.
+Remplacer le rendu visuel actuel du cockpit convoyeur (blanc/vert, `MissionCockpit.tsx` + `MissionWorkflow.tsx` + `PremiumMissionHero.tsx`) par la copie conforme du mockup `mission-app-ligneo-v3.jsx` : thème sombre bleu nuit + accents cyan/bleu néon, hero avec anneau de progression et "road path" animé, 3 onglets (Action / Informations / Documents), cartes glass, chips d'étapes, timeline verticale, carte véhicule "identité" avec scan-line, carte client avec route mini.
 
-## Phase 2 — Injection du contenu pédagogique
-1. Insérer les **10 modules** selon le prompt fourni, avec pour chacun :
-   - `slug`, `title`, `description`, `estimated_minutes` (conformément au prompt).
-   - `sections` JSONB riches : `text`, `callout` (⚠️ Point clé), `checklist`, `image` (placeholder `[IMAGE: …]` + légende).
-   - `quiz_questions` JSONB : 4 questions QCM à la fin du module, 1 bonne réponse, score minimum 80 %.
-   - `is_required = true`, `is_active = true`, `category` adaptée.
-2. Insérer l'**examen final** :
-   - 50 questions couvrant l'ensemble des 10 modules.
-   - Types : QCM, vrai/faux, mises en situation.
-   - `question_count = 50`, `time_limit_minutes = 50`, `minimum_score = 80`.
-   - Explications pour chaque bonne réponse.
+**Contrainte clé** : le CTA de progression **ne doit plus dire "Valider cette étape"** — il doit afficher directement le libellé de l'action à faire (ex. "Arrivé au lieu d'enlèvement", "Commencer l'état des lieux d'enlèvement", "Démarrer le trajet", "Envoyer à l'admin"). Au clic, il exécute exactement la logique métier actuelle de cette étape (ouverture EDL, selfie, signatures, transitions statut).
 
-## Phase 3 — Expérience apprenant (`/convoyeur/formation`)
-1. Refonte de la vue d'ensemble :
-   - Cartes de modules numérotées (1 → 10), avec indicateur d'état (verrouillé / en cours / terminé).
-   - Barre de progression globale.
-   - Bloc examen final débloqué uniquement quand tous les modules obligatoires sont validés.
-   - Section certificat une fois l'examen réussi.
-2. Vue module :
-   - Affichage continu du contenu pédagogique (pas de quiz interrompant la lecture).
-   - Rendu des sections riches : titres, textes, encadrés point clé, checklists, placeholders image avec légende.
-   - Quiz de 4 questions en bas de page, avec correction immédiate et blocage du module suivant si score < 80 %.
-   - Navigation : précédent / suivant, retour à l'académie.
-3. Vue examen final :
-   - Chronomètre 50 min, soumission automatique à la fin du temps.
-   - 50 questions paginées ou scrollées, indicateur de progression.
-   - Bilan détaillé : score, seuil, questions à revoir, délivrance du certificat si réussite.
-4. Cohérence visuelle :
-   - Respect de la charte premium : navy `#0b1026` / `#111a3d`, crème `#faf7ef` / `#fdfcf8`, doré `#d4af37`, typographies Playfair / Inter.
-   - Pas de Framer Motion (CSS/Tailwind uniquement).
+**Aucune modification** : logique DB, `MissionWorkflow` métier interne, `useMissionGates`, `DriverSelfieCapture`, `IncidentReportSheet`, `ArriveeSignatureSheet`, inspections EDL, MissionContactsBlock, PV digitaux, tracking GPS, réalisation des étapes. Uniquement le rendu.
 
-## Phase 4 — Administration (`/admin/formation`)
-1. Améliorer l'éditeur de modules :
-   - Formulaire visuel d'ajout/modification des sections (texte, callout, checklist, image placeholder).
-   - Upload d'image pour remplacer un placeholder par une URL/vrai fichier (bucket storage dédié ou URL externe).
-   - Éditeur des 4 questions QCM du module.
-2. Améliorer l'éditeur d'examen :
-   - Interface de gestion du pool de 50 questions (ajout, suppression, réorganisation).
-   - Paramètres : nombre de questions tirées, durée, score minimum.
-3. Tableau de bord résultats :
-   - Progression par convoyeur, tentatives, scores, certificats émis.
-   - Actions : réinitialiser un convoyeur, forcer la certification, révoquer/réactiver un certificat.
+## Périmètre fichiers
 
-## Phase 5 — Vérification
-1. Build / typecheck du projet.
-2. Test visuel de l'académie côté convoyeur (parcours module + quiz + examen).
-3. Test de l'admin (édition module, upload image, résultats).
-4. Vérification que le reset a bien purgé les anciennes données et que les nouvelles progressions fonctionnent.
+- **Réécriture visuelle** de `src/components/convoyeur/MissionCockpit.tsx` : nouvelle structure JSX (hero + tabs + panes) mais réutilise les mêmes hooks/effects, les mêmes callbacks (`onStartInspection`, `onMacroStatusChange`, `onUpdated`, `runAction`) et le même state actuel (`currentStep`, `selfie modal`, `signature sheet`, `incident sheet`). Les 3 panes appellent les blocs existants (`MissionContactsBlock`, etc.) via composition.
+- **Réécriture visuelle** de `src/components/convoyeur/PremiumMissionHero.tsx` → devient le hero sombre du mockup (ProgressRing, RoadPath, live-pill, badges). Mêmes props que celles déjà consommées par `convoyeur.missions.tsx`.
+- `src/routes/_authenticated/convoyeur.missions.tsx` : ajuster le fond (dark) autour de la carte mission active + supprimer les fonds clairs qui entourent le cockpit. Pas de refactor logique.
+- Ajout d'un fichier CSS scoped `src/components/convoyeur/mission-v3.css` (importé par MissionCockpit) contenant les classes du mockup (`.glass-card`, `.hero`, `.tab-pill`, `.step-advance-btn`, `.chip`, `.vehicle-card`, `.timeline`, `.copy-field`, keyframes `roadFlow`, `shine`, `pulseDot`, `riseIn`…). Fonts Space Grotesk + JetBrains Mono chargées via `<link>` dans `src/routes/__root.tsx` (Inter est déjà présent).
+- `MissionWorkflow.tsx` : **inchangé** — reste utilisable ailleurs (fallback / autre écran). Non affiché dans le nouveau cockpit.
 
-## Livrables attendus
-- Migrations SQL de reset + injection contenu.
-- `src/routes/_authenticated/convoyeur.formation.tsx` refondu.
-- `src/routes/_authenticated/admin.formation.tsx` enrichi (éditeur visuel + upload).
-- Composants pédagogiques réutilisables dans `src/components/formation/`.
-- Examen final 50 questions opérationnel avec certificat PDF.
+## Mapping étapes → CTA (remplace "Valider cette étape")
 
-## Notes
-- Le contenu exact des 10 modules et des 50 questions de l'examen sera calqué sur le prompt fourni par l'utilisateur.
-- Les images seront des placeholders textuels ; l'upload admin permettra de les remplacer ensuite.
-- Le blocage module suivant se fait via le score du quiz (80 % minimum), pas via des questions en cours de lecture.
+Le mockup a un `handleAdvance` générique. On garde la liste `STEPS` existante de `MissionCockpit` (déjà correcte), mais le bouton principal affiche **`step.cta`** (déjà le libellé de l'action) et déclenche la même `runAction(step.key)` déjà implémentée :
+
+| Étape                  | Libellé bouton (déjà présent dans STEPS)           | Action existante                         |
+| ---------------------- | -------------------------------------------------- | ---------------------------------------- |
+| `demarrer`             | En route pour récupérer le véhicule                | persistEtape + status en_cours           |
+| `arrive_depart`        | Arrivé au lieu d'enlèvement                        | persistEtape + ouvre selfie              |
+| `selfie`               | Prendre mon selfie convoyeur                       | ouvre DriverSelfieCapture                |
+| `edl_depart`           | Commencer l'état des lieux d'enlèvement            | onStartInspection("depart")              |
+| `demarrer_livraison`   | Démarrer le trajet                                 | persistEtape en_livraison                |
+| `arrive_livraison`     | Arrivé au lieu de livraison                        | persistEtape arrive_destination          |
+| `edl_arrivee`          | Commencer l'état des lieux d'arrivée               | onStartInspection("arrivee")             |
+| `signature_arrivee`    | Signer la livraison                                | ouvre ArriveeSignatureSheet              |
+| `selfie_final`         | Prendre le selfie final                            | ouvre DriverSelfieCapture (final)        |
+| `cloturer`             | Envoyer à l'admin                                  | onMacroStatusChange en_attente_validation|
+| `done`                 | Mission envoyée (bouton disabled, style "done")    | —                                        |
+
+Aucun changement fonctionnel : on remplace uniquement le texte "Valider cette étape" par `step.cta` dans le rendu du bouton principal + un style disabled/done identique au mockup.
+
+## Structure UI (copie conforme mockup)
+
+```text
+┌─ TopBar  (crest Ligneo + Bell + Menu)          ─┐   (déjà en dehors, garder l'existant)
+├─ Hero    ProgressRing + RoadPath + live-pill    │
+├─ TabBar  [Action] [Informations] [Documents]    │
+│                                                 │
+│ Action pane :                                   │
+│   ├─ glass-card "À faire" (checklist énergie)   │  ← branchée sur vehicule.energie
+│   ├─ next-card :                                │
+│   │    ├─ ProgressBadgeRing + Étape N/total     │
+│   │    ├─ next-icon + titre + hint              │
+│   │    ├─ step-advance-btn = step.cta           │  ← plus de "Valider cette étape"
+│   │    ├─ StepDots                              │
+│   │    └─ chip-row (short labels)               │
+│   └─ bouton discret "Signaler un incident"      │
+│                                                 │
+│ Informations pane :                             │
+│   ├─ vehicle-card (identité + VIN + copy)       │
+│   ├─ client-card (avatar + phone + route mini)  │
+│   ├─ quick-grid (Ouvrir GPS / Appels / Aide)    │
+│   └─ timeline verticale des étapes              │
+│                                                 │
+│ Documents pane :                                │
+│   ├─ docs-summary (progress bar + doc-list)     │  ← branche sur mission_documents réels
+│   └─ ajout document (dropzone + catégories)     │  ← délègue à handler existant
+└─────────────────────────────────────────────────┘
+```
+
+Sources de données réelles à brancher (pas de fake) :
+- `VEHICLE` → `attribution.vehicule` déjà passé en prop.
+- `CLIENT` → depuis `MissionContactsBlock` data (nom, tel, adresses pickup/delivery, instructions).
+- `STEPS`/progression → `currentEtape` réel.
+- `DOCUMENTS` → requête `mission_documents` existante.
+
+## Guardrails
+
+- **Aucune modification** des tables Supabase, RLS, hooks métier, ni `MissionWorkflow.tsx`.
+- **Framer-motion interdit** (rappel memory). Toutes animations en CSS/SVG (déjà le cas dans le mockup).
+- Le cockpit sombre s'affiche **uniquement dans le contexte mission convoyeur** ; ne pas propager le thème sombre au reste de l'espace convoyeur (le fond parent reste géré par `convoyeur.missions.tsx`).
+- Fonts : ajouter `Space Grotesk` et `JetBrains Mono` via `<link>` dans `__root.tsx` (jamais `@import` dans styles.css — rule tanstack).
+- Icône du bouton : petit `ArrowUpRight` à droite du libellé (comme mockup), `Check` quand étape terminée.
+- Accessibilité : garder `aria-label`, focus visibles, tap targets ≥ 44px.
+- Toutes les actions gate-lockées (selfie obligatoire, EDL, etc.) restent respectées : bouton disabled + bandeau `Lock` déjà présent, réutilisé tel quel avec le style sombre du mockup.
+
+## Livrable
+
+Une seule PR d'intégration visuelle. Après implémentation :
+- ouvrir une mission convoyeur → doit être **pixel-proche** du mockup v3
+- cliquer sur le CTA principal doit exécuter l'action de l'étape courante (pas un "valider" générique)
+- EDL, selfie, signatures, incident, envoi admin : comportements strictement identiques à aujourd'hui.

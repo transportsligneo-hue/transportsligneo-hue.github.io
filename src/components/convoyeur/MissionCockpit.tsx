@@ -374,94 +374,278 @@ export function MissionCockpit({
     ? 100
     : Math.min(95, Math.round((visualIdx / totalVisual) * 100));
 
+  const ringSize = 92;
+  const ringStroke = 6;
+  const ringR = (ringSize - ringStroke) / 2;
+  const ringC = 2 * Math.PI * ringR;
+  const ringPct = isDone ? 1 : Math.min(0.95, (visualIdx + 1) / totalVisual);
+
+  const badgeSize = 50;
+  const badgeStroke = 4;
+  const badgeR = (badgeSize - badgeStroke) / 2;
+  const badgeC = 2 * Math.PI * badgeR;
+
   return (
     <>
-      <div className={`rounded-2xl border shadow-lg overflow-hidden ${isDone ? "bg-emerald-50 border-emerald-200" : "border-pro-border"}`}>
-        {/* HERO premium midnight/gold */}
-        <div className={`relative px-4 sm:px-5 pt-5 pb-4 ${isDone ? "bg-emerald-600 text-white" : "bg-gradient-to-br from-[#0b1026] via-[#141432] to-[#0b1026] text-white"}`}>
-          <div className="flex items-start gap-3">
-            <div className={`w-14 h-14 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${isDone ? "bg-white text-emerald-600" : "bg-[#d4af37] text-[#0b1026]"}`}>
-              <currentDef.icon size={26} />
+      <div className="mv3-root">
+        <style>{`
+          .mv3-root { font-family: 'Inter', sans-serif; color: #EAF3FF;
+            border-radius: 26px; overflow: hidden; position: relative; isolation: isolate;
+            background: #060B24;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(120,180,255,0.08); }
+          .mv3-root::before {
+            content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+            background:
+              radial-gradient(38% 30% at 15% 8%, rgba(47,107,255,0.30), transparent 65%),
+              radial-gradient(45% 35% at 92% 18%, rgba(47,216,255,0.26), transparent 65%),
+              radial-gradient(50% 40% at 25% 96%, rgba(110,70,255,0.16), transparent 65%);
+            filter: blur(20px); opacity: .55;
+          }
+          .mv3-hero { position: relative; margin: 14px; padding: 18px 18px 6px; border-radius: 22px;
+            background: linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
+            backdrop-filter: blur(18px); border: 1px solid rgba(120,180,255,0.14); overflow: hidden; }
+          .mv3-hero-mesh { position: absolute; top: -40%; left: -10%; width: 140%; height: 160%;
+            background: radial-gradient(closest-side, rgba(47,216,255,0.16), transparent 70%); pointer-events: none; }
+          .mv3-hero-head { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+          .mv3-eyebrow { font-size: 10px; letter-spacing: .6px; color: #9098AE; font-weight: 600; text-transform: uppercase; }
+          .mv3-live-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(47,216,255,0.12);
+            border: 1px solid rgba(47,216,255,0.35); color: #2FD8FF; font-size: 10.5px; font-weight: 700;
+            padding: 5px 10px; border-radius: 20px; }
+          .mv3-live-dot { width: 5px; height: 5px; border-radius: 50%; background: #2FD8FF; animation: mv3PulseDot 1.6s ease-in-out infinite; }
+          @keyframes mv3PulseDot { 0%,100% { box-shadow: 0 0 0 0 rgba(47,216,255,.6);} 50% { box-shadow: 0 0 0 5px rgba(47,216,255,0);} }
+          .mv3-hero-mid { display: flex; align-items: center; gap: 16px; margin-top: 14px; position: relative; z-index: 1; }
+          .mv3-ring-wrap { position: relative; flex-shrink: 0; }
+          .mv3-ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+          .mv3-ring-num { font-size: 22px; font-weight: 800; line-height: 1; }
+          .mv3-ring-den { font-size: 7.5px; color: #8A93AC; margin-top: 2px; text-align: center; }
+          .mv3-ring-progress { transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+          .mv3-hero-title { font-size: 17px; font-weight: 700; line-height: 1.25; }
+          .mv3-hero-sub { font-size: 12px; color: #9098AE; margin-top: 4px; }
+          .mv3-hero-badges { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+          .mv3-hero-badges span { font-size: 10px; font-weight: 600; color: #C7CCDA; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(120,180,255,0.12); padding: 4px 8px; border-radius: 8px; }
+          .mv3-road-svg { width: 100%; height: 46px; margin-top: 6px; position: relative; z-index: 1; }
+          .mv3-road-fill { animation: mv3RoadFlow 3s linear infinite; }
+          @keyframes mv3RoadFlow { to { stroke-dashoffset: -110; } }
+
+          .mv3-pane { padding: 0 14px 16px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
+
+          .mv3-glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px);
+            border: 1px solid rgba(120,180,255,0.12); border-radius: 20px; padding: 16px; position: relative; overflow: hidden; }
+          .mv3-next-glow { position: absolute; top: -50px; right: -50px; width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(47,216,255,0.18), transparent 70%); }
+          .mv3-badge-ring { position: relative; flex-shrink: 0; }
+          .mv3-badge-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800; color: #EAF3FF; }
+          .mv3-badge-ring-progress { transition: stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1);
+            filter: drop-shadow(0 0 5px rgba(47,216,255,.45)); }
+          .mv3-step-header { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+          .mv3-step-header-text { display: flex; flex-direction: column; gap: 3px; }
+          .mv3-step-eyebrow { font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; color: #7C93C2; font-weight: 800; }
+          .mv3-step-count { font-size: 16px; font-weight: 800; color: #F5F6FA; }
+          .mv3-step-count .mv3-step-total { color: #5F7BB8; font-weight: 600; }
+
+          .mv3-next-main { display: flex; gap: 12px; margin-top: 14px; position: relative; z-index: 1;
+            animation: mv3StepSwap .45s cubic-bezier(.2,.8,.2,1) both; }
+          @keyframes mv3StepSwap { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+          .mv3-next-icon { width: 48px; height: 48px; border-radius: 15px; flex-shrink: 0; display: flex; align-items: center;
+            justify-content: center; background: linear-gradient(140deg,#2F6BFF,#2FD8FF); color: #06070C;
+            box-shadow: 0 8px 24px rgba(47,107,255,0.35); }
+          .mv3-next-title { font-size: 15px; font-weight: 700; }
+          .mv3-next-sub { font-size: 12px; color: #9098AE; margin-top: 3px; line-height: 1.4; }
+
+          .mv3-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 16px;
+            background: linear-gradient(120deg,#2F6BFF,#2FD8FF); color: #06070C; border: none;
+            padding: 14px; border-radius: 14px; font-size: 13.5px; font-weight: 800; cursor: pointer; font-family: inherit;
+            box-shadow: 0 10px 26px rgba(47,107,255,0.32); transition: transform .15s, box-shadow .15s; position: relative; z-index: 1;
+            min-height: 52px; }
+          .mv3-cta:active { transform: scale(0.97); }
+          .mv3-cta:disabled { opacity: .55; cursor: not-allowed; }
+          .mv3-cta.done { background: rgba(52,232,176,0.14); color: #34E8B0; box-shadow: none;
+            border: 1px solid rgba(52,232,176,0.4); cursor: default; }
+
+          .mv3-dots { display: flex; gap: 5px; margin-top: 16px; position: relative; z-index: 1; }
+          .mv3-dot { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); position: relative; overflow: hidden; }
+          .mv3-dot.done { background: linear-gradient(90deg,#2F6BFF,#2FD8FF); box-shadow: 0 0 6px rgba(47,216,255,.5); }
+          .mv3-dot.current { background: rgba(47,216,255,0.14); }
+          .mv3-dot.current::after { content: ""; position: absolute; inset: 0; border-radius: 3px; transform-origin: left;
+            background: linear-gradient(90deg,#2F6BFF,#2FD8FF); animation: mv3DotFill 1.7s ease-in-out infinite; }
+          @keyframes mv3DotFill { 0% { transform: scaleX(.08); opacity: .85; } 55% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(.08); opacity: .85; } }
+
+          .mv3-chips { display: flex; gap: 8px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px; }
+          .mv3-chips::-webkit-scrollbar { display: none; }
+          .mv3-chip { flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 20px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); color: #7C859C; white-space: nowrap; }
+          .mv3-chip.done { color: #34E8B0; border-color: rgba(52,232,176,0.35); background: rgba(52,232,176,0.08); }
+          .mv3-chip.active { background: linear-gradient(120deg,#2F6BFF,#2FD8FF); color: #06070C; border-color: transparent; }
+
+          .mv3-warn { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 12px;
+            background: rgba(255,182,72,0.10); border: 1px solid rgba(255,182,72,0.35); color: #FFD895;
+            font-size: 12px; line-height: 1.35; margin-top: 12px; position: relative; z-index: 1; }
+          .mv3-incident { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px; border-radius: 12px; background: rgba(255,80,90,0.08); border: 1px solid rgba(255,80,90,0.28);
+            color: #FF9AA2; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+          .mv3-incident:hover { background: rgba(255,80,90,0.14); }
+
+          .mv3-contacts-wrap { background: rgba(255,255,255,0.03); border: 1px solid rgba(120,180,255,0.10);
+            border-radius: 18px; padding: 4px; position: relative; z-index: 1; }
+        `}</style>
+
+        {/* HERO — ring + road */}
+        <div className="mv3-hero">
+          <div className="mv3-hero-mesh" />
+          <div className="mv3-hero-head">
+            <div className="mv3-eyebrow">Mission convoyeur</div>
+            <div className="mv3-live-pill">
+              <span className="mv3-live-dot" />
+              {isDone ? "Envoyée" : currentDef.short}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[#e7c76a] font-semibold">
-                Étape {Math.min(visualIdx + 1, totalVisual)} / {totalVisual} · Prochaine action
-              </p>
-              <p className="font-semibold text-lg sm:text-xl leading-tight mt-1">{currentDef.label}</p>
-              {currentDef.hint && !isDone && <p className="text-white/70 text-xs mt-1.5 leading-snug">{currentDef.hint}</p>}
+          </div>
+          <div className="mv3-hero-mid">
+            <div className="mv3-ring-wrap" style={{ width: ringSize, height: ringSize }}>
+              <svg width={ringSize} height={ringSize}>
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="rgba(255,255,255,0.07)" strokeWidth={ringStroke} fill="none" />
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="url(#mv3RingGrad)" strokeWidth={ringStroke} fill="none"
+                  strokeDasharray={ringC} strokeDashoffset={ringC - ringPct * ringC} strokeLinecap="round"
+                  transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`} className="mv3-ring-progress" />
+                <defs>
+                  <linearGradient id="mv3RingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2F6BFF" />
+                    <stop offset="100%" stopColor="#2FD8FF" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="mv3-ring-label">
+                <span className="mv3-ring-num">{Math.min(visualIdx + 1, totalVisual)}</span>
+                <span className="mv3-ring-den">/ {totalVisual} étapes</span>
+              </div>
             </div>
-            <div className="text-right shrink-0">
-              <p className="text-[#e7c76a]/80 text-[10px] uppercase tracking-wider">Avanc.</p>
-              <p className="text-white font-bold text-lg tabular-nums">{progressPct}%</p>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="mv3-hero-title">{currentDef.label}</div>
+              {currentDef.hint && !isDone && <div className="mv3-hero-sub">{currentDef.hint}</div>}
+              <div className="mv3-hero-badges">
+                <span>Étape {Math.min(visualIdx + 1, totalVisual)} / {totalVisual}</span>
+                <span>{progressPct}% terminé</span>
+              </div>
             </div>
           </div>
 
-          <div className="mt-3 h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-[#d4af37] to-emerald-400 transition-all duration-500" style={{ width: `${progressPct}%` }} />
-          </div>
+          <svg viewBox="0 0 320 64" className="mv3-road-svg" preserveAspectRatio="none">
+            <path d="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C280,44 290,20 314,20"
+              fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3" strokeLinecap="round" />
+            <path d="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C280,44 290,20 314,20"
+              fill="none" stroke="url(#mv3RoadGrad)" strokeWidth="3" strokeLinecap="round"
+              strokeDasharray="440" strokeDashoffset={440 - ringPct * 440} className="mv3-road-fill" />
+            <defs>
+              <linearGradient id="mv3RoadGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#2F6BFF" />
+                <stop offset="100%" stopColor="#2FD8FF" />
+              </linearGradient>
+            </defs>
+            <circle r="5.5" fill="#2FD8FF">
+              <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto"
+                path="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C290,20 314,20 314,20" keyPoints="0;0.28" keyTimes="0;1" />
+            </circle>
+          </svg>
+        </div>
 
-          {!isDone && (
-            <div className="mt-3 -mx-4 sm:-mx-5 px-4 sm:px-5 flex gap-1.5 overflow-x-auto snap-x" style={{ scrollbarWidth: "none" }}>
+        {/* PANE : next-card avec CTA = libellé étape */}
+        <div className="mv3-pane">
+          <div className="mv3-glass" style={{ paddingTop: 16 }}>
+            <div className="mv3-next-glow" />
+
+            <div className="mv3-step-header">
+              <div className="mv3-badge-ring" style={{ width: badgeSize, height: badgeSize }}>
+                <svg width={badgeSize} height={badgeSize}>
+                  <circle cx={badgeSize / 2} cy={badgeSize / 2} r={badgeR} stroke="rgba(255,255,255,0.08)" strokeWidth={badgeStroke} fill="none" />
+                  <circle cx={badgeSize / 2} cy={badgeSize / 2} r={badgeR} stroke="url(#mv3BadgeGrad)" strokeWidth={badgeStroke} fill="none"
+                    strokeDasharray={badgeC} strokeDashoffset={badgeC - (progressPct / 100) * badgeC} strokeLinecap="round"
+                    transform={`rotate(-90 ${badgeSize / 2} ${badgeSize / 2})`} className="mv3-badge-ring-progress" />
+                  <defs>
+                    <linearGradient id="mv3BadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#2F6BFF" />
+                      <stop offset="100%" stopColor="#2FD8FF" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span className="mv3-badge-pct">{progressPct}%</span>
+              </div>
+              <div className="mv3-step-header-text">
+                <span className="mv3-step-eyebrow">Progression de la mission</span>
+                <div className="mv3-step-count">
+                  Étape {Math.min(visualIdx + 1, totalVisual)}<span className="mv3-step-total"> / {totalVisual}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mv3-next-main" key={currentKey}>
+              <div className="mv3-next-icon">
+                <currentDef.icon size={24} strokeWidth={2.2} />
+              </div>
+              <div>
+                <div className="mv3-next-title">{currentDef.label}</div>
+                {currentDef.hint && <div className="mv3-next-sub">{currentDef.hint}</div>}
+              </div>
+            </div>
+
+            {!selfieOK && (currentKey === "edl_depart" || currentKey === "demarrer_livraison") && (
+              <div className="mv3-warn">
+                <Lock size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+                <span>Selfie d'identité requis avant de continuer.</span>
+              </div>
+            )}
+
+            {/* CTA — libellé = action, PAS "valider cette étape" */}
+            <button
+              onClick={handleAdvance}
+              disabled={busy || isDone}
+              className={`mv3-cta ${isDone ? "done" : ""}`}
+            >
+              {isDone ? (
+                <><Check size={16} strokeWidth={3} /> Mission envoyée</>
+              ) : busy ? (
+                <><Loader2 className="animate-spin" size={16} /> {currentDef.cta}</>
+              ) : (
+                <>{currentDef.cta} <ChevronRight size={16} /></>
+              )}
+            </button>
+
+            <div className="mv3-dots">
+              {visualSteps.map((_, i) => (
+                <span
+                  key={i}
+                  className={`mv3-dot ${i < visualIdx ? "done" : ""} ${i === visualIdx && !isDone ? "current" : ""}`}
+                />
+              ))}
+            </div>
+
+            <div className="mv3-chips">
               {visualSteps.map((s, i) => {
-                const done = i < visualIdx;
-                const active = i === visualIdx;
+                const done = i < visualIdx || isDone;
+                const active = i === visualIdx && !isDone;
                 return (
-                  <span
-                    key={s.key}
-                    className={`shrink-0 snap-start text-[10px] px-2.5 py-1 rounded-full border whitespace-nowrap ${
-                      active
-                        ? "bg-[#d4af37] text-[#0b1026] border-[#d4af37] font-semibold"
-                        : done
-                          ? "bg-emerald-500/20 text-emerald-100 border-emerald-400/40"
-                          : "bg-white/5 text-white/50 border-white/10"
-                    }`}
-                  >
+                  <span key={s.key} className={`mv3-chip ${done ? "done" : ""} ${active ? "active" : ""}`}>
                     {done && "✓ "}{s.short}
                   </span>
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
 
-        <div className="px-4 sm:px-5 py-4 bg-white">
-          {!selfieOK && (currentKey === "edl_depart" || currentKey === "demarrer_livraison") && (
-            <div className="mb-3 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
-              <Lock size={14} className="mt-0.5 shrink-0" />
-              <p className="text-xs leading-snug">Selfie d'identité requis avant de continuer.</p>
+          {!isDone && (
+            <div className="mv3-contacts-wrap">
+              {(() => {
+                const arriveeSteps: ActionKind[] = ["arrive_livraison", "edl_arrivee", "signature_arrivee", "selfie_final", "cloturer"];
+                const focus: "depart" | "arrivee" | "both" = arriveeSteps.includes(currentKey)
+                  ? "arrivee"
+                  : (currentKey === "demarrer_livraison" ? "both" : "depart");
+                return <MissionContactsBlock attributionId={attributionId} focus={focus} />;
+              })()}
             </div>
           )}
 
           {!isDone && (
-            <button
-              onClick={handleAdvance}
-              disabled={busy}
-              className="w-full flex items-center justify-center gap-2 px-5 py-5 bg-emerald-600 text-white rounded-2xl text-base font-semibold shadow-md hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed min-h-[56px]"
-            >
-              {busy ? <Loader2 className="animate-spin" size={20} /> : <ChevronRight size={22} />}
-              <span>{currentDef.cta}</span>
-            </button>
-          )}
-
-          {!isDone && (() => {
-            const arriveeSteps: ActionKind[] = ["arrive_livraison", "edl_arrivee", "signature_arrivee", "selfie_final", "cloturer"];
-            const focus: "depart" | "arrivee" | "both" = arriveeSteps.includes(currentKey)
-              ? "arrivee"
-              : (currentKey === "demarrer_livraison" ? "both" : "depart");
-            return <MissionContactsBlock attributionId={attributionId} focus={focus} />;
-          })()}
-
-          {isDone && (
-            <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium px-3 py-3 bg-white rounded-xl border border-emerald-200">
-              <Check size={16} /> Mission envoyée. L'équipe va valider sous peu.
-            </div>
-          )}
-
-          {!isDone && (
-            <button
-              onClick={() => setOpenIncident(true)}
-              className="w-full mt-3 flex items-center justify-center gap-1.5 py-2.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium transition border border-red-100"
-            >
+            <button onClick={() => setOpenIncident(true)} className="mv3-incident">
               <AlertTriangle size={13} /> Signaler un incident
             </button>
           )}
