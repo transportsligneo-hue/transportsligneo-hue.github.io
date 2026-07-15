@@ -378,9 +378,41 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           )}
         </div>
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t mission-divider">
-          <Field label="Carburant" value={mission.carburant} />
+          <Field label="Marque" value={mission.marque} />
+          <Field label="Modèle" value={mission.modele} />
+          <Field label="Immatriculation" value={mission.immatriculation} />
+          <Field label="Numéro de série (VIN)" value={mission.vin} />
+          <Field label="Carburant / Énergie" value={mission.carburant} />
         </div>
+        {(mission.carte_grise_recto_url || mission.carte_grise_verso_url) && (
+          <div className="pt-4 mt-4 border-t mission-divider">
+            <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-2">Carte grise</p>
+            <div className="flex flex-wrap gap-2">
+              {mission.carte_grise_recto_url && (
+                <a
+                  href={mission.carte_grise_recto_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#00AEEF]/10 hover:bg-[#00AEEF]/20 mission-accent text-xs font-heading tracking-wider uppercase transition-colors"
+                >
+                  <FileText size={12} /> Recto
+                </a>
+              )}
+              {mission.carte_grise_verso_url && (
+                <a
+                  href={mission.carte_grise_verso_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#00AEEF]/10 hover:bg-[#00AEEF]/20 mission-accent text-xs font-heading tracking-wider uppercase transition-colors"
+                >
+                  <FileText size={12} /> Verso
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
 
 
       <Section title="Détails du convoyage" icon={<FileText size={16} />}>
