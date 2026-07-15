@@ -41,6 +41,9 @@ interface DevisRow {
   statut: string;
   created_at: string;
   paid_at: string | null;
+  accepted_at: string | null;
+  locked_at: string | null;
+  mission_id: string | null;
 }
 
 interface FactureRow {
@@ -48,6 +51,7 @@ interface FactureRow {
   numero: string;
   prix_ttc: number | null;
   statut: string;
+  mode_paiement: string | null;
   date_facture: string | null;
   created_at: string;
 }
@@ -102,11 +106,11 @@ function ProDashboard() {
         supabase.from("profiles").select("organization_id").eq("user_id", user.id).maybeSingle(),
         supabase.from("organization_members").select("organization_id").eq("user_id", user.id).eq("status", "active"),
         supabase.from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, created_at, paid_at")
+          .select("id, numero, depart, arrivee, prix_estime, statut, created_at, paid_at, accepted_at, locked_at, mission_id")
           .order("created_at", { ascending: false })
           .limit(5),
         supabase.from("factures")
-          .select("id, numero, prix_ttc, statut, date_facture, created_at")
+          .select("id, numero, prix_ttc, statut, mode_paiement, date_facture, created_at")
           .order("created_at", { ascending: false })
           .limit(5),
       ]);
@@ -179,7 +183,9 @@ function ProDashboard() {
   }, [vehicles]);
 
   const facturesImpayees = factures.filter(f => f.statut !== "payee" && f.statut !== "paid").length;
-  const devisEnAttente = devis.filter(d => d.statut === "envoye" || d.statut === "en_attente").length;
+  const isDeferredInvoice = (mode?: string | null) => /virement|diff[ée]r|30|60|90/i.test(mode ?? "");
+  const facturesARegler = factures.filter(f => f.statut !== "payee" && f.statut !== "paid" && !isDeferredInvoice(f.mode_paiement)).length;
+  const devisEnAttente = devis.filter(d => !d.paid_at && !d.accepted_at && !d.locked_at && !d.mission_id && (d.statut === "envoye" || d.statut === "en_attente")).length;
 
   if (loading) {
     return (
@@ -206,16 +212,16 @@ function ProDashboard() {
       </div>
 
       {/* Alerts row */}
-      {(facturesImpayees > 0 || devisEnAttente > 0) && (
+      {(facturesARegler > 0 || devisEnAttente > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {facturesImpayees > 0 && (
+          {facturesARegler > 0 && (
             <Link to="/dashboard-pro/documents" className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100/60 transition-colors">
               <div className="w-8 h-8 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                 <AlertTriangle size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-amber-900">
-                  {facturesImpayees} facture{facturesImpayees > 1 ? "s" : ""} à régler
+                  {facturesARegler} facture{facturesARegler > 1 ? "s" : ""} à régler
                 </p>
                 <p className="text-xs text-amber-700/80">Consultez vos documents pour régulariser</p>
               </div>

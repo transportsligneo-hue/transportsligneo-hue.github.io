@@ -64,6 +64,7 @@ const offreStatutLabel: Record<string, string> = {
 function ConvoyeurDisponibles() {
   const { user, convoyeurStatut } = useAuth();
   const isValidated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
+  const [hasTraining, setHasTraining] = useState(false);
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<TrajetDispo[]>([]);
   const [myOffres, setMyOffres] = useState<Record<string, MyOffre>>({});
@@ -79,11 +80,15 @@ function ConvoyeurDisponibles() {
     if (!user) return;
     supabase
       .from("convoyeurs")
-      .select("id")
+      .select("id, has_completed_training")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setConvoyeurId(data.id);
+        if (data) {
+          const row = data as { id: string; has_completed_training?: boolean };
+          setConvoyeurId(row.id);
+          setHasTraining(Boolean(row.has_completed_training));
+        }
       });
   }, [user]);
 
@@ -207,6 +212,10 @@ function ConvoyeurDisponibles() {
       toast.error("Vos documents doivent être validés avant d'accepter une mission.");
       return;
     }
+    if (!hasTraining) {
+      toast.error("Formation obligatoire à terminer avant d'accepter une mission.");
+      return;
+    }
 
     const prix = prixDriverEffectif(trajet);
     if (!convoyeurId || prix == null) return;
@@ -248,6 +257,10 @@ function ConvoyeurDisponibles() {
   const envoyerContreProposition = async (trajet: TrajetDispo) => {
     if (!isValidated) {
       toast.error("Vos documents doivent être validés avant de proposer un prix.");
+      return;
+    }
+    if (!hasTraining) {
+      toast.error("Formation obligatoire à terminer avant de proposer un prix.");
       return;
     }
 
@@ -320,6 +333,13 @@ function ConvoyeurDisponibles() {
             Vous pourrez accepter des missions disponibles lorsque vos documents seront validés par notre équipe.
           </p>
         </div>
+      )}
+
+      {isValidated && !hasTraining && (
+        <a href="/convoyeur/formation" className="block rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 hover:bg-amber-100 transition-colors">
+          <p className="font-semibold">Formation obligatoire requise</p>
+          <p className="text-amber-800/90 mt-0.5">Terminez la formation avant d'accepter une mission ou de proposer un prix.</p>
+        </a>
       )}
 
 
@@ -494,8 +514,8 @@ function ConvoyeurDisponibles() {
                               {prixAcc != null && (
                                 <button
                                   onClick={() => accepterPrixSuggere(t)}
-                                  disabled={submitting || !isValidated}
-                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  disabled={submitting || !isValidated || !hasTraining}
+                                  title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
                                   className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <CheckCircle2 size={15} />
@@ -505,13 +525,13 @@ function ConvoyeurDisponibles() {
                               {!isFixe && (
                                 <button
                                   onClick={() => {
-                                    if (!isValidated) return;
+                                    if (!isValidated || !hasTraining) return;
                                     setOpenTrajetId(t.id);
                                     setContrePrix(prixAcc?.toString() ?? "");
                                     setContreMessage("");
                                   }}
-                                  disabled={!isValidated}
-                                  title={!isValidated ? "Documents en attente de validation" : undefined}
+                                  disabled={!isValidated || !hasTraining}
+                                  title={!isValidated ? "Documents en attente de validation" : !hasTraining ? "Formation obligatoire" : undefined}
                                   className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-600 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-50 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <Euro size={15} />

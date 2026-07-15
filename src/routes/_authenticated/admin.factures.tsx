@@ -101,6 +101,14 @@ function AdminFacturesPage() {
     }
   };
 
+  const handlePaymentMode = async (id: string, mode_paiement: string) => {
+    const conditions_paiement = mode_paiement === "Virement différé" ? "Paiement différé par virement selon accord client." : "Paiement par carte bancaire.";
+    const { error } = await supabase.from("factures").update({ mode_paiement, conditions_paiement }).eq("id", id);
+    if (error) return toast.error("Mode de paiement impossible", { description: error.message });
+    setFactures(prev => prev.map(f => f.id === id ? { ...f, mode_paiement, conditions_paiement } : f));
+    if (selected?.id === id) setSelected({ ...selected, mode_paiement, conditions_paiement });
+  };
+
   const saveReference = async (id: string, ref: string | null, label: string | null) => {
     const { error } = await supabase
       .from("factures")
@@ -266,6 +274,10 @@ function AdminFacturesPage() {
                   >
                     {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </Select>
+                  <Select value={f.mode_paiement ?? "Carte bancaire"} onChange={(e) => handlePaymentMode(f.id, e.target.value)} className="text-xs py-1.5">
+                    <option value="Carte bancaire">Carte bancaire</option>
+                    <option value="Virement différé">Virement différé</option>
+                  </Select>
                   <IconButton title="Voir détail" tone="neutral" onClick={() => setSelected(f)}>
                     <Eye size={15} />
                   </IconButton>
@@ -306,6 +318,7 @@ function AdminFacturesPage() {
           footer={
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => handleDownload(selected)} icon={<Download size={12} />}>Télécharger PDF</Button>
+              <Button size="sm" variant="secondary" onClick={() => handlePaymentMode(selected.id, selected.mode_paiement === "Virement différé" ? "Carte bancaire" : "Virement différé")}>Basculer paiement</Button>
               {selected.statut !== "payee" && (
                 <Button size="sm" onClick={() => { handleStatut(selected.id, "payee"); setSelected({ ...selected, statut: "payee" }); }} className="bg-emerald-500 hover:bg-emerald-600 text-white" icon={<CheckCircle2 size={12} />}>Marquer payée</Button>
               )}

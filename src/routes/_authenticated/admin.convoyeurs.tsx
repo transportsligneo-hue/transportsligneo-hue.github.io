@@ -431,7 +431,7 @@ function AdminConvoyeurs() {
                 </TD>
                 <TD className="hidden md:table-cell">
                   <Badge tone={c.type_convoyeur === "independant" ? "purple" : "info"}>
-                    {c.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}
+                    Indépendant
                   </Badge>
                 </TD>
                 <TD className="hidden lg:table-cell">
@@ -508,7 +508,7 @@ function AdminConvoyeurs() {
           badge={
             <div className="flex flex-wrap gap-2">
               <StatutConvoyeurBadge statut={resolveStatutConvoyeur(selected.statut, docs)} />
-              <DrawerBadge tone="slate">{selected.type_convoyeur === "independant" ? "Indépendant" : "Salarié"}</DrawerBadge>
+              <DrawerBadge tone="slate">Indépendant</DrawerBadge>
             </div>
           }
           footer={
