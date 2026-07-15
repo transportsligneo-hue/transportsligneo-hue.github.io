@@ -96,6 +96,11 @@ function ProDocuments() {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("ht");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [statutFilter, setStatutFilter] = useState<string>("all");
+  const [closingDevis, setClosingDevis] = useState<DevisRow | null>(null);
+  const [closingReason, setClosingReason] = useState<string>("");
+  const [closingSubmitting, setClosingSubmitting] = useState<boolean>(false);
+  const markProcessed = useServerFn(markDevisAsProcessed);
+
 
   useEffect(() => {
     if (!user) return;
