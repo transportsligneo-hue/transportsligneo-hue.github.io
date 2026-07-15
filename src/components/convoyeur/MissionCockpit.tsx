@@ -82,6 +82,9 @@ interface Props {
   onUpdated: () => Promise<void> | void;
   forceOpenSelfie?: boolean;
   onSelfieModalStateChange?: (open: boolean) => void;
+  missionNumber?: string | null;
+  vehiculeEnergie?: string | null;
+  vehiculeType?: string | null;
 }
 
 export function MissionCockpit({
