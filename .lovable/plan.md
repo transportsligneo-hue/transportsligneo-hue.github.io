@@ -1,117 +1,89 @@
 
-# Refonte système de notifications — expérience native premium
+## Objectif
 
-Périmètre strictement front / présentation. Aucune modification de la logique métier, des tables, des edge functions push, du service worker FCM, des permissions ou des workflows existants. Rétrocompatible : chaque `toast(...)`, `create_user_notification`, push web continue de fonctionner tel quel.
+1. Remplacer les 3 modules de formation actuels par les **10 modules pédagogiques** fournis (sans aucune question — 100 % contenu).
+2. Remplacer l'examen final actuel par l'**examen professionnel de 50 questions** fourni, avec un vrai bilan de certification (score, statut, corrections, bouton "repasser").
 
-## 1. Toaster (bandeau in-app) — refonte totale
+Aucune modification de logique métier existante (accès missions, triggers, RLS, certificat, refresh_convoyeur_training_status…). Uniquement du contenu (data) et l'écran de bilan côté front.
 
-Fichier `src/components/ui/sonner.tsx` réécrit autour de `sonner` (déjà installé, aucun changement de dépendance).
+---
 
-- **Fond opaque** premium (plus jamais transparent) : navy profond `#0b1026` / cream `#fdfcf8` selon type. Effet glassmorphism léger (backdrop-blur discret) via `backdrop-blur-xl` Tailwind + fallback opaque.
-- **Coins arrondis** 18 px, **ombre portée** douce et colorée selon type, bordure fine 1 px `border-white/10`.
-- **Icône typée** à gauche (cercle 40 px accent), **titre** semi-bold + **message** court + **timestamp** ("à l'instant", "il y a 2 min") + **action rapide** optionnelle (bouton Voir / Ouvrir).
-- **Barre d'accent verticale** 3 px à gauche, couleur selon type.
-- **Animations** : slide-in-down (mobile) / slide-in-right (desktop), fade-out + scale, 60 FPS via `transform`/`opacity` uniquement (CSS Tailwind, jamais framer-motion — contrainte projet).
-- **Swipe-to-dismiss** (activé nativement par sonner sur mobile, on l'expose).
-- **Positionnement responsive** : `top-center` en < 768 px, `top-right` en desktop, `expand` pour empilement propre, `visibleToasts: 4`, `gap: 12`.
-- **Vibration légère** (`navigator.vibrate([10, 30, 10])`) déclenchée pour types `warning` / `error` / `nouvelle_mission` si `matchMedia('(pointer:coarse)')` ET permission ok — silencieux côté desktop.
-- **Son discret** optionnel : petit `<audio>` préchargé, jouable si l'utilisateur a activé la préférence (nouveau flag `sound` dans `notification_preferences` déjà présent en DB, réutilisé).
+## 1. Modules de formation (data uniquement)
 
-### Helper unifié `notify`
+Via `supabase--insert` : `UPDATE` + upsert dans `formation_modules` pour :
 
-Nouveau `src/lib/notify.ts` — enveloppe fine autour de sonner exposant :
+- Désactiver / supprimer les 3 modules existants (`securite-prise-en-charge`, `edl-signatures`, `relation-client-premium`) → `is_active=false` puis remplacés.
+- Insérer les 10 nouveaux modules avec :
+  - `slug` stable (`m01-metier-convoyeur`, `m02-conditions-mission`, …, `m10-qualite-standard-ligneo`)
+  - `title`, `description`
+  - `content_type = 'text'`
+  - `sections jsonb` = tableau riche (intro, sous-parties, callouts "bonnes pratiques" / "erreurs à éviter", checklists, résumé final)
+  - `quiz_questions = '[]'` (aucune question dans les modules)
+  - `is_required = true`, `is_active = true`, `sort_order = 10..100`
+  - `estimated_minutes` calibré (8–15 min)
+- La fonction `refresh_convoyeur_training_status` est inchangée et prendra automatiquement en compte les 10 modules requis.
 
-```ts
-notify.info(titre, opts?)
-notify.success(titre, opts?)
-notify.warning(titre, opts?)
-notify.error(titre, opts?)
-notify.mission(titre, opts?)      // 🟣 nouvelle mission
-notify.convoyage(titre, opts?)    // 🚗
-notify.document(titre, opts?)     // 📄
-notify.paiement(titre, opts?)     // 💳
-notify.avis(titre, opts?)         // ⭐
-notify.rappel(titre, opts?)       // 🔔
+Contenu des 10 modules (repris tel quel du brief, rédigé façon plateforme pro convoyage) :
+
+1. Comprendre le métier de convoyeur automobile
+2. Conditions pour effectuer une mission
+3. Prise en charge du véhicule
+4. Inspection et protection du véhicule
+5. Conduite professionnelle d'un véhicule client
+6. Sécurité du convoyeur et du véhicule
+7. Gestion des incidents
+8. Relation client et communication
+9. Livraison du véhicule
+10. Qualité et standard Transports Ligneo (10 règles d'or)
+
+Chaque module = intro + sous-parties + exemples terrain + bonnes pratiques (callout success) + erreurs à éviter (callout warning) + résumé final. **Zéro QCM.**
+
+---
+
+## 2. Examen final (data + écran bilan)
+
+### 2.1 Data (via `supabase--insert`)
+
+`UPDATE formation_exams` du record actif :
+- `title` : "Examen de certification Convoyeur Ligneo"
+- `description` : évaluation professionnelle 50 questions / 100 points
+- `question_pool` = les **50 questions** fournies telles quelles (5 parties × 10 Q), format `{ question, choices[4], answer, explanation }`
+- `question_count = 50`
+- `time_limit_minutes = 60`
+- `minimum_score = 80`
+- `is_active = true`
+
+Le tirage tirera les 50 questions du pool (= toutes). Rétrocompatible : le trigger `handle_exam_attempt` continue de délivrer le certificat quand `passed = true`.
+
+### 2.2 Écran de bilan (front — `src/routes/_authenticated/convoyeur.formation.tsx`)
+
+Étendre l'écran de résultats d'examen (sans toucher au flow) pour afficher :
+
+- **Score sur 100** (2 points par question)
+- **Statut de certification** selon le seuil :
+  - 90–100 : *Convoyeur confirmé* (or)
+  - 80–89 : *Certification validée* (vert)
+  - 70–79 : *Nouvelle tentative obligatoire après révision* (orange)
+  - < 70 : *Formation complémentaire obligatoire* (rouge)
+- **Bilan des questions ratées uniquement** (jamais pendant l'examen) : énoncé, réponse choisie, bonne réponse, explication pédagogique.
+- **Bouton "Repasser l'examen"** si `passed = false`.
+- **Bouton "Voir mon certificat"** si `passed = true`.
+
+Aucune modification du composant Question pendant l'examen (pas d'affichage des bonnes réponses en cours). Bilan lu depuis le dernier `formation_exam_attempts` (`questions` + `answers` déjà stockés).
+
+---
+
+## Détails techniques
+
+- Modules & examen = **data seulement** → 2 appels `supabase--insert` (pas de migration schéma).
+- Front : édition ciblée de la vue résultats dans `convoyeur.formation.tsx` (composant `ExamResult` / bloc bilan). Aucun changement dans `admin.formation.tsx`, ni dans les triggers/RLS/fonctions.
+- Rétrocompat : les anciens `formation_progress` restent valides ; la fonction `refresh_convoyeur_training_status` recalcule automatiquement au prochain module complété.
+- Anciens modules désactivés (`is_active=false`) → non affichés côté convoyeur, historique préservé côté admin.
+
+```text
+formation_modules  →  10 modules riches (contenu pur, aucune Q)
+formation_exams    →  1 examen actif, pool = 50 Q officielles
+convoyeur.formation.tsx  →  écran bilan enrichi (statut + corrections ratées + retry)
 ```
 
-`opts` : `{ description?, action?: { label, onClick | href }, duration?, priority? }`.
-
-Les appels existants `toast.success(...)` / `toast.error(...)` **continuent de fonctionner** (sonner reste la lib) — le nouveau helper est adopté progressivement sans casse.
-
-## 2. Cloche & dropdown — refonte visuelle
-
-`src/components/notifications/NotificationBell.tsx` :
-
-- Panneau dropdown en **glass premium navy** (plus le fond blanc actuel) cohérent avec la charte : `bg-[#0b1026]/95 backdrop-blur-xl border-white/10`, cream pour les lignes non lues, tokens dorés pour badges.
-- Icônes par catégorie (Truck, CreditCard, FileText, MessageSquare, Star, Bell) dans une pastille 36 px avec couleur d'accent typée.
-- Timestamp relatif ("à l'instant", "il y a 5 min", puis date courte).
-- Ligne non lue : liseré doré gauche + point néon.
-- Animation ouverture `scale-in` + `fade-in`, focus-trap léger, fermeture ESC.
-- Aucune régression realtime : le hook `useEffect` + channel Supabase reste identique.
-
-## 3. Centre de notifications `/notifications`
-
-`src/routes/_authenticated/notifications.tsx` :
-
-- Cartes redessinées façon Revolut : icône typée, accent gauche coloré, chip catégorie, chip priorité, timestamp relatif, actions (Voir / Marquer / Supprimer) en boutons pilules discrets.
-- Filtres restylés : onglets pilules dans une barre glass, compteur non lues par onglet.
-- Recherche debounced (300 ms) avec icône, focus-ring accent bleu néon.
-- Sélection multiple : cases custom, barre d'actions flottante en bas quand sélection ≥ 1 (Marquer / Supprimer / Annuler).
-- Empty state illustré (icône Bell XXL + texte encourageant).
-- Regroupement par date : "Aujourd'hui", "Hier", "Cette semaine", "Plus ancien".
-- Les mutations (mark read / delete / mark all) restent inchangées.
-
-## 4. Bridge push web → toast
-
-Dans `src/lib/push/client.ts` (si présent), on écoute déjà les messages FCM en foreground ; on ajoute simplement un `notify.<type>()` selon `data.category` reçu du push, pour que les notifications reçues quand l'onglet est ouvert apparaissent aussi comme bannières in-app cohérentes (au lieu d'être silencieuses). Le service worker `firebase-messaging-sw.js` (background) reste **strictement intact** — contrainte PWA.
-
-## 5. Design tokens
-
-Dans `src/styles.css`, ajout de tokens dédiés (ne remplace rien) :
-
-```css
---notif-info: oklch(...);      /* bleu électrique */
---notif-success: oklch(...);   /* vert */
---notif-warning: oklch(...);   /* ambre */
---notif-error: oklch(...);     /* rouge */
---notif-mission: oklch(...);   /* violet */
---notif-convoyage: oklch(...); /* néon bleu */
---notif-document: oklch(...);
---notif-paiement: oklch(...);
---notif-avis: oklch(...);
---notif-rappel: oklch(...);
---shadow-notif: 0 20px 40px -20px rgb(0 0 0 / 0.35);
-```
-
-Palette conforme à la mémoire projet : navy dominant, cream pour surfaces claires, doré/néon bleu pour accents. Jamais de blanc pur, jamais de purple générique.
-
-## 6. Accessibilité & perf
-
-- Contraste AA vérifié sur chaque type (texte cream sur navy + accent).
-- `role="status"` pour info/success, `role="alert"` pour warning/error.
-- Animations en `transform`/`opacity` uniquement, `will-change` ciblé.
-- Respect de `prefers-reduced-motion` : bascule sur fade court sans slide.
-- `aria-live="polite"` géré par sonner.
-
-## 7. Compatibilité stricte
-
-- Toutes les tables (`user_notifications`, `notification_preferences`, `push_subscriptions`) intactes.
-- Toutes les server fns (`notify.functions.ts`, `push.functions.ts`, `push/notify.functions.ts`) intactes.
-- Aucune modification RLS, aucun trigger touché.
-- Le service worker FCM et les hooks push existants ne sont pas modifiés.
-- Toute la centaine d'appels `toast.*(...)` existants continuent d'afficher un toast — visuellement amélioré automatiquement.
-
-## Livraison
-
-1. Tokens CSS + réécriture `sonner.tsx` (bandeau premium, config responsive, vibration, son opt-in).
-2. Helper `src/lib/notify.ts` (10 types typés).
-3. Refonte `NotificationBell.tsx` (glass navy premium, timestamps relatifs, icônes typées).
-4. Refonte `/notifications` (cartes premium, groupement date, sélection multiple, empty state).
-5. Bridge push foreground → `notify.*`.
-6. Vérif build + parcours visuel rapide (bell, centre, toast test dans MobileHomeScreen).
-
-## Question avant lancement
-
-Aucune si tu valides — la logique métier ne bouge pas. Dis-moi juste si tu veux :
-- (a) **son + vibration activés par défaut** (opt-out dans `notification_preferences`), ou
-- (b) **désactivés par défaut** (opt-in explicite depuis le centre de notifications).
+Aucune régression sur le déblocage des missions, le certificat PDF, la page de vérification, ni l'espace admin.
