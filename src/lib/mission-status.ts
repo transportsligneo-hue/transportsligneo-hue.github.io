@@ -29,6 +29,7 @@ export const MISSION_STATUS: Record<MissionStatusKey, MissionStatusMeta> = {
   refusee: { label: "Refusée par le convoyeur", short: "Refusée", tone: "red", description: "À réattribuer ou publier au catalogue." },
   en_cours: { label: "Mission en cours", short: "En cours", tone: "blue", pulse: true },
   en_attente_validation: { label: "En attente de validation admin", short: "À valider", tone: "amber" },
+  validee: { label: "Mission validée par l'admin", short: "Validée", tone: "emerald" },
   termine: { label: "Terminée", short: "Terminée", tone: "emerald" },
   publie: { label: "Publiée au catalogue", short: "Au catalogue", tone: "blue", description: "Visible par les convoyeurs validés." },
   brouillon: { label: "Brouillon", short: "Brouillon", tone: "slate" },
