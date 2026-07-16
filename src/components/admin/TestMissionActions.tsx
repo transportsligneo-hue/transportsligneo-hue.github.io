@@ -64,7 +64,7 @@ export function DeleteTestMissionButton({
   const handleDelete = async () => {
     if (!(await confirmToast("Supprimer définitivement cette mission test et toutes ses données liées ?"))) return;
     setBusy(true);
-    const { error } = await supabase.rpc("admin_delete_test_mission" as never, { _trajet_id: trajetId } as never);
+    const { error } = await supabase.rpc("admin_delete_test_mission", { _trajet_id: trajetId });
     setBusy(false);
     if (error) {
       toast.error("Suppression impossible", { description: error.message });
