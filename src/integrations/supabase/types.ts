@@ -3937,6 +3937,7 @@ export type Database = {
           depart: string | null
           heure_trajet: string | null
           id: string | null
+          is_test_data: boolean | null
           leg_type: string | null
           marque: string | null
           mission_group_id: string | null
@@ -3961,6 +3962,7 @@ export type Database = {
           depart?: string | null
           heure_trajet?: string | null
           id?: string | null
+          is_test_data?: never
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
@@ -3985,6 +3987,7 @@ export type Database = {
           depart?: string | null
           heure_trajet?: string | null
           id?: string | null
+          is_test_data?: never
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
