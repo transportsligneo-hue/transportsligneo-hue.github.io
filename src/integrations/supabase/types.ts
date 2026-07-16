@@ -3258,6 +3258,7 @@ export type Database = {
           heure_trajet: string | null
           id: string
           immatriculation: string | null
+          is_test_data: boolean
           leg_index: number | null
           leg_type: string | null
           marque: string | null
@@ -3323,6 +3324,7 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
           marque?: string | null
@@ -3388,6 +3390,7 @@ export type Database = {
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
           marque?: string | null
@@ -4016,6 +4019,11 @@ export type Database = {
       }
       admin_counter_offer: {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
+        Returns: undefined
+      }
+      admin_create_test_mission: { Args: never; Returns: string }
+      admin_delete_test_mission: {
+        Args: { _trajet_id: string }
         Returns: undefined
       }
       admin_propose_mission_to_convoyeur: {
