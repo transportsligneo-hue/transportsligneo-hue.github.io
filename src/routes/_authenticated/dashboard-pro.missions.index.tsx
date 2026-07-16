@@ -19,6 +19,8 @@ interface MissionRow {
   statut: string;
   prix_total: number;
   created_at: string;
+  leg_type: string | null;
+  mission_group_id: string | null;
 }
 
 interface PendingItem {
