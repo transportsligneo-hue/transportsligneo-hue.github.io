@@ -22,6 +22,7 @@ import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
+import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf } from "@/lib/mission-number";
@@ -40,7 +41,7 @@ interface Attribution {
   etape_courante?: string | null;
   numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null; is_test_data?: boolean | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
@@ -56,6 +57,7 @@ interface Trajet {
   marque?: string | null;
   modele?: string | null;
   prix_client?: number | null;
+  is_test_data?: boolean | null;
 }
 
 interface GpsPoint {
@@ -301,7 +303,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, is_test_data), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -325,14 +327,14 @@ function AdminAttributions() {
     // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client")
+      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client, is_test_data")
       .in("statut", ["en_attente", "attribue"])
       .order("date_trajet", { ascending: true, nullsFirst: false });
     if (!trajets) return;
 
-    const assignableTrajets = trajets.filter(
-      (t) => !(t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "")),
-    );
+    // Fix : les trajets publiés au catalogue restent visibles (badge "Au catalogue"),
+    // l'admin peut reprendre la main pour attribuer manuellement (mode mixte).
+    const assignableTrajets = trajets as Trajet[];
 
     // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
     const ids = assignableTrajets.map((t) => t.id);
@@ -490,6 +492,7 @@ function AdminAttributions() {
         subtitle={`${attributions.length} attribution${attributions.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <CreateTestMissionButton onCreated={() => { fetchOptions(); fetchAttributions(); }} />
             <Button
               icon={<Plus size={14} />}
               onClick={() => {
@@ -516,24 +519,52 @@ function AdminAttributions() {
             <span className="text-[10px] uppercase tracking-wider text-amber-700">Issus des devis convertis</span>
           </div>
           <div className="space-y-2">
-            {trajetsDisponibles.map((t) => (
-              <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-white border border-amber-100 px-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-pro-text truncate">
-                    {t.depart} → {t.arrivee}
-                  </p>
-                  <p className="text-xs text-pro-text-soft mt-0.5 truncate">
-                    {t.client_nom || "Client non renseigné"}
-                    {(t.marque || t.modele) && ` · ${[t.marque, t.modele].filter(Boolean).join(" ")}`}
-                    {t.date_trajet && ` · ${new Date(t.date_trajet).toLocaleDateString("fr-FR")}`}
-                    {t.prix_client != null && ` · ${Number(t.prix_client).toFixed(0)} €`}
-                  </p>
+            {trajetsDisponibles.map((t) => {
+              const isPublished = t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "");
+              return (
+                <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-white border border-amber-100 px-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-pro-text truncate">
+                        {t.depart} → {t.arrivee}
+                      </p>
+                      {t.is_test_data && <TestBadge />}
+                      {isPublished && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border border-emerald-300 bg-emerald-50 text-emerald-700">
+                          Au catalogue
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-pro-text-soft mt-0.5 truncate">
+                      {t.client_nom || "Client non renseigné"}
+                      {(t.marque || t.modele) && ` · ${[t.marque, t.modele].filter(Boolean).join(" ")}`}
+                      {t.date_trajet && ` · ${new Date(t.date_trajet).toLocaleDateString("fr-FR")}`}
+                      {t.prix_client != null && ` · ${Number(t.prix_client).toFixed(0)} €`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="w-40">
+                      <PublishToCatalogueButton
+                        trajetId={t.id}
+                        variant="ghost"
+                        label={isPublished ? "Republier" : "Publier au catalogue"}
+                        onDone={() => fetchOptions()}
+                      />
+                    </div>
+                    <Button size="sm" variant="success" icon={<Send size={12} />} onClick={() => setAssignTrajet(t)}>
+                      Attribuer
+                    </Button>
+                    {t.is_test_data && (
+                      <DeleteTestMissionButton
+                        trajetId={t.id}
+                        compact
+                        onDeleted={() => { fetchOptions(); fetchAttributions(); }}
+                      />
+                    )}
+                  </div>
                 </div>
-                <Button size="sm" variant="success" icon={<Send size={12} />} onClick={() => setAssignTrajet(t)}>
-                  Attribuer
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -561,6 +592,7 @@ function AdminAttributions() {
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                       {statutLabels[a.statut] ?? a.statut}
                     </Badge>
+                    {a.trajet?.is_test_data && <TestBadge />}
                     {a.trajet?.type_transport && (
                       <span className="text-[10px] uppercase tracking-wider text-pro-muted">
                         {a.trajet.type_transport}
@@ -609,6 +641,13 @@ function AdminAttributions() {
                       {invoicingId === a.id ? <Loader2 size={15} className="animate-spin" /> : <Receipt size={15} />}
                     </IconButton>
                   )}
+                  {a.trajet?.is_test_data && (
+                    <DeleteTestMissionButton
+                      trajetId={a.trajet_id}
+                      compact
+                      onDeleted={() => { fetchAttributions(); fetchOptions(); }}
+                    />
+                  )}
                 </div>
               </div>
               </div>
@@ -651,9 +690,17 @@ function AdminAttributions() {
                   }}
                   className="flex-1 text-left"
                 >
-                  <p className="font-medium text-pro-text">
-                    {t.depart} → {t.arrivee}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-pro-text">
+                      {t.depart} → {t.arrivee}
+                    </p>
+                    {t.is_test_data && <TestBadge />}
+                    {t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "") && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border border-emerald-300 bg-emerald-50 text-emerald-700">
+                        Au catalogue
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-pro-text-soft mt-0.5">
                     {t.date_trajet
                       ? new Date(t.date_trajet).toLocaleDateString("fr-FR")

@@ -24,6 +24,7 @@ import {
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
+import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -64,6 +65,7 @@ interface Trajet {
   commission_convoyeur_pct?: number | null;
   prix_convoyeur?: number | null;
   prix_societe?: number | null;
+  is_test_data?: boolean | null;
 }
 
 interface DevisLink {
@@ -569,6 +571,7 @@ function AdminTrajets() {
         subtitle={`${trajets.length} trajet${trajets.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <CreateTestMissionButton onCreated={fetchTrajets} />
             <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
               <option value="all">Tous</option>
               {statuts.map((s) => (
@@ -632,9 +635,12 @@ function AdminTrajets() {
             {trajets.map((t) => (
               <TR key={t.id} onClick={() => { setSelected(t); setEditing(false); }}>
                 <TD>
-                  <p className="font-medium text-pro-text">
-                    {t.depart} → {t.arrivee}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-pro-text">
+                      {t.depart} → {t.arrivee}
+                    </p>
+                    {t.is_test_data && <TestBadge />}
+                  </div>
                   {t.marque && (
                     <p className="text-pro-muted text-xs">
                       {t.marque} {t.modele}
@@ -670,6 +676,9 @@ function AdminTrajets() {
                       >
                         <Ban size={15} />
                       </IconButton>
+                    )}
+                    {t.is_test_data && (
+                      <DeleteTestMissionButton trajetId={t.id} compact onDeleted={fetchTrajets} />
                     )}
                   </div>
                 </TD>
