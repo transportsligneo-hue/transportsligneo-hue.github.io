@@ -17,6 +17,8 @@ import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
+import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
