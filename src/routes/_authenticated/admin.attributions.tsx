@@ -519,24 +519,52 @@ function AdminAttributions() {
             <span className="text-[10px] uppercase tracking-wider text-amber-700">Issus des devis convertis</span>
           </div>
           <div className="space-y-2">
-            {trajetsDisponibles.map((t) => (
-              <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-white border border-amber-100 px-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-pro-text truncate">
-                    {t.depart} → {t.arrivee}
-                  </p>
-                  <p className="text-xs text-pro-text-soft mt-0.5 truncate">
-                    {t.client_nom || "Client non renseigné"}
-                    {(t.marque || t.modele) && ` · ${[t.marque, t.modele].filter(Boolean).join(" ")}`}
-                    {t.date_trajet && ` · ${new Date(t.date_trajet).toLocaleDateString("fr-FR")}`}
-                    {t.prix_client != null && ` · ${Number(t.prix_client).toFixed(0)} €`}
-                  </p>
+            {trajetsDisponibles.map((t) => {
+              const isPublished = t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "");
+              return (
+                <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-white border border-amber-100 px-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-pro-text truncate">
+                        {t.depart} → {t.arrivee}
+                      </p>
+                      {t.is_test_data && <TestBadge />}
+                      {isPublished && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border border-emerald-300 bg-emerald-50 text-emerald-700">
+                          Au catalogue
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-pro-text-soft mt-0.5 truncate">
+                      {t.client_nom || "Client non renseigné"}
+                      {(t.marque || t.modele) && ` · ${[t.marque, t.modele].filter(Boolean).join(" ")}`}
+                      {t.date_trajet && ` · ${new Date(t.date_trajet).toLocaleDateString("fr-FR")}`}
+                      {t.prix_client != null && ` · ${Number(t.prix_client).toFixed(0)} €`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="w-40">
+                      <PublishToCatalogueButton
+                        trajetId={t.id}
+                        variant="ghost"
+                        label={isPublished ? "Republier" : "Publier au catalogue"}
+                        onDone={() => fetchOptions()}
+                      />
+                    </div>
+                    <Button size="sm" variant="success" icon={<Send size={12} />} onClick={() => setAssignTrajet(t)}>
+                      Attribuer
+                    </Button>
+                    {t.is_test_data && (
+                      <DeleteTestMissionButton
+                        trajetId={t.id}
+                        compact
+                        onDeleted={() => { fetchOptions(); fetchAttributions(); }}
+                      />
+                    )}
+                  </div>
                 </div>
-                <Button size="sm" variant="success" icon={<Send size={12} />} onClick={() => setAssignTrajet(t)}>
-                  Attribuer
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
