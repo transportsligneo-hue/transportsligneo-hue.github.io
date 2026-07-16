@@ -84,6 +84,8 @@ interface TrajetFull {
   arrivee_contact_telephone: string | null;
   arrivee_contact_telephone2: string | null;
   arrivee_contact_instructions: string | null;
+  mission_group_id: string | null;
+  leg_type: string | null;
 }
 
 interface ConvoyeurFull {
