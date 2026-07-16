@@ -492,6 +492,7 @@ function AdminAttributions() {
         subtitle={`${attributions.length} attribution${attributions.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <CreateTestMissionButton onCreated={() => { fetchOptions(); fetchAttributions(); }} />
             <Button
               icon={<Plus size={14} />}
               onClick={() => {
