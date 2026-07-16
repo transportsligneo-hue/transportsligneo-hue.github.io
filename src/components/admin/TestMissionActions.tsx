@@ -14,7 +14,7 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
 
   const handleCreate = async () => {
     setBusy(true);
-    const { data, error } = await supabase.rpc("admin_create_test_mission" as never);
+    const { data, error } = await supabase.rpc("admin_create_test_mission");
     setBusy(false);
     if (error) {
       toast.error("Impossible de créer la mission test", { description: error.message });
