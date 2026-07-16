@@ -518,6 +518,24 @@ export function MissionCockpit({
 
           .mv3-contacts-wrap { background: rgba(255,255,255,0.03); border: 1px solid rgba(120,180,255,0.10);
             border-radius: 18px; padding: 4px; position: relative; z-index: 1; }
+
+          .mv3-hero-route { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12.5px;
+            color: #C7CCDA; font-weight: 600; min-width: 0; }
+          .mv3-hero-route-city { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; }
+          .mv3-hero-route-arrow { color: #2FD8FF; font-weight: 800; flex-shrink: 0; }
+
+          .mv3-tabs { display: flex; gap: 8px; padding: 0 14px; margin-top: 6px; position: relative; z-index: 1; }
+          .mv3-tab { flex: 1; padding: 11px 12px; border-radius: 14px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.12);
+            color: #9098AE; font-size: 12.5px; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all .18s ease; min-height: 44px; }
+          .mv3-tab:hover { color: #EAF3FF; border-color: rgba(120,180,255,0.22); }
+          .mv3-tab.active { background: linear-gradient(120deg,#0E1740,#182559); color: #EAF3FF;
+            border-color: rgba(47,216,255,0.4); box-shadow: 0 6px 18px rgba(47,107,255,0.28) inset, 0 0 0 1px rgba(47,216,255,0.15); }
+
+          .mv3-slot { display: flex; flex-direction: column; gap: 12px;
+            animation: mv3PaneIn .22s cubic-bezier(.2,.8,.2,1) both; }
+          @keyframes mv3PaneIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         `}</style>
 
         {/* HERO — ring + road */}
