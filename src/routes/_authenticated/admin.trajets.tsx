@@ -24,6 +24,7 @@ import {
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
+import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
