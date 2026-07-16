@@ -21,8 +21,9 @@ const PlateSchema = z.object({
 async function verifyRecaptchaToken(token: string): Promise<boolean> {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
   if (!secret) {
-    console.warn("[SIV] RECAPTCHA_SECRET_KEY missing — allowing (dev)");
-    return true;
+    // Fail-closed en production : sans secret, on refuse pour ne pas exposer la clé RapidAPI.
+    console.error("[SIV] RECAPTCHA_SECRET_KEY missing — refusing request");
+    return false;
   }
   try {
     const body = new URLSearchParams({ secret, response: token });
@@ -33,14 +34,12 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
     });
     const json = (await res.json()) as { success: boolean; score?: number; "error-codes"?: string[] };
     console.log("[SIV] recaptcha result", { success: json.success, score: json.score, errors: json["error-codes"] });
-    // v3 : on accepte dès que Google reconnaît le token (success=true),
-    // en abaissant le seuil de score à 0.3 (webviews / mobile → scores plus bas).
     if (json.success) return (json.score ?? 1) >= 0.3;
     return false;
   } catch (err) {
     console.error("[SIV] recaptcha verify failed", err);
-    // En cas d'échec réseau, on laisse passer — la clé RapidAPI reste protégée côté serveur.
-    return true;
+    // Fail-closed : en cas d'échec, on refuse pour empêcher l'abus.
+    return false;
   }
 }
 
@@ -111,15 +110,19 @@ export const lookupPlate = createServerFn({ method: "POST" })
         return { ok: false, error: data.error };
       }
 
-      // Anti-abuse gate: authenticated users (Bearer token) OR reCAPTCHA v3.
-      // Si la vérif captcha est indisponible/échoue côté client, on n'empêche
-      // pas la recherche (la clé RapidAPI reste côté serveur, rate-limitée en amont).
+      // Anti-abus : soit utilisateur authentifié (Bearer), soit token reCAPTCHA v3 valide.
+      // Fail-closed pour protéger la clé RapidAPI (facturation à l'appel).
       const authHeader = getRequestHeader("authorization");
       const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
-      if (!hasBearer && data.recaptchaToken) {
+      if (!hasBearer) {
+        if (!data.recaptchaToken) {
+          console.warn("[SIV] no bearer and no recaptcha token — rejecting");
+          return { ok: false, error: "Vérification anti-robot requise" };
+        }
         const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
         if (!captchaOk) {
-          console.warn("[SIV] captcha rejected — continuing anyway (public estimator)");
+          console.warn("[SIV] captcha rejected");
+          return { ok: false, error: "Vérification anti-robot échouée" };
         }
       }
 
