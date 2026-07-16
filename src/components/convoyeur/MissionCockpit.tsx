@@ -709,6 +709,16 @@ export function MissionCockpit({
               <AlertTriangle size={13} /> Signaler un incident
             </button>
           )}
+          </>
+          )}
+
+          {activeTab === "info" && (
+            <div className="mv3-slot">{infoSlot}</div>
+          )}
+
+          {activeTab === "docs" && (
+            <div className="mv3-slot">{docsSlot}</div>
+          )}
         </div>
       </div>
 
