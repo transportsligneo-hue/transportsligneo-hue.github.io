@@ -585,36 +585,32 @@ export function MissionCockpit({
           </svg>
         </div>
 
-        {/* PANE : À faire (checklist énergie) + next-card avec CTA = libellé étape */}
-        <div className="mv3-pane">
-          {!isDone && (() => {
-            const energie = (vehiculeEnergie ?? "").toLowerCase();
-            const isElectric = energie.includes("élect") || energie.includes("elect") || energie.includes("hybr");
-            const taskLabel = isElectric ? "Brancher pour le trajet" : "Vérifier le niveau de carburant";
-            const TaskIcon = isElectric ? Zap : Fuel;
+        {/* TABS */}
+        <div className="mv3-tabs" role="tablist" aria-label="Détail mission">
+          {([
+            { key: "action", label: "Action" },
+            { key: "info", label: "Informations" },
+            { key: "docs", label: "Documents" },
+          ] as const).map((tab) => {
+            const active = activeTab === tab.key;
             return (
-              <div className="mv3-glass">
-                <div className="mv3-card-row">
-                  <span className="mv3-card-title">À faire sur cette mission</span>
-                  <span className="mv3-pill-count">{checklistDone ? 1 : 0}/1</span>
-                </div>
-                <button
-                  type="button"
-                  className={`mv3-checklist ${checklistDone ? "done" : ""}`}
-                  onClick={() => setChecklistDone((v) => !v)}
-                >
-                  <span className="mv3-check-box">{checklistDone && <Check size={13} strokeWidth={3} />}</span>
-                  <TaskIcon size={15} className="mv3-check-icon" />
-                  <span>{taskLabel}</span>
-                </button>
-                <div className="mv3-meta-row">
-                  {vehiculeType && <span>Type <b>{vehiculeType}</b></span>}
-                  {vehiculeEnergie && <span>Énergie <b>{vehiculeEnergie}</b></span>}
-                </div>
-              </div>
+              <button
+                key={tab.key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => onTabChange?.(tab.key)}
+                className={`mv3-tab ${active ? "active" : ""}`}
+              >
+                {tab.label}
+              </button>
             );
-          })()}
+          })}
+        </div>
 
+        {/* PANE : contenu selon onglet */}
+        <div className="mv3-pane">
+          {activeTab === "action" && (
+          <>
           <div className="mv3-glass" style={{ paddingTop: 16 }}>
             <div className="mv3-next-glow" />
 
