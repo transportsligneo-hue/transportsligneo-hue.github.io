@@ -635,9 +635,12 @@ function AdminTrajets() {
             {trajets.map((t) => (
               <TR key={t.id} onClick={() => { setSelected(t); setEditing(false); }}>
                 <TD>
-                  <p className="font-medium text-pro-text">
-                    {t.depart} → {t.arrivee}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-pro-text">
+                      {t.depart} → {t.arrivee}
+                    </p>
+                    {t.is_test_data && <TestBadge />}
+                  </div>
                   {t.marque && (
                     <p className="text-pro-muted text-xs">
                       {t.marque} {t.modele}
