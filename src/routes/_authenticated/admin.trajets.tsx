@@ -677,6 +677,9 @@ function AdminTrajets() {
                         <Ban size={15} />
                       </IconButton>
                     )}
+                    {t.is_test_data && (
+                      <DeleteTestMissionButton trajetId={t.id} compact onDeleted={fetchTrajets} />
+                    )}
                   </div>
                 </TD>
               </TR>
