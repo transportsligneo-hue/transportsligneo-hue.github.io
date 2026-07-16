@@ -25,6 +25,8 @@ import {
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
+import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
