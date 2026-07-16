@@ -127,9 +127,8 @@ export function AdminMissionARBanner({
   };
 
   const doUnlink = async () => {
-    const ok = await confirmToast({
-      title: "Dissocier ce groupe aller-retour ?",
-      message: "Les deux missions deviennent totalement indépendantes. Elles conservent leur numéro et leurs données.",
+    const ok = await confirmToast("Dissocier ce groupe aller-retour ?", {
+      description: "Les deux missions deviennent totalement indépendantes. Elles conservent leur numéro et leurs données.",
       confirmLabel: "Dissocier",
     });
     if (!ok) return;
