@@ -246,8 +246,12 @@ export function MissionCockpit({
   }, [currentKey, forceOpenSelfie, openSelfie]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
-  const currentDef = STEPS[currentIdx] ?? STEPS[0];
+  const baseDef = STEPS[currentIdx] ?? STEPS[0];
   const isDone = currentKey === "done";
+  const isValidated = ["validee", "termine"].includes(statut);
+  const currentDef = isValidated
+    ? { ...baseDef, short: "Validée", label: "Mission validée par l'admin", cta: "Mission validée", hint: "L'admin a validé votre dossier. Merci !" }
+    : baseDef;
 
   useEffect(() => {
     const e = normalizedEtape;
