@@ -1,68 +1,66 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
-import {
-  MapPin, Calendar, Car, Euro, Clock, Search, Filter, Loader2, Send,
-  Sparkles, Zap, ArrowLeftRight, Route as RouteIcon,
-} from "lucide-react";
+import { Loader2, Route as RouteIcon, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import {
+  CatalogueFilters,
+  type CatalogueFilterState,
+} from "@/components/convoyeur/CatalogueFilters";
+import {
+  CatalogueMissionCard,
+  type CatalogTrajet,
+} from "@/components/convoyeur/CatalogueMissionCard";
+import { MissionDetailSheet } from "@/components/convoyeur/MissionDetailSheet";
+import { useGeolocation } from "@/lib/geo/useGeolocation";
+import { haversineKm } from "@/lib/geo/haversine";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/catalogue")({
   component: ConvoyeurCatalogue,
 });
 
-interface CatalogTrajet {
-  id: string;
-  depart: string;
-  arrivee: string;
-  date_trajet: string | null;
-  heure_trajet: string | null;
-  marque: string | null;
-  modele: string | null;
-  distance_km: number | null;
-  duree_estimee_min: number | null;
-  prix_convoyeur_fixe: number | null;
-  prix_convoyeur: number | null;
-  prix_suggere: number | null;
-  attribution_mode: "direct" | "catalogue" | "mixte";
-  allow_counter_offer: boolean;
-  proposal_expires_at: string | null;
-  urgence: string | null;
-  leg_type: string | null;
-  mission_group_id: string | null;
-  created_at: string;
-  published_at: string | null;
-}
-
 interface MyOffer {
-  id: string; trajet_id: string; statut: string; prix_propose: number; type_offre: string;
+  id: string;
+  trajet_id: string;
+  statut: string;
+  prix_propose: number;
+  type_offre: string;
 }
 
-function isLongDistance(km: number | null | undefined) { return (km ?? 0) >= 400; }
-function isRecent(iso: string | null) { return iso ? Date.now() - new Date(iso).getTime() < 24 * 3600 * 1000 : false; }
+const DEFAULT_FILTERS: CatalogueFilterState = {
+  search: "",
+  maxKm: "",
+  minPrix: "",
+  date: "",
+  leg: "all",
+  urgent: false,
+  electric: false,
+  radiusKm: 100,
+  sort: "date",
+};
 
 function ConvoyeurCatalogue() {
   const { user, convoyeurStatut } = useAuth();
   const validated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
   const [hasTraining, setHasTraining] = useState(false);
+  const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<CatalogTrajet[]>([]);
   const [myOffers, setMyOffers] = useState<Record<string, MyOffer>>({});
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [maxKm, setMaxKm] = useState<string>("");
-  const [minPrix, setMinPrix] = useState<string>("");
-  const [sort, setSort] = useState<"prix" | "distance" | "date">("date");
+  const [filters, setFilters] = useState<CatalogueFilterState>(DEFAULT_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
-  const [prix, setPrix] = useState("");
-  const [msg, setMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
+
+  const geo = useGeolocation();
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("convoyeurs").select("id, has_completed_training").eq("user_id", user.id).maybeSingle()
+    supabase
+      .from("convoyeurs")
+      .select("id, has_completed_training")
+      .eq("user_id", user.id)
+      .maybeSingle()
       .then(({ data }) => {
         const row = data as { id?: string; has_completed_training?: boolean } | null;
         setConvoyeurId(row?.id ?? null);
@@ -70,277 +68,316 @@ function ConvoyeurCatalogue() {
       });
   }, [user]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("trajets_publies_safe" as never)
-      .select("id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,created_at,published_at" as never)
+      .select(
+        "id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,statut_publication,created_at,published_at" as never,
+      )
       .in("attribution_mode" as never, ["catalogue", "mixte"] as never)
       .order("published_at" as never, { ascending: false })
       .limit(200);
-    if (!error && data) setTrajets(data as unknown as CatalogTrajet[]);
+    if (data) setTrajets(data as unknown as CatalogTrajet[]);
 
     if (convoyeurId) {
       const { data: offers } = await supabase
         .from("mission_offres")
         .select("id,trajet_id,statut,prix_propose,type_offre")
         .eq("convoyeur_id", convoyeurId)
-        .in("statut", ["en_attente", "contre_offre_admin", "accepte"]);
+        .in("statut", ["en_attente", "contre_offre_admin", "accepte", "acceptee"]);
       const map: Record<string, MyOffer> = {};
-      (offers ?? []).forEach((o) => { map[(o as MyOffer).trajet_id] = o as MyOffer; });
+      (offers ?? []).forEach((o) => {
+        map[(o as MyOffer).trajet_id] = o as MyOffer;
+      });
       setMyOffers(map);
     }
     setLoading(false);
-  };
-
-  useEffect(() => { if (convoyeurId) fetchData(); }, [convoyeurId]);
-
-  useEffect(() => {
-    if (!convoyeurId) return;
-    const ch = supabase
-      .channel("catalogue-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trajets" }, fetchData)
-      .on("postgres_changes", { event: "*", schema: "public", table: "mission_offres" }, fetchData)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [convoyeurId]);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("catalogue-live-v2")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "trajets" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "mission_offres" },
+        () => fetchData(),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [fetchData]);
+
+  const enriched = useMemo(() => {
+    if (!geo.position) return trajets.map((t) => ({ t, dist: null as number | null }));
+    return trajets.map((t) => {
+      if (typeof t.depart_lat === "number" && typeof t.depart_lng === "number") {
+        return {
+          t,
+          dist: haversineKm(geo.position!, { lat: t.depart_lat, lng: t.depart_lng }),
+        };
+      }
+      return { t, dist: null as number | null };
+    });
+  }, [trajets, geo.position]);
+
   const filtered = useMemo(() => {
-    const s = search.trim().toLowerCase();
-    const km = maxKm ? Number(maxKm) : null;
-    const prixMin = minPrix ? Number(minPrix) : null;
-    return trajets
-      .filter((t) => {
-        const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-        if (s && !`${t.depart} ${t.arrivee} ${t.marque ?? ""} ${t.modele ?? ""}`.toLowerCase().includes(s)) return false;
-        if (km && (t.distance_km ?? 0) > km) return false;
-        if (prixMin && price < prixMin) return false;
-        return true;
-      })
-      .sort((a, b) => {
-        if (sort === "prix") return (b.prix_convoyeur_fixe ?? b.prix_convoyeur ?? 0) - (a.prix_convoyeur_fixe ?? a.prix_convoyeur ?? 0);
-        if (sort === "distance") return (a.distance_km ?? 0) - (b.distance_km ?? 0);
-        return new Date(b.published_at ?? b.created_at).getTime() - new Date(a.published_at ?? a.created_at).getTime();
-      });
-  }, [trajets, search, maxKm, minPrix, sort]);
+    const s = filters.search.trim().toLowerCase();
+    const km = filters.maxKm ? Number(filters.maxKm) : null;
+    const prixMin = filters.minPrix ? Number(filters.minPrix) : null;
+    const list = enriched.filter(({ t, dist }) => {
+      const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
+      if (
+        s &&
+        !`${t.depart} ${t.arrivee} ${t.marque ?? ""} ${t.modele ?? ""}`
+          .toLowerCase()
+          .includes(s)
+      )
+        return false;
+      if (km && (t.distance_km ?? 0) > km) return false;
+      if (prixMin && price < prixMin) return false;
+      if (filters.date && t.date_trajet !== filters.date) return false;
+      if (filters.leg === "simple" && t.leg_type && t.leg_type !== "simple")
+        return false;
+      if (filters.leg === "ar" && (!t.leg_type || t.leg_type === "simple"))
+        return false;
+      if (
+        filters.urgent &&
+        !(t.urgence === "urgent" || t.urgence === "immediat")
+      )
+        return false;
+      if (filters.electric) {
+        const carb = (t.type_carburant ?? "").toLowerCase();
+        const model = `${t.marque ?? ""} ${t.modele ?? ""}`.toLowerCase();
+        if (
+          !carb.includes("électr") &&
+          !carb.includes("electr") &&
+          !model.includes("tesla") &&
+          !model.match(/\b(id\.|e-|ev\b|zoé|zoe|ioniq|leaf|kona ev)/)
+        )
+          return false;
+      }
+      if (
+        geo.position &&
+        filters.radiusKm != null &&
+        dist != null &&
+        dist > filters.radiusKm
+      )
+        return false;
+      return true;
+    });
+    list.sort((a, b) => {
+      if (filters.sort === "prix") {
+        const pa = a.t.prix_convoyeur_fixe ?? a.t.prix_convoyeur ?? 0;
+        const pb = b.t.prix_convoyeur_fixe ?? b.t.prix_convoyeur ?? 0;
+        return pb - pa;
+      }
+      if (filters.sort === "distance") {
+        return (a.t.distance_km ?? Infinity) - (b.t.distance_km ?? Infinity);
+      }
+      if (filters.sort === "proximite" && geo.position) {
+        return (a.dist ?? Infinity) - (b.dist ?? Infinity);
+      }
+      return (
+        new Date(b.t.published_at ?? b.t.created_at).getTime() -
+        new Date(a.t.published_at ?? a.t.created_at).getTime()
+      );
+    });
+    return list;
+  }, [enriched, filters, geo.position]);
 
-  const openMission = (t: CatalogTrajet) => {
-    setOpenId(t.id);
-    setPrix(String(t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? ""));
-    setMsg("");
-  };
+  // Auto-switch to proximity sort when geo enables
+  useEffect(() => {
+    if (geo.position && filters.sort === "date") {
+      setFilters((f) => ({ ...f, sort: "proximite" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geo.position]);
 
-  const submitApplication = async () => {
-    if (!openId) return;
-    const t = trajets.find((x) => x.id === openId);
-    if (!t) return;
-    if (!hasTraining) {
-      toast.error("Formation obligatoire à terminer avant de candidater.");
+  const canApply = validated && hasTraining;
+
+  const apply = async (trajet: CatalogTrajet, price: number, message: string) => {
+    if (!canApply) {
+      toast.error("Formation obligatoire et documents validés avant de candidater.");
       return;
     }
-    const suggested = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-    const val = prix ? Number(prix) : suggested;
-    if (!Number.isFinite(val) || val <= 0) { toast.error("Prix invalide"); return; }
-    if (val !== suggested && !t.allow_counter_offer) {
+    const suggested =
+      trajet.prix_convoyeur_fixe ?? trajet.prix_convoyeur ?? trajet.prix_suggere ?? 0;
+    if (price !== suggested && !trajet.allow_counter_offer) {
       toast.error("Les contre-offres ne sont pas autorisées sur cette mission");
       return;
     }
     setSubmitting(true);
     const { error } = await supabase.rpc("driver_apply_to_mission", {
-      _trajet_id: openId,
-      _proposed_price: val,
-      _message: msg || undefined,
+      _trajet_id: trajet.id,
+      _proposed_price: price,
+      _message: message || undefined,
     });
     setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success(val === suggested ? "Candidature envoyée !" : "Contre-offre envoyée !");
-    setOpenId(null); setPrix(""); setMsg("");
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(
+      price === suggested ? "Candidature envoyée !" : "Contre-offre envoyée !",
+    );
+    setOpenId(null);
     fetchData();
   };
 
-  if (!validated) {
-    return (
-      <div className="max-w-3xl mx-auto p-8 text-center rounded-2xl border border-amber-200 bg-amber-50">
-        <p className="text-amber-900 font-semibold">Votre compte doit être validé pour candidater aux missions.</p>
-        <p className="text-amber-800/80 text-sm mt-2">Complétez vos documents dans l'onglet "Documents".</p>
-      </div>
-    );
-  }
-
-  const canApply = validated && hasTraining;
+  const openTrajet = openId ? trajets.find((t) => t.id === openId) : null;
+  const openDist =
+    openTrajet && geo.position
+      ? enriched.find((e) => e.t.id === openTrajet.id)?.dist ?? null
+      : null;
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-pro-text flex items-center gap-2">
-            <Sparkles className="text-pro-gold" size={22} /> Catalogue des missions
-          </h1>
-          <p className="text-sm text-pro-text-soft mt-1">
-            Missions publiques disponibles. Postulez au tarif proposé ou faites une contre-offre.
-          </p>
-        </div>
-        {!hasTraining && (
-          <Link
-            to="/convoyeur/formation"
-            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 hover:bg-amber-100 transition-colors"
-          >
-            <strong>Formation obligatoire à finaliser.</strong> Terminez les modules avant de postuler aux missions.
-          </Link>
-        )}
-        <div className="text-xs text-pro-muted flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Temps réel
-        </div>
-      </div>
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
+      <div
+        className="relative min-h-[calc(100vh-2rem)] px-4 sm:px-6 lg:px-8 pt-6 pb-24 text-white overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% 0%, #0b1a44 0%, #060e28 55%, #030814 100%)",
+        }}
+      >
+        {/* halos */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-16 h-[360px] w-[360px] rounded-full opacity-50 blur-[120px]"
+          style={{
+            background: "radial-gradient(circle, rgba(212,175,55,0.35) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-1/3 -left-24 h-[300px] w-[300px] rounded-full opacity-40 blur-[110px]"
+          style={{
+            background: "radial-gradient(circle, rgba(59,130,246,0.35) 0%, transparent 70%)",
+          }}
+        />
 
-      {/* Filtres */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 rounded-xl border border-pro-border bg-white shadow-pro-card">
-        <div className="md:col-span-2 relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
-          <input placeholder="Ville, marque, modèle…" value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-pro-border text-sm focus:ring-2 focus:ring-pro-gold/40" />
-        </div>
-        <input type="number" placeholder="Distance max (km)" value={maxKm} onChange={(e) => setMaxKm(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border border-pro-border text-sm" />
-        <input type="number" placeholder="Prix min (€)" value={minPrix} onChange={(e) => setMinPrix(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border border-pro-border text-sm" />
-        <select value={sort} onChange={(e) => setSort(e.target.value as "prix" | "distance" | "date")}
-          className="w-full px-3 py-2 rounded-lg border border-pro-border text-sm">
-          <option value="date">Tri : Plus récentes</option>
-          <option value="prix">Tri : Rémunération</option>
-          <option value="distance">Tri : Distance</option>
-        </select>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-16"><Loader2 className="animate-spin text-pro-gold" size={28} /></div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-pro-text-soft rounded-xl border border-dashed border-pro-border bg-white">
-          <RouteIcon className="mx-auto mb-3 text-pro-muted" size={32} />
-          Aucune mission disponible pour ces critères.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((t) => {
-            const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-            const mine = myOffers[t.id];
-            const isAR = t.leg_type && t.leg_type !== "simple";
-            const urgent = t.urgence === "immediat" || t.urgence === "urgent";
-            const longDist = isLongDistance(t.distance_km);
-            const fresh = isRecent(t.published_at);
-            return (
-              <div key={t.id} className="group relative rounded-2xl border border-pro-border bg-white p-5 hover:shadow-pro-elevated transition-all overflow-hidden">
-                {fresh && (
-                  <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-sm animate-pulse">
-                    NOUVELLE
-                  </span>
-                )}
-
-                <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                  {urgent && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 flex items-center gap-1"><Zap size={10} /> URGENT</span>}
-                  {isAR && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-1"><ArrowLeftRight size={10} /> A/R</span>}
-                  {longDist && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-700 border border-violet-200">LONGUE DISTANCE</span>}
-                  {t.allow_counter_offer && <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200">Contre-offre ✓</span>}
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-start gap-2">
-                    <MapPin size={15} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-semibold text-pro-text truncate">{t.depart}</div>
-                      <div className="text-pro-text-soft text-xs">↓</div>
-                      <div className="font-semibold text-pro-text truncate">{t.arrivee}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-pro-text-soft pt-1">
-                    {t.date_trajet && <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(t.date_trajet).toLocaleDateString("fr-FR")}</span>}
-                    {t.heure_trajet && <span className="flex items-center gap-1"><Clock size={12} /> {t.heure_trajet}</span>}
-                    {t.distance_km && <span>· {Math.round(t.distance_km)} km</span>}
-                  </div>
-                  {(t.marque || t.modele) && (
-                    <div className="flex items-center gap-1.5 text-xs text-pro-text-soft">
-                      <Car size={12} /> {[t.marque, t.modele].filter(Boolean).join(" ")}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-pro-border flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-pro-muted">Rémunération</div>
-                    <div className="text-2xl font-bold text-pro-text flex items-center gap-1">
-                      {price.toFixed(0)} <Euro size={16} className="text-pro-gold" />
-                    </div>
-                  </div>
-                  {mine ? (
-                    <div className="text-right">
-                      <MissionStatusBadge status={mine.statut === "contre_offre_admin" ? "propose" : mine.statut} short />
-                      <div className="text-[10px] text-pro-muted mt-1">{mine.prix_propose.toFixed(0)} €</div>
-                    </div>
-                  ) : (
-                    <button onClick={() => canApply ? openMission(t) : toast.error("Formation obligatoire à terminer avant de candidater.")}
-                      className="px-4 py-2 rounded-lg bg-pro-brand-strip text-white text-sm font-semibold hover:opacity-90 flex items-center gap-1.5 disabled:opacity-50"
-                      disabled={!canApply}
-                      title={!canApply ? "Formation obligatoire" : undefined}>
-                      <Send size={14} /> Postuler
-                    </button>
-                  )}
-                </div>
+        <div className="relative z-10 mx-auto max-w-6xl space-y-5">
+          {/* Titre */}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-amber-300/80">
+                <Sparkles size={14} /> Place de marché convoyeurs
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Modal candidature */}
-      {openId && (() => {
-        const t = trajets.find((x) => x.id === openId);
-        if (!t) return null;
-        const suggested = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-        return (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setOpenId(null)}>
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <h3 className="font-bold text-lg text-pro-text mb-1">Postuler à cette mission</h3>
-              <p className="text-sm text-pro-text-soft mb-4">{t.depart} → {t.arrivee}</p>
-
-              <div className="mb-3">
-                <label className="text-xs font-semibold text-pro-text-soft">Votre tarif (€)</label>
-                <input type="number" value={prix} onChange={(e) => setPrix(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg border border-pro-border text-lg font-bold text-pro-text" />
-                <div className="text-[11px] text-pro-muted mt-1">Tarif proposé : <strong>{suggested.toFixed(0)} €</strong></div>
-                {t.allow_counter_offer && (
-                  <div className="flex gap-1 mt-2">
-                    {[0, 5, 10, 20].map((inc) => (
-                      <button key={inc} type="button" onClick={() => setPrix(String(suggested + inc))}
-                        className="flex-1 px-2 py-1 rounded border border-pro-border text-xs hover:bg-pro-bg-soft">
-                        {inc === 0 ? "Au tarif" : `+${inc}€`}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label className="text-xs font-semibold text-pro-text-soft">Message (facultatif)</label>
-                <textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={3}
-                  placeholder="Précisez vos disponibilités, votre expérience…"
-                  className="w-full mt-1 px-3 py-2 rounded-lg border border-pro-border text-sm resize-none" />
-              </div>
-
-              <div className="flex gap-2">
-                <button onClick={() => setOpenId(null)} className="flex-1 px-4 py-2 rounded-lg border border-pro-border text-sm">Annuler</button>
-                <button onClick={submitApplication} disabled={submitting}
-                  className="flex-1 px-4 py-2 rounded-lg bg-pro-brand-strip text-white font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5">
-                  {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={14} />} Envoyer
-                </button>
-              </div>
+              <h1
+                className="mt-1 text-2xl font-black text-white sm:text-3xl"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Catalogue des missions
+              </h1>
+              <p className="mt-1 max-w-2xl text-sm text-white/70">
+                Missions publiques disponibles. Postulez au tarif proposé ou faites
+                une contre-offre. Trié en temps réel.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-100">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+              Temps réel
             </div>
           </div>
-        );
-      })()}
 
-      <div className="text-center pt-2">
-        <Link to="/convoyeur/missions" className="text-xs text-pro-muted hover:text-pro-text">← Retour à mes missions</Link>
+          {/* Alertes */}
+          {!validated && (
+            <div className="rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+              Votre compte doit être validé pour candidater aux missions. Complétez
+              vos documents dans l'onglet "Documents".
+            </div>
+          )}
+          {validated && !hasTraining && (
+            <Link
+              to="/convoyeur/formation"
+              className="block rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 hover:bg-amber-500/15"
+            >
+              <strong>Formation obligatoire à finaliser.</strong> Terminez les
+              modules avant de postuler aux missions.
+            </Link>
+          )}
+
+          {/* Filtres */}
+          <CatalogueFilters
+            value={filters}
+            onChange={setFilters}
+            geoActive={!!geo.position}
+            geoLoading={geo.loading}
+            onRequestGeo={() => {
+              geo.request();
+              if (!geo.position) {
+                toast.info("Autorisez la géolocalisation dans votre navigateur.");
+              }
+            }}
+            onClearGeo={() => {
+              geo.clear();
+              setFilters((f) => ({ ...f, sort: "date" }));
+            }}
+          />
+
+          {geo.error && (
+            <div className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs text-red-100">
+              Position indisponible : {geo.error}
+            </div>
+          )}
+
+          {/* Résultats */}
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="animate-spin text-amber-300" size={28} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] py-16 text-center text-white/60">
+              <RouteIcon className="mx-auto mb-3 text-white/40" size={32} />
+              Aucune mission ne correspond à ces critères.
+            </div>
+          ) : (
+            <>
+              <div className="text-xs text-white/60">
+                {filtered.length} mission{filtered.length > 1 ? "s" : ""} affichée
+                {filtered.length > 1 ? "s" : ""}
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.map(({ t, dist }) => {
+                  const mine = myOffers[t.id];
+                  return (
+                    <CatalogueMissionCard
+                      key={t.id}
+                      trajet={t}
+                      distanceFromMe={dist}
+                      myOfferStatus={mine?.statut ?? null}
+                      myOfferPrice={mine?.prix_propose ?? null}
+                      canApply={canApply}
+                      onOpen={() => setOpenId(t.id)}
+                      onQuickApply={() => setOpenId(t.id)}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {openTrajet && (
+          <MissionDetailSheet
+            trajet={openTrajet}
+            distanceFromMe={openDist}
+            onClose={() => setOpenId(null)}
+            canApply={canApply}
+            submitting={submitting}
+            onSubmit={(price, message) => apply(openTrajet, price, message)}
+          />
+        )}
       </div>
     </div>
   );

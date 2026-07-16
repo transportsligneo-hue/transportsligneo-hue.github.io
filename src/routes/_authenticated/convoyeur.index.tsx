@@ -239,7 +239,7 @@ function ConvoyeurDashboard() {
               Consultez les missions disponibles ou attendez une attribution.
             </p>
             <Link
-              to="/convoyeur/disponibles"
+              to="/convoyeur/catalogue"
               className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]"
             >
               Voir les missions disponibles <ArrowRight size={16} />
