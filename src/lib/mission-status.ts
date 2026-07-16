@@ -7,6 +7,7 @@ export type MissionStatusKey =
   | "refusee"           // Refusé par le convoyeur
   | "en_cours"          // Mission en cours d'exécution
   | "en_attente_validation" // En attente validation admin (fin)
+  | "validee"           // Validée par l'admin
   | "termine"           // Terminé
   | "publie"            // Publié au catalogue
   | "brouillon"         // Brouillon admin
