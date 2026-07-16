@@ -592,6 +592,7 @@ function AdminAttributions() {
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                       {statutLabels[a.statut] ?? a.statut}
                     </Badge>
+                    {a.trajet?.is_test_data && <TestBadge />}
                     {a.trajet?.type_transport && (
                       <span className="text-[10px] uppercase tracking-wider text-pro-muted">
                         {a.trajet.type_transport}
