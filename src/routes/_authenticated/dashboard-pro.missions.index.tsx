@@ -293,7 +293,10 @@ function ProMissionsIndex() {
                     onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
                   >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">{m.numero}</Link>
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
+                        <span>{m.numero}</span>
+                        <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
+                      </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
