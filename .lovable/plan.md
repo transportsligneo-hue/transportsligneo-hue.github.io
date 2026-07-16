@@ -1,88 +1,102 @@
+# Scanner Premium TRANSPORTS LIGNEO
 
-## Diagnostic
+Vous avez validé : **tout en une seule phase**, **OpenCV.js WASM temps réel**, **intégration sur les 3 formulaires** (admin, client, pro). Je découpe en 5 sous-phases livrées à la suite dans ce même chantier, chacune testable indépendamment pour éviter la régression.
 
-Trois problèmes distincts, tous localisés dans l'administration.
+## Architecture cible
 
-### 1. Bug — la mission "disparaît" quand on la publie au catalogue
-
-Racine identifiée : `src/routes/_authenticated/admin.attributions.tsx`, ligne 333-335.
-
-```ts
-const assignableTrajets = trajets.filter(
-  (t) => !(t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "")),
-);
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  <PremiumScanner />  (composant unique, réutilisable)       │
+│  ├─ Caméra getUserMedia + <video> preload                   │
+│  ├─ Web Worker OpenCV.js (findContours, 4 coins, stabilité) │
+│  ├─ Auto-capture quand doc stable > 800ms                   │
+│  ├─ Correction perspective (warpPerspective) + filtres      │
+│  │   (ombre, contraste, netteté, N&B "magic color")         │
+│  ├─ Contrôle qualité local (Laplacian variance = flou)      │
+│  └─ Multi-pages : liste réordonnable + PDF pdf-lib          │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+        ┌──────────────┴───────────────┐
+        ▼                              ▼
+  EDL photos véhicule           Création mission
+  (remplace                     ┌──────────────────────┐
+  QuickCameraCapture)           │ scan-document.fn.ts  │
+                                │ Gemini 2.5 Flash     │
+                                │ tool-calling struct. │
+                                │ classifie type doc   │
+                                │ (CG/CPI/BC/BL/PV/…)  │
+                                │ extrait tous champs  │
+                                └──────────┬───────────┘
+                                           ▼
+                                  Pré-remplit formulaires :
+                                  • admin nouvelle mission
+                                  • dashboard-client réservation
+                                  • dashboard-pro demande
 ```
 
-Dès que `admin_publish_to_catalogue` bascule un trajet en `statut_publication='publie'` + `attribution_mode='catalogue'`, ce filtre le retire de la colonne "Trajets à attribuer". Le trajet existe toujours en base mais n'apparaît plus dans la vue Attributions (et il n'est pas non plus listé dans la table du haut, qui ne montre que les attributions déjà créées). Résultat : impression de disparition.
+## Sous-phase 1 — Fondations scanner (composant + worker OpenCV)
 
-La page `admin.trajets` conserve elle le trajet — il est juste marqué "Publié". Le bug est donc bien un problème d'affichage sur `admin.attributions`.
+- Ajout dep `opencv.js` (WASM ~8 Mo, chargé à la demande via `<script>` dynamique, pas dans le bundle initial).
+- `src/lib/workers/opencv-worker.ts` : détection contours + 4 coins + score stabilité.
+- `src/components/scanner/PremiumScanner.tsx` : UI plein écran, overlay contours animés, capture auto, flash, torch, HD.
+- `src/lib/scanner/image-pipeline.ts` : perspective + shadow removal + auto-enhance (3 modes : Original / Auto / N&B).
+- `src/lib/scanner/quality-check.ts` : flou (Laplacian), luminosité, coupure bord.
+- Fallback total : si OpenCV échoue à charger → capture simple `QuickCameraCapture` actuel (aucune régression).
 
-### 2. Ergonomie — deux étapes séparées "Trajets" + "Attributions"
+## Sous-phase 2 — OCR & classification serveur
 
-Aujourd'hui l'admin doit :
-1. aller sur `/admin/trajets`, ouvrir un trajet, éventuellement le publier ou définir le prix ;
-2. puis aller sur `/admin/attributions` pour cliquer "Assigner" et choisir un convoyeur.
+- Nouvelle fonction `supabase/functions/scan-document-extract/index.ts` (ou server fn) : Gemini 2.5 Flash Vision + `tool_choice` avec un schéma qui accepte **tous les types de documents auto FR** dans un seul `oneOf` — le modèle classifie + extrait en un appel.
+- Champs extraits normalisés : VIN, immat, marque, modèle, énergie, puissance, date_mec, titulaire, adresse, client, concession, n°commande/dossier/facture, tel, mail, kilométrage, dommages notés.
+- Multi-doc : appel batch, fusion serveur (règle : dernière valeur non vide, priorité carte grise > BC > BL pour les champs véhicule ; BC > CG pour client).
+- Cache : hash SHA-256 de l'image → réutilise résultat si scan répété (localStorage).
+- Rétrocompatible : `edl-document-ocr` existante reste en place (non touchée).
 
-Beaucoup d'aller-retour pour une seule mission.
+## Sous-phase 3 — Intégration création mission (3 formulaires)
 
-### 3. Outil manquant — pas de moyen simple de tester le pipeline sans polluer les stats
+- Nouveau composant `<ScanToPrefill onExtracted={fn} />` : bouton premium doré, ouvre scanner → appelle extraction → renvoie objet normalisé.
+- Branché sur :
+  - `admin.trajets` / nouvelle mission
+  - `dashboard-client.nouvelle-reservation`
+  - `dashboard-pro.nouvelle-demande`
+- Mapping champs vers state existant du formulaire (sans changer la validation ni les mutations Supabase).
+- Alertes intelligentes : VIN check digit, doublon immat sur missions récentes (query `missions` + `trajets`), client existant (`profiles.email`).
+- Multi-pages : bouton "+ Ajouter document" → concat des extractions → PDF pdf-lib attaché en storage (`mission-documents` bucket).
 
-## Corrections proposées
+## Sous-phase 4 — Refonte scanner EDL
 
-### A. Fix bug d'affichage (chirurgical, aucun changement métier)
+- `QuickCameraCapture` conservé (fallback + zones simples) mais remplacé par `PremiumScanner` sur :
+  - Photos véhicule (4 zones inspection)
+  - Photos compteur / carburant (avec extraction OCR km auto → pré-remplit champ km)
+  - Photos documents (PV livraison, mandat)
+- Détection dommages : appel Gemini Vision sur chaque photo véhicule → suggestions structurées `{type, sévérité, zone}` → pré-cochées dans l'UI dommages existante, l'utilisateur valide/décoche.
+- File d'attente offline existante (`edl-offline-queue.ts`) réutilisée : le scanner met les images dedans si offline.
 
-Dans `admin.attributions.tsx`, remplacer le filtre "exclusion catalogue" par un **marqueur visuel** :
-- garder le trajet visible dans "Trajets à attribuer",
-- ajouter un badge "Au catalogue" à côté,
-- l'action "Assigner un convoyeur" reste possible (mode mixte / reprise en main admin).
+## Sous-phase 5 — Export, offline, polish
 
-Aucune RPC, aucune policy, aucun workflow modifié.
+- Export PDF/PNG/JPEG HD via pdf-lib (déjà présent dans le projet).
+- Retour haptique `navigator.vibrate` sur capture auto et succès.
+- Skeleton + progressive rendering : preview locale immédiate, OCR en tâche de fond avec indicateur discret.
+- Préchargement du WASM OpenCV au hover du bouton "Scanner" (link `rel=preload`).
+- Tests visuels Playwright sur les 3 formulaires (screenshot avant/après scan avec image de démo).
 
-### B. Fusion Trajet + Attribution — mode "cockpit unifié"
+## Détails techniques
 
-Objectif : **zéro rupture existante**. On ne fusionne pas les tables ni les pages elles-mêmes (elles restent accessibles pour tout usage avancé). On ajoute une action fluide.
+- **Modèle OCR** : `google/gemini-2.5-flash` via Lovable AI Gateway (rapide, tool-calling fiable). Fallback `gemini-2.5-pro` si extraction structurée échoue.
+- **Sécurité** : la fonction OCR vérifie JWT + rôle (admin/client/convoyeur propriétaire). Rate limit côté fonction (10 scans/min/user).
+- **Storage** : bucket `mission-documents` existant, chemin `${user_id}/${mission_id}/scan_${timestamp}.pdf`.
+- **Bundle** : OpenCV.js chargé via `import()` dynamique + `<script async>` — 0 impact sur le bundle initial.
+- **Types** : nouveau fichier `src/lib/scanner/types.ts` avec union discriminée `ExtractedDocument = CarteGrise | BonCommande | PVLivraison | ...`.
+- **Zero-regression** : `QuickCameraCapture`, `edl-document-ocr`, `edl-offline-queue`, formulaires existants restent fonctionnels. Le scanner premium est un **ajout** activable, pas un remplacement destructif.
 
-Concrètement :
-- Sur la ligne d'un trajet (dans `/admin/trajets` **et** dans la carte "À attribuer" de `/admin/attributions`), un bouton **"Traiter"** ouvre une modale unique en 3 sections empilées :
-  1. **Trajet** — édition inline des champs essentiels (départ, arrivée, date, véhicule, prix client, tarif convoyeur, notes) ;
-  2. **Publication** — choix "Attribution directe / Publier au catalogue" (radio) avec les options existantes ;
-  3. **Assignation** — si "Attribution directe" : réutilise le composant existant `AssignDriverDialog` inline (liste convoyeurs + score + flottes).
-- Un seul clic "Enregistrer & attribuer" applique tout dans l'ordre : `UPDATE trajets` → `admin_publish_to_catalogue` (si choisi) OU création de l'`attribution` (si convoyeur choisi).
-- Les pages `/admin/trajets` et `/admin/attributions` continuent d'exister à l'identique pour la compatibilité (aucune régression sur les usages avancés — offres, contre-offres, historique, etc.).
+## Ce qui n'est PAS inclus (à demander séparément si voulu)
 
-Composant nouveau : `src/components/admin/MissionDispatchDialog.tsx` — réutilise `PricingModeBlock`, `PublishToCatalogueButton` (logique interne), et `AssignDriverDialog` (liste convoyeurs).
+- SDK payant (Scanbot / Microblink) — vous avez choisi OpenCV.js.
+- Refonte visuelle des dashboards eux-mêmes.
+- Reconnaissance vocale / dictée.
+- App mobile native (reste web/PWA).
 
-### C. Outil "Créer une mission test"
+## Estimation
 
-- Nouvelle colonne booléenne `trajets.is_test_data` (default false), indexée.
-- Toutes les vues publiques existantes (`trajets_publies_safe`, RPC catalogue convoyeur, listes client/convoyeur/entreprise) filtrent `WHERE is_test_data = false`. Les stats et exports filtrent pareil.
-- Dans l'admin : header `/admin/trajets` gagne un bouton discret **"Créer mission test"** (icône flask). Génère un trajet fictif préfixé `TEST — Paris → Lyon` avec véhicule, prix et statut réalistes.
-- Badge visuel `TEST` (jaune) sur toutes les lignes admin où `is_test_data = true`.
-- Bouton "Supprimer" en un clic (cascade sur attributions, offres, historique liés).
+~15-20 fichiers nouveaux, ~8 fichiers édités, 1 migration mineure (colonne `scan_source` sur `missions` pour traçabilité, optionnel). Livraison en un enchaînement sans questions supplémentaires — je vous ping à chaque sous-phase terminée pour que vous testiez avant la suivante.
 
-Politique RLS admin inchangée : les admins voient tout ; le filtre "is_test_data" est appliqué **uniquement dans les vues et RPC lues par les non-admin**, garantissant que les missions test n'apparaissent jamais côté client/convoyeur/rapport.
-
-## Livraisons
-
-### Migration SQL
-- `ALTER TABLE trajets ADD COLUMN is_test_data boolean NOT NULL DEFAULT false`
-- Index partiel `WHERE is_test_data = true`
-- Mise à jour de `trajets_publies_safe` et des RPC catalogue pour exclure les tests
-- Fonction `admin_create_test_mission()` (SECURITY DEFINER, réservée admin) qui insère un trajet test cohérent
-- Fonction `admin_delete_test_mission(uuid)` qui supprime le trajet + cascade manuelle (attributions, offres, historique) — restreinte à `is_test_data = true` pour éviter les accidents
-
-### Code
-- **Fix** `src/routes/_authenticated/admin.attributions.tsx` : suppression du filtre exclusif catalogue + ajout badge "Au catalogue"
-- **Nouveau** `src/components/admin/MissionDispatchDialog.tsx` (cockpit unifié Trajet + Publication + Assignation)
-- **Nouveau** `src/components/admin/TestMissionActions.tsx` (bouton créer + supprimer + badge TEST)
-- **Édits légers** `admin.trajets.tsx` (bouton "Traiter", bouton "Créer mission test", badge TEST) et `admin.attributions.tsx` (bouton "Traiter" en remplacement du "Assigner", badge TEST)
-- Aucun changement dans `admin.exploitation`, `admin.demandes`, dashboards client/convoyeur/pro, RPC existantes, edge functions.
-
-## Ce qui reste intouché
-
-- Formulaires publics de demande / réservation client
-- Espace client, espace convoyeur, espace pro, espace flotte
-- Toutes les RPC existantes (`admin_publish_to_catalogue`, `admin_convert_demande_to_missions`, etc.)
-- Toutes les policies RLS existantes (on ajoute uniquement un filtre `is_test_data` dans les vues publiques)
-- Pages `admin.trajets` et `admin.attributions` (elles restent accessibles avec toutes leurs fonctionnalités actuelles ; on ajoute juste un bouton "Traiter" et le badge TEST)
-- Le module Formation, les tarifs, l'exploitation live, les paiements
+**Confirmez ce plan et je démarre la sous-phase 1 immédiatement.**
