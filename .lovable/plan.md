@@ -1,62 +1,99 @@
-## Objectif
 
-Traiter chaque demande aller-retour comme **deux missions distinctes et indépendantes** (Aller + Retour), reliées par un `mission_group_id` uniquement pour la navigation. Formulaire client public inchangé.
+# Refonte Catalogue des Missions (espace convoyeur)
 
-Bonne nouvelle : l'infrastructure DB partielle est déjà en place (`mission_group_id`, `leg_type`, `leg_index` existent sur `missions` **et** `trajets`, `demandes_convoyage` a déjà `depart_retour`, `date_retour`, `prix_aller`/`prix_retour` côté `devis`). Le travail consiste à propager la logique jusqu'aux **missions** (aujourd'hui seuls les `trajets` sont éclatés via `auto_create_trajet_from_devis`) et à exposer l'édition indépendante côté admin.
+Objectif : transformer le catalogue en place de marché pro type Uber Driver / Bolt / Amazon Flex, tout en gardant l'identité Ligneo (bleu nuit + doré, glassmorphism). Zéro régression sur les workflows / API / RPC existants.
 
-## Plan
+## 1. Suppression de l'ancienne page "Disponibles"
 
-### 1. Migration DB (schéma + logique serveur)
+- Supprimer `src/routes/_authenticated/convoyeur.disponibles.tsx`.
+- Ajouter `src/routes/_authenticated/convoyeur.disponibles.tsx` en simple **redirect** vers `/convoyeur/catalogue` (loader `throw redirect`), pour ne casser aucun lien externe / notification / email existant.
+- Mettre à jour la sidebar (`convoyeur.tsx`) → l'onglet "Catalogue missions" pointe désormais sur `/convoyeur/catalogue`.
+- Grep global des liens vers `/convoyeur/disponibles` (notifications, emails, redirections auth) et les faire pointer vers `/convoyeur/catalogue`.
 
-- **`missions`** : garantir que `leg_type` accepte `simple|aller|retour`, `leg_index` (1 = aller, 2 = retour), `mission_group_id uuid`. Ajouter `prix_locked boolean default false` pour figer un prix modifié manuellement.
-- **Fonction `split_ar_prices(total numeric)`** : retourne `(aller, retour)` avec règle 2/3 – 1/3, aller arrondi au centime **supérieur**, retour = total − aller (garantit somme exacte).
-- **RPC `admin_convert_demande_to_missions(_demande_id uuid)`** (SECURITY DEFINER, admin/super_admin) :
-  - lit la demande, détecte AR (`options='aller_retour'` OU `depart_retour` non vide),
-  - génère `mission_group_id`,
-  - crée 1 mission simple **ou** 2 missions (Aller + Retour inverse pré-rempli, véhicule/adresses/contacts propres, prix éclatés via `split_ar_prices`),
-  - retourne les IDs.
-- **RPC `admin_unlink_mission_from_group(_mission_id)`** : met `mission_group_id = null`, `leg_type = 'simple'`.
-- **RPC `admin_cancel_mission_leg(_mission_id)`** : marque annulée, laisse le jumeau intact.
-- **RPC `admin_set_mission_prix(_mission_id, _prix)`** : set `prix_total`, `prix_locked = true`, **pas** de recalcul du jumeau.
-- Suivre le pattern GRANT + RLS existant.
+## 2. Refonte visuelle du Catalogue (`convoyeur.catalogue.tsx`)
 
-### 2. Réutilisation du flux devis payé
+Design : reprend la palette navy premium déjà en place sur l'espace convoyeur (fond `radial-gradient` navy + halos, cartes en verre fumé, accents dorés Ligneo, boutons `.btn-onyx` / bleu neon). Cartes glassmorphism, animations CSS uniquement (pas de framer-motion).
 
-`auto_create_trajet_from_devis` continue de créer les trajets. Étendre pour créer aussi les **missions** correspondantes (aujourd'hui c'est manuel/absent) via la même logique de split, en respectant `prix_aller`/`prix_retour` s'ils sont saisis, sinon `split_ar_prices(prix_estime)`.
+### 2.1 En-tête & barre de filtres sticky
+- Titre + statut temps réel (déjà présent).
+- Nouveau **bouton géoloc** ("Autour de moi") avec icône `Navigation` : demande `navigator.geolocation`, mémorise la position en state + `sessionStorage`, active un tri "proximité".
+- Sélecteur de **rayon** : 10 / 25 / 50 / 100 / 150 / 200 / 500 km / France entière.
+- Filtres additionnels :
+  - Recherche texte (ville, marque, modèle) — existant.
+  - Ville / Département / Région (autocomplete simple sur le texte du champ, on parse ville/CP côté client).
+  - Date (jour précis ou plage).
+  - Type mission : Aller simple / Aller-retour / Tous.
+  - Urgentes uniquement (switch).
+  - Véhicule électrique (switch, filtre sur `type_carburant`/`marque` si dispo dans la vue publique — sinon filtre par mots-clés).
+  - Distance max, prix min (existants).
+  - Tri : proximité (si geoloc), plus récentes, prix ↓, distance ↑.
+- Filtres appliqués instantanément (useMemo), aucun reload.
 
-### 3. Admin UI
+### 2.2 Cartes premium
+Chaque carte affiche sans clic :
+- Villes départ → arrivée (nœuds route stylés).
+- Distance (km) + durée estimée (min → h/min).
+- Prix net convoyeur (grand chiffre doré).
+- Badge type mission : "Aller simple" / "Aller-retour" (leg_type).
+- Date + heure.
+- Véhicule (marque + modèle + électrique si applicable).
+- Niveau requis (Débutant / Confirmé / Expert) — dérivé de `distance_km` + urgence par défaut si le champ n'existe pas côté BDD (règle métier locale : <200 km = Débutant, 200-600 = Confirmé, >600 ou urgent = Expert).
+- Badge Urgent si `urgence in ('urgent','immediat')`.
+- Badge Nouvelle (< 24h) — existant.
+- **Compte à rebours** avant expiration (`proposal_expires_at`) mis à jour toutes les 30 s.
+- Si distance depuis moi connue : chip "à X km de vous".
+- Statut de mon offre si déjà candidaté (`MissionStatusBadge`).
+- Bouton "Voir la mission" ouvre la fiche détaillée (drawer/sheet). Bouton rapide "Postuler" reste accessible.
 
-- **Liste missions** (`admin.missions` / `admin.exploitation`) : badge **"Aller"** / **"Retour"** + petit chip cliquable "↔ jumeau" ouvrant l'autre mission.
-- **Détail mission admin** (`admin.missions.$missionId`) :
-  - Bandeau AR : "Mission Aller de MIS-XXX ↔ voir Retour MIS-YYY", boutons **Dissocier** et **Annuler ce sens**.
-  - Champ **prix** éditable inline (input €) → appelle `admin_set_mission_prix`, badge "prix figé manuellement" si `prix_locked`.
-  - Édition indépendante véhicule / adresses / contacts / convoyeur (déjà en place).
-- **Détail demande admin** (`admin.demandes`) : bouton **"Convertir en missions"** qui appelle la nouvelle RPC, redirige vers la 1ʳᵉ mission créée.
+Cartes : glass navy + bordure dorée légère au hover, animation `translateY(-2px)` + halo, `transition-all`, aucun framer-motion.
 
-### 4. Espace client
+### 2.3 Fiche détaillée (drawer plein écran mobile, side-sheet desktop)
+- Ouvre sans quitter le catalogue (état local `openId`), fermeture par clic backdrop / bouton / touche Escape.
+- Sections :
+  - Header : villes, badges (urgent, AR, niveau), prix, expiration.
+  - Trajet : distance, durée, adresses complètes départ/arrivée (si dispo dans la vue publique — sinon villes uniquement, aucune fuite d'infos privées).
+  - Véhicule : marque, modèle, kilométrage estimé, type carburant, photos (si publiées).
+  - Remarques du client (champ public `remarques_publiques` si dispo, sinon on cache la section — pas de leak).
+  - Informations utiles / documents nécessaires (contenu statique métier : permis B en cours de validité, pièce d'identité, attestation assurance, tel chargé — bloc réutilisable).
+  - **Trajet conseillé** : bouton "Ouvrir dans Google Maps" (URL `https://www.google.com/maps/dir/?api=1&origin=...&destination=...`).
+  - **Aide au retour** (uniquement si `leg_type === 'simple'`) : trois CTA modernes pré-remplis avec **arrivée → départ** :
+    - 🚆 **SNCF Connect** : `https://www.sncf-connect.com/app/home/search?origin={arrivee}&destination={depart}`
+    - 🚌 **Moovit** : `https://moovitapp.com/tripplan/?from={arrivee}&to={depart}`
+    - 🌍 **Rome2Rio** : `https://www.rome2rio.com/map/{arrivee}/{depart}`
+  - Actions : Accepter (au tarif) / Faire une offre (si `allow_counter_offer` ou pricing enchère) / Fermer.
+  - Réutilise les RPC existantes (`driver_apply_to_mission` / `accept_mission_fixe`) — **aucune modification de logique métier**.
 
-- Liste missions client (dashboard-client + dashboard-pro + flotte) : badge Aller/Retour, lien "Voir la mission liée".
-- Détail mission (`ClientMissionDetailView`) : encart "Mission jumelle" avec lien.
+### 2.4 Géolocalisation
+- Composant `GeolocationButton` : demande la position, stocke `{lat,lng}` en state + `sessionStorage("convoyeur_geo")`.
+- Distance carte ↔ position : Haversine côté client à partir de coordonnées trajet si présentes dans la vue publique (`depart_lat/lng`) ; sinon on cache le chip "à X km" et le filtre rayon (fallback gracieux, aucun crash).
+- Tri "proximité" activé automatiquement dès que la position est dispo.
 
-### 5. Tarification côté public (aligner l'estimateur)
+## 3. Compatibilité & sécurité
 
-Cas limite explicite du user : appliquer la même règle 2/3 – 1/3 avec arrondi centime supérieur sur l'aller dans `src/lib/reservation-pricing.ts` / `client-pricing.ts` / `pricing-engine.ts` pour que l'affichage tunnel/devis colle à la répartition serveur (aujourd'hui la répartition peut différer de quelques centimes).
+- Aucune migration Supabase, aucune modification de RPC / RLS / vues.
+- Uniquement lecture de `trajets_publies_safe` (déjà utilisée).
+- Les nouveaux champs (coords, kilométrage, carburant, remarques publiques) sont lus de façon **optionnelle** : si absents, l'UI dégrade proprement.
+- Aucun changement dans `mission_offres`, `attributions`, `driver_apply_to_mission`, `accept_mission_fixe`.
+- La redirect `/convoyeur/disponibles` → `/convoyeur/catalogue` préserve tous les liens historiques (emails, notifs, favoris).
 
-### 6. Cas limites couverts
+## 4. Livrables (fichiers)
 
-- Annulation d'un sens → l'autre reste actif (statut indépendant, aucune cascade).
-- Édition prix/véhicule/adresse d'une mission → aucun trigger n'écrase le jumeau (`prix_locked` empêche tout recalcul auto).
-- Dissociation totale → `mission_group_id` mis à `null` sur les deux, badges retirés.
-- Total non divisible (100 €) → aller 66,67 € / retour 33,33 € (somme = 100,00 €).
+Créés :
+- `src/components/convoyeur/CatalogueFilters.tsx`
+- `src/components/convoyeur/CatalogueMissionCard.tsx`
+- `src/components/convoyeur/MissionDetailSheet.tsx`
+- `src/components/convoyeur/ReturnTripHelper.tsx`
+- `src/lib/geo/haversine.ts`
+- `src/lib/geo/useGeolocation.ts`
+- `src/lib/mission-level.ts` (règle Débutant/Confirmé/Expert)
 
-## Détails techniques
+Modifiés :
+- `src/routes/_authenticated/convoyeur.catalogue.tsx` (refonte complète UI, mêmes données/RPC)
+- `src/routes/_authenticated/convoyeur.tsx` (lien sidebar → `/convoyeur/catalogue`)
+- `src/routes/_authenticated/convoyeur.disponibles.tsx` (remplacé par simple `redirect` loader)
 
-- Migration unique groupant : ajout `prix_locked`, `split_ar_prices`, `admin_convert_demande_to_missions`, `admin_unlink_mission_from_group`, `admin_cancel_mission_leg`, `admin_set_mission_prix`, mise à jour de `auto_create_trajet_from_devis` pour créer aussi les missions AR.
-- Composants front nouveaux : `MissionLegBadge`, `MissionTwinLink`, `AdminMissionPriceEditor`.
-- Aucun changement dans `handle_new_user`, `client.ts`, formulaires publics.
-- Build/typecheck après chaque étape.
+## 5. Hors périmètre
 
-## Non inclus
-
-- Formulaire de demande client (inchangé, comme demandé).
-- Refonte de la logique tarifaire globale : on aligne uniquement la répartition AR.
+- Aucun changement backend, aucune migration.
+- Aucun changement au formulaire client de demande.
+- Aucun changement au processus d'attribution / validation admin.
