@@ -684,7 +684,7 @@ export function MissionCockpit({
               className={`mv3-cta ${isDone ? "done" : ""}`}
             >
               {isDone ? (
-                <><Check size={16} strokeWidth={3} /> Mission envoyée</>
+                <><Check size={16} strokeWidth={3} /> {isValidated ? "Mission validée" : "Mission envoyée"}</>
               ) : busy ? (
                 <><Loader2 className="animate-spin" size={16} /> {currentDef.cta}</>
               ) : (
