@@ -508,37 +508,52 @@ function ConvoyeurMissions() {
     const dep = splitAddr(t?.depart);
     const arr = splitAddr(t?.arrivee);
 
+    const v3TimelineIcons: V3TimelineStep["icon"][] = ["nav", "clip", "search", "package", "pin", "shield", "send"];
+    const v3Timeline: V3TimelineStep[] = stepLabels.map((s, i) => {
+      const idx = i + 1;
+      const state: V3TimelineStep["state"] = isTermine
+        ? "done"
+        : idx < currentIdx ? "done" : idx === currentIdx ? "current" : "todo";
+      return { label: s.label, state, icon: v3TimelineIcons[i] ?? "nav" };
+    });
+    const v3ProgressPct = isTermine ? 100 : Math.min(95, Math.round(((currentIdx - 1) / TOTAL) * 100));
+
+    const contactDepartTel = (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null;
+    const contactArriveeTel = (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone
+      ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null;
+    const clientNom = (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null;
+    const clientInstructions = (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null;
+    const gpsTarget = currentIdx <= 3 ? (t?.depart ?? null) : (t?.arrivee ?? null);
+
     const infoSlot = (
       <>
-        <div className="mv3-legacy-info">
-          <PremiumMissionHero
-            data={{
-              numeroMission: openMission.numero_mission ?? null,
-              statutLabel,
-              isLive: isActive,
-              depart: { ville: dep.ville, adresse: dep.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
-              arrivee: { ville: arr.ville, adresse: arr.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
-              vehicule: {
-                marque: t?.marque ?? undefined,
-                modele: t?.modele ?? undefined,
-                immatriculation: t?.immatriculation ?? undefined,
-              },
-              contactDepartTel: (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null,
-              contactArriveeTel: (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null,
-              contactArriveeNom: (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null,
-              contactArriveeTel2: (t as { arrivee_contact_telephone2?: string | null } | null)?.arrivee_contact_telephone2 ?? null,
-              contactArriveeInstructions: (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null,
-              gpsTarget: t?.depart ?? null,
-            }}
-            steps={timelineSteps}
-            currentStepIndex={Math.min(currentIdx, TOTAL)}
-            totalSteps={TOTAL}
-            currentStepLabel={currentStepLabel}
-            onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
-            onOpenDocuments={() => { setDetailTab("docs"); setExpandedDocs(true); }}
-            onOpenIncident={() => setDetailTab("action")}
-          />
-        </div>
+        <MissionV3InfoPane
+          vehicule={{
+            marque: t?.marque ?? null,
+            modele: t?.modele ?? null,
+            immatriculation: t?.immatriculation ?? null,
+            vin: t?.vin ?? null,
+            energie: (t as { vehicule_energie?: string | null } | null)?.vehicule_energie ?? null,
+            type: (t as { vehicule_type?: string | null } | null)?.vehicule_type ?? null,
+            couleur: (t as { vehicule_couleur?: string | null } | null)?.vehicule_couleur ?? null,
+            km: (t as { vehicule_km?: number | null } | null)?.vehicule_km ?? null,
+          }}
+          client={{
+            nom: clientNom ?? "Contact mission",
+            telephone: contactArriveeTel ?? contactDepartTel ?? null,
+            type: "Particulier",
+          }}
+          depart={{ ville: dep.ville, adresse: dep.adresse }}
+          arrivee={{ ville: arr.ville, adresse: arr.adresse }}
+          instructions={clientInstructions}
+          contactDepartTel={contactDepartTel}
+          contactArriveeTel={contactArriveeTel}
+          gpsTarget={gpsTarget}
+          timeline={v3Timeline}
+          currentIndex={Math.min(currentIdx, TOTAL)}
+          totalSteps={TOTAL}
+          progressPct={v3ProgressPct}
+        />
         {isActive && (
           <div className="mv3-live-block">
             <div className="mv3-live-header">
@@ -578,39 +593,15 @@ function ConvoyeurMissions() {
       </>
     );
 
-    const docsSlot = (
-      <>
-        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
-          <div className="mv3-legacy-info">
-            <VehiculeDocsView
-              vin={t?.vin ?? null}
-              rectoPath={t?.carte_grise_recto_url ?? null}
-              versoPath={t?.carte_grise_verso_url ?? null}
-            />
-          </div>
-        )}
-        <div className="mv3-docs-card">
-          <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
-        </div>
-        {user && (
-          <div className="mv3-docs-card">
-            <button
-              onClick={() => setExpandedDocs(v => !v)}
-              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-[#2FD8FF] w-full"
-            >
-              <FileText size={14} />
-              Documents de mission
-              <span className="ml-auto text-xs">{expandedDocs ? "▲" : "▼"}</span>
-            </button>
-            {expandedDocs && (
-              <div className="mt-3">
-                <MissionDocuments attributionId={openMission.id} userId={user.id} />
-              </div>
-            )}
-          </div>
-        )}
-      </>
-    );
+    const docsSlot = user ? (
+      <MissionV3DocsPane
+        attributionId={openMission.id}
+        userId={user.id}
+        inspectionDepartDone={!!openMission.inspectionDepart}
+        inspectionArriveeDone={!!openMission.inspectionArrivee}
+        carteGriseAvailable={!!(t?.carte_grise_recto_url || t?.carte_grise_verso_url || t?.vin)}
+      />
+    ) : null;
 
     return (
       <>
