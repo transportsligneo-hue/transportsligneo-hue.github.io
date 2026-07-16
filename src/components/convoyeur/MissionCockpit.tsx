@@ -82,8 +82,12 @@ interface Props {
   forceOpenSelfie?: boolean;
   onSelfieModalStateChange?: (open: boolean) => void;
   missionNumber?: string | null;
-  vehiculeEnergie?: string | null;
-  vehiculeType?: string | null;
+  departVille?: string | null;
+  arriveeVille?: string | null;
+  activeTab?: "action" | "info" | "docs";
+  onTabChange?: (tab: "action" | "info" | "docs") => void;
+  infoSlot?: ReactNode;
+  docsSlot?: ReactNode;
 }
 
 export function MissionCockpit({
