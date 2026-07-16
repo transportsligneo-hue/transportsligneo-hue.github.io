@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar } from "lucide-react";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
+import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
@@ -18,6 +19,8 @@ interface MissionRow {
   statut: string;
   prix_total: number;
   created_at: string;
+  leg_type: string | null;
+  mission_group_id: string | null;
 }
 
 interface PendingItem {
@@ -66,7 +69,7 @@ function ProMissionsIndex() {
       const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
         supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id")
           .or(orFilter)
           .order("created_at", { ascending: false }),
         supabase
@@ -90,7 +93,7 @@ function ProMissionsIndex() {
       if (orgIds.length > 0) {
         const { data } = await supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id")
           .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
           .order("created_at", { ascending: false });
         orgRows = (data ?? []) as MissionRow[];
@@ -290,7 +293,10 @@ function ProMissionsIndex() {
                     onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
                   >
                     <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">{m.numero}</Link>
+                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
+                        <span>{m.numero}</span>
+                        <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
+                      </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text">
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">

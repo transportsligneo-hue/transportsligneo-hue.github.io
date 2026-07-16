@@ -44,6 +44,7 @@ import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf } from "@/lib/mission-number";
+import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -84,6 +85,8 @@ interface TrajetFull {
   arrivee_contact_telephone: string | null;
   arrivee_contact_telephone2: string | null;
   arrivee_contact_instructions: string | null;
+  mission_group_id: string | null;
+  leg_type: string | null;
 }
 
 interface ConvoyeurFull {
@@ -748,6 +751,15 @@ function AdminMissionDetail() {
           </div>
         </div>
       </Card>
+
+      <AdminMissionARBanner
+        trajetId={trajet.id}
+        groupId={trajet.mission_group_id}
+        legType={trajet.leg_type}
+        currentPrix={trajet.prix ?? null}
+        onPriceSaved={(p) => setTrajet({ ...trajet, prix: p })}
+        onGroupChanged={fetchAll}
+      />
 
       {/* === Timeline progression === */}
       <Card>

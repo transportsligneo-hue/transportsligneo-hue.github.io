@@ -7,6 +7,8 @@ import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components
 import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
+import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
+import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 
 interface Mission {
   id: string;
@@ -32,6 +34,8 @@ interface Mission {
   email: string;
   telephone: string | null;
   created_at: string;
+  mission_group_id: string | null;
+  leg_type: string | null;
 }
 
 interface ClientMissionDetailViewProps {
@@ -318,11 +322,24 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       <div className="mission-surface p-6">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
-            <p className="mission-text-muted text-[10px] uppercase tracking-wider">{mission.numero}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="mission-text-muted text-[10px] uppercase tracking-wider">{mission.numero}</p>
+              <MissionLegBadge leg={mission.leg_type as "aller" | "retour" | "simple" | null} />
+            </div>
             <h1 className="font-heading text-2xl mission-text mt-1 flex items-center gap-2">
               <MapPin size={18} className="mission-accent" />
               {mission.ville_depart} → {mission.ville_arrivee}
             </h1>
+            {mission.mission_group_id && mission.leg_type && mission.leg_type !== "simple" ? (
+              <div className="mt-2">
+                <MissionTwinLink
+                  source="missions"
+                  groupId={mission.mission_group_id}
+                  currentId={mission.id}
+                  linkTo={(twinId) => ({ to: `${backTo}/$missionId`, params: { missionId: twinId } })}
+                />
+              </div>
+            ) : null}
           </div>
           <StatusBadge kind={missionStatusKind(mission.statut)} size="md">
             {missionStatusLabel(mission.statut)}

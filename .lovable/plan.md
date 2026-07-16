@@ -1,97 +1,62 @@
 ## Objectif
 
-Faire du cockpit v3 (dark cyan/bleu néon) **l'écran entier** de la mission convoyeur, avec les 3 onglets Action / Informations / Documents intégrés au design, tout en supprimant le double bandeau "MISSION PLANIFIÉE …" et la carte "À faire sur cette mission" que tu as entourés en rouge.
+Traiter chaque demande aller-retour comme **deux missions distinctes et indépendantes** (Aller + Retour), reliées par un `mission_group_id` uniquement pour la navigation. Formulaire client public inchangé.
 
-**Aucun changement métier** : selfie, EDL, signatures, incident, tracking GPS, envoi admin, RLS, `useMissionGates`, `MissionWorkflow`. Uniquement présentation.
+Bonne nouvelle : l'infrastructure DB partielle est déjà en place (`mission_group_id`, `leg_type`, `leg_index` existent sur `missions` **et** `trajets`, `demandes_convoyage` a déjà `depart_retour`, `date_retour`, `prix_aller`/`prix_retour` côté `devis`). Le travail consiste à propager la logique jusqu'aux **missions** (aujourd'hui seuls les `trajets` sont éclatés via `auto_create_trajet_from_devis`) et à exposer l'édition indépendante côté admin.
 
-## Ce qui est supprimé
+## Plan
 
-1. Le bandeau navy compact "MISSION PLANIFIÉE / MIS-TLG-…/ La Riche → Route de Palluau" affiché au-dessus des onglets sur Action et Documents (`convoyeur.missions.tsx` lignes 563–585) → supprimé.
-2. La carte "À FAIRE SUR CETTE MISSION / Brancher pour le trajet / 0/1 effectuée" du cockpit (`MissionCockpit.tsx` lignes 577–603) → supprimée intégralement (plus de state `checklistDone`, plus d'import `Zap`/`Fuel`).
-3. Les onglets externes actuels (`sticky top-[44px]` styliés `pro-bg-soft`) → sortis du route file et déplacés à l'intérieur du cockpit v3.
-4. Le `PremiumMissionHero` séparé sur l'onglet Info → supprimé du rendu (le hero du cockpit devient la seule "identité" mission). Composant conservé sur disque (utilisable ailleurs).
+### 1. Migration DB (schéma + logique serveur)
 
-## Ce qui devient plein écran
+- **`missions`** : garantir que `leg_type` accepte `simple|aller|retour`, `leg_index` (1 = aller, 2 = retour), `mission_group_id uuid`. Ajouter `prix_locked boolean default false` pour figer un prix modifié manuellement.
+- **Fonction `split_ar_prices(total numeric)`** : retourne `(aller, retour)` avec règle 2/3 – 1/3, aller arrondi au centime **supérieur**, retour = total − aller (garantit somme exacte).
+- **RPC `admin_convert_demande_to_missions(_demande_id uuid)`** (SECURITY DEFINER, admin/super_admin) :
+  - lit la demande, détecte AR (`options='aller_retour'` OU `depart_retour` non vide),
+  - génère `mission_group_id`,
+  - crée 1 mission simple **ou** 2 missions (Aller + Retour inverse pré-rempli, véhicule/adresses/contacts propres, prix éclatés via `split_ar_prices`),
+  - retourne les IDs.
+- **RPC `admin_unlink_mission_from_group(_mission_id)`** : met `mission_group_id = null`, `leg_type = 'simple'`.
+- **RPC `admin_cancel_mission_leg(_mission_id)`** : marque annulée, laisse le jumeau intact.
+- **RPC `admin_set_mission_prix(_mission_id, _prix)`** : set `prix_total`, `prix_locked = true`, **pas** de recalcul du jumeau.
+- Suivre le pattern GRANT + RLS existant.
 
-Dans `convoyeur.missions.tsx`, la vue mission ouverte (`openMission`) rend uniquement :
+### 2. Réutilisation du flux devis payé
 
-- la sticky back-bar existante (`← Missions` + pill EN COURS)
-- puis `<MissionCockpit … />` qui occupe tout l'espace restant, avec `min-h-[calc(100vh-…)]` et fond `#060B24` qui s'étend au-delà du padding parent (`-mx-4 sm:-mx-6 lg:-mx-8`).
+`auto_create_trajet_from_devis` continue de créer les trajets. Étendre pour créer aussi les **missions** correspondantes (aujourd'hui c'est manuel/absent) via la même logique de split, en respectant `prix_aller`/`prix_retour` s'ils sont saisis, sinon `split_ar_prices(prix_estime)`.
 
-Plus aucun autre wrapper visuel entre la back-bar et le cockpit.
+### 3. Admin UI
 
-## Onglets Action / Informations / Documents (dans le cockpit)
+- **Liste missions** (`admin.missions` / `admin.exploitation`) : badge **"Aller"** / **"Retour"** + petit chip cliquable "↔ jumeau" ouvrant l'autre mission.
+- **Détail mission admin** (`admin.missions.$missionId`) :
+  - Bandeau AR : "Mission Aller de MIS-XXX ↔ voir Retour MIS-YYY", boutons **Dissocier** et **Annuler ce sens**.
+  - Champ **prix** éditable inline (input €) → appelle `admin_set_mission_prix`, badge "prix figé manuellement" si `prix_locked`.
+  - Édition indépendante véhicule / adresses / contacts / convoyeur (déjà en place).
+- **Détail demande admin** (`admin.demandes`) : bouton **"Convertir en missions"** qui appelle la nouvelle RPC, redirige vers la 1ʳᵉ mission créée.
 
-Ajoutés dans `MissionCockpit.tsx` juste après le hero, avant les panes. State local `activeTab: "action" | "info" | "docs"` (défaut "action"). Style raccord :
+### 4. Espace client
 
-```text
-.mv3-tabs { display: flex; gap: 8px; padding: 0 14px; margin-top: 4px; }
-.mv3-tab  { flex: 1; padding: 11px 14px; border-radius: 14px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.12);
-            color: #9098AE; font-size: 13px; font-weight: 700; }
-.mv3-tab.active { background: linear-gradient(120deg,#0E1740,#182559); color: #EAF3FF;
-                  border-color: rgba(47,216,255,0.35); box-shadow: 0 6px 18px rgba(47,107,255,0.25) inset; }
-```
+- Liste missions client (dashboard-client + dashboard-pro + flotte) : badge Aller/Retour, lien "Voir la mission liée".
+- Détail mission (`ClientMissionDetailView`) : encart "Mission jumelle" avec lien.
 
-Dynamique : clic sur un tab change `activeTab`, transition douce (fade CSS 180 ms sur les panes). Les 3 panes sont rendues conditionnellement, pas de router.
+### 5. Tarification côté public (aligner l'estimateur)
 
-## Contenu des 3 panes (design v3 conforme au plan initial)
+Cas limite explicite du user : appliquer la même règle 2/3 – 1/3 avec arrondi centime supérieur sur l'aller dans `src/lib/reservation-pricing.ts` / `client-pricing.ts` / `pricing-engine.ts` pour que l'affichage tunnel/devis colle à la répartition serveur (aujourd'hui la répartition peut différer de quelques centimes).
 
-### Action (existant, nettoyé)
-- next-card (progression ring + libellé étape + CTA `currentDef.cta` + dots + chips) — inchangé.
-- MissionContactsBlock existant, dans le wrapper `.mv3-contacts-wrap`.
-- Bouton "Signaler un incident" (mv3-incident) — inchangé.
-- **Ajout** : dans le hero, sous le titre étape, une ligne adresse **Départ → Arrivée** (villes uniquement, tronquées) tirée du trajet passé en props (`departVille`, `arriveeVille`). C'est ce qui remplace visuellement le bandeau qu'on supprime.
+### 6. Cas limites couverts
 
-### Informations (à créer, style v3)
-- **vehicle-card** glass : marque + modèle + immatriculation + type + énergie + VIN (si dispo) avec bouton copier ; scan-line CSS animée.
-- **client-card** glass : nom client réceptionnaire + téléphone (`tel:` cliquable) + mini route SVG (ville départ • ligne • ville arrivée).
-- **quick-grid** 3 cases : Ouvrir GPS (lien Google Maps vers adresse départ/arrivée selon étape courante), Appeler contact (tel:), Aide (ouvre email support ou mailto).
-- **timeline** verticale des étapes basée sur `STEPS` avec dots done / current / todo (mêmes couleurs cyan/gris que dots existants).
+- Annulation d'un sens → l'autre reste actif (statut indépendant, aucune cascade).
+- Édition prix/véhicule/adresse d'une mission → aucun trigger n'écrase le jumeau (`prix_locked` empêche tout recalcul auto).
+- Dissociation totale → `mission_group_id` mis à `null` sur les deux, badges retirés.
+- Total non divisible (100 €) → aller 66,67 € / retour 33,33 € (somme = 100,00 €).
 
-Data : props `vehicule` (marque/modele/immat/type/energie/vin), `client` (nom, tel), `departFull`, `arriveeFull` passées depuis `convoyeur.missions.tsx` (déjà accessibles via `t`).
+## Détails techniques
 
-### Documents (à créer, style v3)
-- **docs-summary** glass : progress bar catégories requises (permis, CG, attestation…) avec pourcentage.
-- **doc-list** : items avec icône fichier + nom + date + statut (uploadé / manquant).
-- **dropzone** upload + sélecteur catégorie.
+- Migration unique groupant : ajout `prix_locked`, `split_ar_prices`, `admin_convert_demande_to_missions`, `admin_unlink_mission_from_group`, `admin_cancel_mission_leg`, `admin_set_mission_prix`, mise à jour de `auto_create_trajet_from_devis` pour créer aussi les missions AR.
+- Composants front nouveaux : `MissionLegBadge`, `MissionTwinLink`, `AdminMissionPriceEditor`.
+- Aucun changement dans `handle_new_user`, `client.ts`, formulaires publics.
+- Build/typecheck après chaque étape.
 
-Data : requête `mission_documents` par attribution (comme aujourd'hui). Handler upload : `supabase.storage.from("mission-documents").upload(...)` puis insert row (schéma existant, non modifié).
+## Non inclus
 
-## Fichiers touchés
-
-- `src/components/convoyeur/MissionCockpit.tsx`
-  - Supprimer bloc À faire (l.577–603) + imports `Zap`/`Fuel` + state `checklistDone`.
-  - Ajouter props `departVille`, `arriveeVille`, `departFull`, `arriveeFull`, `vehicule`, `client`.
-  - Ajouter state `activeTab`, barre `.mv3-tabs` sous le hero, wrappers `.mv3-pane-action`, `.mv3-pane-info`, `.mv3-pane-docs`.
-  - Ajouter styles CSS scoped pour tabs, vehicle-card, client-card, quick-grid, timeline, docs-summary, dropzone.
-  - Ligne adresses "Départ → Arrivée" dans le hero.
-
-- `src/routes/_authenticated/convoyeur.missions.tsx`
-  - Retirer bloc `PremiumMissionHero` (l.532–561).
-  - Retirer bandeau compact navy (l.563–585).
-  - Retirer barre d'onglets externe (l.588–~640).
-  - Remplacer le contenu de la vue ouverte par `<div className="min-h-screen -mx-4 sm:-mx-6 lg:-mx-8" style={{background:"#060B24"}}> …back-bar + MissionCockpit… </div>`.
-  - Passer les nouvelles props (`departVille`, `arriveeVille`, `vehicule`, `client`) au cockpit.
-  - Conserver `inspectionOverlay`, `DriverSelfieCapture`, `IncidentReportSheet`, `ArriveeSignatureSheet` (déclenchés par le cockpit).
-
-- `src/components/convoyeur/PremiumMissionHero.tsx` : **inchangé** (non rendu, mais conservé).
-- `MissionWorkflow.tsx` : **inchangé**.
-
-## Guardrails
-
-- Framer-motion interdit → toutes animations en CSS/SVG.
-- Aucun changement de schéma DB, RLS, hook métier.
-- Le thème dark reste scoped à la vue mission ouverte du convoyeur (pas propagé au reste de l'espace convoyeur — liste des missions, sidebar, header restent identiques).
-- Tap targets ≥ 44 px, focus visibles, aria-labels sur tabs, gpsTarget respecte `depart` ou `arrivee` selon l'étape courante.
-- Sécurité : upload documents passe par les policies existantes de `mission_documents` (aucune nouvelle RLS).
-
-## Livrable
-
-Ouvrir une mission convoyeur → un seul écran cockpit dark v3 plein écran :
-- Hero avec ring + road + `MIS-TLG-…` en eyebrow + adresses Départ → Arrivée
-- 3 onglets cyan dynamiques directement sous le hero
-- Panes Action / Informations / Documents conformes au design v3 (glass, chips, timeline, vehicle-card, docs-list)
-- Plus aucun bandeau navy ni carte "À faire" en double.
-
-Comportement métier strictement identique (selfie, EDL, signatures, incident, envoi admin).
+- Formulaire de demande client (inchangé, comme demandé).
+- Refonte de la logique tarifaire globale : on aligne uniquement la répartition AR.

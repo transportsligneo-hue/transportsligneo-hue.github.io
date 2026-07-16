@@ -2625,6 +2625,7 @@ export type Database = {
           options: Json
           organization_id: string | null
           prenom: string
+          prix_locked: boolean
           prix_total: number
           remarques: string | null
           statut: string
@@ -2663,6 +2664,7 @@ export type Database = {
           options?: Json
           organization_id?: string | null
           prenom: string
+          prix_locked?: boolean
           prix_total?: number
           remarques?: string | null
           statut?: string
@@ -2701,6 +2703,7 @@ export type Database = {
           options?: Json
           organization_id?: string | null
           prenom?: string
+          prix_locked?: boolean
           prix_total?: number
           remarques?: string | null
           statut?: string
@@ -3999,6 +4002,18 @@ export type Database = {
     Functions: {
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
+      admin_cancel_mission_leg: {
+        Args: { _mission_id: string }
+        Returns: undefined
+      }
+      admin_convert_demande_to_missions: {
+        Args: { _demande_id: string }
+        Returns: {
+          leg: string
+          mission_id: string
+          numero: string
+        }[]
+      }
       admin_counter_offer: {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined
@@ -4024,6 +4039,14 @@ export type Database = {
         Returns: undefined
       }
       admin_reset_operational_data: { Args: never; Returns: Json }
+      admin_set_mission_prix: {
+        Args: { _mission_id: string; _prix: number }
+        Returns: undefined
+      }
+      admin_unlink_mission_from_group: {
+        Args: { _mission_id: string }
+        Returns: undefined
+      }
       auto_archive_old_records: { Args: never; Returns: undefined }
       can_driver_update_attribution: {
         Args: {
@@ -4231,6 +4254,13 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      split_ar_prices: {
+        Args: { _total: number }
+        Returns: {
+          aller: number
+          retour: number
+        }[]
+      }
       submit_formation_exam: {
         Args: {
           _answers: Json
