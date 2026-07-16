@@ -1,88 +1,97 @@
-
 ## Objectif
 
-Remplacer le rendu visuel actuel du cockpit convoyeur (blanc/vert, `MissionCockpit.tsx` + `MissionWorkflow.tsx` + `PremiumMissionHero.tsx`) par la copie conforme du mockup `mission-app-ligneo-v3.jsx` : thème sombre bleu nuit + accents cyan/bleu néon, hero avec anneau de progression et "road path" animé, 3 onglets (Action / Informations / Documents), cartes glass, chips d'étapes, timeline verticale, carte véhicule "identité" avec scan-line, carte client avec route mini.
+Faire du cockpit v3 (dark cyan/bleu néon) **l'écran entier** de la mission convoyeur, avec les 3 onglets Action / Informations / Documents intégrés au design, tout en supprimant le double bandeau "MISSION PLANIFIÉE …" et la carte "À faire sur cette mission" que tu as entourés en rouge.
 
-**Contrainte clé** : le CTA de progression **ne doit plus dire "Valider cette étape"** — il doit afficher directement le libellé de l'action à faire (ex. "Arrivé au lieu d'enlèvement", "Commencer l'état des lieux d'enlèvement", "Démarrer le trajet", "Envoyer à l'admin"). Au clic, il exécute exactement la logique métier actuelle de cette étape (ouverture EDL, selfie, signatures, transitions statut).
+**Aucun changement métier** : selfie, EDL, signatures, incident, tracking GPS, envoi admin, RLS, `useMissionGates`, `MissionWorkflow`. Uniquement présentation.
 
-**Aucune modification** : logique DB, `MissionWorkflow` métier interne, `useMissionGates`, `DriverSelfieCapture`, `IncidentReportSheet`, `ArriveeSignatureSheet`, inspections EDL, MissionContactsBlock, PV digitaux, tracking GPS, réalisation des étapes. Uniquement le rendu.
+## Ce qui est supprimé
 
-## Périmètre fichiers
+1. Le bandeau navy compact "MISSION PLANIFIÉE / MIS-TLG-…/ La Riche → Route de Palluau" affiché au-dessus des onglets sur Action et Documents (`convoyeur.missions.tsx` lignes 563–585) → supprimé.
+2. La carte "À FAIRE SUR CETTE MISSION / Brancher pour le trajet / 0/1 effectuée" du cockpit (`MissionCockpit.tsx` lignes 577–603) → supprimée intégralement (plus de state `checklistDone`, plus d'import `Zap`/`Fuel`).
+3. Les onglets externes actuels (`sticky top-[44px]` styliés `pro-bg-soft`) → sortis du route file et déplacés à l'intérieur du cockpit v3.
+4. Le `PremiumMissionHero` séparé sur l'onglet Info → supprimé du rendu (le hero du cockpit devient la seule "identité" mission). Composant conservé sur disque (utilisable ailleurs).
 
-- **Réécriture visuelle** de `src/components/convoyeur/MissionCockpit.tsx` : nouvelle structure JSX (hero + tabs + panes) mais réutilise les mêmes hooks/effects, les mêmes callbacks (`onStartInspection`, `onMacroStatusChange`, `onUpdated`, `runAction`) et le même state actuel (`currentStep`, `selfie modal`, `signature sheet`, `incident sheet`). Les 3 panes appellent les blocs existants (`MissionContactsBlock`, etc.) via composition.
-- **Réécriture visuelle** de `src/components/convoyeur/PremiumMissionHero.tsx` → devient le hero sombre du mockup (ProgressRing, RoadPath, live-pill, badges). Mêmes props que celles déjà consommées par `convoyeur.missions.tsx`.
-- `src/routes/_authenticated/convoyeur.missions.tsx` : ajuster le fond (dark) autour de la carte mission active + supprimer les fonds clairs qui entourent le cockpit. Pas de refactor logique.
-- Ajout d'un fichier CSS scoped `src/components/convoyeur/mission-v3.css` (importé par MissionCockpit) contenant les classes du mockup (`.glass-card`, `.hero`, `.tab-pill`, `.step-advance-btn`, `.chip`, `.vehicle-card`, `.timeline`, `.copy-field`, keyframes `roadFlow`, `shine`, `pulseDot`, `riseIn`…). Fonts Space Grotesk + JetBrains Mono chargées via `<link>` dans `src/routes/__root.tsx` (Inter est déjà présent).
-- `MissionWorkflow.tsx` : **inchangé** — reste utilisable ailleurs (fallback / autre écran). Non affiché dans le nouveau cockpit.
+## Ce qui devient plein écran
 
-## Mapping étapes → CTA (remplace "Valider cette étape")
+Dans `convoyeur.missions.tsx`, la vue mission ouverte (`openMission`) rend uniquement :
 
-Le mockup a un `handleAdvance` générique. On garde la liste `STEPS` existante de `MissionCockpit` (déjà correcte), mais le bouton principal affiche **`step.cta`** (déjà le libellé de l'action) et déclenche la même `runAction(step.key)` déjà implémentée :
+- la sticky back-bar existante (`← Missions` + pill EN COURS)
+- puis `<MissionCockpit … />` qui occupe tout l'espace restant, avec `min-h-[calc(100vh-…)]` et fond `#060B24` qui s'étend au-delà du padding parent (`-mx-4 sm:-mx-6 lg:-mx-8`).
 
-| Étape                  | Libellé bouton (déjà présent dans STEPS)           | Action existante                         |
-| ---------------------- | -------------------------------------------------- | ---------------------------------------- |
-| `demarrer`             | En route pour récupérer le véhicule                | persistEtape + status en_cours           |
-| `arrive_depart`        | Arrivé au lieu d'enlèvement                        | persistEtape + ouvre selfie              |
-| `selfie`               | Prendre mon selfie convoyeur                       | ouvre DriverSelfieCapture                |
-| `edl_depart`           | Commencer l'état des lieux d'enlèvement            | onStartInspection("depart")              |
-| `demarrer_livraison`   | Démarrer le trajet                                 | persistEtape en_livraison                |
-| `arrive_livraison`     | Arrivé au lieu de livraison                        | persistEtape arrive_destination          |
-| `edl_arrivee`          | Commencer l'état des lieux d'arrivée               | onStartInspection("arrivee")             |
-| `signature_arrivee`    | Signer la livraison                                | ouvre ArriveeSignatureSheet              |
-| `selfie_final`         | Prendre le selfie final                            | ouvre DriverSelfieCapture (final)        |
-| `cloturer`             | Envoyer à l'admin                                  | onMacroStatusChange en_attente_validation|
-| `done`                 | Mission envoyée (bouton disabled, style "done")    | —                                        |
+Plus aucun autre wrapper visuel entre la back-bar et le cockpit.
 
-Aucun changement fonctionnel : on remplace uniquement le texte "Valider cette étape" par `step.cta` dans le rendu du bouton principal + un style disabled/done identique au mockup.
+## Onglets Action / Informations / Documents (dans le cockpit)
 
-## Structure UI (copie conforme mockup)
+Ajoutés dans `MissionCockpit.tsx` juste après le hero, avant les panes. State local `activeTab: "action" | "info" | "docs"` (défaut "action"). Style raccord :
 
 ```text
-┌─ TopBar  (crest Ligneo + Bell + Menu)          ─┐   (déjà en dehors, garder l'existant)
-├─ Hero    ProgressRing + RoadPath + live-pill    │
-├─ TabBar  [Action] [Informations] [Documents]    │
-│                                                 │
-│ Action pane :                                   │
-│   ├─ glass-card "À faire" (checklist énergie)   │  ← branchée sur vehicule.energie
-│   ├─ next-card :                                │
-│   │    ├─ ProgressBadgeRing + Étape N/total     │
-│   │    ├─ next-icon + titre + hint              │
-│   │    ├─ step-advance-btn = step.cta           │  ← plus de "Valider cette étape"
-│   │    ├─ StepDots                              │
-│   │    └─ chip-row (short labels)               │
-│   └─ bouton discret "Signaler un incident"      │
-│                                                 │
-│ Informations pane :                             │
-│   ├─ vehicle-card (identité + VIN + copy)       │
-│   ├─ client-card (avatar + phone + route mini)  │
-│   ├─ quick-grid (Ouvrir GPS / Appels / Aide)    │
-│   └─ timeline verticale des étapes              │
-│                                                 │
-│ Documents pane :                                │
-│   ├─ docs-summary (progress bar + doc-list)     │  ← branche sur mission_documents réels
-│   └─ ajout document (dropzone + catégories)     │  ← délègue à handler existant
-└─────────────────────────────────────────────────┘
+.mv3-tabs { display: flex; gap: 8px; padding: 0 14px; margin-top: 4px; }
+.mv3-tab  { flex: 1; padding: 11px 14px; border-radius: 14px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.12);
+            color: #9098AE; font-size: 13px; font-weight: 700; }
+.mv3-tab.active { background: linear-gradient(120deg,#0E1740,#182559); color: #EAF3FF;
+                  border-color: rgba(47,216,255,0.35); box-shadow: 0 6px 18px rgba(47,107,255,0.25) inset; }
 ```
 
-Sources de données réelles à brancher (pas de fake) :
-- `VEHICLE` → `attribution.vehicule` déjà passé en prop.
-- `CLIENT` → depuis `MissionContactsBlock` data (nom, tel, adresses pickup/delivery, instructions).
-- `STEPS`/progression → `currentEtape` réel.
-- `DOCUMENTS` → requête `mission_documents` existante.
+Dynamique : clic sur un tab change `activeTab`, transition douce (fade CSS 180 ms sur les panes). Les 3 panes sont rendues conditionnellement, pas de router.
+
+## Contenu des 3 panes (design v3 conforme au plan initial)
+
+### Action (existant, nettoyé)
+- next-card (progression ring + libellé étape + CTA `currentDef.cta` + dots + chips) — inchangé.
+- MissionContactsBlock existant, dans le wrapper `.mv3-contacts-wrap`.
+- Bouton "Signaler un incident" (mv3-incident) — inchangé.
+- **Ajout** : dans le hero, sous le titre étape, une ligne adresse **Départ → Arrivée** (villes uniquement, tronquées) tirée du trajet passé en props (`departVille`, `arriveeVille`). C'est ce qui remplace visuellement le bandeau qu'on supprime.
+
+### Informations (à créer, style v3)
+- **vehicle-card** glass : marque + modèle + immatriculation + type + énergie + VIN (si dispo) avec bouton copier ; scan-line CSS animée.
+- **client-card** glass : nom client réceptionnaire + téléphone (`tel:` cliquable) + mini route SVG (ville départ • ligne • ville arrivée).
+- **quick-grid** 3 cases : Ouvrir GPS (lien Google Maps vers adresse départ/arrivée selon étape courante), Appeler contact (tel:), Aide (ouvre email support ou mailto).
+- **timeline** verticale des étapes basée sur `STEPS` avec dots done / current / todo (mêmes couleurs cyan/gris que dots existants).
+
+Data : props `vehicule` (marque/modele/immat/type/energie/vin), `client` (nom, tel), `departFull`, `arriveeFull` passées depuis `convoyeur.missions.tsx` (déjà accessibles via `t`).
+
+### Documents (à créer, style v3)
+- **docs-summary** glass : progress bar catégories requises (permis, CG, attestation…) avec pourcentage.
+- **doc-list** : items avec icône fichier + nom + date + statut (uploadé / manquant).
+- **dropzone** upload + sélecteur catégorie.
+
+Data : requête `mission_documents` par attribution (comme aujourd'hui). Handler upload : `supabase.storage.from("mission-documents").upload(...)` puis insert row (schéma existant, non modifié).
+
+## Fichiers touchés
+
+- `src/components/convoyeur/MissionCockpit.tsx`
+  - Supprimer bloc À faire (l.577–603) + imports `Zap`/`Fuel` + state `checklistDone`.
+  - Ajouter props `departVille`, `arriveeVille`, `departFull`, `arriveeFull`, `vehicule`, `client`.
+  - Ajouter state `activeTab`, barre `.mv3-tabs` sous le hero, wrappers `.mv3-pane-action`, `.mv3-pane-info`, `.mv3-pane-docs`.
+  - Ajouter styles CSS scoped pour tabs, vehicle-card, client-card, quick-grid, timeline, docs-summary, dropzone.
+  - Ligne adresses "Départ → Arrivée" dans le hero.
+
+- `src/routes/_authenticated/convoyeur.missions.tsx`
+  - Retirer bloc `PremiumMissionHero` (l.532–561).
+  - Retirer bandeau compact navy (l.563–585).
+  - Retirer barre d'onglets externe (l.588–~640).
+  - Remplacer le contenu de la vue ouverte par `<div className="min-h-screen -mx-4 sm:-mx-6 lg:-mx-8" style={{background:"#060B24"}}> …back-bar + MissionCockpit… </div>`.
+  - Passer les nouvelles props (`departVille`, `arriveeVille`, `vehicule`, `client`) au cockpit.
+  - Conserver `inspectionOverlay`, `DriverSelfieCapture`, `IncidentReportSheet`, `ArriveeSignatureSheet` (déclenchés par le cockpit).
+
+- `src/components/convoyeur/PremiumMissionHero.tsx` : **inchangé** (non rendu, mais conservé).
+- `MissionWorkflow.tsx` : **inchangé**.
 
 ## Guardrails
 
-- **Aucune modification** des tables Supabase, RLS, hooks métier, ni `MissionWorkflow.tsx`.
-- **Framer-motion interdit** (rappel memory). Toutes animations en CSS/SVG (déjà le cas dans le mockup).
-- Le cockpit sombre s'affiche **uniquement dans le contexte mission convoyeur** ; ne pas propager le thème sombre au reste de l'espace convoyeur (le fond parent reste géré par `convoyeur.missions.tsx`).
-- Fonts : ajouter `Space Grotesk` et `JetBrains Mono` via `<link>` dans `__root.tsx` (jamais `@import` dans styles.css — rule tanstack).
-- Icône du bouton : petit `ArrowUpRight` à droite du libellé (comme mockup), `Check` quand étape terminée.
-- Accessibilité : garder `aria-label`, focus visibles, tap targets ≥ 44px.
-- Toutes les actions gate-lockées (selfie obligatoire, EDL, etc.) restent respectées : bouton disabled + bandeau `Lock` déjà présent, réutilisé tel quel avec le style sombre du mockup.
+- Framer-motion interdit → toutes animations en CSS/SVG.
+- Aucun changement de schéma DB, RLS, hook métier.
+- Le thème dark reste scoped à la vue mission ouverte du convoyeur (pas propagé au reste de l'espace convoyeur — liste des missions, sidebar, header restent identiques).
+- Tap targets ≥ 44 px, focus visibles, aria-labels sur tabs, gpsTarget respecte `depart` ou `arrivee` selon l'étape courante.
+- Sécurité : upload documents passe par les policies existantes de `mission_documents` (aucune nouvelle RLS).
 
 ## Livrable
 
-Une seule PR d'intégration visuelle. Après implémentation :
-- ouvrir une mission convoyeur → doit être **pixel-proche** du mockup v3
-- cliquer sur le CTA principal doit exécuter l'action de l'étape courante (pas un "valider" générique)
-- EDL, selfie, signatures, incident, envoi admin : comportements strictement identiques à aujourd'hui.
+Ouvrir une mission convoyeur → un seul écran cockpit dark v3 plein écran :
+- Hero avec ring + road + `MIS-TLG-…` en eyebrow + adresses Départ → Arrivée
+- 3 onglets cyan dynamiques directement sous le hero
+- Panes Action / Informations / Documents conformes au design v3 (glass, chips, timeline, vehicle-card, docs-list)
+- Plus aucun bandeau navy ni carte "À faire" en double.
+
+Comportement métier strictement identique (selfie, EDL, signatures, incident, envoi admin).
