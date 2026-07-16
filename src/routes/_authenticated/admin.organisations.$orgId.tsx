@@ -39,14 +39,17 @@ function OrgDetail() {
   async function load() {
     setLoading(true);
     try {
-      const [orgRes, rolesRes, membersRes, missionsRes, b2bRes, activityRes] = await Promise.all([
+      const [orgRes, rolesRes, membersRes, missionsRes, b2bRes, activityRes, adminNotesRes] = await Promise.all([
         supabase.from("organizations").select("*").eq("id", orgId).maybeSingle(),
         supabase.from("organization_roles").select("role, active").eq("organization_id", orgId),
         supabase.from("organization_members").select("user_id, member_role, status, joined_at").eq("organization_id", orgId),
         supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, statut, prix_total, date_prise_en_charge").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(50),
         supabase.from("b2b_transport_requests").select("id, numero, pickup_address, dropoff_address, scheduled_date, payment_status, operational_status, estimated_price_ttc").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(50),
         supabase.from("activity_logs").select("id, action, entity_type, actor_label, metadata, created_at").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(100),
+        (supabase.from("organizations_admin_data" as never) as any).select("notes_internes").eq("organization_id", orgId).maybeSingle(),
       ]);
+      const notesInternes = (adminNotesRes as any)?.data?.notes_internes ?? null;
+      const orgWithNotes = orgRes.data ? { ...orgRes.data, notes_internes: notesInternes } : orgRes.data;
       setOrg(orgRes.data);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
       const memberRows = membersRes.data ?? [];
