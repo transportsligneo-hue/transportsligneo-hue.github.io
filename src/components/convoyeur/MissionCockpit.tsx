@@ -8,6 +8,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { ReactNode } from "react";
 import {
   Camera,
   ClipboardCheck,
@@ -22,8 +23,6 @@ import {
   AlertTriangle,
   Lock,
   Send,
-  Zap,
-  Fuel,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMissionGates } from "@/hooks/useMissionGates";
