@@ -41,7 +41,7 @@ interface Attribution {
   etape_courante?: string | null;
   numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null; is_test_data?: boolean | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
@@ -57,6 +57,7 @@ interface Trajet {
   marque?: string | null;
   modele?: string | null;
   prix_client?: number | null;
+  is_test_data?: boolean | null;
 }
 
 interface GpsPoint {
