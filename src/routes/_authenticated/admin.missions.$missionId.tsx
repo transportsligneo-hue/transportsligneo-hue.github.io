@@ -752,6 +752,15 @@ function AdminMissionDetail() {
         </div>
       </Card>
 
+      <AdminMissionARBanner
+        trajetId={trajet.id}
+        groupId={trajet.mission_group_id}
+        legType={trajet.leg_type}
+        currentPrix={trajet.prix ?? null}
+        onPriceSaved={(p) => setTrajet({ ...trajet, prix: p })}
+        onGroupChanged={fetchAll}
+      />
+
       {/* === Timeline progression === */}
       <Card>
         <h3 className="text-sm font-semibold text-pro-text-soft uppercase tracking-wider mb-4">
