@@ -189,71 +189,63 @@ function ConvoyeurDashboard() {
         </div>
       </div>
 
-      {/* 4 stat cards */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* 4 stat cards — cliquables */}
+      <div className="grid grid-cols-4 gap-2.5">
         {statCards.map((c) => (
-          <div
+          <Link
             key={c.label}
-            className="relative min-w-0 rounded-[18px] border border-[rgba(96,165,250,0.15)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-2.5 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)] transition-transform active:scale-[0.97]"
+            to={c.to}
+            className="group relative min-w-0 rounded-[18px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)] transition-all active:scale-[0.96] hover:border-[rgba(96,165,250,0.4)] hover:shadow-[0_10px_28px_-14px_rgba(47,125,255,0.4)]"
           >
-            <div className="flex items-start justify-between mb-1">
-              <div className={`w-8 h-8 rounded-lg border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center`}>
-                <c.icon size={14} className={c.iconColor} strokeWidth={2.4} />
-              </div>
-              <ChevronRight size={12} className="text-[#5a6b93] mt-1" />
+            <div className={`w-9 h-9 rounded-xl border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center shadow-inner`}>
+              <c.icon size={16} className={c.iconColor} strokeWidth={2.4} />
             </div>
-            <p className="text-[10px] uppercase tracking-[0.08em] text-[#8fa3cc] font-black leading-tight">{c.label}</p>
-            <p className="text-[17px] font-normal text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
+            <p className="text-[9px] uppercase tracking-[0.1em] text-[#8fa3cc] font-bold mt-2 leading-tight truncate">{c.label}</p>
+            <p className="text-[22px] font-bold text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
             <div className="mt-1.5 flex items-center gap-1 min-w-0">
               <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor} shrink-0`} />
-              <span className={`text-[10px] font-bold ${c.pillColor} leading-tight`}>{c.pill}</span>
+              <span className={`text-[9.5px] font-semibold ${c.pillColor} leading-tight truncate`}>{c.pill}</span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
-      {/* Hero mission card */}
-      {todayMission && todayMission.trajet ? (
-        <Link
-          to="/convoyeur/missions"
-          className="relative block overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
-        >
-          <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
-          <div className="relative">
-            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Mission active</p>
-            <h2 className="text-[22px] font-bold text-white mt-2 leading-tight max-w-[60%]">
-              {todayMission.trajet.depart}
-            </h2>
-            <p className="text-[13px] text-[#c9d6f2] mt-2 max-w-[55%]">
-              → {todayMission.trajet.arrivee}
-            </p>
-            <button className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]">
-              Ouvrir la mission <ArrowRight size={16} />
-            </button>
-          </div>
-        </Link>
-      ) : (
-        <div className="relative overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] min-h-[240px]">
-          <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-70 pointer-events-none" width={1536} height={1024} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
-          <div className="relative max-w-[60%]">
-            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Missions actives</p>
-            <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
-              Aucune mission active aujourd'hui
-            </h2>
-            <p className="text-[12.5px] text-[#c9d6f2] mt-2 leading-relaxed">
-              Consultez les missions disponibles ou attendez une attribution.
-            </p>
-            <Link
-              to="/convoyeur/catalogue"
-              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]"
-            >
-              Voir les missions disponibles <ArrowRight size={16} />
-            </Link>
-          </div>
+      {/* Hero catalogue */}
+      <Link
+        to="/convoyeur/catalogue"
+        className="relative block overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
+      >
+        <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
+        <div className="relative max-w-[62%]">
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Catalogue missions</p>
+          {todayMission && todayMission.trajet ? (
+            <>
+              <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
+                {todayMission.trajet.depart}
+              </h2>
+              <p className="text-[13px] text-[#c9d6f2] mt-2">→ {todayMission.trajet.arrivee}</p>
+              <p className="text-[11.5px] text-[#8fa3cc] mt-3">
+                {catalogueCount} mission{catalogueCount > 1 ? "s" : ""} disponible{catalogueCount > 1 ? "s" : ""} au catalogue
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
+                {catalogueCount > 0
+                  ? `${catalogueCount} mission${catalogueCount > 1 ? "s" : ""} disponible${catalogueCount > 1 ? "s" : ""}`
+                  : "Aucune mission au catalogue"}
+              </h2>
+              <p className="text-[12.5px] text-[#c9d6f2] mt-2 leading-relaxed">
+                Parcourez les trajets ouverts et positionnez-vous en un clic.
+              </p>
+            </>
+          )}
+          <span className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]">
+            Ouvrir le catalogue <ArrowRight size={16} />
+          </span>
         </div>
-      )}
+      </Link>
 
       {/* Prochaine mission */}
       {nextMission && nextMission.trajet && (
