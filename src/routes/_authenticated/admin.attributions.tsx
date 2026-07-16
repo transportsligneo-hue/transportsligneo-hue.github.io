@@ -690,9 +690,17 @@ function AdminAttributions() {
                   }}
                   className="flex-1 text-left"
                 >
-                  <p className="font-medium text-pro-text">
-                    {t.depart} → {t.arrivee}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-pro-text">
+                      {t.depart} → {t.arrivee}
+                    </p>
+                    {t.is_test_data && <TestBadge />}
+                    {t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "") && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border border-emerald-300 bg-emerald-50 text-emerald-700">
+                        Au catalogue
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-pro-text-soft mt-0.5">
                     {t.date_trajet
                       ? new Date(t.date_trajet).toLocaleDateString("fr-FR")
