@@ -110,15 +110,19 @@ export const lookupPlate = createServerFn({ method: "POST" })
         return { ok: false, error: data.error };
       }
 
-      // Anti-abuse gate: authenticated users (Bearer token) OR reCAPTCHA v3.
-      // Si la vérif captcha est indisponible/échoue côté client, on n'empêche
-      // pas la recherche (la clé RapidAPI reste côté serveur, rate-limitée en amont).
+      // Anti-abus : soit utilisateur authentifié (Bearer), soit token reCAPTCHA v3 valide.
+      // Fail-closed pour protéger la clé RapidAPI (facturation à l'appel).
       const authHeader = getRequestHeader("authorization");
       const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
-      if (!hasBearer && data.recaptchaToken) {
+      if (!hasBearer) {
+        if (!data.recaptchaToken) {
+          console.warn("[SIV] no bearer and no recaptcha token — rejecting");
+          return { ok: false, error: "Vérification anti-robot requise" };
+        }
         const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
         if (!captchaOk) {
-          console.warn("[SIV] captcha rejected — continuing anyway (public estimator)");
+          console.warn("[SIV] captcha rejected");
+          return { ok: false, error: "Vérification anti-robot échouée" };
         }
       }
 
