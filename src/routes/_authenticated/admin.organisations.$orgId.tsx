@@ -50,7 +50,7 @@ function OrgDetail() {
       ]);
       const notesInternes = (adminNotesRes as any)?.data?.notes_internes ?? null;
       const orgWithNotes = orgRes.data ? { ...orgRes.data, notes_internes: notesInternes } : orgRes.data;
-      setOrg(orgRes.data);
+      setOrg(orgWithNotes);
       setRoles((rolesRes.data ?? []).filter((r) => r.active).map((r) => r.role));
       const memberRows = membersRes.data ?? [];
       // Hydrate members with profile info
