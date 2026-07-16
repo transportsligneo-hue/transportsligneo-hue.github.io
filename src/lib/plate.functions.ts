@@ -21,8 +21,9 @@ const PlateSchema = z.object({
 async function verifyRecaptchaToken(token: string): Promise<boolean> {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
   if (!secret) {
-    console.warn("[SIV] RECAPTCHA_SECRET_KEY missing — allowing (dev)");
-    return true;
+    // Fail-closed en production : sans secret, on refuse pour ne pas exposer la clé RapidAPI.
+    console.error("[SIV] RECAPTCHA_SECRET_KEY missing — refusing request");
+    return false;
   }
   try {
     const body = new URLSearchParams({ secret, response: token });
@@ -33,14 +34,12 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
     });
     const json = (await res.json()) as { success: boolean; score?: number; "error-codes"?: string[] };
     console.log("[SIV] recaptcha result", { success: json.success, score: json.score, errors: json["error-codes"] });
-    // v3 : on accepte dès que Google reconnaît le token (success=true),
-    // en abaissant le seuil de score à 0.3 (webviews / mobile → scores plus bas).
     if (json.success) return (json.score ?? 1) >= 0.3;
     return false;
   } catch (err) {
     console.error("[SIV] recaptcha verify failed", err);
-    // En cas d'échec réseau, on laisse passer — la clé RapidAPI reste protégée côté serveur.
-    return true;
+    // Fail-closed : en cas d'échec, on refuse pour empêcher l'abus.
+    return false;
   }
 }
 
