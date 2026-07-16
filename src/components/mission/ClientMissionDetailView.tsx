@@ -7,6 +7,8 @@ import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components
 import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
+import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
+import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 
 interface Mission {
   id: string;
@@ -32,6 +34,8 @@ interface Mission {
   email: string;
   telephone: string | null;
   created_at: string;
+  mission_group_id: string | null;
+  leg_type: string | null;
 }
 
 interface ClientMissionDetailViewProps {
