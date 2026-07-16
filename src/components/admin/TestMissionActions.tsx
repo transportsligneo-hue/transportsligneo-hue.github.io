@@ -21,7 +21,7 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
       return;
     }
     toast.success("Mission test créée");
-    onCreated?.(data as unknown as string);
+    onCreated?.(data as string);
   };
 
   return (
