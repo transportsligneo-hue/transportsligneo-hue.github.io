@@ -571,6 +571,7 @@ function AdminTrajets() {
         subtitle={`${trajets.length} trajet${trajets.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <CreateTestMissionButton onCreated={fetchTrajets} />
             <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
               <option value="all">Tous</option>
               {statuts.map((s) => (
