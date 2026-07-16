@@ -66,13 +66,19 @@ export function MissionV3DocsPane({
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const reload = async () => {
-    const [{ data: dRows }, { data: pRows }, { data: sRows }] = await Promise.all([
+    const [{ data: dRows }, { data: insps }, { data: sRows }] = await Promise.all([
       supabase.from("mission_documents").select("id, type_document, nom_fichier, url_fichier, created_at").eq("attribution_id", attributionId),
-      supabase.from("inspection_photos").select("id").eq("attribution_id", attributionId).limit(1),
+      supabase.from("inspections").select("id").eq("attribution_id", attributionId),
       supabase.from("mission_signatures" as never).select("kind").eq("attribution_id" as never, attributionId as never),
     ]);
     setDocs((dRows as DocRow[]) || []);
-    setPhotoCount((pRows || []).length);
+    const inspIds = (insps || []).map((i: { id: string }) => i.id);
+    if (inspIds.length > 0) {
+      const { data: pRows } = await supabase.from("inspection_photos").select("id").in("inspection_id", inspIds).limit(1);
+      setPhotoCount((pRows || []).length);
+    } else {
+      setPhotoCount(0);
+    }
     const kinds = new Set(((sRows as { kind: string }[]) || []).map(r => r.kind));
     setHasClientSig(kinds.has("client_end") || kinds.has("client_start"));
     setLoading(false);
