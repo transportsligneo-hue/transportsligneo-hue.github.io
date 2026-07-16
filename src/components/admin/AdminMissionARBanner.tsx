@@ -157,10 +157,10 @@ export function AdminMissionARBanner({
   };
 
   const doCancelLeg = async () => {
-    const ok = await confirmToast({
-      title: `Annuler la mission ${legType === "aller" ? "Aller" : "Retour"} ?`,
-      message: "L'autre sens reste actif et opérationnel.",
+    const ok = await confirmToast(`Annuler la mission ${legType === "aller" ? "Aller" : "Retour"} ?`, {
+      description: "L'autre sens reste actif et opérationnel.",
       confirmLabel: "Annuler ce sens",
+      variant: "danger",
     });
     if (!ok) return;
     setWorking("cancel");
