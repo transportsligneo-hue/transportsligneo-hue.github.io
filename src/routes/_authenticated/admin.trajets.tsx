@@ -702,6 +702,44 @@ function AdminTrajets() {
         size="lg"
       >
         <div className="space-y-3">
+          {!editing && (
+            <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-gradient-to-br from-[#0b1026] to-[#111a3d] border border-[#d4af37]/30">
+              <div className="text-white">
+                <p className="text-sm font-semibold flex items-center gap-1.5">
+                  📄 Pré-remplir par scan IA
+                </p>
+                <p className="text-[11px] text-white/60">
+                  Carte grise, bon de commande, PV… tous les champs sont détectés automatiquement.
+                </p>
+              </div>
+              <ScanToPrefill
+                label="Scanner"
+                multiPage
+                onExtracted={(fields: ExtractedFields) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    depart: fields.lieu_depart || prev.depart,
+                    arrivee: fields.lieu_arrivee || prev.arrivee,
+                    date_trajet: prev.date_trajet, // les dates OCR sont en JJ/MM/AAAA, laissées à l'admin
+                    marque: fields.marque || prev.marque,
+                    modele: fields.modele || prev.modele,
+                    immatriculation: fields.immatriculation || prev.immatriculation,
+                    client_nom: fields.client_nom || fields.titulaire_nom || prev.client_nom,
+                    client_email: fields.client_email || prev.client_email,
+                    client_telephone: fields.client_telephone || prev.client_telephone,
+                    notes_internes: [
+                      prev.notes_internes,
+                      fields.vin ? `VIN: ${fields.vin}` : "",
+                      fields.numero_commande ? `Cmd: ${fields.numero_commande}` : "",
+                      fields.numero_dossier ? `Dossier: ${fields.numero_dossier}` : "",
+                      fields.kilometrage ? `Km: ${fields.kilometrage}` : "",
+                      fields.observations || "",
+                    ].filter(Boolean).join(" · ").slice(0, 500),
+                  }));
+                }}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Départ" required>
               <TextInput value={form.depart} onChange={(e) => setForm({ ...form, depart: e.target.value })} />
