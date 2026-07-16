@@ -65,6 +65,7 @@ interface Trajet {
   commission_convoyeur_pct?: number | null;
   prix_convoyeur?: number | null;
   prix_societe?: number | null;
+  is_test_data?: boolean | null;
 }
 
 interface DevisLink {
