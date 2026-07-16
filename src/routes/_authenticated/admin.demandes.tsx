@@ -123,92 +123,21 @@ function AdminDemandes() {
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
     try {
-      const { data: existingTrajet } = await supabase
-        .from("trajets")
-        .select("id")
-        .eq("demande_id", d.id)
-        .maybeSingle();
-
-      if (existingTrajet?.id) {
-        if (d.statut !== "convertie") {
-          await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
-        }
-        toast.info("Cette demande a déjà été convertie.");
-        fetchDemandes();
-        return;
-      }
-
-      let createdMissionId: string | null = null;
-
-      if (d.user_id) {
-        const { data: mission, error: missionError } = await supabase
-          .from("missions")
-          .insert({
-            user_id: d.user_id,
-            nom: d.nom,
-            prenom: d.prenom,
-            email: d.email,
-            telephone: d.telephone,
-            ville_depart: d.depart,
-            ville_arrivee: d.arrivee,
-            date_prise_en_charge: d.date_souhaitee ?? new Date().toISOString().slice(0, 10),
-            type_trajet: "aller_simple",
-            marque: d.marque || null,
-            modele: d.modele || null,
-            immatriculation: d.immatriculation || null,
-            carburant: d.carburant || null,
-            remarques: d.message || null,
-            prix_total: d.prix_estime ?? 0,
-            statut: "en_attente",
-          })
-          .select("id, numero")
-          .single();
-
-        if (missionError) throw missionError;
-        createdMissionId = mission?.id ?? null;
-      }
-
-      const { error } = await supabase.from("trajets").insert({
-        demande_id: d.id,
-        depart: d.depart,
-        arrivee: d.arrivee,
-        date_trajet: d.date_souhaitee,
-        heure_trajet: d.heure_souhaitee ?? "",
-        marque: d.vehicule_marque ?? d.marque ?? "",
-        modele: d.vehicule_modele ?? d.modele ?? "",
-        immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? "",
-        client_nom: `${d.prenom} ${d.nom}`,
-        client_email: d.email,
-        client_telephone: d.telephone ?? "",
-        prix: d.prix_estime ?? null,
-        prix_client: d.prix_estime ?? null,
-        commission_convoyeur_pct: 65,
-        statut: "en_attente",
-        statut_publication: "publie",
-        pricing_mode: "fixe",
-        // Phase 6 — propagation véhicule détaillé + options
-        vehicule_immatriculation: d.vehicule_immatriculation ?? d.immatriculation ?? null,
-        vehicule_vin: d.vehicule_vin ?? null,
-        vehicule_energie: d.vehicule_energie ?? d.carburant ?? null,
-        vehicule_type: d.vehicule_type ?? null,
-        vehicule_couleur: d.vehicule_couleur ?? null,
-        vehicule_km: d.vehicule_km ?? null,
-        vehicule_notes: d.vehicule_notes ?? null,
-        options_meta: (d.options_meta ?? {}) as never,
-      });
-      if (error) {
-        if (createdMissionId) {
-          await supabase.from("missions").delete().eq("id", createdMissionId);
-        }
-        throw error;
-      }
-
-      await supabase.from("demandes_convoyage").update({ statut: "convertie" }).eq("id", d.id);
-      toast.success("Demande convertie", {
-        description: createdMissionId
-          ? "La mission et le trajet ont été créés pour attribution."
-          : "Le trajet a été créé pour attribution.",
-      });
+      const { data, error } = await supabase.rpc(
+        "admin_convert_demande_to_missions" as never,
+        { _demande_id: d.id } as never,
+      );
+      if (error) throw error;
+      const rows = (data ?? []) as Array<{ mission_id: string; leg: string; numero: string }>;
+      const isAR = rows.length > 1;
+      toast.success(
+        isAR
+          ? `Aller-retour éclaté : ${rows.map((r) => `${r.leg === "aller" ? "Aller" : "Retour"} ${r.numero}`).join(" · ")}`
+          : rows[0]
+              ? `Mission ${rows[0].numero} créée`
+              : "Demande convertie",
+        { description: isAR ? "Deux missions indépendantes ont été créées et liées." : "La mission et le trajet ont été créés pour attribution." },
+      );
       fetchDemandes();
     } catch (error) {
       toast.error("Impossible de convertir la demande", {
@@ -218,6 +147,7 @@ function AdminDemandes() {
       setConverting(null);
     }
   };
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
