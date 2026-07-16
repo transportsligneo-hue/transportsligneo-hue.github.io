@@ -246,8 +246,12 @@ export function MissionCockpit({
   }, [currentKey, forceOpenSelfie, openSelfie]);
 
   const currentIdx = STEPS.findIndex((s) => s.key === currentKey);
-  const currentDef = STEPS[currentIdx] ?? STEPS[0];
+  const baseDef = STEPS[currentIdx] ?? STEPS[0];
   const isDone = currentKey === "done";
+  const isValidated = ["validee", "termine"].includes(statut);
+  const currentDef = isValidated
+    ? { ...baseDef, short: "Validée", label: "Mission validée par l'admin", cta: "Mission validée", hint: "L'admin a validé votre dossier. Merci !" }
+    : baseDef;
 
   useEffect(() => {
     const e = normalizedEtape;
@@ -680,7 +684,7 @@ export function MissionCockpit({
               className={`mv3-cta ${isDone ? "done" : ""}`}
             >
               {isDone ? (
-                <><Check size={16} strokeWidth={3} /> Mission envoyée</>
+                <><Check size={16} strokeWidth={3} /> {isValidated ? "Mission validée" : "Mission envoyée"}</>
               ) : busy ? (
                 <><Loader2 className="animate-spin" size={16} /> {currentDef.cta}</>
               ) : (
@@ -797,7 +801,8 @@ export function MissionCockpitStickyCTA({
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
 
   let label = "Continuer";
-  if (["en_attente_validation", "validee", "termine"].includes(statut)) label = "Mission envoyée";
+  if (["validee", "termine"].includes(statut)) label = "Mission validée";
+  else if (statut === "en_attente_validation") label = "Mission envoyée";
   else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "En route pour récupérer le véhicule";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
   else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
