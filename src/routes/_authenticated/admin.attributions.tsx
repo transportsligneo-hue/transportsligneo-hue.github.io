@@ -327,14 +327,14 @@ function AdminAttributions() {
     // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client")
+      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client, is_test_data")
       .in("statut", ["en_attente", "attribue"])
       .order("date_trajet", { ascending: true, nullsFirst: false });
     if (!trajets) return;
 
-    const assignableTrajets = trajets.filter(
-      (t) => !(t.statut_publication === "publie" && ["catalogue", "mixte"].includes(t.attribution_mode ?? "")),
-    );
+    // Fix : les trajets publiés au catalogue restent visibles (badge "Au catalogue"),
+    // l'admin peut reprendre la main pour attribuer manuellement (mode mixte).
+    const assignableTrajets = trajets as Trajet[];
 
     // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
     const ids = assignableTrajets.map((t) => t.id);
