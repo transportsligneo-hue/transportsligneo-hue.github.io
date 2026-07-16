@@ -392,7 +392,6 @@ export type Database = {
           estimated_price_ht: number | null
           estimated_price_ttc: number | null
           id: string
-          internal_notes: string | null
           notes: string | null
           numero: string
           operational_status: string
@@ -417,7 +416,6 @@ export type Database = {
           estimated_price_ht?: number | null
           estimated_price_ttc?: number | null
           id?: string
-          internal_notes?: string | null
           notes?: string | null
           numero?: string
           operational_status?: string
@@ -442,7 +440,6 @@ export type Database = {
           estimated_price_ht?: number | null
           estimated_price_ttc?: number | null
           id?: string
-          internal_notes?: string | null
           notes?: string | null
           numero?: string
           operational_status?: string
@@ -471,6 +468,35 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_transport_requests_admin_data: {
+        Row: {
+          created_at: string
+          internal_notes: string | null
+          request_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          internal_notes?: string | null
+          request_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          internal_notes?: string | null
+          request_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_transport_requests_admin_data_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "b2b_transport_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -2910,7 +2936,6 @@ export type Database = {
           id: string
           legacy_company_id: string | null
           legal_name: string
-          notes_internes: string | null
           primary_contact_email: string | null
           primary_contact_name: string | null
           primary_contact_phone: string | null
@@ -2933,7 +2958,6 @@ export type Database = {
           id?: string
           legacy_company_id?: string | null
           legal_name: string
-          notes_internes?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
@@ -2956,7 +2980,6 @@ export type Database = {
           id?: string
           legacy_company_id?: string | null
           legal_name?: string
-          notes_internes?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
@@ -2976,6 +2999,35 @@ export type Database = {
             columns: ["legacy_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations_admin_data: {
+        Row: {
+          created_at: string
+          notes_internes: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          notes_internes?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          notes_internes?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_admin_data_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
