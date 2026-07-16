@@ -641,6 +641,13 @@ function AdminAttributions() {
                       {invoicingId === a.id ? <Loader2 size={15} className="animate-spin" /> : <Receipt size={15} />}
                     </IconButton>
                   )}
+                  {a.trajet?.is_test_data && (
+                    <DeleteTestMissionButton
+                      trajetId={a.trajet_id}
+                      compact
+                      onDeleted={() => { fetchAttributions(); fetchOptions(); }}
+                    />
+                  )}
                 </div>
               </div>
               </div>
