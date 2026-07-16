@@ -46,15 +46,25 @@ export const pushToUser = createServerFn({ method: "POST" })
     return sendPushToUser(data.userId, data.payload);
   });
 
-/** Push to every active admin (any auth user — used for client-triggered alerts). */
+/** Push to every active admin. Restricted to internal same-origin paths and
+ * safe title/body defaults to prevent phishing/spam from arbitrary users. */
 export const pushToAdmins = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { payload: z.infer<typeof payloadSchema> }) => ({
     payload: payloadSchema.parse(input.payload),
   }))
   .handler(async ({ data }) => {
+    // Force url to be an internal admin path only — never external, never arbitrary.
+    const rawUrl = data.payload.url ?? "/admin/notifications";
+    const safeUrl = typeof rawUrl === "string" && rawUrl.startsWith("/admin/") ? rawUrl : "/admin/notifications";
+    const sanitized = {
+      ...data.payload,
+      url: safeUrl,
+      title: data.payload.title.slice(0, 120),
+      body: data.payload.body?.slice(0, 500),
+    };
     const { sendPushToRole } = await import("@/lib/push/send.server");
-    return sendPushToRole("admin", data.payload);
+    return sendPushToRole("admin", sanitized);
   });
 
 /** Self-test push. */
