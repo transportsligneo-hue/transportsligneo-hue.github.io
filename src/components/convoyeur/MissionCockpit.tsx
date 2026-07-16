@@ -551,6 +551,13 @@ export function MissionCockpit({
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div className="mv3-hero-title">{currentDef.label}</div>
+              {(departVille || arriveeVille) && (
+                <div className="mv3-hero-route">
+                  <span className="mv3-hero-route-city">{departVille ?? "—"}</span>
+                  <span className="mv3-hero-route-arrow">→</span>
+                  <span className="mv3-hero-route-city">{arriveeVille ?? "—"}</span>
+                </div>
+              )}
               {currentDef.hint && !isDone && <div className="mv3-hero-sub">{currentDef.hint}</div>}
               <div className="mv3-hero-badges">
                 <span>Étape {Math.min(visualIdx + 1, totalVisual)} / {totalVisual}</span>
