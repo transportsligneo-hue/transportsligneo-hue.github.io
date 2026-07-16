@@ -506,232 +506,62 @@ function ConvoyeurMissions() {
     const dep = splitAddr(t?.depart);
     const arr = splitAddr(t?.arrivee);
 
-    return (
+    const infoSlot = (
       <>
-      {inspectionOverlay}
-      <div className="space-y-4 pb-[calc(144px+env(safe-area-inset-bottom))]">
-        {/* Sticky back bar */}
-        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 driver-sticky-bar">
-          <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={() => setOpenMissionId(null)}
-              className="flex items-center gap-1.5 text-pro-text hover:text-[var(--gold)] text-sm font-medium py-1.5 px-2 -ml-2 rounded-md hover:bg-pro-bg-soft active:scale-95 transition"
-            >
-              <ArrowLeft size={18} /> Missions
-            </button>
-            {isActive && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0b1026] bg-[var(--gold)]/20 border border-[var(--gold)]/40 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] animate-pulse" />
-                EN COURS
-                {getDuration() && <span>· {getDuration()}</span>}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* HERO PREMIUM — visible uniquement sur l'onglet Informations */}
-        {detailTab === "info" && (
-        <PremiumMissionHero
-          data={{
-            numeroMission: openMission.numero_mission ?? null,
-            statutLabel,
-            isLive: isActive,
-            depart: { ville: dep.ville, adresse: dep.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
-            arrivee: { ville: arr.ville, adresse: arr.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
-            vehicule: {
-              marque: t?.marque ?? undefined,
-              modele: t?.modele ?? undefined,
-              immatriculation: t?.immatriculation ?? undefined,
-            },
-            contactDepartTel: (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null,
-            contactArriveeTel: (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null,
-            contactArriveeNom: (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null,
-            contactArriveeTel2: (t as { arrivee_contact_telephone2?: string | null } | null)?.arrivee_contact_telephone2 ?? null,
-            contactArriveeInstructions: (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null,
-            gpsTarget: t?.depart ?? null,
-          }}
-          steps={timelineSteps}
-          currentStepIndex={Math.min(currentIdx, TOTAL)}
-          totalSteps={TOTAL}
-          currentStepLabel={currentStepLabel}
-          onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
-          onOpenDocuments={() => { setDetailTab("docs"); setExpandedDocs(true); }}
-          onOpenIncident={() => setDetailTab("action")}
-        />
-        )}
-
-        {/* Bannière mission compacte (visible sur Action / Documents pour garder le contexte) */}
-        {detailTab !== "info" && (
-          <div
-            className="rounded-2xl p-4 text-white shadow-md"
-            style={{ background: "linear-gradient(135deg,#0b1026 0%,#131a3d 100%)" }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-cream/60 font-semibold">{statutLabel}</p>
-                <h2 className="font-serif text-xl tracking-tight truncate text-white">{openMission.numero_mission ?? "—"}</h2>
-                <p className="mt-0.5 text-cream/85 text-xs truncate">
-                  <span className="font-semibold">{dep.ville}</span> <span className="text-[var(--gold)]">→</span> <span className="font-semibold">{arr.ville}</span>
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-[10px] uppercase tracking-wider text-cream/60">Étape</p>
-                <p className="font-serif text-lg text-white">
-                  {Math.min(currentIdx, TOTAL)}<span className="text-cream/60 text-sm">/{TOTAL}</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-
-        {/* === ONGLETS DÉTAIL MISSION (Action / Infos / Documents) === */}
-        <div className="sticky top-[44px] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-pro-bg-soft/95 backdrop-blur-md border-b border-pro-border">
-          <div className="flex gap-1 py-2 overflow-x-auto" role="tablist" aria-label="Détail mission">
-            {([
-              { key: "action", label: "Action" },
-              { key: "info", label: "Informations" },
-              { key: "docs", label: "Documents" },
-            ] as const).map((tab) => {
-              const active = detailTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setDetailTab(tab.key)}
-                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold tracking-tight transition active:scale-95 ${
-                    active
-                      ? "bg-[#0b1026] text-white shadow-md"
-                      : "bg-white text-[#0b1026] border border-pro-border hover:bg-pro-bg-soft"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Documents véhicule (VIN + carte grise) */}
-        {detailTab === "docs" && (t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
-          <VehiculeDocsView
-            vin={t?.vin ?? null}
-            rectoPath={t?.carte_grise_recto_url ?? null}
-            versoPath={t?.carte_grise_verso_url ?? null}
+        <div className="mv3-legacy-info">
+          <PremiumMissionHero
+            data={{
+              numeroMission: openMission.numero_mission ?? null,
+              statutLabel,
+              isLive: isActive,
+              depart: { ville: dep.ville, adresse: dep.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
+              arrivee: { ville: arr.ville, adresse: arr.adresse, date: t?.date_trajet ?? undefined, heure: t?.heure_trajet ?? undefined },
+              vehicule: {
+                marque: t?.marque ?? undefined,
+                modele: t?.modele ?? undefined,
+                immatriculation: t?.immatriculation ?? undefined,
+              },
+              contactDepartTel: (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null,
+              contactArriveeTel: (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null,
+              contactArriveeNom: (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null,
+              contactArriveeTel2: (t as { arrivee_contact_telephone2?: string | null } | null)?.arrivee_contact_telephone2 ?? null,
+              contactArriveeInstructions: (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null,
+              gpsTarget: t?.depart ?? null,
+            }}
+            steps={timelineSteps}
+            currentStepIndex={Math.min(currentIdx, TOTAL)}
+            totalSteps={TOTAL}
+            currentStepLabel={currentStepLabel}
+            onOpenInspection={() => openInspection({ attributionId: openMission.id, type: inspDepartOk ? "arrivee" : "depart" })}
+            onOpenDocuments={() => { setDetailTab("docs"); setExpandedDocs(true); }}
+            onOpenIncident={() => setDetailTab("action")}
           />
-        )}
-
-        {/* Tâches spécifiques + infos véhicule étendues (Phase 6) — onglet Action */}
-        {detailTab === "action" && (() => {
-          const te = t as (typeof t & {
-            vehicule_energie?: string | null;
-            vehicule_type?: string | null;
-            vehicule_couleur?: string | null;
-            vehicule_km?: number | null;
-            vehicule_notes?: string | null;
-            options_meta?: Record<string, unknown> | null;
-          }) | null;
-          const meta = te?.options_meta ?? null;
-          const energie = (te?.vehicule_energie ?? "").toLowerCase();
-          const isElec = energie.includes("élec") || energie.includes("elec") || energie === "ev";
-          const tasks: { key: string; label: string; tone: "gold" | "blue" | "emerald"; required?: boolean }[] = [];
-          if (meta?.recharge_electrique || isElec) tasks.push({ key: "recharge", label: "⚡ Brancher pour le trajet", tone: "blue", required: true });
-          if (meta?.plein_essence) tasks.push({ key: "plein", label: "⛽ Faire le plein avant livraison", tone: "gold", required: true });
-          if (meta?.lavage) tasks.push({ key: "lavage", label: "🧽 Lavage extérieur", tone: "emerald", required: true });
-          if (meta?.express) tasks.push({ key: "express", label: "⚡ Mission express — priorité", tone: "gold" });
-          if (meta?.aller_retour) tasks.push({ key: "ar", label: "↔ Aller-retour prévu", tone: "blue" });
-          const hasExtra = te?.vehicule_type || te?.vehicule_couleur || te?.vehicule_km || te?.vehicule_notes;
-          if (tasks.length === 0 && !hasExtra) return null;
-          const completion = (openMission.options_completion ?? {}) as Record<string, { done?: boolean; at?: string }>;
-          const toneRing = (tone: string, done: boolean) =>
-            done
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-              : tone === "gold" ? "bg-[#d4af37]/10 border-[#d4af37]/40 text-[#6b5210]"
-              : tone === "emerald" ? "bg-emerald-50/60 border-emerald-200 text-emerald-700"
-              : "bg-blue-50/70 border-blue-200 text-blue-700";
-          const totalReq = tasks.filter(x => x.required).length;
-          const doneReq = tasks.filter(x => x.required && completion[x.key]?.done).length;
-          return (
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-bold text-slate-900 uppercase tracking-wide">À faire sur cette mission</div>
-                {totalReq > 0 && (
-                  <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 border ${doneReq === totalReq ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-800 border-amber-200"}`}>
-                    {doneReq}/{totalReq} effectuée{totalReq > 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
-              {tasks.length > 0 && (
-                <div className="space-y-1.5">
-                  {tasks.map((task) => {
-                    const isDone = !!completion[task.key]?.done;
-                    const at = completion[task.key]?.at;
-                    return (
-                      <button
-                        key={task.key}
-                        type="button"
-                        onClick={() => toggleOptionCompletion(openMission, task.key, !isDone)}
-                        className={`w-full flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm text-left transition active:scale-[0.99] ${toneRing(task.tone, isDone)}`}
-                      >
-                        <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-400 bg-white"}`}>
-                          {isDone && <Check size={12} strokeWidth={3} />}
-                        </span>
-                        <span className={`flex-1 font-semibold text-slate-900 ${isDone ? "line-through opacity-60" : ""}`}>{task.label}</span>
-                        {at && (
-                          <span className="text-[10px] text-emerald-700 shrink-0 font-semibold">
-                            ✓ {new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              {hasExtra && (
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-800 pt-2 border-t border-slate-200">
-                  {te?.vehicule_type && <div><span className="text-slate-500 font-medium">Type :</span> <span className="font-semibold">{te.vehicule_type}</span></div>}
-                  {te?.vehicule_couleur && <div><span className="text-slate-500 font-medium">Couleur :</span> <span className="font-semibold">{te.vehicule_couleur}</span></div>}
-                  {te?.vehicule_km != null && <div><span className="text-slate-500 font-medium">Km :</span> <span className="font-semibold">{te.vehicule_km}</span></div>}
-                  {te?.vehicule_energie && <div><span className="text-slate-500 font-medium">Énergie :</span> <span className="font-semibold">{te.vehicule_energie}</span></div>}
-                </div>
-              )}
-              {te?.vehicule_notes && (
-                <p className="text-xs italic text-slate-700 whitespace-pre-wrap border-l-2 border-slate-300 pl-2">"{te.vehicule_notes}"</p>
-              )}
-            </div>
-          );
-        })()}
-
-
-        {/* Live GPS — onglet Action */}
-        {detailTab === "action" && isActive && (
-          <>
-            <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <div className="flex-1">
-                <p className="text-emerald-800 text-sm font-medium">Mission en cours</p>
-                <p className="text-emerald-600 text-xs">
+        </div>
+        {isActive && (
+          <div className="mv3-live-block">
+            <div className="mv3-live-header">
+              <span className="mv3-live-pulse" />
+              <div className="mv3-live-text">
+                <p className="mv3-live-title">Mission en cours</p>
+                <p className="mv3-live-sub">
                   GPS actif · {gpsPoints.length} position{gpsPoints.length > 1 ? "s" : ""}
                   {getDuration() && ` · ${getDuration()}`}
                 </p>
               </div>
             </div>
-
             <button
               onClick={() => setShowMap(!showMap)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-pro-text border border-pro-border rounded-xl text-sm hover:bg-pro-bg-soft transition"
+              className="mv3-live-mapbtn"
             >
               <MapPin size={14} />
               {showMap ? "Masquer la carte" : "Voir la carte en direct"}
               {showMap ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
-
             {showMap && (
-              <div className="space-y-2">
+              <div className="mt-2 space-y-2">
                 <GpsMapView points={gpsPoints} className="h-[280px] md:h-[400px] rounded-xl overflow-hidden" />
                 {lastPoint && (
-                  <div className="flex items-center justify-between text-[10px] text-pro-muted px-1">
+                  <div className="flex items-center justify-between text-[10px] text-white/50 px-1">
                     <span className="flex items-center gap-1">
                       <Clock size={10} />
                       Dernière position: {new Date(lastPoint.recorded_at).toLocaleTimeString("fr-FR")}
@@ -741,29 +571,132 @@ function ConvoyeurMissions() {
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
+      </>
+    );
 
-        {/* Acceptation rapide si proposée — onglet Action */}
-        {detailTab === "action" && openMission.statut === "propose" && (
-          <div className="grid grid-cols-2 gap-2">
+    const docsSlot = (
+      <>
+        {(t?.vin || t?.carte_grise_recto_url || t?.carte_grise_verso_url) && (
+          <div className="mv3-legacy-info">
+            <VehiculeDocsView
+              vin={t?.vin ?? null}
+              rectoPath={t?.carte_grise_recto_url ?? null}
+              versoPath={t?.carte_grise_verso_url ?? null}
+            />
+          </div>
+        )}
+        <div className="mv3-docs-card">
+          <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
+        </div>
+        {user && (
+          <div className="mv3-docs-card">
             <button
-              onClick={() => updateStatus(openMission.id, "accepte")}
-              className="flex items-center justify-center gap-2 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98]"
+              onClick={() => setExpandedDocs(v => !v)}
+              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-[#2FD8FF] w-full"
             >
-              <Check size={18} /> Accepter
+              <FileText size={14} />
+              Documents de mission
+              <span className="ml-auto text-xs">{expandedDocs ? "▲" : "▼"}</span>
             </button>
-            <button
-              onClick={() => updateStatus(openMission.id, "refusee")}
-              className="flex items-center justify-center gap-2 py-4 bg-white text-red-600 border border-red-200 rounded-xl text-base font-semibold hover:bg-red-50 active:scale-[0.98]"
-            >
-              <X size={18} /> Refuser
+            {expandedDocs && (
+              <div className="mt-3">
+                <MissionDocuments attributionId={openMission.id} userId={user.id} />
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    );
+
+    return (
+      <>
+      {inspectionOverlay}
+      <div className="mv3-fullscreen">
+        <style>{`
+          .mv3-fullscreen { margin: -1rem -1rem 0; min-height: calc(100vh - 1rem); background: #060B24;
+            padding: 0 0 calc(24px + env(safe-area-inset-bottom));
+            color: #EAF3FF; }
+          @media (min-width: 640px) { .mv3-fullscreen { margin: -1.5rem -1.5rem 0; } }
+          @media (min-width: 1024px) { .mv3-fullscreen { margin: -2rem -2rem 0; } }
+          .mv3-backbar { position: sticky; top: 0; z-index: 30; padding: 10px 14px;
+            background: rgba(6,11,36,0.85); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(120,180,255,0.08); }
+          .mv3-back-btn { display: inline-flex; align-items: center; gap: 6px;
+            color: #EAF3FF; font-size: 13px; font-weight: 600; padding: 6px 8px;
+            border-radius: 8px; background: transparent; border: none; cursor: pointer;
+            transition: background .15s; }
+          .mv3-back-btn:hover { background: rgba(255,255,255,0.06); }
+          .mv3-live-pill-top { display: inline-flex; align-items: center; gap: 6px;
+            font-size: 10.5px; font-weight: 700; color: #0B1026;
+            background: linear-gradient(120deg,#F5D57A,#E6BE58); padding: 4px 10px;
+            border-radius: 20px; }
+          .mv3-live-pill-top-dot { width: 5px; height: 5px; border-radius: 50%; background: #0B1026;
+            animation: mv3PulseGold 1.6s ease-in-out infinite; }
+          @keyframes mv3PulseGold { 0%,100% { opacity: 1;} 50% { opacity: .35;} }
+          .mv3-legacy-info { border-radius: 20px; overflow: hidden; }
+          .mv3-live-block { background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(120,180,255,0.14); border-radius: 20px; padding: 14px; }
+          .mv3-live-header { display: flex; align-items: center; gap: 10px; }
+          .mv3-live-pulse { width: 10px; height: 10px; border-radius: 50%; background: #34E8B0;
+            box-shadow: 0 0 0 4px rgba(52,232,176,0.18); animation: mv3PulseDot 1.6s ease-in-out infinite; }
+          .mv3-live-text { flex: 1; }
+          .mv3-live-title { font-size: 13px; font-weight: 700; color: #EAF3FF; margin: 0; }
+          .mv3-live-sub { font-size: 11.5px; color: #9098AE; margin: 2px 0 0; }
+          .mv3-live-mapbtn { margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(120,180,255,0.14); color: #EAF3FF; font-size: 12.5px; font-weight: 600;
+            cursor: pointer; }
+          .mv3-live-mapbtn:hover { background: rgba(255,255,255,0.09); }
+          .mv3-docs-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.14);
+            border-radius: 20px; padding: 14px; color: #EAF3FF; }
+          .mv3-propose { padding: 14px; }
+          .mv3-propose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        `}</style>
+
+        {/* Sticky back bar */}
+        <div className="mv3-backbar">
+          <div className="flex items-center justify-between gap-3">
+            <button onClick={() => setOpenMissionId(null)} className="mv3-back-btn">
+              <ArrowLeft size={18} /> Missions
             </button>
+            {isActive && (
+              <span className="mv3-live-pill-top">
+                <span className="mv3-live-pill-top-dot" />
+                EN COURS
+                {getDuration() && <span>· {getDuration()}</span>}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Acceptation rapide si proposée */}
+        {openMission.statut === "propose" && (
+          <div className="mv3-propose">
+            <div className="mv3-docs-card">
+              <p className="text-sm font-semibold text-white mb-1">Mission proposée</p>
+              <p className="text-xs text-white/60">Acceptez ou refusez cette mission pour continuer.</p>
+              <div className="mv3-propose-grid">
+                <button
+                  onClick={() => updateStatus(openMission.id, "accepte")}
+                  className="flex items-center justify-center gap-2 py-4 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 active:scale-[0.98]"
+                >
+                  <Check size={18} /> Accepter
+                </button>
+                <button
+                  onClick={() => updateStatus(openMission.id, "refusee")}
+                  className="flex items-center justify-center gap-2 py-4 bg-white/5 text-red-300 border border-red-400/30 rounded-xl text-base font-semibold hover:bg-red-500/10 active:scale-[0.98]"
+                >
+                  <X size={18} /> Refuser
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* === COCKPIT MISSION : étape en cours unifiée — onglet Action === */}
-        {detailTab === "action" && openMission.statut !== "propose" && user && (
+        {/* === COCKPIT MISSION plein écran === */}
+        {openMission.statut !== "propose" && user && (
           <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}
@@ -783,45 +716,19 @@ function ConvoyeurMissions() {
               }
             }}
             missionNumber={openMission.numero_mission ?? null}
-            vehiculeEnergie={(t as { vehicule_energie?: string | null } | null)?.vehicule_energie ?? null}
-            vehiculeType={(t as { vehicule_type?: string | null } | null)?.vehicule_type ?? null}
+            departVille={dep.ville}
+            arriveeVille={arr.ville}
+            activeTab={detailTab}
+            onTabChange={setDetailTab}
+            infoSlot={infoSlot}
+            docsSlot={docsSlot}
           />
         )}
-
-        {/* PV de livraison digitalisés — onglet Documents */}
-        {detailTab === "docs" && (
-          <div className="bg-white rounded-2xl border border-pro-border p-4">
-            <MissionPVDigitauxBlock attributionId={openMission.id} mode="driver" />
-          </div>
-        )}
-
-        {/* Documents de mission — onglet Documents */}
-        {detailTab === "docs" && user && (
-          <div className="bg-white rounded-2xl border border-pro-border p-4">
-            <button
-              onClick={() => setExpandedDocs(v => !v)}
-              className="flex items-center gap-2 text-sm font-semibold text-[#0b1026] hover:text-[var(--gold)] w-full"
-            >
-              <FileText size={14} />
-              Documents de mission
-              <span className="ml-auto text-xs">{expandedDocs ? "▲" : "▼"}</span>
-            </button>
-            {expandedDocs && (
-              <div className="mt-3">
-                <MissionDocuments attributionId={openMission.id} userId={user.id} />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Sticky bar GPS/Appeler retirée : elle recouvrait le CTA selfie du
-            cockpit sur mobile (tap qui ouvrait Google Maps au lieu d'ouvrir le
-            selfie). Les raccourcis GPS / Appeler restent disponibles dans la
-            grille de raccourcis du PremiumMissionHero plus haut. */}
       </div>
       </>
     );
   }
+
 
   // === LISTE ===
   const counts = {
