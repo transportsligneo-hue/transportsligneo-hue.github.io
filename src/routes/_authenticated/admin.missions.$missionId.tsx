@@ -978,6 +978,7 @@ function AdminMissionDetail() {
                 ))}
               </div>
             )}
+            <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
           {/* Documents */}
