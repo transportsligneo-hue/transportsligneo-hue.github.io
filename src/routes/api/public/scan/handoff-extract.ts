@@ -88,7 +88,6 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             return jsonResponse({ ok: false, error: "Image trop grande" }, 413);
           }
 
-          const supabase = makeServerClient();
           // Les RPC handoff sont SECURITY DEFINER mais NON exposées à anon.
           // On les appelle avec le client admin (service role) pour éviter
           // l'exposition publique tout en conservant leur logique TTL/rate-limit.
