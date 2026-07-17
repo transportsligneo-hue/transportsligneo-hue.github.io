@@ -51,6 +51,7 @@ type Row = {
   created_at: string;
   roles: string[];
   logo_url?: string | null;
+  account_type?: "b2b_standard" | "flotte" | null;
   // For profile rows
   profileUserId?: string;
 };
@@ -91,7 +92,7 @@ function AdminOrganisations() {
       const [{ data: orgs }, { data: rolesRows }, { data: profiles }] = await Promise.all([
         supabase
           .from("organizations")
-          .select("id, legal_name, commercial_name, siret, sector, size, status, score, score_category, primary_contact_email, primary_contact_phone, created_at")
+          .select("id, legal_name, commercial_name, siret, sector, size, status, score, score_category, primary_contact_email, primary_contact_phone, created_at, logo_url, account_type")
           .order("created_at", { ascending: false }),
         supabase.from("organization_roles").select("organization_id, role, active"),
         supabase
@@ -122,6 +123,8 @@ function AdminOrganisations() {
         primary_contact_phone: o.primary_contact_phone,
         created_at: o.created_at,
         roles: rolesByOrg.get(o.id) ?? [],
+        logo_url: (o as { logo_url?: string | null }).logo_url ?? null,
+        account_type: ((o as { account_type?: string | null }).account_type as "b2b_standard" | "flotte" | null) ?? null,
       }));
 
       // Profiles B2B/flotte not yet attached to a real organization
@@ -286,7 +289,14 @@ function AdminOrganisations() {
                         size="sm"
                       />
                       <div>
-                        <div className="font-medium text-pro-text">{o.legal_name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium text-pro-text">{o.legal_name}</div>
+                          {o.kind === "org" && o.account_type === "flotte" ? (
+                            <Badge className="bg-purple-100 text-purple-700 border-purple-200" variant="outline">Flotte</Badge>
+                          ) : o.kind === "org" ? (
+                            <Badge className="bg-blue-100 text-blue-700 border-blue-200" variant="outline">B2B</Badge>
+                          ) : null}
+                        </div>
                         <div className="text-xs text-pro-muted">
                           {o.commercial_name ? `${o.commercial_name} · ` : ""}
                           {o.siret ?? (o.kind === "profile" ? "Compte client" : "Sans SIRET")}

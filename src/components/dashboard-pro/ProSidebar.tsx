@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { OrgLogo } from "@/components/OrgLogo";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 export interface ProSidebarItem {
   to: string;
@@ -18,6 +20,31 @@ interface Props {
   societe?: string;
   items: ProSidebarItem[];
   children: ReactNode;
+}
+
+function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
+  const { data } = useCurrentOrgAccountType();
+  const name = data?.name ?? fallbackName ?? "Mon entreprise";
+  const isFlotte = data?.accountType === "flotte";
+  return (
+    <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-pro-border bg-pro-bg-soft/60 px-2.5 py-2">
+      <OrgLogo name={name} url={data?.logoUrl} size={34} rounded="rounded-lg" />
+      <div className="min-w-0 flex-1">
+        <div className="text-[13px] font-medium text-pro-text truncate">{name}</div>
+        <div className="mt-0.5">
+          <span
+            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border ${
+              isFlotte
+                ? "bg-purple-50 text-purple-700 border-purple-200"
+                : "bg-blue-50 text-blue-700 border-blue-200"
+            }`}
+          >
+            {isFlotte ? "Flotte" : "B2B"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -43,6 +70,7 @@ export function ProSidebar({ societe, items, children }: Props) {
           <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">
             {societe || user?.email}
           </p>
+          <OrgHeaderBlock fallbackName={societe} />
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -111,6 +139,11 @@ export function ProSidebar({ societe, items, children }: Props) {
                 <X size={18} />
               </button>
             </div>
+            <div className="px-4 pt-3">
+              <OrgHeaderBlock fallbackName={societe} />
+            </div>
+
+
 
             <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
               {items.map((item) => {
