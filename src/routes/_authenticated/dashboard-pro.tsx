@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro")({
   component: ProLayout,
@@ -13,20 +14,30 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro")({
   },
 });
 
-const navItems: ProSidebarItem[] = [
-  { to: "/dashboard-pro", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
-  { to: "/dashboard-pro/nouvelle-demande", label: "Nouvelle mission", icon: PlusCircle },
-  { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
-  { to: "/dashboard-pro/flotte", label: "Flotte", icon: Car },
-  { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
-  { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
-];
-
+function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[] {
+  const base: ProSidebarItem[] = [
+    { to: "/dashboard-pro", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
+    { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
+    { to: "/dashboard-pro/nouvelle-demande", label: "Nouvelle mission", icon: PlusCircle },
+    { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
+  ];
+  // "Flotte" réservé aux comptes Flotte
+  if (accountType === "flotte") {
+    base.push({ to: "/dashboard-pro/flotte", label: "Flotte", icon: Car });
+  }
+  base.push(
+    { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
+    { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+  );
+  return base;
+}
 
 function ProLayout() {
   const { isAuthenticated, role, typeClient, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const accountType = orgInfo?.accountType ?? "b2b_standard";
+  const navItems = useMemo(() => buildNavItems(accountType), [accountType]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -34,7 +45,6 @@ function ProLayout() {
       navigate({ to: "/login" });
       return;
     }
-    // Redirige uniquement si l'utilisateur n'a clairement rien à faire dans l'espace pro
     if (role === "admin" || role === "super_admin" || role === "convoyeur") {
       navigate({ to: homeRoute });
       return;
