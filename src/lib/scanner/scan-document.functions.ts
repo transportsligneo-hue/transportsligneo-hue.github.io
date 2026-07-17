@@ -113,6 +113,7 @@ const EXTRACTION_TOOL = {
 };
 
 export const scanDocumentExtract = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
     const parsed = InputSchema.safeParse(input);
     if (!parsed.success) {
@@ -124,12 +125,8 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
     try {
       if (!data.__ok) return { ok: false, error: data.error };
 
-      // Auth minimale : bearer token présent (on ne valide pas le rôle ici,
-      // c'est un outil offert à tout utilisateur connecté).
-      const authHeader = getRequestHeader("authorization");
-      if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
-        return { ok: false, error: "Authentification requise" };
-      }
+      // Auth : bearer token Supabase validé par le middleware requireSupabaseAuth.
+      // Toute requête sans token valide est rejetée en amont (401).
 
       const apiKey = process.env.LOVABLE_API_KEY;
       if (!apiKey) {
