@@ -234,6 +234,7 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
   // Résolution mention légale + mode fiscal depuis profil/app_settings
   const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
@@ -263,6 +264,11 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.text("FACTURE A", 14, y);
+
+  // Logo client à droite du bloc (façon templates)
+  if (clientLogoData) {
+    try { doc.addImage(clientLogoData, "PNG", 78, y - 4, 22, 22); } catch {}
+  }
 
   y += 8;
   doc.setFontSize(12);
