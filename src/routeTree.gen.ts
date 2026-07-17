@@ -35,6 +35,7 @@ import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
+import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
@@ -115,6 +116,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
@@ -256,6 +258,11 @@ const IndexRoute = IndexRouteImport.update({
 const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
   id: '/verify-certificat/$token',
   path: '/verify-certificat/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanTokenRoute = ScanTokenRouteImport.update({
+  id: '/scan/$token',
+  path: '/scan/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -721,6 +728,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicScanHandoffExtractRoute =
+  ApiPublicScanHandoffExtractRouteImport.update({
+    id: '/api/public/scan/handoff-extract',
+    path: '/api/public/scan/handoff-extract',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
   id: '/api/public/facture/webhook',
   path: '/api/public/facture/webhook',
@@ -833,6 +846,7 @@ export interface FileRoutesByFullPath {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -908,6 +922,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -947,6 +962,7 @@ export interface FileRoutesByTo {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1021,6 +1037,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1068,6 +1085,7 @@ export interface FileRoutesById {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1143,6 +1161,7 @@ export interface FileRoutesById {
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1190,6 +1209,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
     | '/admin/attributions'
@@ -1265,6 +1285,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
+    | '/api/public/scan/handoff-extract'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1304,6 +1325,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
     | '/admin/attributions'
@@ -1378,6 +1400,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
+    | '/api/public/scan/handoff-extract'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1424,6 +1447,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/attributions'
@@ -1499,6 +1523,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
+    | '/api/public/scan/handoff-extract'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1536,6 +1561,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
@@ -1546,6 +1572,7 @@ export interface RootRouteChildren {
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
+  ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1735,6 +1762,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-certificat/$token'
       fullPath: '/verify-certificat/$token'
       preLoaderRoute: typeof VerifyCertificatTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/$token': {
+      id: '/scan/$token'
+      path: '/scan/$token'
+      fullPath: '/scan/$token'
+      preLoaderRoute: typeof ScanTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -2297,6 +2331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/scan/handoff-extract': {
+      id: '/api/public/scan/handoff-extract'
+      path: '/api/public/scan/handoff-extract'
+      fullPath: '/api/public/scan/handoff-extract'
+      preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/facture/webhook': {
       id: '/api/public/facture/webhook'
       path: '/api/public/facture/webhook'
@@ -2775,6 +2816,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
@@ -2785,6 +2827,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
+  ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
