@@ -196,7 +196,7 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
           };
 
           // 3. Push vers la DB (rate limit + TTL SQL-side)
-          const { error: pErr } = await supabase.rpc("push_scan_handoff_extraction", {
+          const { error: pErr } = await supabaseAdmin.rpc("push_scan_handoff_extraction", {
             _token: body.token,
             _extraction: extraction as never,
           });
