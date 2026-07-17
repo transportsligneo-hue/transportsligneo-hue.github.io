@@ -30,7 +30,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     try {
       const [settingsRes, ratesRes] = await Promise.all([
         supabase.rpc("get_public_pricing_display"),
-        supabase.from("vat_rates").select("*").order("sort_order", { ascending: true }),
+        supabase.rpc("get_active_vat_rates"),
       ]);
       const settingsRow = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
       if (settingsRow) {
