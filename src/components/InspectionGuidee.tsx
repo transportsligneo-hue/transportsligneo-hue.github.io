@@ -49,6 +49,16 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   const [isTransitioning, setIsTransitioning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const online = useOnlineStatus();
+  // ─── Assistant IA (non-bloquant, cadres l'utilisateur mais ne bloque jamais)
+  const qualityEnabled = useAiCapability("photo_assistant");
+  const suggestEnabled = useAiCapability("smart_suggestions");
+  const runQuality = useServerFn(photoQualityCheck);
+  const runDamage = useServerFn(analyzePhotoDamage);
+  const [qualities, setQualities] = useState<Record<string, PhotoQuality>>({});
+  const [dismissedQuality, setDismissedQuality] = useState<Record<string, boolean>>({});
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([]);
+  const [aiRunning, setAiRunning] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const currentVue = VUE_TYPES[currentStep];
   const progress = Object.keys(photos).length / VUE_TYPES.length * 100;
