@@ -172,22 +172,48 @@ function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
 }
 
 function drawInfoRow(doc: jsPDF, x: number, y: number, w: number, label: string, value: string) {
-  // gold thin border row
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.25);
-  doc.line(x, y + 8, x + w, y + 8);
+  // Carte gold-bordée façon template : cercle navy à gauche, label, pill valeur à droite
+  const h = 10;
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
   doc.setFillColor(...NAVY);
-  doc.circle(x + 4, y + 4.5, 3, "F");
-  doc.setTextColor(...GOLD);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
-  doc.text("·", x + 4, y + 5.4, { align: "center" });
+  doc.circle(x + 5, y + h / 2, 2.6, "F");
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.circle(x + 5, y + h / 2, 2.6, "S");
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8.8);
   doc.setTextColor(...TEXT);
-  doc.text(label, x + 10, y + 5.5);
+  doc.text(label, x + 11, y + h / 2 + 1.4);
+  const pillW = Math.min(w * 0.45, 55);
+  const pillX = x + w - pillW - 2;
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(pillX, y + 2, pillW, h - 4, 0.8, 0.8, "S");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.8);
   doc.setTextColor(...NAVY);
-  doc.text(value, x + w - 2, y + 5.5, { align: "right" });
+  doc.text(value, pillX + pillW / 2, y + h / 2 + 1.4, { align: "center" });
+}
+
+function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.7);
+  doc.circle(cx, cy, r, "S");
+  doc.setLineWidth(0.3);
+  doc.circle(cx, cy, r - 1.6, "S");
+  doc.circle(cx, cy, r - 4, "S");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.4);
+  doc.setTextColor(...GOLD);
+  doc.text("TRANSPORTS LIGNEO", cx, cy - r + 3.2, { align: "center" });
+  doc.text("CONVOYAGE AUTOMOBILE PREMIUM", cx, cy + r - 1.8, { align: "center" });
+  doc.setFontSize(4.5);
+  doc.text("★", cx - r + 2.6, cy + 1, { align: "center" });
+  doc.text("★", cx + r - 2.6, cy + 1, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
 export async function generateDevisPdf(d: DevisData): Promise<Blob> {
