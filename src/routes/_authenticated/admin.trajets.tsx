@@ -26,6 +26,7 @@ import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -712,15 +713,13 @@ function AdminTrajets() {
                   Carte grise, bon de commande, PV… tous les champs sont détectés automatiquement.
                 </p>
               </div>
-              <ScanToPrefill
-                label="Scanner"
-                multiPage
-                onExtracted={(fields: ExtractedFields) => {
+              {(() => {
+                const applyExtracted = (fields: ExtractedFields) => {
                   setForm((prev) => ({
                     ...prev,
                     depart: fields.lieu_depart || prev.depart,
                     arrivee: fields.lieu_arrivee || prev.arrivee,
-                    date_trajet: prev.date_trajet, // les dates OCR sont en JJ/MM/AAAA, laissées à l'admin
+                    date_trajet: prev.date_trajet,
                     marque: fields.marque || prev.marque,
                     modele: fields.modele || prev.modele,
                     immatriculation: fields.immatriculation || prev.immatriculation,
@@ -736,8 +735,14 @@ function AdminTrajets() {
                       fields.observations || "",
                     ].filter(Boolean).join(" · ").slice(0, 500),
                   }));
-                }}
-              />
+                };
+                return (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <ScanToPrefill label="Scanner" multiPage onExtracted={applyExtracted} />
+                    <QrHandoffButton context="admin_mission" onExtracted={applyExtracted} />
+                  </div>
+                );
+              })()}
             </div>
           )}
           <div className="grid grid-cols-2 gap-3">
