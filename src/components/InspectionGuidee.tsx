@@ -379,6 +379,19 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
               );
             })}
           </div>
+
+          {/* Assistant IA — suggestions de défauts détectés */}
+          {suggestEnabled && (aiRunning || aiSuggestions.length > 0) && (
+            <div className="mt-4">
+              <AiAssistantPanel
+                suggestions={aiSuggestions}
+                loading={aiRunning}
+                title="Défauts détectés par l'IA"
+                onConfirm={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+                onIgnore={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+              />
+            </div>
+          )}
         </div>
 
         {/* Validate button */}
