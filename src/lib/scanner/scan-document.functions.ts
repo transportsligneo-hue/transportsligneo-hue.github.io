@@ -18,8 +18,8 @@
  * rien — c'est au front d'uploader dans le bucket approprié si besoin.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { DocumentType, ExtractionResult } from "./types";
 
 const InputSchema = z.object({
