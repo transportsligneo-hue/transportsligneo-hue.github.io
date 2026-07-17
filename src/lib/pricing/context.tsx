@@ -42,7 +42,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         });
       }
       if (ratesRes.data) {
-        setVatRates(ratesRes.data.map((r) => ({
+        setVatRates(ratesRes.data.map((r: { id: string; rate: number | string; label: string; is_default: boolean; is_active: boolean; sort_order: number | null }) => ({
           id: r.id,
           rate: Number(r.rate),
           label: r.label,
