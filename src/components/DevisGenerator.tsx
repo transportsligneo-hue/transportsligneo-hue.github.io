@@ -16,6 +16,10 @@ import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
+import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
+import type { ExtractedFields } from "@/lib/scanner/types";
+import { toast } from "sonner";
 
 
 // === Pricing data (inchangé) ===
