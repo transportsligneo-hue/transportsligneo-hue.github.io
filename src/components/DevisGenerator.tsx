@@ -16,6 +16,10 @@ import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
+import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
+import type { ExtractedFields } from "@/lib/scanner/types";
+import { toast } from "sonner";
 
 
 // === Pricing data (inchangé) ===
@@ -971,7 +975,36 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {/* STEP 2 — Véhicule */}
               {step === 2 && (
                 <div className="space-y-5 animate-fade-in">
-                  <h4 className="font-heading text-lg text-cream tracking-wide">Informations véhicule</h4>
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <h4 className="font-heading text-lg text-cream tracking-wide">Informations véhicule</h4>
+                    {(() => {
+                      const applyScan = (f: ExtractedFields) => {
+                        if (f.immatriculation && !immatriculation) setImmatriculation(f.immatriculation.toUpperCase());
+                        if (f.vin && !vin) setVin(f.vin.toUpperCase());
+                        if (f.marque && !marque) setMarque(f.marque);
+                        if (f.modele && !modele) setModele(f.modele);
+                        if (f.energie && !energy) setEnergy(f.energie.toLowerCase());
+                        if (f.date_mec && !annee) setAnnee((f.date_mec.match(/\d{4}/)?.[0]) ?? "");
+                        if (f.puissance && !puissance) setPuissance(f.puissance);
+                        if (f.lieu_depart && !departure) setDeparture(f.lieu_depart);
+                        if (f.lieu_arrivee && !arrival) setArrival(f.lieu_arrivee);
+                        if (f.client_nom && !nom) {
+                          const parts = f.client_nom.trim().split(/\s+/);
+                          if (parts.length > 1) { setPrenom(parts[0]); setNom(parts.slice(1).join(" ")); }
+                          else setNom(f.client_nom);
+                        }
+                        if (f.client_email && !email) setEmail(f.client_email);
+                        if (f.client_telephone && !telephone) setTelephone(f.client_telephone);
+                        toast.success("Véhicule pré-rempli depuis le document");
+                      };
+                      return (
+                        <div className="flex flex-wrap gap-2">
+                          <ScanToPrefill label="Scanner" multiPage onExtracted={applyScan} />
+                          <QrHandoffButton context="client_reservation" onExtracted={applyScan} />
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     {/* 1. Plaque d'immatriculation — en premier */}
                     <div className="sm:col-span-2">

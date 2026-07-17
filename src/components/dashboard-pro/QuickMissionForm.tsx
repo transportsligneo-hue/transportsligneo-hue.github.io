@@ -12,6 +12,9 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { lookupPlate } from "@/lib/plate.functions";
+import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
+import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 
 type TripOption = "aller-simple" | "aller-retour" | "express";
@@ -674,9 +677,33 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
 
       {/* Véhicule */}
       <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
-          <Car size={14} className="text-pro-accent" /> Véhicule
-        </h2>
+        <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+          <h2 className="text-sm font-semibold text-pro-text flex items-center gap-1.5">
+            <Car size={14} className="text-pro-accent" /> Véhicule
+          </h2>
+          {(() => {
+            const applyExtracted = (f: ExtractedFields) => {
+              if (f.immatriculation && !immat) setImmat(f.immatriculation.toUpperCase());
+              if (f.vin && !vin) setVin(f.vin.toUpperCase());
+              if (f.marque && !marque) setMarque(f.marque);
+              if (f.modele && !modele) setModele(f.modele);
+              if (f.energie && !energie) setEnergie(f.energie.toLowerCase());
+              if (f.couleur && !couleur) setCouleur(f.couleur);
+              if (f.kilometrage && !km) setKm(f.kilometrage.replace(/\D/g, ""));
+              if (f.lieu_depart && !depart) setDepart(f.lieu_depart);
+              if (f.lieu_arrivee && !arrivee) setArrivee(f.lieu_arrivee);
+              if (f.client_nom && !contactArriveeNom) setContactArriveeNom(f.client_nom);
+              if (f.client_telephone && !contactArriveeTel) setContactArriveeTel(f.client_telephone);
+              toast.success("Champs pré-remplis depuis le document");
+            };
+            return (
+              <div className="flex flex-wrap gap-2">
+                <ScanToPrefill label="Scanner" multiPage onExtracted={applyExtracted} />
+                <QrHandoffButton context="pro_demande" onExtracted={applyExtracted} />
+              </div>
+            );
+          })()}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div className="md:col-span-2">
