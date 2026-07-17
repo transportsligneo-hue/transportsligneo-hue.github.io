@@ -32,13 +32,7 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-medium text-pro-text truncate">{name}</div>
         <div className="mt-0.5">
-          <span
-            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border ${
-              isFlotte
-                ? "bg-purple-50 text-purple-700 border-purple-200"
-                : "bg-blue-50 text-blue-700 border-blue-200"
-            }`}
-          >
+          <span className="org-theme-badge inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border">
             {isFlotte ? "Flotte" : "B2B"}
           </span>
         </div>
