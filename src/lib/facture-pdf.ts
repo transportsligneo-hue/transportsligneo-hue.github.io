@@ -488,6 +488,11 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setTextColor(...MUTED);
   doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
 
+  // Sceau doré central (façon template)
+  drawGoldSeal(doc, pageW / 2, sigBaseY + 14, 14);
+
+
+
 
 
   // Coordonnees bancaires B2B
