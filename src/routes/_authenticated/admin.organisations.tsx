@@ -51,6 +51,7 @@ type Row = {
   created_at: string;
   roles: string[];
   logo_url?: string | null;
+  account_type?: "b2b_standard" | "flotte" | null;
   // For profile rows
   profileUserId?: string;
 };
