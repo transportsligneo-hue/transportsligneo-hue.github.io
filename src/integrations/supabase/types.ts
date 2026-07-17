@@ -3252,6 +3252,71 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_handoff_extractions: {
+        Row: {
+          created_at: string
+          extraction: Json
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          extraction: Json
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          extraction?: Json
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_handoff_extractions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "scan_handoff_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scan_handoff_sessions: {
+        Row: {
+          consumed_at: string | null
+          context: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          short_code: string
+          status: string
+          token: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          context?: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          short_code: string
+          status?: string
+          token: string
+        }
+        Update: {
+          consumed_at?: string | null
+          context?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          short_code?: string
+          status?: string
+          token?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -4076,7 +4141,9 @@ export type Database = {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined
       }
-      admin_create_test_mission: { Args: never; Returns: string }
+      admin_create_test_mission:
+        | { Args: never; Returns: string }
+        | { Args: { _target_convoyeur_id?: string }; Returns: string }
       admin_delete_test_mission: {
         Args: { _trajet_id: string }
         Returns: undefined
@@ -4151,6 +4218,15 @@ export type Database = {
         Returns: {
           id: string
           numero: string
+        }[]
+      }
+      create_scan_handoff_session: {
+        Args: { _context?: string }
+        Returns: {
+          expires_at: string
+          id: string
+          short_code: string
+          token: string
         }[]
       }
       create_user_notification: {
@@ -4271,6 +4347,10 @@ export type Database = {
         Args: { _prefix: string; _year?: number }
         Returns: string
       }
+      push_scan_handoff_extraction: {
+        Args: { _extraction: Json; _token: string }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -4313,6 +4393,15 @@ export type Database = {
           prix_retour: number
           rule_id_aller: string
           rule_id_retour: string
+        }[]
+      }
+      resolve_scan_handoff_token: {
+        Args: { _token: string }
+        Returns: {
+          context: string
+          expires_at: string
+          session_id: string
+          status: string
         }[]
       }
       show_limit: { Args: never; Returns: number }
