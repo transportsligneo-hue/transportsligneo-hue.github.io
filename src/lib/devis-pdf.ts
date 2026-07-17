@@ -451,6 +451,13 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   doc.setTextColor(...MUTED);
   doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
 
+  // Sceau doré central (façon template)
+  if (!d.clientSignatureDataUrl) {
+    drawGoldSeal(doc, pageW / 2, sigBaseY + 14, 14);
+  }
+
+
+
   // Bloc "Bon pour accord" client (centre) — uniquement sur le PDF figé signé
   if (d.clientSignatureDataUrl) {
     const cx = pageW / 2 - 10;
