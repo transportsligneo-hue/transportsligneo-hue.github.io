@@ -4141,9 +4141,10 @@ export type Database = {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined
       }
-      admin_create_test_mission:
-        | { Args: never; Returns: string }
-        | { Args: { _target_convoyeur_id?: string }; Returns: string }
+      admin_create_test_mission: {
+        Args: { _target_convoyeur_id?: string }
+        Returns: string
+      }
       admin_delete_test_mission: {
         Args: { _trajet_id: string }
         Returns: undefined
