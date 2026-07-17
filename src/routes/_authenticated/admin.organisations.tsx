@@ -92,7 +92,7 @@ function AdminOrganisations() {
       const [{ data: orgs }, { data: rolesRows }, { data: profiles }] = await Promise.all([
         supabase
           .from("organizations")
-          .select("id, legal_name, commercial_name, siret, sector, size, status, score, score_category, primary_contact_email, primary_contact_phone, created_at")
+          .select("id, legal_name, commercial_name, siret, sector, size, status, score, score_category, primary_contact_email, primary_contact_phone, created_at, logo_url, account_type")
           .order("created_at", { ascending: false }),
         supabase.from("organization_roles").select("organization_id, role, active"),
         supabase
