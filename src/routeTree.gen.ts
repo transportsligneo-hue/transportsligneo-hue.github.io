@@ -89,6 +89,7 @@ import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './rout
 import { Route as AuthenticatedConvoyeurCatalogueRouteImport } from './routes/_authenticated/convoyeur.catalogue'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
 import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
@@ -569,6 +570,12 @@ const AuthenticatedAdminTrajetsRoute =
     path: '/trajets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminParametresIaRoute =
+  AuthenticatedAdminParametresIaRouteImport.update({
+    id: '/parametres-ia',
+    path: '/parametres-ia',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminParametresRoute =
   AuthenticatedAdminParametresRouteImport.update({
     id: '/parametres',
@@ -868,6 +875,7 @@ export interface FileRoutesByFullPath {
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
+  '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -984,6 +992,7 @@ export interface FileRoutesByTo {
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
+  '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1107,6 +1116,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
+  '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1231,6 +1241,7 @@ export interface FileRouteTypes {
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
+    | '/admin/parametres-ia'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -1347,6 +1358,7 @@ export interface FileRouteTypes {
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
+    | '/admin/parametres-ia'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -1469,6 +1481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/organisations'
     | '/_authenticated/admin/paiements'
     | '/_authenticated/admin/parametres'
+    | '/_authenticated/admin/parametres-ia'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/catalogue'
@@ -2142,6 +2155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/parametres-ia': {
+      id: '/_authenticated/admin/parametres-ia'
+      path: '/parametres-ia'
+      fullPath: '/admin/parametres-ia'
+      preLoaderRoute: typeof AuthenticatedAdminParametresIaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/parametres': {
       id: '/_authenticated/admin/parametres'
       path: '/parametres'
@@ -2512,6 +2532,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
   AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
+  AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2541,6 +2562,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminOrganisationsRouteWithChildren,
   AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
+  AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
