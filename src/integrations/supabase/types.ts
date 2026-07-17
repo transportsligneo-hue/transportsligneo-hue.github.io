@@ -3051,6 +3051,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          account_type: string
           billing_address: string | null
           billing_email: string | null
           commercial_name: string | null
@@ -3059,6 +3060,7 @@ export type Database = {
           id: string
           legacy_company_id: string | null
           legal_name: string
+          logo_url: string | null
           primary_contact_email: string | null
           primary_contact_name: string | null
           primary_contact_phone: string | null
@@ -3073,6 +3075,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          account_type?: string
           billing_address?: string | null
           billing_email?: string | null
           commercial_name?: string | null
@@ -3081,6 +3084,7 @@ export type Database = {
           id?: string
           legacy_company_id?: string | null
           legal_name: string
+          logo_url?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
@@ -3095,6 +3099,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          account_type?: string
           billing_address?: string | null
           billing_email?: string | null
           commercial_name?: string | null
@@ -3103,6 +3108,7 @@ export type Database = {
           id?: string
           legacy_company_id?: string | null
           legal_name?: string
+          logo_url?: string | null
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
