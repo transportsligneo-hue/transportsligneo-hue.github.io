@@ -127,6 +127,7 @@ export function ProSidebar({ societe, items, children }: Props) {
             onClick={() => setMobileOpen(false)}
           />
           <aside className="lg:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
+            <div className="org-theme-rail absolute inset-y-0 left-0 w-[3px]" aria-hidden="true" />
             <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
               <LigneoBrand role="partner" variant="light" />
               <button
