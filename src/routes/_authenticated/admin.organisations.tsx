@@ -123,6 +123,8 @@ function AdminOrganisations() {
         primary_contact_phone: o.primary_contact_phone,
         created_at: o.created_at,
         roles: rolesByOrg.get(o.id) ?? [],
+        logo_url: (o as { logo_url?: string | null }).logo_url ?? null,
+        account_type: ((o as { account_type?: string | null }).account_type as "b2b_standard" | "flotte" | null) ?? null,
       }));
 
       // Profiles B2B/flotte not yet attached to a real organization
