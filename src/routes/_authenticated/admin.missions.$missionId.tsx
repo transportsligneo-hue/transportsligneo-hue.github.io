@@ -45,6 +45,7 @@ import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf } from "@/lib/mission-number";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
+import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -977,6 +978,7 @@ function AdminMissionDetail() {
                 ))}
               </div>
             )}
+            <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
           {/* Documents */}

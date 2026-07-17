@@ -1,10 +1,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle } from "lucide-react";
+import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle, Sparkles } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
 import { compressImage } from "@/lib/image-compression";
 import { enqueueUpload, subscribeQueue, pendingKeysForInspection, kickQueue } from "@/lib/edl-offline-queue";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useServerFn } from "@tanstack/react-start";
+import { useAiCapability } from "@/lib/ai/context";
+import { photoQualityCheck } from "@/lib/ai/photo-quality.functions";
+import { analyzePhotoDamage } from "@/lib/ai/analyze-photo.functions";
+import { PhotoQualityToast } from "./ai/PhotoQualityToast";
+import { AiAssistantPanel, type AiSuggestion } from "./ai/AiAssistantPanel";
+import type { PhotoQuality } from "@/lib/ai/types";
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
@@ -42,6 +49,16 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
   const [isTransitioning, setIsTransitioning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const online = useOnlineStatus();
+  // ─── Assistant IA (non-bloquant, cadres l'utilisateur mais ne bloque jamais)
+  const qualityEnabled = useAiCapability("photo_assistant");
+  const suggestEnabled = useAiCapability("smart_suggestions");
+  const runQuality = useServerFn(photoQualityCheck);
+  const runDamage = useServerFn(analyzePhotoDamage);
+  const [qualities, setQualities] = useState<Record<string, PhotoQuality>>({});
+  const [dismissedQuality, setDismissedQuality] = useState<Record<string, boolean>>({});
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([]);
+  const [aiRunning, setAiRunning] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const currentVue = VUE_TYPES[currentStep];
   const progress = Object.keys(photos).length / VUE_TYPES.length * 100;
@@ -175,6 +192,55 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           contentType: "image/jpeg",
           captureId,
         });
+
+        // 3) Assistant IA en tâche de fond — jamais bloquant.
+        //    Nécessite d'être en ligne + capacités activées.
+        if (online && (qualityEnabled || suggestEnabled)) {
+          try {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(String(r.result));
+              r.onerror = () => reject(new Error("read-failed"));
+              r.readAsDataURL(file);
+            });
+            setAiRunning(true);
+            const previewForVue = previewUrl;
+            const tasks: Promise<unknown>[] = [];
+            if (qualityEnabled) {
+              tasks.push(
+                runQuality({ data: { image_data_url: dataUrl, expected_subject: currentVue?.label ?? vueId } })
+                  .then((res) => {
+                    if (res.ok) {
+                      setQualities((prev) => ({ ...prev, [vueId]: res.quality }));
+                      setDismissedQuality((prev) => ({ ...prev, [vueId]: false }));
+                    }
+                  })
+                  .catch(() => { /* silencieux */ }),
+              );
+            }
+            if (suggestEnabled) {
+              tasks.push(
+                runDamage({ data: { image_data_url: dataUrl, zone_hint: currentVue?.label } })
+                  .then((res) => {
+                    if (res.ok && res.analysis.detections.length > 0) {
+                      const additions: AiSuggestion[] = res.analysis.detections.map((d, i) => ({
+                        id: `${vueId}:${captureId}:${i}`,
+                        imageUrl: previewForVue,
+                        detection: d,
+                      }));
+                      setAiSuggestions((prev) => [
+                        ...prev.filter((s) => !s.id.startsWith(`${vueId}:`)),
+                        ...additions,
+                      ]);
+                    }
+                  })
+                  .catch(() => { /* silencieux */ }),
+              );
+            }
+            await Promise.allSettled(tasks);
+          } catch { /* silencieux */ }
+          finally { setAiRunning(false); }
+        }
       } catch (err) {
         console.error("Enqueue error:", err);
         setSyncState((prev) => ({ ...prev, [vueId]: "failed" }));
@@ -313,6 +379,19 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
               );
             })}
           </div>
+
+          {/* Assistant IA — suggestions de défauts détectés */}
+          {suggestEnabled && (aiRunning || aiSuggestions.length > 0) && (
+            <div className="mt-4">
+              <AiAssistantPanel
+                suggestions={aiSuggestions}
+                loading={aiRunning}
+                title="Défauts détectés par l'IA"
+                onConfirm={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+                onIgnore={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+              />
+            </div>
+          )}
         </div>
 
         {/* Validate button */}
@@ -491,6 +570,46 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           )}
         </div>
       </div>
+
+      {/* Assistant IA — toast qualité photo (non-bloquant) */}
+      {qualityEnabled && qualities[currentVue.id] && !dismissedQuality[currentVue.id] && (
+        <PhotoQualityToast
+          quality={qualities[currentVue.id]}
+          onDismiss={() => setDismissedQuality((prev) => ({ ...prev, [currentVue.id]: true }))}
+          onRetake={() => {
+            setDismissedQuality((prev) => ({ ...prev, [currentVue.id]: true }));
+            handleRetake();
+          }}
+        />
+      )}
+
+      {/* Bouton d'accès aux suggestions IA (défauts détectés) */}
+      {suggestEnabled && aiSuggestions.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setAiPanelOpen(true)}
+          className="fixed bottom-24 right-4 z-40 flex items-center gap-1.5 rounded-full border border-primary/40 bg-navy/90 px-3 py-1.5 text-xs text-primary shadow-lg backdrop-blur hover:bg-navy"
+        >
+          <Sparkles size={14} /> {aiSuggestions.length} suggestion{aiSuggestions.length > 1 ? "s" : ""} IA
+        </button>
+      )}
+
+      {aiPanelOpen && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-3" onClick={() => setAiPanelOpen(false)}>
+          <div className="w-full max-w-md max-h-[80vh] overflow-auto rounded-t-2xl border border-primary/30 bg-navy p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-heading text-primary text-sm uppercase tracking-wider">Suggestions IA</h3>
+              <button onClick={() => setAiPanelOpen(false)} className="text-cream/60 hover:text-cream"><X size={18} /></button>
+            </div>
+            <AiAssistantPanel
+              suggestions={aiSuggestions}
+              loading={aiRunning}
+              onConfirm={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+              onIgnore={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
