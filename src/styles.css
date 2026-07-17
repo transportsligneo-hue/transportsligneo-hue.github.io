@@ -87,6 +87,38 @@
   --admin-drawer-text: #0b1220;
   --admin-drawer-muted: #475569;
   --admin-drawer-border: #e4e9f2;
+
+  /* === v3 Pro/Flotte/Admin design system (ne remplace rien, s'ajoute) === */
+  --v3-bg: #f5f7fc;
+  --v3-surface: #ffffff;
+  --v3-surface-2: #fafbfe;
+  --v3-border: #e8ecf4;
+  --v3-border-soft: #f0f3f9;
+  --v3-text: #0f1526;
+  --v3-text-muted: #6b7590;
+  --v3-text-dim: #9aa2ba;
+  --v3-blue: #2f5fff;
+  --v3-blue-deep: #1c3fc4;
+  --v3-blue-soft: #ecf1ff;
+  --v3-blue-soft-2: #dbe6ff;
+  --v3-gold: #b8862a;
+  --v3-gold-deep: #8f6a1f;
+  --v3-gold-soft: #faf1da;
+  --v3-gold-line: #e7cd8c;
+  --v3-ok: #189a72;
+  --v3-ok-soft: #e3f6ee;
+  --v3-warn: #c07d1f;
+  --v3-warn-soft: #fbf0dd;
+  --v3-danger: #d0473f;
+  --v3-danger-soft: #fbeae9;
+  --v3-violet: #7c5cff;
+  --v3-violet-soft: #f0ecff;
+  --v3-radius: 18px;
+  --v3-shadow: 0 1px 2px rgba(15,21,38,0.04), 0 14px 34px rgba(15,21,38,0.06);
+  --v3-shadow-lg: 0 2px 4px rgba(15,21,38,0.05), 0 24px 56px rgba(15,21,38,0.10);
+  --v3-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --v3-font-body: 'Inter', system-ui, sans-serif;
+  --v3-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 }
 
 @layer base {
