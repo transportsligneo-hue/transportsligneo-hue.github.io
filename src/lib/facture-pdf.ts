@@ -25,6 +25,8 @@ export interface FactureData {
   client_adresse?: string | null;
   client_siret?: string | null;
   client_tva?: string | null;
+  /** Logo public de la société cliente — affiché dans le bloc "FACTURÉ À". */
+  client_logo_url?: string | null;
   designation?: string | null;
   depart?: string | null;
   arrivee?: string | null;
@@ -183,17 +185,47 @@ function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
 }
 
 function drawInfoRow(doc: jsPDF, x: number, y: number, w: number, label: string, value: string, valueColor?: [number, number, number]) {
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.25);
-  doc.line(x, y + 8, x + w, y + 8);
+  const h = 10;
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
   doc.setFillColor(...NAVY);
-  doc.circle(x + 4, y + 4.5, 3, "F");
+  doc.circle(x + 5, y + h / 2, 2.6, "F");
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.circle(x + 5, y + h / 2, 2.6, "S");
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8.8);
   doc.setTextColor(...TEXT);
-  doc.text(label, x + 10, y + 5.5);
+  doc.text(label, x + 11, y + h / 2 + 1.4);
+  const pillW = Math.min(w * 0.45, 55);
+  const pillX = x + w - pillW - 2;
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(pillX, y + 2, pillW, h - 4, 0.8, 0.8, "S");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.8);
   doc.setTextColor(...(valueColor || NAVY));
-  doc.text(value, x + w - 2, y + 5.5, { align: "right" });
+  doc.text(value, pillX + pillW / 2, y + h / 2 + 1.4, { align: "center" });
+}
+
+function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.7);
+  doc.circle(cx, cy, r, "S");
+  doc.setLineWidth(0.3);
+  doc.circle(cx, cy, r - 1.6, "S");
+  doc.circle(cx, cy, r - 4, "S");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.4);
+  doc.setTextColor(...GOLD);
+  doc.text("TRANSPORTS LIGNEO", cx, cy - r + 3.2, { align: "center" });
+  doc.text("CONVOYAGE AUTOMOBILE PREMIUM", cx, cy + r - 1.8, { align: "center" });
+  doc.setFontSize(4.5);
+  doc.text("★", cx - r + 2.6, cy + 1, { align: "center" });
+  doc.text("★", cx + r - 2.6, cy + 1, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
 export async function generateFacturePdf(f: FactureData): Promise<Blob> {
@@ -202,6 +234,7 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
   // Résolution mention légale + mode fiscal depuis profil/app_settings
   const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
@@ -231,6 +264,11 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.text("FACTURE A", 14, y);
+
+  // Logo client à droite du bloc (façon templates)
+  if (clientLogoData) {
+    try { doc.addImage(clientLogoData, "PNG", 78, y - 4, 22, 22); } catch {}
+  }
 
   y += 8;
   doc.setFontSize(12);
@@ -457,6 +495,11 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
+
+  // Sceau doré central (façon template)
+  drawGoldSeal(doc, pageW / 2, sigBaseY + 14, 14);
+
+
 
 
 
