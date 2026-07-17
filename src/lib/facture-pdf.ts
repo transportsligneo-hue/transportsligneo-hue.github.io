@@ -25,6 +25,8 @@ export interface FactureData {
   client_adresse?: string | null;
   client_siret?: string | null;
   client_tva?: string | null;
+  /** Logo public de la société cliente — affiché dans le bloc "FACTURÉ À". */
+  client_logo_url?: string | null;
   designation?: string | null;
   depart?: string | null;
   arrivee?: string | null;
