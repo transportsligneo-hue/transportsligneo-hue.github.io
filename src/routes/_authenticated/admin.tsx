@@ -21,6 +21,7 @@ import {
   Radar,
   Megaphone,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
