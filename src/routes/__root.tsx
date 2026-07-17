@@ -5,6 +5,7 @@ import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
 import PwaSplash from "@/components/pwa/PwaSplash";
 import { PricingProvider } from "@/lib/pricing";
+import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
