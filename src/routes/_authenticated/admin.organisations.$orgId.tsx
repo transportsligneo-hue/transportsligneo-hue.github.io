@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
+import { OrgLogo } from "@/components/OrgLogo";
+import { OrgLogoUploader } from "@/components/OrgLogoUploader";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
@@ -126,9 +128,7 @@ function OrgDetail() {
       {/* Header */}
       <header className="bg-white border border-pro-border rounded-xl p-6 flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-xl bg-pro-accent/10 flex items-center justify-center">
-            <Building2 className="text-pro-accent" size={26} />
-          </div>
+          <OrgLogo name={org.legal_name} url={org.logo_url} size={56} />
           <div>
             <h1 className="text-2xl font-semibold text-pro-text">{org.legal_name}</h1>
             {org.commercial_name && <p className="text-sm text-pro-muted">{org.commercial_name}</p>}
@@ -137,6 +137,11 @@ function OrgDetail() {
                 <Badge key={r} variant="outline">{roleLabels[r] ?? r}</Badge>
               ))}
               <Badge variant="outline">{org.status}</Badge>
+              {org.account_type && (
+                <Badge variant="outline" className="bg-v3-blue-soft text-v3-blue border-v3-blue/20">
+                  {org.account_type === "flotte" ? "Flotte" : "B2B"}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -146,6 +151,14 @@ function OrgDetail() {
           <Badge variant="outline" className="mt-1">{org.score_category}</Badge>
         </div>
       </header>
+
+      {/* Logo uploader */}
+      <OrgLogoUploader
+        organizationId={org.id}
+        organizationName={org.legal_name}
+        value={org.logo_url ?? null}
+        onChange={(url) => setOrg({ ...org, logo_url: url })}
+      />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
