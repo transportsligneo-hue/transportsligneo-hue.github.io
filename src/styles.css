@@ -327,6 +327,57 @@
     background-image: linear-gradient(135deg, #0b1026 0%, #131a38 60%, #0b1026 100%);
   }
 
+  /* === Thème par type d'organisation (B2B standard vs Flotte) ===
+     On repeint les utilitaires .*-pro-accent scopés à un ancêtre
+     [data-org-theme]. La logique métier n'est pas touchée : seul
+     l'accent visuel change (sidebar, active pill, badges, focus).
+     — B2B standard : bleu électrique #2F5FFF
+     — Flotte       : violet         #7C3AED
+  */
+  [data-org-theme="b2b_standard"] {
+    --org-accent: #2F5FFF;
+    --org-accent-hover: #1c3fc4;
+    --org-accent-soft: rgba(47, 95, 255, 0.10);
+    --org-accent-ring: rgba(47, 95, 255, 0.20);
+    --org-accent-border: rgba(47, 95, 255, 0.30);
+    --org-accent-label-bg: #ecf1ff;
+    --org-accent-label-fg: #1c3fc4;
+    --org-accent-label-bd: #c9d6ff;
+  }
+  [data-org-theme="flotte"] {
+    --org-accent: #7C3AED;
+    --org-accent-hover: #5b21b6;
+    --org-accent-soft: rgba(124, 58, 237, 0.10);
+    --org-accent-ring: rgba(124, 58, 237, 0.20);
+    --org-accent-border: rgba(124, 58, 237, 0.30);
+    --org-accent-label-bg: #f3ecff;
+    --org-accent-label-fg: #5b21b6;
+    --org-accent-label-bd: #ddc9ff;
+  }
+  [data-org-theme] .bg-pro-accent          { background-color: var(--org-accent); }
+  [data-org-theme] .bg-pro-accent\/5       { background-color: color-mix(in oklab, var(--org-accent) 5%, transparent); }
+  [data-org-theme] .bg-pro-accent\/10      { background-color: var(--org-accent-soft); }
+  [data-org-theme] .text-pro-accent        { color: var(--org-accent); }
+  [data-org-theme] .border-pro-accent      { border-color: var(--org-accent); }
+  [data-org-theme] .border-pro-accent\/20  { border-color: var(--org-accent-border); }
+  [data-org-theme] .border-pro-accent\/40  { border-color: var(--org-accent-border); }
+  [data-org-theme] .hover\:bg-pro-accent-hover:hover { background-color: var(--org-accent-hover); }
+  [data-org-theme] .hover\:border-pro-accent:hover   { border-color: var(--org-accent); }
+  [data-org-theme] .hover\:border-pro-accent\/40:hover { border-color: var(--org-accent-border); }
+  [data-org-theme] .focus\:border-pro-accent:focus   { border-color: var(--org-accent); }
+  [data-org-theme] .focus\:ring-pro-accent\/20:focus { --tw-ring-color: var(--org-accent-ring); }
+
+  /* Rail vertical à gauche de la sidebar (identité visuelle forte) */
+  .org-theme-rail {
+    background: linear-gradient(180deg, var(--org-accent, #2F5FFF) 0%, var(--org-accent-hover, #1c3fc4) 100%);
+  }
+  /* Badge B2B / Flotte cohérent avec le thème actif */
+  .org-theme-badge {
+    background-color: var(--org-accent-label-bg, #ecf1ff);
+    color: var(--org-accent-label-fg, #1c3fc4);
+    border-color: var(--org-accent-label-bd, #c9d6ff);
+  }
+
   /* === Couleurs rôles Transports Ligneo (séparées des statuts mission) === */
   /* Admin : bleu vif | Driver : vert | Client : orange | Partenaire : violet */
   .role-admin-bg     { background-color: #2563eb; }
