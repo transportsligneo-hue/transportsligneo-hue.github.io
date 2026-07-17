@@ -2028,3 +2028,80 @@
 
 
 
+
+/* ============================================================
+   === V3 — Design system additif (B2B / Flotte / Admin / Super)
+   Utilitaires optionnels, ne remplacent rien.
+   Utiliser explicitement dans les nouveaux écrans v3.
+   ============================================================ */
+@layer utilities {
+  .font-v3-display { font-family: var(--v3-font-display); }
+  .font-v3-body    { font-family: var(--v3-font-body); }
+  .font-v3-mono    { font-family: var(--v3-font-mono); letter-spacing: 0.02em; }
+
+  .bg-v3            { background-color: var(--v3-bg); }
+  .bg-v3-surface    { background-color: var(--v3-surface); }
+  .bg-v3-surface-2  { background-color: var(--v3-surface-2); }
+  .text-v3          { color: var(--v3-text); }
+  .text-v3-muted    { color: var(--v3-text-muted); }
+  .text-v3-dim      { color: var(--v3-text-dim); }
+  .border-v3        { border-color: var(--v3-border); }
+  .border-v3-soft   { border-color: var(--v3-border-soft); }
+
+  .text-v3-blue     { color: var(--v3-blue); }
+  .bg-v3-blue       { background-color: var(--v3-blue); }
+  .bg-v3-blue-soft  { background-color: var(--v3-blue-soft); }
+  .text-v3-gold     { color: var(--v3-gold); }
+  .bg-v3-gold-soft  { background-color: var(--v3-gold-soft); }
+  .text-v3-violet   { color: var(--v3-violet); }
+  .bg-v3-violet-soft{ background-color: var(--v3-violet-soft); }
+
+  .shadow-v3        { box-shadow: var(--v3-shadow); }
+  .shadow-v3-lg     { box-shadow: var(--v3-shadow-lg); }
+
+  .v3-card {
+    background: var(--v3-surface);
+    border: 1px solid var(--v3-border);
+    border-radius: var(--v3-radius);
+    box-shadow: var(--v3-shadow);
+  }
+  .v3-card-hover {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .v3-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--v3-shadow-lg);
+    border-color: rgba(47, 95, 255, 0.28);
+  }
+
+  .v3-btn-primary {
+    background: linear-gradient(135deg, var(--v3-blue) 0%, var(--v3-blue-deep) 100%);
+    color: #fff;
+    font-family: var(--v3-font-display);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: 12px;
+    padding: 10px 18px;
+    box-shadow: 0 6px 18px -6px rgba(47, 95, 255, 0.55), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: filter 180ms ease, transform 180ms ease;
+  }
+  .v3-btn-primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .v3-btn-primary:active { transform: translateY(0); }
+
+  /* Mot électrique animé (à réserver à 1-2 mots-clés maximum par écran) */
+  .electric-text {
+    background: linear-gradient(90deg, var(--v3-blue) 0%, #6fa0ff 25%, var(--v3-violet) 50%, var(--v3-blue) 75%, #6fa0ff 100%);
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: v3-electric-flow 5s linear infinite;
+  }
+  @keyframes v3-electric-flow {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 250% 50%; }
+  }
+
+  /* Compteur qui monte à l'entrée (à combiner avec le hook useAnimatedCounter côté React) */
+  .v3-counter { font-variant-numeric: tabular-nums; font-family: var(--v3-font-display); font-weight: 700; }
+}
