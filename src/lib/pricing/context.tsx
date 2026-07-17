@@ -30,7 +30,8 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     try {
       const [settingsRes, ratesRes] = await Promise.all([
         supabase.rpc("get_public_pricing_display"),
-        supabase.from("vat_rates").select("*").order("sort_order", { ascending: true }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.rpc as any)("get_active_vat_rates"),
       ]);
       const settingsRow = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
       if (settingsRow) {
@@ -41,7 +42,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         });
       }
       if (ratesRes.data) {
-        setVatRates(ratesRes.data.map((r) => ({
+        setVatRates(ratesRes.data.map((r: { id: string; rate: number | string; label: string; is_default: boolean; is_active: boolean; sort_order: number | null }) => ({
           id: r.id,
           rate: Number(r.rate),
           label: r.label,

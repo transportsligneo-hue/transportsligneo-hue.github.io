@@ -13,8 +13,6 @@
  * détient. La lecture se fait côté PC via Realtime + RLS `created_by = uid`.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import type { DocumentType, ExtractionResult } from "@/lib/scanner/types";
 
 const CORS = {
@@ -73,22 +71,6 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-function makeServerClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error("Supabase env missing");
-  return createClient<Database>(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-    global: {
-      fetch: (input, init) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
-}
 
 export const Route = createFileRoute("/api/public/scan/handoff-extract")({
   server: {
@@ -106,10 +88,13 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             return jsonResponse({ ok: false, error: "Image trop grande" }, 413);
           }
 
-          const supabase = makeServerClient();
+          // Les RPC handoff sont SECURITY DEFINER mais NON exposées à anon.
+          // On les appelle avec le client admin (service role) pour éviter
+          // l'exposition publique tout en conservant leur logique TTL/rate-limit.
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           // 1. Valider le token
-          const { data: sess, error: sErr } = await supabase.rpc("resolve_scan_handoff_token", {
+          const { data: sess, error: sErr } = await supabaseAdmin.rpc("resolve_scan_handoff_token", {
             _token: body.token,
           });
           if (sErr) {
@@ -192,7 +177,7 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
           };
 
           // 3. Push vers la DB (rate limit + TTL SQL-side)
-          const { error: pErr } = await supabase.rpc("push_scan_handoff_extraction", {
+          const { error: pErr } = await supabaseAdmin.rpc("push_scan_handoff_extraction", {
             _token: body.token,
             _extraction: extraction as never,
           });
