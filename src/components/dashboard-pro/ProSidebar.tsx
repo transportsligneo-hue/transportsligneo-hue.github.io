@@ -139,6 +139,11 @@ export function ProSidebar({ societe, items, children }: Props) {
                 <X size={18} />
               </button>
             </div>
+            <div className="px-4 pt-3">
+              <OrgHeaderBlock fallbackName={societe} />
+            </div>
+
+
 
             <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
               {items.map((item) => {
