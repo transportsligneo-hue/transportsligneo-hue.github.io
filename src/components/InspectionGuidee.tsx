@@ -192,6 +192,55 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           contentType: "image/jpeg",
           captureId,
         });
+
+        // 3) Assistant IA en tâche de fond — jamais bloquant.
+        //    Nécessite d'être en ligne + capacités activées.
+        if (online && (qualityEnabled || suggestEnabled)) {
+          try {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(String(r.result));
+              r.onerror = () => reject(new Error("read-failed"));
+              r.readAsDataURL(file);
+            });
+            setAiRunning(true);
+            const previewForVue = previewUrl;
+            const tasks: Promise<unknown>[] = [];
+            if (qualityEnabled) {
+              tasks.push(
+                runQuality({ data: { image_data_url: dataUrl, expected_subject: currentVue?.label ?? vueId } })
+                  .then((res) => {
+                    if (res.ok) {
+                      setQualities((prev) => ({ ...prev, [vueId]: res.quality }));
+                      setDismissedQuality((prev) => ({ ...prev, [vueId]: false }));
+                    }
+                  })
+                  .catch(() => { /* silencieux */ }),
+              );
+            }
+            if (suggestEnabled) {
+              tasks.push(
+                runDamage({ data: { image_data_url: dataUrl, zone_hint: currentVue?.label } })
+                  .then((res) => {
+                    if (res.ok && res.analysis.detections.length > 0) {
+                      const additions: AiSuggestion[] = res.analysis.detections.map((d, i) => ({
+                        id: `${vueId}:${captureId}:${i}`,
+                        imageUrl: previewForVue,
+                        detection: d,
+                      }));
+                      setAiSuggestions((prev) => [
+                        ...prev.filter((s) => !s.id.startsWith(`${vueId}:`)),
+                        ...additions,
+                      ]);
+                    }
+                  })
+                  .catch(() => { /* silencieux */ }),
+              );
+            }
+            await Promise.allSettled(tasks);
+          } catch { /* silencieux */ }
+          finally { setAiRunning(false); }
+        }
       } catch (err) {
         console.error("Enqueue error:", err);
         setSyncState((prev) => ({ ...prev, [vueId]: "failed" }));
