@@ -115,6 +115,129 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_settings: {
+        Row: {
+          ai_enabled: boolean
+          assistance_level: string
+          auto_report: boolean
+          compare_departure_arrival: boolean
+          created_at: string
+          detect_battery_level: boolean
+          detect_dents: boolean
+          detect_equipment: boolean
+          detect_fuel_level: boolean
+          detect_impacts: boolean
+          detect_lights: boolean
+          detect_mirrors: boolean
+          detect_rims: boolean
+          detect_scratches: boolean
+          detect_warning_lights: boolean
+          detect_windshield: boolean
+          id: string
+          is_singleton: boolean
+          mission_prefill: boolean
+          model_overrides: Json
+          ocr_documents: boolean
+          ocr_odometer: boolean
+          photo_assistant: boolean
+          smart_suggestions: boolean
+          updated_at: string
+        }
+        Insert: {
+          ai_enabled?: boolean
+          assistance_level?: string
+          auto_report?: boolean
+          compare_departure_arrival?: boolean
+          created_at?: string
+          detect_battery_level?: boolean
+          detect_dents?: boolean
+          detect_equipment?: boolean
+          detect_fuel_level?: boolean
+          detect_impacts?: boolean
+          detect_lights?: boolean
+          detect_mirrors?: boolean
+          detect_rims?: boolean
+          detect_scratches?: boolean
+          detect_warning_lights?: boolean
+          detect_windshield?: boolean
+          id?: string
+          is_singleton?: boolean
+          mission_prefill?: boolean
+          model_overrides?: Json
+          ocr_documents?: boolean
+          ocr_odometer?: boolean
+          photo_assistant?: boolean
+          smart_suggestions?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ai_enabled?: boolean
+          assistance_level?: string
+          auto_report?: boolean
+          compare_departure_arrival?: boolean
+          created_at?: string
+          detect_battery_level?: boolean
+          detect_dents?: boolean
+          detect_equipment?: boolean
+          detect_fuel_level?: boolean
+          detect_impacts?: boolean
+          detect_lights?: boolean
+          detect_mirrors?: boolean
+          detect_rims?: boolean
+          detect_scratches?: boolean
+          detect_warning_lights?: boolean
+          detect_windshield?: boolean
+          id?: string
+          is_singleton?: boolean
+          mission_prefill?: boolean
+          model_overrides?: Json
+          ocr_documents?: boolean
+          ocr_odometer?: boolean
+          photo_assistant?: boolean
+          smart_suggestions?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_usage_events: {
+        Row: {
+          capability: string
+          cost_credits: number | null
+          created_at: string
+          error_code: string | null
+          id: string
+          latency_ms: number | null
+          metadata: Json
+          model_id: string | null
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          capability: string
+          cost_credits?: number | null
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json
+          model_id?: string | null
+          success: boolean
+          user_id?: string | null
+        }
+        Update: {
+          capability?: string
+          cost_credits?: number | null
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json
+          model_id?: string | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -4292,6 +4415,42 @@ export type Database = {
           rate: number
           sort_order: number
         }[]
+      }
+      get_ai_settings: {
+        Args: never
+        Returns: {
+          ai_enabled: boolean
+          assistance_level: string
+          auto_report: boolean
+          compare_departure_arrival: boolean
+          created_at: string
+          detect_battery_level: boolean
+          detect_dents: boolean
+          detect_equipment: boolean
+          detect_fuel_level: boolean
+          detect_impacts: boolean
+          detect_lights: boolean
+          detect_mirrors: boolean
+          detect_rims: boolean
+          detect_scratches: boolean
+          detect_warning_lights: boolean
+          detect_windshield: boolean
+          id: string
+          is_singleton: boolean
+          mission_prefill: boolean
+          model_overrides: Json
+          ocr_documents: boolean
+          ocr_odometer: boolean
+          photo_assistant: boolean
+          smart_suggestions: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
