@@ -1,10 +1,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle } from "lucide-react";
+import { Camera, RotateCcw, ArrowRight, Check, Loader2, X, ArrowLeft, Eye, CloudOff, CloudUpload, AlertCircle, Sparkles } from "lucide-react";
 import { CarSilhouetteOverlay } from "./inspection/CarSilhouetteOverlay";
 import { compressImage } from "@/lib/image-compression";
 import { enqueueUpload, subscribeQueue, pendingKeysForInspection, kickQueue } from "@/lib/edl-offline-queue";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useServerFn } from "@tanstack/react-start";
+import { useAiCapability } from "@/lib/ai/context";
+import { photoQualityCheck } from "@/lib/ai/photo-quality.functions";
+import { analyzePhotoDamage } from "@/lib/ai/analyze-photo.functions";
+import { PhotoQualityToast } from "./ai/PhotoQualityToast";
+import { AiAssistantPanel, type AiSuggestion } from "./ai/AiAssistantPanel";
+import type { PhotoQuality } from "@/lib/ai/types";
 
 const VUE_TYPES = [
   { id: "avant", label: "Avant", description: "Face avant du véhicule" },
