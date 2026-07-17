@@ -12,6 +12,9 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { lookupPlate } from "@/lib/plate.functions";
+import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
+import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 
 type TripOption = "aller-simple" | "aller-retour" | "express";
