@@ -107,9 +107,13 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
           }
 
           const supabase = makeServerClient();
+          // Les RPC handoff sont SECURITY DEFINER mais NON exposées à anon.
+          // On les appelle avec le client admin (service role) pour éviter
+          // l'exposition publique tout en conservant leur logique TTL/rate-limit.
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           // 1. Valider le token
-          const { data: sess, error: sErr } = await supabase.rpc("resolve_scan_handoff_token", {
+          const { data: sess, error: sErr } = await supabaseAdmin.rpc("resolve_scan_handoff_token", {
             _token: body.token,
           });
           if (sErr) {
