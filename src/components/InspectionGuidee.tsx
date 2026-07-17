@@ -570,6 +570,46 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           )}
         </div>
       </div>
+
+      {/* Assistant IA — toast qualité photo (non-bloquant) */}
+      {qualityEnabled && qualities[currentVue.id] && !dismissedQuality[currentVue.id] && (
+        <PhotoQualityToast
+          quality={qualities[currentVue.id]}
+          onDismiss={() => setDismissedQuality((prev) => ({ ...prev, [currentVue.id]: true }))}
+          onRetake={() => {
+            setDismissedQuality((prev) => ({ ...prev, [currentVue.id]: true }));
+            handleRetake();
+          }}
+        />
+      )}
+
+      {/* Bouton d'accès aux suggestions IA (défauts détectés) */}
+      {suggestEnabled && aiSuggestions.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setAiPanelOpen(true)}
+          className="fixed bottom-24 right-4 z-40 flex items-center gap-1.5 rounded-full border border-primary/40 bg-navy/90 px-3 py-1.5 text-xs text-primary shadow-lg backdrop-blur hover:bg-navy"
+        >
+          <Sparkles size={14} /> {aiSuggestions.length} suggestion{aiSuggestions.length > 1 ? "s" : ""} IA
+        </button>
+      )}
+
+      {aiPanelOpen && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-3" onClick={() => setAiPanelOpen(false)}>
+          <div className="w-full max-w-md max-h-[80vh] overflow-auto rounded-t-2xl border border-primary/30 bg-navy p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-heading text-primary text-sm uppercase tracking-wider">Suggestions IA</h3>
+              <button onClick={() => setAiPanelOpen(false)} className="text-cream/60 hover:text-cream"><X size={18} /></button>
+            </div>
+            <AiAssistantPanel
+              suggestions={aiSuggestions}
+              loading={aiRunning}
+              onConfirm={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+              onIgnore={(s) => setAiSuggestions((prev) => prev.filter((x) => x.id !== s.id))}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
