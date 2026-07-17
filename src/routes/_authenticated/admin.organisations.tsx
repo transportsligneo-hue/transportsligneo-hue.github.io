@@ -289,7 +289,14 @@ function AdminOrganisations() {
                         size="sm"
                       />
                       <div>
-                        <div className="font-medium text-pro-text">{o.legal_name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium text-pro-text">{o.legal_name}</div>
+                          {o.kind === "org" && o.account_type === "flotte" ? (
+                            <Badge className="bg-purple-100 text-purple-700 border-purple-200" variant="outline">Flotte</Badge>
+                          ) : o.kind === "org" ? (
+                            <Badge className="bg-blue-100 text-blue-700 border-blue-200" variant="outline">B2B</Badge>
+                          ) : null}
+                        </div>
                         <div className="text-xs text-pro-muted">
                           {o.commercial_name ? `${o.commercial_name} · ` : ""}
                           {o.siret ?? (o.kind === "profile" ? "Compte client" : "Sans SIRET")}
