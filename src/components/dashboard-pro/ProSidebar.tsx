@@ -32,13 +32,7 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-medium text-pro-text truncate">{name}</div>
         <div className="mt-0.5">
-          <span
-            className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border ${
-              isFlotte
-                ? "bg-purple-50 text-purple-700 border-purple-200"
-                : "bg-blue-50 text-blue-700 border-blue-200"
-            }`}
-          >
+          <span className="org-theme-badge inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border">
             {isFlotte ? "Flotte" : "B2B"}
           </span>
         </div>
@@ -55,6 +49,8 @@ export function ProSidebar({ societe, items, children }: Props) {
   const location = useLocation();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const themeAttr = orgInfo?.accountType === "flotte" ? "flotte" : "b2b_standard";
 
   const isActive = (item: ProSidebarItem) =>
     item.exact
@@ -62,9 +58,10 @@ export function ProSidebar({ societe, items, children }: Props) {
       : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
 
   return (
-    <div className="min-h-screen flex bg-pro-bg text-pro-text">
+    <div data-org-theme={themeAttr} className="min-h-screen flex bg-pro-bg text-pro-text">
       {/* === Sidebar Desktop === */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col">
+        <div className="org-theme-rail absolute inset-y-0 left-0 w-[3px]" aria-hidden="true" />
         <div className="px-5 py-5 border-b border-pro-border">
           <LigneoBrand role="partner" variant="light" />
           <p className="text-pro-muted text-[11px] truncate mt-1.5 pl-12">
@@ -130,6 +127,7 @@ export function ProSidebar({ societe, items, children }: Props) {
             onClick={() => setMobileOpen(false)}
           />
           <aside className="lg:hidden fixed inset-y-0 left-0 z-[55] w-72 bg-white border-r border-pro-border flex flex-col safe-top safe-bottom">
+            <div className="org-theme-rail absolute inset-y-0 left-0 w-[3px]" aria-hidden="true" />
             <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
               <LigneoBrand role="partner" variant="light" />
               <button
