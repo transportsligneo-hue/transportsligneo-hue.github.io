@@ -125,12 +125,14 @@ function RootComponent() {
   return (
     <AuthProvider>
       <PricingProvider>
-        <CursorSpotlight />
-        <Outlet />
-        <PublicMobileBottomNav />
-        <PwaProvider />
-        <PwaSplash />
-        <Toaster />
+        <AiSettingsProvider>
+          <CursorSpotlight />
+          <Outlet />
+          <PublicMobileBottomNav />
+          <PwaProvider />
+          <PwaSplash />
+          <Toaster />
+        </AiSettingsProvider>
       </PricingProvider>
     </AuthProvider>
   );
