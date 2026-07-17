@@ -116,6 +116,7 @@ function AdminLayout() {
     // Système
     { to: "/admin/historique", label: "Historique", icon: History, group: "Système" },
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
+    { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
   ];
 
   if (isLoading || !isAuthenticated || (role !== "admin" && role !== "super_admin")) {
