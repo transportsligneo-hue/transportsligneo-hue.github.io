@@ -4282,6 +4282,17 @@ export type Database = {
         }
         Returns: string
       }
+      get_active_vat_rates: {
+        Args: never
+        Returns: {
+          id: string
+          is_active: boolean
+          is_default: boolean
+          label: string
+          rate: number
+          sort_order: number
+        }[]
+      }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
       get_public_pricing_display: {
