@@ -13,8 +13,6 @@
  * détient. La lecture se fait côté PC via Realtime + RLS `created_by = uid`.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import type { DocumentType, ExtractionResult } from "@/lib/scanner/types";
 
 const CORS = {
