@@ -16,8 +16,13 @@ export function useCurrentOrgAccountType() {
     queryKey: ["current-org-account-type", user?.id],
     enabled: !!user?.id && isAuthenticated,
     staleTime: 5 * 60 * 1000,
-    queryFn: async (): Promise<{ orgId: string | null; accountType: OrgAccountType }> => {
-      if (!user?.id) return { orgId: null, accountType: "b2b_standard" };
+    queryFn: async (): Promise<{
+      orgId: string | null;
+      accountType: OrgAccountType;
+      logoUrl: string | null;
+      name: string | null;
+    }> => {
+      if (!user?.id) return { orgId: null, accountType: "b2b_standard", logoUrl: null, name: null };
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -37,16 +42,21 @@ export function useCurrentOrgAccountType() {
         orgId = memberships?.[0]?.organization_id ?? null;
       }
 
-      if (!orgId) return { orgId: null, accountType: "b2b_standard" };
+      if (!orgId) return { orgId: null, accountType: "b2b_standard", logoUrl: null, name: null };
 
       const { data: org } = await supabase
         .from("organizations")
-        .select("account_type")
+        .select("account_type, logo_url, legal_name, commercial_name")
         .eq("id", orgId)
         .maybeSingle();
 
       const accountType = (org?.account_type as OrgAccountType | null) ?? "b2b_standard";
-      return { orgId, accountType };
+      return {
+        orgId,
+        accountType,
+        logoUrl: (org as { logo_url?: string | null } | null)?.logo_url ?? null,
+        name: org?.commercial_name ?? org?.legal_name ?? null,
+      };
     },
   });
 }
