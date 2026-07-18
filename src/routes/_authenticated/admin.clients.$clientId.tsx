@@ -31,6 +31,7 @@ import { LogoUploader } from "@/components/LogoUploader";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
+import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -415,6 +416,23 @@ function AdminClientDetail() {
           </>
         }
       />
+
+      <AdminOrgContextBanner
+        clientId={profile.user_id}
+        name={fullName}
+        kind={
+          (form.type_client === "flotte"
+            ? "flotte"
+            : form.type_client === "b2b" || !!form.societe
+              ? "b2b"
+              : "particulier") as OrgContextKind
+        }
+        email={profile.email}
+        phone={profile.telephone}
+        logoUrl={profile.logo_url}
+        societe={form.societe || null}
+      />
+
 
       {/* KPI */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -174,25 +174,47 @@ function FleetPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-pro-text flex items-center gap-2">
-            <Car size={22} className="text-pro-accent" /> Ma flotte
-          </h1>
-          <p className="text-pro-muted text-sm mt-1">
-            Gérez vos véhicules d'entreprise (VIN, immatriculations, état).
-          </p>
+    <div className="space-y-5" data-org-theme="flotte">
+      {/* Hero violet Flotte */}
+      <section
+        className="relative overflow-hidden rounded-2xl border border-white/10 p-6 sm:p-7 text-white"
+        style={{
+          background:
+            "linear-gradient(120deg,#3b1f78 0%,#5b2ea8 45%,#7c3aed 100%)",
+          boxShadow: "0 18px 40px -18px rgba(90,45,168,.55)",
+        }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(600px 200px at 90% -10%, rgba(255,255,255,.25), transparent 60%)",
+          }}
+        />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/25 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              Flotte partenaire
+            </span>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-semibold flex items-center gap-2 tracking-tight">
+              <Car size={24} /> Parc véhicules
+            </h1>
+            <p className="mt-1 text-sm text-white/80 max-w-xl">
+              Pilotez votre parc : VIN, immatriculations, statut opérationnel et disponibilités.
+            </p>
+          </div>
+          {canManage && (
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-[#3b1f78] text-sm font-semibold shadow-lg shadow-black/10 hover:bg-white/95"
+            >
+              <Plus size={16} /> Ajouter un véhicule
+            </button>
+          )}
         </div>
-        {canManage && (
-          <button
-            onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pro-text text-white text-sm font-medium hover:opacity-90"
-          >
-            <Plus size={16} /> Ajouter un véhicule
-          </button>
-        )}
-      </header>
+      </section>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
