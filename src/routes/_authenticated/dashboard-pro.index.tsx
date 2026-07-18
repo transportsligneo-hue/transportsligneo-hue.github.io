@@ -84,6 +84,8 @@ const statutPillClasses: Record<string, string> = {
 function ProDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate({ from: Route.fullPath });
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const isFlotte = orgInfo?.accountType === "flotte";
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [devis, setDevis] = useState<DevisRow[]>([]);
