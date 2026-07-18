@@ -31,7 +31,7 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
       className={`mt-3 flex items-center gap-2.5 rounded-lg border px-2.5 py-2 ${
         isFlotte
           ? "border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white shadow-[inset_0_0_0_1px_rgba(124,58,237,0.08)]"
-          : "border-pro-border bg-pro-bg-soft/60"
+          : "border-blue-200 bg-gradient-to-br from-blue-50 via-white to-white shadow-[inset_0_0_0_1px_rgba(47,95,255,0.08)]"
       }`}
     >
       <OrgLogo name={name} url={data?.logoUrl} size={34} rounded="rounded-lg" />
@@ -39,7 +39,7 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
         <div className="text-[13px] font-medium text-pro-text truncate">{name}</div>
         <div className="mt-0.5">
           <span className="org-theme-badge inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border">
-            {isFlotte ? "Flotte partenaire" : "B2B"}
+            {isFlotte ? "Flotte partenaire" : "B2B Standard"}
           </span>
         </div>
       </div>
