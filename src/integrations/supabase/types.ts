@@ -115,6 +115,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_security_audit: {
+        Row: {
+          action: string
+          actor_user_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           ai_enabled: boolean
@@ -4602,6 +4629,14 @@ export type Database = {
       submit_module_quiz: {
         Args: { _answers: Json; _module_id: string }
         Returns: Json
+      }
+      super_admin_set_role: {
+        Args: {
+          _actif?: boolean
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
+        Returns: undefined
       }
       verify_certificate: {
         Args: { _token: string }

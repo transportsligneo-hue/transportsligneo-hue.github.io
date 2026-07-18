@@ -89,6 +89,7 @@ import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './rout
 import { Route as AuthenticatedConvoyeurCatalogueRouteImport } from './routes/_authenticated/convoyeur.catalogue'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
@@ -570,6 +571,12 @@ const AuthenticatedAdminTrajetsRoute =
     path: '/trajets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSuperAdminRoute =
+  AuthenticatedAdminSuperAdminRouteImport.update({
+    id: '/super-admin',
+    path: '/super-admin',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminParametresIaRoute =
   AuthenticatedAdminParametresIaRouteImport.update({
     id: '/parametres-ia',
@@ -876,6 +883,7 @@ export interface FileRoutesByFullPath {
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -993,6 +1001,7 @@ export interface FileRoutesByTo {
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1117,6 +1126,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1242,6 +1252,7 @@ export interface FileRouteTypes {
     | '/admin/paiements'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/super-admin'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -1359,6 +1370,7 @@ export interface FileRouteTypes {
     | '/admin/paiements'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/super-admin'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -1482,6 +1494,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/paiements'
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
+    | '/_authenticated/admin/super-admin'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/catalogue'
@@ -2155,6 +2168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/super-admin': {
+      id: '/_authenticated/admin/super-admin'
+      path: '/super-admin'
+      fullPath: '/admin/super-admin'
+      preLoaderRoute: typeof AuthenticatedAdminSuperAdminRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/parametres-ia': {
       id: '/_authenticated/admin/parametres-ia'
       path: '/parametres-ia'
@@ -2533,6 +2553,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
+  AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2563,6 +2584,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
+  AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -2859,13 +2881,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

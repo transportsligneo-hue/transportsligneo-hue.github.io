@@ -22,6 +22,7 @@ import {
   Megaphone,
   GraduationCap,
   Sparkles,
+  Crown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -118,6 +119,17 @@ function AdminLayout() {
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
     { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
   ];
+
+  // Section Super Admin : visible uniquement pour super_admin
+  if (role === "super_admin") {
+    navItems.push({
+      to: "/admin/super-admin",
+      label: "Super Admin",
+      icon: Crown,
+      group: "Super Admin",
+      badge: <span className="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-purple-600 text-white uppercase tracking-wider">SA</span>,
+    });
+  }
 
   if (isLoading || !isAuthenticated || (role !== "admin" && role !== "super_admin")) {
     return (
