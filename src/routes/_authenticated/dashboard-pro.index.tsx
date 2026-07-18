@@ -2,10 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
   Truck, Clock, CheckCircle, Calendar, ArrowUpRight, PlusCircle,
   Loader2, MapPin, Building2, FolderOpen, ChevronRight, Sparkles,
   Car, Wrench, AlertTriangle, Receipt, FileText, Activity, TrendingUp,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -82,6 +84,8 @@ const statutPillClasses: Record<string, string> = {
 function ProDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate({ from: Route.fullPath });
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const isFlotte = orgInfo?.accountType === "flotte";
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [devis, setDevis] = useState<DevisRow[]>([]);
@@ -206,19 +210,53 @@ function ProDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-pro-text">Espace Pro</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Vue d'ensemble de votre flotte et de vos missions</p>
+      {/* Header — hero adaptatif Flotte / B2B */}
+      {isFlotte ? (
+        <div className="relative overflow-hidden rounded-2xl border border-pro-border bg-white">
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-white to-white" aria-hidden="true" />
+          <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-violet-300/30 blur-3xl" aria-hidden="true" />
+          <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold text-violet-700 bg-violet-100 border border-violet-200 rounded-full px-2 py-0.5">
+                <Sparkles size={11} /> Flotte partenaire
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-pro-text mt-2">
+                {orgInfo?.name ? `Espace ${orgInfo.name}` : "Espace Flotte"}
+              </h1>
+              <p className="text-pro-muted text-sm mt-1">
+                Pilotez votre parc, vos conducteurs et les missions confiées par Ligneo.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                to="/dashboard-pro/conducteurs"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-white border border-violet-200 text-violet-700 text-sm font-medium hover:bg-violet-50 transition-colors"
+              >
+                <Users size={16} /> Conducteurs
+              </Link>
+              <Link
+                to="/dashboard-pro/flotte"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors shadow-sm"
+              >
+                <Car size={16} /> Parc véhicules
+              </Link>
+            </div>
+          </div>
         </div>
-        <Link
-          to="/dashboard-pro/nouvelle-demande"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover transition-colors shadow-sm"
-        >
-          <PlusCircle size={16} /> Nouvelle mission
-        </Link>
-      </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-pro-text">Espace Pro</h1>
+            <p className="text-pro-muted text-sm mt-0.5">Vue d'ensemble de votre flotte et de vos missions</p>
+          </div>
+          <Link
+            to="/dashboard-pro/nouvelle-demande"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover transition-colors shadow-sm"
+          >
+            <PlusCircle size={16} /> Nouvelle mission
+          </Link>
+        </div>
+      )}
 
       {/* Alerts row */}
       {(facturesARegler > 0 || devisEnAttente > 0) && (
