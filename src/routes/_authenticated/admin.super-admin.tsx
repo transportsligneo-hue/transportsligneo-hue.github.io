@@ -209,7 +209,7 @@ function SuperAdminPage() {
                     <td className="py-2 pr-3 text-pro-muted whitespace-nowrap">
                       {new Date(ev.created_at as string).toLocaleString("fr-FR")}
                     </td>
-                    <td className="py-2 pr-3"><Badge variant="info">{ev.action as string}</Badge></td>
+                    <td className="py-2 pr-3"><Badge tone="info">{ev.action as string}</Badge></td>
                     <td className="py-2 pr-3 font-mono text-[11px] text-pro-text-soft">{(ev.target_user_id as string) ?? "—"}</td>
                     <td className="py-2 pr-3 font-mono text-[11px] text-pro-text-soft">
                       {JSON.stringify(ev.details ?? {})}
