@@ -10,15 +10,20 @@ interface SendTransactionalEmailParams {
   clientLogoUrl?: string | null
   /** Raison sociale / nom du client — auto-injecté dans templateData. */
   clientName?: string | null
+  /** Type de compte client — colorise le chip du shell email (flotte / b2b). */
+  accountType?: 'flotte' | 'b2b' | 'particulier' | null
 }
 
 
 export async function sendTransactionalEmail(params: SendTransactionalEmailParams) {
   const { data: { session } } = await supabase.auth.getSession()
+  const accountTheme =
+    params.accountType === 'flotte' ? 'flotte' : params.accountType === 'b2b' ? 'b2b' : undefined
   const mergedData = {
     ...(params.templateData ?? {}),
     ...(params.clientLogoUrl ? { clientLogoUrl: params.clientLogoUrl } : {}),
     ...(params.clientName ? { clientName: params.clientName } : {}),
+    ...(accountTheme ? { accountTheme } : {}),
   }
   const response = await fetch('/lovable/email/transactional/send', {
     method: 'POST',
