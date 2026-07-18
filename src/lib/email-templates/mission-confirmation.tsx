@@ -10,9 +10,11 @@ interface Props {
   date?: string
   prestation?: string
   prix?: number | string
+  clientLogoUrl?: string
+  clientName?: string
 }
 
-const Email = ({ prenom, numero, depart, arrivee, date, prestation, prix }: Props) => (
+const Email = ({ prenom, numero, depart, arrivee, date, prestation, prix, clientLogoUrl, clientName }: Props) => (
   <LigneoEmailShell
     preview={`Mission créée — ${numero ?? ''}`}
     tagline="Mission créée"
@@ -21,6 +23,8 @@ const Email = ({ prenom, numero, depart, arrivee, date, prestation, prix }: Prop
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro="Votre mission a été créée avec succès. Notre équipe se charge dès à présent de l'organisation."
     primaryCta={{ label: 'Voir la mission', href: 'https://transportsligneo.fr/dashboard-client/missions' }}
+    clientLogoUrl={clientLogoUrl}
+    clientName={clientName}
   >
     <RecapCard
       title="Récapitulatif de la mission"
