@@ -28,6 +28,7 @@ import {
   AdminEmpty,
 } from "@/components/admin/ui";
 import { LogoUploader } from "@/components/LogoUploader";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 import { toast } from "sonner";
