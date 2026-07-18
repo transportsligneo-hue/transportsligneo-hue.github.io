@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car } from "lucide-react";
+import { LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,9 +21,12 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
     { to: "/dashboard-pro/nouvelle-demande", label: "Nouvelle mission", icon: PlusCircle },
     { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
   ];
-  // "Flotte" réservé aux comptes Flotte
+  // Section Flotte : véhicules + conducteurs, réservée aux comptes Flotte
   if (accountType === "flotte") {
-    base.push({ to: "/dashboard-pro/flotte", label: "Flotte", icon: Car });
+    base.push(
+      { to: "/dashboard-pro/flotte", label: "Parc véhicules", icon: Car },
+      { to: "/dashboard-pro/conducteurs", label: "Conducteurs", icon: Users },
+    );
   }
   base.push(
     { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
