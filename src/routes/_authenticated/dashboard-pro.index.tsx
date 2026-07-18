@@ -2,10 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
   Truck, Clock, CheckCircle, Calendar, ArrowUpRight, PlusCircle,
   Loader2, MapPin, Building2, FolderOpen, ChevronRight, Sparkles,
   Car, Wrench, AlertTriangle, Receipt, FileText, Activity, TrendingUp,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
