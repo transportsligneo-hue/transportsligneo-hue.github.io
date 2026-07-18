@@ -22,6 +22,7 @@ import {
   Megaphone,
   GraduationCap,
   Sparkles,
+  Crown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
