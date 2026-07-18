@@ -70,6 +70,8 @@ export interface LigneoEmailShellProps {
   clientLogoUrl?: string | null
   /** Nom du client / organisation affiché à côté du logo. */
   clientName?: string | null
+  /** Thème d'espace client — colorise le chip sous le brand bar. */
+  accountTheme?: 'flotte' | 'b2b' | 'default' | null
 }
 
 export function LigneoEmailShell({
@@ -85,7 +87,14 @@ export function LigneoEmailShell({
   signature,
   clientLogoUrl,
   clientName,
+  accountTheme,
 }: LigneoEmailShellProps) {
+  const themeChip =
+    accountTheme === 'flotte'
+      ? { label: 'Espace Flotte partenaire', bg: '#3b1f78', border: '#a78bfa' }
+      : accountTheme === 'b2b'
+        ? { label: 'Espace B2B Standard', bg: '#0a3ad1', border: '#5b8dff' }
+        : null
   return (
     <Html lang="fr" dir="ltr">
       <Head />
@@ -105,7 +114,7 @@ export function LigneoEmailShell({
               {tagline ? <Text style={taglineStyle}>{tagline}</Text> : null}
             </Section>
 
-            {clientLogoUrl || clientName ? (
+            {clientLogoUrl || clientName || themeChip ? (
               <Section style={clientBrandBar}>
                 {clientLogoUrl ? (
                   <img
@@ -115,6 +124,26 @@ export function LigneoEmailShell({
                   />
                 ) : null}
                 {clientName ? <Text style={clientBrandName}>{clientName}</Text> : null}
+                {themeChip ? (
+                  <Text
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '6px',
+                      padding: '3px 10px',
+                      borderRadius: '999px',
+                      backgroundColor: themeChip.bg,
+                      border: `1px solid ${themeChip.border}`,
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      letterSpacing: '0.16em',
+                      textTransform: 'uppercase',
+                      fontWeight: 700,
+                      fontFamily: FONT_STACK_BODY,
+                    }}
+                  >
+                    {themeChip.label}
+                  </Text>
+                ) : null}
               </Section>
             ) : null}
 
