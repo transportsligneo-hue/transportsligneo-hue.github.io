@@ -279,6 +279,19 @@ function AdminMissionDetail() {
       }
     }
 
+    // Logo/société client (via email trajet)
+    if (trajRes.data?.client_email) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("logo_url, societe" as never)
+        .eq("email", trajRes.data.client_email)
+        .maybeSingle();
+      if (p) {
+        setClientLogoUrl((p as { logo_url?: string | null }).logo_url ?? null);
+        setClientSociete((p as { societe?: string | null }).societe ?? null);
+      }
+    }
+
     // Photos par inspection : UNE requête .in() + signed URLs en LOT
     const inspList = (inspRes.data ?? []) as Array<{ id: string; type: string; created_at: string }>;
     if (inspList.length) {
