@@ -7,6 +7,8 @@ import PwaSplash from "@/components/pwa/PwaSplash";
 import { PricingProvider } from "@/lib/pricing";
 import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -122,19 +124,23 @@ function PublicMobileBottomNav() {
 }
 
 function RootComponent() {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
-    <AuthProvider>
-      <PricingProvider>
-        <AiSettingsProvider>
-          <CursorSpotlight />
-          <Outlet />
-          <PublicMobileBottomNav />
-          <PwaProvider />
-          <PwaSplash />
-          <Toaster />
-        </AiSettingsProvider>
-      </PricingProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <PricingProvider>
+          <AiSettingsProvider>
+            <CursorSpotlight />
+            <Outlet />
+            <PublicMobileBottomNav />
+            <PwaProvider />
+            <PwaSplash />
+            <Toaster />
+          </AiSettingsProvider>
+        </PricingProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
