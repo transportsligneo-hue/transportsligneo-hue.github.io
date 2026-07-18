@@ -254,6 +254,16 @@ function ProDashboard() {
         </div>
       </div>
 
+      {/* Carte trajets en cours */}
+      <div className="mb-8">
+        <ActiveMissionsMap
+          scope="all"
+          title={isFlotte ? "Flotte en mouvement" : "Vos trajets en cours"}
+          emptyMessage="Aucune mission en cours pour le moment."
+        />
+      </div>
+
+
       {/* Missions section */}
       <div className="v3-section-head">
         <h2>Mes missions</h2>
