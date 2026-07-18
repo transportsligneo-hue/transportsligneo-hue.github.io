@@ -244,17 +244,36 @@ function ProDashboard() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Espace Pro</h1>
-            <p className="text-pro-muted text-sm mt-0.5">Vue d'ensemble de votre flotte et de vos missions</p>
+        <div className="relative overflow-hidden rounded-2xl border border-pro-border bg-white">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-white" aria-hidden="true" />
+          <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-blue-300/30 blur-3xl" aria-hidden="true" />
+          <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold text-blue-700 bg-blue-100 border border-blue-200 rounded-full px-2 py-0.5">
+                <Sparkles size={11} /> B2B Standard
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-pro-text mt-2">
+                {orgInfo?.name ? `Espace ${orgInfo.name}` : "Espace Pro"}
+              </h1>
+              <p className="text-pro-muted text-sm mt-1">
+                Demandez un convoyage ponctuel, suivez vos missions et vos factures.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                to="/dashboard-pro/factures"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-white border border-blue-200 text-blue-700 text-sm font-medium hover:bg-blue-50 transition-colors"
+              >
+                <Receipt size={16} /> Factures
+              </Link>
+              <Link
+                to="/dashboard-pro/nouvelle-demande"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                <PlusCircle size={16} /> Nouvelle mission
+              </Link>
+            </div>
           </div>
-          <Link
-            to="/dashboard-pro/nouvelle-demande"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover transition-colors shadow-sm"
-          >
-            <PlusCircle size={16} /> Nouvelle mission
-          </Link>
         </div>
       )}
 
