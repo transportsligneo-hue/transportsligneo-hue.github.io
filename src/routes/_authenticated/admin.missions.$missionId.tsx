@@ -50,6 +50,7 @@ import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -207,6 +208,8 @@ function AdminMissionDetail() {
   const [contactInstr, setContactInstr] = useState("");
   const [clientLogoUrl, setClientLogoUrl] = useState<string | null>(null);
   const [clientSociete, setClientSociete] = useState<string | null>(null);
+  const [clientTypeClient, setClientTypeClient] = useState<string | null>(null);
+  const [clientUserId, setClientUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!trajet) return;
@@ -283,12 +286,15 @@ function AdminMissionDetail() {
     if (trajRes.data?.client_email) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("logo_url, societe" as never)
+        .select("user_id, logo_url, societe, type_client" as never)
         .eq("email", trajRes.data.client_email)
         .maybeSingle();
       if (p) {
-        setClientLogoUrl((p as { logo_url?: string | null }).logo_url ?? null);
-        setClientSociete((p as { societe?: string | null }).societe ?? null);
+        const pp = p as { user_id?: string | null; logo_url?: string | null; societe?: string | null; type_client?: string | null };
+        setClientLogoUrl(pp.logo_url ?? null);
+        setClientSociete(pp.societe ?? null);
+        setClientTypeClient(pp.type_client ?? null);
+        setClientUserId(pp.user_id ?? null);
       }
     }
 
@@ -657,6 +663,25 @@ function AdminMissionDetail() {
           <RefreshCw size={15} />
         </IconButton>
       </div>
+
+      {(trajet.client_nom || trajet.client_email || clientSociete) && (
+        <AdminOrgContextBanner
+          clientId={clientUserId ?? undefined}
+          name={clientSociete || trajet.client_nom || trajet.client_email || "Client"}
+          kind={
+            (clientTypeClient === "flotte"
+              ? "flotte"
+              : clientTypeClient === "b2b" || !!clientSociete
+                ? "b2b"
+                : "particulier") as OrgContextKind
+          }
+          email={trajet.client_email}
+          phone={trajet.client_telephone}
+          logoUrl={clientLogoUrl}
+          societe={clientSociete}
+        />
+      )}
+
 
       {/* === Header mission === */}
       <Card>

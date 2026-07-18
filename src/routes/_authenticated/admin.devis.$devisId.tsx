@@ -10,6 +10,7 @@ import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -67,7 +68,7 @@ function AdminDevisDetailPage() {
     if (data.user_id) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .select("user_id, societe, siret, tva_intra, logo_url, adresse, adresse_facturation, type_client" as never)
         .eq("user_id", data.user_id)
         .maybeSingle();
       profile = p;
@@ -75,7 +76,7 @@ function AdminDevisDetailPage() {
     if (!profile && data.email) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .select("user_id, societe, siret, tva_intra, logo_url, adresse, adresse_facturation, type_client" as never)
         .eq("email", data.email)
         .maybeSingle();
       profile = p;
@@ -234,6 +235,25 @@ function AdminDevisDetailPage() {
           }
         />
       </div>
+
+      <div className="mb-5">
+        <AdminOrgContextBanner
+          clientId={devis._profile?.user_id ?? undefined}
+          name={devis._profile?.societe || `${devis.prenom ?? ""} ${devis.nom ?? ""}`.trim() || devis.email}
+          kind={
+            (devis._profile?.type_client === "flotte"
+              ? "flotte"
+              : devis._profile?.type_client === "b2b" || !!devis._profile?.societe
+                ? "b2b"
+                : "particulier") as OrgContextKind
+          }
+          email={devis.email}
+          phone={devis.telephone}
+          logoUrl={devis._profile?.logo_url ?? null}
+          societe={devis._profile?.societe ?? null}
+        />
+      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: details */}
