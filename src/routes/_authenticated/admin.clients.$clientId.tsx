@@ -383,6 +383,14 @@ function AdminClientDetail() {
         eyebrow={isB2B ? "Client professionnel" : "Client particulier"}
         title={fullName}
         subtitle={profile.email ?? undefined}
+        logo={
+          <ClientLogo
+            src={profile.logo_url}
+            name={isB2B && form.societe ? form.societe : fullName}
+            isCompany={isB2B}
+            size="lg"
+          />
+        }
         status={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge label={actif ? "Actif" : "Suspendu"} tone={actif ? "success" : "danger"} />
