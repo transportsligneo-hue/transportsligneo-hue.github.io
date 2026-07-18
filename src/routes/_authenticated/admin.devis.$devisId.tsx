@@ -236,6 +236,25 @@ function AdminDevisDetailPage() {
         />
       </div>
 
+      <div className="mb-5">
+        <AdminOrgContextBanner
+          clientId={devis._profile?.user_id ?? undefined}
+          name={devis._profile?.societe || `${devis.prenom ?? ""} ${devis.nom ?? ""}`.trim() || devis.email}
+          kind={
+            (devis._profile?.type_client === "flotte"
+              ? "flotte"
+              : devis._profile?.type_client === "b2b" || !!devis._profile?.societe
+                ? "b2b"
+                : "particulier") as OrgContextKind
+          }
+          email={devis.email}
+          phone={devis.telephone}
+          logoUrl={devis._profile?.logo_url ?? null}
+          societe={devis._profile?.societe ?? null}
+        />
+      </div>
+
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: details */}
         <div className="lg:col-span-1 space-y-4">
