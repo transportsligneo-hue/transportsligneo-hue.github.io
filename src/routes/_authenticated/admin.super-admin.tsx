@@ -73,6 +73,7 @@ function SuperAdminPage() {
     }
   };
 
+  const grouped = users.data ?? [];
   const counts = useMemo(() => {
     const list = users.data ?? [];
     let sa = 0, ad = 0, mg = 0;
