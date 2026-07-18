@@ -6,11 +6,20 @@ interface SendTransactionalEmailParams {
   recipientEmail?: string
   idempotencyKey?: string
   templateData?: Record<string, any>
+  /** Logo client (URL absolue) affiché dans le shell email — auto-injecté dans templateData. */
+  clientLogoUrl?: string | null
+  /** Raison sociale / nom du client — auto-injecté dans templateData. */
+  clientName?: string | null
 }
 
 
 export async function sendTransactionalEmail(params: SendTransactionalEmailParams) {
   const { data: { session } } = await supabase.auth.getSession()
+  const mergedData = {
+    ...(params.templateData ?? {}),
+    ...(params.clientLogoUrl ? { clientLogoUrl: params.clientLogoUrl } : {}),
+    ...(params.clientName ? { clientName: params.clientName } : {}),
+  }
   const response = await fetch('/lovable/email/transactional/send', {
     method: 'POST',
     headers: {
@@ -21,7 +30,7 @@ export async function sendTransactionalEmail(params: SendTransactionalEmailParam
       templateName: params.templateName,
       recipientEmail: params.recipientEmail,
       idempotencyKey: params.idempotencyKey,
-      templateData: params.templateData,
+      templateData: mergedData,
     }),
   })
   if (!response.ok) {
