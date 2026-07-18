@@ -7,6 +7,8 @@ import {
   Truck, Clock, CheckCircle, PlusCircle, Loader2, ArrowUpRight, FileText,
   Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp,
 } from "lucide-react";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
   component: ProDashboard,
@@ -251,6 +253,16 @@ function ProDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* Carte trajets en cours */}
+      <div className="mb-8">
+        <ActiveMissionsMap
+          scope="all"
+          title={isFlotte ? "Flotte en mouvement" : "Vos trajets en cours"}
+          emptyMessage="Aucune mission en cours pour le moment."
+        />
+      </div>
+
 
       {/* Missions section */}
       <div className="v3-section-head">

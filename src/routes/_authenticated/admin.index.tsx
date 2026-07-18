@@ -28,6 +28,8 @@ import {
   AdminSection,
   AdminEmpty,
 } from "@/components/admin/ui";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -273,6 +275,10 @@ function AdminDashboard() {
           </span>
         }
       />
+
+      {/* === Carte trajets en cours === */}
+      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
+
 
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
