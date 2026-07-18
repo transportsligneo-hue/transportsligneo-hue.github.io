@@ -2156,3 +2156,181 @@
   /* Compteur qui monte à l'entrée (à combiner avec le hook useAnimatedCounter côté React) */
   .v3-counter { font-variant-numeric: tabular-nums; font-family: var(--v3-font-display); font-weight: 700; }
 }
+
+/* === V3 — Composants dashboard (KPI, table, tabs, chips, bar chart, cta) === */
+@layer utilities {
+  /* Aurora background subtile pour les écrans v3 (posée sur main) */
+  .v3-aurora {
+    background:
+      radial-gradient(1000px 460px at 100% 0%, rgba(47,95,255,0.09), transparent 60%),
+      radial-gradient(750px 400px at 0% 100%, rgba(184,134,42,0.06), transparent 60%),
+      radial-gradient(600px 300px at 50% 0%, rgba(124,92,255,0.05), transparent 60%),
+      var(--v3-bg);
+    background-size: 140% 140%, 140% 140%, 140% 140%, 100% 100%;
+    animation: v3-aurora-shift 22s ease-in-out infinite;
+  }
+  @keyframes v3-aurora-shift {
+    0%,100% { background-position: 100% 0%, 0% 100%, 50% 0%, 0 0; }
+    50%     { background-position: 85% 15%, 15% 85%, 40% 10%, 0 0; }
+  }
+
+  /* Eyebrow + pulse */
+  .v3-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--v3-font-mono);
+    font-size: 10.5px; letter-spacing: 0.1em;
+    color: var(--v3-gold-deep); text-transform: uppercase;
+    font-weight: 600;
+  }
+  .v3-eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--v3-ok);
+    box-shadow: 0 0 0 3px var(--v3-ok-soft);
+    animation: v3-pulse-node 1.6s ease-in-out infinite;
+  }
+  @keyframes v3-pulse-node { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+  /* H1 v3 */
+  .v3-h1 {
+    font-family: var(--v3-font-display);
+    font-size: clamp(22px, 3vw, 27px);
+    font-weight: 600; letter-spacing: -0.015em;
+    margin: 6px 0 6px;
+  }
+  .v3-sub { color: var(--v3-text-muted); font-size: 14px; margin: 0; }
+
+  /* Buttons */
+  .v3-btn-ghost {
+    background: var(--v3-surface);
+    border: 1px solid var(--v3-border);
+    color: var(--v3-text-muted);
+    padding: 10px 16px; border-radius: 11px;
+    font-weight: 600; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+  }
+  .v3-btn-ghost:hover { color: var(--v3-text); border-color: var(--v3-blue-soft-2); background: var(--v3-blue-soft); }
+
+  /* KPI icon tones */
+  .v3-kpi-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .v3-kpi-icon svg { width: 17px; height: 17px; stroke-width: 2; }
+  .v3-kpi-icon.blue   { background: var(--v3-blue-soft);   color: var(--v3-blue-deep); }
+  .v3-kpi-icon.gold   { background: var(--v3-gold-soft);   color: var(--v3-gold-deep); }
+  .v3-kpi-icon.ok     { background: var(--v3-ok-soft);     color: var(--v3-ok); }
+  .v3-kpi-icon.warn   { background: var(--v3-warn-soft);   color: var(--v3-warn); }
+  .v3-kpi-icon.violet { background: var(--v3-violet-soft); color: #5334d6; }
+
+  .v3-kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .v3-kpi-trend.up   { color: var(--v3-ok);   background: var(--v3-ok-soft); }
+  .v3-kpi-trend.flat { color: var(--v3-text-dim); background: var(--v3-surface-2); }
+  .v3-kpi-trend.warn { color: var(--v3-warn); background: var(--v3-warn-soft); }
+
+  .v3-kpi-label { font-size: 12px; color: var(--v3-text-dim); font-weight: 500; margin-bottom: 6px; }
+  .v3-kpi-value {
+    font-family: var(--v3-font-display);
+    font-size: 27px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--v3-text);
+  }
+
+  /* Tabs */
+  .v3-tabs {
+    display: inline-flex; gap: 4px;
+    background: var(--v3-surface-2); border: 1px solid var(--v3-border);
+    padding: 4px; border-radius: 11px;
+  }
+  .v3-tab {
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--v3-text-muted); cursor: pointer;
+    background: transparent; border: none;
+    transition: background 180ms ease, color 180ms ease;
+  }
+  .v3-tab.active {
+    background: var(--v3-surface); color: var(--v3-text);
+    box-shadow: 0 1px 3px rgba(17,24,48,0.08);
+  }
+
+  /* Chips (filters) */
+  .v3-chip {
+    font-size: 12px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--v3-border); background: var(--v3-surface);
+    color: var(--v3-text-muted); cursor: pointer;
+    transition: all 180ms ease;
+  }
+  .v3-chip.active {
+    background: var(--v3-blue-soft); color: var(--v3-blue-deep);
+    border-color: var(--v3-blue-soft-2);
+  }
+
+  /* Status chips */
+  .v3-status { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; display: inline-block; }
+  .v3-status.progress { background: var(--v3-blue-soft); color: var(--v3-blue-deep); }
+  .v3-status.done     { background: var(--v3-ok-soft);   color: var(--v3-ok); }
+  .v3-status.wait     { background: var(--v3-warn-soft); color: var(--v3-warn); }
+  .v3-status.danger   { background: var(--v3-danger-soft); color: var(--v3-danger); }
+  .v3-status.neutral  { background: var(--v3-surface-2); color: var(--v3-text-muted); border: 1px solid var(--v3-border); }
+
+  /* Bar chart */
+  .v3-bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding-top: 10px; }
+  .v3-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .v3-bar {
+    width: 100%; border-radius: 7px 7px 3px 3px;
+    background: linear-gradient(180deg, var(--v3-blue), var(--v3-blue-deep));
+    transform-origin: bottom;
+    animation: v3-bar-grow 0.9s cubic-bezier(.2,.8,.3,1) backwards;
+  }
+  .v3-bar.gold   { background: linear-gradient(180deg, var(--v3-gold), var(--v3-gold-deep)); }
+  .v3-bar.violet { background: linear-gradient(180deg, var(--v3-violet), #5334d6); }
+  @keyframes v3-bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  .v3-bar-col span { font-size: 10.5px; color: var(--v3-text-dim); }
+
+  /* Route pulse (mission progression bar) */
+  .v3-pulse { position: relative; height: 6px; background: var(--v3-border-soft); border-radius: 3px; overflow: hidden; }
+  .v3-pulse .fill { position: absolute; top: 0; left: 0; bottom: 0; background: linear-gradient(90deg, var(--v3-blue), var(--v3-blue-deep)); border-radius: 3px; }
+  .v3-pulse .dot { position: absolute; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--v3-gold); box-shadow: 0 0 0 4px var(--v3-gold-soft); animation: v3-travel 3.5s ease-in-out infinite; }
+  @keyframes v3-travel { 0%{left:0%;} 50%{left:calc(100% - 12px);} 100%{left:0%;} }
+
+  /* CTA gradient card */
+  .v3-cta {
+    background: linear-gradient(120deg, var(--v3-blue-soft) 0%, var(--v3-gold-soft) 130%);
+    border: 1px solid var(--v3-blue-soft-2);
+    border-radius: var(--v3-radius);
+  }
+
+  /* Shimmer on primary btn (already defined base .v3-btn-primary earlier) */
+  .v3-btn-primary { position: relative; overflow: hidden; }
+  .v3-btn-primary::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg); animation: v3-shine 3.2s ease-in-out infinite;
+  }
+  @keyframes v3-shine { 0%{left:-60%;} 45%{left:130%;} 100%{left:130%;} }
+
+  /* Pager */
+  .v3-pager { display: inline-flex; gap: 6px; }
+  .v3-pager button { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--v3-border); background: var(--v3-surface); color: var(--v3-text-muted); font-size: 12px; cursor: pointer; transition: all 180ms ease; }
+  .v3-pager button.active { background: var(--v3-blue); color: #fff; border-color: var(--v3-blue); }
+  .v3-pager button:hover:not(.active) { border-color: var(--v3-blue-soft-2); color: var(--v3-blue-deep); }
+
+  /* Section title */
+  .v3-section-head { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 14px; flex-wrap: wrap; gap: 12px; }
+  .v3-section-head h2 { font-family: var(--v3-font-display); font-size: 17px; font-weight: 600; margin: 0; color: var(--v3-text); }
+
+  /* Table head / row for missions */
+  .v3-thead { color: var(--v3-text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 12px 22px; border-bottom: 1px solid var(--v3-border-soft); }
+  .v3-trow  { padding: 14px 22px; border-bottom: 1px solid var(--v3-border-soft); transition: background 180ms ease; }
+  .v3-trow:last-child { border-bottom: none; }
+  .v3-trow:hover { background: var(--v3-surface-2); }
+  .v3-tfoot { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; border-top: 1px solid var(--v3-border-soft); font-size: 12px; color: var(--v3-text-dim); }
+
+  .v3-mono-id { font-family: var(--v3-font-mono); font-size: 11px; color: var(--v3-text-dim); }
+  .v3-price { font-family: var(--v3-font-display); font-size: 13.5px; font-weight: 600; color: var(--v3-text); }
+
+  /* Link btn */
+  .v3-link { background: none; border: none; color: var(--v3-blue); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 0; }
+  .v3-link:hover { color: var(--v3-blue-deep); }
+}
