@@ -6,16 +6,21 @@ export function PageHeader({
   title,
   subtitle,
   actions,
+  logo,
 }: {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
+  logo?: ReactNode;
 }) {
   return (
     <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-pro-text">{title}</h1>
-        {subtitle && <p className="text-pro-muted text-sm mt-1">{subtitle}</p>}
+      <div className="flex items-start gap-3 min-w-0">
+        {logo && <div className="shrink-0 pt-0.5">{logo}</div>}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold text-pro-text truncate">{title}</h1>
+          {subtitle && <p className="text-pro-muted text-sm mt-1">{subtitle}</p>}
+        </div>
       </div>
       {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
     </div>

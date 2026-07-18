@@ -9,6 +9,7 @@ import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -220,7 +221,18 @@ function AdminDevisDetailPage() {
         <Link to="/admin/devis">
           <IconButton title="Retour"><ArrowLeft size={16} /></IconButton>
         </Link>
-        <PageHeader title={`Devis ${devis.numero}`} subtitle={`Créé le ${new Date(devis.created_at).toLocaleDateString("fr-FR")}`} />
+        <PageHeader
+          title={`Devis ${devis.numero}`}
+          subtitle={`Créé le ${new Date(devis.created_at).toLocaleDateString("fr-FR")}`}
+          logo={
+            <ClientLogo
+              src={devis._profile?.logo_url ?? null}
+              name={devis._profile?.societe || `${devis.prenom ?? ""} ${devis.nom ?? ""}`.trim() || devis.email}
+              isCompany={!!devis._profile?.societe}
+              size="md"
+            />
+          }
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

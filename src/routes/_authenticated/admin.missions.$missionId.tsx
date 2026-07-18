@@ -49,6 +49,7 @@ import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -204,6 +205,8 @@ function AdminMissionDetail() {
   const [contactTel, setContactTel] = useState("");
   const [contactTel2, setContactTel2] = useState("");
   const [contactInstr, setContactInstr] = useState("");
+  const [clientLogoUrl, setClientLogoUrl] = useState<string | null>(null);
+  const [clientSociete, setClientSociete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!trajet) return;
@@ -273,6 +276,19 @@ function AdminMissionDetail() {
         .maybeSingle();
       if (adminData && (adminData as { notes_internes?: string | null }).notes_internes) {
         setAdminNote((adminData as { notes_internes: string }).notes_internes);
+      }
+    }
+
+    // Logo/société client (via email trajet)
+    if (trajRes.data?.client_email) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("logo_url, societe" as never)
+        .eq("email", trajRes.data.client_email)
+        .maybeSingle();
+      if (p) {
+        setClientLogoUrl((p as { logo_url?: string | null }).logo_url ?? null);
+        setClientSociete((p as { societe?: string | null }).societe ?? null);
       }
     }
 
@@ -645,17 +661,29 @@ function AdminMissionDetail() {
       {/* === Header mission === */}
       <Card>
         <div className="flex items-start justify-between flex-wrap gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold text-pro-text font-heading tracking-wide">
-                {missionNumber}
-              </h1>
-              <Badge tone={attributionStatutTone[attribution.statut] ?? "neutral"}>
-                {statutLabels[attribution.statut] ?? attribution.statut}
-              </Badge>
-              <RoleBadge role={isB2B ? "partner" : "client"} />
-              <RoleBadge role="driver" />
-            </div>
+          <div className="min-w-0 flex-1 flex items-start gap-3">
+            <ClientLogo
+              src={clientLogoUrl}
+              name={clientSociete || trajet.client_nom || undefined}
+              isCompany={!!clientSociete || isB2B}
+              size="md"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-semibold text-pro-text font-heading tracking-wide">
+                  {missionNumber}
+                </h1>
+                <Badge tone={attributionStatutTone[attribution.statut] ?? "neutral"}>
+                  {statutLabels[attribution.statut] ?? attribution.statut}
+                </Badge>
+                <RoleBadge role={isB2B ? "partner" : "client"} />
+                <RoleBadge role="driver" />
+              </div>
+              {(clientSociete || trajet.client_nom) && (
+                <div className="mt-1 text-xs text-pro-muted truncate">
+                  {clientSociete || trajet.client_nom}
+                </div>
+              )}
 
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
@@ -680,7 +708,10 @@ function AdminMissionDetail() {
                 <span className="truncate">MAJ {lastUpdate}</span>
               </div>
             </div>
+            </div>
           </div>
+
+
 
           <div className="flex flex-col items-end gap-2">
             <Select

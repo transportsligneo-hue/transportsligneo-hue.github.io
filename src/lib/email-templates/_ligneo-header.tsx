@@ -66,6 +66,10 @@ export interface LigneoEmailShellProps {
   secondaryCta?: { label: string; href: string } | null
   /** Signature finale. Défaut: "L'équipe Transports Ligneo". */
   signature?: string
+  /** URL du logo client (organisation) — affiché en petit sous le wordmark. */
+  clientLogoUrl?: string | null
+  /** Nom du client / organisation affiché à côté du logo. */
+  clientName?: string | null
 }
 
 export function LigneoEmailShell({
@@ -79,6 +83,8 @@ export function LigneoEmailShell({
   primaryCta,
   secondaryCta,
   signature,
+  clientLogoUrl,
+  clientName,
 }: LigneoEmailShellProps) {
   return (
     <Html lang="fr" dir="ltr">
@@ -98,6 +104,19 @@ export function LigneoEmailShell({
               <Text style={wordmarkRule}>&nbsp;</Text>
               {tagline ? <Text style={taglineStyle}>{tagline}</Text> : null}
             </Section>
+
+            {clientLogoUrl || clientName ? (
+              <Section style={clientBrandBar}>
+                {clientLogoUrl ? (
+                  <img
+                    src={clientLogoUrl}
+                    alt={clientName || 'Logo client'}
+                    style={clientBrandLogo}
+                  />
+                ) : null}
+                {clientName ? <Text style={clientBrandName}>{clientName}</Text> : null}
+              </Section>
+            ) : null}
 
             {/* Zone contenu crème */}
             <Section style={contentWrap}>
@@ -347,6 +366,33 @@ const taglineStyle = {
   textTransform: 'uppercase' as const,
   fontFamily: FONT_STACK_BODY,
   textAlign: 'center' as const,
+}
+
+const clientBrandBar = {
+  backgroundColor: NAVY_DEEP,
+  padding: '10px 24px',
+  textAlign: 'center' as const,
+  borderBottom: `1px solid ${GOLD}22`,
+}
+const clientBrandLogo = {
+  maxHeight: '32px',
+  maxWidth: '140px',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  backgroundColor: '#ffffff',
+  padding: '4px 8px',
+  borderRadius: '4px',
+  border: `1px solid ${GOLD}44`,
+}
+const clientBrandName = {
+  fontSize: '11px',
+  color: GOLD_LIGHT,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase' as const,
+  margin: '6px 0 0',
+  fontFamily: FONT_STACK_BODY,
+  textAlign: 'center' as const,
+  fontWeight: 600,
 }
 
 const contentWrap = {
