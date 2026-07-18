@@ -208,6 +208,8 @@ function AdminMissionDetail() {
   const [contactInstr, setContactInstr] = useState("");
   const [clientLogoUrl, setClientLogoUrl] = useState<string | null>(null);
   const [clientSociete, setClientSociete] = useState<string | null>(null);
+  const [clientTypeClient, setClientTypeClient] = useState<string | null>(null);
+  const [clientUserId, setClientUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!trajet) return;
