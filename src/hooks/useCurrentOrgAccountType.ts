@@ -48,10 +48,11 @@ export function useCurrentOrgAccountType() {
         const fallbackType: OrgAccountType =
           (profile?.type_client as string | null) === "flotte" ? "flotte" : "b2b_standard";
         const fallbackName =
-          profile?.societe ??
+          profile?.societe ||
           [profile?.prenom, profile?.nom].filter(Boolean).join(" ").trim() ||
           null;
         return { orgId: null, accountType: fallbackType, logoUrl: null, name: fallbackName };
+
       }
 
       const { data: org } = await supabase
