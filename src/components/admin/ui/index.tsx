@@ -35,17 +35,22 @@ interface PageHeaderProps {
   breadcrumb?: BreadcrumbItem[];
   actions?: ReactNode;
   status?: ReactNode;
+  /** Logo / avatar affiché à gauche du titre (client, organisation, convoyeur…). */
+  logo?: ReactNode;
 }
-export function AdminPageHeader({ eyebrow, title, subtitle, breadcrumb, actions, status }: PageHeaderProps) {
+export function AdminPageHeader({ eyebrow, title, subtitle, breadcrumb, actions, status, logo }: PageHeaderProps) {
   return (
     <header className="mb-6 space-y-3">
       {breadcrumb && breadcrumb.length > 0 && <AdminBreadcrumb items={breadcrumb} />}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1.5 min-w-0">
-          {eyebrow && <p className="admin-eyebrow">{eyebrow}</p>}
-          <h1 className="admin-h1 truncate">{title}</h1>
-          {subtitle && <p className="text-sm text-[color:var(--admin-muted)]">{subtitle}</p>}
-          {status && <div className="pt-1">{status}</div>}
+        <div className="flex items-start gap-4 min-w-0">
+          {logo && <div className="shrink-0 pt-0.5">{logo}</div>}
+          <div className="space-y-1.5 min-w-0">
+            {eyebrow && <p className="admin-eyebrow">{eyebrow}</p>}
+            <h1 className="admin-h1 truncate">{title}</h1>
+            {subtitle && <p className="text-sm text-[color:var(--admin-muted)]">{subtitle}</p>}
+            {status && <div className="pt-1">{status}</div>}
+          </div>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
       </div>
