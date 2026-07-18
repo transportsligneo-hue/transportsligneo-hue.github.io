@@ -9,6 +9,7 @@ import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
