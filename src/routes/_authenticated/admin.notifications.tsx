@@ -9,6 +9,7 @@ import {
   Bell, Check, AlertTriangle, FileText, Truck, UserPlus,
   CreditCard, Loader2, Filter, CheckCheck,
 } from "lucide-react";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 
 export const Route = createFileRoute("/_authenticated/admin/notifications")({
   component: AdminNotifications,
