@@ -66,6 +66,10 @@ export interface LigneoEmailShellProps {
   secondaryCta?: { label: string; href: string } | null
   /** Signature finale. Défaut: "L'équipe Transports Ligneo". */
   signature?: string
+  /** URL du logo client (organisation) — affiché en petit sous le wordmark. */
+  clientLogoUrl?: string | null
+  /** Nom du client / organisation affiché à côté du logo. */
+  clientName?: string | null
 }
 
 export function LigneoEmailShell({
@@ -79,6 +83,8 @@ export function LigneoEmailShell({
   primaryCta,
   secondaryCta,
   signature,
+  clientLogoUrl,
+  clientName,
 }: LigneoEmailShellProps) {
   return (
     <Html lang="fr" dir="ltr">
