@@ -10,6 +10,7 @@ import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
