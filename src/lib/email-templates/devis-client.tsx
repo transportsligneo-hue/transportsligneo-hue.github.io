@@ -11,9 +11,11 @@ interface Props {
   distance?: number | string
   prix?: number | string
   optionTrajet?: string
+  clientLogoUrl?: string
+  clientName?: string
 }
 
-const Email = ({ prenom, numero, depart, arrivee, distance, prix, optionTrajet }: Props) => {
+const Email = ({ prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName }: Props) => {
   const rows = [
     depart && arrivee && { label: `${depart} → ${arrivee}`, value: prix ? `${prix} €` : '' },
     distance && { label: 'Distance', value: `${distance} km` },
@@ -31,6 +33,8 @@ const Email = ({ prenom, numero, depart, arrivee, distance, prix, optionTrajet }
       intro="Votre devis est prêt. Vous pouvez le consulter en ligne et le signer électroniquement en quelques clics."
       primaryCta={{ label: 'Consulter le devis', href: 'https://transportsligneo.fr/dashboard-client/devis' }}
       secondaryCta={{ label: 'Signer électroniquement', href: 'https://transportsligneo.fr/dashboard-client/devis' }}
+      clientLogoUrl={clientLogoUrl}
+      clientName={clientName}
     >
       {rows.length ? <RecapCard title="Détail du devis" rows={rows} /> : null}
       {prix ? <HighlightBox label="Total TTC" value={`${prix} €`} meta="Péage et carburant inclus" tone="gold" /> : null}
