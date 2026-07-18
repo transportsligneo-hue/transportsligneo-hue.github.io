@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Crown, Shield, ShieldOff, Search, History, Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { Card, PageHeader, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
+import { Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import {
   verifySuperAdminAccess,
   listPrivilegedUsers,
