@@ -149,6 +149,10 @@ function AdminNotifications() {
           {items.map(n => {
             const Icon = TYPE_ICONS[n.type] ?? Bell;
             const isCritical = n.type === "incident";
+            const meta = (n.metadata ?? {}) as Record<string, any>;
+            const clientLogo = (meta.clientLogoUrl || meta.logo_url || meta.orgLogoUrl) as string | undefined;
+            const clientName = (meta.clientName || meta.societe || meta.nom_complet || meta.orgName) as string | undefined;
+            const hasBrand = Boolean(clientLogo || clientName);
             return (
               <li
                 key={n.id}
@@ -156,11 +160,15 @@ function AdminNotifications() {
                   n.lu ? "border-pro-border opacity-70" : isCritical ? "border-red-200 bg-red-50/30" : "border-pro-gold/30"
                 }`}
               >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                  isCritical ? "bg-red-100 text-red-700" : n.lu ? "bg-pro-bg-soft text-pro-muted" : "bg-pro-gold-soft text-pro-gold"
-                }`}>
-                  <Icon size={18} />
-                </div>
+                {hasBrand ? (
+                  <ClientLogo src={clientLogo} name={clientName} size="md" />
+                ) : (
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    isCritical ? "bg-red-100 text-red-700" : n.lu ? "bg-pro-bg-soft text-pro-muted" : "bg-pro-gold-soft text-pro-gold"
+                  }`}>
+                    <Icon size={18} />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] uppercase tracking-wider font-semibold text-pro-muted">
