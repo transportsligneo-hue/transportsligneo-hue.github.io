@@ -664,6 +664,25 @@ function AdminMissionDetail() {
         </IconButton>
       </div>
 
+      {(trajet.client_nom || trajet.client_email || clientSociete) && (
+        <AdminOrgContextBanner
+          clientId={clientUserId ?? undefined}
+          name={clientSociete || trajet.client_nom || trajet.client_email || "Client"}
+          kind={
+            (clientTypeClient === "flotte"
+              ? "flotte"
+              : clientTypeClient === "b2b" || !!clientSociete
+                ? "b2b"
+                : "particulier") as OrgContextKind
+          }
+          email={trajet.client_email}
+          phone={trajet.client_telephone}
+          logoUrl={clientLogoUrl}
+          societe={clientSociete}
+        />
+      )}
+
+
       {/* === Header mission === */}
       <Card>
         <div className="flex items-start justify-between flex-wrap gap-4">
