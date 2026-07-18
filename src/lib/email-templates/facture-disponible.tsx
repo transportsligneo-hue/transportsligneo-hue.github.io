@@ -2,9 +2,9 @@ import * as React from 'react'
 import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, RecapCard, HighlightBox } from './_ligneo-header'
 
-interface Props { prenom?: string; numero?: string; montant?: number | string; echeance?: string }
+interface Props { prenom?: string; numero?: string; montant?: number | string; echeance?: string; clientLogoUrl?: string; clientName?: string }
 
-const Email = ({ prenom, numero, montant, echeance }: Props) => (
+const Email = ({ prenom, numero, montant, echeance, clientLogoUrl, clientName }: Props) => (
   <LigneoEmailShell
     preview="Votre facture est disponible"
     tagline="Facture disponible"
@@ -13,6 +13,8 @@ const Email = ({ prenom, numero, montant, echeance }: Props) => (
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro="Votre facture est disponible dans votre espace client."
     primaryCta={{ label: 'Télécharger la facture', href: 'https://transportsligneo.fr/dashboard-client/documents' }}
+    clientLogoUrl={clientLogoUrl}
+    clientName={clientName}
   >
     {montant ? <HighlightBox label="Montant TTC" value={`${montant} €`} tone="gold" /> : null}
     <RecapCard
