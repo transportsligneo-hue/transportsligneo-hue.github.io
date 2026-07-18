@@ -26,7 +26,7 @@ export function useCurrentOrgAccountType() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("organization_id")
+        .select("organization_id, type_client, societe, nom, prenom")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -42,7 +42,17 @@ export function useCurrentOrgAccountType() {
         orgId = memberships?.[0]?.organization_id ?? null;
       }
 
-      if (!orgId) return { orgId: null, accountType: "b2b_standard", logoUrl: null, name: null };
+      // Fallback : pas d'organisation mais un profil "flotte" → on garde le thème Flotte
+      // (cas CAT France et autres comptes flotte historiques sans row organizations)
+      if (!orgId) {
+        const fallbackType: OrgAccountType =
+          (profile?.type_client as string | null) === "flotte" ? "flotte" : "b2b_standard";
+        const fallbackName =
+          profile?.societe ??
+          [profile?.prenom, profile?.nom].filter(Boolean).join(" ").trim() ||
+          null;
+        return { orgId: null, accountType: fallbackType, logoUrl: null, name: fallbackName };
+      }
 
       const { data: org } = await supabase
         .from("organizations")
@@ -50,13 +60,15 @@ export function useCurrentOrgAccountType() {
         .eq("id", orgId)
         .maybeSingle();
 
-      const accountType = (org?.account_type as OrgAccountType | null) ?? "b2b_standard";
+      const accountType = (org?.account_type as OrgAccountType | null) ??
+        ((profile?.type_client as string | null) === "flotte" ? "flotte" : "b2b_standard");
       return {
         orgId,
         accountType,
         logoUrl: (org as { logo_url?: string | null } | null)?.logo_url ?? null,
-        name: org?.commercial_name ?? org?.legal_name ?? null,
+        name: org?.commercial_name ?? org?.legal_name ?? profile?.societe ?? null,
       };
     },
   });
 }
+
