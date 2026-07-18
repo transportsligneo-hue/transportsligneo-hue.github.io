@@ -661,17 +661,29 @@ function AdminMissionDetail() {
       {/* === Header mission === */}
       <Card>
         <div className="flex items-start justify-between flex-wrap gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold text-pro-text font-heading tracking-wide">
-                {missionNumber}
-              </h1>
-              <Badge tone={attributionStatutTone[attribution.statut] ?? "neutral"}>
-                {statutLabels[attribution.statut] ?? attribution.statut}
-              </Badge>
-              <RoleBadge role={isB2B ? "partner" : "client"} />
-              <RoleBadge role="driver" />
-            </div>
+          <div className="min-w-0 flex-1 flex items-start gap-3">
+            <ClientLogo
+              src={clientLogoUrl}
+              name={clientSociete || trajet.client_nom || undefined}
+              isCompany={!!clientSociete || isB2B}
+              size="md"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-semibold text-pro-text font-heading tracking-wide">
+                  {missionNumber}
+                </h1>
+                <Badge tone={attributionStatutTone[attribution.statut] ?? "neutral"}>
+                  {statutLabels[attribution.statut] ?? attribution.statut}
+                </Badge>
+                <RoleBadge role={isB2B ? "partner" : "client"} />
+                <RoleBadge role="driver" />
+              </div>
+              {(clientSociete || trajet.client_nom) && (
+                <div className="mt-1 text-xs text-pro-muted truncate">
+                  {clientSociete || trajet.client_nom}
+                </div>
+              )}
 
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
