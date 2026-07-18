@@ -7,6 +7,8 @@ import {
   Truck, Clock, CheckCircle, PlusCircle, Loader2, ArrowUpRight, FileText,
   Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp,
 } from "lucide-react";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
   component: ProDashboard,
