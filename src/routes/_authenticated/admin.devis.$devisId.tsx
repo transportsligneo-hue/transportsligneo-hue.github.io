@@ -68,7 +68,7 @@ function AdminDevisDetailPage() {
     if (data.user_id) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .select("user_id, societe, siret, tva_intra, logo_url, adresse, adresse_facturation, type_client" as never)
         .eq("user_id", data.user_id)
         .maybeSingle();
       profile = p;
@@ -76,7 +76,7 @@ function AdminDevisDetailPage() {
     if (!profile && data.email) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("societe, siret, tva_intra, logo_url, adresse, adresse_facturation" as never)
+        .select("user_id, societe, siret, tva_intra, logo_url, adresse, adresse_facturation, type_client" as never)
         .eq("email", data.email)
         .maybeSingle();
       profile = p;
