@@ -286,12 +286,15 @@ function AdminMissionDetail() {
     if (trajRes.data?.client_email) {
       const { data: p } = await supabase
         .from("profiles")
-        .select("logo_url, societe" as never)
+        .select("user_id, logo_url, societe, type_client" as never)
         .eq("email", trajRes.data.client_email)
         .maybeSingle();
       if (p) {
-        setClientLogoUrl((p as { logo_url?: string | null }).logo_url ?? null);
-        setClientSociete((p as { societe?: string | null }).societe ?? null);
+        const pp = p as { user_id?: string | null; logo_url?: string | null; societe?: string | null; type_client?: string | null };
+        setClientLogoUrl(pp.logo_url ?? null);
+        setClientSociete(pp.societe ?? null);
+        setClientTypeClient(pp.type_client ?? null);
+        setClientUserId(pp.user_id ?? null);
       }
     }
 
