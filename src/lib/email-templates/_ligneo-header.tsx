@@ -368,6 +368,33 @@ const taglineStyle = {
   textAlign: 'center' as const,
 }
 
+const clientBrandBar = {
+  backgroundColor: NAVY_DEEP,
+  padding: '10px 24px',
+  textAlign: 'center' as const,
+  borderBottom: `1px solid ${GOLD}22`,
+}
+const clientBrandLogo = {
+  maxHeight: '32px',
+  maxWidth: '140px',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  backgroundColor: '#ffffff',
+  padding: '4px 8px',
+  borderRadius: '4px',
+  border: `1px solid ${GOLD}44`,
+}
+const clientBrandName = {
+  fontSize: '11px',
+  color: GOLD_LIGHT,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase' as const,
+  margin: '6px 0 0',
+  fontFamily: FONT_STACK_BODY,
+  textAlign: 'center' as const,
+  fontWeight: 600,
+}
+
 const contentWrap = {
   backgroundColor: CREAM_SOFT,
   padding: '0',
