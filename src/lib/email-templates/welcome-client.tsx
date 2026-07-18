@@ -2,9 +2,9 @@ import * as React from 'react'
 import type { TemplateEntry } from './registry'
 import { LigneoEmailShell } from './_ligneo-header'
 
-interface Props { prenom?: string }
+interface Props { prenom?: string; clientLogoUrl?: string; clientName?: string }
 
-const Email = ({ prenom }: Props) => (
+const Email = ({ prenom, clientLogoUrl, clientName }: Props) => (
   <LigneoEmailShell
     preview="Bienvenue chez Transports Ligneo"
     tagline="Bienvenue"
@@ -14,6 +14,8 @@ const Email = ({ prenom }: Props) => (
     intro="Votre compte client est activé. Vous pouvez dès à présent réserver un convoyage automobile, suivre vos missions en temps réel et retrouver tous vos documents depuis votre espace personnel."
     primaryCta={{ label: 'Accéder à mon espace', href: 'https://transportsligneo.fr/dashboard-client' }}
     secondaryCta={{ label: 'Nouvelle réservation', href: 'https://transportsligneo.fr/reserver' }}
+    clientLogoUrl={clientLogoUrl}
+    clientName={clientName}
   />
 )
 
