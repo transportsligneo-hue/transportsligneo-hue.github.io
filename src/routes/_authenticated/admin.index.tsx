@@ -276,6 +276,10 @@ function AdminDashboard() {
         }
       />
 
+      {/* === Carte trajets en cours === */}
+      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
+
+
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         <AdminStatCard icon={Activity} label="Missions actives" value={stats.missionsEnCours} accent="success" />
