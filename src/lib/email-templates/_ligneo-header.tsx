@@ -105,6 +105,19 @@ export function LigneoEmailShell({
               {tagline ? <Text style={taglineStyle}>{tagline}</Text> : null}
             </Section>
 
+            {clientLogoUrl || clientName ? (
+              <Section style={clientBrandBar}>
+                {clientLogoUrl ? (
+                  <img
+                    src={clientLogoUrl}
+                    alt={clientName || 'Logo client'}
+                    style={clientBrandLogo}
+                  />
+                ) : null}
+                {clientName ? <Text style={clientBrandName}>{clientName}</Text> : null}
+              </Section>
+            ) : null}
+
             {/* Zone contenu crème */}
             <Section style={contentWrap}>
               <Section style={contentInner}>
