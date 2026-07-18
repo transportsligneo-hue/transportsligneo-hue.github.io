@@ -50,6 +50,7 @@ import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
