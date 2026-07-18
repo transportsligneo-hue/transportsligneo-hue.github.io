@@ -28,6 +28,8 @@ import {
   AdminSection,
   AdminEmpty,
 } from "@/components/admin/ui";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
