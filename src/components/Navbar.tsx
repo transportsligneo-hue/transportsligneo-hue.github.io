@@ -61,14 +61,14 @@ export default function Navbar() {
           </Link>
 
           {/* Liens centraux — pilule englobante */}
-          <ul className="r4-nav-pill">
+          <ul className="r4-nav-pill whitespace-nowrap">
             {navLinks.map((l) => (
               <li key={l.to}>
                 <Link
                   to={l.to}
                   activeOptions={{ exact: true }}
-                  activeProps={{ className: "r4-nav-link is-active" }}
-                  inactiveProps={{ className: "r4-nav-link" }}
+                  activeProps={{ className: "r4-nav-link is-active whitespace-nowrap" }}
+                  inactiveProps={{ className: "r4-nav-link whitespace-nowrap" }}
                 >
                   {l.label}
                 </Link>
