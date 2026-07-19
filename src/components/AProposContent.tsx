@@ -41,8 +41,8 @@ export default function AProposContent() {
       </div>
 
       <div className="v4-story">
-        <p>Fondée à Tours, <b>Transports Ligneo</b> s'est imposée comme un acteur de confiance du convoyage automobile en France, au service des particuliers comme des professionnels — concessions, loueurs et gestionnaires de flotte.</p>
-        <p>Notre différence tient en une phrase : <b>chaque véhicule est traité comme s'il était le nôtre.</b> Chauffeurs formés en continu, tenue professionnelle obligatoire, état des lieux photo systématique, assurance tous risques incluse — rien n'est laissé au hasard.</p>
+        <p>Fondée à Tours, <b>Transports Ligneo</b> s'est imposée comme un acteur de confiance du convoyage automobile en France, au service des particuliers comme des professionnels : concessions, loueurs et gestionnaires de flotte.</p>
+        <p>Notre différence tient en une phrase : <b>chaque véhicule est traité comme s'il était le nôtre.</b> Chauffeurs formés en continu, tenue professionnelle obligatoire, état des lieux photo systématique, assurance tous risques incluse. Rien n'est laissé au hasard.</p>
         <p>Nous avons aussi fait le pari du digital dès le premier jour : devis instantané, suivi GPS en direct, signature électronique et facturation automatique. Une exigence de grand groupe, avec la réactivité d'une équipe qui connaît chaque client par son nom.</p>
       </div>
 
