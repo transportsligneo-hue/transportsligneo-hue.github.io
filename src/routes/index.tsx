@@ -4,6 +4,7 @@ import HeroDesktop from "@/components/HeroDesktop";
 import PourquoiNousChoisir from "@/components/PourquoiNousChoisir";
 import CommentCaMarche from "@/components/CommentCaMarche";
 import PartnersMarquee from "@/components/PartnersMarquee";
+import MapFranceEurope from "@/components/MapFranceEurope";
 import { Award, ShieldCheck, Headphones } from "lucide-react";
 import Footer from "@/components/Footer";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
