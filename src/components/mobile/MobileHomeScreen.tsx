@@ -452,13 +452,6 @@ export default function MobileHomeScreen() {
 
 /* ==== Sub-components ==== */
 
-function Navigation2() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11l19-9-9 19-2-8-8-2Z" />
-    </svg>
-  );
-}
 
 function RouteThread() {
   return (
