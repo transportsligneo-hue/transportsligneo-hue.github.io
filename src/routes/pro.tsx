@@ -79,39 +79,26 @@ function ProPage() {
     <>
       <Navbar />
 
-      {/* === HERO navy === */}
-      <section
-        className="relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32"
-        style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}
-      >
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(60% 50% at 50% 0%, rgba(231,199,106,0.10), transparent 70%), radial-gradient(40% 40% at 80% 20%, rgba(95,182,255,0.12), transparent 70%)",
-          }}
-        />
-        <div aria-hidden className="cyber-aurora" />
-        <div aria-hidden className="cyber-grid opacity-60" />
-        <div aria-hidden className="cyber-scanline" />
+      {/* === HERO V4 navy — refonte === */}
+      <section className="r4-page relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32">
         <div className="relative mx-auto max-w-5xl px-5 text-center">
-          <span className="cyber-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] font-heading">
-            <ShieldCheck className="h-3 w-3" />
-            Solution professionnelle
-          </span>
-          <h1 className="font-heading text-4xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.1]">
+          <div className="r4-eyebrow mb-5 justify-center inline-flex">
+            <span className="r4-eyebrow-dot" />
+            SOLUTION PROFESSIONNELLE
+          </div>
+          <h1
+            className="text-white text-4xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
             Votre partenaire convoyage,
             <br />
-            <span className="cyber-title-accent">pensé pour les pros.</span>
+            <span className="r4-accent">pensé pour les pros.</span>
           </h1>
-
-          <p className="mx-auto mt-7 max-w-2xl text-cream/70 text-base lg:text-lg leading-relaxed">
+          <p className="mx-auto mt-7 max-w-2xl text-[#9aa6c9] text-base lg:text-lg leading-relaxed">
             Concessionnaires, loueurs, assureurs : externalisez vos convoyages
             avec un acteur fiable et transparent. Tarifs volume,
             facturation mensuelle, interlocuteur unique.
           </p>
-          <div className="electric-divider mx-auto mt-10 w-40" />
         </div>
 
         {/* Courbe cream */}
@@ -124,6 +111,7 @@ function ProPage() {
           </svg>
         </div>
       </section>
+
 
       {/* === Segments — cream === */}
       <section className="px-4 py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
