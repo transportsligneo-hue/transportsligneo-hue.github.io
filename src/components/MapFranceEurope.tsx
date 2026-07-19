@@ -105,16 +105,8 @@ export default function MapFranceEurope() {
 
         <div className="r4-map-legend">
           <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#d9b54a", boxShadow: "0 0 8px #d9b54a" }} />
+            <span className="r4-map-legend-dot" style={{ background: "#d9b54a", boxShadow: "0 0 10px #d9b54a" }} />
             Tours · Notre base
-          </div>
-          <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#4f8cff" }} />
-            Villes desservies en France
-          </div>
-          <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#d9b54a" }} />
-            Livraisons en Europe
           </div>
         </div>
       </div>
