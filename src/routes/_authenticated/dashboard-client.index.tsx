@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText, Inbox } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
@@ -218,6 +219,13 @@ function ClientDashboard() {
         <StatCard icon={CheckCircle} label="Terminées" value={stats.terminees} accent="text-green-300" />
         <StatCard icon={Inbox} label="Demandes" value={stats.demandes} accent="text-[#e7c76a]" />
       </div>
+
+      {/* Carte trajets en cours */}
+      <ActiveMissionsMap
+        title="Suivi de vos convoyages"
+        emptyMessage="Aucun convoyage en cours actuellement."
+      />
+
 
       {/* Last mission OU bloc rassurant */}
       <div>
