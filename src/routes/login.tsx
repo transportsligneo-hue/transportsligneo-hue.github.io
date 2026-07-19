@@ -230,24 +230,26 @@ function LoginPage() {
             )}
           </button>
 
-          <div className="text-center pt-3 border-t border-white/10">
-            <Link to="/choisir-compte" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
-              Créer un compte →
+          <div className="text-center pt-4 border-t border-white/10">
+            <Link to="/choisir-compte" className="auth-link-lg is-gold">
+              Créer un compte
+              <ArrowRight size={14} className="arrow" />
             </Link>
           </div>
         </form>
 
-        <div className="text-center mt-5 space-y-2.5">
-          <p className="inline-flex items-center gap-1.5 text-[10px] leading-relaxed text-white/45 px-2">
+        <div className="flex flex-col items-center gap-3 mt-6">
+          <Link to="/" className="auth-link-lg">
+            <ArrowRight size={14} className="arrow-back rotate-180" />
+            Retour au site
+          </Link>
+          <p className="inline-flex items-center gap-1.5 text-[10px] leading-relaxed text-white/45 px-2 text-center">
             <ShieldCheck size={11} className="text-blue-300" />
-            Protégé par reCAPTCHA · {" "}
+            Protégé par reCAPTCHA ·{" "}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Confidentialité</a>
             {" "}·{" "}
             <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">CGU</a>
           </p>
-          <Link to="/" className="block text-white/50 text-xs hover:text-white transition-colors">
-            ← Retour au site
-          </Link>
         </div>
       </div>
     </div>
