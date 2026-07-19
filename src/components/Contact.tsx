@@ -14,7 +14,7 @@ export default function Contact() {
   const [profil, setProfil] = useState<Profil>("particulier");
   const [form, setForm] = useState({
     nom: "", prenom: "", telephone: "", email: "", message: "",
-    societe: "", segment: "concessionnaire", volume: "",
+    societe: "", siret: "", segment: "concessionnaire", volume: "",
   });
   const [status, setStatus] = useState<FormStatus>("idle");
 
