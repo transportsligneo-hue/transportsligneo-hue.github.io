@@ -66,9 +66,9 @@ const MAP_SVG_INNER = `<path d="m 489.58075,285.9684 -0.119,-0.065 0.631,-0.187 
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="3.8s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L474.96,324.43"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L500.33,307.68"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L471.61,309.79"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L504.19,295.33"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L510.14,333.16"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L455.48,354.72"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L513.5,291"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L512.5,335.5"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L465.5,344.5"/></g>
 `;
 
 /**
