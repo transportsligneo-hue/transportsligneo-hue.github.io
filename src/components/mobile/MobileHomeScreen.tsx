@@ -196,15 +196,11 @@ export default function MobileHomeScreen() {
         </div>
       </section>
 
-      {/* === Carte "Estimer mon trajet" (chevauche le hero) === */}
-      <div className="relative z-[3] mx-[18px] -mt-[56px]">
-        <button
-          onClick={scrollToDevis}
-          className="book-card group w-full text-left active:scale-[0.99] transition-transform"
-          aria-label="Aller au simulateur de tarif"
-        >
-          <div className="book-inner">
-            <div className="flex justify-between items-center mb-4">
+      {/* === Carte "Estimer mon trajet" (chevauche le hero) — vrai simulateur === */}
+      <div id="mobile-devis" className="relative z-[3] mx-[18px] -mt-[56px] scroll-mt-20">
+        <div className="book-card">
+          <div className="book-inner !p-4">
+            <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2.5">
                 <span className="w-8 h-8 rounded-full flex items-center justify-center border border-[rgba(122,163,255,0.4)]"
                   style={{ background: "linear-gradient(135deg, rgba(63,123,255,0.4), rgba(217,181,74,0.15))" }}
@@ -220,70 +216,9 @@ export default function MobileHomeScreen() {
                 Live
               </span>
             </div>
-
-            {/* Adresses */}
-            <div className="flex flex-col gap-2.5 relative">
-              <div className="addr-field">
-                <span className="addr-ic">
-                  <MapPin size={13} className="text-[#8fb4ff]" strokeWidth={2} />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#9aa6c9] mb-0.5">Départ</div>
-                  <div className="text-[13px] italic text-[#c3cbe6] truncate">Choisir une adresse</div>
-                </div>
-                <span className="w-7 h-7 rounded-full border border-[rgba(122,163,255,0.35)] bg-[rgba(122,163,255,0.16)] flex items-center justify-center">
-                  <ArrowLeftRight size={12} className="text-[#8fb4ff]" strokeWidth={2.4} />
-                </span>
-              </div>
-              <div className="relative flex items-center gap-2.5 pl-3.5 h-4 -my-1">
-                <div className="connector-line">
-                  <div className="travel-dot" />
-                </div>
-                <span className="text-[9.5px] italic text-[#9aa6c9]">Distance estimée en direct</span>
-              </div>
-              <div className="addr-field">
-                <span className="addr-ic">
-                  <Navigation2 />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#9aa6c9] mb-0.5">Arrivée</div>
-                  <div className="text-[13px] italic text-[#c3cbe6] truncate">Choisir une adresse</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Toggle A/AR */}
-            <div className="trip-type mt-4">
-              <div className="trip-slider" />
-              <div className="trip-seg trip-seg-active">Aller simple</div>
-              <div className="trip-seg">Aller-retour</div>
-            </div>
-
-            {/* Preview estimation */}
-            <div className="mt-3.5 flex items-center justify-between bg-black/20 border border-[rgba(122,163,255,0.16)] rounded-[14px] px-3.5 py-3">
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.06em] font-bold text-[#9aa6c9] mb-1">Estimation</div>
-                <div className="shimmer-bar" />
-              </div>
-              <span className="text-[9px] font-bold text-[#4f8cff] bg-[rgba(63,123,255,0.14)] px-2.5 py-1 rounded-full">
-                Calcul en cours…
-              </span>
-            </div>
-
-            {/* CTA */}
-            <div
-              className="book-cta mt-[18px] relative overflow-hidden flex items-center justify-center gap-2.5 rounded-full py-4 font-bold text-[14.5px] tracking-[0.01em] text-white"
-              style={{
-                background: "linear-gradient(120deg, #2f5fff 0%, #2450e0 60%, #4f8cff 130%)",
-                boxShadow: "0 16px 36px rgba(47,95,255,0.5)",
-              }}
-            >
-              Voir mon tarif
-              <ArrowRight size={16} strokeWidth={2.4} />
-            </div>
-            <p className="text-center text-[10.5px] text-[#9aa6c9] mt-2.5">Réponse instantanée · sans engagement</p>
+            <MobileDevisGenerator />
           </div>
-        </button>
+        </div>
       </div>
 
       {/* Bande fonctionnalités */}
