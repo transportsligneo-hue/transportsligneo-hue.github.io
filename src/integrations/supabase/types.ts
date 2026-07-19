@@ -4268,6 +4268,10 @@ export type Database = {
         Args: { _offre_id: string; _reason?: string }
         Returns: undefined
       }
+      admin_reset_mission: {
+        Args: { _attribution_id: string }
+        Returns: undefined
+      }
       admin_reset_operational_data: { Args: never; Returns: Json }
       admin_set_mission_prix: {
         Args: { _mission_id: string; _prix: number }
