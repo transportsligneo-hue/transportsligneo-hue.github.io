@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { User, Building2, Truck, Star, Camera, ShieldCheck, MapPin, Bell, PhoneCall, Check, FileSignature, ScanLine, Headphones } from "lucide-react";
+import { User, Building2, Truck, Star, Camera, ShieldCheck } from "lucide-react";
+import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
 
 const services = [
   {
@@ -64,36 +64,8 @@ export default function ServicesContent() {
         </div>
       </div>
 
-      <div className="v4-split-feature">
-        <div className="v4-split-visual">
-          <div className="v4-visual-badge">
-            <div className="v4-big-ic"><MapPin size={38} strokeWidth={1.8} /></div>
-            <div style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 15 }}>Suivi GPS en direct</div>
-          </div>
-        </div>
-        <div className="v4-split-text">
-          <h2>Un suivi transparent, à chaque étape</h2>
-          <p>De l'enlèvement à la livraison, vous suivez votre véhicule en temps réel depuis votre espace client · sans avoir à appeler pour prendre des nouvelles.</p>
-          <ul>
-            <li><Check /> Position GPS en direct</li>
-            <li><Bell /> Notifications à chaque étape clé</li>
-            <li><PhoneCall /> Contact direct et rapide avec un conseiller</li>
-            <li><FileSignature /> Signature digitalisée</li>
-            <li><Camera /> États des lieux photo</li>
-            <li><ScanLine /> Scan OCR & documents</li>
-            <li><Headphones /> Ligne dédiée 7j/7</li>
-          </ul>
-        </div>
-      </div>
+      <ServicesGarantiesCarousel />
 
-      <div className="v4-cta-box">
-        <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
-          <span className="dot" />Un besoin spécifique ?
-        </div>
-        <h2>Parlons de votre projet de convoyage</h2>
-        <p>Particulier, concession, loueur ou gestionnaire de flotte : nous avons une solution adaptée.</p>
-        <Link to="/contact" className="v4-btn-primary">Contacter un conseiller</Link>
-      </div>
     </div>
   );
 }
