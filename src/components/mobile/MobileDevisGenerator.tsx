@@ -411,192 +411,308 @@ export default function MobileDevisGenerator() {
   );
 
   return (
-    <section className="md:hidden pt-3 pb-6">
-      <div className="px-1">
-        {/* Carte trajet — premium */}
+    <section className="md:hidden">
+      <div>
+        {/* === STAGE 1 — Carte "Estimer mon trajet" (design HTML v3 bleu néon) === */}
         {!showForm && !submitted && (
-          <div className={`${premiumCardCls} p-5 mb-4`}>
-            {hairline}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">
-                Votre trajet
-              </p>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-[#e7c76a]/35 bg-[#e7c76a]/[0.06] text-[9px] tracking-[0.22em] uppercase text-[#e7c76a]/90 font-heading">
-                Live
-              </span>
-            </div>
-
-            {/* Picker départ */}
-            <button
-              type="button"
-              onClick={() => openPicker("dep")}
-              className="group w-full flex items-center gap-3 py-3.5 px-3.5 bg-[rgba(11,16,38,0.55)] border border-[rgba(212,175,55,0.20)] rounded-xl tap-scale active:bg-[rgba(11,16,38,0.75)] hover:border-[#e7c76a]/45 transition-all mb-2.5"
-            >
-              <span className="w-10 h-10 rounded-xl border border-[rgba(212,175,55,0.4)] bg-gradient-to-br from-[rgba(212,175,55,0.18)] to-[rgba(212,175,55,0.04)] flex items-center justify-center shrink-0">
-                <MapPin size={16} className="text-[#e7c76a]" strokeWidth={1.7} />
-              </span>
-              <div className="flex-1 text-left min-w-0">
-                <p className="text-[9.5px] uppercase tracking-[0.24em] text-[#e7c76a]/75 font-heading">Départ</p>
-                <p className={`text-[14px] truncate mt-0.5 font-heading tracking-wide ${departure ? "text-cream" : "text-cream/40 italic"}`}>
-                  {departure || "Choisir une adresse"}
-                </p>
+          <div className="mdev-card">
+            <div className="mdev-inner">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(63,123,255,0.4), rgba(217,181,74,0.15))",
+                      border: "1px solid rgba(122,163,255,0.4)",
+                    }}
+                  >
+                    <Zap size={15} className="text-[#8fb4ff]" strokeWidth={2} />
+                  </span>
+                  <h3
+                    className="font-bold text-[16.5px] tracking-[-0.01em] text-white"
+                    style={{ fontFamily: "'Space Grotesk',sans-serif" }}
+                  >
+                    Estimer mon trajet
+                  </h3>
+                </div>
+                <span className="flex items-center gap-1.5 text-[9.5px] font-bold text-[#4ad0a0] bg-[rgba(74,208,160,0.1)] px-2.5 py-1 rounded-full">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-[#4ad0a0] mdev-pulse"
+                    style={{ boxShadow: "0 0 6px #4ad0a0" }}
+                  />
+                  Live
+                </span>
               </div>
-              <ChevronRight size={16} className="text-[#5fb6ff]/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-            </button>
 
-            {/* Filet bleu électrique entre les deux pickers */}
-            <div className="relative h-0 mb-2.5">
-              <span aria-hidden className="absolute left-[35px] -top-1.5 h-3 w-px bg-gradient-to-b from-[#e7c76a]/60 to-[#5fb6ff]/60" />
-            </div>
+              {/* Départ */}
+              <button
+                type="button"
+                onClick={() => openPicker("dep")}
+                className="mdev-addr w-full text-left"
+              >
+                <span className="mdev-addr-ic">
+                  <MapPin size={13} className="text-[#8fb4ff]" strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] tracking-[0.1em] uppercase text-[#9aa6c9] font-bold mb-0.5">
+                    Départ
+                  </div>
+                  <div
+                    className={`text-[13px] truncate ${
+                      departure ? "text-white not-italic" : "text-[#c3cbe6] italic"
+                    }`}
+                  >
+                    {departure || "Choisir une adresse"}
+                  </div>
+                </div>
+                {departure && arrival && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Inverser départ et arrivée"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const d = departure;
+                      setDeparture(arrival);
+                      setArrival(d);
+                    }}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{
+                      background: "rgba(122,163,255,0.16)",
+                      border: "1px solid rgba(122,163,255,0.35)",
+                    }}
+                  >
+                    <ArrowUpDown size={12} className="text-[#8fb4ff]" strokeWidth={2.4} />
+                  </span>
+                )}
+              </button>
 
-            {/* Picker arrivée */}
-            <button
-              type="button"
-              onClick={() => openPicker("arr")}
-              className="group w-full flex items-center gap-3 py-3.5 px-3.5 bg-[rgba(11,16,38,0.55)] border border-[rgba(212,175,55,0.20)] rounded-xl tap-scale active:bg-[rgba(11,16,38,0.75)] hover:border-[#e7c76a]/45 transition-all"
-            >
-              <span className="w-10 h-10 rounded-xl border border-[rgba(95,182,255,0.35)] bg-gradient-to-br from-[rgba(95,182,255,0.16)] to-[rgba(95,182,255,0.03)] flex items-center justify-center shrink-0">
-                <Navigation size={16} className="text-[#5fb6ff]" strokeWidth={1.7} />
-              </span>
-              <div className="flex-1 text-left min-w-0">
-                <p className="text-[9.5px] uppercase tracking-[0.24em] text-[#5fb6ff]/85 font-heading">Arrivée</p>
-                <p className={`text-[14px] truncate mt-0.5 font-heading tracking-wide ${arrival ? "text-cream" : "text-cream/40 italic"}`}>
-                  {arrival || "Choisir une adresse"}
-                </p>
+              {/* Connector */}
+              <div className="mdev-conn">
+                <div className="mdev-conn-line">
+                  <div className="mdev-travel" />
+                </div>
+                <span className="text-[9.5px] italic text-[#9aa6c9]">
+                  {distanceLoading
+                    ? "Calcul en cours…"
+                    : distance != null && distance > 0
+                    ? `~ ${distance} km estimés`
+                    : "Distance estimée en direct"}
+                </span>
               </div>
-              <ChevronRight size={16} className="text-[#5fb6ff]/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-            </button>
 
-            {/* Type trajet — segmented control premium */}
-            <div className="mt-5">
-              <p className={labelCls}>Type de trajet</p>
-              <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl border border-[rgba(212,175,55,0.18)] bg-[rgba(11,16,38,0.45)]">
-                {[
-                  { value: "aller-simple", label: "Simple" },
-                  { value: "aller-retour", label: "Retour" },
-                ].map(o => {
-                  const active = option === o.value;
-                  return (
-                    <button
-                      key={o.value}
-                      type="button"
-                      onClick={() => setOption(o.value)}
-                      className={`relative py-2.5 rounded-xl text-[10.5px] font-heading tracking-[0.18em] uppercase transition-all ${
-                        active
-                          ? "text-[#0b1026]"
-                          : "text-cream/70 hover:text-cream"
-                      }`}
-                      style={
-                        active
-                          ? {
-                              background: "linear-gradient(135deg, #e7c76a 0%, #d4af37 100%)",
-                              boxShadow:
-                                "0 8px 22px -10px rgba(212,175,55,0.6), inset 0 1px 0 rgba(255,255,255,0.35)",
-                            }
-                          : undefined
-                      }
-                    >
-                      {o.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+              {/* Arrivée */}
+              <button
+                type="button"
+                onClick={() => openPicker("arr")}
+                className="mdev-addr w-full text-left"
+              >
+                <span className="mdev-addr-ic">
+                  <Navigation size={13} className="text-[#8fb4ff]" strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] tracking-[0.1em] uppercase text-[#9aa6c9] font-bold mb-0.5">
+                    Arrivée
+                  </div>
+                  <div
+                    className={`text-[13px] truncate ${
+                      arrival ? "text-white not-italic" : "text-[#c3cbe6] italic"
+                    }`}
+                  >
+                    {arrival || "Choisir une adresse"}
+                  </div>
+                </div>
+              </button>
 
-        {/* Résultat — carte prix premium */}
-        {!showForm && !submitted && distance !== null && pricing && (
-          <div className={`${premiumCardCls} p-6 mb-4`}>
-            {/* halo doré derrière le prix */}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full opacity-60"
-              style={{
-                background:
-                  "radial-gradient(closest-side, rgba(231,199,106,0.30), rgba(95,182,255,0.10) 55%, transparent 75%)",
-              }}
-            />
-            {hairline}
-
-            <div className="relative text-center mb-5">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#e7c76a]/85 mb-2 font-heading">
-                Estimation instantanée
-              </p>
-              <p
-                className="font-heading text-[64px] leading-none tracking-tight"
+              {/* Toggle Aller simple / Aller-retour */}
+              <div
+                className="relative flex mt-4 rounded-full p-1"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #fdf3c4 0%, #e7c76a 45%, #b8902e 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  textShadow: "0 1px 0 rgba(0,0,0,0.15)",
+                  background: "rgba(0,0,0,0.25)",
+                  border: "1px solid rgba(122,163,255,0.18)",
                 }}
               >
-                {pricing.finalPrice}
-                <span className="text-[26px] ml-1 align-top">€</span>
+                <span
+                  className="absolute top-1 left-1 rounded-full transition-transform duration-300"
+                  style={{
+                    width: "calc(50% - 4px)",
+                    height: "calc(100% - 8px)",
+                    background: "linear-gradient(120deg,#2f5fff,#4f8cff)",
+                    boxShadow: "0 8px 20px rgba(47,95,255,0.45)",
+                    transform: option === "aller-retour" ? "translateX(100%)" : "translateX(0)",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setOption("aller-simple")}
+                  className={`relative z-[1] flex-1 text-center py-2.5 rounded-full text-[11.5px] font-bold transition-colors ${
+                    option === "aller-simple" ? "text-white" : "text-[#9aa6c9]"
+                  }`}
+                >
+                  Aller simple
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOption("aller-retour")}
+                  className={`relative z-[1] flex-1 text-center py-2.5 rounded-full text-[11.5px] font-bold transition-colors ${
+                    option === "aller-retour" ? "text-white" : "text-[#9aa6c9]"
+                  }`}
+                >
+                  Aller-retour
+                </button>
+              </div>
+
+              {/* Estimation preview */}
+              <div
+                className="flex items-center justify-between mt-3.5 rounded-[14px] px-3.5 py-3"
+                style={{
+                  background: "rgba(0,0,0,0.22)",
+                  border: "1px solid rgba(122,163,255,0.16)",
+                }}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] uppercase tracking-[0.06em] text-[#9aa6c9] font-bold mb-1.5">
+                    Estimation
+                  </div>
+                  {pricing ? (
+                    <div
+                      className="text-white text-[20px] font-extrabold leading-none"
+                      style={{ fontFamily: "'Space Grotesk',sans-serif" }}
+                    >
+                      {pricing.finalPrice} €
+                    </div>
+                  ) : (
+                    <div className="h-[9px] rounded mdev-shimmer" style={{ width: 88 }} />
+                  )}
+                </div>
+                <div className="text-right shrink-0 ml-3">
+                  <span
+                    className="text-[9px] font-bold text-[#4f8cff] px-2.5 py-1 rounded-full inline-block"
+                    style={{ background: "rgba(63,123,255,0.14)" }}
+                  >
+                    {pricing
+                      ? distance != null && distance > 0
+                        ? `${distance} km · ${estimateDuration(distance)}`
+                        : "Forfait local"
+                      : distanceLoading
+                      ? "Calcul en cours…"
+                      : departure && arrival
+                      ? "En attente"
+                      : "Choisir un trajet"}
+                  </span>
+                </div>
+              </div>
+
+              {/* CTA "Voir mon tarif" */}
+              <button
+                type="button"
+                disabled={!pricing}
+                onClick={() => setShowForm(true)}
+                className="mdev-cta mt-[18px] w-full flex items-center justify-center gap-2.5 rounded-full py-4 text-[14.5px] font-bold tracking-wide text-white disabled:opacity-55 disabled:cursor-not-allowed"
+              >
+                <span className="relative z-[1]">Voir mon tarif</span>
+                <ChevronRight size={16} strokeWidth={2.4} className="relative z-[1]" />
+              </button>
+              <p className="text-center text-[10.5px] text-[#9aa6c9] mt-2.5">
+                Réponse instantanée · sans engagement
               </p>
-              {pricing.hasExtra && (
-                <p className="font-heading text-[#e7c76a]/85 text-[10px] mt-2 tracking-[0.22em] uppercase">
-                  {pricing.multiplierLabel}
-                </p>
-              )}
-              <span
-                aria-hidden
-                className="block mx-auto mt-3 h-px w-16 bg-gradient-to-r from-transparent via-[#5fb6ff]/70 to-transparent"
-              />
             </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="rounded-xl border border-[rgba(212,175,55,0.22)] bg-[rgba(11,16,38,0.55)] p-3 text-center">
-                <Navigation size={14} className="text-[#e7c76a] mx-auto mb-1.5" strokeWidth={1.7} />
-                <p className="text-cream font-heading text-[14px] tracking-wide">{distance} km</p>
-                <p className="text-cream/45 text-[9.5px] mt-0.5 tracking-[0.18em] uppercase">Distance</p>
-              </div>
-              <div className="rounded-xl border border-[rgba(95,182,255,0.22)] bg-[rgba(11,16,38,0.55)] p-3 text-center">
-                <Clock size={14} className="text-[#5fb6ff] mx-auto mb-1.5" strokeWidth={1.7} />
-                <p className="text-cream font-heading text-[14px] tracking-wide">{distance > 0 ? estimateDuration(distance) : "—"}</p>
-                <p className="text-cream/45 text-[9.5px] mt-0.5 tracking-[0.18em] uppercase">Durée</p>
-              </div>
-            </div>
-
-            <p className="text-center text-cream/55 text-[10px] mt-4 tracking-[0.16em] uppercase">
-              Péages · Carburant · Assurance · Inclus
-            </p>
-
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-5 w-full h-14 rounded-2xl font-heading text-[12px] tracking-[0.22em] uppercase tap-scale flex items-center justify-center gap-2 text-[#0b1026]"
-              style={{
-                background: "linear-gradient(135deg, #e7c76a 0%, #d4af37 100%)",
-                boxShadow:
-                  "0 14px 34px -12px rgba(212,175,55,0.6), inset 0 1px 0 rgba(255,255,255,0.4)",
-              }}
-            >
-              <Sparkles size={15} />
-              Demander un devis
-              <ChevronRight size={15} />
-            </button>
           </div>
         )}
 
-        {!showForm && !submitted && departure && arrival && distance === null && distanceLoading && (
-          <div className={`${premiumCardCls} p-4 text-center`}>
-            {hairline}
-            <p className="text-cream/65 text-sm inline-flex items-center gap-2 font-heading tracking-wide">
-              <Loader2 size={13} className="animate-spin text-[#e7c76a]" /> Calcul de la distance…
-            </p>
-          </div>
-        )}
+        {/* === Styles locaux (design v3 bleu néon) === */}
+        <style>{`
+          .mdev-card {
+            position: relative;
+            background: rgba(14,20,44,0.94);
+            border-radius: 30px;
+            padding: 3px;
+            box-shadow: 0 30px 60px rgba(4,8,22,0.6);
+            animation: mdevFloat 6s ease-in-out infinite;
+          }
+          .mdev-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: 30px; padding: 1.4px;
+            background: linear-gradient(135deg, rgba(122,163,255,0.7), rgba(217,181,74,0.35), rgba(122,163,255,0.15), rgba(79,140,255,0.6));
+            background-size: 280% 280%; animation: mdevBorder 7s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+          }
+          .mdev-inner {
+            position: relative; background: rgba(13,19,42,0.96); border-radius: 27px;
+            padding: 22px 20px; backdrop-filter: blur(18px); overflow: hidden;
+          }
+          .mdev-inner::before {
+            content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+          }
+          @keyframes mdevFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+          @keyframes mdevBorder { 0%{background-position:0% 50%} 100%{background-position:280% 50%} }
+          @keyframes mdevPulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+          .mdev-pulse { animation: mdevPulse 1.6s ease-in-out infinite; }
+
+          .mdev-addr {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(122,163,255,0.16);
+            border-radius: 16px; padding: 13px 14px;
+            position: relative; transition: border-color .2s ease, box-shadow .2s ease;
+          }
+          .mdev-addr:hover, .mdev-addr:focus-visible {
+            border-color: rgba(122,163,255,0.55);
+            box-shadow: 0 0 0 3px rgba(63,123,255,0.12);
+            outline: none;
+          }
+          .mdev-addr-ic {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.1));
+            border: 1px solid rgba(122,163,255,0.4); flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(63,123,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+          }
+          .mdev-conn {
+            position: relative; display: flex; align-items: center; gap: 10px;
+            padding-left: 14px; margin: 6px 0; height: 22px;
+          }
+          .mdev-conn-line {
+            position: relative; width: 1.5px; height: 22px; margin-left: 15px; overflow: hidden;
+            background: repeating-linear-gradient(180deg, rgba(122,163,255,0.5) 0 3px, transparent 3px 6px);
+          }
+          .mdev-travel {
+            position: absolute; left: -2.5px; top: 0; width: 6px; height: 6px; border-radius: 50%;
+            background: #d9b54a; box-shadow: 0 0 8px 2px rgba(217,181,74,0.7);
+            animation: mdevTravel 2.4s ease-in-out infinite;
+          }
+          @keyframes mdevTravel { 0%{top:0;opacity:0} 15%{opacity:1} 85%{opacity:1} 100%{top:100%;opacity:0} }
+
+          .mdev-shimmer {
+            background: linear-gradient(90deg, rgba(122,163,255,0.15) 25%, rgba(122,163,255,0.4) 50%, rgba(122,163,255,0.15) 75%);
+            background-size: 200% 100%;
+            animation: mdevShim 1.6s ease-in-out infinite;
+          }
+          @keyframes mdevShim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+          .mdev-cta {
+            position: relative; overflow: hidden;
+            background: linear-gradient(120deg, #2f5fff 0%, #2450e0 60%, #4f8cff 130%);
+            box-shadow: 0 16px 36px rgba(47,95,255,0.5);
+          }
+          .mdev-cta:not(:disabled)::after {
+            content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg); animation: mdevShine 3.4s ease-in-out infinite;
+          }
+          @keyframes mdevShine { 0%{left:-60%} 45%{left:130%} 100%{left:130%} }
+        `}</style>
+
+        {/* Loading / non-calculable — messages hors carte */}
         {!showForm && !submitted && departure && arrival && distance === null && !distanceLoading && (
-          <div className={`${premiumCardCls} p-4 text-center`}>
-            {hairline}
-            <p className="text-[#e7c76a]/85 text-[11.5px] tracking-wide">
-              Distance non calculable automatiquement. Continuez votre demande, nous confirmerons manuellement.
-            </p>
-          </div>
+          <p className="mt-2 text-center text-[10.5px] text-[#e7c76a]/90">
+            Distance non calculable automatiquement — nous confirmerons manuellement.
+          </p>
         )}
+
+
 
         {/* Formulaire complet */}
         {showForm && !submitted && (
