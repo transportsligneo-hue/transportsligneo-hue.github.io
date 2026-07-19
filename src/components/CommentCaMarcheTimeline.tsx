@@ -99,7 +99,9 @@ export default function CommentCaMarcheTimeline() {
       </section>
 
       {/* ============ TIMELINE ============ */}
-      <section className="py-14 lg:py-20" style={{ background: "var(--surface-cream, #faf7ef)" }}>
+      <section className="ccm-hero py-14 lg:py-20 relative overflow-hidden">
+        <div aria-hidden className="ccm-aurora" />
+        <div aria-hidden className="ccm-grid opacity-40" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="relative">
             {/* Ligne centrale : bleu électrique + doré */}
@@ -140,10 +142,10 @@ export default function CommentCaMarcheTimeline() {
                             </span>
                           </span>
                         </div>
-                        <h2 className="font-heading text-[17px] sm:text-[19px] text-[#0b1026] tracking-wide leading-snug mb-1.5">
+                        <h2 className="font-heading text-[17px] sm:text-[19px] text-cream tracking-wide leading-snug mb-1.5">
                           {step.title}
                         </h2>
-                        <p className="text-[#0b1026]/65 text-[13.5px] leading-relaxed">
+                        <p className="text-cream/70 text-[13.5px] leading-relaxed">
                           {step.desc}
                         </p>
                         {/* Filet iridescent au hover */}
@@ -402,33 +404,34 @@ export default function CommentCaMarcheTimeline() {
 
         /* ---------- CARTE ÉTAPE ---------- */
         .ccm-card {
-          background: linear-gradient(180deg, #ffffff 0%, #fbfaf6 100%);
-          border: 1px solid rgba(11,16,38,0.06);
+          background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+          border: 1px solid rgba(122,163,255,0.18);
           box-shadow:
-            0 1px 2px rgba(11,16,38,0.04),
-            0 10px 30px -18px rgba(11,16,38,0.18);
+            0 1px 2px rgba(4,8,22,0.4),
+            0 20px 40px -22px rgba(4,8,22,0.6);
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(10px);
         }
         .ccm-card::before {
           content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-          background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(231,199,106,0.4));
+          background: linear-gradient(135deg, rgba(122,163,255,0.55), rgba(217,181,74,0.5));
           -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
           -webkit-mask-composite: xor; mask-composite: exclude;
           opacity: 0; transition: opacity .35s ease; pointer-events: none;
         }
         .ccm-card:hover {
           transform: translateY(-3px);
+          border-color: rgba(122,163,255,0.4);
           box-shadow:
-            0 2px 4px rgba(11,16,38,0.05),
-            0 30px 55px -22px rgba(59,130,246,0.28),
-            0 20px 40px -22px rgba(212,175,55,0.22);
+            0 30px 55px -22px rgba(47,95,255,0.35),
+            0 20px 40px -22px rgba(212,175,55,0.2);
         }
         .ccm-card:hover::before { opacity: 1; }
         .ccm-step-chip {
-          background: linear-gradient(90deg, rgba(59,130,246,0.10), rgba(231,199,106,0.16));
-          border: 1px solid rgba(212,175,55,0.35);
-          color: #7a5a10;
+          background: linear-gradient(90deg, rgba(47,95,255,0.18), rgba(217,181,74,0.18));
+          border: 1px solid rgba(217,181,74,0.4);
+          color: #e7c76a;
         }
         .ccm-card-underline {
           background: linear-gradient(90deg, transparent, rgba(59,130,246,0.7), rgba(231,199,106,0.8), rgba(59,130,246,0.7), transparent);
