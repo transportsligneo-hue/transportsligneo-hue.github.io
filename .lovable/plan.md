@@ -1,113 +1,58 @@
-# Assistant IA — État des lieux TRANSPORTS LIGNEO
+## Refonte design globale — Transports Ligneo
 
-Objectif : ajouter un assistant IA (détection défauts, OCR compteur/voyants/équipements, guide photo, comparaison départ/arrivée, rapport premium) **sans toucher** aux workflows EDL, missions, attributions, facturation existants. Tout est piloté par feature‑flags admin ; IA OFF ⇒ comportement 100% identique à aujourd'hui.
+Application du système visuel des 6 maquettes HTML au site en production, **sans toucher à la logique métier existante** (formulaire d'estimation, auth, dashboards, GPS, factures, routes, SEO, tracking).
 
-## Principes non négociables
+### 1. Système de design global (`src/styles.css` + `__root.tsx`)
+- Fond continu bleu marine lumineux : dégradé `#0a1638 → #081230 → #061238` + halos radiaux bleu électrique / or, appliqué au `<body>` marketing (pas dans les dashboards).
+- Chargement polices via `<link>` dans `__root.tsx` : Poppins (800/900), Space Grotesk (500-700), Inter (400-700).
+- Tokens CSS : `--navy`, `--blue #2f5fff`, `--blue-bright #4f8cff`, `--gold #d9b54a`, `--text-muted #9aa6c9`, `--border rgba(122,163,255,.16)`.
+- Wordmark "TRANSPORTS **LIGNEO**" avec glow bleu pulsé sur "LIGNEO".
+- Composants réutilisables : `.glass-card`, `.btn-pill-blue` (reflet lumineux balayant), `.btn-estimer` (bordure dégradée animée + éclair doré), `.btn-connexion` (dégradé bleu→or dérivant), `.nav-pill` (pilule englobante, onglet actif "respire").
+- Animations indépendantes (nav / bouton Estimer / bouton Connexion non synchronisés).
 
-- Zéro régression : aucun composant EDL existant n'est modifié dans sa logique. On **enveloppe** (wrapper) ou on **ajoute des panneaux latéraux**.
-- Kill-switch global + granulaire (par capacité) lisible côté client comme côté serveur.
-- L'IA **suggère**, ne décide jamais. Toute suggestion est révisable/rejetable avant persistance.
-- Server-side uniquement pour les appels payants (Lovable AI Gateway). Auth Supabase requise. Rate limit.
-- Offline-first : file d'attente locale (IndexedDB) déjà présente pour EDL, on greffe les analyses IA dessus.
+### 2. Navbar desktop (`Navbar.tsx`)
+- Refonte visuelle uniquement : liens dans pilule englobante translucide, item actif en dégradé bleu pulsé.
+- Boutons Estimer / Connexion refaits selon maquette.
+- Toutes les routes, actions `goToEstimer` / `goToEspace`, comportement mobile : inchangés.
 
-## Phase 1 — Fondations (livrées cette itération)
+### 3. Hero accueil (`HeroDesktop.tsx`)
+- Garde photo `heroBg` existante + overlay bleu électrique multiply + fondu vers le bas (pas de coupure).
+- Simulateur (`DevisGenerator variant="hero-card"`) **conservé tel quel** (demande explicite : « juste garde l'estimateur actuel sur l'accueil »), juste réhabillé en glass card avec bordure dégradée animée, chevauchant le bas du hero.
+- Trust pills, titre, CTAs restylés au système.
 
-### 1. Table `ai_settings` + RPC publique
+### 4. Carte interactive France/Europe (nouveau composant `MapFranceEurope.tsx`)
+- Nouvelle section sur l'accueil, insérée après le hero / stats.
+- SVG copié tel quel depuis `accueil-desktop-refonte_2.html` (vrais tracés géographiques France + voisins, Tours en hub doré pulsant, 9 lignes bleues vers villes FR, 5 lignes pointillées dorées vers Europe, points lumineux `animateMotion`).
+- Légende 3 couleurs dessous.
 
-`public.ai_settings` (singleton) — toutes les capacités listées ci‑dessous en booléens + `ai_enabled` global + `assistance_level` (`minimal|standard|avance`).
+### 5. Page "Comment ça marche" (`CommentCaMarcheTimeline.tsx`)
+- Restructure en **4 grandes phases** (Estimation & Devis / Validation interne / Convoyage / Clôture & Facturation) avec gros numéro + titre, sous-étapes réelles en grille 2 colonnes.
+- Reprend le **contenu réel actuel des 12 étapes** regroupé par phase — pas le texte d'exemple des maquettes.
 
-Capacités : `ocr_documents`, `ocr_odometer`, `detect_fuel_level`, `detect_battery_level`, `detect_warning_lights`, `detect_scratches`, `detect_dents`, `detect_impacts`, `detect_rims`, `detect_windshield`, `detect_mirrors`, `detect_lights`, `detect_equipment`, `compare_departure_arrival`, `auto_report`, `mission_prefill`, `smart_suggestions`, `photo_assistant`.
+### 6. Pages restylées (contenu réel conservé, seul le style change)
+- `services.tsx` → `ServicesContent.tsx` + `Engagements.tsx`
+- `a-propos.tsx` → `AProposContent.tsx`
+- `b2b.tsx`
+- `contact.tsx` → `Contact.tsx` + `FAQ.tsx`
+- Chaque page adopte : fond global, eyebrow Space Grotesk, titres Poppins avec mot-clé en bleu pulsé, cartes glass, boutons pilule.
+- **Aucun texte, tarif, FAQ, mention légale n'est réécrit** — juste rehabillé.
 
-- RLS : lecture pour `authenticated` (nécessaire côté convoyeur), écriture admin uniquement.
-- RPC `get_public_ai_settings()` (SECURITY DEFINER, `TO authenticated`) : renvoie l'objet plat, cache côté client 60s.
-- Table `ai_usage_events` (append-only) : `capability`, `user_id`, `latency_ms`, `success`, `cost_credits_est`, `created_at` — alimente les statistiques admin.
+### 7. Non touché
+- `DevisGenerator` (logique + UI actuelle du simulateur)
+- Auth, dashboards admin/pro/convoyeur/client, routes `_authenticated/*`, `api/*`
+- SEO (`head()` de chaque route), JSON-LD, tracking
+- Mobile (`MobileHomeScreen`, `MobileBottomNav`) — refonte mobile déjà validée précédemment
+- PartnersMarquee (marqué "INTOUCHABLE" en mémoire)
+- Fichiers `src/integrations/supabase/*` et migrations
 
-### 2. Provider React `AiSettingsProvider`
+### Détails techniques
+- Aucune migration DB, aucun changement de props/ids/classes utilisés hors marketing.
+- Test preview page par page avant validation.
+- Ordre : (1) tokens/polices/composants CSS globaux → (2) Navbar → (3) Hero + carte France → (4) 4 autres pages marketing → (5) Comment ça marche restructuré.
 
-- Un fetch au montage via `get_public_ai_settings`.
-- Realtime sur `ai_settings` pour propagation instantanée.
-- Helper `useAiCapability("detect_scratches")` → `boolean`. **Toute** UI IA gate son rendu derrière ce hook. IA OFF ⇒ arbres React inchangés.
+### Ce qui reste en discussion
+Volume important (6 pages + carte SVG + composants globaux). Je propose de livrer en **2 lots** :
+- **Lot A** : système de design + Navbar + Hero accueil + carte France/Europe (impact visuel principal).
+- **Lot B** : Services, À propos, B2B, Contact, Comment ça marche restructuré.
 
-### 3. Server functions IA (`src/lib/ai/*.functions.ts`)
-
-Chacune : `requireSupabaseAuth`, vérif capacité côté serveur (double gate), Zod input, appel Lovable AI Gateway (`google/gemini-3.1-flash` pour l'analyse rapide, `google/gemini-2.5-pro` pour la comparaison), log `ai_usage_events`, timeout 15s, gestion 429/402 explicite.
-
-- `analyzePhotoDamage` — retourne bounding boxes normalisées + labels + confidence pour rayures/bosses/impacts/etc.
-- `readDashboard` — kilométrage, autonomie, carburant %, batterie %, voyants allumés (liste).
-- `detectEquipment` — équipements intérieur/coffre présents/absents/incertains.
-- `photoQualityCheck` — flou, cadrage, luminosité, sujet manquant.
-- `compareEdl` — deltas départ vs arrivée (nouveaux défauts uniquement).
-- `generateEdlReport` — assemble un rapport structuré (JSON) prêt pour le PDF existant.
-
-L'OCR documents (`scanDocumentExtract`) et le handoff QR existants sont **conservés tels quels** ; on les branche derrière la capacité `ocr_documents`.
-
-### 4. UI Convoyeur — panneau `AiAssistantPanel`
-
-Ajouté **à côté** du composant EDL existant, jamais dedans. Slot latéral repliable :
-
-- Bandeau "Analyse en cours…" (skeleton) puis liste de suggestions groupées par catégorie.
-- Chaque suggestion : miniature avec overlay canvas (bbox), label, confidence, actions `Confirmer` / `Modifier` / `Ignorer`.
-- `Confirmer` ⇒ appelle les mêmes handlers que la saisie manuelle actuelle (ajout au state du form EDL). Aucune écriture directe en DB par l'IA.
-- Assistant photo : toast non‑bloquant en bas de l'écran capture (`"Photo floue, refaire ?"`) — le bouton "Valider quand même" reste toujours dispo.
-
-### 5. UI Admin — nouvelle route `/admin/parametres-ia`
-
-- Toggle global "IA activée".
-- Sélecteur `Niveau d'assistance`.
-- Grille de switches par capacité (les 18 listées).
-- Onglet Statistiques : appels/jour, latence p50/p95, taux de succès, coût estimé sur 30j (agrégation `ai_usage_events`).
-- Onglet Modèles : mapping capacité → id modèle Gemini (édition libre, validation contre l'allow-list Lovable AI).
-
-Ajout d'une entrée dans le menu latéral admin : `⚙️ Paramètres IA` (ne remplace **pas** `admin.parametres.tsx`).
-
-### 6. Création mission par scan
-
-Le bouton `📄 Scanner un document` existe déjà dans `admin.trajets.tsx` (ScanToPrefill + QrHandoffButton). On ajoute :
-- Même bloc dans `DevisGenerator` et `QuickMissionForm` (déjà fait) — on gate derrière `ocr_documents`.
-- Un mode "one-shot" : après OCR, si `mission_prefill` est actif, on peuple aussi les champs client (nom/email/tel) détectés.
-
-### 7. Comparaison Départ / Arrivée
-
-- Nouveau bouton dans la fiche mission côté admin : `Comparer EDL`.
-- Appelle `compareEdl` avec les URLs signées des photos départ + arrivée.
-- Affiche un split-view avec deltas surlignés + section "Nouveaux défauts" prête à être ajoutée au litige/facturation (bouton "Créer un incident" existant).
-
-### 8. Rapport IA
-
-- Bouton `Générer rapport IA` dans la fiche EDL (visible seulement si `auto_report` actif).
-- Appelle `generateEdlReport` puis alimente `src/lib/edl-final-pdf.ts` (déjà en place) via une section additionnelle "Analyse IA" — pas de fork du PDF.
-
-### 9. Performance
-
-- Web Worker pour la compression photo (existe : `src/lib/workers/image-worker.ts`). On y ajoute un downscale ciblé 1280px avant envoi AI (au lieu du fichier plein) → -80% latence + coût.
-- Cache mémoire `Map<sha256(image), result>` sur l'appel `analyzePhotoDamage` (session).
-- Requêtes IA envoyées en parallèle par lot de 3 (limite Gateway).
-- Lazy import de `AiAssistantPanel` (React.lazy) — 0 impact bundle si IA OFF.
-- Objectif p95 : première suggestion visible < 2s sur 4G.
-
-### 10. Mode hors ligne
-
-- Réutilise `edl-offline-queue.ts`. On ajoute une file `ai_pending` (IndexedDB) : `{photo_id, capability, params}`.
-- À la reconnexion, le worker rejoue et pousse dans le state EDL — sans jamais bloquer la saisie manuelle.
-
-## Ce qui **n'est pas** touché
-
-- `useMissionGates`, `mission_status.ts`, `attribution-response.functions.ts`, `pricing-engine.ts`, routes de checkout/webhooks Stripe, PDF facture, emails, EDL persistence (`inspections`, `inspection_photos`, `inspection_document_ocr`).
-- Aucun trigger SQL sur tables existantes.
-- Aucun changement de schéma sur `missions`, `attributions`, `trajets`, `devis`.
-
-## Détails techniques
-
-- Fichiers créés :
-  - `supabase/migrations/xxx_ai_settings.sql` — table + RPC + RLS + grants + seed singleton.
-  - `src/lib/ai/settings.functions.ts`, `src/lib/ai/context.tsx`, `src/lib/ai/useAiCapability.ts`.
-  - `src/lib/ai/analyze-photo.functions.ts`, `read-dashboard.functions.ts`, `detect-equipment.functions.ts`, `photo-quality.functions.ts`, `compare-edl.functions.ts`, `generate-report.functions.ts`.
-  - `src/components/ai/AiAssistantPanel.tsx`, `AiSuggestionCard.tsx`, `BoundingBoxOverlay.tsx`, `PhotoQualityToast.tsx`.
-  - `src/routes/_authenticated/admin.parametres-ia.tsx`.
-- Modèle par défaut : `google/gemini-3.1-flash-lite` (vision, rapide) — configurable en admin.
-- Prompts fortement contraints par tool-calling (JSON schema strict) pour éviter les hallucinations.
-- Chaque server fn journalise `ai_usage_events` même en cas d'échec (avec `success=false`).
-
-## Livraison
-
-Cette phase 1 pose **toutes** les capacités listées mais avec les modèles hébergés (pas de WASM/ONNX embarqué). Une phase 2 pourra remplacer les capacités les plus fréquentes (photo_quality, odomètre) par du on‑device (OpenCV.js déjà installé) pour tomber sous 500 ms de pré‑analyse — la même API `useAiCapability` restera valable, seul l'implémenteur change.
+Confirme-tu ce découpage, ou tu veux tout en un seul passage ?
