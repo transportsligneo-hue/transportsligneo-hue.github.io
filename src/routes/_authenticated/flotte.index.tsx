@@ -77,6 +77,7 @@ function FlotteIndex() {
           </Card>
         ))}
       </div>
+      <ActiveMissionsMap title="Trajets de votre flotte — temps réel" emptyMessage="Aucun trajet actif dans votre flotte." />
     </div>
   );
 }
