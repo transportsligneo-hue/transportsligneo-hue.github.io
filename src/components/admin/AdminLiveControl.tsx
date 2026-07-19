@@ -90,6 +90,47 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
     }
   };
 
+  const resetMission = async () => {
+    const ok = await confirmToast(
+      "Réinitialiser cette mission ?",
+      {
+        description: "Statut, étape, photos EDL, signatures, PV et historique seront effacés. Le convoyeur repartira de zéro.",
+        confirmLabel: "Tout réinitialiser",
+        variant: "danger",
+      },
+    );
+    if (!ok) return;
+    setBusy("reset");
+    try {
+      await resetAdminMission(attributionId);
+      toast.success("Mission réinitialisée");
+      onChange?.();
+    } catch (error) {
+      toast.error("Échec réinitialisation", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+    try {
+      await updateAdminMissionStatus({
+        attributionId,
+        trajetId,
+        statut: "en_cours",
+        note: "Mission ré-ouverte par admin",
+      });
+      toast.success("Mission ré-ouverte");
+      onChange?.();
+    } catch (error) {
+      toast.error("Échec ré-ouverture mission", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-pro-border bg-white p-4 space-y-4">
       <div className="flex items-center gap-2">
