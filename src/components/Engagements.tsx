@@ -12,57 +12,52 @@ const engagements = [
 
 export default function Engagements() {
   return (
-    <section id="engagements" className="py-24 section-bg-alt">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <div className="gold-divider-short mb-4" />
-          <h2 className="font-heading text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary">
-            Nos engagements
-          </h2>
-          <p className="text-cream/60 mt-4 max-w-lg mx-auto text-sm">
-            Sécurité, ponctualité et transparence à chaque mission.
-          </p>
-          <div className="gold-divider-short mt-4" />
+    <div className="r4-page" style={{ minHeight: 0 }}>
+      <section id="engagements" className="v4-section" style={{ paddingTop: 40, paddingBottom: 90 }}>
+        <div className="v4-section-head">
+          <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
+            <span className="dot" />Nos engagements
+          </div>
+          <h2>Sécurité, ponctualité et <span className="v4-accent">transparence</span></h2>
+          <p>Une exigence à chaque mission.</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Engagements cards */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            {engagements.map((e, i) => (
-              <div
-                key={i}
-                className="card-premium p-5 rounded group hover:border-primary/40 transition-colors duration-300"
-              >
-                <e.icon className="text-primary mb-3 group-hover:text-gold-light transition-colors" size={20} />
-                <h3 className="font-heading text-primary tracking-[0.1em] uppercase text-xs mb-2">
-                  {e.title}
-                </h3>
-                <p className="text-cream/60 text-xs leading-relaxed">{e.text}</p>
-              </div>
-            ))}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "center" }} className="v4-engag-split">
+          <div className="v4-services-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            {engagements.map((e, i) => {
+              const Icon = e.icon;
+              return (
+                <div key={i} className="v4-svc-card" style={{ padding: 20 }}>
+                  <div className="v4-svc-ic" style={{ width: 40, height: 40, marginBottom: 12 }}>
+                    <Icon size={18} color="#8fb4ff" strokeWidth={2} />
+                  </div>
+                  <h3 style={{ fontSize: 14 }}>{e.title}</h3>
+                  <p style={{ fontSize: 12.5 }}>{e.text}</p>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Carte de France */}
-          <div className="flex flex-col items-center">
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <img
               src={franceMapImg}
               alt="Carte de France — Basé à Tours (37)"
-              className="w-72 sm:w-80 md:w-96 lg:w-[460px] rounded object-contain"
+              style={{ width: "100%", maxWidth: 420, objectFit: "contain", filter: "drop-shadow(0 0 40px rgba(63,123,255,0.25))" }}
               loading="lazy"
               width={1024}
               height={1024}
             />
-            <div className="mt-6 text-center">
-              <p className="font-heading text-primary tracking-[0.15em] text-lg">
+            <div style={{ marginTop: 20, textAlign: "center" }}>
+              <p style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff", letterSpacing: "0.15em", fontSize: 16 }}>
                 Basé à Tours (37)
               </p>
-              <p className="text-cream/50 text-xs mt-1">
+              <p style={{ color: "var(--v4-text-muted)", fontSize: 12, marginTop: 4 }}>
                 Au cœur du réseau routier national
               </p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

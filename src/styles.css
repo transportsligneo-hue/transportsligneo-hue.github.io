@@ -2760,3 +2760,24 @@
   .r4-page .v4-tl-track { left:36px; }
   .r4-page .v4-stats-row { gap:32px; }
 }
+
+/* ============ V4 Quote Card (Tarifs page) ============ */
+.r4-page .v4-quote-card {
+  position: relative;
+  background: rgba(14,20,44,0.9);
+  border-radius: 28px;
+  padding: 3px;
+  box-shadow: 0 30px 60px rgba(4,8,22,0.55);
+}
+.r4-page .v4-quote-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: 28px; padding: 1.4px;
+  background: linear-gradient(135deg, rgba(122,163,255,0.7), rgba(217,181,74,0.35), rgba(122,163,255,0.15), rgba(79,140,255,0.6));
+  background-size: 280% 280%; animation: v4BorderFlow 7s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+@keyframes v4BorderFlow { 0%{background-position:0% 50%;} 100%{background-position:280% 50%;} }
+.r4-page .v4-quote-inner {
+  position: relative; background: rgba(13,19,42,0.96); border-radius: 25px;
+  padding: 18px; backdrop-filter: blur(18px);
+}
