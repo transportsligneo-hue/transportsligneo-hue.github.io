@@ -113,23 +113,6 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
       setBusy(null);
     }
   };
-    try {
-      await updateAdminMissionStatus({
-        attributionId,
-        trajetId,
-        statut: "en_cours",
-        note: "Mission ré-ouverte par admin",
-      });
-      toast.success("Mission ré-ouverte");
-      onChange?.();
-    } catch (error) {
-      toast.error("Échec ré-ouverture mission", {
-        description: error instanceof Error ? error.message : undefined,
-      });
-    } finally {
-      setBusy(null);
-    }
-  };
 
   return (
     <div className="rounded-2xl border border-pro-border bg-white p-4 space-y-4">
