@@ -13,7 +13,7 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
   head: () => ({
     meta: [
-      { title: "Connexion — Transports Ligneo" },
+      { title: "Connexion · Transports Ligneo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -240,7 +240,7 @@ function LoginPage() {
         <div className="text-center mt-5 space-y-2.5">
           <p className="inline-flex items-center gap-1.5 text-[10px] leading-relaxed text-white/45 px-2">
             <ShieldCheck size={11} className="text-blue-300" />
-            Protégé par reCAPTCHA — {" "}
+            Protégé par reCAPTCHA · {" "}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Confidentialité</a>
             {" "}·{" "}
             <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">CGU</a>

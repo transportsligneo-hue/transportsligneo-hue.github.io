@@ -41,7 +41,7 @@ export default function Engagements() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <img
               src={franceMapImg}
-              alt="Carte de France — Basé à Tours (37)"
+              alt="Carte de France · Basé à Tours (37)"
               style={{ width: "100%", maxWidth: 420, objectFit: "contain", filter: "drop-shadow(0 0 40px rgba(63,123,255,0.25))" }}
               loading="lazy"
               width={1024}

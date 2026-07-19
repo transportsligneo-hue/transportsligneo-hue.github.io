@@ -73,7 +73,7 @@ export default function ServicesContent() {
         </div>
         <div className="v4-split-text">
           <h2>Un suivi transparent, à chaque étape</h2>
-          <p>De l'enlèvement à la livraison, vous suivez votre véhicule en temps réel depuis votre espace client — sans avoir à appeler pour prendre des nouvelles.</p>
+          <p>De l'enlèvement à la livraison, vous suivez votre véhicule en temps réel depuis votre espace client · sans avoir à appeler pour prendre des nouvelles.</p>
           <ul>
             <li><Check /> Position GPS en direct</li>
             <li><Bell /> Notifications à chaque étape clé</li>

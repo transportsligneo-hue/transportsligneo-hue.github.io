@@ -1,5 +1,5 @@
 /**
- * DocumentScanner — scanner intelligent de documents (carte grise, PV livraison, PV restitution).
+ * DocumentScanner · scanner intelligent de documents (carte grise, PV livraison, PV restitution).
  *
  * API STABLE (ne pas changer) :
  *   props: { onCancel(), onScanned(file: File) }

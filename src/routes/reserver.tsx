@@ -7,9 +7,9 @@ export const Route = createFileRoute("/reserver")({
   component: ReserverPage,
   head: () => ({
     meta: [
-      { title: "Réserver un convoyage — Transports Ligneo" },
+      { title: "Réserver un convoyage · Transports Ligneo" },
       { name: "description", content: "Réservez votre convoyage automobile en 5 étapes : trajet, options, véhicule, coordonnées, confirmation. Prix transparent, péages inclus." },
-      { property: "og:title", content: "Réserver un convoyage — Transports Ligneo" },
+      { property: "og:title", content: "Réserver un convoyage · Transports Ligneo" },
       { property: "og:description", content: "Tunnel de réservation en ligne pour votre convoyage." },
     ],
   }),

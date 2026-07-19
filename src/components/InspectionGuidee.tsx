@@ -155,7 +155,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
     // Reset input immediately so user can re-pick same file later
     if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // 1) Local preview instant — révoque l'ancien blob pour éviter les fuites mémoire
+    // 1) Local preview instant · révoque l'ancien blob pour éviter les fuites mémoire
     const previewUrl = URL.createObjectURL(rawFile);
     setPhotos((prev) => {
       const old = prev[vueId];
@@ -193,7 +193,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
           captureId,
         });
 
-        // 3) Assistant IA en tâche de fond — jamais bloquant.
+        // 3) Assistant IA en tâche de fond · jamais bloquant.
         //    Nécessite d'être en ligne + capacités activées.
         if (online && (qualityEnabled || suggestEnabled)) {
           try {
@@ -380,7 +380,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
             })}
           </div>
 
-          {/* Assistant IA — suggestions de défauts détectés */}
+          {/* Assistant IA · suggestions de défauts détectés */}
           {suggestEnabled && (aiRunning || aiSuggestions.length > 0) && (
             <div className="mt-4">
               <AiAssistantPanel
@@ -571,7 +571,7 @@ export function InspectionGuidee({ attributionId, type, userId, onComplete, onCa
         </div>
       </div>
 
-      {/* Assistant IA — toast qualité photo (non-bloquant) */}
+      {/* Assistant IA · toast qualité photo (non-bloquant) */}
       {qualityEnabled && qualities[currentVue.id] && !dismissedQuality[currentVue.id] && (
         <PhotoQualityToast
           quality={qualities[currentVue.id]}

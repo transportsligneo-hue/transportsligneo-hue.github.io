@@ -112,7 +112,7 @@ function estimateDuration(distance: number): string {
 }
 
 /**
- * Estimateur dédié mobile — UX premium type app native.
+ * Estimateur dédié mobile · UX premium type app native.
  * Visible uniquement < md. Le composant desktop reste inchangé.
  */
 export default function MobileDevisGenerator() {
@@ -337,7 +337,7 @@ export default function MobileDevisGenerator() {
 
       await notifyAdmin({
         type: "estimation",
-        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} — ${prenom} ${nom}`,
+        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
         message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
         link: "/admin/devis",
         entityType: "devis",
@@ -413,7 +413,7 @@ export default function MobileDevisGenerator() {
   return (
     <section className="md:hidden">
       <div>
-        {/* === STAGE 1 — Carte "Estimer mon trajet" (design HTML v3 bleu néon) === */}
+        {/* === STAGE 1 · Carte "Estimer mon trajet" (design HTML v3 bleu néon) === */}
         {!showForm && !submitted && (
           <div className="mdev-card">
             <div className="mdev-inner">
@@ -705,10 +705,10 @@ export default function MobileDevisGenerator() {
           @keyframes mdevShine { 0%{left:-60%} 45%{left:130%} 100%{left:130%} }
         `}</style>
 
-        {/* Loading / non-calculable — messages hors carte */}
+        {/* Loading / non-calculable · messages hors carte */}
         {!showForm && !submitted && departure && arrival && distance === null && !distanceLoading && (
           <p className="mt-2 text-center text-[10.5px] text-[#e7c76a]/90">
-            Distance non calculable automatiquement — nous confirmerons manuellement.
+            Distance non calculable automatiquement · nous confirmerons manuellement.
           </p>
         )}
 
@@ -845,7 +845,7 @@ export default function MobileDevisGenerator() {
                   <label className={labelCls}><Car size={11} className="inline mr-1" />Type</label>
                   <div className="relative">
                     <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={`${inputCls} appearance-none pr-9`}>
-                      <option value="">—</option>
+                      <option value=""> · </option>
                       {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none" />
@@ -855,7 +855,7 @@ export default function MobileDevisGenerator() {
                   <label className={labelCls}><Fuel size={11} className="inline mr-1" />Énergie</label>
                   <div className="relative">
                     <select value={energy} onChange={e => setEnergy(e.target.value)} className={`${inputCls} appearance-none pr-9`}>
-                      <option value="">—</option>
+                      <option value=""> · </option>
                       {ENERGY_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none" />
@@ -873,7 +873,7 @@ export default function MobileDevisGenerator() {
                 <label className={labelCls}>Type de prestation</label>
                 <div className="relative">
                   <select value={prestation} onChange={e => setPrestation(e.target.value)} className={`${inputCls} appearance-none pr-9`}>
-                    <option value="">—</option>
+                    <option value=""> · </option>
                     {PRESTATION_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                   </select>
                   <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none" />
@@ -1082,7 +1082,7 @@ export default function MobileDevisGenerator() {
         )}
       </div>
 
-      {/* Bottom sheet — Sélecteur de villes (portal pour échapper à tout
+      {/* Bottom sheet · Sélecteur de villes (portal pour échapper à tout
           ancêtre avec filter / backdrop-filter / transform qui briserait
           le position: fixed) */}
       {pickerType && typeof document !== "undefined" && createPortal((

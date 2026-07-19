@@ -60,13 +60,13 @@ export function VehiculeDocsView({ vin, rectoPath, versoPath }: Props) {
           {recto && (
             <a href={recto} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-pro-border hover:border-[var(--gold)]/40 transition">
               <img src={recto} alt="Carte grise recto" className="w-full h-32 object-cover" />
-              <p className="text-[10px] text-center text-pro-muted py-1.5 bg-pro-bg-soft/50">Carte grise — recto</p>
+              <p className="text-[10px] text-center text-pro-muted py-1.5 bg-pro-bg-soft/50">Carte grise · recto</p>
             </a>
           )}
           {verso && (
             <a href={verso} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-pro-border hover:border-[var(--gold)]/40 transition">
               <img src={verso} alt="Carte grise verso" className="w-full h-32 object-cover" />
-              <p className="text-[10px] text-center text-pro-muted py-1.5 bg-pro-bg-soft/50">Carte grise — verso</p>
+              <p className="text-[10px] text-center text-pro-muted py-1.5 bg-pro-bg-soft/50">Carte grise · verso</p>
             </a>
           )}
         </div>

@@ -1,5 +1,5 @@
 /**
- * DoubleSignatureModal — workflow signature obligatoire.
+ * DoubleSignatureModal · workflow signature obligatoire.
  *
  * Deux modes :
  *   - "start" : signature départ (driver_start puis client_start)
@@ -99,8 +99,8 @@ export function DoubleSignatureModal({
           <div>
             <p className="text-[10px] uppercase tracking-wider text-[#d4af37]">{title}</p>
             <p className="text-sm font-semibold">
-              {phase === "driver" && "1/2 — Signature convoyeur"}
-              {phase === "client" && "2/2 — Signature client"}
+              {phase === "driver" && "1/2 · Signature convoyeur"}
+              {phase === "client" && "2/2 · Signature client"}
               {phase === "done" && "Signatures complètes"}
             </p>
           </div>

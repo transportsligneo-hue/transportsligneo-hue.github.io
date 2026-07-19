@@ -15,7 +15,7 @@ export const Route = createFileRoute("/inscription-convoyeur")({
   component: InscriptionConvoyeur,
   head: () => ({
     meta: [
-      { title: "Devenir convoyeur — Transports Ligneo" },
+      { title: "Devenir convoyeur · Transports Ligneo" },
       { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription premium en 4 étapes, validation par notre équipe sous 24 h." },
     ],
   }),
@@ -211,7 +211,7 @@ function InscriptionConvoyeur() {
       void notifyAdmin({
         type: "driver_action",
         titre: "Nouvelle inscription convoyeur",
-        message: `${form.prenom} ${form.nom} — ${form.email} — ${form.ville}`,
+        message: `${form.prenom} ${form.nom} · ${form.email} · ${form.ville}`,
         link: "/admin/convoyeurs",
         entityType: "convoyeur",
         entityId: userId,
@@ -381,7 +381,7 @@ function InscriptionConvoyeur() {
                   <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
                 </div>
               </div>
-              <FileUpload label="Photo du permis (recto/verso)" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="Format JPG, PNG ou PDF — 5 Mo max." />
+              <FileUpload label="Photo du permis (recto/verso)" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="Format JPG, PNG ou PDF · 5 Mo max." />
               <div>
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
                   <FileText size={12} className="inline mr-1" /> Catégories additionnelles
@@ -417,7 +417,7 @@ function InscriptionConvoyeur() {
                 <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
                 <textarea value={form.message} onChange={update("message")} rows={3} className={`${inputClass} resize-none`} placeholder="Présentez-vous brièvement..." />
               </div>
-              <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF — 5 Mo max par document.</p>
+              <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF · 5 Mo max par document.</p>
             </div>
           )}
 
@@ -429,9 +429,9 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Nom" value={form.nom} />
                 <RecapRow label="Email" value={form.email} />
                 <RecapRow label="Téléphone" value={form.telephone} />
-                <RecapRow label="Ville" value={form.ville || "—"} />
+                <RecapRow label="Ville" value={form.ville || " · "} />
                 <RecapRow label="Statut" value="Indépendant" />
-                <RecapRow label="Disponibilité" value={form.disponibilite || "—"} />
+                <RecapRow label="Disponibilité" value={form.disponibilite || " · "} />
                 <RecapRow label="N° permis" value={form.permis_numero} />
                 <RecapRow label="Années d'expérience" value={form.annees_experience} />
               </div>
@@ -502,7 +502,7 @@ function RecapRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-navy/40 border border-primary/10 rounded px-3 py-2">
       <p className="text-[10px] uppercase tracking-[0.15em] text-cream/40">{label}</p>
-      <p className="text-cream text-sm mt-0.5 truncate">{value || "—"}</p>
+      <p className="text-cream text-sm mt-0.5 truncate">{value || " · "}</p>
     </div>
   );
 }

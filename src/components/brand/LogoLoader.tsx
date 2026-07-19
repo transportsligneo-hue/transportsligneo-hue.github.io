@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Chargeur animé avec le logo Ligneo — animations 100% CSS (pas de framer-motion).
+ * Chargeur animé avec le logo Ligneo · animations 100% CSS (pas de framer-motion).
  * Anneau doré rotatif + logo en pulsation douce.
  */
 export function LogoLoader({ label, fullScreen = false, size = 64, className = "" }: Props) {

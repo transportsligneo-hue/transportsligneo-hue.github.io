@@ -24,7 +24,7 @@ export const Route = createFileRoute("/blog/$slug")({
     if (!a) return { meta: [{ title: "Article introuvable" }] };
     return {
       meta: [
-        { title: `${a.title} — Blog Transports Ligneo` },
+        { title: `${a.title} · Blog Transports Ligneo` },
         { name: "description", content: a.metaDescription },
         { property: "og:title", content: a.title },
         { property: "og:description", content: a.metaDescription },

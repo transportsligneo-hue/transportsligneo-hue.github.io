@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 /**
- * MissionWorkflow — parcours étape par étape pour le convoyeur sur le terrain.
+ * MissionWorkflow · parcours étape par étape pour le convoyeur sur le terrain.
  *
  * Étapes métier (stockées en texte dans attributions.etape_courante) :
  *   assignee, acceptee, en_route, sur_place, vehicule_recupere,
@@ -310,7 +310,7 @@ export function MissionWorkflow({
                       {new Date(h.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                     <span className="text-pro-text">{def?.short ?? h.etape}</span>
-                    {h.notes && <span className="text-pro-text-soft italic truncate">— {h.notes}</span>}
+                    {h.notes && <span className="text-pro-text-soft italic truncate"> ·  {h.notes}</span>}
                   </li>
                 );
               })}

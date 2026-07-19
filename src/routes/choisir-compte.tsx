@@ -5,7 +5,7 @@ export const Route = createFileRoute("/choisir-compte")({
   component: ChoisirCompte,
   head: () => ({
     meta: [
-      { title: "Créer un compte — Transports Ligneo" },
+      { title: "Créer un compte · Transports Ligneo" },
       { name: "description", content: "Choisissez votre type de compte : particulier, professionnel B2B ou convoyeur." },
       { name: "robots", content: "noindex, nofollow" },
     ],

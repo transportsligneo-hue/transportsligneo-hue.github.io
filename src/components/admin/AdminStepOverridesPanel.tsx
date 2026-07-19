@@ -1,5 +1,5 @@
 /**
- * AdminStepOverridesPanel — Surcouche admin contrôle total.
+ * AdminStepOverridesPanel · Surcouche admin contrôle total.
  *
  * Permet à l'admin de bypasser / désactiver les étapes obligatoires d'une
  * mission (selfie identité, double signature départ, double signature arrivée,
@@ -32,12 +32,12 @@ interface Override {
 
 const STEPS: { key: string; label: string }[] = [
   { key: "selfie", label: "Selfie identité (Étape 0)" },
-  { key: "driver_start", label: "Signature convoyeur — départ" },
-  { key: "client_start", label: "Signature client — départ" },
-  { key: "edl_depart", label: "État des lieux — départ" },
-  { key: "driver_end", label: "Signature convoyeur — arrivée" },
-  { key: "client_end", label: "Signature client — arrivée" },
-  { key: "edl_arrivee", label: "État des lieux — arrivée" },
+  { key: "driver_start", label: "Signature convoyeur · départ" },
+  { key: "client_start", label: "Signature client · départ" },
+  { key: "edl_depart", label: "État des lieux · départ" },
+  { key: "driver_end", label: "Signature convoyeur · arrivée" },
+  { key: "client_end", label: "Signature client · arrivée" },
+  { key: "edl_arrivee", label: "État des lieux · arrivée" },
 ];
 
 export function AdminStepOverridesPanel({ attributionId }: Props) {
@@ -96,7 +96,7 @@ export function AdminStepOverridesPanel({ attributionId }: Props) {
       <div className="flex items-center gap-2 mb-3">
         <Shield size={16} className="text-[#d4af37]" />
         <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
-          Contrôle étapes — Bypass admin
+          Contrôle étapes · Bypass admin
         </h3>
         {loading && <Loader2 size={14} className="animate-spin text-pro-muted ml-auto" />}
       </div>
@@ -112,7 +112,7 @@ export function AdminStepOverridesPanel({ attributionId }: Props) {
                 <p className="text-sm font-medium text-pro-text truncate">{s.label}</p>
                 {ov ? (
                   <p className="text-[10px] text-amber-700 flex items-center gap-1">
-                    <ShieldOff size={10}/> {ov.override_mode}{ov.reason ? ` — ${ov.reason}` : ""}
+                    <ShieldOff size={10}/> {ov.override_mode}{ov.reason ? ` · ${ov.reason}` : ""}
                   </p>
                 ) : (
                   <p className="text-[10px] text-pro-muted">Étape active</p>

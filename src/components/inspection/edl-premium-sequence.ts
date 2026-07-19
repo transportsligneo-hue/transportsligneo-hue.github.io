@@ -1,5 +1,5 @@
 /**
- * Séquence stricte EDL Premium — révisée selon le cahier des charges conducteur.
+ * Séquence stricte EDL Premium · révisée selon le cahier des charges conducteur.
  *
  * Ordre final 17 étapes photo + scans (départ).
  * Câble électrique: étape conditionnelle (visible seulement si véhicule électrique).
@@ -8,7 +8,7 @@
  * Les anciens steps `cote_droit` / `cote_gauche` ne sont plus présentés au conducteur,
  * mais les photos déjà prises restent visibles côté admin.
  *
- * Les signatures d'arrivée ne font plus partie du flow EDL d'arrivée — elles sont
+ * Les signatures d'arrivée ne font plus partie du flow EDL d'arrivée · elles sont
  * gérées séparément par ArriveeSignatureSheet, déclenchée par le cockpit APRÈS
  * que l'EDL d'arrivée est complet.
  */
@@ -56,7 +56,7 @@ export interface EdlStepDef {
 }
 
 /**
- * SÉQUENCE STRICTE — phase DÉPART.
+ * SÉQUENCE STRICTE · phase DÉPART.
  * Mêmes IDs en DB, ordre conforme au cahier des charges.
  * Les signatures arrivée sont gérées hors flow EDL (ArriveeSignatureSheet).
  */
@@ -71,7 +71,7 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Équipements véhicule",
     hint: "Vérifiez la présence des équipements de sécurité avant le départ" },
 
-  // ─── Extérieur — tour véhicule ───
+  // ─── Extérieur · tour véhicule ───
   { num: 2, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
     label: "Avant", hint: "Cadrez la face avant complète, calandre + phares visibles",
     example: face_avant },
@@ -141,7 +141,7 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Kit de sécurité", hint: "Gilet jaune + triangle de signalisation",
     example: kit_securite },
 
-  // ─── Documents — scan auto OCR ───
+  // ─── Documents · scan auto OCR ───
   { num: 18, id: "pv_livraison", kind: "scan", section: "documents", phase: "depart",
     label: "PV livraison / restitution", hint: "Cadrez le document, contours détectés automatiquement",
     example: pv_livraison },
@@ -162,12 +162,12 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
   // ─── Signatures départ (toujours dans le flow EDL départ) ───
   { num: 22, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "driver_start",
-    label: "Signature départ — convoyeur",
+    label: "Signature départ · convoyeur",
     hint: "Signez pour attester de l'état du véhicule au départ" },
 
   { num: 23, id: "signature_client_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "client_start",
-    label: "Signature départ — client / parc",
+    label: "Signature départ · client / parc",
     hint: "Faites signer le donneur d'ordre (concession, parc, client)" },
 
   // ─── Kilométrage arrivée (filtré sur phase=arrivee) ───
@@ -177,18 +177,18 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
 ];
 
 /**
- * Étapes de signature ARRIVÉE — déclenchées séparément par ArriveeSignatureSheet,
+ * Étapes de signature ARRIVÉE · déclenchées séparément par ArriveeSignatureSheet,
  * APRÈS validation complète de l'EDL d'arrivée.
  */
 export const ARRIVEE_SIGNATURE_STEPS: EdlStepDef[] = [
   { num: 1, id: "signature_driver_end", kind: "signature", section: "cloture", phase: "arrivee",
     signatureKind: "driver_end",
-    label: "Signature arrivée — convoyeur",
+    label: "Signature arrivée · convoyeur",
     hint: "Signez pour attester de la livraison" },
 
   { num: 2, id: "signature_client_end", kind: "signature", section: "cloture", phase: "arrivee",
     signatureKind: "client_end",
-    label: "Signature arrivée — client final",
+    label: "Signature arrivée · client final",
     hint: "Faites signer le réceptionnaire" },
 ];
 

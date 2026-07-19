@@ -1,5 +1,5 @@
 /**
- * QuickCameraCapture — bouton de prise de photo terrain ultra rapide.
+ * QuickCameraCapture · bouton de prise de photo terrain ultra rapide.
  *
  * Robustesse :
  *  - upload non bloquant (l'app reste utilisable pendant l'upload)
@@ -61,7 +61,7 @@ export function QuickCameraCapture({
     const raw = e.target.files?.[0];
     if (!raw) return;
 
-    // Aperçu local IMMÉDIAT — n'attend pas l'upload
+    // Aperçu local IMMÉDIAT · n'attend pas l'upload
     const localUrl = URL.createObjectURL(raw);
     setPreview(localUrl);
     setStatus("uploading");
@@ -106,7 +106,7 @@ export function QuickCameraCapture({
 
   const validate = () => {
     // On valide dès qu'une photo est prise. Si l'upload est encore en cours,
-    // on transmet quand même le futur path (calculé à l'upload) — la photo a déjà
+    // on transmet quand même le futur path (calculé à l'upload) · la photo a déjà
     // été enregistrée en BDD côté handleFile dès la fin réelle de l'upload.
     if (savedPath) onCaptured(savedPath);
     onClose();

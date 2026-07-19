@@ -1,5 +1,5 @@
 /**
- * AiAssistantPanel — panneau latéral repliable d'assistance IA.
+ * AiAssistantPanel · panneau latéral repliable d'assistance IA.
  * NON obligatoire : ne s'affiche que si `useAiCapability("smart_suggestions")` = true.
  * Aucune modification directe du state EDL : appelle les callbacks fournis.
  */

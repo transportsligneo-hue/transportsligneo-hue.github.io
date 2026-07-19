@@ -1,5 +1,5 @@
 /**
- * MissionTrackingPanel — module Suivi de Mission lecture seule pour tous les
+ * MissionTrackingPanel · module Suivi de Mission lecture seule pour tous les
  * espaces clients (Particulier / B2B / Flotte).
  *
  * Affiche : convoyeur, GPS live + carte + timeline, photos EDL classées,
@@ -7,7 +7,7 @@
  * documents partagés. Aucune action d'édition / suppression.
  *
  * Sécurité : RLS Supabase (is_mission_client) garantit que le client ne lit
- * que ses propres données — aucune logique côté UI ne peut bypasser ça.
+ * que ses propres données · aucune logique côté UI ne peut bypasser ça.
  */
 import { Activity, AlertTriangle, CheckCircle2, Circle, Mail, Phone, Truck } from "lucide-react";
 import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";

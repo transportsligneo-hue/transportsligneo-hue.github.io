@@ -10,7 +10,7 @@ export const Route = createFileRoute("/inscription-pro")({
   component: InscriptionPro,
   head: () => ({
     meta: [
-      { title: "Inscription professionnelle — Transports Ligneo" },
+      { title: "Inscription professionnelle · Transports Ligneo" },
       { name: "description", content: "Créez votre compte professionnel B2B pour gérer vos missions de convoyage." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -90,7 +90,7 @@ function InscriptionPro() {
         void notifyAdmin({
           type: "client_action",
           titre: "Nouvelle inscription pro (B2B)",
-          message: `${form.societe} — ${form.prenom} ${form.nom} — ${form.email}`,
+          message: `${form.societe} · ${form.prenom} ${form.nom} · ${form.email}`,
           link: "/admin/clients",
           entityType: "user",
           entityId: authData.user.id,
@@ -137,7 +137,7 @@ function InscriptionPro() {
           <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">
             Inscription pro
           </h1>
-          <p className="text-cream/50 text-sm mt-2">Espace B2B — concessionnaires, loueurs, assurances</p>
+          <p className="text-cream/50 text-sm mt-2">Espace B2B · concessionnaires, loueurs, assurances</p>
         </div>
 
         <form onSubmit={handleSubmit} className="card-premium p-6 md:p-8 rounded space-y-5">

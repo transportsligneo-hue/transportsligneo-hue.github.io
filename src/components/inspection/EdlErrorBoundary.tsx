@@ -1,5 +1,5 @@
 /**
- * EdlErrorBoundary — capture toute exception de rendu à l'intérieur de
+ * EdlErrorBoundary · capture toute exception de rendu à l'intérieur de
  * l'overlay EDL pour éviter de casser toute la route convoyeur (page
  * "Something went wrong"). Affiche un message lisible avec les actions
  * "Réessayer" et "Retour à la mission".

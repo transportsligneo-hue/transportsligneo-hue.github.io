@@ -31,13 +31,13 @@ export default function Tarifs() {
             <span className="text-2xl align-middle mr-2">à partir de</span>0,85 €<span className="text-2xl">/km</span>
           </p>
           <p className="text-cream/70 text-sm mt-2">
-            Hors département 37 et limitrophes — pour les trajets de plus de 200 km
+            Hors département 37 et limitrophes · pour les trajets de plus de 200 km
           </p>
           <p className="text-primary text-sm mt-3 font-medium tracking-wide">
             Assurance tout risque avec péage et carburant inclus
           </p>
           <p className="text-cream/50 text-xs mt-2">
-            Tarifs TTC — options supplémentaires possibles selon vos besoins
+            Tarifs TTC · options supplémentaires possibles selon vos besoins
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus — Tarifs TTC</p>
+            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus · Tarifs TTC</p>
           </div>
 
           <div className="card-premium p-8 rounded">
@@ -81,7 +81,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
-            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus — Tarifs TTC</p>
+            <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus · Tarifs TTC</p>
           </div>
 
           {/* Tarifs hors département 37 masqués sur le site (toujours utilisés en interne par l'estimateur) */}

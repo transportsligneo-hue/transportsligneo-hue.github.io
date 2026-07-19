@@ -1,5 +1,5 @@
 /**
- * MissionTraceability — Affiche le bloc de double signature (départ + arrivée)
+ * MissionTraceability · Affiche le bloc de double signature (départ + arrivée)
  * pour Admin / Client / B2B / Flotte. Lecture seule.
  *
  * Recherche dans `mission_documents` les documents :
@@ -162,7 +162,7 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
           <PenTool size={16} className="text-amber-500" />
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Signatures & Traçabilité</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire — départ et arrivée</p>
+            <p className="text-xs text-slate-500 mt-0.5">Double signature obligatoire · départ et arrivée</p>
           </div>
         </div>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
@@ -214,7 +214,7 @@ export function MissionTraceability({ attributionId, variant = "full" }: Props) 
                     </div>
                   )}
                   <p className="text-[11px] text-slate-500">
-                    Signé le {slot.signedAt ? new Date(slot.signedAt).toLocaleString("fr-FR") : "—"}
+                    Signé le {slot.signedAt ? new Date(slot.signedAt).toLocaleString("fr-FR") : " · "}
                   </p>
                 </>
               ) : (
@@ -234,7 +234,7 @@ function Badge({ label, ok }: { label: string; ok: boolean }) {
       ok ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-slate-100 text-slate-500 ring-1 ring-slate-200"
     }`}>
       {ok ? <Check size={11} /> : <AlertCircle size={11} />}
-      {label} {ok ? "✓" : "—"}
+      {label} {ok ? "✓" : " · "}
     </span>
   );
 }

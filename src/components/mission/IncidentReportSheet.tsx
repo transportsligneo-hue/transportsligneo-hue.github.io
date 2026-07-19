@@ -1,5 +1,5 @@
 /**
- * IncidentReportSheet — interface plein écran (sheet) pour signaler un incident.
+ * IncidentReportSheet · interface plein écran (sheet) pour signaler un incident.
  * Remplace l'ancienne mini-modale transparente difficilement lisible.
  *
  * Crée une ligne dans `mission_incidents` + une notif admin + envoie l'email
@@ -87,7 +87,7 @@ export function IncidentReportSheet({
     const incId = (incident as { id: string }).id;
     await notifyAdmin({
       type: "incident",
-      titre: `Incident ${gravite} — ${numeroMission ?? "mission"}`,
+      titre: `Incident ${gravite} · ${numeroMission ?? "mission"}`,
       message: titre.trim(),
       link: `/admin/missions/${attributionId}?tab=incidents`,
       entityType: "incident",

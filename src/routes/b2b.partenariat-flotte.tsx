@@ -16,9 +16,9 @@ export const Route = createFileRoute("/b2b/partenariat-flotte")({
   component: FleetPartnershipPage,
   head: () => ({
     meta: [
-      { title: "Partenariat flotte B2B — Transports Ligneo" },
+      { title: "Partenariat flotte B2B · Transports Ligneo" },
       { name: "description", content: "Étude flotte sur-mesure pour entreprises, loueurs, concessions et grands comptes. Tarifs négociés, account manager dédié, facturation centralisée." },
-      { property: "og:title", content: "Partenariat flotte B2B — Transports Ligneo" },
+      { property: "og:title", content: "Partenariat flotte B2B · Transports Ligneo" },
       { property: "og:description", content: "Solution récurrente avec tarifs négociés et account manager dédié pour grands comptes." },
     ],
   }),
@@ -181,7 +181,7 @@ function FleetPartnershipPage() {
       }).select("id").maybeSingle();
       if (lErr) throw lErr;
 
-      // Notify admin (server-side, fire-and-forget — UX should not depend on it)
+      // Notify admin (server-side, fire-and-forget · UX should not depend on it)
       if (insertedLead?.id) {
         fetch("/api/public/b2b/lead-created", {
           method: "POST",
@@ -191,7 +191,7 @@ function FleetPartnershipPage() {
       }
 
       setSubmitted(true);
-      toast.success("Demande envoyée — nous vous recontactons sous 24h ouvrées");
+      toast.success("Demande envoyée · nous vous recontactons sous 24h ouvrées");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Erreur lors de l'envoi");
@@ -366,7 +366,7 @@ function FleetPartnershipPage() {
           {/* Preview score */}
           {Number(form.vehicleCount) > 0 && (
             <div className="rounded-xl border border-[#0b1026]/20 bg-[#0b1026]/5 p-4 text-sm">
-              <strong>Score lead estimé :</strong> {previewScore.score}/100 — catégorie{" "}
+              <strong>Score lead estimé :</strong> {previewScore.score}/100 · catégorie{" "}
               <span className={`font-semibold ${previewScore.category === "hot" ? "text-red-600" : previewScore.category === "warm" ? "text-[#b8860b]" : "text-[#0b1026]/65"}`}>
                 {previewScore.category.toUpperCase()}
               </span>

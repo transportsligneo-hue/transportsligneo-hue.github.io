@@ -1,5 +1,5 @@
 /**
- * MissionCard — carte mission style Stripe/Brex (sobre, glass premium).
+ * MissionCard · carte mission style Stripe/Brex (sobre, glass premium).
  * Pilules monotone, hiérarchie typo, numérique tabulaire, accent or unique.
  */
 import {
@@ -95,11 +95,11 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
           <div className="flex-1 min-w-0 space-y-2">
             <div>
               <p className="brex-label-xs">Départ</p>
-              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.depart || "—"}</p>
+              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.depart || " · "}</p>
             </div>
             <div>
               <p className="brex-label-xs">Arrivée</p>
-              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.arrivee || "—"}</p>
+              <p className="text-[14px] text-white font-semibold leading-snug truncate mt-0.5">{t?.arrivee || " · "}</p>
             </div>
           </div>
           <ChevronRight size={16} className="text-[var(--driver-muted)] shrink-0 mt-1" />
@@ -160,7 +160,7 @@ function InspectionFlag({ label, done }: { label: string; done: boolean }) {
     <span className={`inline-flex items-center gap-1.5 ${done ? "text-[#7ee2b8]" : "text-[var(--driver-muted)]"}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${done ? "bg-[#7ee2b8]" : "bg-[var(--driver-muted)]"}`} />
       {label}
-      <span className="tabular-nums opacity-80">{done ? "OK" : "—"}</span>
+      <span className="tabular-nums opacity-80">{done ? "OK" : " · "}</span>
     </span>
   );
 }

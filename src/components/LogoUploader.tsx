@@ -8,7 +8,7 @@ const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_BYTES = 2 * 1024 * 1024; // 2MB
 
 interface LogoUploaderProps {
-  /** Folder name in the bucket — must be the auth user's id for RLS. */
+  /** Folder name in the bucket · must be the auth user's id for RLS. */
   ownerUserId: string;
   /** Current public URL (or null). */
   value: string | null;

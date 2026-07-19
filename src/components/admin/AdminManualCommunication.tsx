@@ -175,7 +175,7 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
             </select>
             <select value={selectedUserId} onChange={(e) => chooseRecipient(e.target.value)} className="rounded-md border border-slate-200 px-3 py-2 text-sm">
               <option value="">Choisir un destinataire…</option>
-              {recipients.map((r) => <option key={r.userId} value={r.userId}>{r.label} — {r.email}</option>)}
+              {recipients.map((r) => <option key={r.userId} value={r.userId}>{r.label} · {r.email}</option>)}
             </select>
           </div>
         )}

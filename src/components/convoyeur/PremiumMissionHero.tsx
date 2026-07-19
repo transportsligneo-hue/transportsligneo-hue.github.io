@@ -51,7 +51,7 @@ function fmtDate(d?: string, h?: string) {
 }
 
 /**
- * Hero premium fiche mission convoyeur — layout 2 colonnes (desktop) :
+ * Hero premium fiche mission convoyeur · layout 2 colonnes (desktop) :
  *   • Gauche : header navy + cartes Départ/Arrivée/Véhicule + raccourcis
  *   • Droite : timeline VERTICALE 6 étapes (sticky desktop, sous le reste sur mobile)
  *
@@ -96,7 +96,7 @@ export function PremiumMissionHero({
                 {data.isLive && <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] animate-pulse" />}
               </div>
               <h1 className="mt-1 font-serif text-2xl sm:text-3xl text-white tracking-tight truncate">
-                {data.numeroMission ?? "—"}
+                {data.numeroMission ?? " · "}
               </h1>
               {(data.depart?.ville || data.arrivee?.ville) && (
                 <p className="mt-1.5 text-cream/85 text-sm truncate">
@@ -141,13 +141,13 @@ export function PremiumMissionHero({
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6 items-start">
           {/* === COLONNE GAUCHE : cartes + raccourcis === */}
           <div className="space-y-4 min-w-0">
-            {/* 3 cartes Départ / Arrivée / Véhicule — format unifié */}
+            {/* 3 cartes Départ / Arrivée / Véhicule · format unifié */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <InfoCard
                 label="Départ"
                 iconBg="bg-[#0b1026]"
                 icon={<MapPin size={16} className="text-[var(--gold)]" />}
-                title={data.depart?.ville || "—"}
+                title={data.depart?.ville || " · "}
                 line1={data.depart?.adresse}
                 footer={fmtDate(data.depart?.date, data.depart?.heure)}
               />
@@ -155,7 +155,7 @@ export function PremiumMissionHero({
                 label="Arrivée"
                 iconBg="bg-[#0b1026]"
                 icon={<MapPin size={16} className="text-[var(--gold)]" />}
-                title={data.arrivee?.ville || "—"}
+                title={data.arrivee?.ville || " · "}
                 line1={data.arrivee?.adresse}
                 footer={fmtDate(data.arrivee?.date, data.arrivee?.heure)}
               />
@@ -163,13 +163,13 @@ export function PremiumMissionHero({
                 label="Véhicule"
                 iconBg="bg-[#0b1026]"
                 icon={<Car size={16} className="text-[var(--gold)]" />}
-                title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || "—"}
+                title={[data.vehicule?.marque, data.vehicule?.modele].filter(Boolean).join(" ") || " · "}
                 badge={data.vehicule?.immatriculation}
                 footer={data.vehicule?.vin ? `VIN : ${data.vehicule.vin}` : null}
               />
             </div>
 
-            {/* Raccourcis 6 boutons — boutons d'appel toujours actifs */}
+            {/* Raccourcis 6 boutons · boutons d'appel toujours actifs */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
               <ShortcutTile
                 label="Ouvrir GPS"
@@ -193,7 +193,7 @@ export function PremiumMissionHero({
               <ShortcutTile label="Aide / Incident" icon={<HeadphonesIcon size={20} />} onClick={onOpenIncident} />
             </div>
 
-            {/* Contact livraison (réceptionnaire) — visible seulement si admin a renseigné un contact */}
+            {/* Contact livraison (réceptionnaire) · visible seulement si admin a renseigné un contact */}
             {(data.contactArriveeNom || data.contactArriveeTel || data.contactArriveeInstructions) && (
               <div
                 className="rounded-2xl border p-4 shadow-sm"
@@ -324,7 +324,7 @@ function ShortcutTile({
   return <button type="button" disabled className={cls}>{content}</button>;
 }
 
-/* === TIMELINE VERTICALE — style EDL Inspection Driver === */
+/* === TIMELINE VERTICALE · style EDL Inspection Driver === */
 
 const STEP_ICONS = [
   MapPinned,        // 1. Arrivé au lieu d'enlèvement

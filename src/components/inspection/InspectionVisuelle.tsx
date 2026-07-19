@@ -1,5 +1,5 @@
 /**
- * InspectionVisuelle — Nouveau parcours d'état des lieux visuel.
+ * InspectionVisuelle · Nouveau parcours d'état des lieux visuel.
  *
  * Combine VehicleInspectionMap (silhouette interactive) + QuickCameraCapture
  * (appareil photo direct) dans un workflow ordonné selon la logique métier :
@@ -389,7 +389,7 @@ export function InspectionVisuelle({
                     .filter(([, s]) => s.state === "defaut")
                     .map(([id, s]) => (
                       <li key={id} className="text-red-800 text-xs">
-                        • <span className="font-mono">{id}</span> {s.comment ? `— ${s.comment}` : ""}
+                        • <span className="font-mono">{id}</span> {s.comment ? ` ·  ${s.comment}` : ""}
                       </li>
                     ))}
                 </ul>

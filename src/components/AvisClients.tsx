@@ -3,7 +3,7 @@ import { Star, Quote } from "lucide-react";
 const avis = [
   {
     nom: "Laurent M.",
-    role: "Professionnel auto — Tours",
+    role: "Professionnel auto · Tours",
     text: "Honnêtement au début j'étais pas sûr, j'avais déjà eu des mauvaises expériences avec d'autres convoyeurs. Mais là rien à dire, le véhicule est arrivé nickel, dans les temps, et le chauffeur m'a tenu au courant tout du long. Depuis j'ai refait appel à eux 3 fois.",
     stars: 5,
     date: "Mars 2025",

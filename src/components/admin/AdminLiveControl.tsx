@@ -29,7 +29,7 @@ const QUICK_STATUTS: { key: string; label: string; icon: typeof PlayCircle; dang
 ];
 
 /**
- * Panneau de contrôle admin live — agit en direct sur l'attribution.
+ * Panneau de contrôle admin live · agit en direct sur l'attribution.
  * Toutes les modifs passent par realtime → Driver et Client voient l'effet immédiatement.
  */
 export function AdminLiveControl({ attributionId, trajetId, currentStatut, currentEtape, onChange }: AdminLiveControlProps) {
@@ -120,8 +120,8 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
         <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
         <h3 className="text-pro-text font-semibold text-sm">Contrôle live admin</h3>
         <span className="ml-auto text-[11px] text-pro-muted">
-          Statut : <strong className="text-pro-text-soft">{currentStatut ?? "—"}</strong> · Étape :{" "}
-          <strong className="text-pro-text-soft">{currentEtape ?? "—"}</strong>
+          Statut : <strong className="text-pro-text-soft">{currentStatut ?? " · "}</strong> · Étape :{" "}
+          <strong className="text-pro-text-soft">{currentEtape ?? " · "}</strong>
         </span>
       </div>
 

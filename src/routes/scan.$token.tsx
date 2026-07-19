@@ -1,5 +1,5 @@
 /**
- * /scan/$token — page mobile publique appelée par le QR code depuis le PC.
+ * /scan/$token · page mobile publique appelée par le QR code depuis le PC.
  *
  * L'utilisateur arrive ici après avoir scanné le QR généré par
  * `QrHandoffButton`. Aucun compte requis. Il utilise `PremiumScanner` pour
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/scan/$token")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Scan document — Transports Ligneo" },
+      { title: "Scan document · Transports Ligneo" },
       { name: "description", content: "Envoyez instantanément vos documents scannés à Transports Ligneo." },
       { name: "robots", content: "noindex, nofollow" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },

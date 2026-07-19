@@ -8,7 +8,7 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPassword,
   head: () => ({
     meta: [
-      { title: "Nouveau mot de passe — Transports Ligneo" },
+      { title: "Nouveau mot de passe · Transports Ligneo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

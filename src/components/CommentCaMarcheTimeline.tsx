@@ -1,5 +1,5 @@
 /**
- * Comment ça marche — refonte V5 exactement calquée sur le HTML
+ * Comment ça marche · refonte V5 exactement calquée sur le HTML
  * `comment-ca-marche-refonte.html` : hero + timeline 4 phases (12 sous-étapes)
  * + section plateforme + stats + CTA. Tout est scopé sous .r4-page.
  */
@@ -10,7 +10,7 @@ const phases = [
     n: "01",
     tag: "Étape 1",
     title: "Estimation & Devis",
-    p: "Le client crée son compte ou lance directement une estimation — le compte se crée automatiquement à cette occasion. Le devis est généré et signé électroniquement, sans attendre.",
+    p: "Le client crée son compte ou lance directement une estimation · le compte se crée automatiquement à cette occasion. Le devis est généré et signé électroniquement, sans attendre.",
     subs: [
       "Création de compte",
       "Estimateur intelligent",

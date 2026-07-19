@@ -1,6 +1,6 @@
 /**
  * Overlay canvas simple : dessine des bounding boxes normalisées sur une image.
- * Rendu 100% CSS/absolute — pas de canvas natif (évite les problèmes de resize).
+ * Rendu 100% CSS/absolute · pas de canvas natif (évite les problèmes de resize).
  */
 import type { BBox } from "@/lib/ai/types";
 

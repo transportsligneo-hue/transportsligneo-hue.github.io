@@ -23,7 +23,7 @@ interface Props {
 }
 
 /**
- * Carte "trajets en cours" — affiche la dernière position GPS connue
+ * Carte "trajets en cours" · affiche la dernière position GPS connue
  * de chaque mission active (attribution.statut ∈ en_cours/livraison).
  * Rendu client-only (Leaflet), fallback vide propre si aucun trajet.
  */
@@ -45,7 +45,7 @@ export function ActiveMissionsMap({
     let cancelled = false;
     async function load() {
       setLoading(true);
-      // Récup dernières positions (2h) — on regroupe côté JS
+      // Récup dernières positions (2h) · on regroupe côté JS
       const sinceIso = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
       const { data: locs } = await supabase
         .from("mission_locations")

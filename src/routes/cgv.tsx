@@ -4,7 +4,7 @@ export const Route = createFileRoute("/cgv")({
   component: CGVPage,
   head: () => ({
     meta: [
-      { title: "CGV — Transports LIGNEO" },
+      { title: "CGV · Transports LIGNEO" },
       { name: "description", content: "Conditions générales de vente de Transports LIGNEO." },
     ],
   }),
@@ -21,7 +21,7 @@ function CGVPage() {
 
           <section>
             <h2 className="font-heading text-primary text-lg mb-3">Identité de l'entreprise</h2>
-            <p>Transports Ligneo — SIREN : 753 320 001 — Siège social à Tours (37), France.</p>
+            <p>Transports Ligneo · SIREN : 753 320 001 · Siège social à Tours (37), France.</p>
           </section>
 
           <section>

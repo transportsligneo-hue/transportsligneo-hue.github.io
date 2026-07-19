@@ -1,5 +1,5 @@
 /**
- * DriverSelfieCapture — Étape 0 : selfie identité du convoyeur.
+ * DriverSelfieCapture · Étape 0 : selfie identité du convoyeur.
  *
  * Flow:
  *   1. Ouvrir caméra (capture="user") via clic direct utilisateur
@@ -324,7 +324,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
       const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
       const path = `${userId}/${attributionId}/selfie_${Date.now()}.${ext}`;
 
-      // Upload avec timeout strict + 1 retry — empêche tout chargement infini.
+      // Upload avec timeout strict + 1 retry · empêche tout chargement infini.
       const uploadOnce = () => supabase.storage
         .from("mission-selfies")
         .upload(path, file, { upsert: true, contentType });
@@ -391,7 +391,7 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
           onClose();
         }} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
         <div className="text-center">
-          <p className="driver-eyebrow opacity-80">Étape 1 — Identité</p>
+          <p className="driver-eyebrow opacity-80">Étape 1 · Identité</p>
           <p className="text-sm font-semibold">Selfie convoyeur</p>
         </div>
         <div className="w-9"/>

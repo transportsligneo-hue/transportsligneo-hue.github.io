@@ -4,7 +4,7 @@ export const Route = createFileRoute("/confidentialite")({
   component: ConfidentialitePage,
   head: () => ({
     meta: [
-      { title: "Politique de Confidentialite — Transports LIGNEO" },
+      { title: "Politique de Confidentialite · Transports LIGNEO" },
       { name: "description", content: "Politique de confidentialite de Transports LIGNEO." },
     ],
   }),

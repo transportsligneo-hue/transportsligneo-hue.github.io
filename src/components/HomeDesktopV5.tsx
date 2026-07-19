@@ -73,16 +73,16 @@ export default function HomeDesktopV5() {
       {/* ============ MAP FRANCE + EUROPE ============ */}
       <MapFranceEurope />
 
-      {/* ============ TRUST — Partenaires ============ */}
+      {/* ============ TRUST — Partenaires (marquee) ============ */}
       <section className="v5-trust">
-        <div className="v5-trust-label">Partenaires &amp; clients — Ils nous font confiance</div>
-        <div className="v5-logo-track">
-          <div className="v5-logo-item"><img src={logoCat} alt="CAT France" /></div>
-          <div className="v5-logo-item"><img src={logoTransak} alt="TransakAuto" /></div>
-          <div className="v5-logo-item text">TransakAuto</div>
-          <div className="v5-logo-item"><img src={logoCat} alt="CAT France" /></div>
-          <div className="v5-logo-item text">Ligneo Network</div>
-          <div className="v5-logo-item"><img src={logoTransak} alt="TransakAuto" /></div>
+        <div className="v5-trust-label">Ils nous font confiance</div>
+        <div className="v5-marquee-mask">
+          <div className="v5-marquee-track">
+            {Array.from({ length: 8 }).flatMap((_, i) => [
+              <div key={`c-${i}`} className="v5-logo-item"><img src={logoCat} alt="CAT France" /></div>,
+              <div key={`t-${i}`} className="v5-logo-item"><img src={logoTransak} alt="TransakAuto" /></div>,
+            ])}
+          </div>
         </div>
       </section>
 

@@ -49,7 +49,7 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
 
 /**
  * Layout SaaS clair pour l'espace B2B (/dashboard-pro/*).
- * Indépendant de DashboardSidebar (espace particulier) — design clair, dense, business.
+ * Indépendant de DashboardSidebar (espace particulier) · design clair, dense, business.
  */
 export function ProSidebar({ societe, items, children }: Props) {
   const location = useLocation();

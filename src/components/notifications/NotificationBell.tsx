@@ -1,5 +1,5 @@
 /**
- * NotificationBell — cloche premium temps réel.
+ * NotificationBell · cloche premium temps réel.
  * Panneau opaque, typographie contrastée, icônes typées, timestamps relatifs.
  */
 import { useEffect, useState, useCallback, useId } from "react";

@@ -1,5 +1,5 @@
 /**
- * PhotoQualityToast — retour non-bloquant sur la qualité d'une photo.
+ * PhotoQualityToast · retour non-bloquant sur la qualité d'une photo.
  * Utilisé après capture ; l'utilisateur peut toujours valider quand même.
  */
 import { AlertTriangle, X } from "lucide-react";

@@ -1,5 +1,5 @@
 /**
- * EtatDesLieuxFlow — Parcours photo guidé "grand groupe" pour Transports Ligneo.
+ * EtatDesLieuxFlow · Parcours photo guidé "grand groupe" pour Transports Ligneo.
  *
  * RÈGLES STRICTES (NON NÉGOCIABLES) :
  *  - 1 étape = 1 photo
@@ -9,7 +9,7 @@
  *  - Plein écran fixe, navigation 100% interne
  *
  * Branché sur le backend existant (table `inspections` + `inspection_photos`).
- * Aucune migration nécessaire — les `vue_type` réutilisent les IDs déjà connus
+ * Aucune migration nécessaire · les `vue_type` réutilisent les IDs déjà connus
  * et ajoutent ceux qui manquaient (jante_*, roue_secours, kit_securite, pv_livraison,
  * carte_grise, cables).
  */
@@ -50,7 +50,7 @@ interface StepDef {
 }
 
 /**
- * ORDRE OBLIGATOIRE — défini par le métier.
+ * ORDRE OBLIGATOIRE · défini par le métier.
  * NE PAS RÉORGANISER.
  */
 const ALL_STEPS: StepDef[] = [
@@ -198,7 +198,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Filtre les étapes EV — la double signature (convoyeur + client) est OBLIGATOIRE au départ ET à l'arrivée
+  // Filtre les étapes EV · la double signature (convoyeur + client) est OBLIGATOIRE au départ ET à l'arrivée
   const STEPS = useMemo(() => {
     const ev = isEvOrPhev(carburant);
     return ALL_STEPS.filter(s => s.conditional !== "ev_only" || ev);
@@ -315,7 +315,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
 
       await uploadWithRetry(path, compressed);
 
-      // Save row in DB (upsert sur (inspection_id, vue_type) — fallback select+update si la contrainte n'existe pas)
+      // Save row in DB (upsert sur (inspection_id, vue_type) · fallback select+update si la contrainte n'existe pas)
       const { error: upsertErr } = await supabase
         .from("inspection_photos")
         .upsert(
@@ -606,7 +606,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     <FullScreen>
       <Header
         title={`${safeStepIndex + 1} / ${totalSteps}`}
-        subtitle={type === "depart" ? "État des lieux — Départ" : "État des lieux — Arrivée"}
+        subtitle={type === "depart" ? "État des lieux · Départ" : "État des lieux · Arrivée"}
         right={
           completedCount > 0 && (
             <button
@@ -820,7 +820,7 @@ function ExampleFrame({ stepId, label }: { stepId: string; label: string }) {
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">Exemple</span>
       </div>
       <button type="button" className="w-full border-t border-slate-200 py-2 text-xs font-semibold text-blue-700 underline-offset-2 hover:underline">
-        Voir l'exemple — {label}
+        Voir l'exemple · {label}
       </button>
     </div>
   );

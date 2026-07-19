@@ -5,7 +5,7 @@ export const Route = createFileRoute("/unsubscribe")({
   component: UnsubscribePage,
   head: () => ({
     meta: [
-      { title: "Se désabonner — Transports Ligneo" },
+      { title: "Se désabonner · Transports Ligneo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

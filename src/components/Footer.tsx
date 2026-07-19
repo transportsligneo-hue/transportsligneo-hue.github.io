@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-8 mb-10">
           <div>
-            <Link to="/" className="inline-flex items-center gap-3 mb-3" aria-label="Accueil — Transports Ligneo">
+            <Link to="/" className="inline-flex items-center gap-3 mb-3" aria-label="Accueil · Transports Ligneo">
               <img
                 src={logoLigneo}
                 alt="Transports Ligneo"
@@ -71,7 +71,7 @@ export default function Footer() {
         </div>
         <div className="gold-divider mb-6" />
         <p className="text-center text-cream/30 text-xs tracking-wider">
-          © {new Date().getFullYear()} Transports Ligneo — Tous droits réservés
+          © {new Date().getFullYear()} Transports Ligneo · Tous droits réservés
         </p>
       </div>
     </footer>

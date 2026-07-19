@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Bouton "Publier au catalogue" — bascule un trajet en mode catalogue.
+ * Bouton "Publier au catalogue" · bascule un trajet en mode catalogue.
  * Ouvre un mini-formulaire pour paramétrer contre-offres + expiration.
  */
 export function PublishToCatalogueButton({ trajetId, onDone, variant = "button", label = "Publier au catalogue" }: Props) {
