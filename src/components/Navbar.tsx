@@ -85,10 +85,14 @@ export default function Navbar() {
             >
               <span className="nav-phone-icon">
                 <Phone size={15} strokeWidth={2.25} />
+                <span className="nav-phone-pulse" aria-hidden="true" />
               </span>
               <span className="flex flex-col items-start">
                 <span className="nav-phone-number">07 82 45 61 81</span>
-                <span className="nav-phone-sub">Disponible 7j/7</span>
+                <span className="nav-phone-sub">
+                  <span className="nav-phone-live" aria-hidden="true" />
+                  Disponible 7j/7
+                </span>
               </span>
             </a>
             <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
