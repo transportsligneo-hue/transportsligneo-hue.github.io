@@ -24,11 +24,11 @@ const MAP_SVG_INNER = `<path d="m 489.58075,285.9684 -0.119,-0.065 0.631,-0.187 
 <path id="ln-Lyon" class="line-fr" d="M478.8,313.01 L491.5,320.31"/>
 <path id="ln-Marseille" class="line-fr" d="M478.8,313.01 L493.08,331.32"/>
 <path id="ln-Strasbourg" class="line-fr" d="M478.8,313.01 L500.33,307.68"/>
-<path id="ln-Belgique" class="line-eu" d="M478.8,313.01 L487.37,298.99"/>
-<path id="ln-Allemagne" class="line-eu" d="M478.8,313.01 L504.19,295.33"/>
-<path id="ln-Suisse" class="line-eu" d="M478.8,313.01 L497.94,314.67"/>
-<path id="ln-Italie" class="line-eu" d="M478.8,313.01 L510.14,333.16"/>
-<path id="ln-Espagne" class="line-eu" d="M478.8,313.01 L455.48,354.72"/>
+<path id="ln-Belgique" class="line-eu" d="M478.8,313.01 L489.96,297.44"/>
+<path id="ln-Allemagne" class="line-eu" d="M478.8,313.01 L513.5,291"/>
+<path id="ln-Suisse" class="line-eu" d="M478.8,313.01 L499.35,314.99"/>
+<path id="ln-Italie" class="line-eu" d="M478.8,313.01 L512.5,335.5"/>
+<path id="ln-Espagne" class="line-eu" d="M478.8,313.01 L465.5,344.5"/>
 <circle cx="483.88" cy="306.43" r="0.55" class="dot-fr" style="animation-delay:0.0s"/>
 <text x="483.88" y="304.9" class="lbl-fr" text-anchor="middle">Paris</text>
 <circle cx="486.05" cy="298.5" r="0.55" class="dot-fr" style="animation-delay:0.2s"/>
