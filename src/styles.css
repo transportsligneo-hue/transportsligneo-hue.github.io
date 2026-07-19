@@ -2334,3 +2334,206 @@
   .v3-link { background: none; border: none; color: var(--v3-blue); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 0; }
   .v3-link:hover { color: var(--v3-blue-deep); }
 }
+
+/* ==========================================================
+   REFONTE V4 — Système de design maquette navy/blue/gold
+   Classes préfixées .r4-* pour éviter toute collision
+   ========================================================== */
+@layer utilities {
+  :root {
+    --r4-navy: #070c1f;
+    --r4-navy-1: #0a1638;
+    --r4-navy-2: #081230;
+    --r4-navy-3: #061238;
+    --r4-blue: #2f5fff;
+    --r4-blue-bright: #4f8cff;
+    --r4-blue-glow: #6ea1ff;
+    --r4-gold: #d9b54a;
+    --r4-text-muted: #9aa6c9;
+    --r4-border: rgba(122,163,255,0.16);
+    --r4-border-strong: rgba(122,163,255,0.28);
+  }
+
+  /* Fond global marketing */
+  .r4-page {
+    color: #fff;
+    background:
+      radial-gradient(700px 500px at 92% -5%, rgba(63,123,255,0.20), transparent 60%),
+      radial-gradient(600px 460px at -10% 20%, rgba(217,181,74,0.08), transparent 60%),
+      radial-gradient(650px 500px at 100% 55%, rgba(79,140,255,0.15), transparent 60%),
+      radial-gradient(600px 460px at 0% 90%, rgba(63,123,255,0.12), transparent 60%),
+      linear-gradient(180deg,#0a1638 0%, #081230 45%, #061238 100%);
+    min-height: 100vh;
+  }
+
+  /* Wordmark LIGNEO */
+  .r4-word { font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: 0.01em; }
+  .r4-word .g { color: var(--r4-blue-glow); text-shadow: 0 0 12px rgba(91,143,255,0.6); animation: r4PulseGlow 2.6s ease-in-out infinite; }
+  @keyframes r4PulseGlow {
+    0%,100% { text-shadow: 0 0 12px rgba(91,143,255,0.6), 0 0 30px rgba(91,143,255,0.35); }
+    50%     { text-shadow: 0 0 20px rgba(91,143,255,0.9), 0 0 44px rgba(91,143,255,0.55); }
+  }
+  .r4-accent { color: var(--r4-blue-glow);
+    text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.5);
+    animation: r4PulseGlow 2.6s ease-in-out infinite; }
+
+  .r4-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.2em; color: var(--r4-blue-bright); text-transform: uppercase;
+  }
+  .r4-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%;
+    background: var(--r4-blue-bright); box-shadow: 0 0 8px var(--r4-blue-bright); }
+
+  /* Nav pill */
+  .r4-nav-pill {
+    display: inline-flex; gap: 4px; align-items: center;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid rgba(122,163,255,0.16);
+    border-radius: 999px; padding: 5px;
+  }
+  .r4-nav-link {
+    position: relative; overflow: hidden;
+    padding: 9px 17px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--r4-text-muted);
+    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .r4-nav-link:hover { color: #fff; background: rgba(122,163,255,0.14); transform: translateY(-2px); }
+  .r4-nav-link.is-active {
+    color: #fff;
+    background: linear-gradient(120deg, var(--r4-blue), var(--r4-blue-bright));
+    box-shadow: 0 6px 18px rgba(47,95,255,0.5);
+    animation: r4NavBreathe 3s ease-in-out infinite;
+  }
+  .r4-nav-link.is-active::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.45),transparent);
+    transform: skewX(-20deg);
+    animation: r4NavShine 3.2s ease-in-out infinite;
+  }
+  @keyframes r4NavShine { 0% { left:-60%; } 45%,100% { left:130%; } }
+  @keyframes r4NavBreathe {
+    0%,100% { box-shadow: 0 6px 18px rgba(47,95,255,0.5); }
+    50%     { box-shadow: 0 8px 26px rgba(47,95,255,0.75), 0 0 20px rgba(79,140,255,0.4); }
+  }
+
+  /* Bouton "Connexion" — pilule dégradée bleu → or dérivante */
+  .r4-btn-connect {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--r4-blue) 0%, var(--r4-blue-bright) 50%, var(--r4-gold) 150%);
+    background-size: 220% 220%;
+    box-shadow: 0 8px 20px rgba(47,95,255,0.4);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+    animation: r4PillDrift 6s ease-in-out infinite;
+  }
+  .r4-btn-connect:hover { transform: scale(1.07) translateY(-2px); box-shadow: 0 12px 28px rgba(47,95,255,0.55), 0 0 22px rgba(217,181,74,0.25); }
+  .r4-btn-connect::after {
+    content: ''; position: absolute; top: 0; left: -70%; width: 35%; height: 100%;
+    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.55),transparent);
+    transform: skewX(-20deg); animation: r4PillShine 4.5s ease-in-out infinite;
+  }
+  @keyframes r4PillShine { 0% { left:-70%; } 50%,100% { left:130%; } }
+  @keyframes r4PillDrift {
+    0%,100% { background-position: 0% 50%; }
+    50%     { background-position: 100% 50%; }
+  }
+
+  /* Bouton "Estimer mon trajet" — bordure dégradée animée + éclair doré */
+  .r4-btn-estimer {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; color: #fff;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(rgba(9,16,42,0.9), rgba(9,16,42,0.9)) padding-box,
+      linear-gradient(120deg, var(--r4-blue-bright), var(--r4-gold), var(--r4-blue-bright)) border-box;
+    background-size: 100% 100%, 220% 220%;
+    box-shadow: 0 8px 20px rgba(47,95,255,0.25);
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    animation: r4BorderDrift 5s ease-in-out infinite;
+    cursor: pointer;
+  }
+  .r4-btn-estimer .r4-ic-bolt { width: 14px; height: 14px; color: var(--r4-gold); filter: drop-shadow(0 0 4px rgba(217,181,74,0.6)); flex-shrink: 0; }
+  .r4-btn-estimer .r4-ic-arrow { width: 13px; height: 13px; transition: transform .3s ease; }
+  .r4-btn-estimer:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 12px 28px rgba(47,95,255,0.4), 0 0 20px rgba(217,181,74,0.25); }
+  .r4-btn-estimer:hover .r4-ic-arrow { transform: translateX(3px); }
+  .r4-btn-estimer::after {
+    content: ''; position: absolute; top: 0; left: -70%; width: 35%; height: 100%;
+    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+    transform: skewX(-20deg); animation: r4GhostShine 4s ease-in-out infinite;
+  }
+  @keyframes r4GhostShine { 0% { left:-70%; } 50%,100% { left:130%; } }
+  @keyframes r4BorderDrift {
+    0%,100% { background-position: 0 0, 0% 50%; }
+    50%     { background-position: 0 0, 100% 50%; }
+  }
+
+  /* Topbar sticky glass */
+  .r4-topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--r4-border);
+    background: linear-gradient(90deg, rgba(20,45,140,0.55), rgba(47,95,255,0.28));
+    backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: 0 1px 0 rgba(122,163,255,0.35), 0 4px 20px rgba(47,95,255,0.15);
+  }
+
+  /* Glass card générique */
+  .r4-glass {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--r4-border);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+  }
+
+  /* ===== Carte France/Europe ===== */
+  .r4-map-section { max-width: 1220px; margin: 0 auto; padding: 70px 32px 30px; position: relative; }
+  .r4-map-head { text-align: center; margin-bottom: 36px; }
+  .r4-map-head h2 { font-family: 'Poppins', sans-serif; font-size: 34px; font-weight: 800; margin: 16px 0 12px; color: #fff; }
+  .r4-map-head p { color: var(--r4-text-muted); font-size: 14.5px; max-width: 620px; margin: 0 auto; }
+  .r4-map-card {
+    position: relative; background: rgba(255,255,255,0.02);
+    border: 1px solid var(--r4-border-strong); border-radius: 28px;
+    padding: 20px; overflow: hidden;
+    box-shadow: 0 30px 70px rgba(4,8,22,0.4);
+  }
+  .r4-map-card::before {
+    content: ''; position: absolute; top:-120px; left:-100px; width:340px; height:340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(63,123,255,0.28), transparent 70%); filter: blur(20px); pointer-events: none;
+  }
+  .r4-map-card::after {
+    content: ''; position: absolute; bottom:-140px; right:-100px; width:380px; height:380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,181,74,0.14), transparent 70%); filter: blur(20px); pointer-events: none;
+  }
+  .r4-map-svg { position: relative; z-index: 1; width: 100%; height: auto; display: block; }
+  .eu-country { fill: rgba(255,255,255,0.025); stroke: rgba(122,163,255,0.28); stroke-width: 0.16; }
+  .fr-country { fill: rgba(63,123,255,0.16); stroke: #7aa3ff; stroke-width: 0.26;
+    filter: drop-shadow(0 0 2px rgba(63,123,255,0.6)); }
+  .line-fr { stroke: rgba(122,163,255,0.45); stroke-width: 0.17; fill: none; }
+  .line-eu { stroke: rgba(217,181,74,0.4); stroke-width: 0.15; stroke-dasharray: 0.42 0.52; fill: none; }
+  .dot-fr { fill: #4f8cff; animation: r4MapPulse 2.4s ease-in-out infinite; }
+  .dot-eu { fill: #d9b54a; animation: r4MapPulse 2.4s ease-in-out infinite; }
+  @keyframes r4MapPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  .hub-ring { fill: none; stroke: #d9b54a; stroke-width: 0.22;
+    animation: r4HubPulse 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  .hub-dot { fill: #d9b54a; }
+  @keyframes r4HubPulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%     { opacity: 0.7; transform: scale(1.15); }
+  }
+  .lbl-fr { font-family: 'Inter', sans-serif; font-size: 1.35px; fill: #c3cbe6; }
+  .lbl-eu { font-family: 'Inter', sans-serif; font-size: 1.25px; fill: #e8cf8c; font-style: italic; }
+  .lbl-hub { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.55px; fill: #fff; }
+  .lbl-sub { font-family: 'Inter', sans-serif; font-size: 1px; fill: #9aa6c9; }
+  .travel-dot { fill: #fff; }
+  .travel-dot-eu { fill: #f0dc9e; }
+  .r4-map-legend { display: flex; justify-content: center; gap: 32px; margin-top: 22px; flex-wrap: wrap; }
+  .r4-map-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--r4-text-muted); }
+  .r4-map-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+}

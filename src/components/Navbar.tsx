@@ -47,43 +47,36 @@ export default function Navbar() {
     <>
       <nav
         className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "navbar-hairline"
-            : "bg-transparent"
+          scrolled ? "r4-topbar" : "bg-transparent"
         }`}
-        style={scrolled ? {
-          background: "linear-gradient(180deg, rgba(6,18,56,0.95) 0%, rgba(10,31,92,0.95) 100%)",
-          backdropFilter: "blur(16px) saturate(160%)",
-        } : undefined}
       >
-        <div className="max-w-7xl mx-auto pl-10 pr-6 py-4 flex items-center justify-between gap-8">
-          <Link to="/" className="flex items-center gap-3 mr-4 shrink-0" aria-label="Accueil — Transports Ligneo">
+        <div className="max-w-7xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-8">
+          <Link to="/" className="flex items-center gap-3 mr-2 shrink-0" aria-label="Accueil — Transports Ligneo">
             <img
               src={logoLigneo}
               alt="Transports Ligneo"
-              className="h-16 md:h-20 w-auto object-contain"
+              className="h-14 md:h-16 w-auto object-contain"
               loading="eager"
             />
           </Link>
 
-          {/* Liens centraux */}
-          <ul className="flex gap-7 items-center">
+          {/* Liens centraux — pilule englobante */}
+          <ul className="r4-nav-pill whitespace-nowrap">
             {navLinks.map((l) => (
               <li key={l.to}>
                 <Link
                   to={l.to}
                   activeOptions={{ exact: true }}
-                  activeProps={{ className: "nav-link-active" }}
-                  className="nav-link-electric text-[11px] font-medium tracking-[0.22em] uppercase text-cream/75 transition-colors duration-300"
+                  activeProps={{ className: "r4-nav-link is-active whitespace-nowrap" }}
+                  inactiveProps={{ className: "r4-nav-link whitespace-nowrap" }}
                 >
                   {l.label}
                 </Link>
-
               </li>
             ))}
           </ul>
 
-          {/* Actions droite : téléphone premium + CTAs */}
+          {/* Actions droite : téléphone + Estimer + Connexion */}
           <div className="flex items-center gap-3 shrink-0">
             <a
               href="tel:+33782456181"
@@ -98,17 +91,16 @@ export default function Navbar() {
                 <span className="nav-phone-sub">Disponible 7j/7</span>
               </span>
             </a>
-            <button
-              onClick={goToEstimer}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[11px] tracking-[0.22em] uppercase font-heading edl-cta"
-            >
-              <Sparkles size={13} />
-              Estimer
+            <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
+              <svg className="r4-ic-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
+              </svg>
+              Estimer mon trajet
+              <svg className="r4-ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
             </button>
-            <button
-              onClick={goToEspace}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#60a5fa]/55 text-[#60a5fa] text-[11px] tracking-[0.22em] uppercase font-heading hover:bg-[#60a5fa] hover:text-[#061238] transition-colors"
-            >
+            <button onClick={goToEspace} className="r4-btn-connect" type="button">
               <User size={13} />
               {isAuthenticated ? "Mon espace" : "Connexion"}
             </button>
@@ -133,20 +125,14 @@ export default function Navbar() {
                 </li>
               ))}
               <li>
-                <button
-                  onClick={goToEstimer}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs tracking-[0.15em] uppercase font-medium edl-cta"
-                >
-                  <Sparkles size={14} />
+                <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
+                  <Sparkles size={13} />
                   Estimer
                 </button>
               </li>
               <li>
-                <button
-                  onClick={goToEspace}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 border border-primary/60 text-primary text-xs tracking-[0.15em] uppercase font-medium"
-                >
-                  <User size={14} />
+                <button onClick={goToEspace} className="r4-btn-connect" type="button">
+                  <User size={13} />
                   {isAuthenticated ? "Mon espace" : "Connexion"}
                 </button>
               </li>
@@ -157,3 +143,4 @@ export default function Navbar() {
     </>
   );
 }
+
