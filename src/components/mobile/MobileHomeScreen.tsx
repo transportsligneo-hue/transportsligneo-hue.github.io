@@ -263,7 +263,7 @@ export default function MobileHomeScreen() {
         </div>
         <div className="flex flex-col gap-3">
           <MiniStat label="Expérience" value="6+ ans" />
-          <MiniStat label="Annulation" value="Gratuite" />
+          <MiniStat label="Inclus" value="Carburant, péage, assurance" />
           <MiniStat label="Dispo" value="24/7" />
         </div>
       </div>
