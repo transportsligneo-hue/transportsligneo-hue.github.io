@@ -466,7 +466,7 @@ function Navigation2() {
 
 function RouteThread() {
   return (
-    <div className="route-thread hidden" aria-hidden>
+    <div className="route-thread" aria-hidden>
       <div className="route-thread-dot" />
     </div>
   );
