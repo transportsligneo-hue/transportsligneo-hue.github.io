@@ -1547,45 +1547,97 @@
   }
 
   .nav-phone-block {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.4rem 0.85rem 0.4rem 0.5rem;
-    border-radius: 0.65rem;
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-    transition: border-color .25s ease, background .25s ease;
+    gap: 0.7rem;
+    padding: 0.4rem 1rem 0.4rem 0.5rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(212, 175, 55, 0.32);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+      radial-gradient(120% 140% at 0% 0%, rgba(212,175,55,0.10), transparent 55%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 10px 28px -18px rgba(212,175,55,0.35);
+    transition: border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
+    overflow: hidden;
+  }
+  .nav-phone-block::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 35%, rgba(231,199,106,0.18) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform .9s ease;
+    pointer-events: none;
   }
   .nav-phone-block:hover {
-    border-color: rgba(212, 175, 55, 0.6);
-    background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border-color: rgba(212, 175, 55, 0.7);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 18px 42px -20px rgba(212,175,55,0.5);
   }
+  .nav-phone-block:hover::after { transform: translateX(120%); }
   .nav-phone-icon {
+    position: relative;
     width: 34px;
     height: 34px;
-    border-radius: 0.5rem;
+    border-radius: 0.6rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(212,175,55,0.20), rgba(212,175,55,0.06));
-    border: 1px solid rgba(212, 175, 55, 0.40);
+    background: linear-gradient(135deg, rgba(212,175,55,0.28), rgba(212,175,55,0.06));
+    border: 1px solid rgba(212, 175, 55, 0.45);
     color: #e7c76a;
     flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(212,175,55,0.10) inset;
+  }
+  .nav-phone-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(212,175,55,0.5);
+    animation: navPhonePulse 2.2s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes navPhonePulse {
+    0%   { transform: scale(0.9); opacity: 0.9; }
+    70%  { transform: scale(1.25); opacity: 0; }
+    100% { transform: scale(1.25); opacity: 0; }
   }
   .nav-phone-number {
     font-family: var(--font-serif);
-    font-size: 0.95rem;
-    letter-spacing: 0.04em;
-    color: #f5f1e8;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    color: #f8f4ea;
     line-height: 1.1;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.25);
   }
   .nav-phone-sub {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 9px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(212, 175, 55, 0.85);
-    margin-top: 2px;
+    color: rgba(231, 199, 106, 0.95);
+    margin-top: 3px;
     line-height: 1;
+  }
+  .nav-phone-live {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #4ade80;
+    box-shadow: 0 0 0 0 rgba(74,222,128,0.7);
+    animation: navPhoneLive 1.8s ease-out infinite;
+  }
+  @keyframes navPhoneLive {
+    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); }
+    70%  { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
   }
 }
 

@@ -573,7 +573,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <PlacesInput
                   value={departure}
                   onChange={setDeparture}
-                  placeholder="Ville ou code postal de départ"
+                  placeholder="Adresse de départ"
                   className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
                   fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
@@ -586,7 +586,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <PlacesInput
                   value={arrival}
                   onChange={setArrival}
-                  placeholder="Ville ou code postal d'arrivée"
+                  placeholder="Adresse d'arrivée"
                   className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
                   fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"

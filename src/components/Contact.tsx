@@ -14,7 +14,7 @@ export default function Contact() {
   const [profil, setProfil] = useState<Profil>("particulier");
   const [form, setForm] = useState({
     nom: "", prenom: "", telephone: "", email: "", message: "",
-    societe: "", segment: "concessionnaire", volume: "",
+    societe: "", siret: "", segment: "concessionnaire", volume: "",
   });
   const [status, setStatus] = useState<FormStatus>("idle");
 
@@ -32,6 +32,7 @@ export default function Contact() {
       profil === "pro"
         ? `[B2B - ${form.segment.toUpperCase()}]
 Société : ${form.societe}
+SIRET / SIREN : ${form.siret || "non précisé"}
 Volume mensuel estimé : ${form.volume || "non précisé"}
 
 ${form.message}`
@@ -81,7 +82,7 @@ ${form.message}`;
       setStatus("success");
       setForm({
         nom: "", prenom: "", telephone: "", email: "", message: "",
-        societe: "", segment: "concessionnaire", volume: "",
+        societe: "", siret: "", segment: "concessionnaire", volume: "",
       });
     } catch {
       setStatus("error");
@@ -142,9 +143,13 @@ ${form.message}`;
 
           {profil === "pro" && (
             <div className="v4-form-grid" style={{ marginBottom: 16 }}>
-              <div className="v4-field full">
+              <div className="v4-field">
                 <label>Société <span className="req">*</span></label>
-                <input type="text" name="societe" value={form.societe} onChange={handleChange} required maxLength={120} />
+                <input type="text" name="societe" value={form.societe} onChange={handleChange} required maxLength={120} placeholder="Nom de la société" />
+              </div>
+              <div className="v4-field">
+                <label>SIRET / SIREN</label>
+                <input type="text" name="siret" value={form.siret} onChange={handleChange} maxLength={20} placeholder="14 chiffres (SIRET) ou 9 (SIREN)" inputMode="numeric" />
               </div>
               <div className="v4-field">
                 <label>Type d'activité</label>

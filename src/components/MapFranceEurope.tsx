@@ -24,11 +24,11 @@ const MAP_SVG_INNER = `<path d="m 489.58075,285.9684 -0.119,-0.065 0.631,-0.187 
 <path id="ln-Lyon" class="line-fr" d="M478.8,313.01 L491.5,320.31"/>
 <path id="ln-Marseille" class="line-fr" d="M478.8,313.01 L493.08,331.32"/>
 <path id="ln-Strasbourg" class="line-fr" d="M478.8,313.01 L500.33,307.68"/>
-<path id="ln-Belgique" class="line-eu" d="M478.8,313.01 L487.37,298.99"/>
-<path id="ln-Allemagne" class="line-eu" d="M478.8,313.01 L504.19,295.33"/>
-<path id="ln-Suisse" class="line-eu" d="M478.8,313.01 L497.94,314.67"/>
-<path id="ln-Italie" class="line-eu" d="M478.8,313.01 L510.14,333.16"/>
-<path id="ln-Espagne" class="line-eu" d="M478.8,313.01 L455.48,354.72"/>
+<path id="ln-Belgique" class="line-eu" d="M478.8,313.01 L489.96,297.44"/>
+<path id="ln-Allemagne" class="line-eu" d="M478.8,313.01 L513.5,291"/>
+<path id="ln-Suisse" class="line-eu" d="M478.8,313.01 L499.35,314.99"/>
+<path id="ln-Italie" class="line-eu" d="M478.8,313.01 L512.5,335.5"/>
+<path id="ln-Espagne" class="line-eu" d="M478.8,313.01 L465.5,344.5"/>
 <circle cx="483.88" cy="306.43" r="0.55" class="dot-fr" style="animation-delay:0.0s"/>
 <text x="483.88" y="304.9" class="lbl-fr" text-anchor="middle">Paris</text>
 <circle cx="486.05" cy="298.5" r="0.55" class="dot-fr" style="animation-delay:0.2s"/>
@@ -46,29 +46,29 @@ const MAP_SVG_INNER = `<path d="m 489.58075,285.9684 -0.119,-0.065 0.631,-0.187 
 <circle cx="493.08" cy="331.32" r="0.55" class="dot-fr" style="animation-delay:1.4s"/>
 <text x="494.1" y="332.6" class="lbl-fr" text-anchor="start">Marseille</text>
 <circle cx="500.33" cy="307.68" r="0.55" class="dot-fr" style="animation-delay:1.6s"/>
-<text x="501.3" y="308.1" class="lbl-fr" text-anchor="start">Strasbourg</text>
-<circle cx="487.37" cy="298.99" r="0.5" class="dot-eu" style="animation-delay:0.0s"/>
-<text x="487.37" y="297.4" class="lbl-eu" text-anchor="middle">Belgique</text>
-<circle cx="504.19" cy="295.33" r="0.5" class="dot-eu" style="animation-delay:0.2s"/>
-<text x="505.1" y="295.7" class="lbl-eu" text-anchor="start">Allemagne</text>
-<circle cx="497.94" cy="314.67" r="0.5" class="dot-eu" style="animation-delay:0.5s"/>
-<text x="498.85" y="315.05" class="lbl-eu" text-anchor="start">Suisse</text>
-<circle cx="510.14" cy="333.16" r="0.5" class="dot-eu" style="animation-delay:0.8s"/>
-<text x="511.05" y="333.55" class="lbl-eu" text-anchor="start">Italie</text>
-<circle cx="455.48" cy="354.72" r="0.5" class="dot-eu" style="animation-delay:1.0s"/>
-<text x="455.48" y="356.6" class="lbl-eu" text-anchor="middle">Espagne</text>
+<text x="500.33" y="306.15" class="lbl-fr" text-anchor="middle">Strasbourg</text>
+<circle cx="489.96" cy="297.44" r="0.5" class="dot-eu" style="animation-delay:0.0s"/>
+<text x="489.96" y="295.9" class="lbl-eu" text-anchor="middle">Belgique</text>
+<circle cx="513.5" cy="291" r="0.5" class="dot-eu" style="animation-delay:0.2s"/>
+<text x="513.5" y="289.5" class="lbl-eu" text-anchor="middle">Allemagne</text>
+<circle cx="499.35" cy="314.99" r="0.5" class="dot-eu" style="animation-delay:0.5s"/>
+<text x="499.35" y="317.15" class="lbl-eu" text-anchor="middle">Suisse</text>
+<circle cx="512.5" cy="335.5" r="0.5" class="dot-eu" style="animation-delay:0.8s"/>
+<text x="512.5" y="337.6" class="lbl-eu" text-anchor="middle">Italie</text>
+<circle cx="465.5" cy="344.5" r="0.5" class="dot-eu" style="animation-delay:1.0s"/>
+<text x="465.5" y="346.5" class="lbl-eu" text-anchor="middle">Espagne</text>
 <circle cx="478.8" cy="313.01" r="1.5" class="hub-ring"/>
 <circle cx="478.8" cy="313.01" r="0.7" class="hub-dot"/>
-<text x="478.8" y="311.1" class="lbl-hub" text-anchor="middle">TOURS</text>
+<text x="478.8" y="311.05" class="lbl-hub" text-anchor="middle">Tours (37)</text>
 <text x="478.8" y="317.2" class="lbl-sub" text-anchor="middle">Notre base</text>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="3.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L483.88,306.43"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.2s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L493.08,331.32"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="3.8s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L474.96,324.43"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L500.33,307.68"/></g>
 <g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L471.61,309.79"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L504.19,295.33"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L510.14,333.16"/></g>
-<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L455.48,354.72"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L513.5,291"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L512.5,335.5"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L465.5,344.5"/></g>
 `;
 
 /**
