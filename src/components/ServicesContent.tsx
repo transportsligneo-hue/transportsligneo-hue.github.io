@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { User, Building2, Truck, Star, Camera, ShieldCheck, MapPin, Bell, PhoneCall, Check } from "lucide-react";
+import { User, Building2, Truck, Star, Camera, ShieldCheck, MapPin, Bell, PhoneCall, Check, FileSignature, ScanLine, Headphones } from "lucide-react";
 
 const services = [
   {
@@ -77,7 +77,11 @@ export default function ServicesContent() {
           <ul>
             <li><Check /> Position GPS en direct</li>
             <li><Bell /> Notifications à chaque étape clé</li>
-            <li><PhoneCall /> Contact direct avec le convoyeur</li>
+            <li><PhoneCall /> Contact direct et rapide avec un conseiller</li>
+            <li><FileSignature /> Signature digitalisée</li>
+            <li><Camera /> États des lieux photo</li>
+            <li><ScanLine /> Scan OCR & documents</li>
+            <li><Headphones /> Ligne dédiée 7j/7</li>
           </ul>
         </div>
       </div>
