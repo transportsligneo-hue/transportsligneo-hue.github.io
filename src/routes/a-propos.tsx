@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import AProposContent from "@/components/AProposContent";
 import Footer from "@/components/Footer";
+import R4Hero from "@/components/marketing/R4Hero";
 
 export const Route = createFileRoute("/a-propos")({
   component: AProposPage,
@@ -20,6 +21,17 @@ function AProposPage() {
     <>
       <Navbar />
       <main>
+        <R4Hero
+          eyebrow="NOTRE HISTOIRE"
+          title={
+            <>
+              La <span className="r4-accent">passion</span> du convoyage,
+              <br />
+              au service de votre tranquillité
+            </>
+          }
+          subtitle="Née à Tours, Transports Ligneo est portée par une conviction : chaque véhicule mérite d'être transporté avec la même exigence qu'une pièce d'exception."
+        />
         <AProposContent />
       </main>
       <Footer />
