@@ -28,8 +28,7 @@ const STEPS = [
   { id: 4, label: "Récap", icon: ShieldCheck },
 ] as const;
 
-const inputClass =
-  "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
+const inputClass = "auth-input !pl-4";
 
 function InscriptionConvoyeur() {
   const navigate = useNavigate();
@@ -232,22 +231,21 @@ function InscriptionConvoyeur() {
 
   if (submittedEmail) {
     return (
-      <div className="min-h-screen section-bg flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-5 card-premium p-8 rounded">
-          <div className="gold-divider-short mx-auto" />
-          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
-            <Mail className="text-primary" size={28} />
+      <div className="auth-shell flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center space-y-5 auth-card p-8">
+          <div className="mx-auto h-14 w-14 rounded-full bg-blue-500/15 border border-blue-400/30 flex items-center justify-center">
+            <Mail className="text-blue-300" size={28} />
           </div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Vérifiez votre email</h1>
-          <p className="text-cream/70 text-sm leading-relaxed">
-            Nous venons d'envoyer un lien de confirmation à <span className="text-primary font-medium">{submittedEmail}</span>.
+          <h1 className="auth-title text-xl md:text-2xl">Vérifiez votre email</h1>
+          <p className="auth-subtle text-sm leading-relaxed">
+            Nous venons d'envoyer un lien de confirmation à <span className="text-white font-medium">{submittedEmail}</span>.
             Cliquez dessus pour activer votre compte.
           </p>
-          <div className="text-cream/40 text-xs space-y-1 pt-2 border-t border-primary/10">
+          <div className="text-white/60 text-xs space-y-1 pt-2 border-t border-primary/10">
             <p>Pas reçu ? Vérifiez vos spams.</p>
             <p>Notre équipe traite votre dossier sous 24-48 h ouvrées.</p>
           </div>
-          <Link to="/login" className="inline-block text-primary text-sm hover:text-gold-light transition-colors uppercase tracking-[0.15em]">
+          <Link to="/login" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
             Aller à la connexion →
           </Link>
         </div>
@@ -257,26 +255,26 @@ function InscriptionConvoyeur() {
 
   const FileUpload = ({ label, file, onChange, hint }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string }) => (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+      <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
         <Upload size={12} className="inline mr-1" /> {label}
       </label>
       <input
         type="file" accept="image/*,application/pdf" onChange={onChange}
-        className="w-full bg-navy/60 border border-primary/20 rounded px-3 py-2 text-cream text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gold-light"
+        className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
       />
       {file
         ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name}</p>
-        : hint && <p className="text-cream/30 text-[10px] mt-1">{hint}</p>}
+        : hint && <p className="text-white/40 text-[10px] mt-1">{hint}</p>}
     </div>
   );
 
   return (
-    <div className="min-h-screen section-bg flex items-center justify-center px-4 py-12">
+    <div className="auth-shell flex items-center justify-center px-4 py-12">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
-          <div className="gold-divider-short mb-4" />
-          <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">Devenir convoyeur</h1>
-          <p className="text-cream/50 text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé.</p>
+          <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
+          <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
+          <p className="auth-subtle text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé · validation sous 24-48 h.</p>
         </div>
 
         {/* Stepper */}
@@ -291,60 +289,60 @@ function InscriptionConvoyeur() {
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
                     done ? "bg-primary/20 border-primary text-primary"
                     : active ? "bg-primary text-primary-foreground border-primary shadow-[0_0_18px_rgba(212,175,55,0.35)]"
-                    : "bg-navy/60 border-primary/20 text-cream/40"
+                    : "bg-navy/60 border-primary/20 text-white/60"
                   }`}>
                     {done ? <Check size={16} /> : <Icon size={15} />}
                   </div>
-                  <span className={`text-[10px] uppercase tracking-[0.15em] mt-2 ${active || done ? "text-primary" : "text-cream/40"}`}>{s.label}</span>
+                  <span className={`text-[10px] uppercase tracking-[0.15em] mt-2 ${active || done ? "text-primary" : "text-white/60"}`}>{s.label}</span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`h-px flex-1 mx-1 -mt-6 ${step > s.id ? "bg-primary/60" : "bg-primary/10"}`} />
+                  <div className={`h-px flex-1 mx-1 -mt-6 ${step > s.id ? "bg-blue-300/60" : "bg-white/10"}`} />
                 )}
               </div>
             );
           })}
         </div>
 
-        <div className="card-premium p-6 md:p-8 rounded space-y-5">
+        <div className="auth-card p-6 md:p-7 space-y-5">
           {/* STEP 1 : Identité */}
           {step === 1 && (
             <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <User size={12} className="inline mr-1" /> Prénom *
                   </label>
                   <input type="text" value={form.prenom} onChange={update("prenom")} className={inputClass} required />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <User size={12} className="inline mr-1" /> Nom *
                   </label>
                   <input type="text" value={form.nom} onChange={update("nom")} className={inputClass} required />
                 </div>
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <Mail size={12} className="inline mr-1" /> Email *
                 </label>
                 <input type="email" value={form.email} onChange={update("email")} className={inputClass} required />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <Phone size={12} className="inline mr-1" /> Téléphone *
                   </label>
                   <input type="tel" value={form.telephone} onChange={update("telephone")} className={inputClass} required />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <MapPin size={12} className="inline mr-1" /> Ville
                   </label>
                   <input type="text" value={form.ville} onChange={update("ville")} className={inputClass} placeholder="Ex: Tours" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <Lock size={12} className="inline mr-1" /> Mot de passe *
                 </label>
                 <div className="relative">
@@ -355,11 +353,11 @@ function InscriptionConvoyeur() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <ShieldCheck size={12} className="inline mr-1" /> Statut professionnel
                 </label>
-                <div className={`${inputClass} flex items-center gap-2 opacity-90`}>Convoyeur indépendant</div>
-                <p className="text-[10px] text-cream/50 mt-1">Ligneo travaille exclusivement avec des convoyeurs indépendants.</p>
+                <div className={`${inputClass} flex items-center gap-2 opacity-90 !py-3`}>Convoyeur indépendant</div>
+                <p className="text-[10px] text-white/50 mt-1">Ligneo travaille exclusivement avec des convoyeurs indépendants.</p>
               </div>
             </div>
           )}
@@ -369,13 +367,13 @@ function InscriptionConvoyeur() {
             <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <BadgeCheck size={12} className="inline mr-1" /> N° permis *
                   </label>
                   <input type="text" value={form.permis_numero} onChange={update("permis_numero")} className={inputClass} required placeholder="Ex: 1234567890123" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <Calendar size={12} className="inline mr-1" /> Années d'expérience *
                   </label>
                   <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
@@ -383,13 +381,13 @@ function InscriptionConvoyeur() {
               </div>
               <FileUpload label="Photo du permis (recto/verso)" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="Format JPG, PNG ou PDF · 5 Mo max." />
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <FileText size={12} className="inline mr-1" /> Catégories additionnelles
                 </label>
                 <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B + EB" />
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <Calendar size={12} className="inline mr-1" /> Disponibilité
                 </label>
                 <select value={form.disponibilite} onChange={update("disponibilite")} className={inputClass}>
@@ -406,7 +404,7 @@ function InscriptionConvoyeur() {
           {/* STEP 3 : Documents */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-[11px] uppercase tracking-[0.15em] text-primary/80">Documents officiels</p>
+              <p className="text-[11px] uppercase tracking-[0.15em] text-blue-200">Documents officiels</p>
               <FileUpload label="Pièce d'identité *" file={cniFile} onChange={makeFileHandler(setCniFile)} />
               <FileUpload label="RIB *" file={ribFile} onChange={makeFileHandler(setRibFile)} />
               <FileUpload label="Attestation RC Pro *" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
@@ -414,10 +412,10 @@ function InscriptionConvoyeur() {
                 <FileUpload label="KBIS *" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
               )}
               <div>
-                <label className="block text-xs uppercase tracking-wider text-cream/40 mb-1">Message (optionnel)</label>
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Message (optionnel)</label>
                 <textarea value={form.message} onChange={update("message")} rows={3} className={`${inputClass} resize-none`} placeholder="Présentez-vous brièvement..." />
               </div>
-              <p className="text-cream/30 text-[10px]">Format JPG, PNG ou PDF · 5 Mo max par document.</p>
+              <p className="text-white/40 text-[10px]">Format JPG, PNG ou PDF · 5 Mo max par document.</p>
             </div>
           )}
 
@@ -435,41 +433,41 @@ function InscriptionConvoyeur() {
                 <RecapRow label="N° permis" value={form.permis_numero} />
                 <RecapRow label="Années d'expérience" value={form.annees_experience} />
               </div>
-              <div className="pt-4 border-t border-primary/10 space-y-1 text-xs text-cream/60">
-                <p className="flex items-center gap-2">{permisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Photo permis {permisFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} Pièce d'identité {cniFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{ribFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} RIB {ribFile ? "✓" : "(non fourni)"}</p>
-                {form.type_convoyeur === "independant" && <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} KBIS {kbisFile ? "✓" : "(non fourni)"}</p>}
-                <p className="flex items-center gap-2">{rcProFile ? <Check size={12} className="text-primary"/> : <span className="text-cream/30">·</span>} RC Pro {rcProFile ? "✓" : "(non fournie)"}</p>
+              <div className="pt-4 border-t border-white/10 space-y-1 text-xs text-white/60">
+                <p className="flex items-center gap-2">{permisFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} Photo permis {permisFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} Pièce d'identité {cniFile ? "✓" : "(non fournie)"}</p>
+                <p className="flex items-center gap-2">{ribFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} RIB {ribFile ? "✓" : "(non fourni)"}</p>
+                {form.type_convoyeur === "independant" && <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} KBIS {kbisFile ? "✓" : "(non fourni)"}</p>}
+                <p className="flex items-center gap-2">{rcProFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} RC Pro {rcProFile ? "✓" : "(non fournie)"}</p>
               </div>
               <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
-                <ShieldCheck size={14} className="inline text-primary mr-1" />
+                <ShieldCheck size={14} className="inline text-blue-300 mr-1" />
                 Votre inscription sera validée par notre équipe sous 24-48 h ouvrées. Vous recevrez un email de confirmation.
               </div>
             </div>
           )}
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
           {/* Navigation */}
           <div className="flex items-center justify-between pt-2">
             <button
               type="button" onClick={prev} disabled={step === 1 || loading}
-              className="flex items-center gap-1 px-4 py-2 text-cream/60 hover:text-primary text-sm uppercase tracking-[0.1em] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-white/60 hover:text-primary text-sm uppercase tracking-[0.1em] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft size={14} /> Retour
             </button>
             {step < 4 ? (
               <button
                 type="button" onClick={next}
-                className="flex items-center gap-1 px-6 py-2.5 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)]"
               >
                 Continuer <ChevronRight size={14} />
               </button>
             ) : (
               <button
                 type="button" onClick={handleSubmit} disabled={loading}
-                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-heading text-sm tracking-[0.1em] uppercase hover:bg-gold-light transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)] disabled:opacity-50"
               >
                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
                 {loading ? "Envoi..." : "Valider mon inscription"}
@@ -479,17 +477,17 @@ function InscriptionConvoyeur() {
         </div>
 
         <div className="text-center mt-6 space-y-3">
-          <p className="text-[10px] leading-relaxed text-cream/40 px-2">
+          <p className="text-[10px] leading-relaxed text-white/45 px-2">
             Protégé par reCAPTCHA et soumis à la{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Politique de Confidentialité</a>
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Politique de Confidentialité</a>
             {" "}et aux{" "}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Termes d'Utilisation</a>
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Termes d'Utilisation</a>
             {" "}de Google.
           </p>
-          <Link to="/login" className="block text-primary text-xs hover:text-gold-light transition-colors">
+          <Link to="/login" className="block auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
             Déjà inscrit ? Se connecter
           </Link>
-          <Link to="/" className="block text-cream/40 text-xs hover:text-primary transition-colors">
+          <Link to="/" className="block text-white/60 text-xs hover:text-primary transition-colors">
             ← Retour au site
           </Link>
         </div>
@@ -500,9 +498,9 @@ function InscriptionConvoyeur() {
 
 function RecapRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-navy/40 border border-primary/10 rounded px-3 py-2">
-      <p className="text-[10px] uppercase tracking-[0.15em] text-cream/40">{label}</p>
-      <p className="text-cream text-sm mt-0.5 truncate">{value || " · "}</p>
+    <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-white/50">{label}</p>
+      <p className="text-white text-sm mt-0.5 truncate">{value || " · "}</p>
     </div>
   );
 }

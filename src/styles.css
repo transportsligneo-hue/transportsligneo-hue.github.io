@@ -1725,10 +1725,34 @@
     color: #f8fafc;
   }
   .auth-title {
-    font-family: 'Playfair Display', serif;
-    color: #f8fafc;
-    letter-spacing: 0.12em;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .auth-accent {
+    color: #6ea1ff;
+    text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.45);
+    animation: v4PulseGlow 2.6s ease-in-out infinite;
+  }
+  .auth-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: #6ea1ff;
+    margin-bottom: 14px;
+  }
+  .auth-eyebrow::before {
+    content: "";
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #6ea1ff;
+    box-shadow: 0 0 8px #6ea1ff;
   }
   .auth-subtle { color: rgba(226, 232, 240, 0.65); }
   .auth-label {
