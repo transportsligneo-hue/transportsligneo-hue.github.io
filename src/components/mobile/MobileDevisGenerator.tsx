@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import {
   MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
   Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
+  Zap, ArrowUpDown,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
