@@ -220,6 +220,13 @@ function ClientDashboard() {
         <StatCard icon={Inbox} label="Demandes" value={stats.demandes} accent="text-[#e7c76a]" />
       </div>
 
+      {/* Carte trajets en cours */}
+      <ActiveMissionsMap
+        title="Suivi de vos convoyages"
+        emptyMessage="Aucun convoyage en cours actuellement."
+      />
+
+
       {/* Last mission OU bloc rassurant */}
       <div>
         <div className="flex items-center justify-between mb-3">
