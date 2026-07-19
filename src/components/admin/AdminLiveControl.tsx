@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Activity, AlertTriangle, RotateCcw, PlayCircle, PauseCircle, CheckCircle2, XCircle, Send } from "lucide-react";
+import { Activity, AlertTriangle, RotateCcw, PlayCircle, PauseCircle, CheckCircle2, XCircle, Send, RefreshCw } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
-import { forceAdminMissionStep, updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { forceAdminMissionStep, resetAdminMission, updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { confirmToast } from "@/lib/confirm-toast";
 
 interface AdminLiveControlProps {
   attributionId: string;
