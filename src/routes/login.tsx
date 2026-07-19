@@ -134,11 +134,11 @@ function LoginPage() {
     <div className="auth-shell flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
-          <Link to="/" className="inline-block mb-4">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
+          <Link to="/" className="inline-block mb-4 relative auth-logo-pulse">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.45)] relative z-10" />
           </Link>
-          <h1 className="auth-title text-2xl md:text-3xl">Connexion</h1>
-          <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace sécurisé</p>
+          <h1 className="auth-title text-2xl md:text-3xl">Connexion <span className="auth-accent">sécurisée</span></h1>
+          <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace en un clic</p>
         </div>
 
         <div className="auth-tabs mb-4">

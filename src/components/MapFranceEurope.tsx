@@ -29,43 +29,46 @@ const MAP_SVG_INNER = `<path d="m 489.58075,285.9684 -0.119,-0.065 0.631,-0.187 
 <path id="ln-Suisse" class="line-eu" d="M478.8,313.01 L497.94,314.67"/>
 <path id="ln-Italie" class="line-eu" d="M478.8,313.01 L510.14,333.16"/>
 <path id="ln-Espagne" class="line-eu" d="M478.8,313.01 L455.48,354.72"/>
-<circle cx="483.88" cy="306.43" r="0.5" class="dot-fr" style="animation-delay:0.0s"/>
-<text x="484.73" y="305.78" class="lbl-fr">Paris</text>
-<circle cx="486.05" cy="298.5" r="0.5" class="dot-fr" style="animation-delay:0.2s"/>
-<text x="486.90" y="297.85" class="lbl-fr">Lille</text>
-<circle cx="471.61" cy="309.79" r="0.5" class="dot-fr" style="animation-delay:0.4s"/>
-<text x="472.46" y="309.14" class="lbl-fr">Rennes</text>
-<circle cx="472.01" cy="313.77" r="0.5" class="dot-fr" style="animation-delay:0.6s"/>
-<text x="472.86" y="313.12" class="lbl-fr">Nantes</text>
-<circle cx="474.96" cy="324.43" r="0.5" class="dot-fr" style="animation-delay:0.8s"/>
-<text x="475.81" y="323.78" class="lbl-fr">Bordeaux</text>
-<circle cx="481.11" cy="329.98" r="0.5" class="dot-fr" style="animation-delay:1.0s"/>
-<text x="481.96" y="329.33" class="lbl-fr">Toulouse</text>
-<circle cx="491.5" cy="320.31" r="0.5" class="dot-fr" style="animation-delay:1.2s"/>
-<text x="492.35" y="319.66" class="lbl-fr">Lyon</text>
-<circle cx="493.08" cy="331.32" r="0.5" class="dot-fr" style="animation-delay:1.4s"/>
-<text x="493.93" y="330.67" class="lbl-fr">Marseille</text>
-<circle cx="500.33" cy="307.68" r="0.5" class="dot-fr" style="animation-delay:1.6s"/>
-<text x="501.18" y="307.03" class="lbl-fr">Strasbourg</text>
-<circle cx="487.37" cy="298.99" r="0.45" class="dot-eu" style="animation-delay:0.0s"/>
-<text x="488.17" y="298.39" class="lbl-eu">Belgique</text>
-<circle cx="504.19" cy="295.33" r="0.45" class="dot-eu" style="animation-delay:0.2s"/>
-<text x="504.99" y="294.73" class="lbl-eu">Allemagne</text>
-<circle cx="497.94" cy="314.67" r="0.45" class="dot-eu" style="animation-delay:0.5s"/>
-<text x="498.74" y="314.07" class="lbl-eu">Suisse</text>
-<circle cx="510.14" cy="333.16" r="0.45" class="dot-eu" style="animation-delay:0.8s"/>
-<text x="510.94" y="332.56" class="lbl-eu">Italie</text>
-<circle cx="455.48" cy="354.72" r="0.45" class="dot-eu" style="animation-delay:1.0s"/>
-<text x="456.28" y="354.12" class="lbl-eu">Espagne</text>
-<circle cx="478.8" cy="313.01" r="0.9" class="hub-ring"/>
-<circle cx="478.8" cy="313.01" r="0.55" class="hub-dot"/>
-<text x="478.8" y="315.31" class="lbl-hub" text-anchor="middle">TOURS</text>
-<text x="478.8" y="316.61" class="lbl-sub" text-anchor="middle">Base operationnelle</text>
-<circle r="0.3" class="travel-dot"><animateMotion dur="3s" repeatCount="indefinite" path="M478.8,313.01 L483.88,306.43"/></circle>
-<circle r="0.3" class="travel-dot"><animateMotion dur="3.8s" repeatCount="indefinite" path="M478.8,313.01 L493.08,331.32"/></circle>
-<circle r="0.3" class="travel-dot"><animateMotion dur="4.2s" repeatCount="indefinite" path="M478.8,313.01 L474.96,324.43"/></circle>
-<circle r="0.28" class="travel-dot-eu"><animateMotion dur="5.5s" repeatCount="indefinite" path="M478.8,313.01 L504.19,295.33"/></circle>
-<circle r="0.28" class="travel-dot-eu"><animateMotion dur="6s" repeatCount="indefinite" path="M478.8,313.01 L510.14,333.16"/></circle>
+<circle cx="483.88" cy="306.43" r="0.55" class="dot-fr" style="animation-delay:0.0s"/>
+<text x="483.88" y="304.9" class="lbl-fr" text-anchor="middle">Paris</text>
+<circle cx="486.05" cy="298.5" r="0.55" class="dot-fr" style="animation-delay:0.2s"/>
+<text x="486.05" y="297" class="lbl-fr" text-anchor="middle">Lille</text>
+<circle cx="471.61" cy="309.79" r="0.55" class="dot-fr" style="animation-delay:0.4s"/>
+<text x="470.8" y="309.2" class="lbl-fr" text-anchor="end">Rennes</text>
+<circle cx="472.01" cy="313.77" r="0.55" class="dot-fr" style="animation-delay:0.6s"/>
+<text x="471.2" y="315.5" class="lbl-fr" text-anchor="end">Nantes</text>
+<circle cx="474.96" cy="324.43" r="0.55" class="dot-fr" style="animation-delay:0.8s"/>
+<text x="474.1" y="325.9" class="lbl-fr" text-anchor="end">Bordeaux</text>
+<circle cx="481.11" cy="329.98" r="0.55" class="dot-fr" style="animation-delay:1.0s"/>
+<text x="481.11" y="331.85" class="lbl-fr" text-anchor="middle">Toulouse</text>
+<circle cx="491.5" cy="320.31" r="0.55" class="dot-fr" style="animation-delay:1.2s"/>
+<text x="492.5" y="320.6" class="lbl-fr" text-anchor="start">Lyon</text>
+<circle cx="493.08" cy="331.32" r="0.55" class="dot-fr" style="animation-delay:1.4s"/>
+<text x="494.1" y="332.6" class="lbl-fr" text-anchor="start">Marseille</text>
+<circle cx="500.33" cy="307.68" r="0.55" class="dot-fr" style="animation-delay:1.6s"/>
+<text x="501.3" y="308.1" class="lbl-fr" text-anchor="start">Strasbourg</text>
+<circle cx="487.37" cy="298.99" r="0.5" class="dot-eu" style="animation-delay:0.0s"/>
+<text x="487.37" y="297.4" class="lbl-eu" text-anchor="middle">Belgique</text>
+<circle cx="504.19" cy="295.33" r="0.5" class="dot-eu" style="animation-delay:0.2s"/>
+<text x="505.1" y="295.7" class="lbl-eu" text-anchor="start">Allemagne</text>
+<circle cx="497.94" cy="314.67" r="0.5" class="dot-eu" style="animation-delay:0.5s"/>
+<text x="498.85" y="315.05" class="lbl-eu" text-anchor="start">Suisse</text>
+<circle cx="510.14" cy="333.16" r="0.5" class="dot-eu" style="animation-delay:0.8s"/>
+<text x="511.05" y="333.55" class="lbl-eu" text-anchor="start">Italie</text>
+<circle cx="455.48" cy="354.72" r="0.5" class="dot-eu" style="animation-delay:1.0s"/>
+<text x="455.48" y="356.6" class="lbl-eu" text-anchor="middle">Espagne</text>
+<circle cx="478.8" cy="313.01" r="1.5" class="hub-ring"/>
+<circle cx="478.8" cy="313.01" r="0.7" class="hub-dot"/>
+<text x="478.8" y="311.1" class="lbl-hub" text-anchor="middle">TOURS</text>
+<text x="478.8" y="317.2" class="lbl-sub" text-anchor="middle">Notre base</text>
+<g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="3.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L483.88,306.43"/></g>
+<g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.2s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L493.08,331.32"/></g>
+<g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="3.8s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L474.96,324.43"/></g>
+<g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L500.33,307.68"/></g>
+<g class="travel-car"><path d="M-0.9 -0.35 L0.55 -0.35 L0.9 0 L0.55 0.35 L-0.9 0.35 Z"/><animateMotion dur="4.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L471.61,309.79"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L504.19,295.33"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L510.14,333.16"/></g>
+<g class="travel-car travel-car-eu"><path d="M-0.85 -0.32 L0.5 -0.32 L0.85 0 L0.5 0.32 L-0.85 0.32 Z"/><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L455.48,354.72"/></g>
 `;
 
 /**
@@ -102,16 +105,8 @@ export default function MapFranceEurope() {
 
         <div className="r4-map-legend">
           <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#d9b54a", boxShadow: "0 0 8px #d9b54a" }} />
+            <span className="r4-map-legend-dot" style={{ background: "#d9b54a", boxShadow: "0 0 10px #d9b54a" }} />
             Tours · Notre base
-          </div>
-          <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#4f8cff" }} />
-            Villes desservies en France
-          </div>
-          <div className="r4-map-legend-item">
-            <span className="r4-map-legend-dot" style={{ background: "#d9b54a" }} />
-            Livraisons en Europe
           </div>
         </div>
       </div>

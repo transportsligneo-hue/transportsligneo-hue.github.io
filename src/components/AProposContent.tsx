@@ -16,8 +16,8 @@ const valeurs = [
 ];
 
 const timeline = [
-  { year: "Création", title: "Les débuts à Tours", desc: "Olivier G démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale." },
-  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et l'intégration de convoyeurs indépendants certifiés en renfort." },
+  { year: "Création", title: "Les débuts à Tours", desc: "Olivier P.G. démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale." },
+  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort." },
   { year: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale." },
   { year: "Aujourd'hui", title: "Un partenaire pour les pros", desc: "Développement des solutions dédiées aux concessions, loueurs et gestionnaires de flotte, partout en France et en Europe." },
 ];
@@ -41,8 +41,8 @@ export default function AProposContent() {
       </div>
 
       <div className="v4-story">
-        <p>Fondée à Tours, <b>Transports Ligneo</b> s'est imposée comme un acteur de confiance du convoyage automobile en France, au service des particuliers comme des professionnels — concessions, loueurs et gestionnaires de flotte.</p>
-        <p>Notre différence tient en une phrase : <b>chaque véhicule est traité comme s'il était le nôtre.</b> Chauffeurs formés en continu, tenue professionnelle obligatoire, état des lieux photo systématique, assurance tous risques incluse — rien n'est laissé au hasard.</p>
+        <p>Fondée à Tours, <b>Transports Ligneo</b> s'est imposée comme un acteur de confiance du convoyage automobile en France, au service des particuliers comme des professionnels : concessions, loueurs et gestionnaires de flotte.</p>
+        <p>Notre différence tient en une phrase : <b>chaque véhicule est traité comme s'il était le nôtre.</b> Chauffeurs formés en continu, tenue professionnelle obligatoire, état des lieux photo systématique, assurance tous risques incluse. Rien n'est laissé au hasard.</p>
         <p>Nous avons aussi fait le pari du digital dès le premier jour : devis instantané, suivi GPS en direct, signature électronique et facturation automatique. Une exigence de grand groupe, avec la réactivité d'une équipe qui connaît chaque client par son nom.</p>
       </div>
 
@@ -73,8 +73,8 @@ export default function AProposContent() {
         </div>
         <div className="v4-timeline">
           <div className="v4-tl-track" />
-          {timeline.map((it) => (
-            <div key={it.year} className="v4-tl-item">
+          {timeline.map((it, i) => (
+            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 140}ms` }}>
               <div className="v4-tl-year">{it.year}</div>
               <div className="v4-tl-body">
                 <h4>{it.title}</h4>
