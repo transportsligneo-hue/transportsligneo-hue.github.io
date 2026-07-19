@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { User, Building2, Truck, Star, Camera, ShieldCheck, MapPin, Bell, PhoneCall, Check } from "lucide-react";
+import { User, Building2, Truck, Star, Camera, ShieldCheck, MapPin, Bell, PhoneCall, Check, FileSignature, ScanLine, Headphones } from "lucide-react";
 
 const services = [
   {
