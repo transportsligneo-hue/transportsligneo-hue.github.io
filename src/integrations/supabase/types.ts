@@ -360,13 +360,6 @@ export type Database = {
             referencedRelation: "trajets_assigned_safe"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attributions_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_publies_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       b2b_actions_history: {
@@ -2596,13 +2589,6 @@ export type Database = {
             referencedRelation: "trajets_assigned_safe"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "mission_offres_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_publies_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       mission_pv_digitaux: {
@@ -3725,13 +3711,6 @@ export type Database = {
             referencedRelation: "trajets_assigned_safe"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "trajets_parent_trajet_id_fkey"
-            columns: ["parent_trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_publies_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       trajets_admin_data: {
@@ -3772,13 +3751,6 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: true
             referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: true
-            referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -3951,13 +3923,6 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: false
             referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_movements_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_publies_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4225,60 +4190,38 @@ export type Database = {
           published_at: string | null
           statut_publication: string | null
         }
-        Insert: {
-          allow_counter_offer?: boolean | null
-          arrivee?: string | null
-          attribution_mode?: string | null
-          bidding_enabled?: never
-          created_at?: string | null
-          date_trajet?: string | null
-          depart?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          is_test_data?: never
-          leg_type?: string | null
-          marque?: string | null
-          mission_group_id?: string | null
-          modele?: string | null
-          pricing_mode?: string | null
-          prix_convoyeur?: number | null
-          prix_convoyeur_fixe?: number | null
-          prix_convoyeur_max?: number | null
-          prix_convoyeur_min?: number | null
-          prix_suggere?: number | null
-          proposal_expires_at?: string | null
-          published_at?: string | null
-          statut_publication?: string | null
-        }
-        Update: {
-          allow_counter_offer?: boolean | null
-          arrivee?: string | null
-          attribution_mode?: string | null
-          bidding_enabled?: never
-          created_at?: string | null
-          date_trajet?: string | null
-          depart?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          is_test_data?: never
-          leg_type?: string | null
-          marque?: string | null
-          mission_group_id?: string | null
-          modele?: string | null
-          pricing_mode?: string | null
-          prix_convoyeur?: number | null
-          prix_convoyeur_fixe?: number | null
-          prix_convoyeur_max?: number | null
-          prix_convoyeur_min?: number | null
-          prix_suggere?: number | null
-          proposal_expires_at?: string | null
-          published_at?: string | null
-          statut_publication?: string | null
-        }
         Relationships: []
       }
     }
     Functions: {
+      _trajets_publies_safe_rows: {
+        Args: never
+        Returns: {
+          allow_counter_offer: boolean
+          arrivee: string
+          attribution_mode: string
+          bidding_enabled: boolean
+          created_at: string
+          date_trajet: string
+          depart: string
+          heure_trajet: string
+          id: string
+          is_test_data: boolean
+          leg_type: string
+          marque: string
+          mission_group_id: string
+          modele: string
+          pricing_mode: string
+          prix_convoyeur: number
+          prix_convoyeur_fixe: number
+          prix_convoyeur_max: number
+          prix_convoyeur_min: number
+          prix_suggere: number
+          proposal_expires_at: string
+          published_at: string
+          statut_publication: string
+        }[]
+      }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
       admin_cancel_mission_leg: {
