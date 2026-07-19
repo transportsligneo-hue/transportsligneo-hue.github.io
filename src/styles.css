@@ -2551,16 +2551,36 @@
     0%,100% { opacity: 1; transform: scale(1); }
     50%     { opacity: 0.7; transform: scale(1.15); }
   }
-  .lbl-fr { font-family: 'Inter', sans-serif; font-size: 1.35px; fill: #c3cbe6; }
-  .lbl-eu { font-family: 'Inter', sans-serif; font-size: 1.25px; fill: #e8cf8c; font-style: italic; }
-  .lbl-hub { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.55px; fill: #fff; }
-  .lbl-sub { font-family: 'Inter', sans-serif; font-size: 1px; fill: #9aa6c9; }
-  .travel-dot { fill: #fff; }
-  .travel-dot-eu { fill: #f0dc9e; }
+  .lbl-fr { font-family: 'Inter', sans-serif; font-size: 1.55px; font-weight: 600; fill: #e6ecff;
+    paint-order: stroke; stroke: rgba(6,12,32,0.85); stroke-width: 0.35px; stroke-linejoin: round; }
+  .lbl-eu { font-family: 'Inter', sans-serif; font-size: 1.45px; font-weight: 500; fill: #f0dc9e; font-style: italic;
+    paint-order: stroke; stroke: rgba(6,12,32,0.85); stroke-width: 0.32px; stroke-linejoin: round; }
+  .lbl-hub { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 2.1px; fill: #fff; letter-spacing: 0.15px;
+    paint-order: stroke; stroke: rgba(6,12,32,0.9); stroke-width: 0.45px; stroke-linejoin: round; }
+  .lbl-sub { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.15px; fill: #d9b54a;
+    paint-order: stroke; stroke: rgba(6,12,32,0.9); stroke-width: 0.32px; stroke-linejoin: round; }
+  .travel-car > path { fill: #ffffff; filter: drop-shadow(0 0 1.2px rgba(122,163,255,0.9)); }
+  .travel-car-eu > path { fill: #f0dc9e; filter: drop-shadow(0 0 1.2px rgba(217,181,74,0.9)); }
   .r4-map-legend { display: flex; justify-content: center; gap: 32px; margin-top: 22px; flex-wrap: wrap; }
   .r4-map-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--r4-text-muted); }
   .r4-map-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
 }
+
+/* Timeline stagger (à propos) */
+.r4-page .v4-tl-anim { opacity: 0; transform: translateY(14px);
+  animation: v4TlIn .7s cubic-bezier(.2,.7,.2,1) both; }
+.r4-page .v4-tl-item { transition: transform .35s ease, box-shadow .35s ease; }
+.r4-page .v4-tl-item:hover .v4-tl-body {
+  transform: translateX(4px);
+  box-shadow: 0 12px 40px -14px rgba(79,140,255,0.35);
+  border-color: rgba(122,163,255,0.35);
+}
+.r4-page .v4-tl-item:hover .v4-tl-year {
+  box-shadow: 0 0 0 3px rgba(217,181,74,0.25), 0 0 24px rgba(217,181,74,0.35);
+}
+.r4-page .v4-tl-body { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+.r4-page .v4-tl-year { transition: box-shadow .35s ease; }
+@keyframes v4TlIn { to { opacity: 1; transform: translateY(0); } }
 
 /* ============================================================
    V4 Refonte marketing pages (services / a-propos / b2b / contact)
