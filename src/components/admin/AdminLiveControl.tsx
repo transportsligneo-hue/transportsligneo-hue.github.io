@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Activity, AlertTriangle, RotateCcw, PlayCircle, PauseCircle, CheckCircle2, XCircle, Send } from "lucide-react";
+import { Activity, AlertTriangle, RotateCcw, PlayCircle, PauseCircle, CheckCircle2, XCircle, Send, RefreshCw } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
-import { forceAdminMissionStep, updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { forceAdminMissionStep, resetAdminMission, updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { confirmToast } from "@/lib/confirm-toast";
 
 interface AdminLiveControlProps {
   attributionId: string;
@@ -89,6 +90,30 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
     }
   };
 
+  const resetMission = async () => {
+    const ok = await confirmToast(
+      "Réinitialiser cette mission ?",
+      {
+        description: "Statut, étape, photos EDL, signatures, PV et historique seront effacés. Le convoyeur repartira de zéro.",
+        confirmLabel: "Tout réinitialiser",
+        variant: "danger",
+      },
+    );
+    if (!ok) return;
+    setBusy("reset");
+    try {
+      await resetAdminMission(attributionId);
+      toast.success("Mission réinitialisée");
+      onChange?.();
+    } catch (error) {
+      toast.error("Échec réinitialisation", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-pro-border bg-white p-4 space-y-4">
       <div className="flex items-center gap-2">
@@ -123,6 +148,15 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
               Ré-ouvrir
             </Button>
           )}
+          <button
+            onClick={resetMission}
+            disabled={busy === "reset"}
+            title="Remet la mission à zéro pour le convoyeur (efface EDL, photos, signatures, historique)"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-red-300 bg-white text-red-700 text-xs font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={13} />
+            Remettre à zéro
+          </button>
         </div>
       </div>
 

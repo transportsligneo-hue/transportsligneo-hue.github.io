@@ -161,3 +161,7 @@ export async function forceAdminMissionStep({ attributionId, etape, note }: Admi
 
   if (historyError) throw historyError;
 }
+export async function resetAdminMission(attributionId: string) {
+  const { error } = await supabase.rpc("admin_reset_mission" as never, { _attribution_id: attributionId } as never);
+  if (error) throw error;
+}
