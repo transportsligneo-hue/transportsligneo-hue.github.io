@@ -5,11 +5,8 @@ import {
   Phone,
   ShieldCheck,
   ChevronRight,
-  Clock,
   Zap,
-  Award,
   ArrowRight,
-  Star,
   Truck,
   FileText,
   User,
@@ -22,6 +19,9 @@ import {
   MessageSquare,
   LogIn,
   LogOut,
+  Bell,
+  ArrowLeftRight,
+  Award,
 } from "lucide-react";
 
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
@@ -30,25 +30,22 @@ import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * MobileHomeScreen — App-like mobile experience (2026 SaaS premium)
- * Palette : fond profond #050B1D + dégradés bleus électriques.
- * Icônes Lucide modernes, cartes glassmorphism, halos lumineux discrets.
+ * MobileHomeScreen — v3
+ * Reproduction fidèle de la maquette "accueil-mobile-v3" :
+ * fond navy continu avec halos bleus/or, hero photo + overlay bleu,
+ * carte "Estimer mon trajet" flottante, fil de route décoratif, bento stats.
+ * Toutes les routes et le vrai simulateur (MobileDevisGenerator) restent branchés.
  */
 export default function MobileHomeScreen() {
   const { isAuthenticated, role, user, logout } = useAuth();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
 
   const goEspace = () => {
@@ -61,89 +58,75 @@ export default function MobileHomeScreen() {
 
   const handleLogout = async () => {
     setMenuOpen(false);
-    try { await logout(); } catch {}
+    try {
+      await logout();
+    } catch {}
     navigate({ to: "/" });
   };
 
-  const handleScrollToDevis = () => {
+  const scrollToDevis = () => {
     const el = document.getElementById("mobile-devis");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const espaceLabel = isAuthenticated ? "Mon espace" : "Se connecter";
-  const userInitial = user?.email?.[0]?.toUpperCase() ?? "";
 
   return (
     <div
       className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-bottom-nav"
       style={{
         background:
-          "radial-gradient(120% 80% at 50% 0%, #0a1638 0%, #050B1D 55%, #030816 100%)",
+          "radial-gradient(520px 440px at 90% 0%, rgba(63,123,255,0.32), transparent 60%)," +
+          "radial-gradient(420px 360px at -8% 26%, rgba(217,181,74,0.10), transparent 60%)," +
+          "radial-gradient(480px 420px at 105% 60%, rgba(79,140,255,0.18), transparent 60%)," +
+          "radial-gradient(460px 400px at -5% 92%, rgba(63,123,255,0.14), transparent 60%)," +
+          "linear-gradient(180deg, #0a1230 0%, #0a1230 10%, #070c1f 34%, #060a1a 70%, #050813 100%)",
       }}
     >
-      {/* Halos lumineux */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full blur-[130px] opacity-60"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-[38%] -left-32 w-[340px] h-[340px] rounded-full blur-[110px] opacity-40"
-        style={{ background: "radial-gradient(circle, rgba(56,189,248,0.35) 0%, transparent 70%)" }}
-      />
+      {/* Blobs décoratifs */}
+      <div aria-hidden className="pointer-events-none absolute -right-24 top-20 w-[260px] h-[260px] rounded-full blur-[60px] bg-[rgba(63,123,255,0.20)]" />
+      <div aria-hidden className="pointer-events-none absolute -left-20 top-[760px] w-[220px] h-[220px] rounded-full blur-[60px] bg-[rgba(217,181,74,0.11)]" />
+      <div aria-hidden className="pointer-events-none absolute -right-16 top-[1260px] w-[230px] h-[230px] rounded-full blur-[60px] bg-[rgba(79,140,255,0.16)]" />
 
-      {/* === HEADER === */}
-      <header
-        className={`safe-top sticky top-0 z-40 px-5 pt-3 pb-3 flex items-center justify-between transition-all duration-300 ${
-          scrolled
-            ? "bg-[#050B1D]/85 backdrop-blur-xl border-b border-white/[0.06]"
-            : "bg-transparent"
-        }`}
+      {/* Fil de route décoratif */}
+      <RouteThread />
+
+      {/* Topbar (overlay transparent sur hero) */}
+      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-between px-5 pt-4 pb-4"
+        style={{ background: "linear-gradient(180deg, rgba(4,7,18,0.55) 0%, rgba(4,7,18,0.15) 70%, transparent 100%)" }}
       >
-        <Link to="/" className="flex items-center gap-2.5 tap-scale min-w-0" aria-label="Accueil">
-          <span className="shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden">
-            <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain" loading="eager" />
+        <Link to="/" className="flex items-center gap-2.5 min-w-0" aria-label="Accueil">
+          <span className="shrink-0 w-9 h-9 rounded-[10px] overflow-hidden bg-[#0a1230]"
+            style={{ boxShadow: "0 0 16px rgba(63,123,255,0.55), 0 0 0 1px rgba(122,163,255,0.4)" }}
+          >
+            <img src={logoLigneo} alt="Ligneo" className="w-full h-full object-cover" loading="eager" />
           </span>
-          <span className="flex flex-col leading-tight min-w-0">
-            <span className="font-heading text-white text-[13px] tracking-[0.18em] uppercase">
-              Transports
-            </span>
-            <span className="font-heading text-[#3b82f6] text-[13px] tracking-[0.22em] uppercase">
-              Ligneo
-            </span>
+          <span
+            className="font-black tracking-[0.02em] text-[13.5px] leading-none text-white"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            TRANSPORTS <span className="text-[#d9b54a]">LIGNEO</span>
           </span>
         </Link>
-
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2">
           <button
-            onClick={goEspace}
-            aria-label={espaceLabel}
-            className="h-11 w-11 rounded-full flex items-center justify-center active:scale-95 transition-transform"
-            style={{
-              background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-              boxShadow:
-                "0 10px 28px -8px rgba(59,130,246,0.75), inset 0 1px 0 rgba(255,255,255,0.25)",
-            }}
+            onClick={() => (isAuthenticated ? navigate({ to: "/notifications" }) : navigate({ to: "/login" }))}
+            aria-label="Notifications"
+            className="relative w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
           >
-            {isAuthenticated && userInitial ? (
-              <span className="text-white font-heading text-[14px]">{userInitial}</span>
-            ) : (
-              <User size={18} className="text-white" strokeWidth={2} />
-            )}
+            <Bell size={15} className="text-[#cdd7ff]" strokeWidth={2} />
+            <span className="absolute top-1.5 right-2 w-1.5 h-1.5 rounded-full bg-[#ff5c7a]" style={{ boxShadow: "0 0 6px #ff5c7a" }} />
           </button>
           <button
             onClick={() => setMenuOpen(true)}
-            aria-label="Ouvrir le menu"
-            aria-expanded={menuOpen}
-            className="w-11 h-11 rounded-full flex items-center justify-center active:scale-95 transition-transform"
+            aria-label="Menu"
+            className="w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
           >
-            <Menu size={22} className="text-white/85" strokeWidth={2} />
+            <Menu size={15} className="text-[#cdd7ff]" strokeWidth={2} />
           </button>
         </div>
       </header>
 
-      {/* === DRAWER MENU === */}
       <MobileMenuDrawer
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -153,309 +136,287 @@ export default function MobileHomeScreen() {
         onLogout={handleLogout}
       />
 
-      <main className="relative z-10 px-5 pt-3 space-y-7">
-        {/* === HERO === */}
-        <Reveal>
+      {/* === HERO photo (fondu progressif vers le fond) === */}
+      <section className="relative z-[1] h-[430px] overflow-hidden">
+        <img
+          src={heroBg}
+          alt="Convoyeur Transports Ligneo"
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
+        {/* Teinte multiply bleu électrique + fondu vers navy en bas */}
+        <div
+          aria-hidden
+          className="absolute inset-0 mix-blend-multiply"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(6,10,26,0.35) 0%, rgba(7,12,31,0.25) 30%, rgba(6,10,26,0.75) 68%, #0a1230 96%)," +
+              "linear-gradient(115deg, rgba(20,40,120,0.35) 0%, transparent 55%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, transparent 40%, rgba(7,12,31,0.55) 72%, #0a1230 100%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute -top-10 -right-14 w-[260px] h-[260px] rounded-full blur-[10px] mix-blend-screen"
+          style={{ background: "radial-gradient(circle, rgba(63,123,255,0.55), transparent 70%)" }}
+        />
+
+        <div className="relative z-[2] h-full flex flex-col justify-end px-[22px] pb-16">
           <div
-            className="relative rounded-[32px] overflow-hidden"
-            style={{
-              boxShadow:
-                "0 30px 70px -30px rgba(59,130,246,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset",
-            }}
+            className="flex items-center gap-2 uppercase mb-3 text-[10.5px] font-semibold tracking-[0.2em] text-[#4f8cff]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", textShadow: "0 0 12px rgba(63,123,255,0.6)" }}
           >
-            {/* Image de fond */}
-            <img
-              src={heroBg}
-              alt="Convoyage automobile premium Ligneo"
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-            {/* Overlays */}
-            <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(5,11,29,0.05) 0%, rgba(5,11,29,0.55) 45%, rgba(5,11,29,0.96) 92%)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(200deg, rgba(59,130,246,0.15) 0%, transparent 55%)",
-              }}
-            />
-            {/* Bord lumineux */}
-            <div
-              aria-hidden
-              className="absolute inset-0 rounded-[32px] pointer-events-none"
-              style={{
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)",
-              }}
-            />
-
-            {/* Contenu */}
-            <div className="relative pt-[220px] px-6 pb-6">
-              <p className="text-[10px] tracking-[0.35em] uppercase text-[#60a5fa] font-heading font-bold">
-                Accueil
-              </p>
-              <h1 className="font-heading mt-2 leading-[0.95] tracking-[0.02em]">
-                <span className="block text-white text-[34px] font-black uppercase">Transports</span>
-                <span className="block text-[#3b82f6] text-[34px] font-black uppercase">Ligneo</span>
-              </h1>
-              <p className="text-white/70 text-[13.5px] mt-3 leading-relaxed max-w-[92%]">
-                Estimez, réservez et suivez vos convoyages en quelques secondes.
-              </p>
-
-              {/* Capsules glassmorphism */}
-              <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl p-2.5 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-                <HeroChip icon={<Zap size={15} />} title="Rapide" sub="Estimation 30s" />
-                <HeroChip icon={<ShieldCheck size={15} />} title="Sécurisé" sub="Convoyeurs vérifiés" />
-                <HeroChip icon={<MapPin size={15} />} title="France" sub="Interventions 24/48h" />
-              </div>
-            </div>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4f8cff]" style={{ boxShadow: "0 0 8px #4f8cff" }} />
+            Convoyage automobile · France &amp; Europe
           </div>
-        </Reveal>
-
-        {/* === CTA principal — Estimer mon trajet === */}
-        <Reveal delay={60}>
-          <button
-            onClick={handleScrollToDevis}
-            className="w-full text-left rounded-[28px] p-5 relative overflow-hidden active:scale-[0.98] transition-transform"
-            style={{
-              background:
-                "linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #1d4ed8 100%)",
-              boxShadow:
-                "0 30px 60px -20px rgba(59,130,246,0.7), 0 0 0 1px rgba(255,255,255,0.12) inset",
-            }}
+          <h1
+            className="text-[35px] leading-[1.06] font-extrabold tracking-[-0.01em] mb-3 text-white"
+            style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}
           >
-            {/* Halo */}
-            <span
-              aria-hidden
-              className="absolute -top-16 -right-10 w-40 h-40 rounded-full blur-3xl bg-white/25"
-            />
-            <span
-              aria-hidden
-              className="absolute -bottom-20 -left-10 w-40 h-40 rounded-full blur-3xl bg-cyan-300/20"
-            />
-            <div className="flex items-center gap-4 relative">
-              <span
-                className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center border border-white/25 backdrop-blur-xl"
-                style={{
-                  background: "rgba(255,255,255,0.15)",
-                }}
-              >
-                <Truck size={26} className="text-white" strokeWidth={2} />
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-heading text-white text-[18px] font-bold tracking-wide">
+            La tranquillité<br />
+            sur <span className="neon-accent">toute la ligne</span>
+          </h1>
+          <p className="text-[13px] leading-[1.55] mb-4 max-w-[290px] text-[#dbe3ff]" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>
+            Estimez, réservez et suivez vos convoyages en quelques secondes, partout en France.
+          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <TrustItem icon={<Zap size={12} className="text-[#d9b54a]" />} label="Devis en 30s" />
+            <TrustItem label="6+ ans d'expérience" />
+            <TrustItem label="France entière" />
+          </div>
+        </div>
+      </section>
+
+      {/* === Carte "Estimer mon trajet" (chevauche le hero) === */}
+      <div className="relative z-[3] mx-[18px] -mt-[56px]">
+        <button
+          onClick={scrollToDevis}
+          className="book-card group w-full text-left active:scale-[0.99] transition-transform"
+          aria-label="Aller au simulateur de tarif"
+        >
+          <div className="book-inner">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-full flex items-center justify-center border border-[rgba(122,163,255,0.4)]"
+                  style={{ background: "linear-gradient(135deg, rgba(63,123,255,0.4), rgba(217,181,74,0.15))" }}
+                >
+                  <Zap size={15} className="text-[#8fb4ff]" strokeWidth={2} />
+                </span>
+                <h3 className="text-[16.5px] font-bold tracking-[-0.01em] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   Estimer mon trajet
-                </p>
-                <p className="text-white/75 text-[12.5px] mt-0.5">
-                  Tarif en 30 secondes · gratuit
-                </p>
+                </h3>
               </div>
-              <span
-                className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center bg-white"
-                style={{ boxShadow: "0 8px 20px -6px rgba(0,0,0,0.25)" }}
-              >
-                <ArrowRight size={18} className="text-[#1d4ed8]" strokeWidth={2.5} />
+              <span className="flex items-center gap-1.5 text-[9.5px] font-bold text-[#4ad0a0] bg-[rgba(74,208,160,0.1)] px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4ad0a0] pulse-dot" style={{ boxShadow: "0 0 6px #4ad0a0" }} />
+                Live
               </span>
             </div>
-          </button>
-        </Reveal>
 
-        {/* === Accès rapides === */}
-        <Reveal delay={100}>
-          <div>
-            <h2 className="font-heading text-white text-[18px] font-bold tracking-[0.01em] mb-4 px-1">
-              Gérez en toute simplicité
-            </h2>
-            <div className="grid grid-cols-2 gap-3.5">
-              <QuickTile
-                icon={<FileText size={22} strokeWidth={2} />}
-                label="Mes devis"
-                sublabel="Consultez et gérez vos devis"
-                onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
-              />
-              <QuickTile
-                icon={<Truck size={22} strokeWidth={2} />}
-                label="Mes missions"
-                sublabel="Suivez vos missions en cours"
-                onClick={() =>
-                  navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })
-                }
-              />
-              <QuickTile
-                icon={
-                  isAuthenticated && userInitial ? (
-                    <span className="font-heading text-[15px] font-bold">{userInitial}</span>
-                  ) : (
-                    <LogIn size={22} strokeWidth={2} />
-                  )
-                }
-                label={espaceLabel}
-                sublabel={isAuthenticated ? "Tableau de bord" : "Accéder à mon compte"}
-                onClick={goEspace}
-              />
-              <QuickTile
-                icon={<Phone size={22} strokeWidth={2} />}
-                label="Contact"
-                sublabel="Notre équipe 7j/7"
-                onClick={() => navigate({ to: "/contact" })}
-              />
+            {/* Adresses */}
+            <div className="flex flex-col gap-2.5 relative">
+              <div className="addr-field">
+                <span className="addr-ic">
+                  <MapPin size={13} className="text-[#8fb4ff]" strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#9aa6c9] mb-0.5">Départ</div>
+                  <div className="text-[13px] italic text-[#c3cbe6] truncate">Choisir une adresse</div>
+                </div>
+                <span className="w-7 h-7 rounded-full border border-[rgba(122,163,255,0.35)] bg-[rgba(122,163,255,0.16)] flex items-center justify-center">
+                  <ArrowLeftRight size={12} className="text-[#8fb4ff]" strokeWidth={2.4} />
+                </span>
+              </div>
+              <div className="relative flex items-center gap-2.5 pl-3.5 h-4 -my-1">
+                <div className="connector-line">
+                  <div className="travel-dot" />
+                </div>
+                <span className="text-[9.5px] italic text-[#9aa6c9]">Distance estimée en direct</span>
+              </div>
+              <div className="addr-field">
+                <span className="addr-ic">
+                  <Navigation2 />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#9aa6c9] mb-0.5">Arrivée</div>
+                  <div className="text-[13px] italic text-[#c3cbe6] truncate">Choisir une adresse</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </Reveal>
 
-        {/* === Simulateur === */}
-        <Reveal delay={140}>
-          <section
-            id="mobile-devis"
-            className="scroll-mt-20 rounded-[28px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl overflow-hidden"
-            style={{
-              boxShadow:
-                "0 30px 70px -30px rgba(59,130,246,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset",
-            }}
-          >
-            <div className="flex items-end justify-between px-5 pt-5 pb-3">
+            {/* Toggle A/AR */}
+            <div className="trip-type mt-4">
+              <div className="trip-slider" />
+              <div className="trip-seg trip-seg-active">Aller simple</div>
+              <div className="trip-seg">Aller-retour</div>
+            </div>
+
+            {/* Preview estimation */}
+            <div className="mt-3.5 flex items-center justify-between bg-black/20 border border-[rgba(122,163,255,0.16)] rounded-[14px] px-3.5 py-3">
               <div>
-                <p className="text-[10px] tracking-[0.32em] uppercase text-[#60a5fa] font-heading font-bold">
-                  Estimation
-                </p>
-                <h2 className="font-heading text-white text-[20px] font-bold tracking-wide mt-1">
-                  Simulateur direct
-                </h2>
+                <div className="text-[10px] uppercase tracking-[0.06em] font-bold text-[#9aa6c9] mb-1">Estimation</div>
+                <div className="shimmer-bar" />
               </div>
-              <span
-                className="px-3 py-1 rounded-full text-[9.5px] tracking-[0.22em] uppercase font-heading font-bold"
-                style={{
-                  background: "rgba(59,130,246,0.18)",
-                  border: "1px solid rgba(96,165,250,0.4)",
-                  color: "#93c5fd",
-                }}
-              >
-                Gratuit
+              <span className="text-[9px] font-bold text-[#4f8cff] bg-[rgba(63,123,255,0.14)] px-2.5 py-1 rounded-full">
+                Calcul en cours…
               </span>
             </div>
-            <MobileDevisGenerator />
-          </section>
-        </Reveal>
 
-        {/* === Stats compactes === */}
-        <Reveal delay={180}>
-          <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-[#60a5fa] font-heading font-bold mb-3 px-1">
-              Vue d'ensemble
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard
-                icon={<Star size={13} className="text-[#60a5fa] fill-[#60a5fa]" />}
-                value="4.9/5"
-                label="Note clients"
-              />
-              <StatCard
-                icon={<Award size={13} className="text-[#93c5fd]" />}
-                value="6+ ans"
-                label="D'expérience"
-              />
-              <StatCard
-                icon={<ShieldCheck size={13} className="text-[#93c5fd]" />}
-                value="0"
-                label="Annulation"
-              />
-              <StatCard
-                icon={<Clock size={13} className="text-[#60a5fa]" />}
-                value="7j/7"
-                label="Disponibilité"
-              />
+            {/* CTA */}
+            <div
+              className="book-cta mt-[18px] relative overflow-hidden flex items-center justify-center gap-2.5 rounded-full py-4 font-bold text-[14.5px] tracking-[0.01em] text-white"
+              style={{
+                background: "linear-gradient(120deg, #2f5fff 0%, #2450e0 60%, #4f8cff 130%)",
+                boxShadow: "0 16px 36px rgba(47,95,255,0.5)",
+              }}
+            >
+              Voir mon tarif
+              <ArrowRight size={16} strokeWidth={2.4} />
             </div>
+            <p className="text-center text-[10.5px] text-[#9aa6c9] mt-2.5">Réponse instantanée · sans engagement</p>
           </div>
-        </Reveal>
+        </button>
+      </div>
 
-        {/* === Comment ça marche === */}
-        <Reveal delay={260}>
-          <section className="rounded-[28px] p-5 border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl">
-            <div className="flex items-end justify-between mb-5">
-              <h3 className="font-heading text-[19px] font-bold tracking-wide text-white">
-                Comment ça marche
-              </h3>
-              <Link
-                to="/comment-ca-marche"
-                className="text-[#60a5fa] text-[10.5px] tracking-[0.2em] uppercase flex items-center gap-1 font-heading font-bold"
-              >
-                Détails <ChevronRight size={12} />
-              </Link>
-            </div>
-            <div className="space-y-4">
-              <Step n="01" title="Réservation" desc="Estimation instantanée, confirmation rapide." />
-              <Step n="02" title="Prise en charge" desc="État des lieux digitalisé, assurance incluse." />
-              <Step n="03" title="Suivi temps réel" desc="Tracking GPS et notifications à chaque étape." />
-            </div>
-          </section>
-        </Reveal>
+      {/* Bande fonctionnalités */}
+      <div className="relative z-[1] flex justify-between gap-3 px-[26px] pt-5 pb-1">
+        <FeatureItem icon={<Zap size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="Rapide" sub="Estimation 30s" />
+        <FeatureItem icon={<ShieldCheck size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="Sécurisé" sub="Convoyeurs vérifiés" />
+        <FeatureItem icon={<MapPin size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="France" sub="24/48h" />
+      </div>
 
-        {/* === CTA Contact === */}
-        <Reveal delay={300}>
-          <section
-            className="rounded-[28px] p-5 border border-white/[0.08]"
+      {/* Accès rapide (scroll horizontal) */}
+      <section className="relative z-[1] pl-[22px] pt-6 pb-1">
+        <div className="flex justify-between items-center pr-[22px] mb-3.5">
+          <h2 className="section-title text-[16px] font-bold tracking-[-0.01em] text-white flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Accès rapide
+          </h2>
+          <button
+            onClick={goEspace}
+            className="text-[11px] font-bold tracking-[0.02em] text-[#4f8cff]"
+          >
+            Tout voir
+          </button>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-1.5 pr-[22px] no-scrollbar">
+          <QuickCard
+            icon={<FileText size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            title="Mes devis"
+            sub="Consulter & gérer"
+            onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
+          />
+          <QuickCard
+            icon={<Truck size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            title="Mes missions"
+            sub="Suivi en direct"
+            onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })}
+          />
+          <QuickCard
+            icon={<LogIn size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            title={espaceLabel}
+            sub="Mon compte"
+            onClick={goEspace}
+          />
+          <QuickCard
+            icon={<Phone size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            title="Contact"
+            sub="Équipe 7j/7"
+            onClick={() => navigate({ to: "/contact" })}
+          />
+        </div>
+      </section>
+
+      {/* Bento stats */}
+      <div className="relative z-[1] mx-[18px] mt-6 grid grid-cols-[1.15fr_1fr] gap-3">
+        <div
+          className="rounded-[22px] p-[18px] flex flex-col justify-center border border-[rgba(122,163,255,0.24)]"
+          style={{ background: "linear-gradient(150deg, rgba(63,123,255,0.16), rgba(217,181,74,0.08))" }}
+        >
+          <span className="w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.4)] bg-[rgba(63,123,255,0.2)] flex items-center justify-center mb-3"
+            style={{ boxShadow: "0 0 12px rgba(63,123,255,0.35)" }}
+          >
+            <Truck size={16} className="text-[#8fb4ff]" strokeWidth={2} />
+          </span>
+          <div className="text-[26px] font-bold leading-none tracking-[-0.01em] text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            5000+
+          </div>
+          <div className="text-[10px] text-[#9aa6c9]">Véhicules convoyés</div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <MiniStat label="Expérience" value="6+ ans" />
+          <MiniStat label="Annulation" value="Gratuite" />
+          <MiniStat label="Dispo" value="24/7" />
+        </div>
+      </div>
+
+      {/* Contact banner */}
+      <Link
+        to="/contact"
+        className="relative z-[1] mx-[18px] mt-[22px] flex items-center gap-3.5 rounded-[20px] px-[18px] py-4 border border-[rgba(122,163,255,0.22)] active:scale-[0.98] transition-transform"
+        style={{ background: "linear-gradient(120deg, rgba(63,123,255,0.14), rgba(217,181,74,0.08))" }}
+      >
+        <span className="w-10 h-10 rounded-full bg-[rgba(63,123,255,0.22)] flex items-center justify-center shrink-0">
+          <Phone size={18} className="text-[#8fb4ff]" strokeWidth={2} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[12.5px] font-bold text-white">Une question ?</div>
+          <div className="text-[10.3px] text-[#9aa6c9]">Notre équipe répond 7j/7</div>
+        </div>
+        <span className="w-[30px] h-[30px] rounded-full bg-[rgba(122,163,255,0.14)] flex items-center justify-center shrink-0">
+          <ArrowRight size={13} className="text-[#8fb4ff]" strokeWidth={2.4} />
+        </span>
+      </Link>
+
+      {/* === Simulateur RÉEL (inchangé fonctionnellement) === */}
+      <section
+        id="mobile-devis"
+        className="relative z-[1] scroll-mt-20 mx-[18px] mt-8 rounded-[28px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+        style={{ boxShadow: "0 30px 70px -30px rgba(63,123,255,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset" }}
+      >
+        <div className="flex items-end justify-between px-5 pt-5 pb-3">
+          <div>
+            <p className="text-[10px] tracking-[0.32em] uppercase text-[#4f8cff] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Estimation
+            </p>
+            <h2 className="text-[20px] font-bold tracking-wide text-white mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Simulateur direct
+            </h2>
+          </div>
+          <span
+            className="px-3 py-1 rounded-full text-[9.5px] tracking-[0.22em] uppercase font-bold"
             style={{
-              background:
-                "linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(15,45,128,0.5) 100%)",
-              boxShadow: "0 24px 60px -24px rgba(59,130,246,0.4)",
+              background: "rgba(63,123,255,0.18)",
+              border: "1px solid rgba(96,165,250,0.4)",
+              color: "#93c5fd",
+              fontFamily: "'Space Grotesk', sans-serif",
             }}
           >
-            <div className="flex items-start gap-4">
-              <span className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center bg-white/10 border border-white/15">
-                <Phone size={20} className="text-[#93c5fd]" />
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-heading text-[17px] font-bold text-white">Une question ?</p>
-                <p className="text-white/65 text-[12.5px] mt-0.5">
-                  Devis personnalisé, urgences, flottes.
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5 mt-4">
-              <a
-                href="tel:0782456181"
-                className="h-12 rounded-2xl flex items-center justify-center gap-2 text-[11px] tracking-[0.2em] uppercase font-heading font-bold text-white active:scale-[0.97] transition-transform"
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                  boxShadow: "0 12px 28px -10px rgba(59,130,246,0.7)",
-                }}
-              >
-                <Phone size={14} /> Appeler
-              </a>
-              <Link
-                to="/contact"
-                className="h-12 rounded-2xl flex items-center justify-center gap-2 text-[11px] tracking-[0.2em] uppercase font-heading font-bold text-[#93c5fd] border border-[#60a5fa]/40 bg-white/[0.03] active:scale-[0.97] transition-transform"
-              >
-                Message
-              </Link>
-            </div>
-          </section>
-        </Reveal>
-      </main>
+            Gratuit
+          </span>
+        </div>
+        <MobileDevisGenerator />
+      </section>
 
-      {/* === FOOTER === */}
-      <footer className="relative z-10 px-5 pt-8 pb-6 mt-4">
+      {/* Footer minimal */}
+      <footer className="relative z-[1] px-5 pt-10 pb-8 mt-6">
         <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-4 flex items-center gap-3 backdrop-blur-xl">
           <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-[#60a5fa]/35 bg-[#60a5fa]/10">
             <MapPin className="text-[#93c5fd]" size={17} />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-[13px] font-heading font-bold tracking-wide">Basé à Tours (37)</p>
-            <p className="text-white/55 text-[11px] mt-0.5 truncate">
-              07 82 45 61 81 · contact@transportsligneo.fr
-            </p>
+            <p className="text-white text-[13px] font-bold tracking-wide">Basé à Tours (37)</p>
+            <p className="text-white/55 text-[11px] mt-0.5 truncate">07 82 45 61 81 · contact@transportsligneo.fr</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-4 mt-5 text-[10.5px] text-white/45 font-heading tracking-wider uppercase">
+        <div className="flex items-center justify-center gap-4 mt-5 text-[10.5px] text-white/45 tracking-wider uppercase">
           <Link to="/cgv" className="hover:text-[#93c5fd] transition-colors">CGV</Link>
           <span className="text-white/20">·</span>
           <Link to="/mentions-legales" className="hover:text-[#93c5fd] transition-colors">Mentions</Link>
@@ -466,128 +427,214 @@ export default function MobileHomeScreen() {
           © {new Date().getFullYear()} Transports LIGNEO
         </p>
       </footer>
+
+      {/* Styles locaux (animations spécifiques à la maquette) */}
+      <style>{`
+        .neon-accent {
+          color: #6ea1ff;
+          text-shadow: 0 0 18px rgba(91,143,255,0.9), 0 0 38px rgba(91,143,255,0.6), 0 0 64px rgba(91,143,255,0.35);
+          animation: neonPulse 2.6s ease-in-out infinite;
+        }
+        @keyframes neonPulse {
+          0%,100% { text-shadow: 0 0 18px rgba(91,143,255,0.9), 0 0 38px rgba(91,143,255,0.6), 0 0 64px rgba(91,143,255,0.35); }
+          50%     { text-shadow: 0 0 26px rgba(91,143,255,1), 0 0 50px rgba(91,143,255,0.75), 0 0 84px rgba(91,143,255,0.45); }
+        }
+        .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+        @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        .book-card {
+          position: relative;
+          background: rgba(14,20,44,0.94);
+          border-radius: 30px;
+          padding: 3px;
+          box-shadow: 0 30px 60px rgba(4,8,22,0.6);
+          animation: cardFloat 6s ease-in-out infinite;
+        }
+        @keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .book-card::before {
+          content: ''; position: absolute; inset: 0; border-radius: 30px; padding: 1.4px;
+          background: linear-gradient(135deg, rgba(122,163,255,0.7), rgba(217,181,74,0.35), rgba(122,163,255,0.15), rgba(79,140,255,0.6));
+          background-size: 280% 280%; animation: borderFlow 7s linear infinite;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+        }
+        @keyframes borderFlow { 0% { background-position: 0% 50%; } 100% { background-position: 280% 50%; } }
+        .book-inner {
+          position: relative; background: rgba(13,19,42,0.96); border-radius: 27px;
+          padding: 22px 20px; backdrop-filter: blur(18px); overflow: hidden;
+        }
+        .book-inner::before {
+          content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .addr-field {
+          display: flex; align-items: center; gap: 12px;
+          background: rgba(0,0,0,0.25);
+          border: 1px solid rgba(122,163,255,0.16);
+          border-radius: 16px; padding: 13px 14px;
+        }
+        .addr-ic {
+          width: 32px; height: 32px; border-radius: 50%;
+          background: linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.1));
+          border: 1px solid rgba(122,163,255,0.4);
+          box-shadow: 0 0 10px rgba(63,123,255,0.3);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+
+        .connector-line {
+          position: relative; width: 1.5px; height: 18px; margin-left: 15px; overflow: hidden;
+          background: repeating-linear-gradient(180deg, rgba(122,163,255,0.5) 0 3px, transparent 3px 6px);
+        }
+        .travel-dot {
+          position: absolute; left: -2.5px; top: 0; width: 6px; height: 6px; border-radius: 50%;
+          background: #d9b54a; box-shadow: 0 0 8px 2px rgba(217,181,74,0.7);
+          animation: connTravel 2.4s ease-in-out infinite;
+        }
+        @keyframes connTravel { 0% { top: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .trip-type {
+          position: relative; display: flex; background: rgba(0,0,0,0.25);
+          border: 1px solid rgba(122,163,255,0.18); border-radius: 999px; padding: 4px;
+        }
+        .trip-slider {
+          position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px);
+          background: linear-gradient(120deg, #2f5fff, #4f8cff); border-radius: 999px;
+          box-shadow: 0 8px 20px rgba(47,95,255,0.45);
+        }
+        .trip-seg {
+          position: relative; z-index: 1; flex: 1; text-align: center; padding: 10px;
+          border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #9aa6c9;
+        }
+        .trip-seg-active { color: #fff; }
+
+        .shimmer-bar {
+          height: 9px; border-radius: 5px; width: 88px;
+          background: linear-gradient(90deg, rgba(122,163,255,0.15) 25%, rgba(122,163,255,0.4) 50%, rgba(122,163,255,0.15) 75%);
+          background-size: 200% 100%; animation: shimmerBar 1.6s ease-in-out infinite;
+        }
+        @keyframes shimmerBar { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .book-cta::after {
+          content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+          transform: skewX(-20deg); animation: ctaShine 3.4s ease-in-out infinite;
+        }
+        @keyframes ctaShine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
+
+        .section-title::before {
+          content: ''; width: 4px; height: 16px; border-radius: 3px; display: inline-block;
+          background: linear-gradient(180deg, #4f8cff, #d9b54a);
+          box-shadow: 0 0 8px rgba(63,123,255,0.5);
+        }
+
+        .no-scrollbar { scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .route-thread {
+          position: absolute; left: 8px; top: 800px; bottom: 200px; width: 2px; z-index: 0;
+          background: repeating-linear-gradient(180deg, rgba(122,163,255,0.55) 0 5px, transparent 5px 11px);
+          pointer-events: none;
+        }
+        .route-thread-dot {
+          position: absolute; left: -3.5px; width: 9px; height: 9px; border-radius: 50%;
+          background: radial-gradient(circle, #fff, #4f8cff);
+          box-shadow: 0 0 12px 3px rgba(79,140,255,0.8);
+          animation: threadTravel 7s linear infinite;
+        }
+        @keyframes threadTravel { 0% { top: 0%; opacity: 0; } 5% { opacity: 1; } 95% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+      `}</style>
     </div>
   );
 }
 
 /* ==== Sub-components ==== */
 
-function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
+function Navigation2() {
   return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-500 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-      }`}
-    >
-      {children}
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11l19-9-9 19-2-8-8-2Z" />
+    </svg>
+  );
+}
+
+function RouteThread() {
+  return (
+    <div className="route-thread hidden" aria-hidden>
+      <div className="route-thread-dot" />
     </div>
   );
 }
 
-function HeroChip({
+function TrustItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
+  return (
+    <span
+      className="flex items-center gap-1.5 text-[11.5px] font-semibold text-white bg-[rgba(10,16,38,0.4)] border border-white/15 px-3 py-1.5 rounded-full backdrop-blur-md"
+    >
+      {icon}
+      {label}
+    </span>
+  );
+}
+
+function FeatureItem({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 flex-1">
+      <span
+        className="w-[38px] h-[38px] rounded-full border border-[rgba(122,163,255,0.35)] flex items-center justify-center"
+        style={{
+          background: "linear-gradient(135deg, rgba(63,123,255,0.32), rgba(47,95,255,0.06))",
+          boxShadow: "0 0 12px rgba(63,123,255,0.25)",
+        }}
+      >
+        {icon}
+      </span>
+      <div className="text-[11px] font-bold text-white">{title}</div>
+      <div className="text-[9px] text-[#9aa6c9]">{sub}</div>
+    </div>
+  );
+}
+
+function QuickCard({
   icon,
   title,
   sub,
+  onClick,
 }: {
   icon: React.ReactNode;
   title: string;
   sub: string;
-}) {
-  return (
-    <div className="flex flex-col items-start gap-1.5 rounded-xl px-2 py-2">
-      <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#3b82f6]/15 border border-[#60a5fa]/25 text-[#60a5fa]">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-white text-[11.5px] font-heading font-bold leading-tight">{title}</p>
-        <p className="text-white/55 text-[9.5px] leading-tight mt-0.5">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
-function QuickTile({
-  icon,
-  label,
-  sublabel,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  sublabel?: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className="group relative rounded-[26px] p-4 border border-white/[0.07] overflow-hidden active:scale-[0.97] transition-transform text-left min-h-[160px] flex flex-col"
-      style={{
-        background:
-          "linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(10,22,56,0.6) 60%, rgba(5,11,29,0.85) 100%)",
-        boxShadow:
-          "0 22px 50px -26px rgba(59,130,246,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset",
-      }}
+      className="shrink-0 w-[130px] text-left rounded-[18px] p-4 border border-[rgba(122,163,255,0.18)] bg-white/[0.04] active:scale-[0.97] transition-transform"
     >
-      {/* Halo */}
       <span
-        aria-hidden
-        className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl bg-[#3b82f6]/25"
-      />
-
-      <span
-        className="relative w-12 h-12 rounded-2xl flex items-center justify-center text-[#60a5fa] border border-[#60a5fa]/25"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(59,130,246,0.20) 0%, rgba(30,64,175,0.08) 100%)",
-          boxShadow: "0 10px 24px -10px rgba(59,130,246,0.5)",
-        }}
+        className="w-8 h-8 rounded-full border border-[rgba(122,163,255,0.4)] flex items-center justify-center mb-3"
+        style={{ background: "linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.08))" }}
       >
         {icon}
       </span>
-
-      <div className="relative mt-auto pt-4">
-        <p className="text-white text-[15px] font-heading font-bold tracking-tight">
-          {label}
-        </p>
-        {sublabel && (
-          <div className="flex items-end justify-between gap-2 mt-1">
-            <p className="text-white/55 text-[11.5px] leading-snug flex-1">{sublabel}</p>
-            <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.06] border border-white/[0.08] group-active:translate-x-0.5 transition-transform">
-              <ArrowRight size={14} className="text-[#60a5fa]" strokeWidth={2.2} />
-            </span>
-          </div>
-        )}
-      </div>
+      <div className="text-[12.5px] font-bold text-white mb-0.5">{title}</div>
+      <div className="text-[9.8px] text-[#9aa6c9] leading-[1.35]">{sub}</div>
     </button>
   );
 }
 
-/* ==== Drawer menu mobile ==== */
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex-1 flex items-center justify-between rounded-[16px] border border-[rgba(122,163,255,0.16)] bg-white/[0.035] px-3.5 py-3">
+      <span className="text-[8.5px] uppercase tracking-[0.05em] font-semibold text-[#9aa6c9]">{label}</span>
+      <span className="text-[15px] font-bold tabular-nums text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/* ==== Drawer menu ==== */
 function MobileMenuDrawer({
   open,
   onClose,
@@ -630,16 +677,13 @@ function MobileMenuDrawer({
           open ? "translate-x-0" : "translate-x-full"
         }`}
         style={{
-          background:
-            "linear-gradient(180deg, #050B1D 0%, #0a1638 60%, #0f2d80 100%)",
+          background: "linear-gradient(180deg, #050B1D 0%, #0a1638 60%, #0f2d80 100%)",
           borderLeft: "1px solid rgba(255,255,255,0.08)",
           boxShadow: "-24px 0 60px -20px rgba(0,0,0,0.7)",
         }}
       >
         <div className="flex items-center justify-between mb-6">
-          <span className="font-heading text-[11px] tracking-[0.28em] uppercase text-[#60a5fa] font-bold">
-            Menu
-          </span>
+          <span className="text-[11px] tracking-[0.28em] uppercase text-[#60a5fa] font-bold">Menu</span>
           <button
             onClick={onClose}
             aria-label="Fermer le menu"
@@ -653,22 +697,18 @@ function MobileMenuDrawer({
           onClick={onEspace}
           className="rounded-[22px] p-4 flex items-center gap-3 border border-white/[0.08] active:scale-[0.98] transition-transform text-left mb-5"
           style={{
-            background:
-              "linear-gradient(135deg, rgba(59,130,246,0.28) 0%, rgba(15,45,128,0.6) 100%)",
+            background: "linear-gradient(135deg, rgba(59,130,246,0.28) 0%, rgba(15,45,128,0.6) 100%)",
             boxShadow: "0 18px 40px -18px rgba(59,130,246,0.6)",
           }}
         >
           <span
-            className="w-11 h-11 rounded-full flex items-center justify-center text-white font-heading"
-            style={{
-              background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-              boxShadow: "0 8px 20px -6px rgba(59,130,246,0.6)",
-            }}
+            className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+            style={{ background: "linear-gradient(135deg, #3b82f6, #1d4ed8)", boxShadow: "0 8px 20px -6px rgba(59,130,246,0.6)" }}
           >
             {isAuthenticated && userEmail ? userEmail[0]?.toUpperCase() : <LogIn size={18} />}
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-heading text-[14px] text-white font-bold tracking-wide">
+            <span className="block text-[14px] text-white font-bold tracking-wide">
               {isAuthenticated ? "Mon espace" : "Se connecter"}
             </span>
             <span className="block text-white/60 text-[11.5px] mt-0.5 truncate">
@@ -690,7 +730,7 @@ function MobileMenuDrawer({
                   <span className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#60a5fa]/25 bg-[#3b82f6]/10">
                     <Icon size={16} className="text-[#93c5fd]" />
                   </span>
-                  <span className="flex-1 text-white text-[14px] font-heading tracking-wide">{label}</span>
+                  <span className="flex-1 text-white text-[14px] tracking-wide">{label}</span>
                   <ChevronRight size={14} className="text-white/30" />
                 </Link>
               </li>
@@ -707,7 +747,7 @@ function MobileMenuDrawer({
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center border border-red-400/30 bg-red-400/10">
                   <LogOut size={16} className="text-red-300" />
                 </span>
-                <span className="flex-1 text-white/85 text-[13.5px] font-heading tracking-wide text-left">
+                <span className="flex-1 text-white/85 text-[13.5px] tracking-wide text-left">
                   Se déconnecter
                 </span>
               </button>
@@ -722,65 +762,11 @@ function MobileMenuDrawer({
             style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(15,45,128,0.5))" }}
           >
             <Phone size={15} className="text-[#93c5fd]" />
-            <span className="text-white text-[12.5px] font-heading tracking-wide">07 82 45 61 81</span>
+            <span className="text-white text-[12.5px] tracking-wide">07 82 45 61 81</span>
           </a>
-          <p className="text-center text-white/40 text-[10px] tracking-widest uppercase">
-            Disponible 7j/7
-          </p>
+          <p className="text-center text-white/40 text-[10px] tracking-widest uppercase">Disponible 7j/7</p>
         </div>
       </aside>
     </>
-  );
-}
-
-function StatCard({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-}) {
-  return (
-    <div
-      className="relative rounded-[22px] p-4 border border-white/[0.07] overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(10,22,56,0.45) 60%, rgba(5,11,29,0.7) 100%)",
-        boxShadow: "0 14px 30px -18px rgba(59,130,246,0.35)",
-      }}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -bottom-8 -right-8 w-20 h-20 rounded-full blur-2xl bg-[#3b82f6]/25"
-      />
-      <div className="relative flex items-center gap-1.5 mb-2">
-        {icon}
-        <span className="text-[9px] tracking-[0.24em] uppercase text-white/55 font-heading font-bold">
-          {label}
-        </span>
-      </div>
-      <p className="relative font-heading text-[24px] font-black leading-none text-white">{value}</p>
-    </div>
-  );
-}
-
-function Step({ n, title, desc }: { n: string; title: string; desc: string }) {
-  return (
-    <div className="flex gap-4 items-start">
-      <span
-        className="w-9 h-9 shrink-0 rounded-full border border-[#60a5fa]/45 text-[#93c5fd] flex items-center justify-center text-[11px] font-bold font-heading"
-        style={{ boxShadow: "0 0 20px -6px rgba(96,165,250,0.5)" }}
-      >
-        {n}
-      </span>
-      <div className="flex-1 min-w-0 pt-1">
-        <p className="text-white text-[13.5px] font-heading font-bold tracking-[0.04em] uppercase leading-tight">
-          {title}
-        </p>
-        <p className="text-white/60 text-[12px] mt-1 leading-relaxed">{desc}</p>
-      </div>
-    </div>
   );
 }

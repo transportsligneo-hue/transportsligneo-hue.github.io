@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Home, Tag, User, Sparkles } from "lucide-react";
+import { Home, Truck, User, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
@@ -32,13 +32,19 @@ export default function MobileBottomNav() {
   };
 
   const isHome = location.pathname === "/";
-  const isTarifs = location.pathname.startsWith("/tarifs");
+  const isMissions = location.pathname.includes("/missions");
   const isEspace =
     isAuthenticated ||
     location.pathname.startsWith("/dashboard-client") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/convoyeur") ||
     location.pathname.startsWith("/login");
+
+  const goMissions = () => {
+    if (!isAuthenticated) return navigate({ to: "/login" });
+    if (role === "convoyeur") return navigate({ to: "/convoyeur/missions" });
+    return navigate({ to: "/dashboard-client/missions" });
+  };
 
   const tabBase = "flex flex-col items-center justify-center gap-1 h-full tap-scale";
   const colorOn = "text-[#60a5fa]";
@@ -66,12 +72,13 @@ export default function MobileBottomNav() {
             </span>
           </Link>
 
-          <Link to="/tarifs" className={tabBase}>
-            <Tag size={20} className={isTarifs ? colorOn : colorOff} strokeWidth={2} />
-            <span className={`text-[10px] tracking-[0.08em] font-heading font-bold ${isTarifs ? colorOn : colorOff}`}>
-              Tarifs
+          <button onClick={goMissions} className={tabBase} aria-label="Mes missions">
+            <Truck size={20} className={isMissions ? colorOn : colorOff} strokeWidth={2} />
+            <span className={`text-[10px] tracking-[0.08em] font-heading font-bold ${isMissions ? colorOn : colorOff}`}>
+              Missions
             </span>
-          </Link>
+          </button>
+
 
           {/* CTA Estimer — centré, surélevé, halo bleu */}
           <button
