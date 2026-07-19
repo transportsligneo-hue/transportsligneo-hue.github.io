@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 
 type Slide = {
@@ -6,7 +6,7 @@ type Slide = {
   title: string;
   desc: string;
   features: string[];
-  icon: JSX.Element;
+  icon: ReactNode;
 };
 
 const SLIDES: Slide[] = [
