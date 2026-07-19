@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
+import MobileNavbar from "@/components/mobile/MobileNavbar";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
 import PwaSplash from "@/components/pwa/PwaSplash";
@@ -132,6 +133,7 @@ function RootComponent() {
         <PricingProvider>
           <AiSettingsProvider>
             <CursorSpotlight />
+            <MobileNavbar />
             <Outlet />
             <PublicMobileBottomNav />
             <PwaProvider />

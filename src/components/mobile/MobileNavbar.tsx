@@ -1,0 +1,104 @@
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { User, Phone } from "lucide-react";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { useAuth } from "@/hooks/useAuth";
+
+const links = [
+  { to: "/", label: "Accueil" },
+  { to: "/services", label: "Services" },
+  { to: "/tarifs", label: "Tarifs" },
+  { to: "/comment-ca-marche", label: "Process" },
+  { to: "/pro", label: "B2B" },
+  { to: "/a-propos", label: "À propos" },
+  { to: "/contact", label: "Contact" },
+] as const;
+
+const HIDDEN_PREFIXES = [
+  "/convoyeur",
+  "/admin",
+  "/dashboard-",
+  "/entreprise",
+  "/flotte",
+  "/attente-validation",
+  "/login",
+  "/inscription",
+  "/choisir-compte",
+  "/mot-de-passe-oublie",
+  "/reset-password",
+  "/scan",
+];
+
+export default function MobileNavbar() {
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  const { isAuthenticated, role } = useAuth();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      if (y < 50) setHidden(false);
+      else if (delta > 8) setHidden(true);
+      else if (delta < -8) setHidden(false);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return null;
+  }
+
+  const goEspace = () => {
+    if (!isAuthenticated) return navigate({ to: "/login" });
+    if (role === "admin" || role === "super_admin") navigate({ to: "/admin" });
+    else if (role === "convoyeur") navigate({ to: "/convoyeur" });
+    else navigate({ to: "/dashboard-client" });
+  };
+
+  return (
+    <header
+      className={`md:hidden fixed top-0 left-0 right-0 z-[55] safe-top transition-transform duration-300 ease-out ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
+      <div className="mnav-bar">
+        <div className="flex items-center justify-between px-4 h-14">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" />
+          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <a href="tel:+33782456181" className="mnav-phone" aria-label="Appeler 07 82 45 61 81">
+              <Phone size={14} strokeWidth={2.4} />
+            </a>
+            <button onClick={goEspace} className="mnav-cta" type="button">
+              <User size={12} />
+              {isAuthenticated ? "Espace" : "Connexion"}
+            </button>
+          </div>
+        </div>
+        <nav>
+          <ul className="flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
+            {links.map((l) => (
+              <li key={l.to} className="shrink-0">
+                <Link
+                  to={l.to}
+                  activeOptions={{ exact: true }}
+                  activeProps={{ className: "mnav-link mnav-link-active" }}
+                  inactiveProps={{ className: "mnav-link" }}
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+}

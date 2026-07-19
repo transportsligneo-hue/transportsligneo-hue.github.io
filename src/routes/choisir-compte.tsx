@@ -73,12 +73,14 @@ function ChoisirCompte() {
           ))}
         </div>
 
-        <div className="text-center mt-10 space-y-2.5">
-          <Link to="/login" className="block auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
-            Déjà inscrit ? Se connecter →
+        <div className="text-center mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link to="/login" className="auth-link-lg is-gold">
+            Déjà inscrit ? Se connecter
+            <ArrowRight size={14} className="arrow" />
           </Link>
-          <Link to="/" className="block text-white/40 text-xs hover:text-white transition-colors">
-            ← Retour au site
+          <Link to="/" className="auth-link-lg">
+            <ArrowRight size={14} className="arrow-back rotate-180" />
+            Retour au site
           </Link>
         </div>
       </div>
