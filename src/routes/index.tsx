@@ -87,6 +87,11 @@ function Index() {
           {/* PartnersMarquee — INTOUCHÉ */}
           <PartnersMarquee />
 
+          {/* Carte interactive France & Europe (maquette refonte v4) */}
+          <div className="r4-page">
+            <MapFranceEurope />
+          </div>
+
           {/* Pourquoi nous choisir — version claire */}
           <PourquoiNousChoisir />
 
