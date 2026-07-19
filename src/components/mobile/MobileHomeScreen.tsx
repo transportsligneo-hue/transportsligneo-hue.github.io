@@ -194,27 +194,7 @@ export default function MobileHomeScreen() {
 
       {/* === Carte "Estimer mon trajet" (chevauche le hero) — vrai simulateur === */}
       <div id="mobile-devis" className="relative z-[3] mx-[18px] -mt-[56px] scroll-mt-20">
-        <div className="book-card">
-          <div className="book-inner !p-4">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2.5">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center border border-[rgba(122,163,255,0.4)]"
-                  style={{ background: "linear-gradient(135deg, rgba(63,123,255,0.4), rgba(217,181,74,0.15))" }}
-                >
-                  <Zap size={15} className="text-[#8fb4ff]" strokeWidth={2} />
-                </span>
-                <h3 className="text-[16.5px] font-bold tracking-[-0.01em] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Estimer mon trajet
-                </h3>
-              </div>
-              <span className="flex items-center gap-1.5 text-[9.5px] font-bold text-[#4ad0a0] bg-[rgba(74,208,160,0.1)] px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4ad0a0] pulse-dot" style={{ boxShadow: "0 0 6px #4ad0a0" }} />
-                Live
-              </span>
-            </div>
-            <MobileDevisGenerator />
-          </div>
-        </div>
+        <MobileDevisGenerator />
       </div>
 
       {/* Bande fonctionnalités */}
