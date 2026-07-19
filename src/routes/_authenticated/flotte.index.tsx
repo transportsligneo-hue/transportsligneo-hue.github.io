@@ -4,6 +4,7 @@ import { Truck, Users, Calendar, TrendingUp, PlusCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 
 export const Route = createFileRoute("/_authenticated/flotte/")({
   component: FlotteIndex,
