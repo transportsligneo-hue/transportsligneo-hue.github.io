@@ -73,8 +73,8 @@ export default function AProposContent() {
         </div>
         <div className="v4-timeline">
           <div className="v4-tl-track" />
-          {timeline.map((it) => (
-            <div key={it.year} className="v4-tl-item">
+          {timeline.map((it, i) => (
+            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 140}ms` }}>
               <div className="v4-tl-year">{it.year}</div>
               <div className="v4-tl-body">
                 <h4>{it.title}</h4>
