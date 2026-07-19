@@ -133,6 +133,7 @@ function RootComponent() {
         <PricingProvider>
           <AiSettingsProvider>
             <CursorSpotlight />
+            <MobileNavbar />
             <Outlet />
             <PublicMobileBottomNav />
             <PwaProvider />
