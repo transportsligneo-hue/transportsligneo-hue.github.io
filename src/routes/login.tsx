@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, LogIn, User, Truck, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Loader2, LogIn, User, Truck, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
