@@ -1,5 +1,5 @@
 /**
- * MissionGatesPanel — bloc visuel des étapes obligatoires de validation
+ * MissionGatesPanel · bloc visuel des étapes obligatoires de validation
  * (selfie identité + double signature départ + double signature arrivée).
  *
  * S'affiche au-dessus du workflow. Chaque "porte" peut être :
@@ -7,7 +7,7 @@
  *  - en attente (CTA bouton)
  *  - bypassée par admin (badge gris)
  *
- * N'écrit rien tout seul — ouvre les modales contrôlées par le parent.
+ * N'écrit rien tout seul · ouvre les modales contrôlées par le parent.
  */
 import { useState } from "react";
 import { Camera, PenLine, Check, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
@@ -80,7 +80,7 @@ export function MissionGatesPanel({
       <div className="border-t border-pro-border/60"/>
       <Row
         icon={PenLine}
-        label="Signature convoyeur — départ"
+        label="Signature convoyeur · départ"
         ok={startDriverOK}
         bypassed={!hasSignature("driver_start") && isDisabled("driver_start")}
         cta="Signer"
@@ -88,7 +88,7 @@ export function MissionGatesPanel({
       />
       <Row
         icon={PenLine}
-        label="Signature client — départ"
+        label="Signature client · départ"
         ok={startClientOK}
         bypassed={!hasSignature("client_start") && isDisabled("client_start")}
         cta="Signer"
@@ -100,7 +100,7 @@ export function MissionGatesPanel({
           <div className="border-t border-pro-border/60"/>
           <Row
             icon={PenLine}
-            label="Signature convoyeur — arrivée"
+            label="Signature convoyeur · arrivée"
             ok={endDriverOK}
             bypassed={!hasSignature("driver_end") && isDisabled("driver_end")}
             cta="Signer"
@@ -108,7 +108,7 @@ export function MissionGatesPanel({
           />
           <Row
             icon={PenLine}
-            label="Signature client — arrivée"
+            label="Signature client · arrivée"
             ok={endClientOK}
             bypassed={!hasSignature("client_end") && isDisabled("client_end")}
             cta="Signer"

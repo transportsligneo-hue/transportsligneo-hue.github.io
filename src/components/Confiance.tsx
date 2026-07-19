@@ -28,7 +28,7 @@ export default function Confiance() {
           <div className="gold-divider-short mt-4" />
         </div>
 
-        {/* Logos partenaires — un par carte */}
+        {/* Logos partenaires · un par carte */}
         <div className="flex flex-wrap justify-center gap-6 mb-16 max-w-3xl mx-auto">
           {logos.map((logo, i) => (
             <div

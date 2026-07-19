@@ -1,5 +1,5 @@
 /**
- * EdlPremiumFlow — Parcours EDL Premium glassmorphism bleu électrique (Lot 1).
+ * EdlPremiumFlow · Parcours EDL Premium glassmorphism bleu électrique (Lot 1).
  *
  * Implémente la séquence stricte 1→26 (cf. edl-premium-sequence.ts) :
  *   1.  Selfie convoyeur (réutilise DriverSelfieCapture)
@@ -284,7 +284,7 @@ export function EdlPremiumFlow({
           video: { facingMode: "environment" }, audio: false,
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
-        // Stop immédiat — on n'avait besoin que d'initialiser le pipeline
+        // Stop immédiat · on n'avait besoin que d'initialiser le pipeline
         stream.getTracks().forEach(t => t.stop());
       } catch { /* permission refusée → silence, le clic ouvrira le dialog */ }
     })();
@@ -596,7 +596,7 @@ export function EdlPremiumFlow({
   // === Libération mémoire : révoque les blob: des étapes non actives.
   // Chaque blob retient le File compressé (jusqu'à plusieurs Mo). Sur 20+ photos,
   // sans révocation, on dépasse facilement la limite mémoire mobile (OOM).
-  // L'aperçu n'est utile que pour l'étape courante — les autres ont déjà été uploadées.
+  // L'aperçu n'est utile que pour l'étape courante · les autres ont déjà été uploadées.
   useEffect(() => {
     const currentId = STEPS[safeIndex]?.id;
     setStates(prev => {
@@ -651,7 +651,7 @@ export function EdlPremiumFlow({
       const errored = Object.values(states).filter(s => s?.status === "error").length;
       if (errored > 0) {
         toast.success("Connexion rétablie", {
-          description: `${errored} photo(s) en attente — cliquez "Réessayer l'envoi".`,
+          description: `${errored} photo(s) en attente · cliquez "Réessayer l'envoi".`,
         });
       }
     };
@@ -659,7 +659,7 @@ export function EdlPremiumFlow({
     return () => window.removeEventListener("online", onOnline);
   }, [states]);
 
-  // === Inspection de la phase courante — créée à la première photo nécessaire
+  // === Inspection de la phase courante · créée à la première photo nécessaire
   const ensureInspection = useCallback(async () => {
     if (inspectionId) return inspectionId;
     const { data: existing } = await supabase
@@ -713,7 +713,7 @@ export function EdlPremiumFlow({
   const skipCurrentScan = () => {
     const stepId = currentStep.id;
     setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
-    toast.info("Scan ignoré — appuyez sur \"Photo suivante\" pour continuer");
+    toast.info("Scan ignoré · appuyez sur \"Photo suivante\" pour continuer");
   };
 
   const setState = (id: string, s: StepState) =>
@@ -795,7 +795,7 @@ export function EdlPremiumFlow({
         ocr: isScan ? { status: "pending" } : undefined,
       });
 
-      // 2) Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer.
+      // 2) Upload + persistance en arrière-plan · n'empêche pas l'utilisateur d'avancer.
       void (async () => {
         try {
           // Préparation du fichier stable (peut être lente sur mobile) en arrière-plan.
@@ -835,7 +835,7 @@ export function EdlPremiumFlow({
             return { ...prev, [stepId]: { ...cur, status: "success", storagePath: path } };
           });
 
-          // OCR auto pour scans — non bloquant
+          // OCR auto pour scans · non bloquant
           if (isScan) {
             supabase.functions.invoke("edl-document-ocr", {
               body: {
@@ -913,7 +913,7 @@ export function EdlPremiumFlow({
 
     const stepId = currentStep.id;
     const extraId = crypto.randomUUID();
-    // Preview INSTANTANÉ depuis le fichier brut — pas d'await avant l'affichage.
+    // Preview INSTANTANÉ depuis le fichier brut · pas d'await avant l'affichage.
     const previewUrl = URL.createObjectURL(raw);
     setStates((prev) => ({
       ...prev,
@@ -927,7 +927,7 @@ export function EdlPremiumFlow({
       },
     }));
 
-    // Upload + persistance en arrière-plan — n'empêche pas l'utilisateur d'avancer
+    // Upload + persistance en arrière-plan · n'empêche pas l'utilisateur d'avancer
     // ni d'ajouter d'autres photos (uploads parallèles possibles).
     void (async () => {
       try {
@@ -1023,7 +1023,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", previewUrl, storagePath: path });
       toast.success("Selfie validé");
-      // Pas d'auto-avance — utilisateur appuie sur "Photo suivante".
+      // Pas d'auto-avance · utilisateur appuie sur "Photo suivante".
     } catch (err) {
       console.error("[EDL Premium] selfie failed", err);
       setState(stepId, {
@@ -1085,7 +1085,7 @@ export function EdlPremiumFlow({
 
       setState(stepId, { status: "success", storagePath: path, previewUrl: dataUrl });
       toast.success("Signature validée");
-      // Pas d'auto-avance — utilisateur appuie sur "Étape suivante".
+      // Pas d'auto-avance · utilisateur appuie sur "Étape suivante".
     } catch (err) {
       console.error("[EDL Premium] signature failed", err);
       setState(stepId, {
@@ -1115,7 +1115,7 @@ export function EdlPremiumFlow({
         setState(stepId, { status: "success" });
         toast.success("Envoyé à l'admin pour validation");
       } else if (stepId === "admin_validated") {
-        // Cette étape attend la validation admin externe — elle ne se valide pas côté driver
+        // Cette étape attend la validation admin externe · elle ne se valide pas côté driver
         setState(stepId, { status: "success" });
         toast.info("Validation admin enregistrée");
       }
@@ -1141,7 +1141,7 @@ export function EdlPremiumFlow({
 
     if (type === "arrivee") {
       // On marque seulement l'EDL arrivée comme faite. Le selfie final et
-      // l'envoi à l'admin sont déclenchés depuis le cockpit mission — pas ici.
+      // l'envoi à l'admin sont déclenchés depuis le cockpit mission · pas ici.
       const [{ error: attributionError }, { error: historyError }] = await Promise.all([
         supabase.from("attributions")
           .update({ etape_courante: "edl_arrivee_fait" })
@@ -1501,7 +1501,7 @@ export function EdlPremiumFlow({
 
         </div>
 
-        {/* Input file caché — type adapté.
+        {/* Input file caché · type adapté.
             Le `key` change à chaque étape : on force React à remonter
             l'élément <input>. Sans ça, iOS Safari (et certains Chrome
             Android) refusent de réouvrir la caméra après la première
@@ -1520,7 +1520,7 @@ export function EdlPremiumFlow({
         />
       </main>
 
-      {/* === BARRE NAV STICKY BAS — toujours visible, mobile-first === */}
+      {/* === BARRE NAV STICKY BAS · toujours visible, mobile-first === */}
       <footer
         className="edl-glass-strong rounded-none border-x-0 border-b-0 shrink-0 safe-bottom"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
@@ -1534,7 +1534,7 @@ export function EdlPremiumFlow({
             {!online && (
               <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-amber-500/15 text-amber-200 ring-1 ring-amber-400/40 normal-case tracking-normal">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                Hors-ligne — reprise auto
+                Hors-ligne · reprise auto
               </span>
             )}
             <span className="text-white font-bold tabular-nums">

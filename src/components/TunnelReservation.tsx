@@ -233,7 +233,7 @@ export default function TunnelReservation({ onClose }: Props) {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs uppercase tracking-wider text-primary/80">
-            Étape {step}/5 — {STEPS[step - 1]}
+            Étape {step}/5 · {STEPS[step - 1]}
           </span>
           {onClose && (
             <button
@@ -286,7 +286,7 @@ export default function TunnelReservation({ onClose }: Props) {
         </p>
       )}
 
-      {/* Live price strip — visible dès l'étape 1 quand un prix est calculé */}
+      {/* Live price strip · visible dès l'étape 1 quand un prix est calculé */}
       {step < 5 && step > 0 && (form.ville_depart && form.ville_arrivee) && (
         <div className="mt-6 flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-primary/30 bg-primary/5">
           <div className="min-w-0">
@@ -295,7 +295,7 @@ export default function TunnelReservation({ onClose }: Props) {
           </div>
           <div className="text-right shrink-0">
             <p className="font-heading text-2xl text-primary leading-none">
-              {total > 0 ? `${total.toFixed(2)} €` : "—"}
+              {total > 0 ? `${total.toFixed(2)} €` : " · "}
             </p>
             <p className="text-[10px] text-cream/50 mt-1">TTC, péages & carburant inclus</p>
           </div>
@@ -337,7 +337,7 @@ export default function TunnelReservation({ onClose }: Props) {
         </div>
       )}
 
-      {/* Modal de confirmation explicite — aucune demande envoyée tant que l'utilisateur n'a pas validé */}
+      {/* Modal de confirmation explicite · aucune demande envoyée tant que l'utilisateur n'a pas validé */}
       {confirmOpen && step === 4 && (
         <div
           className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
@@ -547,7 +547,7 @@ function Step4({
       <div className="bg-navy-light/60 border border-primary/30 rounded p-5 mb-5">
         <p className="text-xs uppercase tracking-wider text-primary mb-3">Récapitulatif de la commande</p>
         <RecapLine label="Trajet" value={`${form.ville_depart} → ${form.ville_arrivee}`} />
-        <RecapLine label="Date" value={form.date_prise_en_charge ? new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR") : "—"} />
+        <RecapLine label="Date" value={form.date_prise_en_charge ? new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR") : " · "} />
         <RecapLine label="Type" value={tripTypeLabel(form.type_trajet)} />
         {form.options.length > 0 && (
           <RecapLine
@@ -555,12 +555,12 @@ function Step4({
             value={form.options.map((id) => RESERVATION_OPTIONS.find((o) => o.id === id)?.label).join(", ")}
           />
         )}
-        <RecapLine label="Véhicule" value={`${form.marque} ${form.modele}`.trim() || "—"} />
+        <RecapLine label="Véhicule" value={`${form.marque} ${form.modele}`.trim() || " · "} />
         <div className="border-t border-primary/20 mt-3 pt-3 flex items-baseline justify-between">
           <span className="text-cream/70 text-xs uppercase tracking-wider">Total TTC</span>
           <span className="font-heading text-2xl text-primary">{total.toFixed(2)} €</span>
         </div>
-        <p className="text-cream/40 text-xs mt-1">Base : {basePrice.toFixed(2)} € — {priceLabel}{optionsTotal > 0 ? ` · Options : +${optionsTotal.toFixed(2)} €` : ""}</p>
+        <p className="text-cream/40 text-xs mt-1">Base : {basePrice.toFixed(2)} € · {priceLabel}{optionsTotal > 0 ? ` · Options : +${optionsTotal.toFixed(2)} €` : ""}</p>
       </div>
 
       <label className="flex items-start gap-3 cursor-pointer">

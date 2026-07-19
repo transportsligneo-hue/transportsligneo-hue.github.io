@@ -108,7 +108,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
   const [vehNotes, setVehNotes] = useState("");
   const [plateBusy, setPlateBusy] = useState(false);
 
-  // Restitution (Aller-retour) — 2e véhicule + adresses différentes
+  // Restitution (Aller-retour) · 2e véhicule + adresses différentes
   const [sameRetourAddress, setSameRetourAddress] = useState(true);
   const [departRetour, setDepartRetour] = useState("");
   const [arriveeRetour, setArriveeRetour] = useState("");
@@ -275,7 +275,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     try {
       const result = await lookupPlate({ data: { plate: immat } });
       if (!result.ok || !result.data) {
-        toast.error(result.error || "Aucune donnée trouvée — vous pouvez remplir manuellement");
+        toast.error(result.error || "Aucune donnée trouvée · vous pouvez remplir manuellement");
         return;
       }
       const d = result.data;
@@ -293,7 +293,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       }
       toast.success("Informations véhicule récupérées");
     } catch {
-      toast.error("Service indisponible — vous pouvez remplir manuellement");
+      toast.error("Service indisponible · vous pouvez remplir manuellement");
     } finally {
       setPlateBusy(false);
     }
@@ -461,14 +461,14 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       // Notification admin (in-app + push web)
       notifyAdmin({
         type: "client_action",
-        titre: `Nouvelle demande — ${clientLabel}`,
+        titre: `Nouvelle demande · ${clientLabel}`,
         message: `${depart} → ${arrivee}${prixTtc ? ` · ${prixTtc.toFixed(0)} €` : ""}${devisNumero ? ` · Devis ${devisNumero}` : ""}`,
         link: devisId ? "/admin/devis" : "/admin/demandes",
         entityType: devisId ? "devis" : "demande",
         entityId: devisId ?? demandeId,
       }).catch(() => {});
 
-      // Emails transactionnels : devis client + notif admin — non bloquants
+      // Emails transactionnels : devis client + notif admin · non bloquants
       void Promise.allSettled([
         devisId
           ? sendTransactionalEmail({
@@ -508,7 +508,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             telephone: profile.telephone,
             depart,
             arrivee,
-            date: date || "—",
+            date: date || " · ",
             prix: prixTtc,
             numero,
             type: tripType,
@@ -748,7 +748,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           <div>
             <label className={lbl}>Énergie</label>
             <select className={inp} value={energie} onChange={(e) => setEnergie(e.target.value)}>
-              <option value="">—</option>
+              <option value=""> · </option>
               {ENERGIES.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
             </select>
           </div>

@@ -30,7 +30,7 @@ import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * MobileHomeScreen — v3
+ * MobileHomeScreen · v3
  * Reproduction fidèle de la maquette "accueil-mobile-v3" :
  * fond navy continu avec halos bleus/or, hero photo + overlay bleu,
  * carte "Estimer mon trajet" flottante, fil de route décoratif, bento stats.
@@ -192,7 +192,7 @@ export default function MobileHomeScreen() {
         </div>
       </section>
 
-      {/* === Carte "Estimer mon trajet" (chevauche le hero) — vrai simulateur === */}
+      {/* === Carte "Estimer mon trajet" (chevauche le hero) · vrai simulateur === */}
       <div id="mobile-devis" className="relative z-[3] mx-[18px] -mt-[56px] scroll-mt-20">
         <MobileDevisGenerator />
       </div>

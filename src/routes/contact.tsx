@@ -8,9 +8,9 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
   head: () => ({
     meta: [
-      { title: "Contact — Transports Ligneo" },
+      { title: "Contact · Transports Ligneo" },
       { name: "description", content: "Contactez Transports Ligneo pour toute demande de convoyage automobile. Devis rapide et réponse personnalisée." },
-      { property: "og:title", content: "Contact — Transports Ligneo" },
+      { property: "og:title", content: "Contact · Transports Ligneo" },
       { property: "og:description", content: "Une question ? Notre équipe vous répond rapidement." },
     ],
   }),

@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import DevisGenerator from "@/components/DevisGenerator";
-import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
+import MobileTarifsScreen from "@/components/mobile/MobileTarifsScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/tarifs")({
   component: TarifsPage,
   head: () => ({
     meta: [
-      { title: "Tarifs & estimation — Transports Ligneo" },
+      { title: "Tarifs & estimation · Transports Ligneo" },
       { name: "description", content: "Tarifs convoyage automobile transparents au départ de Tours (37). Péages, carburant et assurance inclus. Estimation immédiate en ligne." },
-      { property: "og:title", content: "Tarifs & estimation — Transports Ligneo" },
+      { property: "og:title", content: "Tarifs & estimation · Transports Ligneo" },
       { property: "og:description", content: "Un tarif clair et juste. Devis instantané, aucun frais caché." },
     ],
   }),
@@ -19,10 +19,15 @@ export const Route = createFileRoute("/tarifs")({
 function TarifsPage() {
   return (
     <>
-      <Navbar />
-      <main className="r4-page">
-        {/* ============ HERO ============ */}
-        <section className="v4-hero">
+      {/* Mobile · écran dédié navy */}
+      <MobileTarifsScreen />
+
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <Navbar />
+        <main className="r4-page">
+          {/* ============ HERO ============ */}
+          <section className="v4-hero">
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center" }}>
             <span className="dot" />Tarifs
           </div>
@@ -36,12 +41,7 @@ function TarifsPage() {
         <section className="v4-section" style={{ maxWidth: 720, paddingTop: 0 }}>
           <div className="v4-quote-card">
             <div className="v4-quote-inner">
-              <div className="hidden md:block">
-                <DevisGenerator variant="hero-card" />
-              </div>
-              <div className="md:hidden">
-                <MobileDevisGenerator />
-              </div>
+              <DevisGenerator variant="hero-card" />
             </div>
           </div>
         </section>
@@ -67,7 +67,7 @@ function TarifsPage() {
                 <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller-retour</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>129 €</span>
               </div>
-              <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus — TTC</p>
+              <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>
             </div>
 
             <div className="v4-svc-card">
@@ -80,7 +80,7 @@ function TarifsPage() {
                 <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller-retour</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>129 €</span>
               </div>
-              <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus — TTC</p>
+              <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>
             </div>
 
             <div className="v4-svc-card">
@@ -175,8 +175,9 @@ function TarifsPage() {
           <p>Volume important, trajet particulier : nous adaptons le devis à votre besoin.</p>
           <Link to="/contact" className="v4-btn-primary">Contacter un conseiller</Link>
         </div>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

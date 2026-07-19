@@ -1,5 +1,5 @@
 /**
- * MissionClientGallery — affiche côté client toutes les preuves visuelles d'une mission :
+ * MissionClientGallery · affiche côté client toutes les preuves visuelles d'une mission :
  * - Photos d'inspection (départ / arrivée) avec signed URLs
  * - Signatures (départ / arrivée)
  * - Carte grise (recto / verso)
@@ -8,7 +8,7 @@
  * Chargement progressif :
  *   1. squelettes affichés immédiatement
  *   2. chaque section (carte grise, photos, docs) se remplit indépendamment
- *      dès que ses données arrivent — pas d'écran d'attente global
+ *      dès que ses données arrivent · pas d'écran d'attente global
  *   3. pagination "Voir plus" au-delà de 12 photos par section pour garder
  *      un défilement fluide même sur mobile / grosses missions
  */
@@ -68,7 +68,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [cg, setCg] = useState<{ recto: string | null; verso: string | null }>({ recto: null, verso: null });
 
-  // Chargement indépendant par section — pas de "grand spinner" bloquant
+  // Chargement indépendant par section · pas de "grand spinner" bloquant
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [loadingCg, setLoadingCg] = useState(!!trajetId);
@@ -84,7 +84,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
       if (!hasAny) { hasAny = true; onProofsAvailable?.(true); }
     };
 
-    // 1) Photos d'inspection — pipeline indépendant
+    // 1) Photos d'inspection · pipeline indépendant
     (async () => {
       setLoadingPhotos(true);
       const { data: insps } = await supabase
@@ -127,7 +127,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
       if (built.length) flagProofs();
     })();
 
-    // 2) Documents partagés — pipeline indépendant
+    // 2) Documents partagés · pipeline indépendant
     (async () => {
       setLoadingDocs(true);
       const { data: dRes } = await supabase
@@ -155,7 +155,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
       if (dList.length) flagProofs();
     })();
 
-    // 3) Carte grise — pipeline indépendant
+    // 3) Carte grise · pipeline indépendant
     if (trajetId) {
       (async () => {
         setLoadingCg(true);

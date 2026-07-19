@@ -11,7 +11,7 @@ export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
   head: () => ({
     meta: [
-      { title: "Inscription client — Transports Ligneo" },
+      { title: "Inscription client · Transports Ligneo" },
       { name: "description", content: "Créez votre compte client pour réserver vos convoyages en toute simplicité." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -90,7 +90,7 @@ function InscriptionClient() {
         void notifyAdmin({
           type: "client_action",
           titre: "Nouvelle inscription client",
-          message: `${form.prenom} ${form.nom} — ${form.email}`,
+          message: `${form.prenom} ${form.nom} · ${form.email}`,
           link: "/admin/clients",
           entityType: "user",
           entityId: authData.user.id,
@@ -208,7 +208,7 @@ function InscriptionClient() {
 
         <div className="text-center mt-5 space-y-2.5">
           <p className="text-[10px] leading-relaxed text-white/45 px-2">
-            Protégé par reCAPTCHA —{" "}
+            Protégé par reCAPTCHA  · {" "}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Confidentialité</a>
             {" "}·{" "}
             <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">CGU</a>

@@ -386,7 +386,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           <div className="min-w-0">
             <p className="mission-text-muted text-[10px] uppercase tracking-wider">Modèle</p>
             <p className="mission-text text-lg font-semibold mt-1 truncate">
-              {[mission.marque, mission.modele].filter(Boolean).join(" ") || "—"}
+              {[mission.marque, mission.modele].filter(Boolean).join(" ") || " · "}
             </p>
           </div>
           {mission.immatriculation && (
@@ -514,7 +514,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             <div>
               <p className="mission-text-muted text-[10px] uppercase tracking-wider">{facture.numero}</p>
               <p className="mission-text-soft text-sm mt-0.5">
-                {facture.date_facture ? new Date(facture.date_facture).toLocaleDateString("fr-FR") : "—"}
+                {facture.date_facture ? new Date(facture.date_facture).toLocaleDateString("fr-FR") : " · "}
                 {" · "}
                 <span className={facture.statut === "payee" ? "text-[#22C55E] font-semibold" : "text-[#F59E0B] font-semibold"}>
                   {facture.statut === "payee" ? "Payée" : /virement|diff[ée]r|30|60|90/i.test((facture as { mode_paiement?: string | null }).mode_paiement ?? "") ? "Virement différé" : "À régler"}
@@ -559,7 +559,7 @@ function Field({ label, value, icon }: { label: string; value: string | null | u
       <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
         {icon} {label}
       </p>
-      <p className="mission-text text-sm font-medium">{value || "—"}</p>
+      <p className="mission-text text-sm font-medium">{value || " · "}</p>
     </div>
   );
 }

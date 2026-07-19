@@ -1,5 +1,5 @@
 /**
- * SignatureCanvas — Capture tactile de la signature client.
+ * SignatureCanvas · Capture tactile de la signature client.
  *
  * - Trait fluide (pointer events, marche au doigt et à la souris)
  * - Bouton Effacer + Valider

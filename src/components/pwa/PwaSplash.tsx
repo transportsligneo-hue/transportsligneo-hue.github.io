@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 /**
  * Splash screen affiché uniquement quand l'app est ouverte en mode PWA installée
- * (display-mode: standalone) — comme une application native. Animation courte du
+ * (display-mode: standalone) · comme une application native. Animation courte du
  * logo Ligneo doré sur fond bleu nuit, puis fondu de sortie.
  */
 export default function PwaSplash() {

@@ -1,5 +1,5 @@
 /**
- * MissionCockpit — parcours unifié et guidé pour le convoyeur.
+ * MissionCockpit · parcours unifié et guidé pour le convoyeur.
  *
  * Version mobile-first centrée sur l'étape en cours :
  *   - selfie obligatoire
@@ -152,7 +152,7 @@ export function MissionCockpit({
   }, [attributionId]);
 
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
-  // Selfie final = 2e selfie pris (après EDL arrivée) — count BDD.
+  // Selfie final = 2e selfie pris (après EDL arrivée) · count BDD.
   const finalSelfieOK = gates.selfies.length >= 2 || gates.isDisabled("selfie_final");
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
@@ -372,7 +372,7 @@ export function MissionCockpit({
   }
 
   const refreshAll = async () => {
-    // Déverrouillage optimiste immédiat — l'utilisateur voit l'étape suivante
+    // Déverrouillage optimiste immédiat · l'utilisateur voit l'étape suivante
     // sans attendre la propagation realtime / fetch parent.
     setSelfieJustDone(true);
     setPendingDriverSelfie(attributionId, false);
@@ -542,11 +542,11 @@ export function MissionCockpit({
           @keyframes mv3PaneIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         `}</style>
 
-        {/* HERO — ring + road */}
+        {/* HERO · ring + road */}
         <div className="mv3-hero">
           <div className="mv3-hero-mesh" />
           <div className="mv3-hero-head">
-            <div className="mv3-eyebrow">Mission convoyeur · {missionNumber ?? "—"}</div>
+            <div className="mv3-eyebrow">Mission convoyeur · {missionNumber ?? " · "}</div>
             <div className="mv3-live-pill">
               <span className="mv3-live-dot" />
               {isDone ? "Envoyée" : currentDef.short}
@@ -575,9 +575,9 @@ export function MissionCockpit({
               <div className="mv3-hero-title">{currentDef.label}</div>
               {(departVille || arriveeVille) && (
                 <div className="mv3-hero-route">
-                  <span className="mv3-hero-route-city">{departVille ?? "—"}</span>
+                  <span className="mv3-hero-route-city">{departVille ?? " · "}</span>
                   <span className="mv3-hero-route-arrow">→</span>
-                  <span className="mv3-hero-route-city">{arriveeVille ?? "—"}</span>
+                  <span className="mv3-hero-route-city">{arriveeVille ?? " · "}</span>
                 </div>
               )}
               {currentDef.hint && !isDone && <div className="mv3-hero-sub">{currentDef.hint}</div>}
@@ -677,7 +677,7 @@ export function MissionCockpit({
               </div>
             )}
 
-            {/* CTA — libellé = action, PAS "valider cette étape" */}
+            {/* CTA · libellé = action, PAS "valider cette étape" */}
             <button
               onClick={handleAdvance}
               disabled={busy || isDone}

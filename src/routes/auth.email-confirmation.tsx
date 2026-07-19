@@ -5,7 +5,7 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 export const Route = createFileRoute("/auth/email-confirmation")({
   head: () => ({
     meta: [
-      { title: "Email validé — Transports Ligneo" },
+      { title: "Email validé · Transports Ligneo" },
       { name: "robots", content: "noindex" },
     ],
   }),

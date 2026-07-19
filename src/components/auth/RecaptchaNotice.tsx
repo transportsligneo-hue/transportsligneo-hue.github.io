@@ -1,5 +1,5 @@
 /**
- * RecaptchaNotice — mention légale obligatoire pour reCAPTCHA v3.
+ * RecaptchaNotice · mention légale obligatoire pour reCAPTCHA v3.
  * À placer sous tout formulaire de connexion / inscription / contact.
  */
 export function RecaptchaNotice({ className = "" }: { className?: string }) {

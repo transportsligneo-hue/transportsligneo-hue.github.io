@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 /**
- * Bouton "Créer une mission test" — appelle la RPC admin_create_test_mission.
+ * Bouton "Créer une mission test" · appelle la RPC admin_create_test_mission.
  * Réservé aux administrateurs (contrôle côté RPC). La mission créée est marquée
  * is_test_data=true, invisible côté client/convoyeur "normal", supprimable en un clic.
  *
@@ -57,7 +57,7 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
     }
     toast.success(
       targetConvoyeurId
-        ? "Mission test attribuée — le convoyeur peut l'accepter"
+        ? "Mission test attribuée · le convoyeur peut l'accepter"
         : "Mission test publiée au catalogue",
     );
     onCreated?.(data as string);
@@ -68,7 +68,7 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
       <button
         onClick={() => handleCreate()}
         disabled={busy}
-        title="Publie une mission fictive au catalogue (TEST — invisible côté client)"
+        title="Publie une mission fictive au catalogue (TEST · invisible côté client)"
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-l-lg border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold hover:bg-amber-100 transition-colors disabled:opacity-50"
       >
         {busy ? <Loader2 size={13} className="animate-spin" /> : <FlaskConical size={13} />}
@@ -119,7 +119,7 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
 export function TestBadge() {
   return (
     <span
-      title="Mission de test — invisible côté client"
+      title="Mission de test · invisible côté client"
       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border border-amber-400 bg-amber-100 text-amber-900 tracking-wider"
     >
       <FlaskConical size={9} /> TEST

@@ -1,12 +1,12 @@
 /**
- * QrHandoffButton — bouton "Scanner depuis mon téléphone".
+ * QrHandoffButton · bouton "Scanner depuis mon téléphone".
  *
  * Ouvre une modale premium contenant un QR code + code court. L'utilisateur
  * scanne le QR avec l'appareil photo natif de son téléphone → il arrive sur
  * `/scan/$token` (page publique), photographie ses documents, et chaque
  * extraction remonte au PC en temps réel via Supabase Realtime.
  *
- * Contrat identique à `ScanToPrefill` : `onExtracted(fields, docs)` — donc
+ * Contrat identique à `ScanToPrefill` : `onExtracted(fields, docs)` · donc
  * branchement zéro-friction sur tout formulaire qui utilise déjà ScanToPrefill.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -226,7 +226,7 @@ export function QrHandoffButton({
                           <li key={i} className="flex items-center gap-2 text-white/80 text-xs">
                             <Check size={14} className="text-[#e7c76a]" />
                             <span className="flex-1">
-                              {DOCUMENT_LABEL[d.document_type] ?? "Document"} — {Object.keys(d.fields).length} champs
+                              {DOCUMENT_LABEL[d.document_type] ?? "Document"} · {Object.keys(d.fields).length} champs
                             </span>
                           </li>
                         ))}

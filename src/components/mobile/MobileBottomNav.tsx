@@ -80,7 +80,7 @@ export default function MobileBottomNav() {
           </button>
 
 
-          {/* CTA Estimer — centré, surélevé, halo bleu */}
+          {/* CTA Estimer · centré, surélevé, halo bleu */}
           <button
             onClick={goEstimer}
             className="relative flex flex-col items-center justify-center gap-1 h-full tap-scale"

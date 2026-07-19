@@ -9,7 +9,7 @@ import { ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/verify-certificat/$token")({
   component: VerifyCertificat,
-  head: () => ({ meta: [{ title: "Vérification de certificat — Transports Ligneo" }] }),
+  head: () => ({ meta: [{ title: "Vérification de certificat · Transports Ligneo" }] }),
 });
 
 type Cert = { certificate_number: string; full_name: string; issued_at: string; revoked_at: string | null };

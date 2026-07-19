@@ -29,7 +29,7 @@ export default function MobilePartnersStrip() {
         </h2>
       </div>
 
-      {/* Marquee logos — même style/grayscale que desktop */}
+      {/* Marquee logos · même style/grayscale que desktop */}
       <div className="logo-marquee-mask overflow-hidden -mx-5 px-1">
         <div className="logo-marquee">
           <div className="logo-marquee-track">

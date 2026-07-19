@@ -8,9 +8,9 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Transports LIGNEO — Estimation convoyage automobile" },
+      { title: "Transports LIGNEO · Estimation convoyage automobile" },
       { name: "description", content: "Estimez votre convoyage automobile en 30 secondes. Service au départ de Tours, péages et carburant inclus. Disponible 7j/7." },
-      { property: "og:title", content: "Transports LIGNEO — Estimation convoyage automobile" },
+      { property: "og:title", content: "Transports LIGNEO · Estimation convoyage automobile" },
       { property: "og:description", content: "Estimation instantanée. Votre véhicule, notre priorité. La tranquillité sur toute la ligne." },
     ],
   }),

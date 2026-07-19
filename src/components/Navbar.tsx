@@ -28,7 +28,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // CTA principal : Estimer — scrolle vers l'estimateur (centré) si présent, sinon → /tarifs
+  // CTA principal : Estimer · scrolle vers l'estimateur (centré) si présent, sinon → /tarifs
   const goToEstimer = () => {
     setMobileOpen(false);
     if (scrollToDevis()) return;
@@ -51,7 +51,7 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-8">
-          <Link to="/" className="flex items-center gap-3 mr-2 shrink-0" aria-label="Accueil — Transports Ligneo">
+          <Link to="/" className="flex items-center gap-3 mr-2 shrink-0" aria-label="Accueil · Transports Ligneo">
             <img
               src={logoLigneo}
               alt="Transports Ligneo"
@@ -60,7 +60,7 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Liens centraux — pilule englobante */}
+          {/* Liens centraux · pilule englobante */}
           <ul className="r4-nav-pill whitespace-nowrap">
             {navLinks.map((l) => (
               <li key={l.to}>
@@ -81,7 +81,7 @@ export default function Navbar() {
             <a
               href="tel:+33782456181"
               className="nav-phone-block hidden xl:inline-flex"
-              aria-label="Appeler Transports Ligneo — 07 82 45 61 81"
+              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
             >
               <span className="nav-phone-icon">
                 <Phone size={15} strokeWidth={2.25} />

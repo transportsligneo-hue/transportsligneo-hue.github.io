@@ -1,5 +1,5 @@
 /**
- * ScanToPrefill — bouton "Scanner un document" premium à intégrer sur les
+ * ScanToPrefill · bouton "Scanner un document" premium à intégrer sur les
  * formulaires de création de mission (admin, client, pro).
  *
  * Flow :
@@ -89,7 +89,7 @@ export function ScanToPrefill({
 
       const types = results.map((r) => DOCUMENT_LABEL[r.document_type]).join(", ");
       const filled = Object.values(merged).filter(Boolean).length;
-      toast.success(`${filled} champs pré-remplis — ${types}`, {
+      toast.success(`${filled} champs pré-remplis · ${types}`, {
         id: toastId,
         description: warnings.length ? `⚠ ${warnings.join(", ")}` : undefined,
       });

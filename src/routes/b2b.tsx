@@ -7,9 +7,9 @@ export const Route = createFileRoute("/b2b")({
   component: B2BPage,
   head: () => ({
     meta: [
-      { title: "Solutions B2B convoyage automobile — Transports Ligneo" },
+      { title: "Solutions B2B convoyage automobile · Transports Ligneo" },
       { name: "description", content: "Deux solutions B2B : transport ponctuel avec paiement en ligne, ou partenariat flotte sur-mesure pour grands comptes, concessions et loueurs." },
-      { property: "og:title", content: "Solutions B2B — Transports Ligneo" },
+      { property: "og:title", content: "Solutions B2B · Transports Ligneo" },
       { property: "og:description", content: "Transport ponctuel B2B et partenariat flotte. Devis, paiement et dispatch professionnels." },
     ],
   }),
@@ -56,7 +56,7 @@ function B2BPage() {
         </div>
       </section>
 
-      {/* === Deux solutions — cartes cream premium === */}
+      {/* === Deux solutions · cartes cream premium === */}
       <section className="px-4 py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
@@ -65,7 +65,7 @@ function B2BPage() {
           </div>
 
           <div className="grid gap-7 lg:grid-cols-2">
-            {/* Carte 1 — Transport ponctuel */}
+            {/* Carte 1 · Transport ponctuel */}
             <article className="card-premium-light group relative flex flex-col overflow-hidden p-9 transition-all duration-500 hover:-translate-y-1">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a] to-transparent" />
               <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#b8860b]">
@@ -100,7 +100,7 @@ function B2BPage() {
               <p className="mt-4 text-center text-[11px] text-[#0b1026]/50 tracking-wide">Estimation et paiement en moins de 3 minutes</p>
             </article>
 
-            {/* Carte 2 — Partenariat flotte */}
+            {/* Carte 2 · Partenariat flotte */}
             <article className="card-premium-light group relative flex flex-col overflow-hidden p-9 transition-all duration-500 hover:-translate-y-1">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a] to-transparent" />
               <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#b8860b]">
@@ -138,7 +138,7 @@ function B2BPage() {
         </div>
       </section>
 
-      {/* === Bandeau valeurs — navy premium === */}
+      {/* === Bandeau valeurs · navy premium === */}
       <section className="relative px-4 py-20 lg:py-24"
         style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}>
         <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />

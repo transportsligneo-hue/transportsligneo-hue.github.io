@@ -8,7 +8,7 @@ export const Route = createFileRoute("/mot-de-passe-oublie")({
   component: MotDePasseOublie,
   head: () => ({
     meta: [
-      { title: "Mot de passe oublié — Transports Ligneo" },
+      { title: "Mot de passe oublié · Transports Ligneo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

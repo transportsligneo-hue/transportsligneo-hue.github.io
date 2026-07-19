@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Global cursor spotlight — premium blue halo following the mouse.
+ * Global cursor spotlight · premium blue halo following the mouse.
  * - pointer-events: none (does not block clicks)
  * - requestAnimationFrame throttling
  * - disabled on touch devices / coarse pointers

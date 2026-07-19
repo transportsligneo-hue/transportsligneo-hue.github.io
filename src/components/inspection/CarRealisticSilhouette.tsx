@@ -1,5 +1,5 @@
 /**
- * CarRealisticSilhouette — Silhouettes véhicule premium, style "grand groupe".
+ * CarRealisticSilhouette · Silhouettes véhicule premium, style "grand groupe".
  *
  * Approche : profil 2D épuré inspiré des études design automobile (proportions
  * berline moderne, lignes nettes, dégradés discrets, aucun élément cartoon).

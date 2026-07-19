@@ -25,28 +25,28 @@ interface Props {
   onCancel: () => void;
 }
 
-const CGV_TEXT = `Article 1 — Objet
+const CGV_TEXT = `Article 1 · Objet
 Les présentes Conditions Générales de Vente régissent les prestations de convoyage automobile fournies par Transports Ligneo.
 
-Article 2 — Acceptation du devis
+Article 2 · Acceptation du devis
 Le devis devient ferme et définitif après acceptation expresse par le client (case à cocher et validation par code de signature unique reçu par e-mail). Le montant accepté est ferme et ne peut être modifié sans nouvelle acceptation.
 
-Article 3 — Prix
+Article 3 · Prix
 Les prix indiqués sont en euros TTC, péages et carburant inclus, sauf mention contraire.
 
-Article 4 — Paiement
+Article 4 · Paiement
 Le paiement est dû à l'acceptation du devis, sauf accord écrit contraire.
 
-Article 5 — Annulation
+Article 5 · Annulation
 Toute annulation à moins de 48h du convoyage entraîne la facturation de 50% du montant.
 
-Article 6 — Responsabilité
+Article 6 · Responsabilité
 Transports Ligneo souscrit une assurance professionnelle couvrant le véhicule pendant le trajet.
 
-Article 7 — Données personnelles
+Article 7 · Données personnelles
 Les données sont traitées conformément à notre politique de confidentialité. La preuve de signature (horodatage, adresse IP, code OTP vérifié) est conservée à des fins légales.
 
-Article 8 — Litiges
+Article 8 · Litiges
 Tout litige relève des tribunaux compétents de Tours.`;
 
 async function sha256HexOfBlob(blob: Blob): Promise<string> {

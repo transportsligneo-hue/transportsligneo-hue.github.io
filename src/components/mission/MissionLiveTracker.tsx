@@ -14,7 +14,7 @@ const STATUT_LABEL: Record<string, string> = {
   propose: "Convoyeur attribué",
   accepte: "Mission acceptée",
   en_cours: "En route",
-  en_attente_validation: "Livré — validation en cours",
+  en_attente_validation: "Livré · validation en cours",
   validee: "Mission validée",
   termine: "Mission terminée",
   terminee: "Mission terminée",
@@ -195,7 +195,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
             {isFinished && (
               <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2.5 text-emerald-700">
                 <CheckCircle2 size={16} />
-                <span className="text-sm font-semibold">Mission livrée — merci !</span>
+                <span className="text-sm font-semibold">Mission livrée · merci !</span>
               </div>
             )}
 
@@ -248,7 +248,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
         )}
       </div>
 
-      {/* Timeline étapes — sous la carte, mise en page premium */}
+      {/* Timeline étapes · sous la carte, mise en page premium */}
       <div className="mission-surface rounded-2xl p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
           <Navigation size={14} className="mission-accent" />

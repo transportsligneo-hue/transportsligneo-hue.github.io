@@ -2822,11 +2822,16 @@
   box-shadow:inset 0 1px 0 rgba(122,163,255,0.15), inset 0 -1px 0 rgba(122,163,255,0.15); }
 .r4-page .v5-trust-label { text-align:center; font-family:'Space Grotesk',sans-serif; font-size:11px;
   font-weight:600; letter-spacing:0.2em; color:var(--v4-text-muted); text-transform:uppercase; margin-bottom:22px; }
-.r4-page .v5-logo-track { display:flex; gap:60px; align-items:center; justify-content:center;
-  flex-wrap:wrap; padding:0 32px; }
-.r4-page .v5-logo-item { opacity:0.85; transition:opacity .2s ease; }
-.r4-page .v5-logo-item:hover { opacity:1; }
-.r4-page .v5-logo-item img { height:38px; width:auto; filter:brightness(1.1); display:block; }
+.r4-page .v5-marquee-mask { position:relative; overflow:hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
+.r4-page .v5-marquee-track { display:flex; gap:80px; align-items:center; width:max-content;
+  animation: v5MarqueeScroll 28s linear infinite; }
+.r4-page .v5-marquee-track:hover { animation-play-state: paused; }
+@keyframes v5MarqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.r4-page .v5-logo-item { opacity:0.85; transition:opacity .2s ease, transform .2s ease; flex-shrink:0; }
+.r4-page .v5-logo-item:hover { opacity:1; transform: translateY(-2px); }
+.r4-page .v5-logo-item img { height:44px; width:auto; filter:brightness(1.15) drop-shadow(0 4px 14px rgba(63,123,255,0.28)); display:block; }
 .r4-page .v5-logo-item.text { font-family:'Poppins',sans-serif; font-weight:700; font-size:20px;
   color:#c3cbe6; letter-spacing:0.02em; }
 

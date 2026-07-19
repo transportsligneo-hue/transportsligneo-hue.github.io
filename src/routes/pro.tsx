@@ -10,9 +10,9 @@ export const Route = createFileRoute("/pro")({
   component: ProPage,
   head: () => ({
     meta: [
-      { title: "Solutions B2B convoyage — Concessions, loueurs, flottes | Transports Ligneo" },
+      { title: "Solutions B2B convoyage · Concessions, loueurs, flottes | Transports Ligneo" },
       { name: "description", content: "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace." },
-      { property: "og:title", content: "Solutions B2B — Transports Ligneo" },
+      { property: "og:title", content: "Solutions B2B · Transports Ligneo" },
       { property: "og:description", content: "Concessions, loueurs, gestionnaires de flotte : le convoyage à l'échelle de votre parc." },
     ],
   }),

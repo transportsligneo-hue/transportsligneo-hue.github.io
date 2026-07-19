@@ -1,5 +1,5 @@
 /**
- * VehicleInspectionMap — représentation visuelle interactive du véhicule.
+ * VehicleInspectionMap · représentation visuelle interactive du véhicule.
  *
  * 3 vues :
  *   - top    (vue de dessus : capot, pare-brise, toit, coffre, 4 portes, 4 jantes)
@@ -173,7 +173,7 @@ export function ZoneEvalModal({
   ];
 
   const save = () => {
-    const finalComment = defectTag ? `${defectTag}${comment ? ` — ${comment}` : ""}` : comment;
+    const finalComment = defectTag ? `${defectTag}${comment ? ` · ${comment}` : ""}` : comment;
     onChange(zoneId, { state, comment: finalComment || undefined, photoUrl: current?.photoUrl });
     onClose();
   };
@@ -221,7 +221,7 @@ export function ZoneEvalModal({
             value={comment}
             onChange={e => setComment(e.target.value)}
             rows={2}
-            placeholder="Optionnel — détails utiles"
+            placeholder="Optionnel · détails utiles"
             className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
           />
         </div>

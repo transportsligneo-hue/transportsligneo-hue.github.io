@@ -1,5 +1,5 @@
 /**
- * PremiumScanner — scanner de documents plein écran, style Adobe Scan.
+ * PremiumScanner · scanner de documents plein écran, style Adobe Scan.
  *
  * Sub-phase 1 : capture caméra premium sans OpenCV (le WASM sera ajouté en
  * itération suivante pour la détection de contours temps réel). Ici on offre :
@@ -159,7 +159,7 @@ export function PremiumScanner({
       const blurVariance = estimateBlur(canvas);
       let warning: string | undefined;
       if (blurVariance < 60) {
-        warning = "Photo un peu floue — vérifiez la mise au point si possible.";
+        warning = "Photo un peu floue · vérifiez la mise au point si possible.";
       }
 
       const blob = await new Promise<Blob | null>((resolve) =>
@@ -348,7 +348,7 @@ export function PremiumScanner({
 
         {pages.length > 0 && multiPage && (
           <p className="text-[11px] text-center text-white/50 mt-2">
-            {pages.length} page{pages.length > 1 ? "s" : ""} — appuyez sur le déclencheur pour ajouter la suivante
+            {pages.length} page{pages.length > 1 ? "s" : ""} · appuyez sur le déclencheur pour ajouter la suivante
           </p>
         )}
 

@@ -20,7 +20,7 @@ interface Props {
 }
 
 /**
- * Driver shell premium — Electric Blue / Glassmorphism
+ * Driver shell premium · Electric Blue / Glassmorphism
  * Inspirations : Tesla App, Mercedes Me, Porsche, Rivian, Apple Wallet, Revolut Ultra.
  */
 export function ConvoyeurSidebar({ items, children }: Props) {

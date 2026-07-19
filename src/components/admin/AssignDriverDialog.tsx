@@ -36,7 +36,7 @@ interface Props {
     depart: string;
     arrivee: string;
     date?: string | null;
-    /** Source — détermine quelle table on update */
+    /** Source · détermine quelle table on update */
     source: "trajet" | "b2b_request" | "mission";
   };
   existingAttributionId?: string;

@@ -1,13 +1,13 @@
 /**
- * StatutConvoyeurBadge — badge unifié pour le statut convoyeur.
+ * StatutConvoyeurBadge · badge unifié pour le statut convoyeur.
  * Couleurs et libellés cohérents partout dans la plateforme.
  *
- *  🟢 valide       — Profil validé
- *  🟡 en_attente   — Documents en attente
- *  🟠 a_corriger   — Documents à corriger (au moins un refusé)
- *  🔵 en_verif     — En cours de vérification
- *  🔴 refuse       — Profil refusé
- *  ⚫ suspendu     — Compte suspendu
+ *  🟢 valide       · Profil validé
+ *  🟡 en_attente   · Documents en attente
+ *  🟠 a_corriger   · Documents à corriger (au moins un refusé)
+ *  🔵 en_verif     · En cours de vérification
+ *  🔴 refuse       · Profil refusé
+ *  ⚫ suspendu     · Compte suspendu
  */
 import * as React from "react";
 import { CheckCircle2, Clock, AlertTriangle, Search, XCircle, Ban } from "lucide-react";

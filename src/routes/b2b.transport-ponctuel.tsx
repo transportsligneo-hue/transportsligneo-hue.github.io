@@ -18,7 +18,7 @@ export const Route = createFileRoute("/b2b/transport-ponctuel")({
   component: TransportPonctuelPage,
   head: () => ({
     meta: [
-      { title: "Transport ponctuel B2B — Devis et paiement | Transports Ligneo" },
+      { title: "Transport ponctuel B2B · Devis et paiement | Transports Ligneo" },
       { name: "description", content: "Commandez un transport ponctuel B2B en 3 étapes avec devis instantané et paiement en ligne sécurisé." },
     ],
   }),
@@ -27,13 +27,13 @@ export const Route = createFileRoute("/b2b/transport-ponctuel")({
 type Step = 1 | 2 | 3;
 
 interface FormData {
-  // Étape 1 — Entreprise
+  // Étape 1 · Entreprise
   companyName: string;
   companyType: string;
   contactName: string;
   contactPhone: string;
   contactEmail: string;
-  // Étape 2 — Transport
+  // Étape 2 · Transport
   pickupAddress: string;
   dropoffAddress: string;
   scheduledDate: string;
@@ -351,11 +351,11 @@ function TransportPonctuelPage() {
               <div className="rounded-xl bg-[#faf7ef] p-4 text-sm">
                 <h3 className="mb-2 font-semibold text-[#0b1026]">Récapitulatif</h3>
                 <div className="space-y-1 text-[#0b1026]/65">
-                  <div><strong>{form.companyName}</strong> — {form.contactName}</div>
+                  <div><strong>{form.companyName}</strong> · {form.contactName}</div>
                   <div>{form.pickupAddress} → {form.dropoffAddress}</div>
                   <div>{form.scheduledDate} à {form.scheduledTime}</div>
                   <div>{B2B_VEHICLE_LABELS[form.vehicleType]} · {form.vehicleRunning === "oui" ? "Roulant" : "Non roulant"} · {B2B_URGENCY_LABELS[form.urgency]}</div>
-                  {requestNumero && <div className="pt-2 text-xs text-[#b8860b]">Demande {requestNumero} créée — finalisez le paiement ci-dessous.</div>}
+                  {requestNumero && <div className="pt-2 text-xs text-[#b8860b]">Demande {requestNumero} créée · finalisez le paiement ci-dessous.</div>}
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 /**
- * VehiculeDocsStep — étape obligatoire avant paiement d'un devis.
+ * VehiculeDocsStep · étape obligatoire avant paiement d'un devis.
  *
  * - Saisie VIN (validation 17 caractères, pas de I/O/Q)
  * - Upload carte grise recto (obligatoire)
@@ -128,7 +128,7 @@ export function VehiculeDocsStep({
 
       {/* Recto */}
       <UploadCard
-        label="Carte grise — Recto"
+        label="Carte grise · Recto"
         required
         currentPath={rectoUrl}
         uploading={uploading === "recto"}
@@ -137,7 +137,7 @@ export function VehiculeDocsStep({
 
       {/* Verso */}
       <UploadCard
-        label="Carte grise — Verso (optionnel)"
+        label="Carte grise · Verso (optionnel)"
         currentPath={versoUrl}
         uploading={uploading === "verso"}
         onFile={(f) => upload(f, "verso")}

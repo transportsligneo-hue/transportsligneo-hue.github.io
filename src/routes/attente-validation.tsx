@@ -8,7 +8,7 @@ export const Route = createFileRoute("/attente-validation")({
   component: AttenteValidation,
   head: () => ({
     meta: [
-      { title: "Compte en attente de validation — Transports Ligneo" },
+      { title: "Compte en attente de validation · Transports Ligneo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -274,8 +274,8 @@ function AttenteValidation() {
                       </div>
                       <p className="text-xs mt-0.5 text-cream/50">
                         {d.statut === "approuve" && "Document validé par notre équipe"}
-                        {d.statut === "en_attente" && "Reçu — en cours d'examen"}
-                        {d.statut === "refuse" && (d.motif || "Document refusé — à renvoyer")}
+                        {d.statut === "en_attente" && "Reçu · en cours d'examen"}
+                        {d.statut === "refuse" && (d.motif || "Document refusé · à renvoyer")}
                         {d.statut === "manquant" && "À envoyer depuis votre espace"}
                       </p>
                     </div>

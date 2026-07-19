@@ -44,7 +44,7 @@ export function StatusBadge({ kind = "neutral", children, size = "sm", className
   );
 }
 
-/** Mapping métier — couleurs opérationnelles requises */
+/** Mapping métier · couleurs opérationnelles requises */
 export function missionStatusKind(statut: string): StatusKind {
   switch (statut) {
     case "en_attente": return "warning";            // Orange
@@ -79,7 +79,7 @@ export function missionStatusLabel(statut: string): string {
     accepte: "Mission acceptée",
     acceptee: "Mission acceptée",
     en_cours: "En cours",
-    en_attente_validation: "Livré — validation en cours",
+    en_attente_validation: "Livré · validation en cours",
     livree: "Livrée",
     validee: "Validée",
     termine: "Terminée",

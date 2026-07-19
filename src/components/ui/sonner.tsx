@@ -1,5 +1,5 @@
 /**
- * Toaster premium Transports Ligneo — bandeau opaque, glass léger, contraste AA,
+ * Toaster premium Transports Ligneo · bandeau opaque, glass léger, contraste AA,
  * positionnement responsive (top-center mobile / top-right desktop), animations 60fps
  * respectant prefers-reduced-motion. Compatible avec tous les appels `toast.*` existants.
  */

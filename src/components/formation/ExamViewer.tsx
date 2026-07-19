@@ -48,7 +48,7 @@ export function ExamViewer({
     const r = data as unknown as { score: number; passed: boolean; questions: QuizQ[] };
     setResult({ score: r.score, passed: r.passed, questions: Array.isArray(r.questions) ? r.questions : [] });
     setPhase("result");
-    if (r.passed) toast.success("Examen réussi — certificat en cours de délivrance");
+    if (r.passed) toast.success("Examen réussi · certificat en cours de délivrance");
   };
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export function ExamViewer({
                 <div key={qi} className="rounded-xl border border-red-200 bg-white p-4 text-sm">
                   <p className="font-semibold text-pro-text">Q{qi + 1}. {q.question}</p>
                   <p className="text-red-700 mt-2">
-                    Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : "—"}
+                    Votre réponse : {answers[qi] != null ? q.choices[answers[qi]] : " · "}
                   </p>
                   <p className="text-emerald-700 mt-1">Bonne réponse : {q.choices[q.answer]}</p>
                   {q.explanation && (

@@ -214,8 +214,8 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
 
   if (!report) return null;
 
-  const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-  const formatDateTime = (d: string | null) => d ? new Date(d).toLocaleString("fr-FR") : "—";
+  const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : " · ";
+  const formatDateTime = (d: string | null) => d ? new Date(d).toLocaleString("fr-FR") : " · ";
   const inspDepart = report.inspections.find(i => i.type === "depart");
   const inspArrivee = report.inspections.find(i => i.type === "arrivee");
 
@@ -236,11 +236,11 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
         <div className="p-6 space-y-6 print:p-8" id="mission-report">
           {/* Title for print */}
           <div className="hidden print:block text-center mb-8">
-            <h1 className="text-2xl font-bold">TRANSPORTS LIGNEO — Rapport de mission</h1>
+            <h1 className="text-2xl font-bold">TRANSPORTS LIGNEO · Rapport de mission</h1>
             <p className="text-sm text-gray-500 mt-1">Généré le {new Date().toLocaleString("fr-FR")}</p>
           </div>
 
-          {/* Avancement de la mission — en haut pour accès rapide */}
+          {/* Avancement de la mission · en haut pour accès rapide */}
           <Section title="Avancement de la mission" icon={<Activity size={16} />}>
             {report.history.length === 0 ? (
               <p className="text-cream/40 text-sm">Aucune étape enregistrée.</p>
@@ -326,7 +326,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
           {/* Inspections */}
           {[inspDepart, inspArrivee].map((insp, idx) => {
             if (!insp) return null;
-            const label = idx === 0 ? "État des lieux — Départ" : "État des lieux — Arrivée";
+            const label = idx === 0 ? "État des lieux · Départ" : "État des lieux · Arrivée";
             return (
               <Section key={idx} title={label} icon={<ClipboardCheck size={16} />}>
                 <div className="grid grid-cols-2 gap-2 text-sm mb-3">
@@ -378,7 +378,7 @@ export function MissionReport({ attributionId, onClose }: MissionReportProps) {
           {/* Timestamp */}
           <div className="text-center pt-4 border-t border-primary/10">
             <p className="text-cream/30 text-xs">
-              Rapport généré le {new Date().toLocaleString("fr-FR")} — Transports Ligneo
+              Rapport généré le {new Date().toLocaleString("fr-FR")} · Transports Ligneo
             </p>
           </div>
         </div>
@@ -402,7 +402,7 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
   return (
     <div>
       <span className="text-cream/40 text-xs">{label}</span>
-      <p className="text-cream/80 text-sm">{value || "—"}</p>
+      <p className="text-cream/80 text-sm">{value || " · "}</p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 /**
- * PricingModeBlock — éditeur premium de la tarification d'un trajet (B1).
+ * PricingModeBlock · éditeur premium de la tarification d'un trajet (B1).
  *
  * Modes :
  *  - "fixe"    : l'admin impose un prix net convoyeur. Le driver l'accepte ou le refuse.
@@ -268,7 +268,7 @@ export function PricingModeBlock({ trajetId, initial, lockedClientPrice, lockedS
                   <span className="opacity-80"> · cible {cible}% ±10</span>
                 )}
                 <p className="text-[11px] mt-0.5 opacity-80">
-                  Indication uniquement — vous pouvez sauvegarder n'importe quel prix.
+                  Indication uniquement · vous pouvez sauvegarder n'importe quel prix.
                 </p>
               </>
             ) : (

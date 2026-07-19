@@ -1,8 +1,8 @@
 /**
- * Section admin — Régime de facturation + taux de TVA.
+ * Section admin · Régime de facturation + taux de TVA.
  *
  * Persiste dans la table `pricing_settings` (singleton) et `vat_rates`.
- * Le choix Micro / Société impacte tous les devis et factures FUTURS —
+ * Le choix Micro / Société impacte tous les devis et factures FUTURS  · 
  * les documents existants gardent leur `regime_snapshot` figé (zéro régression).
  */
 import { useEffect, useState } from "react";
@@ -141,7 +141,7 @@ export function RegimeFacturationCard() {
       {/* Aperçu live */}
       <div className="mt-4 rounded-lg border border-dashed border-pro-border bg-white p-3">
         <p className="text-[11px] uppercase tracking-wider text-pro-text-soft mb-2">
-          Aperçu — Devis 180 € (montant saisi)
+          Aperçu · Devis 180 € (montant saisi)
         </p>
         <div className="flex items-center justify-between text-sm">
           <div className="text-pro-muted">

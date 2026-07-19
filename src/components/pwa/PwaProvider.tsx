@@ -91,7 +91,7 @@ export default function PwaProvider() {
           },
         });
       } catch {
-        /* virtual module unavailable — silent */
+        /* virtual module unavailable · silent */
       }
     })();
 

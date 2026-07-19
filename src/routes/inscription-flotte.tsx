@@ -9,7 +9,7 @@ export const Route = createFileRoute("/inscription-flotte")({
   component: InscriptionFlotte,
   head: () => ({
     meta: [
-      { title: "Inscription flotte & grand compte — Transports Ligneo" },
+      { title: "Inscription flotte & grand compte · Transports Ligneo" },
       { name: "description", content: "Inscription dédiée aux flottes : concessionnaires multi-sites, loueurs, partenaires assureurs. Tarifs négociés et dashboard flotte." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -116,7 +116,7 @@ function InscriptionFlotte() {
           estimated_vehicle_count: estVolume,
           frequency: form.frequence,
           geography: form.geographie || null,
-          description: `Inscription Flotte: ${form.societe} — ${form.nom} ${form.prenom}${form.fonction ? ` (${form.fonction})` : ""} — ${form.email} / ${form.telephone}`,
+          description: `Inscription Flotte: ${form.societe} · ${form.nom} ${form.prenom}${form.fonction ? ` (${form.fonction})` : ""} · ${form.email} / ${form.telephone}`,
         });
       } catch { /* non bloquant */ }
 
@@ -171,7 +171,7 @@ function InscriptionFlotte() {
           <h1 className="font-heading text-2xl md:text-3xl text-primary tracking-[0.1em] uppercase">
             Inscription Flotte
           </h1>
-          <p className="text-cream/50 text-sm mt-2">Grand compte — concessionnaires multi-sites, loueurs, assureurs</p>
+          <p className="text-cream/50 text-sm mt-2">Grand compte · concessionnaires multi-sites, loueurs, assureurs</p>
         </div>
 
         <form onSubmit={handleSubmit} className="card-premium p-6 md:p-8 rounded space-y-5">

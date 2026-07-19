@@ -4,7 +4,7 @@ export const Route = createFileRoute("/mentions-legales")({
   component: MentionsLegalesPage,
   head: () => ({
     meta: [
-      { title: "Mentions Legales — Transports LIGNEO" },
+      { title: "Mentions Legales · Transports LIGNEO" },
       { name: "description", content: "Mentions legales du site Transports LIGNEO." },
     ],
   }),

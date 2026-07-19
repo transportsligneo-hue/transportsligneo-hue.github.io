@@ -1,5 +1,5 @@
 /**
- * AdminMissionAiPanel — outils IA côté admin, fiche mission.
+ * AdminMissionAiPanel · outils IA côté admin, fiche mission.
  * - Comparaison IA départ/arrivée (par vue_type)
  * - Génération d'un rapport IA structuré
  *

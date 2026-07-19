@@ -3,7 +3,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 /**
- * Drawer latéral premium "bleu électrique" — modèle UX unique pour TOUT l'admin.
+ * Drawer latéral premium "bleu électrique" · modèle UX unique pour TOUT l'admin.
  * Utiliser à la place des modales / pages superposées / overlays /
  * navigations vers une page détail.
  */
@@ -43,7 +43,7 @@ export function AdminDetailDrawer({
           "bg-[color:var(--admin-drawer-bg)] text-[color:var(--admin-drawer-text)] shadow-[0_24px_64px_-24px_rgba(15,23,42,0.35)]",
         )}
       >
-        {/* Header premium — la croix de fermeture est fournie par SheetContent (shadcn) pour éviter tout doublon */}
+        {/* Header premium · la croix de fermeture est fournie par SheetContent (shadcn) pour éviter tout doublon */}
         <div className="relative px-6 pt-6 pb-5 border-b border-[color:var(--admin-drawer-border)] bg-[linear-gradient(180deg,#ffffff,#f8fafc)]">
           {badge ? <div className="mb-3 flex flex-wrap gap-2">{badge}</div> : null}
           <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight pr-10 text-slate-900 leading-tight">
@@ -113,7 +113,7 @@ export function DrawerField({
           mono && "font-mono text-xs text-slate-600",
         )}
       >
-        {value || <span className="text-slate-300">—</span>}
+        {value || <span className="text-slate-300"> · </span>}
       </span>
     </div>
   );
@@ -130,7 +130,7 @@ export function DrawerBadge({
   children: ReactNode;
   tone?: "blue" | "green" | "amber" | "red" | "slate" | "purple";
 }) {
-  // Badges à contraste renforcé — lecture nette sur fond blanc, aspect professionnel.
+  // Badges à contraste renforcé · lecture nette sur fond blanc, aspect professionnel.
   const tones: Record<string, string> = {
     blue:   "bg-blue-600 text-white border-blue-700 shadow-sm",
     green:  "bg-emerald-600 text-white border-emerald-700 shadow-sm",

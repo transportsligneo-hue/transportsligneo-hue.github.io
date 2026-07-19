@@ -8,9 +8,9 @@ export const Route = createFileRoute("/services")({
   component: ServicesPage,
   head: () => ({
     meta: [
-      { title: "Nos services — Transports Ligneo" },
+      { title: "Nos services · Transports Ligneo" },
       { name: "description", content: "Convoyage automobile pour particuliers et professionnels : livraison, transferts inter-agences, partenariats, rapatriement." },
-      { property: "og:title", content: "Nos services — Transports Ligneo" },
+      { property: "og:title", content: "Nos services · Transports Ligneo" },
       { property: "og:description", content: "Des solutions de convoyage pour particuliers et professionnels." },
     ],
   }),

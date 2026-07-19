@@ -62,7 +62,7 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
   // 1) Tarif local par département (zone agglo basée sur les codes postaux)
   const local = resolveLocalDeptTariff(departure, arrival, distance, option);
   if (local) return local;
-  // 2) Trajet très court / même ville hors zone forfaitaire — minimum existant
+  // 2) Trajet très court / même ville hors zone forfaitaire · minimum existant
   if (distance <= 0) {
     const [simple] = FIXED_TARIFFS["37-intra"];
     const label = "Forfait local (minimum)";
@@ -104,7 +104,7 @@ export interface DevisGeneratorProps {
    * Visual layout of step 0.
    * - "bar"        : current full-width horizontal bar (used on /tarifs and everywhere else).
    * - "hero-card"  : compact vertical card meant to live in the right column of the hero.
-   * Only the step-0 visual changes — wizard, calculations and modal are identical.
+   * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
   variant?: "bar" | "hero-card";
 }
@@ -329,7 +329,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
 
-  // Prix serveur (source de vérité unique) — aligne l'estimateur avec la règle DB
+  // Prix serveur (source de vérité unique) · aligne l'estimateur avec la règle DB
   const resolveServerPrice = useServerFn(resolvePersonalizedPrice);
   const [serverTtc, setServerTtc] = useState<number | null>(null);
   useEffect(() => {
@@ -478,7 +478,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
       await notifyAdmin({
         type: "estimation",
-        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} — ${prenom} ${nom}`,
+        titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
         message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
@@ -510,7 +510,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           sendTransactionalEmail({
             templateName: "devis-cree-admin",
             idempotencyKey: `admin-devis-${devisRow?.id || devisData.numero}`,
-            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || "—", prix: pricing.finalPrice },
+            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || " · ", prix: pricing.finalPrice },
           }),
         ]);
         if (devisRow?.id) await supabase.from("devis").update({ email_envoye: true }).eq("id", devisRow.id);
@@ -538,14 +538,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   return (
     <div className="w-full">
       <div className={isHero ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
-        {/* Halo doré — uniquement variante bar (le hero gère son propre fond) */}
+        {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
         {!isHero && (
           <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
         )}
 
         {isHero ? (
           // ============================================================
-          // VARIANTE HERO-CARD — layout vertical compact (maquette)
+          // VARIANTE HERO-CARD · layout vertical compact (maquette)
           // Mêmes états, mêmes setters, mêmes calculs. Seul l'agencement change.
           // ============================================================
           <div className="relative z-30 rounded-[26px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl shadow-[0_40px_90px_-30px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-7 lg:p-8">
@@ -564,7 +564,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </p>
             </div>
 
-            {/* Départ / Arrivée — 2 colonnes */}
+            {/* Départ / Arrivée · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
                 <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
@@ -601,7 +601,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </span>
             </div>
 
-            {/* Véhicule — pleine largeur */}
+            {/* Véhicule · pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
               <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
                 <Car size={11} className="text-[#60a5fa]" /> Véhicule
@@ -617,7 +617,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               <ChevronDown size={13} className="absolute right-3 bottom-3.5 text-[#60a5fa]/70 pointer-events-none" />
             </div>
 
-            {/* Date / Heure — 2 colonnes */}
+            {/* Date / Heure · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
@@ -643,7 +643,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
             </div>
 
-            {/* CTA principal — pleine largeur, bleu électrique */}
+            {/* CTA principal · pleine largeur, bleu électrique */}
             <button
               type="button"
               onClick={() => setStep(1)}
@@ -653,7 +653,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               <Send size={14} /> Obtenir mon prix
             </button>
 
-            {/* Choix de prestation — discret en bas */}
+            {/* Choix de prestation · discret en bas */}
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
               {[
                 { v: "aller-simple", l: "Aller simple" },
@@ -676,7 +676,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           </div>
         ) : (
           // ============================================================
-          // VARIANTE BAR — rendu original (utilisé sur /tarifs etc.)
+          // VARIANTE BAR · rendu original (utilisé sur /tarifs etc.)
           // ============================================================
           <div className="relative z-30 rounded-[24px] border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-[0_25px_80px_-20px_rgba(59,130,246,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] p-5 md:p-7">
 
@@ -797,7 +797,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
 
-        {/* Détail prix EN LIVE — visible immédiatement, sans clic */}
+        {/* Détail prix EN LIVE · visible immédiatement, sans clic */}
         {isComplete && pricing && distance !== null && (
           <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
@@ -820,7 +820,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Durée estimée</p>
-                <p className="font-heading text-base text-cream/85">{distance > 0 ? estimateDuration(distance) : "—"}</p>
+                <p className="font-heading text-base text-cream/85">{distance > 0 ? estimateDuration(distance) : " · "}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Tarif appliqué</p>
@@ -890,7 +890,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             <div className="px-6 md:px-10 py-6">
-              {/* STEP 1 — Trajet (récap modifiable) */}
+              {/* STEP 1 · Trajet (récap modifiable) */}
               {step === 1 && (
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Confirmez votre trajet</h4>
@@ -959,7 +959,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         </div>
                       </div>
                       <p className="text-[10px] text-cream/45">
-                        Les deux véhicules (livraison et restitution) peuvent être différents — vous saisirez la seconde plaque à l'étape suivante.
+                        Les deux véhicules (livraison et restitution) peuvent être différents · vous saisirez la seconde plaque à l'étape suivante.
                       </p>
                     </div>
                   )}
@@ -972,7 +972,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 </div>
               )}
 
-              {/* STEP 2 — Véhicule */}
+              {/* STEP 2 · Véhicule */}
               {step === 2 && (
                 <div className="space-y-5 animate-fade-in">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -1006,7 +1006,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     })()}
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {/* 1. Plaque d'immatriculation — en premier */}
+                    {/* 1. Plaque d'immatriculation · en premier */}
                     <div className="sm:col-span-2">
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque d'immatriculation</label>
                       <div className="flex gap-2">
@@ -1162,7 +1162,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 </div>
               )}
 
-              {/* STEP 3 — Coordonnées */}
+              {/* STEP 3 · Coordonnées */}
               {step === 3 && (
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Vos coordonnées</h4>
@@ -1189,7 +1189,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     </div>
                   </div>
 
-                  {/* Bloc compte client — masqué dans les dashboards (utilisateur déjà connecté) */}
+                  {/* Bloc compte client · masqué dans les dashboards (utilisateur déjà connecté) */}
                   {!hideAccountStep && (
                     <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
                       <div className="flex items-start gap-3">
@@ -1200,7 +1200,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                           <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
                           <p className="text-cream/55 text-xs mt-1 leading-relaxed">
                             Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
-                            dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email — vos devis y seront rattachés automatiquement.
+                            dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email · vos devis y seront rattachés automatiquement.
                           </p>
                         </div>
                       </div>
@@ -1241,7 +1241,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               )}
 
 
-              {/* STEP 4 — Récap */}
+              {/* STEP 4 · Récap */}
               {step === 4 && (
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Récapitulatif</h4>
@@ -1249,9 +1249,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     <div className="grid grid-cols-2 gap-3 text-cream/80">
                       <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</p>{departure} → {arrival}</div>
                       <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</p>{distance} km · {distance ? estimateDuration(distance) : ""}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</p>{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</p>{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</p>{date || "—"} {heure}</div>
+                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</p>{[marque, modele].filter(Boolean).join(" ") || vehicleType || " · "}</div>
+                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</p>{plaqueInconnue ? "À confirmer" : (immatriculation || " · ")}</div>
+                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</p>{date || " · "} {heure}</div>
                       <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</p>{prenom} {nom}</div>
                     </div>
                     {pricing && (

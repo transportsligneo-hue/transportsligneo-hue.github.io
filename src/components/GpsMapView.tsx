@@ -20,7 +20,7 @@ interface GpsMapViewProps {
   destination?: LatLngLabel | null;
 }
 
-// Tile theme — CartoDB Positron : style clair épuré, type Uber/Bolt.
+// Tile theme · CartoDB Positron : style clair épuré, type Uber/Bolt.
 const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>';
 

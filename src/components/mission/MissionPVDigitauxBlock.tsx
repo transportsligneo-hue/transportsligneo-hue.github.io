@@ -1,5 +1,5 @@
 /**
- * MissionPVDigitauxBlock — PV de livraison digitalisés (plateformes partenaires).
+ * MissionPVDigitauxBlock · PV de livraison digitalisés (plateformes partenaires).
  *
  * NE PAS confondre avec l'état des lieux interne.
  * Ce bloc gère uniquement les PV digitalisés des plateformes externes.

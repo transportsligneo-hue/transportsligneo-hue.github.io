@@ -1,7 +1,7 @@
 /**
- * InspectionSequentielle — Parcours d'état des lieux séquentiel "grand groupe".
+ * InspectionSequentielle · Parcours d'état des lieux séquentiel "grand groupe".
  *
- * ORDRE MÉTIER OBLIGATOIRE (UI uniquement — les `id` BDD restent stables) :
+ * ORDRE MÉTIER OBLIGATOIRE (UI uniquement · les `id` BDD restent stables) :
  *   1.  3/4 avant gauche
  *   2.  Jante avant gauche
  *   3.  Jante arrière gauche
@@ -67,7 +67,7 @@ type Variant = Parameters<typeof CarRealisticSilhouette>[0]["variant"];
 interface StepDef {
   /** Numéro affiché (1..N) */
   num: number;
-  /** ID stable utilisé pour `vue_type` en BDD — ne JAMAIS changer */
+  /** ID stable utilisé pour `vue_type` en BDD · ne JAMAIS changer */
   id: string;
   /** Libellé court (titre étape) */
   label: string;
@@ -149,7 +149,7 @@ const STEP_GUIDE_IMAGES: Partial<Record<string, GuideAsset>> = {
     alt: "Repère visuel véhicule en trois quarts avant droite",
     mirror: true,
   },
-  // Vue avant — conservée pour anciennes inspections en base
+  // Vue avant · conservée pour anciennes inspections en base
   devant: {
     src: frontGuide,
     alt: "Repère visuel véhicule vu de face",

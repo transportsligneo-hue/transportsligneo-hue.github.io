@@ -1,5 +1,5 @@
 /**
- * ArriveeSignatureSheet — capture séparée des signatures d'arrivée
+ * ArriveeSignatureSheet · capture séparée des signatures d'arrivée
  * (convoyeur puis client). Déclenchée par MissionCockpit APRÈS validation
  * complète de l'EDL d'arrivée, jamais avant.
  *
@@ -253,7 +253,7 @@ export function ArriveeSignatureSheet({
                   <div>
                     <p className="font-semibold">Échec de l'enregistrement</p>
                     <p className="mt-0.5">{states[currentStep.kind].error}</p>
-                    <p className="mt-1 italic">Resignez puis revalidez — aucune signature précédente n'est perdue.</p>
+                    <p className="mt-1 italic">Resignez puis revalidez · aucune signature précédente n'est perdue.</p>
                   </div>
                 </div>
               )}
