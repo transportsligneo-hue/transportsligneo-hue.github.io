@@ -1,240 +1,124 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  Building2, Car, ShieldCheck, TrendingUp, Clock, FileCheck,
-  Mail, Phone, Loader2, Check, Sparkles, Zap, BarChart3, FileText,
+  Truck, FileText, Users, Zap, Building2, Warehouse, Clock,
+  LayoutDashboard, Calendar, BarChart3, MapPin,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pro")({
   component: ProPage,
   head: () => ({
     meta: [
-      { title: "Solution B2B convoyage — Concessionnaires, loueurs, assureurs | Transports Ligneo" },
-      { name: "description", content: "Partenaire convoyage dédié aux concessionnaires, loueurs et assureurs. Volumes, tarifs négociés, facturation mensuelle. Demandez votre offre sur-mesure." },
-      { property: "og:title", content: "Solution B2B convoyage — Transports Ligneo" },
-      { property: "og:description", content: "Tarifs volume, facturation mensuelle, interlocuteur dédié pour les pros de l'auto." },
+      { title: "Solutions B2B convoyage — Concessions, loueurs, flottes | Transports Ligneo" },
+      { name: "description", content: "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace." },
+      { property: "og:title", content: "Solutions B2B — Transports Ligneo" },
+      { property: "og:description", content: "Concessions, loueurs, gestionnaires de flotte : le convoyage à l'échelle de votre parc." },
     ],
   }),
 });
 
-const segments = [
-  { icon: Car, title: "Concessionnaires", desc: "Livraisons clients, transferts inter-sites, retours leasing. Service à la marque, traçabilité totale." },
-  { icon: Building2, title: "Loueurs", desc: "Repositionnement de flotte, retours longue durée, livraisons clients pro. Volumes négociés." },
-  { icon: ShieldCheck, title: "Assureurs & experts", desc: "Convoyage post-sinistre vers réparateurs agréés, restitutions véhicules. Prise en charge rapide." },
+const audiences = [
+  { Icon: Building2, title: "Concessions", desc: "Transferts inter-sites, livraisons clients, restitutions : gagnez du temps sur vos flux quotidiens." },
+  { Icon: Truck, title: "Loueurs", desc: "Repositionnement de véhicules entre agences, restitution en fin de contrat, gestion de pics saisonniers." },
+  { Icon: Clock, title: "Gestionnaires de flotte", desc: "Pilotage complet du parc : missions groupées, planification récurrente, reporting par site." },
 ];
 
-const benefits = [
-  { icon: TrendingUp, title: "Tarifs dégressifs", desc: "Grille négociée selon le volume mensuel. Plus vous confiez, moins ça coûte." },
-  { icon: FileCheck, title: "Facturation mensuelle", desc: "Une seule facture récap, regroupée par site ou par centre de coûts." },
-  { icon: Clock, title: "Disponibilité prioritaire", desc: "Délai de prise en charge garanti : 24 à 48 h selon engagement." },
-  { icon: ShieldCheck, title: "Interlocuteur dédié", desc: "Un account manager unique. Plus de standard, plus d'attente." },
-];
-
-const engagements = [
-  { icon: Zap, title: "Réactivité", desc: "Prise en charge sous 24-48h, immédiat possible." },
-  { icon: ShieldCheck, title: "Conformité", desc: "Convoyeurs assurés, papiers à jour, RC pro." },
-  { icon: FileText, title: "Traçabilité", desc: "État des lieux photo, signature numérique, PDF." },
-  { icon: BarChart3, title: "Reporting", desc: "Tableau de bord pro, exports, facturation claire." },
+const features = [
+  { Icon: LayoutDashboard, title: "Tableau de bord dédié", desc: "Vue d'ensemble de vos missions en cours, terminées et à venir, en temps réel." },
+  { Icon: Calendar, title: "Missions groupées", desc: "Déplacez plusieurs véhicules de votre parc en une seule commande planifiée." },
+  { Icon: Users, title: "Utilisateurs & sites", desc: "Gérez les accès par site : chaque responsable ne voit que son périmètre." },
+  { Icon: BarChart3, title: "Reporting détaillé", desc: "Coûts, délais et volumes par site, exportables en un clic." },
+  { Icon: MapPin, title: "Suivi temps réel", desc: "Position GPS, statut et ETA pour chaque mission, accessibles à tout moment." },
+  { Icon: FileText, title: "Documents centralisés", desc: "Devis, factures, états des lieux et signatures, tous archivés au même endroit." },
 ];
 
 function ProPage() {
-  const [form, setForm] = useState({
-    societe: "", nom: "", email: "", telephone: "", segment: "concessionnaire",
-    volume: "", message: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const { error } = await supabase.from("demandes_convoyage").insert({
-        nom: form.societe || form.nom,
-        prenom: form.nom,
-        email: form.email,
-        telephone: form.telephone,
-        depart: "Demande partenariat B2B",
-        arrivee: form.segment,
-        message: `[B2B] Société: ${form.societe} | Segment: ${form.segment} | Volume estimé: ${form.volume || "n/c"}\n\n${form.message}`,
-        statut: "nouvelle",
-      });
-      if (error) throw error;
-      setSent(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputCls = "w-full bg-white border border-[#0b1026]/15 rounded-xl px-4 py-3 text-[#0b1026] text-sm placeholder-[#0b1026]/40 focus:border-[#5fb6ff] focus:ring-2 focus:ring-[#5fb6ff]/20 outline-none transition-all";
-
   return (
     <>
       <Navbar />
-
-      {/* === HERO V4 navy — refonte === */}
-      <section className="r4-page relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32">
-        <div className="relative mx-auto max-w-5xl px-5 text-center">
-          <div className="r4-eyebrow mb-5 justify-center inline-flex">
-            <span className="r4-eyebrow-dot" />
-            SOLUTION PROFESSIONNELLE
-          </div>
-          <h1
-            className="text-white text-4xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
-          >
-            Votre partenaire convoyage,
-            <br />
-            <span className="r4-accent">pensé pour les pros.</span>
-          </h1>
-          <p className="mx-auto mt-7 max-w-2xl text-[#9aa6c9] text-base lg:text-lg leading-relaxed">
-            Concessionnaires, loueurs, assureurs : externalisez vos convoyages
-            avec un acteur fiable et transparent. Tarifs volume,
-            facturation mensuelle, interlocuteur unique.
-          </p>
-        </div>
-
-        {/* Courbe cream */}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "120px" }}>
-          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full block">
-            <path
-              d="M0,80 C320,20 760,5 1080,30 C1240,42 1360,70 1440,55 L1440,120 L0,120 Z"
-              fill="var(--surface-cream, #faf7ef)"
-            />
-          </svg>
-        </div>
-      </section>
-
-
-      {/* === Segments — cream === */}
-      <section className="px-4 py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <span className="text-[10.5px] uppercase tracking-[0.28em] text-[#b8860b] font-heading">Pour qui ?</span>
-            <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-2">Une offre dédiée à chaque métier</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {segments.map((s) => (
-              <article key={s.title} className="card-premium-light group relative flex flex-col overflow-hidden p-8 transition-all duration-500 hover:-translate-y-1">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a] to-transparent" />
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#b8860b]">
-                  <s.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-heading text-xl text-[#0b1026]">{s.title}</h3>
-                <p className="mt-3 text-[#0b1026]/65 text-sm leading-relaxed">{s.desc}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* === Bénéfices — navy === */}
-      <section className="relative px-4 py-20 lg:py-24" style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}>
-        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <span className="text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">Vos avantages</span>
-            <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-2">Une relation pensée long terme</h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {benefits.map((b) => (
-              <div key={b.title} className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-7 transition-all duration-500 hover:border-[#5fb6ff]/40 hover:bg-white/[0.05]">
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a]">
-                  <b.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-heading text-[17px] text-cream tracking-wide">{b.title}</h3>
-                <p className="mt-2 text-[13.5px] text-cream/60 leading-relaxed">{b.desc}</p>
+      <main>
+        <div className="r4-page">
+          {/* HERO split */}
+          <div className="v4-b2b-hero">
+            <div>
+              <div className="v4-hero-eyebrow v"><span className="dot" />Solutions professionnelles</div>
+              <h1>Le convoyage à l'échelle de <span className="v4-accent v">votre flotte</span>.</h1>
+              <p>Concessions, loueurs, gestionnaires de parc : une plateforme dédiée pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace.</p>
+              <div className="v4-hero-actions">
+                <Link to="/contact" className="v4-btn-primary v">Devenir partenaire</Link>
+                <Link to="/contact" className="v4-btn-outline">Parler à un conseiller</Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* === Formulaire — cream premium === */}
-      <section className="px-4 py-20 lg:py-24" style={{ background: "var(--surface-cream, #faf7ef)" }}>
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center mb-12">
-            <span className="text-[10.5px] uppercase tracking-[0.28em] text-[#b8860b] font-heading">Demande de partenariat</span>
-            <h2 className="font-heading text-3xl lg:text-4xl text-[#0b1026] mt-2">Parlons de votre besoin</h2>
-            <p className="text-[#0b1026]/60 text-sm mt-4">Réponse sous 24h ouvrées avec une proposition tarifaire personnalisée.</p>
-          </div>
-
-          {sent ? (
-            <div className="card-premium-light p-10 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#e7c76a]/15 flex items-center justify-center mx-auto mb-4">
-                <Check className="text-[#b8860b]" size={28} />
-              </div>
-              <h3 className="font-heading text-[#0b1026] text-xl mb-2">Demande envoyée</h3>
-              <p className="text-[#0b1026]/65 text-sm">Notre équipe vous recontacte rapidement.</p>
             </div>
-          ) : (
-            <form onSubmit={onSubmit} className="card-premium-light p-7 md:p-10 space-y-4">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a] to-transparent" />
-              <div className="grid sm:grid-cols-2 gap-4">
-                <input required value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} placeholder="Société *" className={inputCls} />
-                <input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="Votre nom *" className={inputCls} />
+            <div className="v4-hero-panel">
+              <div className="v4-row">
+                <div className="v4-row-ic"><Warehouse size={17} /></div>
+                <div className="v4-row-text"><div className="t">Gestion de flotte centralisée</div><div className="s">Tous vos véhicules, un seul tableau de bord</div></div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email pro *" className={inputCls} />
-                <input value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} placeholder="Téléphone" className={inputCls} />
+              <div className="v4-row">
+                <div className="v4-row-ic"><FileText size={17} /></div>
+                <div className="v4-row-text"><div className="t">Facturation consolidée</div><div className="s">Une facture mensuelle, par site</div></div>
               </div>
-              <select value={form.segment} onChange={(e) => setForm({ ...form, segment: e.target.value })} className={inputCls}>
-                <option value="concessionnaire">Concessionnaire</option>
-                <option value="loueur">Loueur</option>
-                <option value="assureur">Assureur / Expert</option>
-                <option value="autre">Autre</option>
-              </select>
-              <input value={form.volume} onChange={(e) => setForm({ ...form, volume: e.target.value })} placeholder="Volume mensuel estimé (ex : 10 à 30 trajets)" className={inputCls} />
-              <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} placeholder="Votre besoin (zones géographiques, types de véhicules, fréquence...)" className={`${inputCls} resize-none`} />
-
-              {error && <p className="text-destructive text-xs">{error}</p>}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2.5 w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#e7c76a] via-[#d4af37] to-[#e7c76a] bg-[length:200%_100%] hover:bg-[position:100%_0] text-[#0b1026] font-heading text-[11.5px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-12px_rgba(231,199,106,0.55)] transition-all duration-300 disabled:opacity-60"
-              >
-                {loading ? <><Loader2 className="animate-spin" size={14} /> Envoi…</> : <><Sparkles size={14} /> Envoyer ma demande</>}
-              </button>
-
-              <div className="flex items-center justify-center gap-6 pt-2 text-[#0b1026]/50 text-xs">
-                <a href="tel:+33782456181" className="inline-flex items-center gap-1.5 hover:text-[#5fb6ff] transition-colors"><Phone size={12} /><span>07 82 45 61 81</span></a>
-                <a href="mailto:contact@transportsligneo.fr" className="inline-flex items-center gap-1.5 hover:text-[#5fb6ff] transition-colors"><Mail size={12} /><span>contact@transportsligneo.fr</span></a>
+              <div className="v4-row">
+                <div className="v4-row-ic"><Users size={17} /></div>
+                <div className="v4-row-text"><div className="t">Interlocuteur dédié</div><div className="s">Un contact unique, joignable 7j/7</div></div>
               </div>
-            </form>
-          )}
-        </div>
-      </section>
-
-      {/* === Engagements — navy final === */}
-      <section className="relative px-4 py-20 lg:py-24" style={{ background: "linear-gradient(160deg, #061238 0%, #0a1f5c 50%, #0f2d80 100%)" }}>
-        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/40 to-transparent" />
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <span className="text-[10.5px] uppercase tracking-[0.28em] text-[#e7c76a] font-heading">Engagement Ligneo</span>
-            <h2 className="font-heading text-3xl lg:text-4xl text-cream mt-2">Pourquoi les pros nous choisissent</h2>
+              <div className="v4-row">
+                <div className="v4-row-ic"><Zap size={17} /></div>
+                <div className="v4-row-text"><div className="t">Tarifs préférentiels</div><div className="s">Selon volume et récurrence</div></div>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {engagements.map((v) => (
-              <div key={v.title} className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-7 transition-all duration-500 hover:border-[#5fb6ff]/40 hover:bg-white/[0.05]">
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 text-[#e7c76a]">
-                  <v.icon className="h-5 w-5" />
+
+          {/* Pour qui */}
+          <div className="v4-section">
+            <div className="v4-section-head">
+              <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
+                <span className="dot" />Pour qui ?
+              </div>
+              <h2>Une solution pour chaque professionnel</h2>
+            </div>
+            <div className="v4-audience-grid">
+              {audiences.map(({ Icon, title, desc }) => (
+                <div key={title} className="v4-aud-card">
+                  <div className="v4-aud-ic"><Icon size={21} /></div>
+                  <h4>{title}</h4>
+                  <p>{desc}</p>
                 </div>
-                <h3 className="font-heading text-[17px] text-cream tracking-wide">{v.title}</h3>
-                <p className="mt-2 text-[13.5px] text-cream/60 leading-relaxed">{v.desc}</p>
+              ))}
+            </div>
+          </div>
+
+          {/* Fonctionnalités */}
+          <div className="v4-section">
+            <div className="v4-section-head">
+              <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
+                <span className="dot" />Fonctionnalités
               </div>
-            ))}
+              <h2>Une plateforme pensée pour les pros</h2>
+            </div>
+            <div className="v4-feat-grid">
+              {features.map(({ Icon, title, desc }) => (
+                <div key={title} className="v4-feat-card">
+                  <div className="v4-feat-ic"><Icon size={19} /></div>
+                  <h4>{title}</h4>
+                  <p>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="v4-cta-box">
+            <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
+              <span className="dot" />Devenir partenaire
+            </div>
+            <h2>Discutons de vos besoins de convoyage</h2>
+            <p>Un conseiller dédié vous accompagne pour construire une offre adaptée à votre volume et à vos contraintes.</p>
+            <Link to="/contact" className="v4-btn-primary v">Demander un rendez-vous</Link>
           </div>
         </div>
-      </section>
-
+      </main>
       <Footer />
     </>
   );
