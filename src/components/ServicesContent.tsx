@@ -1,5 +1,4 @@
 import { User, Building2, Truck, Star, Camera, ShieldCheck } from "lucide-react";
-import { User, Building2, Truck, Star, Camera, ShieldCheck } from "lucide-react";
 import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
 
 const services = [
