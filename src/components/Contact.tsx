@@ -32,6 +32,7 @@ export default function Contact() {
       profil === "pro"
         ? `[B2B - ${form.segment.toUpperCase()}]
 Société : ${form.societe}
+SIRET / SIREN : ${form.siret || "non précisé"}
 Volume mensuel estimé : ${form.volume || "non précisé"}
 
 ${form.message}`
