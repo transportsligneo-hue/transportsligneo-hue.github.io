@@ -21,7 +21,7 @@ export default function MobileTarifsScreen() {
 
   return (
     <div
-      className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-24"
+      className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-24 pt-[96px]"
       style={{
         background:
           "radial-gradient(520px 440px at 90% 0%, rgba(63,123,255,0.28), transparent 60%)," +
