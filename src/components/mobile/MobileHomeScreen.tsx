@@ -64,10 +64,6 @@ export default function MobileHomeScreen() {
     navigate({ to: "/" });
   };
 
-  const scrollToDevis = () => {
-    const el = document.getElementById("mobile-devis");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   const espaceLabel = isAuthenticated ? "Mon espace" : "Se connecter";
 
