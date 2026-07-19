@@ -82,6 +82,7 @@ function EntrepriseIndex() {
           </Card>
         ))}
       </div>
+      <ActiveMissionsMap title="Trajets en cours — votre entreprise" emptyMessage="Aucun trajet actif pour votre entreprise." />
     </div>
   );
 }
