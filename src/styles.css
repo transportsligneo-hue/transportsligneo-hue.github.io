@@ -1868,6 +1868,17 @@
   .auth-link:hover { color: #ffffff; }
 
   .auth-fade-in { animation: auth-fade-in .5s cubic-bezier(.2,.7,.2,1) both; }
+  .auth-logo-pulse::before, .auth-logo-pulse::after {
+    content: ""; position: absolute; inset: -14px; border-radius: 50%;
+    border: 1px solid rgba(147,197,253,0.35); pointer-events: none;
+    animation: auth-logo-ring 3.2s ease-out infinite;
+  }
+  .auth-logo-pulse::after { animation-delay: 1.6s; }
+  @keyframes auth-logo-ring {
+    0%   { transform: scale(0.6); opacity: 0.9; }
+    80%  { opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
   @keyframes auth-fade-in {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
