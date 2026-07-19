@@ -91,11 +91,6 @@ export default function CommentCaMarcheTimeline() {
           </div>
         </div>
 
-        <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "80px" }}>
-          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full block">
-            <path d="M0,80 C320,20 760,5 1080,30 C1240,42 1360,70 1440,55 L1440,120 L0,120 Z" fill="var(--surface-cream, #faf7ef)" />
-          </svg>
-        </div>
       </section>
 
       {/* ============ TIMELINE ============ */}
