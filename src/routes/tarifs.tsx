@@ -41,12 +41,7 @@ function TarifsPage() {
         <section className="v4-section" style={{ maxWidth: 720, paddingTop: 0 }}>
           <div className="v4-quote-card">
             <div className="v4-quote-inner">
-              <div className="hidden md:block">
-                <DevisGenerator variant="hero-card" />
-              </div>
-              <div className="md:hidden">
-                <MobileDevisGenerator />
-              </div>
+              <DevisGenerator variant="hero-card" />
             </div>
           </div>
         </section>
@@ -180,8 +175,9 @@ function TarifsPage() {
           <p>Volume important, trajet particulier : nous adaptons le devis à votre besoin.</p>
           <Link to="/contact" className="v4-btn-primary">Contacter un conseiller</Link>
         </div>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }
