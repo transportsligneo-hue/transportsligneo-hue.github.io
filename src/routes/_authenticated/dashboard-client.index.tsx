@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText, Inbox } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
