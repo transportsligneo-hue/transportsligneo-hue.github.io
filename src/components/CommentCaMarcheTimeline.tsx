@@ -1,538 +1,196 @@
+/**
+ * Comment ça marche — refonte V5 exactement calquée sur le HTML
+ * `comment-ca-marche-refonte.html` : hero + timeline 4 phases (12 sous-étapes)
+ * + section plateforme + stats + CTA. Tout est scopé sous .r4-page.
+ */
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import {
-  UserPlus, Calculator, FileText, PenLine, Inbox, ShieldCheck,
-  UserCheck, MapPin, Car, ClipboardCheck, Receipt, CheckCircle,
-  Clock, ArrowRight, Phone, LayoutDashboard, History, FolderOpen,
-  Activity, Truck, Sparkles,
-} from "lucide-react";
 
-const steps = [
-  { icon: UserPlus, n: "01", title: "Création de compte", desc: "Inscription en moins d'une minute. Espace sécurisé avec devis, factures et missions." },
-  { icon: Calculator, n: "02", title: "Estimateur intelligent", desc: "Départ, arrivée, véhicule (recherche par plaque), date. Tarif clair en 3 secondes." },
-  { icon: FileText, n: "03", title: "Devis automatique", desc: "Devis horodaté, numéroté, transmis instantanément et disponible dans votre espace." },
-  { icon: PenLine, n: "04", title: "Signature électronique", desc: "Signature en ligne à valeur probante. Mise en production immédiate de la mission." },
-  { icon: Inbox, n: "05", title: "Réception admin", desc: "Notre équipe reçoit le devis signé dans le dashboard avec toutes les pièces jointes." },
-  { icon: ShieldCheck, n: "06", title: "Validation exploitation", desc: "Contrôle de cohérence, vérification des contraintes et validation finale." },
-  { icon: UserCheck, n: "07", title: "Attribution convoyeur", desc: "Convoyeur certifié affecté selon zone, disponibilité et notation." },
-  { icon: MapPin, n: "08", title: "Suivi GPS temps réel", desc: "Position live, ETA, étapes franchies, directement depuis votre espace client." },
-  { icon: Car, n: "09", title: "Livraison ponctuelle", desc: "Convoyeur identifié, ponctualité contractuelle, contact direct avec le destinataire." },
-  { icon: ClipboardCheck, n: "10", title: "État des lieux signé", desc: "EDL digital entrée/sortie : photos 360°, kilométrage, carburant, signature contradictoire." },
-  { icon: Receipt, n: "11", title: "Facturation automatique", desc: "Facture générée dès la livraison, conforme et archivée dans votre espace." },
-  { icon: CheckCircle, n: "12", title: "Historique centralisé", desc: "Devis, signatures, EDL, factures, photos, GPS — tout consultable en un clic." },
+const phases = [
+  {
+    n: "01",
+    tag: "Étape 1",
+    title: "Estimation & Devis",
+    p: "Le client crée son compte ou lance directement une estimation — le compte se crée automatiquement à cette occasion. Le devis est généré et signé électroniquement, sans attendre.",
+    subs: [
+      "Création de compte",
+      "Estimateur intelligent",
+      "Devis automatique",
+      "Signature électronique",
+    ],
+  },
+  {
+    n: "02",
+    tag: "Étape 2",
+    title: "Validation interne",
+    p: "Notre équipe réceptionne le devis signé et contrôle la cohérence de la mission avant de la mettre en production.",
+    subs: ["Réception admin", "Validation exploitation"],
+  },
+  {
+    n: "03",
+    tag: "Étape 3",
+    title: "Convoyage",
+    p: "Un convoyeur certifié est attribué selon la zone et la disponibilité. Le client suit son véhicule en direct jusqu'à la livraison.",
+    subs: ["Attribution convoyeur", "Suivi GPS temps réel", "Livraison ponctuelle"],
+  },
+  {
+    n: "04",
+    tag: "Étape 4",
+    title: "Clôture & Facturation",
+    p: "État des lieux signé à la livraison, facture générée automatiquement, tout est archivé et consultable en un clic.",
+    subs: ["État des lieux signé", "Facturation automatique", "Historique centralisé"],
+  },
 ];
 
-const fleetFeatures = [
-  { icon: LayoutDashboard, title: "Tableau de bord", desc: "Véhicules disponibles, en convoyage, missions en cours, terminées et à venir. Statistiques d'activité en temps réel." },
-  { icon: Truck, title: "Gestion de flotte", desc: "Centralisez tous vos véhicules, suivez les convoyages et pilotez votre parc depuis un seul écran." },
-  { icon: History, title: "Historique complet", desc: "Toutes les missions, trajets, départs, arrivées, dates, convoyeurs et états des lieux archivés." },
-  { icon: FolderOpen, title: "Documents centralisés", desc: "Devis, factures, EDL, signatures, photos et historiques accessibles depuis un espace unique." },
-  { icon: Activity, title: "Suivi temps réel", desc: "Avancement des missions, étapes franchies, horaires, statuts et notifications instantanées." },
-  { icon: ShieldCheck, title: "Alertes & sécurité", desc: "Alertes administratives, signature électronique probante et traçabilité complète des actions." },
+const platformFeatures = [
+  {
+    t: "Tableau de bord",
+    d: "Véhicules disponibles, en convoyage, missions en cours, terminées et à venir. Statistiques d'activité en temps réel.",
+    svg: <><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></>,
+  },
+  {
+    t: "Gestion de flotte",
+    d: "Centralisez tous vos véhicules, suivez les convoyages et pilotez votre parc depuis un seul écran.",
+    svg: <><path d="M3 11l2-5h14l2 5" /><path d="M5 11h14v6H5z" /><circle cx="8" cy="19" r="1.5" /><circle cx="16" cy="19" r="1.5" /></>,
+  },
+  {
+    t: "Historique complet",
+    d: "Toutes les missions, trajets, départs, arrivées, dates, convoyeurs et états des lieux archivés.",
+    svg: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></>,
+  },
+  {
+    t: "Documents centralisés",
+    d: "Devis, factures, EDL, signatures, photos et historiques accessibles depuis un espace unique.",
+    svg: <><path d="M6 3h9l3 3v15H6z" /><path d="M9 9h6M9 13h6M9 17h4" /></>,
+  },
+  {
+    t: "Suivi temps réel",
+    d: "Avancement des missions, étapes franchies, horaires, statuts et notifications instantanées.",
+    svg: <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />,
+  },
+  {
+    t: "Alertes & sécurité",
+    d: "Alertes administratives, signature électronique probante et traçabilité complète des actions.",
+    svg: <><path d="M12 2l8 4v6c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6z" /><path d="m9 12 2 2 4-4" /></>,
+  },
 ];
-
-/** Reveal on scroll — CSS-only via IntersectionObserver (aucune lib) */
-function useReveal() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const els = root.querySelectorAll<HTMLElement>("[data-reveal]");
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-revealed");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-  return rootRef;
-}
 
 export default function CommentCaMarcheTimeline() {
-  const rootRef = useReveal();
-
   return (
-    <div ref={rootRef} className="ccm-root">
+    <div className="r4-page">
       {/* ============ HERO ============ */}
-      <section
-        className="ccm-hero relative overflow-hidden pt-24 pb-24 lg:pt-32 lg:pb-32"
-      >
-        {/* Aurora animée */}
-        <div aria-hidden className="ccm-aurora" />
-        {/* Grille technique */}
-        <div aria-hidden className="ccm-grid" />
-        {/* Scanning beam horizontal */}
-        <div aria-hidden className="ccm-scanline" />
-        {/* Halo central */}
-        <div aria-hidden className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(60% 50% at 50% 0%, rgba(96,165,250,0.22), transparent 70%)" }} />
-
-        <div className="relative max-w-3xl mx-auto px-5 text-center">
-          <span className="ccm-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.3em] font-heading">
-            <Sparkles size={12} className="text-blue-300" /> Notre process
-          </span>
-          <h1 className="ccm-title font-heading text-[36px] sm:text-5xl lg:text-6xl tracking-wide text-cream mt-6 leading-[1.05]">
-            Comment <span className="ccm-title-accent">ça marche</span>
-          </h1>
-          <p className="text-cream/75 mt-5 text-[15px] lg:text-lg leading-relaxed">
-            De la création de compte à la facture&nbsp;: <strong className="text-white">12 étapes</strong> claires, traçables et 100 % digitalisées.
-          </p>
-          <div className="mt-6 inline-flex items-center gap-3 text-cream/60 text-[11px] tracking-[0.22em] uppercase font-heading">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-blue-300/60" />
-            Plateforme digitale nouvelle génération
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-blue-300/60" />
-          </div>
+      <section className="v4-hero" style={{ paddingBottom: 40 }}>
+        <div className="v4-hero-eyebrow" style={{ justifyContent: "center" }}>
+          <span className="dot" />Notre process
         </div>
-
-      </section>
-
-      {/* ============ TIMELINE ============ */}
-      <section className="ccm-hero py-14 lg:py-20 relative overflow-hidden">
-        <div aria-hidden className="ccm-aurora" />
-        <div aria-hidden className="ccm-grid opacity-40" />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="relative">
-            {/* Ligne centrale : bleu électrique + doré */}
-            <div
-              aria-hidden
-              className="ccm-rail absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[2px] md:-translate-x-1/2"
-            />
-
-            <ol className="space-y-4 md:space-y-6">
-              {steps.map((step, i) => {
-                const Icon = step.icon;
-                const isLeft = i % 2 === 0;
-                return (
-                  <li
-                    key={i}
-                    data-reveal
-                    style={{ transitionDelay: `${Math.min(i * 40, 240)}ms` }}
-                    className="ccm-reveal relative md:grid md:grid-cols-2 md:gap-10 items-center"
-                  >
-                    {/* Pastille icône */}
-                    <div className="absolute left-[22px] md:left-1/2 -translate-x-1/2 z-10 top-4 md:top-1/2 md:-translate-y-1/2">
-                      <div className="ccm-node w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center">
-                        <Icon className="text-[#0b1026]" size={19} strokeWidth={2.3} />
-                      </div>
-                    </div>
-
-                    {/* Carte */}
-                    <div
-                      className={`pl-[58px] md:pl-0 ${
-                        isLeft ? "md:pr-12 md:text-right" : "md:col-start-2 md:pl-12"
-                      }`}
-                    >
-                      <article className="ccm-card group relative rounded-2xl p-5 sm:p-6 transition-all duration-300">
-                        <div className={`flex items-center gap-2 mb-2 ${isLeft ? "md:justify-end" : ""}`}>
-                          <span className="ccm-step-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5">
-                            <span className="text-[10px] font-heading tracking-[0.24em] uppercase">
-                              Étape {step.n}
-                            </span>
-                          </span>
-                        </div>
-                        <h2 className="font-heading text-[17px] sm:text-[19px] text-cream tracking-wide leading-snug mb-1.5">
-                          {step.title}
-                        </h2>
-                        <p className="text-cream/70 text-[13.5px] leading-relaxed">
-                          {step.desc}
-                        </p>
-                        {/* Filet iridescent au hover */}
-                        <span aria-hidden className="ccm-card-underline pointer-events-none absolute inset-x-4 bottom-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </article>
-                    </div>
-
-                    <div className={isLeft ? "hidden md:block md:col-start-2" : "hidden md:block md:col-start-1 md:row-start-1"} />
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+        <h1 className="v4-h1">
+          Comment <span className="v4-accent">ça marche</span>
+        </h1>
+        <p>
+          De la création de compte à la facture : <b style={{ color: "#fff" }}>4 grandes étapes</b>, 12 actions précises, 100 % digitalisées.
+        </p>
+        <div style={{ marginTop: 12 }}>
+          <span className="v5-platform-pill">⚡ Plateforme digitale nouvelle génération</span>
         </div>
       </section>
 
-      {/* ============ GÉRER SA FLOTTE ============ */}
-      <section className="ccm-hero relative py-16 lg:py-24 overflow-hidden">
-        <div aria-hidden className="ccm-aurora" />
-        <div aria-hidden className="ccm-grid opacity-60" />
-
-        <div className="relative max-w-6xl mx-auto px-5 sm:px-6">
-          <div className="text-center mb-10 lg:mb-14" data-reveal>
-            <span className="ccm-reveal ccm-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.3em] font-heading">
-              <Truck size={12} className="text-blue-300" /> Plateforme complète
-            </span>
-            <h2 className="font-heading text-[28px] sm:text-4xl lg:text-5xl text-cream mt-5 leading-[1.1]">
-              Gérez votre flotte <span className="ccm-title-accent">en toute simplicité</span>
-            </h2>
-            <p className="text-cream/70 mt-4 text-[15px] lg:text-base max-w-2xl mx-auto leading-relaxed">
-              Bien plus qu'un service de convoyage&nbsp;: une véritable plateforme digitale pour piloter votre parc, vos missions et vos documents depuis un seul espace.
-            </p>
-          </div>
-
-          {/* Grid features */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {fleetFeatures.map((f, i) => {
-              const Icon = f.icon;
-              return (
-                <article
-                  key={i}
-                  data-reveal
-                  style={{ transitionDelay: `${i * 60}ms` }}
-                  className="ccm-reveal ccm-fleet-card group relative rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1"
-                >
-                  <div className="ccm-fleet-icon inline-flex h-11 w-11 items-center justify-center rounded-xl mb-4 transition-transform duration-500 group-hover:scale-110">
-                    <Icon size={20} strokeWidth={2.1} />
+      {/* ============ TIMELINE 4 PHASES ============ */}
+      <section className="v5-timeline">
+        <div className="v5-timeline-track" />
+        <div className="v5-timeline-dot" />
+        {phases.map((phase) => (
+          <div key={phase.n} className="v5-step">
+            <div className="v5-step-num">
+              <div className="n">{phase.n}</div>
+              <div className="lbl">Phase</div>
+            </div>
+            <div className="v5-step-body">
+              <div className="v5-phase-tag">{phase.tag}</div>
+              <h3>{phase.title}</h3>
+              <p>{phase.p}</p>
+              <div className="v5-substeps">
+                {phase.subs.map((s, i) => (
+                  <div key={s} className="v5-substep">
+                    <span className="idx">{
+                      // numéro global : 4 + 2 + 3 + 3 cumul
+                      phase.n === "01" ? i + 1
+                      : phase.n === "02" ? i + 5
+                      : phase.n === "03" ? i + 7
+                      : i + 10
+                    }</span>{s}
                   </div>
-                  <h3 className="font-heading text-cream text-[17px] tracking-wide mb-1.5">{f.title}</h3>
-                  <p className="text-cream/65 text-[13.5px] leading-relaxed">{f.desc}</p>
-                  <span aria-hidden className="ccm-fleet-corner" />
-                </article>
-              );
-            })}
-          </div>
-
-          {/* KPIs */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-5 mt-10 lg:mt-14 max-w-3xl mx-auto" data-reveal>
-            {[
-              { v: "100%", l: "Digitalisé" },
-              { v: "7j/7", l: "Disponible" },
-              { v: "0", l: "Annulation" },
-            ].map((k, i) => (
-              <div key={i} className="ccm-reveal ccm-kpi text-center rounded-2xl px-3 py-5">
-                <p className="font-heading text-[26px] sm:text-3xl">
-                  <span className="ccm-kpi-value">{k.v}</span>
-                </p>
-                <p className="text-cream/60 text-[10.5px] uppercase tracking-[0.22em] mt-1">{k.l}</p>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ CTA FINAL ============ */}
-      <section
-        className="relative py-16 lg:py-20"
-        style={{ background: "var(--surface-cream, #faf7ef)" }}
-      >
-        <div className="max-w-3xl mx-auto px-5 sm:px-6 text-center" data-reveal>
-          <div className="ccm-reveal">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/40 bg-[#e7c76a]/10 px-4 py-1.5 text-[10.5px] uppercase tracking-[0.28em] text-[#b8860b] font-heading">
-              Prêt à démarrer ?
-            </span>
-            <h2 className="font-heading text-[26px] sm:text-3xl lg:text-4xl text-[#0b1026] mt-5 leading-tight">
-              Prêt à simplifier la gestion <span className="gold-gradient-text">de vos véhicules</span> ?
-            </h2>
-            <p className="text-[#0b1026]/65 mt-4 text-[15px] leading-relaxed">
-              Obtenez un devis en 3 secondes ou parlez directement à un conseiller. Sans engagement.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <Link
-                to="/tarifs"
-                className="ccm-btn-primary group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-heading text-[11.5px] tracking-[0.24em] uppercase transition-all duration-300"
-              >
-                <Car size={15} /> Demander un devis
-              </Link>
-              <Link
-                to="/contact"
-                className="ccm-btn-ghost inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-heading text-[11.5px] tracking-[0.24em] uppercase transition-all duration-300"
-              >
-                <Phone size={15} /> Contacter un conseiller
-              </Link>
             </div>
           </div>
-        </div>
+        ))}
       </section>
 
-      {/* ============ Réassurance ============ */}
-      <section className="ccm-hero relative py-14 lg:py-16 overflow-hidden">
-        <div aria-hidden className="ccm-aurora opacity-70" />
-        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e7c76a]/50 to-transparent" />
-        <div className="relative max-w-4xl mx-auto px-5">
-          <div className="grid grid-cols-3 gap-3 sm:gap-5">
-            {[
-              { icon: ShieldCheck, label: "Assurance incluse" },
-              { icon: Clock, label: "Disponible 7j/7" },
-              { icon: CheckCircle, label: "0 annulation" },
-            ].map((r, i) => (
-              <div
-                key={i}
-                data-reveal
-                style={{ transitionDelay: `${i * 80}ms` }}
-                className="ccm-reveal ccm-reass group p-4 sm:p-5 rounded-2xl text-center transition-all duration-500"
-              >
-                <div className="ccm-reass-icon mx-auto mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full">
-                  <r.icon size={18} />
-                </div>
-                <p className="text-cream/85 text-[10.5px] sm:text-[11.5px] font-heading tracking-[0.18em] uppercase leading-tight">{r.label}</p>
-              </div>
-            ))}
+      {/* ============ PLATEFORME COMPLÈTE ============ */}
+      <section className="v4-section">
+        <div className="v4-section-head">
+          <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
+            <span className="dot" />Plateforme complète
           </div>
-
-          <p className="text-center mt-8">
-            <Link
-              to="/tarifs"
-              className="inline-flex items-center gap-2 text-cream/80 text-sm hover:text-[#e7c76a] transition-colors"
-            >
-              Estimer mon trajet <ArrowRight size={14} />
-            </Link>
+          <h2>Gérez votre flotte en toute simplicité</h2>
+          <p>
+            Bien plus qu'un service de convoyage : une véritable plateforme
+            digitale pour piloter votre parc, vos missions et vos documents
+            depuis un seul espace.
           </p>
         </div>
+        <div className="v5-feat-grid">
+          {platformFeatures.map((f) => (
+            <div key={f.t} className="v5-feat-card">
+              <div className="v5-feat-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2">{f.svg}</svg>
+              </div>
+              <h4>{f.t}</h4>
+              <p>{f.d}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* ==== Styles scoped ==== */}
-      <style>{`
-        .ccm-root { --ccm-blue-1: #061238; --ccm-blue-2: #0a1f5c; --ccm-blue-3: #0f2d80; --ccm-electric: #3b82f6; --ccm-cyan: #38bdf8; --ccm-gold: #d4af37; --ccm-gold-light: #e7c76a; }
+      {/* ============ STATS ============ */}
+      <section className="v4-stats-row">
+        {[
+          { v: "100%", l: "Digitalisé" },
+          { v: "7j/7", l: "Disponible" },
+          { v: "0", l: "Annulation" },
+        ].map((s) => (
+          <div key={s.l} className="v4-stat">
+            <div className="v">{s.v}</div>
+            <div className="l">{s.l}</div>
+          </div>
+        ))}
+      </section>
 
-        /* ---------- HERO / SECTIONS SOMBRES ---------- */
-        .ccm-hero {
-          background:
-            radial-gradient(120% 80% at 50% 0%, rgba(59,130,246,0.20), transparent 60%),
-            linear-gradient(160deg, var(--ccm-blue-1) 0%, var(--ccm-blue-2) 50%, var(--ccm-blue-3) 100%);
-          isolation: isolate;
-        }
-        .ccm-aurora {
-          position: absolute; inset: -20%;
-          background:
-            radial-gradient(35% 35% at 20% 30%, rgba(56,189,248,0.18), transparent 60%),
-            radial-gradient(30% 30% at 80% 20%, rgba(99,102,241,0.20), transparent 60%),
-            radial-gradient(45% 45% at 60% 90%, rgba(59,130,246,0.22), transparent 60%);
-          filter: blur(20px);
-          animation: ccm-aurora 22s ease-in-out infinite alternate;
-          pointer-events: none;
-          z-index: 0;
-        }
-        @keyframes ccm-aurora {
-          0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
-          50%  { transform: translate3d(3%, 2%, 0) scale(1.05); }
-          100% { transform: translate3d(-1%, 3%, 0) scale(1.02); }
-        }
-        .ccm-grid {
-          position: absolute; inset: 0; pointer-events: none; z-index: 0;
-          background-image:
-            linear-gradient(to right, rgba(147,197,253,0.07) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(147,197,253,0.07) 1px, transparent 1px);
-          background-size: 56px 56px;
-          mask-image: radial-gradient(ellipse at 50% 40%, black 40%, transparent 80%);
-          -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 40%, transparent 80%);
-        }
-        .ccm-scanline {
-          position: absolute; left: 0; right: 0; top: 0; height: 1px; z-index: 0;
-          background: linear-gradient(90deg, transparent 0%, rgba(147,197,253,0.75) 50%, transparent 100%);
-          box-shadow: 0 0 22px rgba(96,165,250,0.6);
-          animation: ccm-scan 6s linear infinite;
-        }
-        @keyframes ccm-scan {
-          0%   { transform: translateY(0); opacity: 0; }
-          8%   { opacity: 1; }
-          92%  { opacity: 1; }
-          100% { transform: translateY(90vh); opacity: 0; }
-        }
-
-        /* ---------- CHIP HOLOGRAPHIQUE ---------- */
-        .ccm-chip {
-          color: #dbeafe;
-          background: linear-gradient(135deg, rgba(59,130,246,0.14), rgba(56,189,248,0.06));
-          border: 1px solid rgba(147,197,253,0.28);
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 8px 28px -12px rgba(59,130,246,0.55);
-          backdrop-filter: blur(10px) saturate(140%);
-          position: relative;
-        }
-
-        /* ---------- TITRE ---------- */
-        .ccm-title { text-shadow: 0 6px 40px rgba(59,130,246,0.35); }
-        .ccm-title-accent {
-          background: linear-gradient(90deg, #e7c76a 0%, #fff2c2 30%, #d4af37 55%, #e7c76a 80%, #fff2c2 100%);
-          background-size: 200% 100%;
-          -webkit-background-clip: text; background-clip: text; color: transparent;
-          animation: ccm-shine 6s linear infinite;
-        }
-        @keyframes ccm-shine { to { background-position: 200% 0; } }
-
-        /* ---------- REVEAL ---------- */
-        .ccm-reveal {
-          opacity: 0;
-          transform: translateY(14px);
-          transition: opacity .55s cubic-bezier(.2,.7,.2,1), transform .55s cubic-bezier(.2,.7,.2,1);
-          will-change: opacity, transform;
-        }
-        .ccm-reveal.is-revealed,
-        [data-reveal].is-revealed .ccm-reveal { opacity: 1; transform: none; }
-        [data-reveal].is-revealed { opacity: 1; }
-        [data-reveal] > .ccm-reveal { opacity: 1; transform: none; }
-        li[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity .55s cubic-bezier(.2,.7,.2,1), transform .55s cubic-bezier(.2,.7,.2,1); }
-        li[data-reveal].is-revealed { opacity: 1; transform: none; }
-
-        /* ---------- TIMELINE ---------- */
-        .ccm-rail {
-          background: linear-gradient(180deg,
-            rgba(59,130,246,0) 0%,
-            rgba(59,130,246,0.55) 12%,
-            rgba(231,199,106,0.85) 50%,
-            rgba(59,130,246,0.55) 88%,
-            rgba(59,130,246,0) 100%);
-          box-shadow: 0 0 16px rgba(59,130,246,0.35), 0 0 22px rgba(231,199,106,0.20);
-        }
-        .ccm-node {
-          background: linear-gradient(135deg, #e7c76a 0%, #d4af37 100%);
-          box-shadow:
-            0 0 0 4px rgba(250, 247, 239, 0.9),
-            0 0 0 5px rgba(59,130,246,0.35),
-            0 10px 28px -6px rgba(59,130,246,0.55),
-            0 8px 22px -6px rgba(212,175,55,0.45);
-          transition: transform .3s ease, box-shadow .3s ease;
-        }
-        li:hover .ccm-node {
-          transform: scale(1.1) rotate(-3deg);
-          box-shadow:
-            0 0 0 4px rgba(250, 247, 239, 0.95),
-            0 0 0 6px rgba(59,130,246,0.55),
-            0 14px 34px -6px rgba(59,130,246,0.7),
-            0 10px 26px -6px rgba(231,199,106,0.5);
-        }
-
-        /* ---------- CARTE ÉTAPE ---------- */
-        .ccm-card {
-          background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-          border: 1px solid rgba(122,163,255,0.18);
-          box-shadow:
-            0 1px 2px rgba(4,8,22,0.4),
-            0 20px 40px -22px rgba(4,8,22,0.6);
-          position: relative;
-          overflow: hidden;
-          backdrop-filter: blur(10px);
-        }
-        .ccm-card::before {
-          content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-          background: linear-gradient(135deg, rgba(122,163,255,0.55), rgba(217,181,74,0.5));
-          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor; mask-composite: exclude;
-          opacity: 0; transition: opacity .35s ease; pointer-events: none;
-        }
-        .ccm-card:hover {
-          transform: translateY(-3px);
-          border-color: rgba(122,163,255,0.4);
-          box-shadow:
-            0 30px 55px -22px rgba(47,95,255,0.35),
-            0 20px 40px -22px rgba(212,175,55,0.2);
-        }
-        .ccm-card:hover::before { opacity: 1; }
-        .ccm-step-chip {
-          background: linear-gradient(90deg, rgba(47,95,255,0.18), rgba(217,181,74,0.18));
-          border: 1px solid rgba(217,181,74,0.4);
-          color: #e7c76a;
-        }
-        .ccm-card-underline {
-          background: linear-gradient(90deg, transparent, rgba(59,130,246,0.7), rgba(231,199,106,0.8), rgba(59,130,246,0.7), transparent);
-        }
-
-        /* ---------- FLEET CARDS ---------- */
-        .ccm-fleet-card {
-          background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-          border: 1px solid rgba(255,255,255,0.09);
-          backdrop-filter: blur(16px) saturate(140%);
-          position: relative; overflow: hidden;
-        }
-        .ccm-fleet-card::before {
-          content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-          background: conic-gradient(from 120deg, rgba(59,130,246,0), rgba(59,130,246,0.55), rgba(56,189,248,0.5), rgba(231,199,106,0.5), rgba(59,130,246,0));
-          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor; mask-composite: exclude;
-          opacity: 0; transition: opacity .5s ease; pointer-events: none;
-        }
-        .ccm-fleet-card:hover {
-          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-          border-color: rgba(147,197,253,0.25);
-          box-shadow: 0 30px 60px -25px rgba(59,130,246,0.55);
-        }
-        .ccm-fleet-card:hover::before { opacity: 1; }
-        .ccm-fleet-icon {
-          background: linear-gradient(135deg, rgba(59,130,246,0.30), rgba(56,189,248,0.14));
-          border: 1px solid rgba(147,197,253,0.35);
-          color: #dbeafe;
-          box-shadow: 0 0 22px -6px rgba(59,130,246,0.55), inset 0 0 12px rgba(255,255,255,0.06);
-        }
-        .ccm-fleet-corner {
-          position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
-          border-top: 1px solid rgba(231,199,106,0.5);
-          border-right: 1px solid rgba(231,199,106,0.5);
-          opacity: 0.55;
-        }
-
-        /* ---------- KPI ---------- */
-        .ccm-kpi {
-          background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-          border: 1px solid rgba(255,255,255,0.09);
-          backdrop-filter: blur(14px);
-          position: relative;
-        }
-        .ccm-kpi::after {
-          content: ""; position: absolute; inset: auto 20% -1px 20%; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(231,199,106,0.6), transparent);
-        }
-        .ccm-kpi-value {
-          background: linear-gradient(90deg, #e7c76a, #fff2c2, #d4af37);
-          -webkit-background-clip: text; background-clip: text; color: transparent;
-          text-shadow: 0 0 30px rgba(231,199,106,0.25);
-        }
-
-        /* ---------- CTA ---------- */
-        .ccm-btn-primary {
-          color: #0b1026;
-          background: linear-gradient(90deg, #e7c76a, #d4af37, #e7c76a);
-          background-size: 200% 100%;
-          border: 1px solid rgba(212,175,55,0.55);
-          box-shadow:
-            0 18px 40px -12px rgba(231,199,106,0.55),
-            0 0 0 1px rgba(255,255,255,0.6) inset;
-          position: relative; overflow: hidden;
-        }
-        .ccm-btn-primary::after {
-          content: ""; position: absolute; inset: -1px; border-radius: inherit;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
-          transform: translateX(-120%); transition: transform .8s ease;
-        }
-        .ccm-btn-primary:hover { background-position: 100% 0; transform: translateY(-1px); }
-        .ccm-btn-primary:hover::after { transform: translateX(120%); }
-        .ccm-btn-ghost {
-          background: #fff; color: #0b1026;
-          border: 1px solid rgba(11,16,38,0.15);
-        }
-        .ccm-btn-ghost:hover {
-          background: #0b1026; color: #e7c76a; border-color: #0b1026;
-          box-shadow: 0 18px 40px -14px rgba(11,16,38,0.5);
-          transform: translateY(-1px);
-        }
-
-        /* ---------- RÉASSURANCE ---------- */
-        .ccm-reass {
-          background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
-          border: 1px solid rgba(255,255,255,0.09);
-          backdrop-filter: blur(12px);
-        }
-        .ccm-reass:hover {
-          border-color: rgba(231,199,106,0.45);
-          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-          box-shadow: 0 22px 45px -22px rgba(59,130,246,0.4);
-        }
-        .ccm-reass-icon {
-          background: radial-gradient(circle at 30% 30%, rgba(231,199,106,0.25), rgba(231,199,106,0.05));
-          border: 1px solid rgba(231,199,106,0.45);
-          color: #e7c76a;
-          box-shadow: 0 0 18px -4px rgba(231,199,106,0.4);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .ccm-reveal, li[data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
-          .ccm-aurora, .ccm-scanline, .ccm-title-accent { animation: none !important; }
-        }
-      `}</style>
+      {/* ============ CTA FINALE ============ */}
+      <div className="v4-cta-box">
+        <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
+          <span className="dot" />Prêt à démarrer ?
+        </div>
+        <h2>Prêt à simplifier la gestion de vos véhicules ?</h2>
+        <p>Obtenez un devis en 3 secondes ou parlez directement à un conseiller. Sans engagement.</p>
+        <div className="v5-cta-buttons">
+          <Link to="/tarifs" className="v4-btn-primary">Demander un devis</Link>
+          <Link to="/contact" className="v4-btn-outline">Contacter un conseiller</Link>
+        </div>
+        <div className="v5-trust-row">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l8 4v6c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6z" /></svg>
+            Assurance incluse
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+            Disponible 7j/7
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 12 2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
+            0 annulation
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
