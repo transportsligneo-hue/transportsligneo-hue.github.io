@@ -82,7 +82,7 @@ ${form.message}`;
       setStatus("success");
       setForm({
         nom: "", prenom: "", telephone: "", email: "", message: "",
-        societe: "", segment: "concessionnaire", volume: "",
+        societe: "", siret: "", segment: "concessionnaire", volume: "",
       });
     } catch {
       setStatus("error");
