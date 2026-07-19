@@ -148,6 +148,15 @@ export function AdminLiveControl({ attributionId, trajetId, currentStatut, curre
               Ré-ouvrir
             </Button>
           )}
+          <button
+            onClick={resetMission}
+            disabled={busy === "reset"}
+            title="Remet la mission à zéro pour le convoyeur (efface EDL, photos, signatures, historique)"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-red-300 bg-white text-red-700 text-xs font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={13} />
+            Remettre à zéro
+          </button>
         </div>
       </div>
 
