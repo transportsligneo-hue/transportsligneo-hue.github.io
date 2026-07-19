@@ -3,7 +3,6 @@ import Navbar from "@/components/Navbar";
 import ServicesContent from "@/components/ServicesContent";
 import Engagements from "@/components/Engagements";
 import Footer from "@/components/Footer";
-import R4Hero from "@/components/marketing/R4Hero";
 
 export const Route = createFileRoute("/services")({
   component: ServicesPage,
@@ -22,15 +21,6 @@ function ServicesPage() {
     <>
       <Navbar />
       <main>
-        <R4Hero
-          eyebrow="NOS EXPERTISES"
-          title={
-            <>
-              Un service pensé pour <span className="r4-accent">chaque besoin</span>
-            </>
-          }
-          subtitle="Que vous soyez particulier, professionnel ou gestionnaire de flotte, nos convoyeurs prennent en charge votre véhicule avec la même rigueur."
-        />
         <ServicesContent />
         <Engagements />
       </main>
