@@ -310,35 +310,6 @@ export default function MobileHomeScreen() {
         </span>
       </Link>
 
-      {/* === Simulateur RÉEL (inchangé fonctionnellement) === */}
-      <section
-        id="mobile-devis"
-        className="relative z-[1] scroll-mt-20 mx-[18px] mt-8 rounded-[28px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl overflow-hidden"
-        style={{ boxShadow: "0 30px 70px -30px rgba(63,123,255,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset" }}
-      >
-        <div className="flex items-end justify-between px-5 pt-5 pb-3">
-          <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-[#4f8cff] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Estimation
-            </p>
-            <h2 className="text-[20px] font-bold tracking-wide text-white mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Simulateur direct
-            </h2>
-          </div>
-          <span
-            className="px-3 py-1 rounded-full text-[9.5px] tracking-[0.22em] uppercase font-bold"
-            style={{
-              background: "rgba(63,123,255,0.18)",
-              border: "1px solid rgba(96,165,250,0.4)",
-              color: "#93c5fd",
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-          >
-            Gratuit
-          </span>
-        </div>
-        <MobileDevisGenerator />
-      </section>
 
       {/* Footer minimal */}
       <footer className="relative z-[1] px-5 pt-10 pb-8 mt-6">
