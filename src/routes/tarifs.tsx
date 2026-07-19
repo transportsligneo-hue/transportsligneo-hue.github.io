@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import DevisGenerator from "@/components/DevisGenerator";
-import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
+import MobileTarifsScreen from "@/components/mobile/MobileTarifsScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/tarifs")({
@@ -19,10 +19,15 @@ export const Route = createFileRoute("/tarifs")({
 function TarifsPage() {
   return (
     <>
-      <Navbar />
-      <main className="r4-page">
-        {/* ============ HERO ============ */}
-        <section className="v4-hero">
+      {/* Mobile · écran dédié navy */}
+      <MobileTarifsScreen />
+
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <Navbar />
+        <main className="r4-page">
+          {/* ============ HERO ============ */}
+          <section className="v4-hero">
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center" }}>
             <span className="dot" />Tarifs
           </div>
