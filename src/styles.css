@@ -1867,6 +1867,46 @@
   }
   .auth-link:hover { color: #ffffff; }
 
+  /* Big dynamic auth links (Retour au site, Déjà inscrit, Créer un compte) */
+  .auth-link-lg {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #dbeafe;
+    background: linear-gradient(135deg, rgba(59,130,246,0.14), rgba(147,197,253,0.06));
+    border: 1px solid rgba(147,197,253,0.28);
+    box-shadow: 0 8px 24px -12px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: all .28s cubic-bezier(.2,.7,.2,1);
+    position: relative; overflow: hidden;
+  }
+  .auth-link-lg::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%);
+    transform: translateX(-100%); transition: transform .7s ease;
+  }
+  .auth-link-lg:hover {
+    color: #fff;
+    border-color: rgba(147,197,253,0.55);
+    background: linear-gradient(135deg, rgba(59,130,246,0.28), rgba(147,197,253,0.14));
+    box-shadow: 0 14px 32px -12px rgba(59,130,246,0.7), 0 0 0 3px rgba(59,130,246,0.14);
+    transform: translateY(-2px);
+  }
+  .auth-link-lg:hover::before { transform: translateX(100%); }
+  .auth-link-lg .arrow { transition: transform .28s ease; }
+  .auth-link-lg:hover .arrow { transform: translateX(4px); }
+  .auth-link-lg:hover .arrow-back { transform: translateX(-4px); }
+  .auth-link-lg.is-gold {
+    color: #f5deb0;
+    background: linear-gradient(135deg, rgba(212,175,55,0.16), rgba(231,199,106,0.06));
+    border-color: rgba(212,175,55,0.35);
+    box-shadow: 0 8px 24px -12px rgba(212,175,55,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .auth-link-lg.is-gold:hover {
+    color: #fff8e1;
+    border-color: rgba(231,199,106,0.7);
+    box-shadow: 0 14px 32px -12px rgba(212,175,55,0.7), 0 0 0 3px rgba(212,175,55,0.16);
+  }
+
   .auth-fade-in { animation: auth-fade-in .5s cubic-bezier(.2,.7,.2,1) both; }
   .auth-logo-pulse::before, .auth-logo-pulse::after {
     content: ""; position: absolute; inset: -14px; border-radius: 50%;
@@ -1883,6 +1923,46 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ============ Mobile top navbar (all links, hide-on-scroll) ============ */
+  .mnav-bar {
+    background: linear-gradient(180deg, rgba(11,16,38,0.96), rgba(11,16,38,0.88));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid rgba(212,175,55,0.18);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+  }
+  .mnav-phone {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(212,175,55,0.12); color: #e7c76a;
+    border: 1px solid rgba(212,175,55,0.28);
+    transition: all .2s;
+  }
+  .mnav-phone:hover { background: rgba(212,175,55,0.2); }
+  .mnav-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    background: linear-gradient(135deg, #3b6fff, #6a8cff);
+    color: #fff; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    box-shadow: 0 8px 20px -6px rgba(59,111,255,0.55);
+  }
+  .mnav-link {
+    display: inline-block; padding: 6px 12px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(226,232,240,0.68);
+    border: 1px solid transparent; white-space: nowrap;
+    transition: all .2s;
+  }
+  .mnav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .mnav-link-active {
+    color: #0b1026;
+    background: linear-gradient(135deg, #e7c76a, #d4af37);
+    border-color: rgba(212,175,55,0.55);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
 }
 
 /* ============================================================
