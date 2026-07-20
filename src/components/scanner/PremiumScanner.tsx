@@ -17,14 +17,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Camera, X, Check, RotateCcw, Zap, ZapOff, Loader2,
-  AlertTriangle, ImagePlus, Trash2,
+  AlertTriangle, ImagePlus, Trash2, Sparkles,
 } from "lucide-react";
+import { enhanceDocumentCapture } from "@/lib/scanner/scanic-process";
 
 interface Page {
   id: string;
   blob: Blob;
   preview: string; // object URL
   qualityWarning?: string;
+  enhanced?: boolean;
 }
 
 interface Props {
@@ -162,13 +164,24 @@ export function PremiumScanner({
         warning = "Photo un peu floue · vérifiez la mise au point si possible.";
       }
 
-      const blob = await new Promise<Blob | null>((resolve) =>
+      const rawBlob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY)
       );
-      if (!blob) throw new Error("Encodage JPEG échoué");
+      if (!rawBlob) throw new Error("Encodage JPEG échoué");
 
-      const preview = URL.createObjectURL(blob);
-      const page: Page = { id: crypto.randomUUID(), blob, preview, qualityWarning: warning };
+      // Post-traitement Scanic : détection de contours + correction de perspective.
+      // Non bloquant — si échec, on garde la photo brute.
+      const enhanced = await enhanceDocumentCapture(rawBlob);
+      const finalBlob = enhanced.blob;
+
+      const preview = URL.createObjectURL(finalBlob);
+      const page: Page = {
+        id: crypto.randomUUID(),
+        blob: finalBlob,
+        preview,
+        qualityWarning: warning,
+        enhanced: enhanced.enhanced,
+      };
       setPages((prev) => (multiPage ? [...prev, page] : [page]));
 
       if (typeof navigator.vibrate === "function") navigator.vibrate(30);
@@ -190,11 +203,18 @@ export function PremiumScanner({
   const handleFileFallback = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-    const newPages: Page[] = files.map((f) => ({
-      id: crypto.randomUUID(),
-      blob: f,
-      preview: URL.createObjectURL(f),
-    }));
+    // Applique scanic aussi aux imports galerie.
+    const newPages: Page[] = await Promise.all(
+      files.map(async (f) => {
+        const enh = await enhanceDocumentCapture(f);
+        return {
+          id: crypto.randomUUID(),
+          blob: enh.blob,
+          preview: URL.createObjectURL(enh.blob),
+          enhanced: enh.enhanced,
+        };
+      }),
+    );
     setPages((prev) => (multiPage ? [...prev, ...newPages] : newPages.slice(0, 1)));
     if (fileFallbackRef.current) fileFallbackRef.current.value = "";
   }, [multiPage]);
@@ -289,6 +309,11 @@ export function PremiumScanner({
               {p.qualityWarning && (
                 <span className="absolute bottom-0 left-0 right-0 bg-amber-500/90 text-[8px] text-black text-center py-0.5">
                   ⚠
+                </span>
+              )}
+              {p.enhanced && !p.qualityWarning && (
+                <span className="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-[8px] text-black text-center py-0.5 flex items-center justify-center gap-0.5">
+                  <Sparkles size={8} /> redressé
                 </span>
               )}
             </div>

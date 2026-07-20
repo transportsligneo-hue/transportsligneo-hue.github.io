@@ -134,8 +134,61 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
         return { ok: false, error: "Service OCR non configuré" };
       }
 
+      // Étape 1 (optionnelle) : Azure Read pour un texte OCR fiable.
+      // Si la clé Azure n'est pas configurée, on passe directement à Gemini.
+      let azureText = "";
+      const azureEndpoint = process.env.AZURE_VISION_ENDPOINT?.replace(/\/+$/, "");
+      const azureKey = process.env.AZURE_VISION_KEY;
+      if (azureEndpoint && azureKey) {
+        try {
+          const m = /^data:([^;]+);base64,(.+)$/.exec(data.image_data_url);
+          if (m) {
+            const bin = atob(m[2]);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const submit = await fetch(`${azureEndpoint}/vision/v3.2/read/analyze?language=fr`, {
+              method: "POST",
+              headers: {
+                "Ocp-Apim-Subscription-Key": azureKey,
+                "Content-Type": "application/octet-stream",
+              },
+              body: new Blob([bytes as BlobPart], { type: "application/octet-stream" }),
+            });
+            const opLoc = submit.headers.get("operation-location");
+            if (submit.ok && opLoc) {
+              const deadline = Date.now() + 15_000;
+              while (Date.now() < deadline) {
+                await new Promise((r) => setTimeout(r, 700));
+                const r = await fetch(opLoc, { headers: { "Ocp-Apim-Subscription-Key": azureKey } });
+                if (!r.ok) break;
+                const j = (await r.json()) as {
+                  status?: string;
+                  analyzeResult?: { readResults?: Array<{ lines?: Array<{ text?: string }> }> };
+                };
+                if (j.status === "succeeded") {
+                  const lines: string[] = [];
+                  for (const p of j.analyzeResult?.readResults ?? []) {
+                    for (const l of p.lines ?? []) {
+                      if (typeof l.text === "string" && l.text.trim()) lines.push(l.text.trim());
+                    }
+                  }
+                  azureText = lines.join("\n");
+                  break;
+                }
+                if (j.status === "failed") break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("[scan-document] azure pre-OCR failed, fallback to Gemini alone:", e);
+        }
+      }
+
       const hint = data.hint_type
         ? `\n\nHint (peut être erroné, à vérifier) : le document est probablement de type "${data.hint_type}".`
+        : "";
+      const azureBlock = azureText
+        ? `\n\nOCR de référence (Azure Read, très fiable — utilise-le en priorité pour les champs texte) :\n<<<\n${azureText.slice(0, 8000)}\n>>>`
         : "";
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -147,7 +200,7 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT + hint },
+            { role: "system", content: SYSTEM_PROMPT + hint + azureBlock },
             {
               role: "user",
               content: [
