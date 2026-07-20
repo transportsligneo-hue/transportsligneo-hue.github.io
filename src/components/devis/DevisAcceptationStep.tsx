@@ -62,11 +62,13 @@ async function sha256HexOfBlob(blob: Blob): Promise<string> {
 
 type Phase =
   | "consent"
+  | "sign"
   | "otp"
   | "processing"
   | "refuse"
   | "refused"
   | "success";
+
 
 export function DevisAcceptationStep({
   devisId,
