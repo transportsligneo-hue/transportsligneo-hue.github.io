@@ -39,14 +39,7 @@ export default function Engagements() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <img
-              src={franceMapImg}
-              alt="Carte de France · Basé à Tours (37)"
-              style={{ width: "100%", maxWidth: 420, objectFit: "contain", filter: "drop-shadow(0 0 40px rgba(63,123,255,0.25))" }}
-              loading="lazy"
-              width={1024}
-              height={1024}
-            />
+            <MapLigneo size="small" />
             <div style={{ marginTop: 20, textAlign: "center" }}>
               <p style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff", letterSpacing: "0.15em", fontSize: 16 }}>
                 Basé à Tours (37)
@@ -56,6 +49,7 @@ export default function Engagements() {
               </p>
             </div>
           </div>
+
         </div>
       </section>
     </div>
