@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapFranceEurope from "@/components/MapFranceEurope";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
-import logoCat from "@/assets/logo-cat.png";
-import logoTransak from "@/assets/logo-transakauto.png";
+import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
+import logoTransak from "@/assets/transakauto-new.png.asset.json";
+
 
 /**
  * Home Desktop V5 — reproduit fidèlement le HTML de référence
@@ -76,15 +77,17 @@ export default function HomeDesktopV5() {
       {/* ============ TRUST — Partenaires (marquee) ============ */}
       <section className="v5-trust">
         <div className="v5-trust-label">Ils nous font confiance</div>
+        <div className="v5-trust-sub">Partenaires & clients de référence</div>
         <div className="v5-marquee-mask">
           <div className="v5-marquee-track">
             {Array.from({ length: 8 }).flatMap((_, i) => [
-              <div key={`c-${i}`} className="v5-logo-item"><img src={logoCat} alt="CAT France" /></div>,
-              <div key={`t-${i}`} className="v5-logo-item"><img src={logoTransak} alt="TransakAuto" /></div>,
+              <div key={`c-${i}`} className="v5-logo-item"><img src={logoCat.url} alt="Groupe CAT" /></div>,
+              <div key={`t-${i}`} className="v5-logo-item"><img src={logoTransak.url} alt="TransakAuto" /></div>,
             ])}
           </div>
         </div>
       </section>
+
 
       {/* ============ POURQUOI NOUS CHOISIR ============ */}
       <section className="v4-section">
