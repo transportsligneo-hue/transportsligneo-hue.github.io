@@ -99,7 +99,7 @@ export const azureReadOcr = createServerFn({ method: "POST" })
           "Ocp-Apim-Subscription-Key": key,
           "Content-Type": "application/octet-stream",
         },
-        body: bytes,
+        body: new Blob([bytes as BlobPart], { type: "application/octet-stream" }),
       });
       if (!submit.ok) {
         const t = await submit.text().catch(() => "");
