@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw } from "lucide-react";
+import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +9,12 @@ import {
   attachSignedDevisPdf,
   refuseDevis,
 } from "@/lib/devis-signature-otp.functions";
+import { acceptDevis } from "@/lib/devis-acceptation.functions";
+import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
+
 
 interface Props {
   devisId: string;
