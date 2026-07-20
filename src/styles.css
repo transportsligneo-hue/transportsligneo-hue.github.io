@@ -2710,20 +2710,39 @@
 }
 
 /* Timeline stagger (à propos) */
-.r4-page .v4-tl-anim { opacity: 0; transform: translateY(14px);
-  animation: v4TlIn .7s cubic-bezier(.2,.7,.2,1) both; }
-.r4-page .v4-tl-item { transition: transform .35s ease, box-shadow .35s ease; }
+.r4-page .v4-tl-anim { opacity: 0; transform: translateY(18px) scale(0.97);
+  animation: v4TlIn .8s cubic-bezier(.2,.7,.2,1) both; }
+.r4-page .v4-tl-item { position:relative; display:flex; gap:24px; padding-bottom:32px; transition: transform .35s ease; }
+.r4-page .v4-tl-item:last-child { padding-bottom:0; }
+.r4-page .v4-tl-item:hover { transform: translateX(6px); }
 .r4-page .v4-tl-item:hover .v4-tl-body {
-  transform: translateX(4px);
-  box-shadow: 0 12px 40px -14px rgba(79,140,255,0.35);
-  border-color: rgba(122,163,255,0.35);
+  box-shadow: 0 16px 44px -14px rgba(79,140,255,0.35);
+  border-color: rgba(122,163,255,0.45);
 }
 .r4-page .v4-tl-item:hover .v4-tl-year {
-  box-shadow: 0 0 0 3px rgba(217,181,74,0.25), 0 0 24px rgba(217,181,74,0.35);
+  box-shadow: 0 0 0 4px rgba(217,181,74,0.22), 0 0 32px rgba(217,181,74,0.45);
+  border-color: rgba(217,181,74,0.65);
 }
-.r4-page .v4-tl-body { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
-.r4-page .v4-tl-year { transition: box-shadow .35s ease; }
-@keyframes v4TlIn { to { opacity: 1; transform: translateY(0); } }
+.r4-page .v4-tl-item:hover .v4-tl-connector::after {
+  transform: scale(1.6);
+  background: var(--v4-gold);
+  box-shadow: 0 0 18px var(--v4-gold);
+}
+.r4-page .v4-tl-body { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--v4-border); border-radius:18px; padding:20px 24px;
+  transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+.r4-page .v4-tl-year { flex-shrink:0; width:96px;height:96px;border-radius:50%; background:rgba(13,19,42,0.9);
+  border:2px solid rgba(122,163,255,0.35); box-shadow:0 0 0 6px rgba(7,12,31,1);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  font-family:'Space Grotesk',sans-serif; font-weight:800; color:var(--v4-blue-bright); font-size:12.5px; text-align:center; padding:0 6px;
+  transition: box-shadow .35s ease, border-color .35s ease; }
+.r4-page .v4-tl-year svg { color:var(--v4-gold); filter:drop-shadow(0 0 6px rgba(217,181,74,0.45)); }
+.r4-page .v4-tl-connector { position:absolute; left:52px; top:48px; width:24px; height:2px; background:linear-gradient(90deg, rgba(122,163,255,0.45), transparent); }
+.r4-page .v4-tl-connector::after { content:''; position:absolute; left:-5px; top:-4px; width:10px; height:10px; border-radius:50%;
+  background:var(--v4-blue-bright); box-shadow:0 0 10px var(--v4-blue-bright); transition: transform .35s ease, background .35s ease, box-shadow .35s ease;
+  animation:v4TlPulse 2.2s ease-in-out infinite; }
+.r4-page .v4-tl-item:last-child .v4-tl-connector { background:linear-gradient(90deg, rgba(122,163,255,0.45), var(--v4-gold)); }
+@keyframes v4TlIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes v4TlPulse { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:0.65; transform:scale(1.15);} }
 
 /* ============================================================
    V4 Refonte marketing pages (services / a-propos / b2b / contact)
@@ -2828,14 +2847,13 @@
 .r4-page .v4-value-card p { color:var(--v4-text-muted); font-size:12.3px; line-height:1.55; }
 
 /* Timeline */
-.r4-page .v4-timeline { max-width:700px; margin:0 auto; padding:20px 32px 80px; position:relative; }
+.r4-page .v4-timeline { max-width:760px; margin:0 auto; padding:20px 32px 80px; position:relative; }
 .r4-page .v4-tl-track { position:absolute; left:52px; top:20px; bottom:20px; width:2px;
-  background:linear-gradient(180deg, var(--v4-blue-bright), var(--v4-gold) 50%, var(--v4-blue-bright)); opacity:0.4; }
-.r4-page .v4-tl-item { position:relative; display:flex; gap:24px; padding-bottom:32px; }
-.r4-page .v4-tl-item:last-child { padding-bottom:0; }
-.r4-page .v4-tl-year { flex-shrink:0; width:96px;height:96px;border-radius:50%; background:rgba(13,19,42,0.9);
-  border:2px solid rgba(122,163,255,0.35); box-shadow:0 0 0 6px rgba(7,12,31,1);
-  display:flex;align-items:center;justify-content:center; font-family:'Poppins',sans-serif; font-weight:800; color:var(--v4-blue-bright); font-size:15px; text-align:center; padding:0 6px; }
+  background:linear-gradient(180deg, transparent, var(--v4-blue-bright) 10%, var(--v4-gold) 50%, var(--v4-blue-bright) 90%, transparent); opacity:0.35; }
+.r4-page .v4-tl-progress { position:absolute; left:52px; top:20px; width:2px; height:0;
+  background:linear-gradient(180deg, var(--v4-blue-bright), var(--v4-gold)); box-shadow:0 0 14px var(--v4-blue-bright);
+  animation:v4TlProgress 2.4s ease-out forwards; }
+@keyframes v4TlProgress { to { height:calc(100% - 40px); } }
 .r4-page .v4-tl-body { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--v4-border); border-radius:18px; padding:20px 24px; }
 .r4-page .v4-tl-body h4 { font-family:'Poppins',sans-serif; font-size:16px; font-weight:700; margin-bottom:6px; color:#fff; }
 .r4-page .v4-tl-body p { color:var(--v4-text-muted); font-size:13px; line-height:1.55; }
@@ -2943,8 +2961,12 @@
 @media (max-width: 560px) {
   .r4-page .v4-services-grid, .r4-page .v4-audience-grid, .r4-page .v4-feat-grid, .r4-page .v4-values-grid { grid-template-columns:1fr; }
   .r4-page .v4-h1 { font-size:32px; }
-  .r4-page .v4-tl-year { width:72px;height:72px;font-size:12px; }
-  .r4-page .v4-tl-track { left:36px; }
+  .r4-page .v4-tl-year { width:72px;height:72px;font-size:10px; }
+  .r4-page .v4-tl-year svg { width:18px; height:18px; }
+  .r4-page .v4-tl-track, .r4-page .v4-tl-progress { left:36px; }
+  .r4-page .v4-tl-connector { left:36px; width:18px; }
+  .r4-page .v4-timeline { padding:20px 20px 80px; }
+  .r4-page .v4-tl-item { gap:16px; }
   .r4-page .v4-stats-row { gap:32px; }
 }
 

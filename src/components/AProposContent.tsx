@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Phone, Zap, CheckCircle } from "lucide-react";
+import { ShieldCheck, Phone, Zap, CheckCircle, Flag, Users, Monitor, Award } from "lucide-react";
 
 const stats = [
   { v: "6+", l: "Ans d'expérience" },
@@ -16,10 +16,10 @@ const valeurs = [
 ];
 
 const timeline = [
-  { year: "Création", title: "Les débuts à Tours", desc: "Olivier P.G. démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale." },
-  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort." },
-  { year: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale." },
-  { year: "Aujourd'hui", title: "Un partenaire pour les pros", desc: "Développement des solutions dédiées aux concessions, loueurs et gestionnaires de flotte, partout en France et en Europe." },
+  { year: "Création", title: "Les débuts à Tours", desc: "Olivier P.G. démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale.", Icon: Flag },
+  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort.", Icon: Users },
+  { year: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale.", Icon: Monitor },
+  { year: "Aujourd'hui", title: "Un partenaire pour les pros", desc: "Développement des solutions dédiées aux concessions, loueurs et gestionnaires de flotte, partout en France et en Europe.", Icon: Award },
 ];
 
 export default function AProposContent() {
@@ -72,10 +72,15 @@ export default function AProposContent() {
           <h2>Quelques étapes clés</h2>
         </div>
         <div className="v4-timeline">
-          <div className="v4-tl-track" />
+          <div className="v4-tl-track" aria-hidden="true" />
+          <div className="v4-tl-progress" aria-hidden="true" />
           {timeline.map((it, i) => (
-            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 140}ms` }}>
-              <div className="v4-tl-year">{it.year}</div>
+            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 160}ms` }}>
+              <div className="v4-tl-year">
+                <it.Icon size={22} strokeWidth={2} aria-hidden="true" />
+                <span>{it.year}</span>
+              </div>
+              <div className="v4-tl-connector" aria-hidden="true" />
               <div className="v4-tl-body">
                 <h4>{it.title}</h4>
                 <p>{it.desc}</p>
