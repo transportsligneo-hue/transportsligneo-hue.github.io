@@ -17,14 +17,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Camera, X, Check, RotateCcw, Zap, ZapOff, Loader2,
-  AlertTriangle, ImagePlus, Trash2,
+  AlertTriangle, ImagePlus, Trash2, Sparkles,
 } from "lucide-react";
+import { enhanceDocumentCapture } from "@/lib/scanner/scanic-process";
 
 interface Page {
   id: string;
   blob: Blob;
   preview: string; // object URL
   qualityWarning?: string;
+  enhanced?: boolean;
 }
 
 interface Props {
