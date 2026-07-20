@@ -71,6 +71,17 @@
 
 <!-- Voitures animees : petites voitures SVG stylisees, variees -->
 <defs>
+  <filter id="carGoldHalo" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="0.9"/>
+    <feFlood flood-color="#e7c76a" flood-opacity="0.85"/>
+    <feComposite in2="SourceAlpha" operator="in"/>
+    <feGaussianBlur stdDeviation="0.6"/>
+    <feMerge>
+      <feMergeNode/>
+      <feMergeNode/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
   <g id="car-sedan">
     <g transform="translate(-1.8,-0.9)">
       <rect width="3.6" height="1.8" rx="0.6" ry="0.6" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="0.12"/>
@@ -98,21 +109,21 @@
   </g>
 </defs>
 
-<use href="#car-sedan" color="#ffffff"><animateMotion dur="5.1s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L483.88,306.43"/></use>
-<use href="#car-suv" color="#8fb4ff"><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L482,297.6"/></use>
-<use href="#car-sport" color="#f5f5f5"><animateMotion dur="4.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L471.61,309.79"/></use>
-<use href="#car-sedan" color="#e7c76a"><animateMotion dur="4.1s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L472.01,313.77"/></use>
-<use href="#car-suv" color="#ffffff"><animateMotion dur="7.1s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L474.96,324.43"/></use>
-<use href="#car-sport" color="#6ea1ff"><animateMotion dur="7.8s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L481.11,329.98"/></use>
-<use href="#car-sedan" color="#c9d4ff"><animateMotion dur="6.1s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L491.5,320.31"/></use>
-<use href="#car-suv" color="#d4af37"><animateMotion dur="6.5s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L492,329"/></use>
-<use href="#car-sport" color="#ffffff"><animateMotion dur="5.3s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L495,307.5"/></use>
+<use href="#car-sedan" color="#ffffff" filter="url(#carGoldHalo)"><animateMotion dur="5.1s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L483.88,306.43"/></use>
+<use href="#car-suv" color="#8fb4ff" filter="url(#carGoldHalo)"><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L482,297.6"/></use>
+<use href="#car-sport" color="#f5f5f5" filter="url(#carGoldHalo)"><animateMotion dur="4.4s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L471.61,309.79"/></use>
+<use href="#car-sedan" color="#e7c76a" filter="url(#carGoldHalo)"><animateMotion dur="4.1s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L472.01,313.77"/></use>
+<use href="#car-suv" color="#ffffff" filter="url(#carGoldHalo)"><animateMotion dur="7.1s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L474.96,324.43"/></use>
+<use href="#car-sport" color="#6ea1ff" filter="url(#carGoldHalo)"><animateMotion dur="7.8s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L481.11,329.98"/></use>
+<use href="#car-sedan" color="#c9d4ff" filter="url(#carGoldHalo)"><animateMotion dur="6.1s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L491.5,320.31"/></use>
+<use href="#car-suv" color="#d4af37" filter="url(#carGoldHalo)"><animateMotion dur="6.5s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L492,329"/></use>
+<use href="#car-sport" color="#ffffff" filter="url(#carGoldHalo)"><animateMotion dur="5.3s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L495,307.5"/></use>
 
-<use href="#car-sedan" color="#e7c76a"><animateMotion dur="8.5s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L487.37,298.99"/></use>
-<use href="#car-suv" color="#f0dc9e"><animateMotion dur="9.4s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L504.19,295.33"/></use>
-<use href="#car-sport" color="#d4af37"><animateMotion dur="8.2s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L497.94,314.67"/></use>
-<use href="#car-sedan" color="#f0dc9e"><animateMotion dur="10.2s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L510.14,333.16"/></use>
-<use href="#car-suv" color="#e7c76a"><animateMotion dur="11s" repeatCount="indefinite" rotate="auto" path="M478.8,313.01 L465,336"/></use>
+<use href="#car-sedan" color="#e7c76a" filter="url(#carGoldHalo)"><animateMotion dur="8.5s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L487.37,298.99"/></use>
+<use href="#car-suv" color="#f0dc9e" filter="url(#carGoldHalo)"><animateMotion dur="9.4s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L504.19,295.33"/></use>
+<use href="#car-sport" color="#d4af37" filter="url(#carGoldHalo)"><animateMotion dur="8.2s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L497.94,314.67"/></use>
+<use href="#car-sedan" color="#f0dc9e" filter="url(#carGoldHalo)"><animateMotion dur="10.2s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L510.14,333.16"/></use>
+<use href="#car-suv" color="#e7c76a" filter="url(#carGoldHalo)"><animateMotion dur="11s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L465,336"/></use>
 
 
     </svg>
