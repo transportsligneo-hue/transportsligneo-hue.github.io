@@ -273,6 +273,92 @@ export function DevisAcceptationStep({
     }
   };
 
+  /* -------- Signature manuscrite rapide (canvas) -------- */
+  const handleQuickSign = async (signatureFile: File) => {
+    setSigning(true);
+    setPhase("processing");
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Session expirée");
+
+      // 1. Charge le devis + version
+      const { data: devisRow, error: dErr } = await supabase
+        .from("devis").select("*").eq("id", devisId).single();
+      if (dErr || !devisRow) throw new Error("Devis introuvable");
+      const version = (devisRow as { version?: number }).version ?? 1;
+
+      // 2. Upload signature PNG
+      const sigPath = `${uid}/${devisId}/v${version}-signature.png`;
+      const upSig = await supabase.storage.from("devis-acceptes")
+        .upload(sigPath, signatureFile, { upsert: true, contentType: "image/png" });
+      if (upSig.error) throw new Error(`Signature non enregistrée : ${upSig.error.message}`);
+
+      // 3. Génère PDF signé (avec cartouche + signature)
+      const acceptedAtDate = new Date();
+      const acceptedAtLabel = `${acceptedAtDate.toLocaleDateString("fr-FR")} à ${acceptedAtDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      const rawPdf = await generateDevisPdf({
+        ...(devisRow as unknown as DevisData),
+        version,
+      });
+      const pdfHash = await sha256HexOfBlob(rawPdf);
+      const email = (devisRow as { email?: string }).email ?? userData.user?.email ?? "";
+      const signedPdf = await generateDevisPdf({
+        ...(devisRow as unknown as DevisData),
+        version,
+        acceptedAtLabel,
+        otpProof: {
+          email,
+          method: "Signature manuscrite en ligne",
+          acceptedAtLabel,
+          ipAddress: null,
+          userAgent: null,
+          cgvVersion: "v1-2026-01",
+          pdfHash,
+        },
+      });
+      const pdfPath = `${uid}/${devisId}/v${version}-devis-signe.pdf`;
+      const upPdf = await supabase.storage.from("devis-acceptes")
+        .upload(pdfPath, signedPdf, { upsert: true, contentType: "application/pdf" });
+      if (upPdf.error) throw new Error(`Archivage du PDF impossible : ${upPdf.error.message}`);
+
+      // 4. Enregistre l'acceptation (signature + PDF)
+      await acceptDevisFn({ data: { devisId, signaturePath: sigPath, pdfPath } });
+
+      // 5. E-mails best-effort
+      try {
+        const prenom = (devisRow as { prenom?: string }).prenom ?? "";
+        const nom = (devisRow as { nom?: string }).nom ?? "";
+        const sends: Promise<unknown>[] = [
+          sendTransactionalEmail({
+            templateName: "devis-accepte-admin",
+            idempotencyKey: `admin-devis-accepte-${devisId}-v${version}`,
+            templateData: { prenom, nom, email, numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
+          }),
+        ];
+        if (email) {
+          sends.unshift(sendTransactionalEmail({
+            templateName: "devis-accepte",
+            recipientEmail: email,
+            idempotencyKey: `devis-accepte-${devisId}-v${version}`,
+            templateData: { prenom, numero, depart, arrivee, montant: `${prixTtc.toFixed(2)} €`, dateAcceptation: acceptedAtLabel, version: String(version) },
+          }));
+        }
+        await Promise.allSettled(sends);
+      } catch { /* best-effort */ }
+
+      setPhase("success");
+      toast.success("Devis signé", { description: "Signature enregistrée et archivée." });
+      setTimeout(() => onAccepted(), 900);
+    } catch (e) {
+      toast.error("Signature impossible", { description: (e as Error).message });
+      setPhase("sign");
+    } finally {
+      setSigning(false);
+    }
+  };
+
+
   // Téléchargement du PDF signé depuis storage
   const downloadSignedPdf = async () => {
     try {
