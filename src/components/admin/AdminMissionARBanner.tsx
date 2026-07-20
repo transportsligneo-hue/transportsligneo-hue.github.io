@@ -127,7 +127,7 @@ export function AdminMissionARBanner({
   };
 
   const doUnlink = async () => {
-    const ok = await confirmToast("Dissocier ce groupe aller-retour ?", {
+    const ok = await confirmToast("Dissocier ce groupe livraison + restitution ?", {
       description: "Les deux missions deviennent totalement indépendantes. Elles conservent leur numéro et leurs données.",
       confirmLabel: "Dissocier",
     });
@@ -157,7 +157,7 @@ export function AdminMissionARBanner({
   };
 
   const doCancelLeg = async () => {
-    const ok = await confirmToast(`Annuler la mission ${legType === "aller" ? "Aller" : "Retour"} ?`, {
+    const ok = await confirmToast(`Annuler la mission ${legType === "aller" ? "Livraison" : "Restitution"} ?`, {
       description: "L'autre sens reste actif et opérationnel.",
       confirmLabel: "Annuler ce sens",
       variant: "danger",
@@ -191,8 +191,8 @@ export function AdminMissionARBanner({
       <div className="flex flex-wrap items-center gap-3">
         <MissionLegBadge leg={legType as "aller" | "retour"} />
         <div className="text-sm text-white/85">
-          <span className="font-medium">Mission {legType === "aller" ? "Aller" : "Retour"}</span>
-          <span className="text-white/50"> · fait partie d'un aller-retour éclaté</span>
+          <span className="font-medium">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
+          <span className="text-white/50"> · fait partie d'un groupe livraison + restitution</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           {loading ? (

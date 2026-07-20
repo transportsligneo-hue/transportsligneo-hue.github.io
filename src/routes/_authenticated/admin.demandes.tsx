@@ -132,7 +132,7 @@ function AdminDemandes() {
       const isAR = rows.length > 1;
       toast.success(
         isAR
-          ? `Aller-retour éclaté : ${rows.map((r) => `${r.leg === "aller" ? "Aller" : "Retour"} ${r.numero}`).join(" · ")}`
+          ? `Livraison + Restitution éclatée : ${rows.map((r) => `${r.leg === "aller" ? "Livraison" : "Restitution"} ${r.numero}`).join(" · ")}`
           : rows[0]
               ? `Mission ${rows[0].numero} créée`
               : "Demande convertie",
@@ -475,7 +475,7 @@ function DemandeDrawer({
       </DrawerSection>
 
       {(demande.options === "aller_retour" || demande.options === "aller-retour" || demande.depart_retour || demande.immatriculation_retour) && (
-        <DrawerSection title="Restitution (Aller-retour)" icon={<MapPin size={12} />}>
+        <DrawerSection title="Restitution (Livraison + Restitution)" icon={<MapPin size={12} />}>
           <DrawerGrid>
             <DrawerField
               label="Récupération retour"

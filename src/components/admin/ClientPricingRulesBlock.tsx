@@ -106,7 +106,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     const par = parseNum(form.prix_aller_retour);
     const pex = parseNum(form.prix_express);
     if (pas == null && par == null && pex == null) {
-      toast.error("Renseignez au moins un prix (aller simple, retour ou express)");
+      toast.error("Renseignez au moins un prix (livraison simple, restitution ou express)");
       return;
     }
     setSaving(true);
@@ -188,7 +188,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
   return (
     <AdminSection
       title="Tarifs personnalisés"
-      description="Prix par trajet (aller simple / retour / express) + suppléments options. Appliqués automatiquement dans le formulaire « Nouvelle mission » du client."
+      description="Prix par trajet (livraison simple / livraison + restitution / express) + suppléments options. Appliqués automatiquement dans le formulaire « Nouvelle mission » du client."
     >
       <div className="space-y-3">
         {loading ? (
@@ -270,10 +270,10 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
               Remplis ville <b>OU</b> département (ou les deux). Les 4 combinaisons sont supportées : ville→ville, ville→département, département→ville, département→département. Détection automatique du département depuis le code postal de l'adresse client.
             </p>
             <div className="grid grid-cols-3 gap-3">
-              <AdminField label="Prix aller simple (€)">
+              <AdminField label="Prix livraison simple (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_simple} onChange={(e) => setForm({ ...form, prix_aller_simple: e.target.value })} placeholder="70" />
               </AdminField>
-              <AdminField label="Prix aller-retour (€)">
+              <AdminField label="Prix livraison + restitution (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_retour} onChange={(e) => setForm({ ...form, prix_aller_retour: e.target.value })} placeholder="120" />
               </AdminField>
               <AdminField label="Prix express (€)">

@@ -133,7 +133,7 @@ export function CatalogueMissionCard({
           }`}
         >
           {isAR ? <ArrowLeftRight size={10} /> : <ArrowRight size={10} />}
-          {isAR ? "Aller-retour" : "Aller simple"}
+          {isAR ? "Livraison + Restitution" : "Livraison simple"}
         </span>
         <span
           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(

@@ -487,7 +487,7 @@ export function resolveLocalDeptTariff(
     : `Forfait département ${zDep.dept} — hors agglomération`;
 
   if (option === "aller-retour") {
-    return { price: simple, label, finalPrice: retour, multiplierLabel: "Aller-retour", hasExtra: true };
+    return { price: simple, label, finalPrice: retour, multiplierLabel: "Livraison + Restitution", hasExtra: true };
   }
   if (option === "express") {
     return { price: simple, label, finalPrice: Math.round(simple * 1.2), multiplierLabel: "+20% express", hasExtra: true };

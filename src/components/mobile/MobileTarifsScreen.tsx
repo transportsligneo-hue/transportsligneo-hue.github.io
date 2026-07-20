@@ -97,16 +97,16 @@ export default function MobileTarifsScreen() {
           <PriceCard
             title="Tours intra"
             lines={[
-              { l: "Aller simple", p: "79 €" },
-              { l: "Aller-retour", p: "129 €" },
+              { l: "Livraison simple", p: "79 €" },
+              { l: "Livraison + Restitution", p: "129 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />
           <PriceCard
             title="Hors agglomération (37)"
             lines={[
-              { l: "Aller simple", p: "99 €" },
-              { l: "Aller-retour", p: "129 €" },
+              { l: "Livraison simple", p: "99 €" },
+              { l: "Livraison + Restitution", p: "129 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />
@@ -157,7 +157,7 @@ export default function MobileTarifsScreen() {
         <div className="flex flex-col gap-2.5">
           <FactorRow icon={<RouteIcon size={15} />} title="La distance" desc="Calculée entre l'enlèvement et la livraison." />
           <FactorRow icon={<Car size={15} />} title="Le type de véhicule" desc="Citadine, berline, SUV ou utilitaire." />
-          <FactorRow icon={<ArrowRight size={15} />} title="Aller simple ou retour" desc="Le retour est proposé à un tarif préférentiel." />
+          <FactorRow icon={<ArrowRight size={15} />} title="Livraison simple ou avec restitution" desc="La restitution est proposée à un tarif préférentiel." />
           <FactorRow icon={<Clock size={15} />} title="Le délai souhaité" desc="Une mission express (< 24h) : supplément de 20 %." />
         </div>
       </section>
