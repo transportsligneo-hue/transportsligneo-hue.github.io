@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Phone, Zap, CheckCircle } from "lucide-react";
+import { ShieldCheck, Phone, Zap, CheckCircle, Flag, Users, Monitor, Award } from "lucide-react";
 
 const stats = [
   { v: "6+", l: "Ans d'expérience" },
@@ -16,10 +16,10 @@ const valeurs = [
 ];
 
 const timeline = [
-  { year: "Création", title: "Les débuts à Tours", desc: "Olivier P.G. démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale." },
-  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort." },
-  { year: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale." },
-  { year: "Aujourd'hui", title: "Un partenaire pour les pros", desc: "Développement des solutions dédiées aux concessions, loueurs et gestionnaires de flotte, partout en France et en Europe." },
+  { year: "Création", title: "Les débuts à Tours", desc: "Olivier P.G. démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale.", Icon: Flag },
+  { year: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort.", Icon: Users },
+  { year: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale.", Icon: Monitor },
+  { year: "Aujourd'hui", title: "Un partenaire pour les pros", desc: "Développement des solutions dédiées aux concessions, loueurs et gestionnaires de flotte, partout en France et en Europe.", Icon: Award },
 ];
 
 export default function AProposContent() {
