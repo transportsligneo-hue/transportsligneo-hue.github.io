@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import DevisGenerator from "@/components/DevisGenerator";
-import MapFranceEurope from "@/components/MapFranceEurope";
+import MapLigneo from "@/components/MapLigneo";
+
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
@@ -72,7 +73,7 @@ export default function HomeDesktopV5() {
       </section>
 
       {/* ============ MAP FRANCE + EUROPE ============ */}
-      <MapFranceEurope />
+      <MapLigneo size="big" />
 
       {/* ============ TRUST — Partenaires (marquee) ============ */}
       <section className="v5-trust">
