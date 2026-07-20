@@ -72,10 +72,15 @@ export default function AProposContent() {
           <h2>Quelques étapes clés</h2>
         </div>
         <div className="v4-timeline">
-          <div className="v4-tl-track" />
+          <div className="v4-tl-track" aria-hidden="true" />
+          <div className="v4-tl-progress" aria-hidden="true" />
           {timeline.map((it, i) => (
-            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 140}ms` }}>
-              <div className="v4-tl-year">{it.year}</div>
+            <div key={it.year} className="v4-tl-item v4-tl-anim" style={{ animationDelay: `${i * 160}ms` }}>
+              <div className="v4-tl-year">
+                <it.Icon size={22} strokeWidth={2} aria-hidden="true" />
+                <span>{it.year}</span>
+              </div>
+              <div className="v4-tl-connector" aria-hidden="true" />
               <div className="v4-tl-body">
                 <h4>{it.title}</h4>
                 <p>{it.desc}</p>
