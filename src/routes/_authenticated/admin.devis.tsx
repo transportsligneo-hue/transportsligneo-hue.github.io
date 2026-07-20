@@ -213,6 +213,24 @@ function AdminDevisPage() {
     load();
   }, []);
 
+  // Realtime : signature / statut d'un devis se met à jour instantanément côté admin.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-devis-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "devis" },
+        () => { load(); },
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "devis_acceptations" },
+        () => { load(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   const updateStatut = async (id: string, statut: string) => {
     const { error } = await supabase.from("devis").update({ statut }).eq("id", id);
     if (error) {
