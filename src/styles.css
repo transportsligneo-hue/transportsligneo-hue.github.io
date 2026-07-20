@@ -3016,22 +3016,22 @@
 .r4-page .v5-marquee-mask { position:relative; overflow:hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
-.r4-page .v5-marquee-track { display:flex; gap:64px; align-items:center; width:max-content;
-  animation: v5MarqueeScroll 24s linear infinite; }
+.r4-page .v5-marquee-track { display:flex; gap:80px; align-items:center; width:max-content;
+  animation: v5MarqueeScroll 28s linear infinite; }
 .r4-page .v5-marquee-track:hover { animation-play-state: paused; }
 @keyframes v5MarqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.r4-page .v5-logo-item { position:relative; flex-shrink:0; padding:14px 26px; border-radius:16px;
+.r4-page .v5-logo-item { position:relative; flex-shrink:0; padding:22px 38px; border-radius:20px;
   background:linear-gradient(180deg, rgba(11,19,56,0.75), rgba(6,12,36,0.55));
   border:1px solid rgba(122,163,255,0.22);
   box-shadow:0 8px 26px rgba(4,10,32,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
   transition:transform .3s ease, border-color .3s ease, box-shadow .3s ease; }
-.r4-page .v5-logo-item::before { content:""; position:absolute; inset:0; border-radius:16px;
+.r4-page .v5-logo-item::before { content:""; position:absolute; inset:0; border-radius:20px;
   background:linear-gradient(120deg, transparent 30%, rgba(122,163,255,0.18) 50%, transparent 70%);
   background-size:200% 100%; animation:v5LogoShine 4.5s linear infinite; pointer-events:none; opacity:0.7; }
 @keyframes v5LogoShine { from { background-position:200% 0; } to { background-position:-200% 0; } }
 .r4-page .v5-logo-item:hover { transform:translateY(-3px); border-color:rgba(122,163,255,0.55);
   box-shadow:0 12px 34px rgba(63,123,255,0.35), inset 0 1px 0 rgba(255,255,255,0.06); }
-.r4-page .v5-logo-item img { height:56px; width:auto; display:block; object-fit:contain;
+.r4-page .v5-logo-item img { height:84px; width:auto; display:block; object-fit:contain;
   filter:brightness(1.1) drop-shadow(0 4px 14px rgba(63,123,255,0.35)); }
 
 
