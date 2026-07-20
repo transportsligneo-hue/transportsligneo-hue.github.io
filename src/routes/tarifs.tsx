@@ -60,11 +60,11 @@ function TarifsPage() {
             <div className="v4-svc-card">
               <h3>Tours intra</h3>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--v4-border)" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller simple</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison simple</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>79 €</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller-retour</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison + Restitution</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>129 €</span>
               </div>
               <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>
@@ -73,11 +73,11 @@ function TarifsPage() {
             <div className="v4-svc-card">
               <h3>Hors agglomération (37)</h3>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--v4-border)" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller simple</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison simple</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>99 €</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Aller-retour</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison + Restitution</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>129 €</span>
               </div>
               <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>
@@ -152,7 +152,7 @@ function TarifsPage() {
             {[
               { t: "La distance", d: "Calculée automatiquement entre le lieu d'enlèvement et de livraison.", p: "M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z" },
               { t: "Le type de véhicule", d: "Citadine, berline, SUV ou utilitaire : chaque gabarit a son tarif dédié.", p: "M3 11l2-5h14l2 5 M5 11h14v6H5z" },
-              { t: "Aller simple ou retour", d: "Le trajet retour est proposé à un tarif préférentiel.", p: "M17 3v12M17 15l-4-4M17 15l4-4M7 21V9M7 9l4 4M7 9 3 13" },
+              { t: "Livraison simple ou avec restitution", d: "La restitution est proposée à un tarif préférentiel.", p: "M17 3v12M17 15l-4-4M17 15l4-4M7 21V9M7 9l4 4M7 9 3 13" },
               { t: "Le délai souhaité", d: "Une mission express (< 24h) applique un supplément de 20 %.", p: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M12 7v5l3 3" },
             ].map((c) => (
               <div key={c.t} className="v4-svc-card">

@@ -148,8 +148,8 @@ export function CatalogueFilters({
       <div className="flex flex-wrap gap-1.5">
         {[
           { key: "all" as const, label: "Toutes" },
-          { key: "simple" as const, label: "Aller simple" },
-          { key: "ar" as const, label: "Aller-retour" },
+          { key: "simple" as const, label: "Livraison simple" },
+          { key: "ar" as const, label: "Livraison + Restitution" },
         ].map((o) => {
           const active = value.leg === o.key;
           return (

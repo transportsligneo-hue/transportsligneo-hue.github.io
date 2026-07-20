@@ -9,7 +9,7 @@ const styles: Record<string, string> = {
 
 export function MissionLegBadge({ leg, size = "sm" }: { leg: Leg; size?: "xs" | "sm" }) {
   if (!leg || leg === "simple") return null;
-  const label = leg === "aller" ? "Aller" : "Retour";
+  const label = leg === "aller" ? "Livraison" : "Restitution";
   const Icon = leg === "aller" ? ArrowRight : ArrowLeft;
   const cls =
     size === "xs"
@@ -18,7 +18,7 @@ export function MissionLegBadge({ leg, size = "sm" }: { leg: Leg; size?: "xs" | 
   return (
     <span
       className={`inline-flex items-center rounded-full border font-medium ${styles[leg]} ${cls}`}
-      title={leg === "aller" ? "Mission Aller d'un aller-retour" : "Mission Retour d'un aller-retour"}
+      title={leg === "aller" ? "Mission Livraison d'un groupe livraison + restitution" : "Mission Restitution d'un groupe livraison + restitution"}
     >
       <Icon size={size === "xs" ? 10 : 11} />
       {label}

@@ -550,7 +550,7 @@ export default function MobileDevisGenerator() {
                     option === "aller-simple" ? "text-white" : "text-[#9aa6c9]"
                   }`}
                 >
-                  Aller simple
+                  Livraison simple
                 </button>
                 <button
                   type="button"
@@ -559,7 +559,7 @@ export default function MobileDevisGenerator() {
                     option === "aller-retour" ? "text-white" : "text-[#9aa6c9]"
                   }`}
                 >
-                  Aller-retour
+                  Livraison + Restitution
                 </button>
               </div>
 

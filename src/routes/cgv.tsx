@@ -33,7 +33,7 @@ function CGVPage() {
             <h2 className="font-heading text-primary text-lg mb-3">Prestations</h2>
             <p className="mb-2">Transports Ligneo propose :</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Le convoyage de véhicules (aller simple ou aller-retour)</li>
+              <li>Le convoyage de véhicules (livraison simple ou livraison + restitution)</li>
               <li>La livraison de véhicules à domicile ou sur site</li>
               <li>Des prestations sur mesure selon la demande du client</li>
             </ul>
@@ -54,7 +54,7 @@ function CGVPage() {
               <li>Les péages</li>
               <li>Les frais de déplacement du chauffeur</li>
             </ul>
-            <p className="mt-2">Les tarifs aller-retour bénéficient d'un avantage tarifaire.</p>
+            <p className="mt-2">Les tarifs livraison + restitution bénéficient d'un avantage tarifaire.</p>
             <p className="mt-2">Un ajustement peut être appliqué si la distance réelle ou les conditions diffèrent de la demande initiale.</p>
           </section>
 
