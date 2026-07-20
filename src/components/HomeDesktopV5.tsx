@@ -73,7 +73,7 @@ export default function HomeDesktopV5() {
       </section>
 
       {/* ============ MAP FRANCE + EUROPE ============ */}
-      <MapFranceEurope />
+      <MapLigneo size="big" />
 
       {/* ============ TRUST — Partenaires (marquee) ============ */}
       <section className="v5-trust">
