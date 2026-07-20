@@ -164,13 +164,24 @@ export function PremiumScanner({
         warning = "Photo un peu floue · vérifiez la mise au point si possible.";
       }
 
-      const blob = await new Promise<Blob | null>((resolve) =>
+      const rawBlob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY)
       );
-      if (!blob) throw new Error("Encodage JPEG échoué");
+      if (!rawBlob) throw new Error("Encodage JPEG échoué");
 
-      const preview = URL.createObjectURL(blob);
-      const page: Page = { id: crypto.randomUUID(), blob, preview, qualityWarning: warning };
+      // Post-traitement Scanic : détection de contours + correction de perspective.
+      // Non bloquant — si échec, on garde la photo brute.
+      const enhanced = await enhanceDocumentCapture(rawBlob);
+      const finalBlob = enhanced.blob;
+
+      const preview = URL.createObjectURL(finalBlob);
+      const page: Page = {
+        id: crypto.randomUUID(),
+        blob: finalBlob,
+        preview,
+        qualityWarning: warning,
+        enhanced: enhanced.enhanced,
+      };
       setPages((prev) => (multiPage ? [...prev, page] : [page]));
 
       if (typeof navigator.vibrate === "function") navigator.vibrate(30);
