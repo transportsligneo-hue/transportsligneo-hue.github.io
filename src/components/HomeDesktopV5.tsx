@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import DevisGenerator from "@/components/DevisGenerator";
-import MapFranceEurope from "@/components/MapFranceEurope";
+import MapLigneo from "@/components/MapLigneo";
+
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
