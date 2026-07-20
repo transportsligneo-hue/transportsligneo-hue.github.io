@@ -171,7 +171,7 @@ export default function CommentCaMarcheTimeline() {
           <span className="dot" />Prêt à démarrer ?
         </div>
         <h2>Prêt à simplifier la gestion de vos véhicules ?</h2>
-        <p>Obtenez un devis en 3 secondes ou parlez directement à un conseiller. Sans engagement.</p>
+        <p>Obtenez un devis en 30 secondes ou parlez directement à un conseiller. Sans engagement.</p>
         <div className="v5-cta-buttons">
           <Link to="/tarifs" className="v4-btn-primary">Demander un devis</Link>
           <Link to="/contact" className="v4-btn-outline">Contacter un conseiller</Link>
