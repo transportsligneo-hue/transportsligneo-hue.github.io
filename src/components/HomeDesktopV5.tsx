@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapFranceEurope from "@/components/MapFranceEurope";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
-import logoCat from "@/assets/logo-cat.png";
-import logoTransak from "@/assets/logo-transakauto.png";
+import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
+import logoTransak from "@/assets/transakauto-new.png.asset.json";
+
 
 /**
  * Home Desktop V5 — reproduit fidèlement le HTML de référence
