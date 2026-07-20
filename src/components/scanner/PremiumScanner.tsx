@@ -311,6 +311,11 @@ export function PremiumScanner({
                   ⚠
                 </span>
               )}
+              {p.enhanced && !p.qualityWarning && (
+                <span className="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-[8px] text-black text-center py-0.5 flex items-center justify-center gap-0.5">
+                  <Sparkles size={8} /> redressé
+                </span>
+              )}
             </div>
           ))}
         </div>
