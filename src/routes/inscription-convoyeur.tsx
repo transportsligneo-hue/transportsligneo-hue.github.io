@@ -6,7 +6,7 @@ import { notifyAdmin } from "@/lib/admin-notifications";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
   Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
-  Eye, EyeOff,
+  Eye, EyeOff, Image as ImageIcon,
 } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/inscription-convoyeur")({
   head: () => ({
     meta: [
       { title: "Devenir convoyeur · Transports Ligneo" },
-      { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription premium en 4 étapes, validation par notre équipe sous 24 h." },
+      { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription premium en 4 étapes, validation par notre équipe sous 24 à 48 h." },
     ],
   }),
 });
@@ -28,21 +28,33 @@ const STEPS = [
   { id: 4, label: "Récap", icon: ShieldCheck },
 ] as const;
 
+const PREREQUIS = [
+  "Permis B valide depuis 3 ans minimum",
+  "21 ans minimum",
+  "Casier judiciaire vierge",
+  "Statut auto-entrepreneur ou société (créé ou en cours)",
+  "Attestation RC Pro couvrant l'activité de convoyage",
+];
+
 const inputClass = "auth-input !pl-4";
 
 function InscriptionConvoyeur() {
   const navigate = useNavigate();
+  const [prerequisOk, setPrerequisOk] = useState(false);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
     permis_numero: "", annees_experience: "", type_convoyeur: "independant",
+    permis_date_obtention: "",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
+  const [permisVersoFile, setPermisVersoFile] = useState<File | null>(null);
   const [cniFile, setCniFile] = useState<File | null>(null);
   const [ribFile, setRibFile] = useState<File | null>(null);
   const [kbisFile, setKbisFile] = useState<File | null>(null);
   const [rcProFile, setRcProFile] = useState<File | null>(null);
+  const [photoProfilFile, setPhotoProfilFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
@@ -72,13 +84,23 @@ function InscriptionConvoyeur() {
     if (s === 2) {
       if (!form.permis_numero) return "Numéro de permis obligatoire.";
       if (!form.annees_experience) return "Années d'expérience obligatoires.";
+      if (!form.permis_date_obtention) return "Date d'obtention du permis obligatoire.";
+      // Vérification 3 ans mini
+      const d = new Date(form.permis_date_obtention);
+      if (!Number.isNaN(d.getTime())) {
+        const now = new Date();
+        const diffYears = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+        if (diffYears < 3) return "Le permis doit être valide depuis 3 ans minimum.";
+      }
+      if (!permisFile) return "Ajoutez la photo du permis (recto).";
+      if (!permisVersoFile) return "Ajoutez la photo du permis (verso).";
     }
     if (s === 3) {
-      if (!permisFile) return "Ajoutez le permis de conduire.";
       if (!cniFile) return "Ajoutez la pièce d'identité.";
       if (!ribFile) return "Ajoutez le RIB.";
       if (!rcProFile) return "Ajoutez l'attestation RC Pro.";
-      if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le KBIS pour un convoyeur indépendant.";
+      if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le Kbis ou l'avis de situation SIRENE.";
+      if (!photoProfilFile) return "Ajoutez une photo de profil.";
     }
     return null;
   };
@@ -120,6 +142,7 @@ function InscriptionConvoyeur() {
             permis_numero: form.permis_numero,
             annees_experience: form.annees_experience,
             type_convoyeur: form.type_convoyeur,
+            permis_date_obtention: form.permis_date_obtention,
           },
         },
       });
@@ -188,24 +211,34 @@ function InscriptionConvoyeur() {
         };
         await Promise.all([
           uploadDoc(permisFile, "permis"),
+          uploadDoc(permisVersoFile, "permis_verso"),
           uploadDoc(cniFile, "identite"),
           uploadDoc(ribFile, "rib"),
           uploadDoc(kbisFile, "kbis"),
           uploadDoc(rcProFile, "assurance"),
+          uploadDoc(photoProfilFile, "photo_profil"),
         ]);
       }
 
+      // Email de confirmation au candidat
+      try {
+        await sendTransactionalEmail({
+          templateName: "inscription-convoyeur",
+          recipientEmail: form.email,
+          idempotencyKey: `inscription-candidat-${userId}`,
+          templateData: { prenom: form.prenom },
+        });
+      } catch (e) { console.warn("[inscription] email candidat:", e); }
+
+      // Notification interne équipe
       try {
         await sendTransactionalEmail({
           templateName: "inscription-convoyeur",
           recipientEmail: "contact@transportsligneo.fr",
-          idempotencyKey: `inscription-${userId}`,
-          templateData: {
-            prenom: form.prenom, nom: form.nom, email: form.email,
-            telephone: form.telephone, ville: form.ville,
-          },
+          idempotencyKey: `inscription-admin-${userId}`,
+          templateData: { prenom: `${form.prenom} ${form.nom} (${form.email} · ${form.telephone} · ${form.ville})` },
         });
-      } catch (e) { console.warn("[inscription] email:", e); }
+      } catch (e) { console.warn("[inscription] email admin:", e); }
 
       void notifyAdmin({
         type: "driver_action",
@@ -243,11 +276,53 @@ function InscriptionConvoyeur() {
           </p>
           <div className="text-white/60 text-xs space-y-1 pt-2 border-t border-primary/10">
             <p>Pas reçu ? Vérifiez vos spams.</p>
-            <p>Notre équipe traite votre dossier sous 24-48 h ouvrées.</p>
+            <p>Notre équipe traite votre dossier sous 24 à 48 h ouvrées, pas des semaines.</p>
           </div>
           <Link to="/login" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
             Aller à la connexion →
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // === Écran Prérequis avant le formulaire ===
+  if (!prerequisOk) {
+    return (
+      <div className="auth-shell flex items-center justify-center px-4 py-12">
+        <div className="max-w-2xl w-full">
+          <div className="text-center mb-8">
+            <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
+            <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
+            <p className="auth-subtle text-sm mt-2">Avant de commencer, vérifiez que vous remplissez ces conditions.</p>
+          </div>
+          <div className="auth-card p-6 md:p-8 space-y-5">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-blue-200">Conditions d'éligibilité</p>
+            <ul className="space-y-3">
+              {PREREQUIS.map((p) => (
+                <li key={p} className="flex items-start gap-3 text-sm text-white/85">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-200">
+                    <Check size={13} />
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="pt-2 text-xs text-white/60 leading-relaxed border-t border-white/10">
+              Pas encore d'assurance RC Pro ou de statut ?{" "}
+              <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous oriente.
+            </div>
+            <button
+              type="button"
+              onClick={() => setPrerequisOk(true)}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)]"
+            >
+              Je remplis les conditions <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="text-center mt-6">
+            <Link to="/" className="block text-white/60 text-xs hover:text-primary transition-colors">← Retour au site</Link>
+          </div>
         </div>
       </div>
     );
@@ -274,7 +349,7 @@ function InscriptionConvoyeur() {
         <div className="text-center mb-8">
           <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
           <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
-          <p className="auth-subtle text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé · validation sous 24-48 h.</p>
+          <p className="auth-subtle text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé · validation sous 24 à 48 h.</p>
         </div>
 
         {/* Stepper */}
@@ -379,7 +454,24 @@ function InscriptionConvoyeur() {
                   <input type="number" min="0" max="70" value={form.annees_experience} onChange={update("annees_experience")} className={inputClass} required placeholder="Ex: 10" />
                 </div>
               </div>
-              <FileUpload label="Photo du permis (recto/verso)" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="Format JPG, PNG ou PDF · 5 Mo max." />
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
+                  <Calendar size={12} className="inline mr-1" /> Date d'obtention du permis *
+                </label>
+                <input
+                  type="date"
+                  value={form.permis_date_obtention}
+                  onChange={update("permis_date_obtention")}
+                  className={inputClass}
+                  required
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+                <p className="text-[10px] text-white/50 mt-1">Permis B requis depuis 3 ans minimum.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FileUpload label="Permis (recto) *" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+                <FileUpload label="Permis (verso) *" file={permisVersoFile} onChange={makeFileHandler(setPermisVersoFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+              </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                   <FileText size={12} className="inline mr-1" /> Catégories additionnelles
@@ -405,12 +497,30 @@ function InscriptionConvoyeur() {
           {step === 3 && (
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.15em] text-blue-200">Documents officiels</p>
-              <FileUpload label="Pièce d'identité *" file={cniFile} onChange={makeFileHandler(setCniFile)} />
-              <FileUpload label="RIB *" file={ribFile} onChange={makeFileHandler(setRibFile)} />
-              <FileUpload label="Attestation RC Pro *" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+              <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} onChange={makeFileHandler(setCniFile)} />
               {form.type_convoyeur === "independant" && (
-                <FileUpload label="KBIS *" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
+                <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
               )}
+              <FileUpload label="RIB *" file={ribFile} onChange={makeFileHandler(setRibFile)} />
+              <div>
+                <FileUpload label="Attestation RC Pro *" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+                <p className="text-[11px] text-white/55 mt-1.5">
+                  Pas encore d'assurance RC Pro ?{" "}
+                  <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous accompagne.
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
+                  <ImageIcon size={12} className="inline mr-1" /> Photo de profil *
+                </label>
+                <input
+                  type="file" accept="image/*" onChange={makeFileHandler(setPhotoProfilFile)}
+                  className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
+                />
+                {photoProfilFile
+                  ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {photoProfilFile.name}</p>
+                  : <p className="text-white/40 text-[10px] mt-1">Portrait clair, format carré recommandé.</p>}
+              </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Message (optionnel)</label>
                 <textarea value={form.message} onChange={update("message")} rows={3} className={`${inputClass} resize-none`} placeholder="Présentez-vous brièvement..." />
@@ -432,17 +542,20 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Disponibilité" value={form.disponibilite || " · "} />
                 <RecapRow label="N° permis" value={form.permis_numero} />
                 <RecapRow label="Années d'expérience" value={form.annees_experience} />
+                <RecapRow label="Date d'obtention permis" value={form.permis_date_obtention || " · "} />
               </div>
-              <div className="pt-4 border-t border-white/10 space-y-1 text-xs text-white/60">
-                <p className="flex items-center gap-2">{permisFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} Photo permis {permisFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{cniFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} Pièce d'identité {cniFile ? "✓" : "(non fournie)"}</p>
-                <p className="flex items-center gap-2">{ribFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} RIB {ribFile ? "✓" : "(non fourni)"}</p>
-                {form.type_convoyeur === "independant" && <p className="flex items-center gap-2">{kbisFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} KBIS {kbisFile ? "✓" : "(non fourni)"}</p>}
-                <p className="flex items-center gap-2">{rcProFile ? <Check size={12} className="text-blue-300"/> : <span className="text-white/30">·</span>} RC Pro {rcProFile ? "✓" : "(non fournie)"}</p>
+              <div className="pt-4 border-t border-white/10 space-y-1.5 text-xs">
+                <DocRow label="Permis (recto)" ok={!!permisFile} />
+                <DocRow label="Permis (verso)" ok={!!permisVersoFile} />
+                <DocRow label="Pièce d'identité" ok={!!cniFile} />
+                {form.type_convoyeur === "independant" && <DocRow label="Kbis / SIRENE" ok={!!kbisFile} />}
+                <DocRow label="RIB" ok={!!ribFile} />
+                <DocRow label="RC Pro" ok={!!rcProFile} />
+                <DocRow label="Photo de profil" ok={!!photoProfilFile} />
               </div>
               <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
                 <ShieldCheck size={14} className="inline text-blue-300 mr-1" />
-                Votre inscription sera validée par notre équipe sous 24-48 h ouvrées. Vous recevrez un email de confirmation.
+                Votre dossier est étudié par notre équipe sous 24 à 48 h ouvrées, pas des semaines. Après validation, vous recevrez le contrat de partenariat à signer électroniquement.
               </div>
             </div>
           )}
@@ -501,6 +614,21 @@ function RecapRow({ label, value }: { label: string; value: string }) {
     <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
       <p className="text-[10px] uppercase tracking-[0.15em] text-white/50">{label}</p>
       <p className="text-white text-sm mt-0.5 truncate">{value || " · "}</p>
+    </div>
+  );
+}
+
+function DocRow({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.03] border border-white/10 px-3 py-1.5">
+      <span className="text-white/80">{label}</span>
+      {ok ? (
+        <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-blue-200">
+          <Check size={12} /> fourni
+        </span>
+      ) : (
+        <span className="text-[10px] uppercase tracking-[0.14em] text-white/40">manquant</span>
+      )}
     </div>
   );
 }
