@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw } from "lucide-react";
+import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +9,12 @@ import {
   attachSignedDevisPdf,
   refuseDevis,
 } from "@/lib/devis-signature-otp.functions";
+import { acceptDevis } from "@/lib/devis-acceptation.functions";
+import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
+
 
 interface Props {
   devisId: string;
@@ -59,11 +62,13 @@ async function sha256HexOfBlob(blob: Blob): Promise<string> {
 
 type Phase =
   | "consent"
+  | "sign"
   | "otp"
   | "processing"
   | "refuse"
   | "refused"
   | "success";
+
 
 export function DevisAcceptationStep({
   devisId,
@@ -95,6 +100,9 @@ export function DevisAcceptationStep({
   const verifyOtp = useServerFn(verifyDevisOtp);
   const attachPdf = useServerFn(attachSignedDevisPdf);
   const refuse = useServerFn(refuseDevis);
+  const acceptDevisFn = useServerFn(acceptDevis);
+  const [signing, setSigning] = useState(false);
+
 
   // Ticker pour compte à rebours
   useEffect(() => {
@@ -265,6 +273,92 @@ export function DevisAcceptationStep({
     }
   };
 
+  /* -------- Signature manuscrite rapide (canvas) -------- */
+  const handleQuickSign = async (signatureFile: File) => {
+    setSigning(true);
+    setPhase("processing");
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Session expirée");
+
+      // 1. Charge le devis + version
+      const { data: devisRow, error: dErr } = await supabase
+        .from("devis").select("*").eq("id", devisId).single();
+      if (dErr || !devisRow) throw new Error("Devis introuvable");
+      const version = (devisRow as { version?: number }).version ?? 1;
+
+      // 2. Upload signature PNG
+      const sigPath = `${uid}/${devisId}/v${version}-signature.png`;
+      const upSig = await supabase.storage.from("devis-acceptes")
+        .upload(sigPath, signatureFile, { upsert: true, contentType: "image/png" });
+      if (upSig.error) throw new Error(`Signature non enregistrée : ${upSig.error.message}`);
+
+      // 3. Génère PDF signé (avec cartouche + signature)
+      const acceptedAtDate = new Date();
+      const acceptedAtLabel = `${acceptedAtDate.toLocaleDateString("fr-FR")} à ${acceptedAtDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      const rawPdf = await generateDevisPdf({
+        ...(devisRow as unknown as DevisData),
+        version,
+      });
+      const pdfHash = await sha256HexOfBlob(rawPdf);
+      const email = (devisRow as { email?: string }).email ?? userData.user?.email ?? "";
+      const signedPdf = await generateDevisPdf({
+        ...(devisRow as unknown as DevisData),
+        version,
+        acceptedAtLabel,
+        otpProof: {
+          email,
+          method: "Signature manuscrite en ligne",
+          acceptedAtLabel,
+          ipAddress: null,
+          userAgent: null,
+          cgvVersion: "v1-2026-01",
+          pdfHash,
+        },
+      });
+      const pdfPath = `${uid}/${devisId}/v${version}-devis-signe.pdf`;
+      const upPdf = await supabase.storage.from("devis-acceptes")
+        .upload(pdfPath, signedPdf, { upsert: true, contentType: "application/pdf" });
+      if (upPdf.error) throw new Error(`Archivage du PDF impossible : ${upPdf.error.message}`);
+
+      // 4. Enregistre l'acceptation (signature + PDF)
+      await acceptDevisFn({ data: { devisId, signaturePath: sigPath, pdfPath } });
+
+      // 5. E-mails best-effort
+      try {
+        const prenom = (devisRow as { prenom?: string }).prenom ?? "";
+        const nom = (devisRow as { nom?: string }).nom ?? "";
+        const sends: Promise<unknown>[] = [
+          sendTransactionalEmail({
+            templateName: "devis-accepte-admin",
+            idempotencyKey: `admin-devis-accepte-${devisId}-v${version}`,
+            templateData: { prenom, nom, email, numero, depart, arrivee, date: acceptedAtLabel, prix: prixTtc },
+          }),
+        ];
+        if (email) {
+          sends.unshift(sendTransactionalEmail({
+            templateName: "devis-accepte",
+            recipientEmail: email,
+            idempotencyKey: `devis-accepte-${devisId}-v${version}`,
+            templateData: { prenom, numero, depart, arrivee, montant: `${prixTtc.toFixed(2)} €`, dateAcceptation: acceptedAtLabel, version: String(version) },
+          }));
+        }
+        await Promise.allSettled(sends);
+      } catch { /* best-effort */ }
+
+      setPhase("success");
+      toast.success("Devis signé", { description: "Signature enregistrée et archivée." });
+      setTimeout(() => onAccepted(), 900);
+    } catch (e) {
+      toast.error("Signature impossible", { description: (e as Error).message });
+      setPhase("sign");
+    } finally {
+      setSigning(false);
+    }
+  };
+
+
   // Téléchargement du PDF signé depuis storage
   const downloadSignedPdf = async () => {
     try {
@@ -402,12 +496,12 @@ export function DevisAcceptationStep({
             </span>
           </label>
 
-          <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:flex-wrap sm:justify-end">
             <button
               onClick={() => setPhase("refuse")}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-red-500/40 text-red-300 hover:bg-red-500/10 text-xs uppercase tracking-wider"
             >
-              <XCircle size={14} /> Refuser le devis
+              <XCircle size={14} /> Refuser
             </button>
             <button
               onClick={onCancel}
@@ -418,14 +512,46 @@ export function DevisAcceptationStep({
             <button
               onClick={() => checked && sendCode(false)}
               disabled={!checked || sending}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-primary/40 text-primary hover:bg-primary/10 font-heading text-xs tracking-[0.15em] uppercase rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Mail size={14} />
-              {sending ? "Envoi…" : "Accepter et signer"}
+              {sending ? "Envoi…" : "Signer par e-mail"}
+            </button>
+            <button
+              onClick={() => checked && setPhase("sign")}
+              disabled={!checked}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <PenLine size={14} /> Signer maintenant
             </button>
           </div>
+          <p className="text-[10px] text-cream/55 leading-relaxed text-right">
+            Signature manuscrite instantanée · aucun code à attendre.
+          </p>
         </>
       )}
+
+      {phase === "sign" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
+              <PenLine size={13} className="text-primary" /> Signez pour valider
+            </p>
+            <button
+              onClick={() => setPhase("consent")}
+              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+            >
+              <ArrowLeft size={12} /> Retour
+            </button>
+          </div>
+          <p className="text-xs text-cream/70">
+            Signez ci-dessous puis validez. La signature, l'horodatage et votre adresse IP
+            sont archivés comme preuve légale.
+          </p>
+          <SignatureCanvas onValidate={handleQuickSign} disabled={signing} />
+        </div>
+      )}
+
 
       {phase === "otp" && (
         <div className="space-y-4">
