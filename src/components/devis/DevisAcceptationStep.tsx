@@ -100,6 +100,9 @@ export function DevisAcceptationStep({
   const verifyOtp = useServerFn(verifyDevisOtp);
   const attachPdf = useServerFn(attachSignedDevisPdf);
   const refuse = useServerFn(refuseDevis);
+  const acceptDevisFn = useServerFn(acceptDevis);
+  const [signing, setSigning] = useState(false);
+
 
   // Ticker pour compte à rebours
   useEffect(() => {
