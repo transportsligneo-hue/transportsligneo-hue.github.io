@@ -43,8 +43,8 @@ export default function HomeDesktopV5() {
               ))}
             </div>
             <div className="v5-hero-actions">
-              <Link to="/tarifs" className="v4-btn-primary">Estimer mon trajet</Link>
-              <Link to="/tarifs" className="v4-btn-outline">Voir les tarifs</Link>
+              <Link to="/contact" className="v4-btn-primary">Contact</Link>
+              <Link to="/services" className="v4-btn-outline">Nos services</Link>
             </div>
           </div>
 
