@@ -134,6 +134,26 @@ function MesFacturesEtDevis() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Realtime : rafraîchit dès que le statut ou la signature d'un devis change.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`devis-client-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "devis", filter: `user_id=eq.${user.id}` },
+        () => { refresh(); },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "devis_acceptations", filter: `client_user_id=eq.${user.id}` },
+        () => { refresh(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const active = devis.find(d => d.id === activeId);
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/dashboard-client/devis?paye=1`
