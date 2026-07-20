@@ -203,11 +203,18 @@ export function PremiumScanner({
   const handleFileFallback = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-    const newPages: Page[] = files.map((f) => ({
-      id: crypto.randomUUID(),
-      blob: f,
-      preview: URL.createObjectURL(f),
-    }));
+    // Applique scanic aussi aux imports galerie.
+    const newPages: Page[] = await Promise.all(
+      files.map(async (f) => {
+        const enh = await enhanceDocumentCapture(f);
+        return {
+          id: crypto.randomUUID(),
+          blob: enh.blob,
+          preview: URL.createObjectURL(enh.blob),
+          enhanced: enh.enhanced,
+        };
+      }),
+    );
     setPages((prev) => (multiPage ? [...prev, ...newPages] : newPages.slice(0, 1)));
     if (fileFallbackRef.current) fileFallbackRef.current.value = "";
   }, [multiPage]);
