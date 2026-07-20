@@ -496,12 +496,12 @@ export function DevisAcceptationStep({
             </span>
           </label>
 
-          <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:flex-wrap sm:justify-end">
             <button
               onClick={() => setPhase("refuse")}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-red-500/40 text-red-300 hover:bg-red-500/10 text-xs uppercase tracking-wider"
             >
-              <XCircle size={14} /> Refuser le devis
+              <XCircle size={14} /> Refuser
             </button>
             <button
               onClick={onCancel}
@@ -512,14 +512,46 @@ export function DevisAcceptationStep({
             <button
               onClick={() => checked && sendCode(false)}
               disabled={!checked || sending}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-primary/40 text-primary hover:bg-primary/10 font-heading text-xs tracking-[0.15em] uppercase rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Mail size={14} />
-              {sending ? "Envoi…" : "Accepter et signer"}
+              {sending ? "Envoi…" : "Signer par e-mail"}
+            </button>
+            <button
+              onClick={() => checked && setPhase("sign")}
+              disabled={!checked}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <PenLine size={14} /> Signer maintenant
             </button>
           </div>
+          <p className="text-[10px] text-cream/55 leading-relaxed text-right">
+            Signature manuscrite instantanée · aucun code à attendre.
+          </p>
         </>
       )}
+
+      {phase === "sign" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
+              <PenLine size={13} className="text-primary" /> Signez pour valider
+            </p>
+            <button
+              onClick={() => setPhase("consent")}
+              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+            >
+              <ArrowLeft size={12} /> Retour
+            </button>
+          </div>
+          <p className="text-xs text-cream/70">
+            Signez ci-dessous puis validez. La signature, l'horodatage et votre adresse IP
+            sont archivés comme preuve légale.
+          </p>
+          <SignatureCanvas onValidate={handleQuickSign} disabled={signing} />
+        </div>
+      )}
+
 
       {phase === "otp" && (
         <div className="space-y-4">
