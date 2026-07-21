@@ -1,78 +1,225 @@
 import { Link } from "@tanstack/react-router";
+import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin, Instagram, Facebook } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
+const trustItems = [
+  { icon: Shield, label: "Assurance incluse" },
+  { icon: Clock, label: "Disponible 7j/7" },
+  { icon: CheckCircle2, label: "0 frais caché" },
+  { icon: Zap, label: "Devis en 30s" },
+];
+
+const navLinks: { label: string; to: string }[] = [
+  { label: "Accueil", to: "/" },
+  { label: "Services", to: "/services" },
+  { label: "Tarifs", to: "/tarifs" },
+  { label: "À propos", to: "/a-propos" },
+  { label: "Contact", to: "/contact" },
+];
+
+const legalLinks: { label: string; to: string }[] = [
+  { label: "Espace professionnels", to: "/pro" },
+  { label: "Conditions Générales de Vente", to: "/cgv" },
+  { label: "Mentions Légales", to: "/mentions-legales" },
+  { label: "Politique de Confidentialité", to: "/confidentialite" },
+  { label: "Devenir convoyeur", to: "/inscription-convoyeur" },
+  { label: "Espace pro", to: "/login" },
+];
+
 export default function Footer() {
+  const scrollTop = () => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer
-      className="py-12 border-t border-[#60a5fa]/15"
-      style={{
-        background:
-          "linear-gradient(180deg, #061238 0%, #0a1f5c 50%, #061238 100%)",
-      }}
+      className="relative overflow-hidden"
+      style={{ background: "linear-gradient(180deg,#132a6b 0%,#102153 45%,#0c1c4a 100%)" }}
     >
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid md:grid-cols-3 gap-8 mb-10">
-          <div>
-            <Link to="/" className="inline-flex items-center gap-3 mb-3" aria-label="Accueil · Transports Ligneo">
-              <img
-                src={logoLigneo}
-                alt="Transports Ligneo"
-                className="h-14 w-auto object-contain opacity-90"
-                loading="lazy"
-              />
-            </Link>
-            <p className="font-heading text-[#60a5fa] tracking-[0.2em] uppercase text-base mb-2">
-              Transports Ligneo
-            </p>
-            <p className="text-cream/50 text-sm leading-relaxed">
-              Convoyage automobile<br />
-              Basé à Tours (37)
-            </p>
+      {/* Halos flottants */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-36 left-[10%] h-[360px] w-[360px] rounded-full blur-2xl animate-[ligneoBlob_8s_ease-in-out_infinite]"
+        style={{ background: "radial-gradient(circle, rgba(63,123,255,0.25), transparent 70%)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 right-[5%] h-[380px] w-[380px] rounded-full blur-2xl animate-[ligneoBlob_9s_ease-in-out_infinite_reverse]"
+        style={{ background: "radial-gradient(circle, rgba(217,181,74,0.14), transparent 70%)" }}
+      />
+
+      {/* Ligne lumineuse en haut */}
+      <div
+        className="relative h-[2px] w-full animate-[ligneoLineDrift_6s_linear_infinite]"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(122,163,255,0.6), rgba(217,181,74,0.6), rgba(122,163,255,0.6), transparent)",
+          backgroundSize: "200% 100%",
+        }}
+      />
+
+      {/* Particules */}
+      {[
+        { top: 40, left: "15%", delay: 0 },
+        { top: 90, left: "60%", delay: 1.5 },
+        { top: 150, left: "85%", delay: 3 },
+        { top: 200, left: "35%", delay: 2 },
+      ].map((p, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="pointer-events-none absolute h-[3px] w-[3px] rounded-full animate-[ligneoDriftUp_7s_ease-in-out_infinite]"
+          style={{
+            top: p.top,
+            left: p.left,
+            animationDelay: `${p.delay}s`,
+            background: "rgba(180,205,255,0.6)",
+            filter: "blur(0.5px)",
+          }}
+        />
+      ))}
+
+      {/* Bande confiance */}
+      <div className="relative z-10 flex flex-wrap justify-center gap-6 md:gap-10 border-b border-[#7aa3ff]/15 px-8 py-6">
+        {trustItems.map((t, i) => (
+          <div key={t.label} className="flex items-center gap-2 text-[12.5px] font-semibold text-[#9aa6c9]">
+            <t.icon
+              size={15}
+              className="shrink-0 text-[#d9b54a] animate-[ligneoIconPulse_2.6s_ease-in-out_infinite]"
+              style={{ animationDelay: `${i * 0.4}s` }}
+            />
+            {t.label}
           </div>
-          <div>
-            <p className="font-heading text-cream/70 text-xs tracking-[0.15em] uppercase mb-3">
-              Navigation
-            </p>
-            <ul className="space-y-2 text-sm">
-              {["Accueil", "Engagements", "Prestations", "Tarifs", "Devis", "Contact"].map((l) => (
-                <li key={l}>
-                  <a
-                    href={`#${l.toLowerCase()}`}
-                    className="text-cream/50 hover:text-[#60a5fa] transition-colors"
-                  >
-                    {l}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="font-heading text-cream/70 text-xs tracking-[0.15em] uppercase mb-3">
-              Coordonnées
-            </p>
-            <div className="text-sm text-cream/50 space-y-1 mb-6">
-              <p>07 82 45 61 81</p>
-              <p>contact@transportsligneo.fr</p>
-              <p>www.transportsligneo.fr</p>
+        ))}
+      </div>
+
+      {/* Colonnes */}
+      <div className="relative z-10 mx-auto grid max-w-[1180px] grid-cols-1 gap-9 px-8 pb-8 pt-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
+        {/* Bloc marque */}
+        <div>
+          <div className="mb-4 flex items-center gap-3">
+            <div
+              className="h-11 w-11 overflow-hidden rounded-xl animate-[ligneoLogoGlow_3s_ease-in-out_infinite]"
+              style={{ boxShadow: "0 0 0 1px rgba(122,163,255,0.4), 0 0 16px rgba(63,123,255,0.4)" }}
+            >
+              <img src={logoLigneo} alt="Transports Ligneo" className="h-full w-full object-cover" loading="lazy" />
             </div>
-            <p className="font-heading text-cream/70 text-xs tracking-[0.15em] uppercase mb-3">
-              Informations légales
-            </p>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/pro" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Espace professionnels</Link></li>
-              
-              <li><Link to="/cgv" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Conditions Générales de Vente</Link></li>
-              <li><Link to="/mentions-legales" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Mentions Légales</Link></li>
-              <li><Link to="/confidentialite" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Politique de Confidentialité</Link></li>
-              <li><Link to="/inscription-convoyeur" className="text-cream/50 hover:text-[#60a5fa] transition-colors">Devenir convoyeur</Link></li>
-              <li><Link to="/login" className="text-cream/30 hover:text-[#60a5fa] transition-colors text-xs mt-2 inline-block">Espace pro</Link></li>
-            </ul>
+            <span
+              className="font-heading text-[15px] font-extrabold tracking-[0.03em] text-white"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.6)]">LIGNEO</span>
+            </span>
+          </div>
+          <p className="mb-5 max-w-[260px] text-[13px] leading-relaxed text-[#9aa6c9]">
+            Convoyage automobile premium.<br />
+            Basé à Tours (37) · France entière.
+          </p>
+          <div className="flex gap-2.5">
+            {[
+              { Icon: Linkedin, cls: "hover:!border-[#0a66c2] hover:!bg-[#0a66c2] hover:shadow-[0_8px_18px_rgba(10,102,194,0.4)]", label: "LinkedIn" },
+              { Icon: Instagram, cls: "hover:!border-[#c23fc2] hover:!bg-gradient-to-br hover:!from-[#f09433] hover:!via-[#dc2743] hover:!to-[#bc1888] hover:shadow-[0_8px_18px_rgba(220,39,67,0.4)]", label: "Instagram" },
+              { Icon: Facebook, cls: "hover:!border-[#1877f2] hover:!bg-[#1877f2] hover:shadow-[0_8px_18px_rgba(24,119,242,0.4)]", label: "Facebook" },
+            ].map(({ Icon, cls, label }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className={`flex h-9 w-9 items-center justify-center rounded-full border border-[#7aa3ff]/30 bg-white/[0.03] text-[#9aa6c9] transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:text-white ${cls}`}
+              >
+                <Icon size={16} />
+              </a>
+            ))}
           </div>
         </div>
-        <div className="gold-divider mb-6" />
-        <p className="text-center text-cream/30 text-xs tracking-wider">
-          © {new Date().getFullYear()} Transports Ligneo · Tous droits réservés
+
+        {/* Navigation */}
+        <div>
+          <p
+            className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#d9b54a]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Navigation
+          </p>
+          <ul className="flex flex-col gap-3">
+            {navLinks.map((l) => (
+              <li key={l.label}>
+                <Link to={l.to} className="group relative inline-flex w-fit items-center text-[13.5px] text-[#9aa6c9] transition-all duration-300 hover:translate-x-1 hover:text-white">
+                  <span className="absolute -left-4 text-[#4f8cff] opacity-0 transition-all duration-300 group-hover:-left-3.5 group-hover:opacity-100">›</span>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Infos légales */}
+        <div>
+          <p
+            className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#d9b54a]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Informations légales
+          </p>
+          <ul className="flex flex-col gap-3">
+            {legalLinks.map((l) => (
+              <li key={l.label}>
+                <Link to={l.to} className="group relative inline-flex w-fit items-center text-[13.5px] text-[#9aa6c9] transition-all duration-300 hover:translate-x-1 hover:text-white">
+                  <span className="absolute -left-4 text-[#4f8cff] opacity-0 transition-all duration-300 group-hover:-left-3.5 group-hover:opacity-100">›</span>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Coordonnées */}
+        <div>
+          <p
+            className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#d9b54a]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Coordonnées
+          </p>
+          <a href="tel:+33782456181" className="mb-3.5 flex items-center gap-2.5 text-[13.5px] text-[#9aa6c9] transition-colors hover:text-white">
+            <Phone size={15} className="shrink-0 text-[#4f8cff]" /> 07 82 45 61 81
+          </a>
+          <a href="mailto:contact@transportsligneo.fr" className="mb-3.5 flex items-center gap-2.5 text-[13.5px] text-[#9aa6c9] transition-colors hover:text-white">
+            <Mail size={15} className="shrink-0 text-[#4f8cff]" /> contact@transportsligneo.fr
+          </a>
+          <div className="mb-4 flex items-center gap-2.5 text-[13.5px] text-[#9aa6c9]">
+            <Globe size={15} className="shrink-0 text-[#4f8cff]" /> www.transportsligneo.fr
+          </div>
+          <Link
+            to="/contact"
+            className="relative mt-2 inline-flex items-center gap-2 overflow-hidden rounded-full px-4.5 py-2.5 text-[12.5px] font-bold text-white shadow-[0_10px_22px_rgba(47,95,255,0.35)]"
+            style={{ background: "linear-gradient(120deg,#2f5fff,#2450e0 60%,#4f8cff)", padding: "10px 18px" }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-y-0 -left-[60%] h-full w-[40%] -skew-x-12 animate-[ligneoShine_3.4s_ease-in-out_infinite]"
+              style={{ background: "linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent)" }}
+            />
+            <span className="relative flex items-center gap-2">
+              Nous contacter <ArrowRight size={13} />
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Bas */}
+      <div className="relative z-10 mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-3 border-t border-[#7aa3ff]/15 px-8 py-5">
+        <p className="text-xs text-[#9aa6c9]">
+          © {new Date().getFullYear()} <b className="text-white">Transports Ligneo</b> · Tous droits réservés
         </p>
+        <button
+          onClick={scrollTop}
+          type="button"
+          className="flex items-center gap-1.5 rounded-full border border-[#7aa3ff]/30 bg-[#3f7bff]/10 px-4 py-2 text-xs font-bold text-[#4f8cff] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3f7bff]/20"
+        >
+          <ArrowUp size={13} className="animate-[ligneoFloatUp_2s_ease-in-out_infinite]" />
+          Haut de page
+        </button>
       </div>
     </footer>
   );
