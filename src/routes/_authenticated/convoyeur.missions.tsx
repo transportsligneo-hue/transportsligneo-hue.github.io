@@ -40,7 +40,8 @@ interface GpsPoint {
   accuracy: number | null;
 }
 
-type FilterKey = "all" | "today" | "upcoming" | "in_progress" | "done";
+type FilterKey = "all" | "today" | "upcoming" | "in_progress" | "done" | "proposed" | "accepted";
+const DONE_STATUTS = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
 type InspectionSession = { attributionId: string; type: "depart" | "arrivee" };
 
 const EDL_SESSION_KEY = "edl:inspection";
@@ -94,7 +95,12 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>(() => {
+    if (typeof window === "undefined") return "all";
+    const f = new URLSearchParams(window.location.search).get("f");
+    const allowed: FilterKey[] = ["all", "today", "upcoming", "in_progress", "done", "proposed", "accepted"];
+    return (allowed as string[]).includes(f ?? "") ? (f as FilterKey) : "all";
+  });
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
@@ -102,7 +108,9 @@ function ConvoyeurMissions() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const storedOpenMissionId = sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
+      const params = new URLSearchParams(window.location.search);
+      const openFromUrl = params.get("open");
+      const storedOpenMissionId = openFromUrl || sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
       const storedInspection = readStoredInspection();
 
       if (storedOpenMissionId) setOpenMissionIdState(storedOpenMissionId);
@@ -111,6 +119,22 @@ function ConvoyeurMissions() {
       // Ignore storage restoration issues on privacy-restricted devices.
     }
   }, []);
+
+  // Nettoie l'openMissionId restauré si la mission n'est plus active
+  // (évite d'atterrir sur une mission terminée quand on revient depuis
+  // le dashboard).
+  useEffect(() => {
+    if (!openMissionId || missions.length === 0) return;
+    const m = missions.find(x => x.id === openMissionId);
+    if (!m) return;
+    if (typeof window === "undefined") return;
+    const openFromUrl = new URLSearchParams(window.location.search).get("open");
+    if (openFromUrl === openMissionId) return;
+    if (DONE_STATUTS.has(m.statut)) {
+      setOpenMissionId(null);
+    }
+  }, [openMissionId, missions, setOpenMissionId]);
+
 
   // Sync inspection state to sessionStorage
   useEffect(() => {
