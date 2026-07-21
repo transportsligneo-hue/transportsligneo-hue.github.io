@@ -155,8 +155,13 @@ function ConvoyeurDashboard() {
           <p className="text-[13.5px] text-[#8fa3cc] mt-2">Vos missions, en un coup d'œil.</p>
         </div>
 
-        {/* Revenue card */}
-        <div className="relative overflow-hidden rounded-[22px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] px-4 py-3.5 min-w-[170px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)]">
+        {/* Revenue card — clickable → Finances */}
+        <Link
+          to="/convoyeur/finances"
+          className="group relative overflow-hidden rounded-[22px] border border-[rgba(217,181,74,0.35)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] px-4 py-3.5 min-w-[170px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] transition-all active:scale-[0.97] hover:border-[rgba(217,181,74,0.55)]"
+          aria-label="Ouvrir l'espace Finances"
+        >
+          <span className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[radial-gradient(circle,rgba(217,181,74,0.28),transparent_70%)]" />
           {/* mini chart bg */}
           <svg className="absolute right-0 bottom-0 opacity-40 pointer-events-none" width="120" height="55" viewBox="0 0 120 55" fill="none">
             <path d="M0 40 Q20 35 35 30 T70 20 T105 8 L120 5 L120 55 L0 55 Z" fill="url(#g1)" />
@@ -174,19 +179,23 @@ function ConvoyeurDashboard() {
               <TrendingUp size={14} className="text-white" />
             </div>
           </div>
-          <p className="relative text-[30px] font-bold text-[#f5b940] mt-1 tabular-nums leading-none tracking-tight">
+          <p className="relative text-[30px] font-bold text-[#f5b940] mt-1 tabular-nums leading-none tracking-tight drop-shadow-[0_0_14px_rgba(217,181,74,0.35)]">
             {revenueMonth.toFixed(0)} €
           </p>
-          {revenueDelta !== null && (
+          {revenueDelta !== null ? (
             <p className="relative flex items-center gap-1 text-[11px] mt-3 text-[#8fa3cc]">
               <ArrowUpRight size={12} className={revenueDelta >= 0 ? "text-[#34d399]" : "text-[#34d399] rotate-90"} />
-              <span className={revenueDelta >= 0 ? "text-[#34d399] font-semibold" : "text-[#34d399] font-semibold"}>
+              <span className="text-[#34d399] font-semibold">
                 {revenueDelta > 0 ? "+" : ""}{revenueDelta}%
               </span>
               <span>vs mois dernier</span>
             </p>
+          ) : (
+            <p className="relative text-[10.5px] mt-3 text-[#8fa3cc] font-medium tracking-wide">
+              Voir mes finances →
+            </p>
           )}
-        </div>
+        </Link>
       </div>
 
       {/* 4 stat cards — cliquables */}

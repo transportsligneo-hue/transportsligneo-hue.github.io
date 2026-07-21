@@ -10,6 +10,7 @@ import {
   Loader2,
   Sparkles,
   GraduationCap,
+  Wallet,
 } from "lucide-react";
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -26,6 +27,7 @@ const navItems: ConvoyeurSidebarItem[] = [
   { to: "/convoyeur/disponibilites", label: "Disponibilités", shortLabel: "Agenda", icon: CalendarDays },
   { to: "/convoyeur/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
   { to: "/convoyeur/historique", label: "Historique", icon: History },
+  { to: "/convoyeur/finances", label: "Finances", shortLabel: "Finances", icon: Wallet },
   { to: "/convoyeur/profil", label: "Mon profil", shortLabel: "Profil", icon: UserRound },
 ];
 
