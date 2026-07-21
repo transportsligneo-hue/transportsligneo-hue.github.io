@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import brandBanner from "@/assets/ligneo-brand-banner.jpg.asset.json";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
@@ -52,14 +52,20 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-8">
-          <Link to="/" className="flex items-center shrink-0" aria-label="Accueil · Transports Ligneo">
-            <img
-              src={brandBanner.url}
-              alt="Transports Ligneo"
-              className="h-14 md:h-16 w-auto object-contain rounded-lg"
-              loading="eager"
-            />
+        <div className="max-w-7xl mx-auto pl-6 pr-4 py-3 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
+            <div
+              className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
+              style={{ boxShadow: "0 0 0 1px rgba(122,163,255,0.4), 0 0 16px rgba(63,123,255,0.35)" }}
+            >
+              <img src={logoLigneo} alt="Transports Ligneo" className="h-full w-full object-cover" loading="eager" />
+            </div>
+            <span
+              className="font-heading text-[15px] font-extrabold tracking-[0.03em] text-white whitespace-nowrap"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">LIGNEO</span>
+            </span>
           </Link>
 
           {/* Liens centraux · pilule englobante */}
