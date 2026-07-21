@@ -2633,8 +2633,8 @@
   .r4-btn-connect {
     position: relative; overflow: hidden;
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 22px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 700; color: #fff;
+    padding: 9px 16px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; color: #fff;
     background: linear-gradient(135deg, var(--r4-blue) 0%, var(--r4-blue-bright) 50%, var(--r4-gold) 150%);
     background-size: 220% 220%;
     box-shadow: 0 8px 20px rgba(47,95,255,0.4);
