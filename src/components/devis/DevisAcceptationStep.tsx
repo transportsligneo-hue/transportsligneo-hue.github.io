@@ -103,6 +103,8 @@ export function DevisAcceptationStep({
   const refuse = useServerFn(refuseDevis);
   const acceptDevisFn = useServerFn(acceptDevis);
   const [signing, setSigning] = useState(false);
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const isFlotte = orgInfo?.accountType === "flotte";
 
 
   // Ticker pour compte à rebours
