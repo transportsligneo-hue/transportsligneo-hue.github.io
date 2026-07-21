@@ -11,6 +11,7 @@ import {
 } from "@/lib/devis-signature-otp.functions";
 import { acceptDevis } from "@/lib/devis-acceptation.functions";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -102,6 +103,8 @@ export function DevisAcceptationStep({
   const refuse = useServerFn(refuseDevis);
   const acceptDevisFn = useServerFn(acceptDevis);
   const [signing, setSigning] = useState(false);
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const isFlotte = orgInfo?.accountType === "flotte";
 
 
   // Ticker pour compte à rebours
@@ -512,21 +515,25 @@ export function DevisAcceptationStep({
             <button
               onClick={() => checked && sendCode(false)}
               disabled={!checked || sending}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-primary/40 text-primary hover:bg-primary/10 font-heading text-xs tracking-[0.15em] uppercase rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 font-heading text-xs tracking-[0.15em] uppercase rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isFlotte ? "bg-primary text-navy hover:bg-gold-light" : "border border-primary/40 text-primary hover:bg-primary/10"}`}
             >
               <Mail size={14} />
               {sending ? "Envoi…" : "Signer par e-mail"}
             </button>
-            <button
-              onClick={() => checked && setPhase("sign")}
-              disabled={!checked}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <PenLine size={14} /> Signer maintenant
-            </button>
+            {!isFlotte && (
+              <button
+                onClick={() => checked && setPhase("sign")}
+                disabled={!checked}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <PenLine size={14} /> Signer maintenant
+              </button>
+            )}
           </div>
           <p className="text-[10px] text-cream/55 leading-relaxed text-right">
-            Signature manuscrite instantanée · aucun code à attendre.
+            {isFlotte
+              ? "Signature Flotte · validation par code de signature unique reçu par e-mail (obligatoire)."
+              : "Signature manuscrite instantanée · aucun code à attendre."}
           </p>
         </>
       )}
