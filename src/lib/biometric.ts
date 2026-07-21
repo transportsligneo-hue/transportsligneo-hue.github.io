@@ -102,7 +102,7 @@ export async function verifyBiometric(userId: string): Promise<boolean> {
     const assertion = await navigator.credentials.get({
       publicKey: {
         challenge: randomBytes(32),
-        allowCredentials: [{ type: "public-key", id: b64uDecode(stored.credId) }],
+        allowCredentials: [{ type: "public-key", id: b64uDecode(stored.credId).buffer as ArrayBuffer }],
         userVerification: "required",
         timeout: 60000,
       },
