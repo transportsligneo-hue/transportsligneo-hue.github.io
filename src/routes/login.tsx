@@ -36,6 +36,10 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [remember, setRemember] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("ligneo_remember") !== "false";
+  });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
