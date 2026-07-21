@@ -60,7 +60,7 @@ export async function enableBiometric(userId: string, email: string): Promise<vo
       challenge: randomBytes(32),
       rp: { name: "Transports Ligneo" },
       user: {
-        id: new TextEncoder().encode(userId),
+        id: new TextEncoder().encode(userId).buffer as ArrayBuffer,
         name: email,
         displayName: email,
       },
