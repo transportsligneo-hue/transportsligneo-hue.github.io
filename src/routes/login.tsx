@@ -36,6 +36,10 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [remember, setRemember] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("ligneo_remember") !== "false";
+  });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
@@ -74,6 +78,10 @@ function LoginPage() {
     submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
+      try {
+        localStorage.setItem("ligneo_remember", remember ? "true" : "false");
+        sessionStorage.setItem("ligneo_tab_alive", "1");
+      } catch { /* ignore */ }
       const TRANSIENT = new Set(["timeout-or-duplicate", "missing-input-response", "invalid-input-response", "network"]);
       const tryVerify = async () => {
         const token = await getRecaptchaToken("login");
@@ -222,7 +230,19 @@ function LoginPage() {
             </div>
           </div>
 
+          <label className="flex items-center gap-2.5 text-[12px] text-white/75 select-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              disabled={loading}
+              className="h-4 w-4 rounded border-white/25 bg-white/5 accent-blue-400 cursor-pointer"
+            />
+            <span>Rester connecté sur cet appareil</span>
+          </label>
+
           <button type="submit" disabled={loading} className="auth-btn-primary">
+
             {loading ? (
               <><Loader2 size={16} className="animate-spin" />Connexion…</>
             ) : (
