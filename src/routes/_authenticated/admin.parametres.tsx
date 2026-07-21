@@ -171,6 +171,7 @@ function AdminParametres() {
           </Card>
 
           <DevisAcceptationToggleCard />
+          <DriverScreenProtectionCard />
         </TabsContent>
 
 
