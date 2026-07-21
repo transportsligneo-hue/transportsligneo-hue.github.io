@@ -732,4 +732,3 @@ function DriverScreenProtectionCard() {
     </Card>
   );
 }
-}
