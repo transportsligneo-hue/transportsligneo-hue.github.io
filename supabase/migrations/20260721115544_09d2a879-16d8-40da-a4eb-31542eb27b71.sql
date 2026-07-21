@@ -1,0 +1,1 @@
+INSERT INTO public.app_settings (key, value) VALUES ('driver_screen_protection', '{"enabled": false}'::jsonb) ON CONFLICT (key) DO NOTHING;
