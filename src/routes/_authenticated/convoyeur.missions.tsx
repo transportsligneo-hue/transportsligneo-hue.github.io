@@ -401,10 +401,15 @@ function ConvoyeurMissions() {
   const filtered = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     let list = missions;
+    // "Toutes" = missions actives uniquement (proposées / acceptées / à venir / en cours)
+    // Les missions terminées, validées ou refusées vont dans l'onglet Terminées / Historique.
+    if (filter === "all") list = list.filter(m => !DONE_STATUTS.has(m.statut));
     if (filter === "today") list = list.filter(m => m.trajet?.date_trajet === today);
     if (filter === "upcoming") list = list.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > today);
     if (filter === "in_progress") list = list.filter(m => m.statut === "en_cours");
-    if (filter === "done") list = list.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut));
+    if (filter === "proposed") list = list.filter(m => m.statut === "propose");
+    if (filter === "accepted") list = list.filter(m => m.statut === "accepte");
+    if (filter === "done") list = list.filter(m => DONE_STATUTS.has(m.statut));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(m =>
@@ -415,10 +420,9 @@ function ConvoyeurMissions() {
       );
     }
     // Tri : en cours d'abord, puis à venir (date asc), puis terminées (date desc).
-    const doneStatuts = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
     const bucket = (m: typeof missions[number]) => {
       if (m.statut === "en_cours") return 0;
-      if (doneStatuts.has(m.statut)) return 2;
+      if (DONE_STATUTS.has(m.statut)) return 2;
       return 1;
     };
     return [...list].sort((a, b) => {
