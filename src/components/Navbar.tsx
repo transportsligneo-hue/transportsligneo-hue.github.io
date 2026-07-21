@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import brandBanner from "@/assets/ligneo-brand-banner.jpg.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
-const navLinks = [
+type NavAccent = "purple" | "green" | undefined;
+const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
-  { to: "/pro", label: "B2B" },
+  { to: "/pro", label: "B2B", accent: "purple" },
+  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "green" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
@@ -51,29 +53,32 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-8">
-          <Link to="/" className="flex items-center gap-3 mr-2 shrink-0" aria-label="Accueil · Transports Ligneo">
+          <Link to="/" className="flex items-center shrink-0" aria-label="Accueil · Transports Ligneo">
             <img
-              src={logoLigneo}
+              src={brandBanner.url}
               alt="Transports Ligneo"
-              className="h-14 md:h-16 w-auto object-contain"
+              className="h-14 md:h-16 w-auto object-contain rounded-lg"
               loading="eager"
             />
           </Link>
 
           {/* Liens centraux · pilule englobante */}
           <ul className="r4-nav-pill whitespace-nowrap">
-            {navLinks.map((l) => (
-              <li key={l.to}>
-                <Link
-                  to={l.to}
-                  activeOptions={{ exact: true }}
-                  activeProps={{ className: "r4-nav-link is-active whitespace-nowrap" }}
-                  inactiveProps={{ className: "r4-nav-link whitespace-nowrap" }}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+            {navLinks.map((l) => {
+              const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
+              return (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
+                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Actions droite : téléphone + Estimer + Connexion */}
