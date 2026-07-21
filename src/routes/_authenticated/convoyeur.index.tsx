@@ -120,17 +120,24 @@ function ConvoyeurDashboard() {
     })();
   }, [user]);
 
+  const clearStoredOpenMission = () => {
+    try {
+      sessionStorage.removeItem("driver:openMissionId");
+      localStorage.removeItem("driver:openMissionId");
+    } catch { /* noop */ }
+  };
+
   const statCards = [
-    { to: "/convoyeur/missions", label: "Proposées", value: stats.proposed, icon: Clock, pill: "En attente",
+    { to: "/convoyeur/missions", search: { f: "proposed" as const }, label: "Proposées", value: stats.proposed, icon: Clock, pill: "En attente",
       iconBg: "from-[#3d2a10] to-[#2a1d0b]", iconBorder: "border-[rgba(234,179,8,0.35)]", iconColor: "text-[#f59e0b]",
       dotColor: "bg-[#f59e0b]", pillColor: "text-[#fbbf24]" },
-    { to: "/convoyeur/missions", label: "Acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
+    { to: "/convoyeur/missions", search: { f: "accepted" as const }, label: "Acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
       iconBg: "from-[#0d1f4d] to-[#0a1638]", iconBorder: "border-[rgba(96,165,250,0.35)]", iconColor: "text-[#60a5fa]",
       dotColor: "bg-[#60a5fa]", pillColor: "text-[#93c5fd]" },
-    { to: "/convoyeur/missions", label: "En cours", value: stats.inProgress, icon: Truck, pill: "Actives",
+    { to: "/convoyeur/missions", search: { f: "in_progress" as const }, label: "En cours", value: stats.inProgress, icon: Truck, pill: "Actives",
       iconBg: "from-[#0f2e28] to-[#0a1f1a]", iconBorder: "border-[rgba(52,211,153,0.35)]", iconColor: "text-[#34d399]",
       dotColor: "bg-[#34d399]", pillColor: "text-[#6ee7b7]" },
-    { to: "/convoyeur/historique", label: "Terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
+    { to: "/convoyeur/historique", search: undefined, label: "Terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
       iconBg: "from-[#26183d] to-[#1a1128]", iconBorder: "border-[rgba(167,139,250,0.35)]", iconColor: "text-[#a78bfa]",
       dotColor: "bg-[#a78bfa]", pillColor: "text-[#c4b5fd]" },
   ] as const;
@@ -204,6 +211,8 @@ function ConvoyeurDashboard() {
           <Link
             key={c.label}
             to={c.to}
+            search={c.search as never}
+            onClick={clearStoredOpenMission}
             className="group relative min-w-0 rounded-[18px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)] transition-all active:scale-[0.96] hover:border-[rgba(96,165,250,0.4)] hover:shadow-[0_10px_28px_-14px_rgba(47,125,255,0.4)]"
           >
             <div className={`w-9 h-9 rounded-xl border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center shadow-inner`}>

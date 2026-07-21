@@ -40,7 +40,8 @@ interface GpsPoint {
   accuracy: number | null;
 }
 
-type FilterKey = "all" | "today" | "upcoming" | "in_progress" | "done";
+type FilterKey = "all" | "today" | "upcoming" | "in_progress" | "done" | "proposed" | "accepted";
+const DONE_STATUTS = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
 type InspectionSession = { attributionId: string; type: "depart" | "arrivee" };
 
 const EDL_SESSION_KEY = "edl:inspection";
@@ -94,7 +95,12 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>(() => {
+    if (typeof window === "undefined") return "all";
+    const f = new URLSearchParams(window.location.search).get("f");
+    const allowed: FilterKey[] = ["all", "today", "upcoming", "in_progress", "done", "proposed", "accepted"];
+    return (allowed as string[]).includes(f ?? "") ? (f as FilterKey) : "all";
+  });
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
@@ -102,7 +108,9 @@ function ConvoyeurMissions() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const storedOpenMissionId = sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
+      const params = new URLSearchParams(window.location.search);
+      const openFromUrl = params.get("open");
+      const storedOpenMissionId = openFromUrl || sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
       const storedInspection = readStoredInspection();
 
       if (storedOpenMissionId) setOpenMissionIdState(storedOpenMissionId);
@@ -111,6 +119,22 @@ function ConvoyeurMissions() {
       // Ignore storage restoration issues on privacy-restricted devices.
     }
   }, []);
+
+  // Nettoie l'openMissionId restauré si la mission n'est plus active
+  // (évite d'atterrir sur une mission terminée quand on revient depuis
+  // le dashboard).
+  useEffect(() => {
+    if (!openMissionId || missions.length === 0) return;
+    const m = missions.find(x => x.id === openMissionId);
+    if (!m) return;
+    if (typeof window === "undefined") return;
+    const openFromUrl = new URLSearchParams(window.location.search).get("open");
+    if (openFromUrl === openMissionId) return;
+    if (DONE_STATUTS.has(m.statut)) {
+      setOpenMissionId(null);
+    }
+  }, [openMissionId, missions, setOpenMissionId]);
+
 
   // Sync inspection state to sessionStorage
   useEffect(() => {
@@ -377,10 +401,15 @@ function ConvoyeurMissions() {
   const filtered = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     let list = missions;
+    // "Toutes" = missions actives uniquement (proposées / acceptées / à venir / en cours)
+    // Les missions terminées, validées ou refusées vont dans l'onglet Terminées / Historique.
+    if (filter === "all") list = list.filter(m => !DONE_STATUTS.has(m.statut));
     if (filter === "today") list = list.filter(m => m.trajet?.date_trajet === today);
     if (filter === "upcoming") list = list.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > today);
     if (filter === "in_progress") list = list.filter(m => m.statut === "en_cours");
-    if (filter === "done") list = list.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut));
+    if (filter === "proposed") list = list.filter(m => m.statut === "propose");
+    if (filter === "accepted") list = list.filter(m => m.statut === "accepte");
+    if (filter === "done") list = list.filter(m => DONE_STATUTS.has(m.statut));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(m =>
@@ -391,10 +420,9 @@ function ConvoyeurMissions() {
       );
     }
     // Tri : en cours d'abord, puis à venir (date asc), puis terminées (date desc).
-    const doneStatuts = new Set(["termine", "en_attente_validation", "validee", "refusee"]);
     const bucket = (m: typeof missions[number]) => {
       if (m.statut === "en_cours") return 0;
-      if (doneStatuts.has(m.statut)) return 2;
+      if (DONE_STATUTS.has(m.statut)) return 2;
       return 1;
     };
     return [...list].sort((a, b) => {
@@ -725,19 +753,33 @@ function ConvoyeurMissions() {
 
   // === LISTE ===
   const counts = {
+    proposed: missions.filter(m => m.statut === "propose").length,
+    accepted: missions.filter(m => m.statut === "accepte").length,
     today: missions.filter(m => m.trajet?.date_trajet === new Date().toISOString().split("T")[0]).length,
     in_progress: missions.filter(m => m.statut === "en_cours").length,
     upcoming: missions.filter(m => m.trajet?.date_trajet && m.trajet.date_trajet > new Date().toISOString().split("T")[0]).length,
-    done: missions.filter(m => ["termine", "en_attente_validation", "validee", "refusee"].includes(m.statut)).length,
+    done: missions.filter(m => DONE_STATUTS.has(m.statut)).length,
   };
 
   const filters: { key: FilterKey; label: string; count?: number }[] = [
     { key: "all", label: "Toutes" },
+    { key: "proposed", label: "Proposées", count: counts.proposed },
+    { key: "accepted", label: "Acceptées", count: counts.accepted },
     { key: "today", label: "Aujourd'hui", count: counts.today },
     { key: "in_progress", label: "En cours", count: counts.in_progress },
     { key: "upcoming", label: "À venir", count: counts.upcoming },
     { key: "done", label: "Terminées", count: counts.done },
   ];
+
+  const emptyMessages: Record<FilterKey, { title: string; hint?: string }> = {
+    all: { title: "Aucune mission active pour le moment.", hint: "Consultez le catalogue pour vous positionner sur une mission." },
+    proposed: { title: "Vous n'avez aucune proposition pour le moment.", hint: "Dès qu'une mission vous sera proposée, elle apparaîtra ici." },
+    accepted: { title: "Aucune mission acceptée en attente.", hint: "Les missions que vous acceptez apparaîtront ici jusqu'au démarrage." },
+    in_progress: { title: "Aucune mission en cours.", hint: "Démarrez une mission acceptée pour la voir apparaître ici." },
+    today: { title: "Aucune mission prévue aujourd'hui." },
+    upcoming: { title: "Aucune mission à venir.", hint: "Positionnez-vous sur une mission depuis le catalogue." },
+    done: { title: "Aucune mission terminée.", hint: "Retrouvez l'ensemble de vos missions passées dans l'Historique." },
+  };
 
   return (
     <>
@@ -787,7 +829,12 @@ function ConvoyeurMissions() {
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-pro-border p-8 text-center shadow-sm">
           <Truck size={32} className="mx-auto text-pro-muted mb-3" />
-          <p className="text-pro-text-soft text-sm">Aucune mission {search || filter !== "all" ? "pour ces critères" : "pour le moment"}.</p>
+          <p className="text-pro-text text-sm font-medium">
+            {search ? "Aucune mission ne correspond à votre recherche." : emptyMessages[filter].title}
+          </p>
+          {!search && emptyMessages[filter].hint && (
+            <p className="text-pro-text-soft text-xs mt-1.5">{emptyMessages[filter].hint}</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
