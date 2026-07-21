@@ -669,3 +669,67 @@ function DevisAcceptationToggleCard() {
     </Card>
   );
 }
+
+function DriverScreenProtectionCard() {
+  const [enabled, setEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings" as never)
+        .select("value")
+        .eq("key" as never, "driver_screen_protection" as never)
+        .maybeSingle();
+      const v = (data as { value?: { enabled?: boolean } } | null)?.value;
+      setEnabled(!!v?.enabled);
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async (next: boolean) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings" as never)
+      .upsert({ key: "driver_screen_protection", value: { enabled: next } } as never, { onConflict: "key" } as never);
+    setSaving(false);
+    if (error) {
+      toast.error("Échec de l'enregistrement", { description: error.message });
+      return;
+    }
+    setEnabled(next);
+    toast.success(next ? "Protection anti-capture activée" : "Protection anti-capture désactivée");
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+          <ShieldCheck size={18} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-pro-text">Protection anti-capture d'écran (Convoyeur)</h3>
+          <p className="text-xs text-pro-muted mt-1 max-w-2xl">
+            Applique dans l'app convoyeur : clic droit désactivé, impression et raccourcis de capture bloqués,
+            flou automatique du contenu quand l'onglet passe en arrière-plan (heuristique captures iOS/Android).
+            Note : aucun site web ne peut réellement empêcher une capture système, il s'agit d'une dissuasion.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 shrink-0">
+          <input
+            type="checkbox"
+            className="w-10 h-6 appearance-none rounded-full bg-pro-border checked:bg-emerald-500 relative cursor-pointer transition-colors
+              before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform
+              checked:before:translate-x-4 disabled:opacity-50"
+            disabled={loading || saving}
+            checked={enabled}
+            onChange={(e) => save(e.target.checked)}
+          />
+          <span className="text-xs font-medium text-pro-text">{enabled ? "Activée" : "Désactivée"}</span>
+        </label>
+      </div>
+    </Card>
+  );
+}
+}
