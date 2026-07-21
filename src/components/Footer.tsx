@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin, Instagram, Facebook } from "lucide-react";
+import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 
 const trustItems = [
@@ -116,20 +116,15 @@ export default function Footer() {
             Basé à Tours (37) · France et Europe.
           </p>
           <div className="flex gap-2.5">
-            {[
-              { Icon: Linkedin, cls: "hover:!border-[#0a66c2] hover:!bg-[#0a66c2] hover:shadow-[0_8px_18px_rgba(10,102,194,0.4)]", label: "LinkedIn" },
-              { Icon: Instagram, cls: "hover:!border-[#c23fc2] hover:!bg-gradient-to-br hover:!from-[#f09433] hover:!via-[#dc2743] hover:!to-[#bc1888] hover:shadow-[0_8px_18px_rgba(220,39,67,0.4)]", label: "Instagram" },
-              { Icon: Facebook, cls: "hover:!border-[#1877f2] hover:!bg-[#1877f2] hover:shadow-[0_8px_18px_rgba(24,119,242,0.4)]", label: "Facebook" },
-            ].map(({ Icon, cls, label }) => (
-              <a
-                key={label}
-                href="#"
-                aria-label={label}
-                className={`flex h-9 w-9 items-center justify-center rounded-full border border-[#7aa3ff]/30 bg-white/[0.03] text-[#9aa6c9] transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:text-white ${cls}`}
-              >
-                <Icon size={16} />
-              </a>
-            ))}
+            <a
+              href="https://www.linkedin.com/company/transports-ligneo/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn Transports Ligneo"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#7aa3ff]/30 bg-white/[0.03] text-[#9aa6c9] transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white hover:shadow-[0_8px_18px_rgba(10,102,194,0.4)]"
+            >
+              <Linkedin size={16} />
+            </a>
           </div>
         </div>
 
