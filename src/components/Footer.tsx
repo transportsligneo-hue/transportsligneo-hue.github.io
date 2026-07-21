@@ -112,8 +112,8 @@ export default function Footer() {
             </span>
           </div>
           <p className="mb-5 max-w-[260px] text-[13px] leading-relaxed text-[#9aa6c9]">
-            Convoyage automobile premium.<br />
-            Basé à Tours (37) · France entière.
+            Convoyage et Logistique Automobile.<br />
+            Basé à Tours (37) · France et Europe.
           </p>
           <div className="flex gap-2.5">
             {[
