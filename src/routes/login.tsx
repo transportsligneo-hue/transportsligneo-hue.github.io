@@ -78,6 +78,10 @@ function LoginPage() {
     submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
+      try {
+        localStorage.setItem("ligneo_remember", remember ? "true" : "false");
+        sessionStorage.setItem("ligneo_tab_alive", "1");
+      } catch { /* ignore */ }
       const TRANSIENT = new Set(["timeout-or-duplicate", "missing-input-response", "invalid-input-response", "network"]);
       const tryVerify = async () => {
         const token = await getRecaptchaToken("login");
