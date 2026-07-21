@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import brandBanner from "@/assets/ligneo-brand-banner.jpg.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
-const navLinks = [
+type NavAccent = "purple" | "green" | undefined;
+const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
-  { to: "/pro", label: "B2B" },
+  { to: "/pro", label: "B2B", accent: "purple" },
+  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "green" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
