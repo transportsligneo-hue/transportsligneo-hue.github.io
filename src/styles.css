@@ -3366,7 +3366,11 @@
 .ligneo-map-inner .lbl-eu { font-family:'Inter',sans-serif; font-size:1.25px; fill:#e8cf8c; font-style:italic; }
 .ligneo-map-inner .lbl-hub { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.55px; fill:#fff; }
 .ligneo-map-inner .lbl-sub { font-family:'Inter',sans-serif; font-size:1px; fill:#9aa6c9; }
-.ligneo-map-inner .car { font-size:2.1px; text-anchor:middle; dominant-baseline:central; }
+.ligneo-map-inner .car { display:none; }
+.ligneo-map-inner .travel-dot { filter:drop-shadow(0 0 1.2px rgba(79,140,255,0.95)) drop-shadow(0 0 2.4px rgba(79,140,255,0.55)); }
+.ligneo-map-inner .travel-fr { fill:#4f8cff; animation:ligneoTravelPulse 1.6s ease-in-out infinite; }
+.ligneo-map-inner .travel-eu { fill:#7aa3ff; opacity:0.9; animation:ligneoTravelPulse 1.8s ease-in-out infinite; }
+@keyframes ligneoTravelPulse { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
 .ligneo-map-legend { display:flex; justify-content:center; margin-top:22px; }
 .ligneo-map-legend-item { display:flex; align-items:center; gap:8px; font-size:12px; color:#9aa6c9; font-family:'Inter',sans-serif; }
 .ligneo-map-legend-dot { width:9px; height:9px; border-radius:50%; background:#d9b54a; box-shadow:0 0 8px #d9b54a; }
