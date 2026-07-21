@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import brandBanner from "@/assets/ligneo-brand-banner.jpg.asset.json";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
