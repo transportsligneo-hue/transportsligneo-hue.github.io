@@ -21,10 +21,10 @@ function b64uDecode(str: string): Uint8Array {
   const bin = atob(str.replace(/-/g, "+").replace(/_/g, "/") + pad);
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
-function randomBytes(len = 32): Uint8Array {
+function randomBytes(len = 32): BufferSource {
   const b = new Uint8Array(len);
   crypto.getRandomValues(b);
-  return b;
+  return b.buffer as ArrayBuffer;
 }
 
 export async function isBiometricSupported(): Promise<boolean> {
