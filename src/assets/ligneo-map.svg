@@ -168,21 +168,21 @@
   </g>
 </defs>
 
-<use href="#car-citadine" color="#c62b2b" filter="url(#carShadow)"><animateMotion dur="6.4s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L483.88,306.43"/></use>
-<use href="#car-suv" color="#1f2a44" filter="url(#carShadow)"><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L482,297.6"/></use>
-<use href="#car-berline" color="#dedede" filter="url(#carShadow)"><animateMotion dur="5.6s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L471.61,309.79"/></use>
-<use href="#car-utilitaire" color="#f4f4f4" filter="url(#carShadow)"><animateMotion dur="5.2s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L472.01,313.77"/></use>
-<use href="#car-suv" color="#2b3d6b" filter="url(#carShadow)"><animateMotion dur="8.4s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L474.96,324.43"/></use>
-<use href="#car-citadine" color="#3778c2" filter="url(#carShadow)"><animateMotion dur="9.1s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L481.11,329.98"/></use>
-<use href="#car-berline" color="#0f1730" filter="url(#carShadow)"><animateMotion dur="7.3s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L491.5,320.31"/></use>
-<use href="#car-utilitaire" color="#e7c76a" filter="url(#carShadow)"><animateMotion dur="7.7s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L492,329"/></use>
-<use href="#car-suv" color="#ffffff" filter="url(#carShadow)"><animateMotion dur="6.2s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L495,307.5"/></use>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="6.4s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L483.88,306.43"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="7.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L482,297.6"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="5.6s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L471.61,309.79"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="5.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L472.01,313.77"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="8.4s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L474.96,324.43"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="9.1s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L481.11,329.98"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="7.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L491.5,320.31"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="7.7s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L492,329"/></circle>
+<circle r="0.55" class="travel-dot travel-fr"><animateMotion dur="6.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L495,307.5"/></circle>
 
-<use href="#car-berline" color="#7a1a1a" filter="url(#carShadow)"><animateMotion dur="9.8s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L487.37,298.99"/></use>
-<use href="#car-citadine" color="#f2f2f2" filter="url(#carShadow)"><animateMotion dur="10.8s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L504.19,295.33"/></use>
-<use href="#car-suv" color="#1a1a1a" filter="url(#carShadow)"><animateMotion dur="9.5s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L497.94,314.67"/></use>
-<use href="#car-utilitaire" color="#2f5fff" filter="url(#carShadow)"><animateMotion dur="11.5s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L510.14,333.16"/></use>
-<use href="#car-berline" color="#c9c9c9" filter="url(#carShadow)"><animateMotion dur="12.3s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L465,336"/></use>
+<circle r="0.5" class="travel-dot travel-eu"><animateMotion dur="9.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L487.37,298.99"/></circle>
+<circle r="0.5" class="travel-dot travel-eu"><animateMotion dur="10.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L504.19,295.33"/></circle>
+<circle r="0.5" class="travel-dot travel-eu"><animateMotion dur="9.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L497.94,314.67"/></circle>
+<circle r="0.5" class="travel-dot travel-eu"><animateMotion dur="11.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L510.14,333.16"/></circle>
+<circle r="0.5" class="travel-dot travel-eu"><animateMotion dur="12.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.33 0 0.2 1" path="M478.8,313.01 L465,336"/></circle>
 
 
 
