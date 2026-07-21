@@ -2585,6 +2585,40 @@
     50%     { box-shadow: 0 8px 26px rgba(47,95,255,0.75), 0 0 20px rgba(79,140,255,0.4); }
   }
 
+  /* Nav link accents : B2B violet néon, Espace Driver vert électrique */
+  .r4-nav-link.nav-accent-purple {
+    color: #d8b4ff;
+    text-shadow: 0 0 10px rgba(168,85,247,0.55);
+  }
+  .r4-nav-link.nav-accent-purple:hover {
+    color: #fff;
+    background: rgba(168,85,247,0.18);
+    box-shadow: 0 0 18px rgba(168,85,247,0.45);
+  }
+  .r4-nav-link.nav-accent-purple.is-active {
+    background: linear-gradient(120deg,#7c3aed,#a855f7,#c084fc);
+    box-shadow: 0 6px 18px rgba(168,85,247,0.55), 0 0 22px rgba(192,132,252,0.5);
+    color: #fff;
+    text-shadow: none;
+    animation: none;
+  }
+  .r4-nav-link.nav-accent-green {
+    color: #86efac;
+    text-shadow: 0 0 10px rgba(34,197,94,0.55);
+  }
+  .r4-nav-link.nav-accent-green:hover {
+    color: #fff;
+    background: rgba(34,197,94,0.18);
+    box-shadow: 0 0 18px rgba(34,197,94,0.45);
+  }
+  .r4-nav-link.nav-accent-green.is-active {
+    background: linear-gradient(120deg,#16a34a,#22c55e,#4ade80);
+    box-shadow: 0 6px 18px rgba(34,197,94,0.55), 0 0 22px rgba(74,222,128,0.5);
+    color: #fff;
+    text-shadow: none;
+    animation: none;
+  }
+
   /* Bouton "Connexion" — pilule dégradée bleu → or dérivante */
   .r4-btn-connect {
     position: relative; overflow: hidden;
