@@ -10,6 +10,7 @@ import {
   Loader2,
   Sparkles,
   GraduationCap,
+  Wallet,
 } from "lucide-react";
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
