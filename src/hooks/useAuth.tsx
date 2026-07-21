@@ -153,28 +153,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // 1) S'abonner AVANT de charger la session pour ne rater aucun event.
-    //    On ne réhydrate que sur les transitions d'identité (SIGNED_IN / SIGNED_OUT / USER_UPDATED).
-    //    Sinon TOKEN_REFRESHED (~1×/h) et INITIAL_SESSION (à chaque montage) rejoueraient
-    //    toutes les requêtes de profil et feraient clignoter les spinners partout dans l'app.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       const nextUserId = newSession?.user?.id ?? null;
-      if (nextUserId === currentUserIdRef.current) return; // même identité → pas de re-hydratation
+      if (nextUserId === currentUserIdRef.current) return;
       void hydrateForUser(newSession?.user ?? null);
     });
 
-    // 2) Charger la session existante
-    supabase.auth.getSession().then(async ({ data: { session: existing } }) => {
-      setSession(existing);
-      setUser(existing?.user ?? null);
-      await hydrateForUser(existing?.user ?? null);
-      setIsInitializing(false);
-    }).catch(() => {
-      setIsInitializing(false);
-      setIsLoading(false);
-    });
+    // 2) Charger la session existante — sauf si "Rester connecté" avait été décoché
+    //    et que l'onglet a été fermé depuis (aucune sessionStorage sentinel).
+    const rememberFlag = typeof window !== "undefined" ? localStorage.getItem("ligneo_remember") : null;
+    const tabAlive = typeof window !== "undefined" ? sessionStorage.getItem("ligneo_tab_alive") : null;
+    const shouldPurge = rememberFlag === "false" && !tabAlive;
+
+    const boot = async () => {
+      if (shouldPurge) {
+        try { await supabase.auth.signOut(); } catch { /* ignore */ }
+        setIsInitializing(false);
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const { data: { session: existing } } = await supabase.auth.getSession();
+        setSession(existing);
+        setUser(existing?.user ?? null);
+        await hydrateForUser(existing?.user ?? null);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+    void boot();
+
+    // Marqueur d'onglet vivant : survit aux reloads mais disparaît à la fermeture de l'onglet.
+    if (typeof window !== "undefined") {
+      try { sessionStorage.setItem("ligneo_tab_alive", "1"); } catch { /* ignore */ }
+    }
 
     return () => subscription.unsubscribe();
   }, [hydrateForUser]);
