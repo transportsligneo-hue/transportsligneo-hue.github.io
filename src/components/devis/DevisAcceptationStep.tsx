@@ -11,6 +11,7 @@ import {
 } from "@/lib/devis-signature-otp.functions";
 import { acceptDevis } from "@/lib/devis-acceptation.functions";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
