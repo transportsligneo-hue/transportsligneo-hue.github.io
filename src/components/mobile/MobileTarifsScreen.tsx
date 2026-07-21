@@ -41,7 +41,7 @@ export default function MobileTarifsScreen() {
             <img src={logoLigneo} alt="Ligneo" className="w-full h-full object-cover" loading="eager" />
           </span>
           <span className="font-black tracking-[0.02em] text-[13.5px] leading-none text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            TRANSPORTS <span className="text-[#d9b54a]">LIGNEO</span>
+            TRANSPORTS <span className="text-[#2F5FFF]">LIGNEO</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">
