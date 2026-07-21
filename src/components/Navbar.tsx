@@ -52,7 +52,7 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto pl-10 pr-6 py-3 flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto pl-6 pr-4 py-3 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
             <div
               className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
