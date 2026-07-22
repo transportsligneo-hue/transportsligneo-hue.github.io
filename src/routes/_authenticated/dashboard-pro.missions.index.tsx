@@ -21,7 +21,7 @@ interface MissionRow {
   created_at: string;
   leg_type: string | null;
   mission_group_id: string | null;
-}
+  group_reference: string | null;
 
 interface PendingItem {
   id: string;
@@ -69,7 +69,7 @@ function ProMissionsIndex() {
       const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
         supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id, group_reference")
           .or(orFilter)
           .order("created_at", { ascending: false }),
         supabase
