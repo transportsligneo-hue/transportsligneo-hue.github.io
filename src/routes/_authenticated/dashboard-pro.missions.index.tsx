@@ -298,6 +298,14 @@ function ProMissionsIndex() {
                       <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
                         <span>{m.numero}</span>
                         <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
+                        {m.group_reference && (
+                          <span
+                            className="ml-1 rounded-full bg-[#f0ecff] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#5334d6]"
+                            title={`Mission groupée ${m.group_reference}`}
+                          >
+                            Groupée
+                          </span>
+                        )}
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-pro-text">
