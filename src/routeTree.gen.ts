@@ -128,6 +128,7 @@ import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
 import { Route as AuthenticatedFlotteMissionsMissionIdRouteImport } from './routes/_authenticated/flotte.missions.$missionId'
+import { Route as AuthenticatedDashboardProNouvelleMissionGroupeeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.groupee'
 import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-pro.missions.$missionId'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
@@ -801,6 +802,12 @@ const AuthenticatedFlotteMissionsMissionIdRoute =
     path: '/$missionId',
     getParentRoute: () => AuthenticatedFlotteMissionsRoute,
   } as any)
+const AuthenticatedDashboardProNouvelleMissionGroupeeRoute =
+  AuthenticatedDashboardProNouvelleMissionGroupeeRouteImport.update({
+    id: '/groupee',
+    path: '/groupee',
+    getParentRoute: () => AuthenticatedDashboardProNouvelleMissionRoute,
+  } as any)
 const AuthenticatedDashboardProMissionsMissionIdRoute =
   AuthenticatedDashboardProMissionsMissionIdRouteImport.update({
     id: '/$missionId',
@@ -928,7 +935,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
-  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
+  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -956,6 +963,7 @@ export interface FileRoutesByFullPath {
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
@@ -1048,7 +1056,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
-  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
+  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1076,6 +1084,7 @@ export interface FileRoutesByTo {
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
@@ -1177,7 +1186,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
-  '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
+  '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/_authenticated/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/_authenticated/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1205,6 +1214,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/_authenticated/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
+  '/_authenticated/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/_authenticated/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
@@ -1334,6 +1344,7 @@ export interface FileRouteTypes {
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
+    | '/dashboard-pro/nouvelle-mission/groupee'
     | '/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
@@ -1454,6 +1465,7 @@ export interface FileRouteTypes {
     | '/admin/organisations/$orgId'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
+    | '/dashboard-pro/nouvelle-mission/groupee'
     | '/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
@@ -1582,6 +1594,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/organisations/$orgId'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/_authenticated/dashboard-pro/missions/$missionId'
+    | '/_authenticated/dashboard-pro/nouvelle-mission/groupee'
     | '/_authenticated/flotte/missions/$missionId'
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
@@ -2480,6 +2493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFlotteMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedFlotteMissionsRoute
     }
+    '/_authenticated/dashboard-pro/nouvelle-mission/groupee': {
+      id: '/_authenticated/dashboard-pro/nouvelle-mission/groupee'
+      path: '/groupee'
+      fullPath: '/dashboard-pro/nouvelle-mission/groupee'
+      preLoaderRoute: typeof AuthenticatedDashboardProNouvelleMissionGroupeeRouteImport
+      parentRoute: typeof AuthenticatedDashboardProNouvelleMissionRoute
+    }
     '/_authenticated/dashboard-pro/missions/$missionId': {
       id: '/_authenticated/dashboard-pro/missions/$missionId'
       path: '/$missionId'
@@ -2744,6 +2764,21 @@ const AuthenticatedDashboardProMissionsRouteWithChildren =
     AuthenticatedDashboardProMissionsRouteChildren,
   )
 
+interface AuthenticatedDashboardProNouvelleMissionRouteChildren {
+  AuthenticatedDashboardProNouvelleMissionGroupeeRoute: typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
+}
+
+const AuthenticatedDashboardProNouvelleMissionRouteChildren: AuthenticatedDashboardProNouvelleMissionRouteChildren =
+  {
+    AuthenticatedDashboardProNouvelleMissionGroupeeRoute:
+      AuthenticatedDashboardProNouvelleMissionGroupeeRoute,
+  }
+
+const AuthenticatedDashboardProNouvelleMissionRouteWithChildren =
+  AuthenticatedDashboardProNouvelleMissionRoute._addFileChildren(
+    AuthenticatedDashboardProNouvelleMissionRouteChildren,
+  )
+
 interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProAdressesRoute: typeof AuthenticatedDashboardProAdressesRoute
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
@@ -2752,7 +2787,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
-  AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRoute
+  AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
 }
@@ -2773,7 +2808,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
     AuthenticatedDashboardProNouvelleDemandeRoute:
       AuthenticatedDashboardProNouvelleDemandeRoute,
     AuthenticatedDashboardProNouvelleMissionRoute:
-      AuthenticatedDashboardProNouvelleMissionRoute,
+      AuthenticatedDashboardProNouvelleMissionRouteWithChildren,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
     AuthenticatedDashboardProIndexRoute: AuthenticatedDashboardProIndexRoute,
