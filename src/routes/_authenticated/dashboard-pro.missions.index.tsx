@@ -95,7 +95,7 @@ function ProMissionsIndex() {
       if (orgIds.length > 0) {
         const { data } = await supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id, group_reference")
           .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
           .order("created_at", { ascending: false });
         orgRows = (data ?? []) as MissionRow[];
