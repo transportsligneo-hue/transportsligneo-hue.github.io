@@ -66,8 +66,10 @@ function ProLayout() {
   }
 
   return (
-    <ProSidebar items={navItems}>
-      <Outlet />
-    </ProSidebar>
+    <div className="dashboard-shell-light" data-account-type={accountType}>
+      <ProSidebar items={navItems}>
+        <Outlet />
+      </ProSidebar>
+    </div>
   );
 }
