@@ -18,7 +18,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
   const base: ProSidebarItem[] = [
     { to: "/dashboard-pro", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
     { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
-    { to: "/dashboard-pro/nouvelle-demande", label: "Nouvelle mission", icon: PlusCircle },
+    { to: "/dashboard-pro/nouvelle-mission", label: "Nouvelle mission", icon: PlusCircle },
     { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
   ];
   // Section Flotte : véhicules + conducteurs, réservée aux comptes Flotte
@@ -66,8 +66,10 @@ function ProLayout() {
   }
 
   return (
-    <ProSidebar items={navItems}>
-      <Outlet />
-    </ProSidebar>
+    <div className="dashboard-shell-light" data-account-type={accountType}>
+      <ProSidebar items={navItems}>
+        <Outlet />
+      </ProSidebar>
+    </div>
   );
 }

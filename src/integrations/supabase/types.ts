@@ -1002,6 +1002,7 @@ export type Database = {
           devis_id: string | null
           distance_km: number | null
           email: string
+          group_reference: string | null
           heure_retour: string | null
           heure_souhaitee: string | null
           id: string
@@ -1062,6 +1063,7 @@ export type Database = {
           devis_id?: string | null
           distance_km?: number | null
           email: string
+          group_reference?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -1122,6 +1124,7 @@ export type Database = {
           devis_id?: string | null
           distance_km?: number | null
           email?: string
+          group_reference?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -2775,6 +2778,7 @@ export type Database = {
           date_prise_en_charge: string
           email: string
           fleet_organization_id: string | null
+          group_reference: string | null
           id: string
           immatriculation: string | null
           leg_index: number | null
@@ -2814,6 +2818,7 @@ export type Database = {
           date_prise_en_charge: string
           email: string
           fleet_organization_id?: string | null
+          group_reference?: string | null
           id?: string
           immatriculation?: string | null
           leg_index?: number | null
@@ -2853,6 +2858,7 @@ export type Database = {
           date_prise_en_charge?: string
           email?: string
           fleet_organization_id?: string | null
+          group_reference?: string | null
           id?: string
           immatriculation?: string | null
           leg_index?: number | null
@@ -4385,6 +4391,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_group_reference: { Args: never; Returns: string }
       get_active_vat_rates: {
         Args: never
         Returns: {
