@@ -1,58 +1,76 @@
-## Refonte design globale — Transports Ligneo
+# Nouvelle mission (Simple / Groupée) + thème clair Flotte/B2B
 
-Application du système visuel des 6 maquettes HTML au site en production, **sans toucher à la logique métier existante** (formulaire d'estimation, auth, dashboards, GPS, factures, routes, SEO, tracking).
+Référence visuelle : `nouvelle-mission-flotte.html`. L'espace Flotte est déjà fusionné dans `/dashboard-pro` (routes `/flotte/*` redirigent) — j'agis donc sur `dashboard-pro`.
 
-### 1. Système de design global (`src/styles.css` + `__root.tsx`)
-- Fond continu bleu marine lumineux : dégradé `#0a1638 → #081230 → #061238` + halos radiaux bleu électrique / or, appliqué au `<body>` marketing (pas dans les dashboards).
-- Chargement polices via `<link>` dans `__root.tsx` : Poppins (800/900), Space Grotesk (500-700), Inter (400-700).
-- Tokens CSS : `--navy`, `--blue #2f5fff`, `--blue-bright #4f8cff`, `--gold #d9b54a`, `--text-muted #9aa6c9`, `--border rgba(122,163,255,.16)`.
-- Wordmark "TRANSPORTS **LIGNEO**" avec glow bleu pulsé sur "LIGNEO".
-- Composants réutilisables : `.glass-card`, `.btn-pill-blue` (reflet lumineux balayant), `.btn-estimer` (bordure dégradée animée + éclair doré), `.btn-connexion` (dégradé bleu→or dérivant), `.nav-pill` (pilule englobante, onglet actif "respire").
-- Animations indépendantes (nav / bouton Estimer / bouton Connexion non synchronisés).
+## 1. Écran de choix "Nouvelle mission"
 
-### 2. Navbar desktop (`Navbar.tsx`)
-- Refonte visuelle uniquement : liens dans pilule englobante translucide, item actif en dégradé bleu pulsé.
-- Boutons Estimer / Connexion refaits selon maquette.
-- Toutes les routes, actions `goToEstimer` / `goToEspace`, comportement mobile : inchangés.
+- Nouvelle route `dashboard-pro.nouvelle-mission.tsx` : deux cartes (Simple / Groupée), reprend la maquette.
+- Le lien "Nouvelle mission" de la sidebar pointe désormais sur cette route.
+- L'ancien formulaire `dashboard-pro.nouvelle-demande.tsx` **n'est pas modifié** — il est simplement atteint via le bouton "Mission simple". Un bandeau "← Retour au choix" est ajouté en tête.
 
-### 3. Hero accueil (`HeroDesktop.tsx`)
-- Garde photo `heroBg` existante + overlay bleu électrique multiply + fondu vers le bas (pas de coupure).
-- Simulateur (`DevisGenerator variant="hero-card"`) **conservé tel quel** (demande explicite : « juste garde l'estimateur actuel sur l'accueil »), juste réhabillé en glass card avec bordure dégradée animée, chevauchant le bas du hero.
-- Trust pills, titre, CTAs restylés au système.
+## 2. Mission groupée (nouveau flux réel)
 
-### 4. Carte interactive France/Europe (nouveau composant `MapFranceEurope.tsx`)
-- Nouvelle section sur l'accueil, insérée après le hero / stats.
-- SVG copié tel quel depuis `accueil-desktop-refonte_2.html` (vrais tracés géographiques France + voisins, Tours en hub doré pulsant, 9 lignes bleues vers villes FR, 5 lignes pointillées dorées vers Europe, points lumineux `animateMotion`).
-- Légende 3 couleurs dessous.
+Nouvelle route `dashboard-pro.nouvelle-mission.groupee.tsx` avec 4 étapes (stepper client, un seul écran, pas de sous-routes).
 
-### 5. Page "Comment ça marche" (`CommentCaMarcheTimeline.tsx`)
-- Restructure en **4 grandes phases** (Estimation & Devis / Validation interne / Convoyage / Clôture & Facturation) avec gros numéro + titre, sous-étapes réelles en grille 2 colonnes.
-- Reprend le **contenu réel actuel des 12 étapes** regroupé par phase — pas le texte d'exemple des maquettes.
+### Étape 1 — Sélection véhicules
+- Source : table `vehicles` filtrée par `organization_id` du user courant (via `useCurrentOrgAccountType`).
+- Colonnes affichées : modèle, plaque, site (`organization_sites`), statut.
+- Statut dérivé : véhicules avec mission active (`missions` en `attribue`/`en_cours`) → grisés non sélectionnables. Statut `maintenance` sur `vehicles` → grisé.
+- Recherche (modèle/plaque/site) + filtre puce par site.
+- Barre sticky bas : compteur + bouton Continuer.
 
-### 6. Pages restylées (contenu réel conservé, seul le style change)
-- `services.tsx` → `ServicesContent.tsx` + `Engagements.tsx`
-- `a-propos.tsx` → `AProposContent.tsx`
-- `b2b.tsx`
-- `contact.tsx` → `Contact.tsx` + `FAQ.tsx`
-- Chaque page adopte : fond global, eyebrow Space Grotesk, titres Poppins avec mot-clé en bleu pulsé, cartes glass, boutons pilule.
-- **Aucun texte, tarif, FAQ, mention légale n'est réécrit** — juste rehabillé.
+### Étape 2 — Trajet & planning
+- Adresse d'enlèvement commune, pré-remplie depuis `organizations.address` / `organization_sites` principale.
+- Toggle "Destinations différentes par véhicule" : si off → un seul input ; si on → un input par véhicule sélectionné.
+- Date (shadcn DatePicker) + créneau (matin/après-midi/journée) en radio.
 
-### 7. Non touché
-- `DevisGenerator` (logique + UI actuelle du simulateur)
-- Auth, dashboards admin/pro/convoyeur/client, routes `_authenticated/*`, `api/*`
-- SEO (`head()` de chaque route), JSON-LD, tracking
-- Mobile (`MobileHomeScreen`, `MobileBottomNav`) — refonte mobile déjà validée précédemment
-- PartnersMarquee (marqué "INTOUCHABLE" en mémoire)
-- Fichiers `src/integrations/supabase/*` et migrations
+### Étape 3 — Récapitulatif
+- Pour chaque véhicule : appelle le server fn existant `resolvePersonalizedPrice` (même moteur que Mission simple) avec le trajet correspondant.
+- Total consolidé TTC affiché en or.
+- Champ message facultatif.
+- "Confirmer la mission groupée" :
+  - Génère une référence `GRP-TLG-YYYY-XXX` (server fn nouveau).
+  - Crée N lignes dans `demandes_convoyage` (une par véhicule), avec un champ `group_reference` renseigné, en réutilisant exactement le pipeline actuel (les triggers existants créent le devis/mission).
+
+### Étape 4 — Confirmation & suivi
+- Écran de succès : référence groupe + liste des véhicules avec statut initial (récupéré via realtime sur `demandes_convoyage`/`missions` filtrés par `group_reference`).
+- Chaque carte véhicule cliquable → détail mission individuelle.
+- Sur `dashboard-pro.missions.index.tsx` : regroupement visuel des missions partageant une même `group_reference` (accordéon "Mission groupée GRP-…"). Non destructif : les missions non groupées s'affichent comme avant.
 
 ### Détails techniques
-- Aucune migration DB, aucun changement de props/ids/classes utilisés hors marketing.
-- Test preview page par page avant validation.
-- Ordre : (1) tokens/polices/composants CSS globaux → (2) Navbar → (3) Hero + carte France → (4) 4 autres pages marketing → (5) Comment ça marche restructuré.
 
-### Ce qui reste en discussion
-Volume important (6 pages + carte SVG + composants globaux). Je propose de livrer en **2 lots** :
-- **Lot A** : système de design + Navbar + Hero accueil + carte France/Europe (impact visuel principal).
-- **Lot B** : Services, À propos, B2B, Contact, Comment ça marche restructuré.
+- **Migration DB** : ajouter `group_reference text` sur `demandes_convoyage` et `missions` (nullable, indexé). Trigger existant qui copie les champs demande→mission propagera automatiquement si on ajoute la colonne aux deux et met à jour le trigger, ou plus simplement on repasse un UPDATE après création côté server fn.
+- **Server fn** `createGroupedMission` (`src/lib/grouped-mission.functions.ts`) sous `requireSupabaseAuth` : valide entrée Zod, calcule prix par trajet via l'engine existant, insère N demandes avec `group_reference`, renvoie la référence + IDs.
+- Aucune modification du moteur de prix, ni de la logique d'attribution, ni de l'app convoyeur.
 
-Confirme-tu ce découpage, ou tu veux tout en un seul passage ?
+## 3. Thème clair Flotte + B2B (dashboards uniquement)
+
+Le layout `dashboard-pro.tsx` monte déjà `[data-org-theme]`. J'ajoute un mode `theme="light"` scopé aux dashboards Flotte/B2B via un wrapper `dashboard-shell-light` sur ces layouts uniquement.
+
+Nouveau bloc CSS dans `src/styles.css` (namespace `.dashboard-shell-light`) :
+- `--bg: #f6f8fc`, `--surface: #ffffff`, `--border: #e7ebf3`, texte `#0f1526`/`#6b7590`.
+- Accents : bleu `#2f5fff` (primary), or `#b8862a` (montants), violet `#7c5cff` (badges Flotte / groupée).
+- Padding généreux sur `.card`, `.section`.
+- Typos inchangées (Poppins/Inter/Space Grotesk déjà chargées).
+
+Appliqué sur :
+- `src/routes/_authenticated/dashboard-pro.tsx` (layout Flotte/B2B fusionné).
+- Aucun impact sur : site public, app convoyeur (`convoyeur.*`), admin, dashboard-client.
+
+## 4. Ordre d'exécution
+
+1. Migration DB (`group_reference`).
+2. Server fn `createGroupedMission`.
+3. Route de choix + redirect sidebar.
+4. Route mission groupée (4 étapes) + bandeau retour sur mission simple.
+5. Regroupement visuel dans `dashboard-pro.missions.index.tsx`.
+6. Thème clair sur layout dashboard-pro.
+7. Test manuel Playwright (compte flotte de test) sur preview.
+
+## Décisions à confirmer
+
+- **Créneau horaire** (matin/après-midi/journée) : je stocke la valeur en clair dans le champ `commentaires` de `demandes_convoyage` (pas de colonne dédiée aujourd'hui), OU je crée une colonne `time_slot`. Je pars sur la **colonne dédiée** pour rester propre.
+- **`group_reference`** : format `GRP-TLG-YYYY-XXX` avec XXX = compteur annuel via séquence PG.
+- **Adresse enlèvement pré-remplie** : je prends `organizations.address` en priorité, sinon le premier `organization_sites` marqué principal.
+
+Dis-moi si l'un de ces points doit changer, sinon je lance dans l'ordre indiqué.
