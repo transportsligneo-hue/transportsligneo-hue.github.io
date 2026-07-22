@@ -68,6 +68,7 @@ import { Route as AuthenticatedEntrepriseMissionsRouteImport } from './routes/_a
 import { Route as AuthenticatedEntrepriseMembresRouteImport } from './routes/_authenticated/entreprise.membres'
 import { Route as AuthenticatedEntrepriseFacturesRouteImport } from './routes/_authenticated/entreprise.factures'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
+import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
 import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_authenticated/dashboard-pro.flotte'
@@ -445,6 +446,12 @@ const AuthenticatedDashboardProSocieteRoute =
   AuthenticatedDashboardProSocieteRouteImport.update({
     id: '/societe',
     path: '/societe',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProNouvelleMissionRoute =
+  AuthenticatedDashboardProNouvelleMissionRouteImport.update({
+    id: '/nouvelle-mission',
+    path: '/nouvelle-mission',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProNouvelleDemandeRoute =
@@ -921,6 +928,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1040,6 +1048,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1168,6 +1177,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/_authenticated/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/_authenticated/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1296,6 +1306,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
+    | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/societe'
     | '/entreprise/factures'
     | '/entreprise/membres'
@@ -1415,6 +1426,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/documents'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
+    | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/societe'
     | '/entreprise/factures'
     | '/entreprise/membres'
@@ -1542,6 +1554,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/flotte'
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
+    | '/_authenticated/dashboard-pro/nouvelle-mission'
     | '/_authenticated/dashboard-pro/societe'
     | '/_authenticated/entreprise/factures'
     | '/_authenticated/entreprise/membres'
@@ -2045,6 +2058,13 @@ declare module '@tanstack/react-router' {
       path: '/societe'
       fullPath: '/dashboard-pro/societe'
       preLoaderRoute: typeof AuthenticatedDashboardProSocieteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/nouvelle-mission': {
+      id: '/_authenticated/dashboard-pro/nouvelle-mission'
+      path: '/nouvelle-mission'
+      fullPath: '/dashboard-pro/nouvelle-mission'
+      preLoaderRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/nouvelle-demande': {
@@ -2732,6 +2752,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRoute
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
 }
@@ -2751,6 +2772,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProMissionsRouteWithChildren,
     AuthenticatedDashboardProNouvelleDemandeRoute:
       AuthenticatedDashboardProNouvelleDemandeRoute,
+    AuthenticatedDashboardProNouvelleMissionRoute:
+      AuthenticatedDashboardProNouvelleMissionRoute,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
     AuthenticatedDashboardProIndexRoute: AuthenticatedDashboardProIndexRoute,
