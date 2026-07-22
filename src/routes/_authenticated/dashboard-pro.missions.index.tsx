@@ -22,6 +22,8 @@ interface MissionRow {
   leg_type: string | null;
   mission_group_id: string | null;
   group_reference: string | null;
+}
+
 
 interface PendingItem {
   id: string;
