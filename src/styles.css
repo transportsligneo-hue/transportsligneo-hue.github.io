@@ -3427,3 +3427,30 @@
 @keyframes ligneoLogoGlow { 0%,100% { box-shadow:0 0 0 1px rgba(122,163,255,0.4), 0 0 16px rgba(63,123,255,0.4); } 50% { box-shadow:0 0 0 1px rgba(122,163,255,0.7), 0 0 24px rgba(63,123,255,0.65); } }
 @keyframes ligneoShine { 0% { left:-60%; } 45% { left:130%; } 100% { left:130%; } }
 @keyframes ligneoFloatUp { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+/* ============ Thème clair dashboards Flotte / B2B ============ */
+/* Scope strict : uniquement quand on est sous .dashboard-shell-light.
+   Le site public, l'app convoyeur et l'admin ne sont pas impactés. */
+.dashboard-shell-light {
+  --pro-bg: #f6f8fc;
+  --pro-surface: #ffffff;
+  --pro-border: #e7ebf3;
+  --pro-text: #0f1526;
+  --pro-text-soft: #6b7590;
+  --pro-accent: #2f5fff;
+  --pro-accent-deep: #1c3fc4;
+  --pro-gold: #b8862a;
+  --pro-violet: #7c5cff;
+  background: var(--pro-bg);
+  color: var(--pro-text);
+  min-height: 100vh;
+}
+.dashboard-shell-light .bg-pro-bg { background-color: var(--pro-bg); }
+.dashboard-shell-light .text-pro-text { color: var(--pro-text); }
+.dashboard-shell-light .text-pro-text-soft { color: var(--pro-text-soft); }
+.dashboard-shell-light .text-pro-accent { color: var(--pro-accent); }
+.dashboard-shell-light .border-pro-border { border-color: var(--pro-border); }
+.dashboard-shell-light[data-account-type="flotte"] {
+  --pro-accent: #7c5cff;
+  --pro-accent-deep: #5334d6;
+}
