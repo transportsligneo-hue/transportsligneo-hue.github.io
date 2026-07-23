@@ -1,5 +1,6 @@
 import { User, Building2, Truck, Star, Camera, ShieldCheck } from "lucide-react";
 import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
+import ServicesPlateforme from "@/components/ServicesPlateforme";
 
 const services = [
   {
@@ -65,6 +66,10 @@ export default function ServicesContent() {
       </div>
 
       <ServicesGarantiesCarousel />
+
+      <ServicesPlateforme />
+
+
 
     </div>
   );
