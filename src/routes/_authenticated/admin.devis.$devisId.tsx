@@ -261,6 +261,12 @@ function AdminDevisDetailPage() {
           <Card>
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className="font-mono text-pro-accent text-sm font-semibold">{devis.numero}</span>
+              <EditableNumero
+                table="devis"
+                id={devis.id}
+                value={devis.numero}
+                onSaved={(next) => setDevis((d: any) => (d ? { ...d, numero: next } : d))}
+              />
               <Badge tone={devisStatutTone[devis.statut] ?? "neutral"}>{statut.label}</Badge>
               {devis.email_envoye && <Badge tone="success">Email envoyé</Badge>}
               {devis.mission_id && <Badge tone="info">Mission</Badge>}
