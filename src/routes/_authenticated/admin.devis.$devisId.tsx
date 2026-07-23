@@ -266,7 +266,7 @@ function AdminDevisDetailPage() {
                 table="devis"
                 id={devis.id}
                 value={devis.numero}
-                onSaved={(next) => setDevis((d: any) => (d ? { ...d, numero: next } : d))}
+                onSaved={(next: string) => setDevis((d: any) => (d ? { ...d, numero: next } : d))}
               />
               <Badge tone={devisStatutTone[devis.statut] ?? "neutral"}>{statut.label}</Badge>
               {devis.email_envoye && <Badge tone="success">Email envoyé</Badge>}
