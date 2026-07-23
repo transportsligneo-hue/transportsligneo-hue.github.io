@@ -17,6 +17,7 @@ import {
   factureStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { EditableNumero } from "@/components/admin/EditableNumero";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminFacturesPage,
@@ -241,6 +242,12 @@ function AdminFacturesPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-pro-text font-medium">{f.numero}</p>
+                    <EditableNumero
+                      table="factures"
+                      id={f.id}
+                      value={f.numero}
+                      onSaved={(next: string) => setFactures((list) => list.map((x) => x.id === f.id ? { ...x, numero: next } : x))}
+                    />
                     <Badge tone={factureStatutTone[f.statut] ?? "neutral"}>
                       {STATUTS.find(s => s.value === f.statut)?.label ?? f.statut}
                     </Badge>
