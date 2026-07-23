@@ -17,6 +17,7 @@ import {
   factureStatutTone,
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
+import { EditableNumero } from "@/components/admin/EditableNumero";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminFacturesPage,
