@@ -56,13 +56,23 @@ function GroupedMissionFlow() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: mems } = await supabase
-        .from("organization_members")
+      // 1) org via profile
+      const { data: profile } = await supabase
+        .from("profiles")
         .select("organization_id")
         .eq("user_id", user.id)
-        .eq("status", "active")
-        .limit(1);
-      const oid = (mems ?? [])[0]?.organization_id as string | undefined;
+        .maybeSingle();
+      let oid = profile?.organization_id as string | null;
+      // 2) fallback via membership
+      if (!oid) {
+        const { data: mems } = await supabase
+          .from("organization_members")
+          .select("organization_id")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .limit(1);
+        oid = (mems ?? [])[0]?.organization_id as string | undefined ?? null;
+      }
       if (!oid) {
         setLoading(false);
         return;
@@ -84,6 +94,7 @@ function GroupedMissionFlow() {
       setLoading(false);
     })();
   }, [user]);
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -172,7 +183,9 @@ function GroupedMissionFlow() {
       setStep(4);
       toast.success(`Mission groupée créée · ${res.groupReference}`);
     } catch (e) {
-      toast.error(`Erreur : ${(e as Error).message}`);
+      console.error("[grouped-mission] submit failed", e);
+      const msg = (e as { message?: string })?.message || String(e);
+      toast.error(`Impossible de créer la mission : ${msg}`);
     } finally {
       setSubmitting(false);
     }
