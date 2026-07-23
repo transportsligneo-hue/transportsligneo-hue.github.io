@@ -183,7 +183,9 @@ function GroupedMissionFlow() {
       setStep(4);
       toast.success(`Mission groupée créée · ${res.groupReference}`);
     } catch (e) {
-      toast.error(`Erreur : ${(e as Error).message}`);
+      console.error("[grouped-mission] submit failed", e);
+      const msg = (e as { message?: string })?.message || String(e);
+      toast.error(`Impossible de créer la mission : ${msg}`);
     } finally {
       setSubmitting(false);
     }
