@@ -11,6 +11,7 @@ import {
 } from "@/components/admin/AdminUI";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
+import { EditableNumero } from "@/components/admin/EditableNumero";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
