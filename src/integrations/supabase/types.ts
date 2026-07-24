@@ -2776,6 +2776,7 @@ export type Database = {
           contact_depart_tel: string | null
           created_at: string
           date_prise_en_charge: string
+          devis_id: string | null
           email: string
           fleet_organization_id: string | null
           group_reference: string | null
@@ -2816,6 +2817,7 @@ export type Database = {
           contact_depart_tel?: string | null
           created_at?: string
           date_prise_en_charge: string
+          devis_id?: string | null
           email: string
           fleet_organization_id?: string | null
           group_reference?: string | null
@@ -2856,6 +2858,7 @@ export type Database = {
           contact_depart_tel?: string | null
           created_at?: string
           date_prise_en_charge?: string
+          devis_id?: string | null
           email?: string
           fleet_organization_id?: string | null
           group_reference?: string | null
@@ -2884,6 +2887,13 @@ export type Database = {
           vin?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "missions_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "missions_fleet_organization_id_fkey"
             columns: ["fleet_organization_id"]

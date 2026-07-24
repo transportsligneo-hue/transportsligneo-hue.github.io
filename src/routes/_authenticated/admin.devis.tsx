@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
@@ -20,6 +21,7 @@ import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPre
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
@@ -113,6 +115,7 @@ function isExpired(d: DevisRow): boolean {
 }
 
 function AdminDevisPage() {
+  const convertDevis = useServerFn(convertDevisToMission);
   const [selected, setSelected] = useState<DevisRow | null>(null);
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [acceptations, setAcceptations] = useState<Record<string, AcceptationInfo>>({});
@@ -134,49 +137,15 @@ function AdminDevisPage() {
     if (!(await confirmToast(`Convertir le devis ${row.numero} en mission ?`))) return;
     setConvertingId(row.id);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      if (!userId) throw new Error("Utilisateur non authentifié");
+      const mission = await convertDevis({ data: { devisId: row.id } });
 
-      const { data: mission, error: mErr } = await supabase
-        .from("missions")
-        .insert({
-          user_id: userId,
-          nom: row.nom,
-          prenom: row.prenom,
-          email: row.email,
-          telephone: row.telephone,
-          ville_depart: row.depart,
-          ville_arrivee: row.arrivee,
-          date_prise_en_charge: row.date_souhaitee ?? new Date().toISOString().slice(0, 10),
-          type_trajet: row.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
-          marque: row.marque,
-          modele: row.modele,
-          carburant: row.carburant,
-          remarques: row.message,
-          prix_total: row.prix_estime,
-          statut: "en_attente",
-        })
-        .select("id, numero")
-        .single();
-      if (mErr) throw mErr;
-
-      const { error: dErr } = await supabase
-        .from("devis")
-        .update({
-          statut: "convertit",
-          mission_id: mission.id,
-          converted_at: new Date().toISOString(),
-          converted_by: userId,
-        })
-        .eq("id", row.id);
-      if (dErr) throw dErr;
-
-      toast.success("Mission créée", { description: `${mission.numero} depuis ${row.numero}` });
+      toast.success(mission.alreadyConverted ? "Devis déjà converti" : "Mission créée", {
+        description: `${mission.numero} depuis ${row.numero}`,
+      });
       setDevis((d) =>
         d.map((x) =>
           x.id === row.id
-            ? { ...x, statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString() }
+            ? { ...x, statut: "convertit", mission_id: mission.missionId, converted_at: new Date().toISOString() }
             : x
         )
       );
