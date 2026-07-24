@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
@@ -12,6 +13,7 @@ import {
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -29,6 +31,7 @@ const STATUTS = [
 function AdminDevisDetailPage() {
   const { devisId } = Route.useParams();
   const navigate = useNavigate();
+  const convertDevis = useServerFn(convertDevisToMission);
   const [devis, setDevis] = useState<any | null>(null);
   const [acceptation, setAcceptation] = useState<any | null>(null);
   const [history, setHistory] = useState<any[]>([]);
@@ -174,22 +177,9 @@ function AdminDevisDetailPage() {
     if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
     setConverting(true);
     try {
-      const userId = devis.user_id;
-      if (!userId) throw new Error("Ce devis n'est pas lié à un compte client");
-      const { data: mission, error } = await supabase.from("missions").insert({
-        user_id: userId, nom: devis.nom, prenom: devis.prenom, email: devis.email,
-        telephone: devis.telephone, ville_depart: devis.depart, ville_arrivee: devis.arrivee,
-        date_prise_en_charge: devis.date_souhaitee ?? new Date().toISOString().slice(0, 10),
-        type_trajet: devis.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
-        marque: devis.marque, modele: devis.modele, carburant: devis.carburant,
-        remarques: devis.message, prix_total: devis.prix_estime, statut: "en_attente",
-      }).select("id, numero").single();
-      if (error) throw error;
-      await supabase.from("devis").update({
-        statut: "convertit", mission_id: mission.id, converted_at: new Date().toISOString(), converted_by: (await supabase.auth.getUser()).data.user?.id,
-      }).eq("id", devis.id);
-      toast.success("Mission créée", { description: mission.numero });
-      setDevis({ ...devis, statut: "convertit", mission_id: mission.id });
+      const mission = await convertDevis({ data: { devisId: devis.id } });
+      toast.success(mission.alreadyConverted ? "Devis déjà converti" : "Mission créée", { description: mission.numero });
+      setDevis({ ...devis, statut: "convertit", mission_id: mission.missionId });
     } catch (e) {
       toast.error("Échec conversion", { description: e instanceof Error ? e.message : "" });
     } finally { setConverting(false); }

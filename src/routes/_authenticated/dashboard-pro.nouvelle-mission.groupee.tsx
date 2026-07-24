@@ -34,6 +34,7 @@ function GroupedMissionFlow() {
 
   const [step, setStep] = useState<Step>(1);
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [orgIds, setOrgIds] = useState<string[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -56,34 +57,38 @@ function GroupedMissionFlow() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      // 1) org via profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      let oid = profile?.organization_id as string | null;
-      // 2) fallback via membership
-      if (!oid) {
-        const { data: mems } = await supabase
+      const [{ data: profile }, { data: mems }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("organization_id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
           .from("organization_members")
           .select("organization_id")
           .eq("user_id", user.id)
-          .eq("status", "active")
-          .limit(1);
-        oid = (mems ?? [])[0]?.organization_id as string | undefined ?? null;
-      }
-      if (!oid) {
+          .eq("status", "active"),
+      ]);
+
+      const ids = Array.from(new Set([
+        profile?.organization_id,
+        ...((mems ?? []).map((m) => m.organization_id)),
+      ].filter(Boolean))) as string[];
+
+      if (ids.length === 0) {
         setLoading(false);
         return;
       }
+
+      const oid = ids[0];
       setOrgId(oid);
+      setOrgIds(ids);
 
       const [{ data: veh }, { data: org }] = await Promise.all([
         supabase
           .from("vehicles")
           .select("id, immatriculation, marque, modele, energie, statut")
-          .eq("organization_id", oid)
+          .in("organization_id", ids)
           .neq("statut", "archive")
           .order("created_at", { ascending: false }),
         supabase.from("organizations").select("address, commercial_name, legal_name").eq("id", oid).maybeSingle(),
@@ -109,12 +114,31 @@ function GroupedMissionFlow() {
     [vehicles, selected],
   );
 
+  const availableVehicleIds = useMemo(
+    () => filtered.filter((v) => v.statut === "actif").map((v) => v.id),
+    [filtered],
+  );
+
+  const allVisibleAvailableSelected = availableVehicleIds.length > 0 && availableVehicleIds.every((id) => selected.has(id));
+
   const toggle = (id: string, disabled: boolean) => {
     if (disabled) return;
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allVisibleAvailableSelected) {
+        availableVehicleIds.forEach((id) => next.delete(id));
+      } else {
+        availableVehicleIds.forEach((id) => next.add(id));
+      }
       return next;
     });
   };
@@ -238,15 +262,30 @@ function GroupedMissionFlow() {
       {!loading && orgId && step === 1 && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher par modèle ou plaque…"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-              />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher par modèle ou plaque…"
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={toggleAllVisible}
+                disabled={availableVehicleIds.length === 0}
+                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#7c5cff] hover:text-[#5334d6] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {allVisibleAvailableSelected ? "Tout désélectionner" : "Tout sélectionner"}
+              </button>
             </div>
+            {orgIds.length > 1 && (
+              <p className="mt-2 text-xs text-slate-500">
+                Véhicules chargés depuis {orgIds.length} organisations actives.
+              </p>
+            )}
             <div className="mt-4 divide-y divide-slate-100">
               {filtered.length === 0 && (
                 <div className="py-10 text-center text-sm text-slate-500">Aucun véhicule dans votre parc.</div>
