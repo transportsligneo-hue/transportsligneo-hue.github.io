@@ -38,6 +38,7 @@ export const convertDevisToMission = createServerFn({ method: "POST" })
       .from("missions")
       .select("id, numero")
       .eq("devis_id", devis.id)
+      .limit(1)
       .maybeSingle();
     if (alreadyLinked) {
       await supabaseAdmin
