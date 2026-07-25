@@ -69,6 +69,10 @@ interface Trajet {
   prix_convoyeur?: number | null;
   prix_societe?: number | null;
   is_test_data?: boolean | null;
+  mission_group_id?: string | null;
+  leg_type?: string | null;
+  leg_index?: number | null;
+  type_mission?: string | null;
 }
 
 interface DevisLink {
@@ -407,7 +411,9 @@ function AdminTrajets() {
     const deduped = new Map<string, Trajet>();
 
     operational.forEach((trajet) => {
-      const key = trajet.demande_id ? `demande:${trajet.demande_id}` : `trajet:${trajet.id}`;
+      const key = trajet.demande_id
+        ? `demande:${trajet.demande_id}:${trajet.mission_group_id ?? "solo"}:${trajet.leg_type ?? "simple"}:${trajet.leg_index ?? 1}`
+        : `trajet:${trajet.id}`;
       const existing = deduped.get(key);
       if (!existing) {
         deduped.set(key, trajet);
