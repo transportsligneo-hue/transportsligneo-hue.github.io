@@ -4252,6 +4252,18 @@ export type Database = {
           numero: string
         }[]
       }
+      admin_convert_devis_to_missions: {
+        Args: {
+          _converted_by?: string
+          _devis_id: string
+          _mission_status?: string
+        }
+        Returns: {
+          leg: string
+          mission_id: string
+          numero: string
+        }[]
+      }
       admin_counter_offer: {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined

@@ -54,38 +54,21 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
 
               let missionId: string | null = devis?.mission_id ?? null;
 
-              // 3. Auto-create mission if needed
-              if (devis && !missionId && devis.user_id) {
-                const { data: mission } = await supabaseAdmin
-                  .from("missions")
-                  .insert({
-                    user_id: devis.user_id,
-                    ville_depart: devis.depart,
-                    ville_arrivee: devis.arrivee,
-                    date_prise_en_charge: devis.date_souhaitee ?? new Date().toISOString().slice(0, 10),
-                    type_trajet: devis.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
-                    options: [],
-                    marque: devis.marque ?? null,
-                    modele: devis.modele ?? null,
-                    carburant: devis.carburant ?? null,
-                    remarques: devis.message ?? null,
-                    nom: devis.nom,
-                    prenom: devis.prenom,
-                    email: devis.email,
-                    telephone: devis.telephone ?? null,
-                    prix_total: devis.prix_estime,
-                    statut: "confirmee",
-                  } as any)
-                  .select("id")
-                  .single();
+              // 3. Auto-create / complete missions through the shared AR-safe conversion flow
+              if (devis) {
+                const { data: convertedRows, error: conversionError } = await supabaseAdmin.rpc(
+                  "admin_convert_devis_to_missions" as never,
+                  {
+                    _devis_id: devis.id,
+                    _converted_by: devis.user_id ?? null,
+                    _mission_status: "confirmee",
+                  } as never,
+                );
+                if (conversionError) throw conversionError;
 
-                missionId = mission?.id ?? null;
-                if (missionId) {
-                  await supabaseAdmin
-                    .from("devis")
-                    .update({ mission_id: missionId, converted_at: new Date().toISOString() })
-                    .eq("id", devisId);
-                }
+                const rows = (convertedRows ?? []) as Array<{ mission_id: string; leg: string }>;
+                const mainMission = rows.find((row) => row.leg === "aller" || row.leg === "simple") ?? rows[0];
+                missionId = mainMission?.mission_id ?? missionId;
               }
 
               // 4. Auto-create facture (payée) — numéro aligné sur le devis (DEV-TLG-YYYY-### → FAC-TLG-YYYY-###)
