@@ -25,92 +25,24 @@ export const convertDevisToMission = createServerFn({ method: "POST" })
     if (devisError) throw devisError;
     if (!devis) throw new Error("Devis introuvable");
 
-    if (devis.mission_id) {
-      const { data: existing } = await supabaseAdmin
-        .from("missions")
-        .select("id, numero")
-        .eq("id", devis.mission_id)
-        .maybeSingle();
-      if (existing) return { missionId: existing.id, numero: existing.numero, alreadyConverted: true };
-    }
+    const { data: convertedRows, error: conversionError } = await supabaseAdmin.rpc(
+      "admin_convert_devis_to_missions" as never,
+      {
+        _devis_id: devis.id,
+        _converted_by: userId,
+        _mission_status: "en_attente",
+      } as never,
+    );
+    if (conversionError) throw conversionError;
 
-    const { data: alreadyLinked } = await supabaseAdmin
-      .from("missions")
-      .select("id, numero")
-      .eq("devis_id", devis.id)
-      .limit(1)
-      .maybeSingle();
-    if (alreadyLinked) {
-      await supabaseAdmin
-        .from("devis")
-        .update({
-          statut: "convertit",
-          mission_id: alreadyLinked.id,
-          converted_at: devis.converted_at ?? new Date().toISOString(),
-          converted_by: devis.converted_by ?? userId,
-        })
-        .eq("id", devis.id);
-      return { missionId: alreadyLinked.id, numero: alreadyLinked.numero, alreadyConverted: true };
-    }
+    const rows = (convertedRows ?? []) as Array<{ mission_id: string; leg: string; numero: string | null }>;
+    const mainMission = rows.find((row) => row.leg === "aller" || row.leg === "simple") ?? rows[0];
+    if (!mainMission) throw new Error("Mission non créée");
 
-    let profile: { user_id: string | null; organization_id: string | null; type_client: string | null } | null = null;
-    if (devis.user_id) {
-      const { data: profileByUser } = await supabaseAdmin
-        .from("profiles")
-        .select("user_id, organization_id, type_client")
-        .eq("user_id", devis.user_id)
-        .maybeSingle();
-      profile = profileByUser;
-    }
-    if (!profile && devis.email) {
-      const { data: profileByEmail } = await supabaseAdmin
-        .from("profiles")
-        .select("user_id, organization_id, type_client")
-        .eq("email", devis.email)
-        .maybeSingle();
-      profile = profileByEmail;
-    }
-
-    const missionUserId = devis.user_id ?? profile?.user_id ?? userId;
-    const missionOrgId = profile?.organization_id ?? null;
-
-    const { data: mission, error: missionError } = await supabaseAdmin
-      .from("missions")
-      .insert({
-        devis_id: devis.id,
-        user_id: missionUserId,
-        organization_id: missionOrgId,
-        fleet_organization_id: profile?.type_client === "flotte" ? missionOrgId : null,
-        nom: devis.nom,
-        prenom: devis.prenom,
-        email: devis.email,
-        telephone: devis.telephone,
-        ville_depart: devis.depart,
-        ville_arrivee: devis.arrivee,
-        date_prise_en_charge: devis.date_souhaitee ?? new Date().toISOString().slice(0, 10),
-        type_trajet: devis.option_trajet === "aller_retour" ? "aller_retour" : "aller_simple",
-        marque: devis.marque,
-        modele: devis.modele,
-        carburant: devis.carburant,
-        remarques: devis.message,
-        prix_total: devis.prix_estime ?? 0,
-        statut: "en_attente",
-      })
-      .select("id, numero")
-      .maybeSingle();
-    if (missionError) throw missionError;
-    if (!mission) throw new Error("Mission non créée");
-
-    const { error: updateError } = await supabaseAdmin
-      .from("devis")
-      .update({
-        statut: "convertit",
-        mission_id: mission.id,
-        converted_at: new Date().toISOString(),
-        converted_by: userId,
-      })
-      .eq("id", devis.id);
-    if (updateError) throw updateError;
-
-    return { missionId: mission.id, numero: mission.numero, alreadyConverted: false };
+    return {
+      missionId: mainMission.mission_id,
+      numero: mainMission.numero,
+      alreadyConverted: Boolean(devis.mission_id),
+      legsCreated: rows.length,
+    };
   });
