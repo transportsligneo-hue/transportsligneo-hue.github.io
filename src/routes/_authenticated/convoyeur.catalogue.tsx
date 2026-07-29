@@ -65,11 +65,13 @@ function toGroupedCatalogueTrajets(items: CatalogTrajet[]) {
       return;
     }
 
+    const totalPrice = legs.reduce((sum, leg) => sum + getMissionPrice(leg), 0);
+
     grouped.push({
       ...aller,
-      prix_convoyeur_fixe: legs.reduce((sum, leg) => sum + (leg.prix_convoyeur_fixe ?? 0), 0) || null,
-      prix_convoyeur: legs.reduce((sum, leg) => sum + (leg.prix_convoyeur ?? 0), 0) || null,
-      prix_suggere: legs.reduce((sum, leg) => sum + (leg.prix_suggere ?? 0), 0) || null,
+      prix_convoyeur_fixe: totalPrice || null,
+      prix_convoyeur: null,
+      prix_suggere: null,
       allow_counter_offer: legs.every((leg) => leg.allow_counter_offer),
       proposal_expires_at: legs
         .map((leg) => leg.proposal_expires_at)
