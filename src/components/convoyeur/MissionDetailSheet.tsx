@@ -342,6 +342,63 @@ export function MissionDetailSheet({
               )}
             </div>
 
+            {isAR && (
+              <div className="cat-card">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div
+                    className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em]"
+                    style={{ color: "#d9b54a" }}
+                  >
+                    <ArrowLeftRight size={15} /> Mission liée
+                  </div>
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+                    style={{
+                      background: "rgba(217,181,74,.13)",
+                      border: "1px solid rgba(217,181,74,.36)",
+                      color: "#fde68a",
+                    }}
+                  >
+                    <FileCheck2 size={11} /> 2 EDL
+                  </span>
+                </div>
+                <div className="space-y-2.5">
+                  {(arLegs.length > 0 ? arLegs : [t]).map((leg, index) => {
+                    const label = leg.leg_type === "retour" ? "Restitution" : "Livraison";
+                    const amount = leg.prix_convoyeur_fixe ?? leg.prix_convoyeur ?? leg.prix_suggere;
+                    return (
+                      <div
+                        key={`${leg.id}-${index}`}
+                        className="rounded-2xl px-3.5 py-3"
+                        style={{
+                          background: "rgba(0,0,0,.2)",
+                          border: "1px solid rgba(122,163,255,.16)",
+                        }}
+                      >
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#cddcff" }}>
+                            {label}
+                          </span>
+                          {typeof amount === "number" && (
+                            <span className="text-[11px] font-bold" style={{ color: "#d9b54a" }}>
+                              {amount.toFixed(0)} €
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[13px] font-semibold leading-snug" style={{ color: "#eef3ff" }}>
+                          {leg.depart} <span style={{ color: "#d9b54a" }}>→</span> {leg.arrivee}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex items-start gap-2 text-[12px]" style={{ color: "#9aa6c9" }}>
+                  <Info size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#4f8cff" }} />
+                  Une seule candidature pour la mission complète ; deux états des lieux seront réalisés séparément.
+                </div>
+              </div>
+            )}
+
             {/* Véhicule */}
             <div className="cat-card">
               <div
