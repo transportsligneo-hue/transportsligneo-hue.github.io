@@ -40,6 +40,50 @@ const DEFAULT_FILTERS: CatalogueFilterState = {
   sort: "date",
 };
 
+function getMissionPrice(t: CatalogTrajet) {
+  return t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
+}
+
+function toGroupedCatalogueTrajets(items: CatalogTrajet[]) {
+  const byGroup = new Map<string, CatalogTrajet[]>();
+  const singles: CatalogTrajet[] = [];
+
+  items.forEach((t) => {
+    if (t.mission_group_id && (t.leg_type === "aller" || t.leg_type === "retour")) {
+      byGroup.set(t.mission_group_id, [...(byGroup.get(t.mission_group_id) ?? []), t]);
+      return;
+    }
+    singles.push(t);
+  });
+
+  const grouped: CatalogTrajet[] = [];
+  byGroup.forEach((legs) => {
+    const aller = legs.find((leg) => leg.leg_type === "aller");
+    const retour = legs.find((leg) => leg.leg_type === "retour");
+    if (!aller || !retour) {
+      grouped.push(...legs);
+      return;
+    }
+
+    grouped.push({
+      ...aller,
+      prix_convoyeur_fixe: legs.reduce((sum, leg) => sum + (leg.prix_convoyeur_fixe ?? 0), 0) || null,
+      prix_convoyeur: legs.reduce((sum, leg) => sum + (leg.prix_convoyeur ?? 0), 0) || null,
+      prix_suggere: legs.reduce((sum, leg) => sum + (leg.prix_suggere ?? 0), 0) || null,
+      allow_counter_offer: legs.every((leg) => leg.allow_counter_offer),
+      proposal_expires_at: legs
+        .map((leg) => leg.proposal_expires_at)
+        .filter(Boolean)
+        .sort()[0] ?? null,
+      leg_type: "aller",
+      isGroupedAr: true,
+      groupedLegs: [aller, retour],
+    });
+  });
+
+  return [...grouped, ...singles];
+}
+
 function ConvoyeurCatalogue() {
   const { user, convoyeurStatut } = useAuth();
   const validated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
@@ -118,9 +162,11 @@ function ConvoyeurCatalogue() {
     };
   }, [fetchData]);
 
+  const catalogueTrajets = useMemo(() => toGroupedCatalogueTrajets(trajets), [trajets]);
+
   const enriched = useMemo(() => {
-    if (!geo.position) return trajets.map((t) => ({ t, dist: null as number | null }));
-    return trajets.map((t) => {
+    if (!geo.position) return catalogueTrajets.map((t) => ({ t, dist: null as number | null }));
+    return catalogueTrajets.map((t) => {
       if (typeof t.depart_lat === "number" && typeof t.depart_lng === "number") {
         return {
           t,
@@ -129,14 +175,14 @@ function ConvoyeurCatalogue() {
       }
       return { t, dist: null as number | null };
     });
-  }, [trajets, geo.position]);
+  }, [catalogueTrajets, geo.position]);
 
   const filtered = useMemo(() => {
     const s = filters.search.trim().toLowerCase();
     const km = filters.maxKm ? Number(filters.maxKm) : null;
     const prixMin = filters.minPrix ? Number(filters.minPrix) : null;
     const list = enriched.filter(({ t, dist }) => {
-      const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
+      const price = getMissionPrice(t);
       if (
         s &&
         !`${t.depart} ${t.arrivee} ${t.marque ?? ""} ${t.modele ?? ""}`
@@ -149,7 +195,7 @@ function ConvoyeurCatalogue() {
       if (filters.date && t.date_trajet !== filters.date) return false;
       if (filters.leg === "simple" && t.leg_type && t.leg_type !== "simple")
         return false;
-      if (filters.leg === "ar" && (!t.leg_type || t.leg_type === "simple"))
+      if (filters.leg === "ar" && !t.isGroupedAr && (!t.leg_type || t.leg_type === "simple"))
         return false;
       if (
         filters.urgent &&
@@ -178,8 +224,8 @@ function ConvoyeurCatalogue() {
     });
     list.sort((a, b) => {
       if (filters.sort === "prix") {
-        const pa = a.t.prix_convoyeur_fixe ?? a.t.prix_convoyeur ?? 0;
-        const pb = b.t.prix_convoyeur_fixe ?? b.t.prix_convoyeur ?? 0;
+        const pa = getMissionPrice(a.t);
+        const pb = getMissionPrice(b.t);
         return pb - pa;
       }
       if (filters.sort === "distance") {
@@ -212,7 +258,7 @@ function ConvoyeurCatalogue() {
       return;
     }
     const suggested =
-      trajet.prix_convoyeur_fixe ?? trajet.prix_convoyeur ?? trajet.prix_suggere ?? 0;
+      getMissionPrice(trajet);
     if (price !== suggested && !trajet.allow_counter_offer) {
       toast.error("Les contre-offres ne sont pas autorisées sur cette mission");
       return;
@@ -235,7 +281,7 @@ function ConvoyeurCatalogue() {
     fetchData();
   };
 
-  const openTrajet = openId ? trajets.find((t) => t.id === openId) : null;
+  const openTrajet = openId ? catalogueTrajets.find((t) => t.id === openId) : null;
   const openDist =
     openTrajet && geo.position
       ? enriched.find((e) => e.t.id === openTrajet.id)?.dist ?? null
@@ -349,7 +395,9 @@ function ConvoyeurCatalogue() {
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map(({ t, dist }) => {
-                  const mine = myOffers[t.id];
+                  const mine = [t, ...(t.groupedLegs ?? [])]
+                    .map((leg) => myOffers[leg.id])
+                    .find(Boolean);
                   return (
                     <CatalogueMissionCard
                       key={t.id}

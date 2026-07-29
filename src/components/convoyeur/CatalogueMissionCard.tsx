@@ -11,6 +11,7 @@ import {
   Timer,
   Navigation,
   Send,
+  FileCheck2,
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
 import { inferMissionLevel, missionLevelStyle } from "@/lib/mission-level";
@@ -41,6 +42,8 @@ export interface CatalogTrajet {
   published_at: string | null;
   depart_lat?: number | null;
   depart_lng?: number | null;
+  groupedLegs?: CatalogTrajet[];
+  isGroupedAr?: boolean;
 }
 
 interface Props {
@@ -89,7 +92,7 @@ export function CatalogueMissionCard({
   onQuickApply,
 }: Props) {
   const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-  const isAR = !!t.leg_type && t.leg_type !== "simple";
+  const isAR = Boolean(t.isGroupedAr || (!!t.leg_type && t.leg_type !== "simple"));
   const urgent = t.urgence === "immediat" || t.urgence === "urgent";
   const fresh = t.published_at
     ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000
@@ -135,6 +138,11 @@ export function CatalogueMissionCard({
           {isAR ? <ArrowLeftRight size={10} /> : <ArrowRight size={10} />}
           {isAR ? "Livraison + Restitution" : "Livraison simple"}
         </span>
+        {isAR && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-100">
+            <FileCheck2 size={10} /> 2 états des lieux
+          </span>
+        )}
         <span
           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
             level,
@@ -260,6 +268,11 @@ export function CatalogueMissionCard({
             </span>
             <Euro size={16} className="text-amber-300" />
           </div>
+          {isAR && (
+            <div className="mt-1 text-[10px] font-semibold text-amber-100/75">
+              Mission complète · livraison + restitution
+            </div>
+          )}
         </div>
 
         {myOfferStatus ? (
