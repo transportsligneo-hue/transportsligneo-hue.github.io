@@ -28,6 +28,7 @@ interface Offer {
     id: string; depart: string; arrivee: string; date_trajet: string | null;
     distance_km: number | null; prix_convoyeur_fixe: number | null; prix_convoyeur: number | null;
     urgence: string | null; allow_counter_offer: boolean;
+    mission_group_id: string | null; leg_type: string | null; prix_suggere: number | null;
   };
   convoyeur?: {
     id: string; nom: string; prenom: string; ville: string | null;
@@ -50,7 +51,7 @@ function AdminCandidatures() {
     setLoading(true);
     const { data, error } = await supabase
       .from("mission_offres")
-      .select("id,trajet_id,convoyeur_id,prix_propose,prix_suggere_snapshot,type_offre,statut,message,admin_counter_offer,admin_counter_at,created_at, trajet:trajets(id,depart,arrivee,date_trajet,distance_km,prix_convoyeur_fixe,prix_convoyeur,urgence,allow_counter_offer), convoyeur:convoyeurs(id,nom,prenom,ville)")
+      .select("id,trajet_id,convoyeur_id,prix_propose,prix_suggere_snapshot,type_offre,statut,message,admin_counter_offer,admin_counter_at,created_at, trajet:trajets(id,depart,arrivee,date_trajet,distance_km,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,urgence,allow_counter_offer,mission_group_id,leg_type), convoyeur:convoyeurs(id,nom,prenom,ville)")
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) { toast.error(error.message); setLoading(false); return; }
@@ -82,9 +83,40 @@ function AdminCandidatures() {
 
   const groupedByTrajet = useMemo(() => {
     const map: Record<string, Offer[]> = {};
-    filtered.forEach((o) => { (map[o.trajet_id] ||= []).push(o); });
+    filtered.forEach((o) => {
+      const isAr = o.trajet?.mission_group_id && (o.trajet.leg_type === "aller" || o.trajet.leg_type === "retour");
+      const key = isAr ? o.trajet?.mission_group_id ?? o.trajet_id : o.trajet_id;
+      (map[key] ||= []).push(o);
+    });
     return Object.entries(map);
   }, [filtered]);
+
+  const displayOffersForGroup = (list: Offer[]) => {
+    const byDriver = new Map<string, Offer[]>();
+    list.forEach((offer) => {
+      byDriver.set(offer.convoyeur_id, [...(byDriver.get(offer.convoyeur_id) ?? []), offer]);
+    });
+
+    return Array.from(byDriver.values()).map((driverOffers) => {
+      const primary =
+        driverOffers.find((offer) => offer.trajet?.leg_type === "aller") ?? driverOffers[0];
+      return {
+        ...primary,
+        prix_propose: driverOffers.reduce((sum, offer) => sum + Number(offer.prix_propose ?? 0), 0),
+      };
+    });
+  };
+
+  const suggestedForGroup = (list: Offer[]) => {
+    const byTrajet = new Map<string, Offer["trajet"]>();
+    list.forEach((offer) => {
+      if (offer.trajet) byTrajet.set(offer.trajet.id, offer.trajet);
+    });
+    return Array.from(byTrajet.values()).reduce(
+      (sum, trajet) => sum + Number(trajet?.prix_convoyeur_fixe ?? trajet?.prix_convoyeur ?? trajet?.prix_suggere ?? 0),
+      0,
+    );
+  };
 
   const stats = useMemo(() => ({
     total: offers.length,
@@ -174,7 +206,9 @@ function AdminCandidatures() {
         <div className="space-y-4">
           {groupedByTrajet.map(([trajetId, list]) => {
             const t = list[0].trajet;
-            const suggested = t?.prix_convoyeur_fixe ?? t?.prix_convoyeur ?? 0;
+            const isAr = Boolean(t?.mission_group_id && (t.leg_type === "aller" || t.leg_type === "retour"));
+            const displayOffers = displayOffersForGroup(list);
+            const suggested = isAr ? suggestedForGroup(list) : t?.prix_convoyeur_fixe ?? t?.prix_convoyeur ?? t?.prix_suggere ?? 0;
             return (
               <div key={trajetId} className="rounded-xl border border-pro-border bg-white overflow-hidden">
                 <div className="p-4 bg-pro-bg-soft border-b border-pro-border flex items-center justify-between gap-3 flex-wrap">
@@ -184,18 +218,19 @@ function AdminCandidatures() {
                     <span className="text-pro-muted">→</span>
                     <span className="font-semibold text-pro-text">{t?.arrivee}</span>
                     {t?.distance_km && <span className="text-xs text-pro-muted">· {Math.round(t.distance_km)} km</span>}
+                    {isAr && <span className="text-xs font-bold text-amber-700">· Livraison + Restitution</span>}
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-pro-muted">Tarif base :</span>
                     <span className="font-bold text-pro-text">{suggested.toFixed(0)} €</span>
                     <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
-                      {list.length} candidature{list.length > 1 ? "s" : ""}
+                      {displayOffers.length} candidature{displayOffers.length > 1 ? "s" : ""}
                     </span>
                   </div>
                 </div>
 
                 <div className="divide-y divide-pro-border">
-                  {list.map((o) => {
+                  {displayOffers.map((o) => {
                     const diff = o.prix_propose - suggested;
                     return (
                       <div key={o.id} className="p-4 flex flex-wrap items-center gap-4">
