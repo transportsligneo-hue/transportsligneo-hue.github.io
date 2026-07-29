@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   X, User, Calendar, Clock, Car, Lock, ShieldCheck,
   Minus, Plus, ChevronDown, Check, Coins, Info, Zap, Loader2,
+  FileCheck2, ArrowLeftRight,
 } from "lucide-react";
 import { ReturnTripHelper } from "./ReturnTripHelper";
 import type { CatalogTrajet } from "./CatalogueMissionCard";
@@ -34,7 +35,8 @@ export function MissionDetailSheet({
 }: Props) {
   const suggested =
     t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
-  const isAR = !!t.leg_type && t.leg_type !== "simple";
+  const isAR = Boolean(t.isGroupedAr || (!!t.leg_type && t.leg_type !== "simple"));
+  const arLegs = t.groupedLegs ?? (isAR ? [t] : []);
   const urgent = t.urgence === "immediat" || t.urgence === "urgent";
   const level = inferMissionLevel({
     distanceKm: t.distance_km,
@@ -200,7 +202,9 @@ export function MissionDetailSheet({
               style={{ fontFamily: "'Poppins',sans-serif" }}
             >
               {t.depart}
-              <span style={{ color: "#d9b54a", margin: "0 6px" }}>→</span>
+              <span style={{ color: "#d9b54a", margin: "0 6px" }}>
+                {isAR ? "↔" : "→"}
+              </span>
               {t.arrivee}
             </div>
             <div className="mt-1.5 text-[12.5px]" style={{ color: "#9aa6c9" }}>
