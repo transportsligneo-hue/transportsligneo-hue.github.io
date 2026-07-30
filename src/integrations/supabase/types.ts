@@ -3538,6 +3538,7 @@ export type Database = {
           leg_type: string | null
           marque: string | null
           mission_group_id: string | null
+          mission_id: string | null
           modele: string | null
           options_meta: Json
           parent_trajet_id: string | null
@@ -3604,6 +3605,7 @@ export type Database = {
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
+          mission_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -3670,6 +3672,7 @@ export type Database = {
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
+          mission_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -3711,6 +3714,13 @@ export type Database = {
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
             referencedColumns: ["id"]
           },
           {
