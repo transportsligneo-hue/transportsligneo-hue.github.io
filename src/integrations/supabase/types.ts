@@ -4584,6 +4584,14 @@ export type Database = {
           status: string
         }[]
       }
+      service_convert_demande_to_missions: {
+        Args: { _converted_by: string; _demande_id: string }
+        Returns: {
+          leg: string
+          mission_id: string
+          numero: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       split_ar_prices: {
