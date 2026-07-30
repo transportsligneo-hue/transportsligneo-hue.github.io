@@ -8,12 +8,13 @@ export const convertDevisToMission = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-    if (roleError) throw roleError;
-    if (!isAdmin) throw new Error("Accès admin requis");
+    const [{ data: isAdmin, error: adminRoleError }, { data: isSuperAdmin, error: superRoleError }] = await Promise.all([
+      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+      supabase.rpc("has_role", { _user_id: userId, _role: "super_admin" }),
+    ]);
+    if (adminRoleError) throw adminRoleError;
+    if (superRoleError) throw superRoleError;
+    if (!isAdmin && !isSuperAdmin) throw new Error("Accès administrateur requis");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
