@@ -3526,6 +3526,7 @@ export type Database = {
           contact_depart_note: string | null
           contact_depart_tel: string | null
           created_at: string
+          date_souhaitee: string | null
           date_trajet: string | null
           demande_id: string | null
           depart: string
@@ -3593,6 +3594,7 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_souhaitee?: string | null
           date_trajet?: string | null
           demande_id?: string | null
           depart: string
@@ -3660,6 +3662,7 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_souhaitee?: string | null
           date_trajet?: string | null
           demande_id?: string | null
           depart?: string
