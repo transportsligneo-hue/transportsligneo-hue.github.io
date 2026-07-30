@@ -3531,9 +3531,11 @@ export type Database = {
           demande_id: string | null
           depart: string
           devis_id: string | null
+          group_reference: string | null
           heure_trajet: string | null
           id: string
           immatriculation: string | null
+          is_round_trip: boolean
           is_test_data: boolean
           leg_index: number | null
           leg_type: string | null
@@ -3600,9 +3602,11 @@ export type Database = {
           demande_id?: string | null
           depart: string
           devis_id?: string | null
+          group_reference?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_round_trip?: boolean
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
@@ -3669,9 +3673,11 @@ export type Database = {
           demande_id?: string | null
           depart?: string
           devis_id?: string | null
+          group_reference?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_round_trip?: boolean
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
