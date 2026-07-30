@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
 import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User } from "lucide-react";
 import {
   AdminPageHeader,
@@ -105,6 +107,7 @@ function AdminDemandes() {
   const [search, setSearch] = useState("");
   const [converting, setConverting] = useState<string | null>(null);
   const [selected, setSelected] = useState<Demande | null>(null);
+  const convertDemande = useServerFn(convertDemandeToMissions);
 
   const fetchDemandes = useCallback(async () => {
     let query = supabase
@@ -123,12 +126,7 @@ function AdminDemandes() {
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
     try {
-      const { data, error } = await supabase.rpc(
-        "admin_convert_demande_to_missions" as never,
-        { _demande_id: d.id } as never,
-      );
-      if (error) throw error;
-      const rows = (data ?? []) as Array<{ mission_id: string; leg: string; numero: string }>;
+      const rows = await convertDemande({ data: { demandeId: d.id } });
       const isAR = rows.length > 1;
       toast.success(
         isAR

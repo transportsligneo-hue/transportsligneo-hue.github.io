@@ -3526,18 +3526,22 @@ export type Database = {
           contact_depart_note: string | null
           contact_depart_tel: string | null
           created_at: string
+          date_souhaitee: string | null
           date_trajet: string | null
           demande_id: string | null
           depart: string
           devis_id: string | null
+          group_reference: string | null
           heure_trajet: string | null
           id: string
           immatriculation: string | null
+          is_round_trip: boolean
           is_test_data: boolean
           leg_index: number | null
           leg_type: string | null
           marque: string | null
           mission_group_id: string | null
+          mission_id: string | null
           modele: string | null
           options_meta: Json
           parent_trajet_id: string | null
@@ -3550,6 +3554,7 @@ export type Database = {
           prix_convoyeur_min: number | null
           prix_societe: number | null
           prix_suggere: number | null
+          prix_total: number | null
           proposal_expires_at: string | null
           published_at: string | null
           statut: string
@@ -3592,18 +3597,22 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_souhaitee?: string | null
           date_trajet?: string | null
           demande_id?: string | null
           depart: string
           devis_id?: string | null
+          group_reference?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_round_trip?: boolean
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
+          mission_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -3616,6 +3625,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
@@ -3658,18 +3668,22 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_souhaitee?: string | null
           date_trajet?: string | null
           demande_id?: string | null
           depart?: string
           devis_id?: string | null
+          group_reference?: string | null
           heure_trajet?: string | null
           id?: string
           immatriculation?: string | null
+          is_round_trip?: boolean
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
           marque?: string | null
           mission_group_id?: string | null
+          mission_id?: string | null
           modele?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -3682,6 +3696,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
@@ -3711,6 +3726,13 @@ export type Database = {
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
             referencedColumns: ["id"]
           },
           {
@@ -4582,6 +4604,14 @@ export type Database = {
           expires_at: string
           session_id: string
           status: string
+        }[]
+      }
+      service_convert_demande_to_missions: {
+        Args: { _converted_by: string; _demande_id: string }
+        Returns: {
+          leg: string
+          mission_id: string
+          numero: string
         }[]
       }
       show_limit: { Args: never; Returns: number }
