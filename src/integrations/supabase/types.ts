@@ -3552,6 +3552,7 @@ export type Database = {
           prix_convoyeur_min: number | null
           prix_societe: number | null
           prix_suggere: number | null
+          prix_total: number | null
           proposal_expires_at: string | null
           published_at: string | null
           statut: string
@@ -3620,6 +3621,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
@@ -3688,6 +3690,7 @@ export type Database = {
           prix_convoyeur_min?: number | null
           prix_societe?: number | null
           prix_suggere?: number | null
+          prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
           statut?: string
