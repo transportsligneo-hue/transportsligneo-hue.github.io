@@ -55,10 +55,15 @@ export function MissionDetailSheet({
   }, [onClose]);
 
   const submit = () => {
-    const price = bidOpen && allowBid ? bidPrice : suggested;
-    if (!Number.isFinite(price) || price <= 0) return;
+    const raw = bidOpen && allowBid ? bidPrice : suggested;
+    const price = Number.isFinite(raw) && raw > 0 ? raw : suggested;
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error("Rémunération indisponible pour cette mission, contactez l'admin.");
+      return;
+    }
     void onSubmit(price, msg);
   };
+
 
   const delta = bidPrice - suggested;
   const deltaLabel =
