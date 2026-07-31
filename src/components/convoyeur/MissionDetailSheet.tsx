@@ -280,13 +280,48 @@ export function MissionDetailSheet({
 
               <div className="relative pl-1.5">
                 <div className="cat-tl-line" />
-                {[
-                  { key: "Départ", value: t.depart, dot: "#4ad0a0" },
-                  { key: "Arrivée", value: t.arrivee, dot: "#d9b54a" },
-                ].map((row, i) => (
+                {(() => {
+                  const retourLeg = (t.groupedLegs ?? []).find(
+                    (l) => l.leg_type === "retour",
+                  );
+                  const fmt = (d?: string | null, h?: string | null) =>
+                    [
+                      d ? new Date(d).toLocaleDateString("fr-FR") : null,
+                      h,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ");
+                  const steps = [
+                    {
+                      key: "Prise en charge du véhicule",
+                      value: t.depart,
+                      when: fmt(t.date_trajet, t.heure_trajet),
+                      dot: "#4ad0a0",
+                    },
+                    {
+                      key: "Livraison du véhicule",
+                      value: t.arrivee,
+                      when: "",
+                      dot: "#4f8cff",
+                    },
+                    ...(isAR
+                      ? [
+                          {
+                            key: "Restitution du véhicule",
+                            value: retourLeg?.arrivee ?? t.depart,
+                            when: fmt(
+                              retourLeg?.date_trajet,
+                              retourLeg?.heure_trajet,
+                            ),
+                            dot: "#d9b54a",
+                          },
+                        ]
+                      : []),
+                  ];
+                  return steps.map((row, i) => (
                   <div
                     key={row.key}
-                    className={`relative flex gap-4 items-start ${i === 0 ? "mb-[18px]" : ""}`}
+                    className={`relative flex gap-4 items-start ${i === steps.length - 1 ? "" : "mb-[18px]"}`}
                   >
                     <div
                       className="mt-[3px] flex-shrink-0 relative z-[1]"
@@ -309,6 +344,14 @@ export function MissionDetailSheet({
                       >
                         {row.value}
                       </div>
+                      {row.when && (
+                        <div
+                          className="mt-1 text-[11.5px] font-semibold"
+                          style={{ color: "#d9b54a" }}
+                        >
+                          {row.when}
+                        </div>
+                      )}
                       <div
                         className="mt-1.5 flex items-center gap-1.5 text-[11.5px]"
                         style={{ color: "#9aa6c9" }}
@@ -318,8 +361,10 @@ export function MissionDetailSheet({
                       </div>
                     </div>
                   </div>
-                ))}
+                  ));
+                })()}
               </div>
+
 
               {/* Stats trip */}
               {(typeof t.distance_km === "number" || dur || t.heure_trajet) && (
