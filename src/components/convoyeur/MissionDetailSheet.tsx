@@ -141,11 +141,15 @@ export function MissionDetailSheet({
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-full w-full max-w-[440px] flex-col overflow-hidden text-white shadow-[0_0_80px_rgba(0,0,0,.7)] sm:animate-slide-in-right cat-frame"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden text-white shadow-[0_0_80px_rgba(0,0,0,.7)] sm:animate-slide-in-right cat-frame"
         style={{ fontFamily: "'Inter',sans-serif" }}
       >
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 220 }}>
+        <div
+          className="min-h-0 flex-1 overflow-y-auto"
+          style={{ paddingBottom: "calc(40px + env(safe-area-inset-bottom))" }}
+        >
+
           {/* Topbar */}
           <div className="flex items-center justify-between px-[18px] pt-4 pb-1.5">
             <div className="flex gap-2 flex-wrap">
