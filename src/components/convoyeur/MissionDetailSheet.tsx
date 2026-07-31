@@ -524,14 +524,16 @@ export function MissionDetailSheet({
 
         {/* Bottom sticky panel */}
         <div
-          className="absolute bottom-0 left-0 right-0 z-20 px-[18px] pt-4 pb-3.5"
+          className="relative z-20 shrink-0 max-h-[70dvh] overflow-y-auto px-[18px] pt-4"
           style={{
             background: "rgba(10,18,44,.97)",
             backdropFilter: "blur(18px)",
             borderTop: "1px solid rgba(122,163,255,.3)",
             boxShadow: "0 -10px 30px rgba(4,8,22,.5)",
+            paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
           }}
         >
+
           {canApply ? (
             <>
               {/* Toggle contre-offre — visible SEULEMENT si allow_counter_offer */}
