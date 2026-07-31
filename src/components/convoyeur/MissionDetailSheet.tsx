@@ -7,6 +7,8 @@ import {
 import { ReturnTripHelper } from "./ReturnTripHelper";
 import type { CatalogTrajet } from "./CatalogueMissionCard";
 import { inferMissionLevel } from "@/lib/mission-level";
+import { toast } from "sonner";
+
 
 interface Props {
   trajet: CatalogTrajet;
@@ -55,10 +57,15 @@ export function MissionDetailSheet({
   }, [onClose]);
 
   const submit = () => {
-    const price = bidOpen && allowBid ? bidPrice : suggested;
-    if (!Number.isFinite(price) || price <= 0) return;
+    const raw = bidOpen && allowBid ? bidPrice : suggested;
+    const price = Number.isFinite(raw) && raw > 0 ? raw : suggested;
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error("Rémunération indisponible pour cette mission, contactez l'admin.");
+      return;
+    }
     void onSubmit(price, msg);
   };
+
 
   const delta = bidPrice - suggested;
   const deltaLabel =
@@ -141,11 +148,15 @@ export function MissionDetailSheet({
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-full w-full max-w-[440px] flex-col overflow-hidden text-white shadow-[0_0_80px_rgba(0,0,0,.7)] sm:animate-slide-in-right cat-frame"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden text-white shadow-[0_0_80px_rgba(0,0,0,.7)] sm:animate-slide-in-right cat-frame"
         style={{ fontFamily: "'Inter',sans-serif" }}
       >
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 220 }}>
+        <div
+          className="min-h-0 flex-1 overflow-y-auto"
+          style={{ paddingBottom: "calc(40px + env(safe-area-inset-bottom))" }}
+        >
+
           {/* Topbar */}
           <div className="flex items-center justify-between px-[18px] pt-4 pb-1.5">
             <div className="flex gap-2 flex-wrap">
@@ -520,14 +531,16 @@ export function MissionDetailSheet({
 
         {/* Bottom sticky panel */}
         <div
-          className="absolute bottom-0 left-0 right-0 z-20 px-[18px] pt-4 pb-3.5"
+          className="relative z-20 shrink-0 max-h-[70dvh] overflow-y-auto px-[18px] pt-4"
           style={{
             background: "rgba(10,18,44,.97)",
             backdropFilter: "blur(18px)",
             borderTop: "1px solid rgba(122,163,255,.3)",
             boxShadow: "0 -10px 30px rgba(4,8,22,.5)",
+            paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
           }}
         >
+
           {canApply ? (
             <>
               {/* Toggle contre-offre — visible SEULEMENT si allow_counter_offer */}
