@@ -163,31 +163,47 @@ export function CatalogueMissionCard({
       </div>
 
       {/* Route */}
-      <div className="relative mt-3 flex items-stretch gap-3">
-        <div className="flex flex-col items-center pt-1">
-          <span className="h-3 w-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20" />
-          <span className="my-1 w-px flex-1 bg-gradient-to-b from-emerald-400/60 to-amber-300/60" />
-          <span className="h-3 w-3 rounded-full bg-amber-300 ring-4 ring-amber-300/20" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-2">
-          <div>
-            <div className="text-[10px] uppercase tracking-wider text-white/50">
-              Départ
+      {(() => {
+        const retourLeg = (t.groupedLegs ?? []).find((l) => l.leg_type === "retour");
+        const steps = [
+          { k: "Prise en charge du véhicule", v: t.depart, c: "bg-emerald-400 ring-emerald-400/20" },
+          { k: "Livraison du véhicule", v: t.arrivee, c: "bg-sky-400 ring-sky-400/20" },
+          ...(isAR
+            ? [
+                {
+                  k: "Restitution du véhicule",
+                  v: retourLeg?.arrivee ?? t.depart,
+                  c: "bg-amber-300 ring-amber-300/20",
+                },
+              ]
+            : []),
+        ];
+        return (
+          <div className="relative mt-3 flex items-stretch gap-3">
+            <div className="flex flex-col items-center pt-1">
+              {steps.map((s, i) => (
+                <div key={s.k} className="flex flex-1 flex-col items-center">
+                  {i > 0 && (
+                    <span className="my-1 w-px flex-1 bg-gradient-to-b from-emerald-400/50 to-amber-300/50" />
+                  )}
+                  <span className={`h-3 w-3 rounded-full ring-4 ${s.c}`} />
+                </div>
+              ))}
             </div>
-            <div className="truncate text-sm font-semibold text-white">
-              {t.depart}
+            <div className="min-w-0 flex-1 space-y-2">
+              {steps.map((s) => (
+                <div key={s.k}>
+                  <div className="text-[10px] uppercase tracking-wider text-white/50">
+                    {s.k}
+                  </div>
+                  <div className="truncate text-sm font-semibold text-white">{s.v}</div>
+                </div>
+              ))}
             </div>
           </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wider text-white/50">
-              Arrivée
-            </div>
-            <div className="truncate text-sm font-semibold text-white">
-              {t.arrivee}
-            </div>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
+
 
       {/* Meta row */}
       <div className="relative mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-white/70">
