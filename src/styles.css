@@ -3472,3 +3472,136 @@
 .feat-item:hover span { color: #fff; }
 @media (max-width: 860px) { .feat-grid2 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .feat-grid2 { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   Admin V6 — Tableau de bord & Missions unifiées
+   Design system : fond clair #f6f8fc, cartes blanches,
+   accents bleu électrique / or / vert / violet / orange.
+   ============================================================ */
+.adm6 {
+  --a6-surface: #ffffff;
+  --a6-surface-2: #fbfcfe;
+  --a6-border: #e7ebf3;
+  --a6-border-soft: #eff2f8;
+  --a6-text: #0f1526;
+  --a6-muted: #6b7590;
+  --a6-dim: #9aa2ba;
+  --a6-blue: #2f5fff;
+  --a6-blue-deep: #1c3fc4;
+  --a6-blue-soft: #eaf0ff;
+  --a6-gold: #b8862a;
+  --a6-gold-soft: #faf1da;
+  --a6-ok: #189a72;
+  --a6-ok-soft: #e3f6ee;
+  --a6-warn: #c07d1f;
+  --a6-warn-soft: #fbf0dd;
+  --a6-red: #d24545;
+  --a6-red-soft: #fbe9e9;
+  --a6-violet: #7c5cff;
+  --a6-violet-soft: #f0ecff;
+  color: var(--a6-text);
+}
+.adm6 h1.a6-title { font-family: 'Poppins', sans-serif; font-size: 23px; font-weight: 800; letter-spacing: -0.01em; }
+.adm6 .a6-sub { color: var(--a6-muted); font-size: 12.8px; }
+.a6-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.a6-num { font-family: 'Space Grotesk', sans-serif; }
+
+/* --- KPI cards --- */
+.a6-kpi { position: relative; overflow: hidden; border-radius: 18px; padding: 18px; border: 1px solid transparent;
+  transition: transform .2s cubic-bezier(.2,.8,.3,1), box-shadow .2s ease; }
+.a6-kpi:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(15,21,38,0.12); }
+.a6-kpi::before { content: ''; position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; border-radius: 50%; filter: blur(10px); opacity: .5; }
+.a6-kpi.c-blue { background: linear-gradient(150deg,#eef3ff 0%,#fff 60%); border-color: #dce6fd; }
+.a6-kpi.c-blue::before { background: radial-gradient(circle,#4f8cff,transparent 70%); }
+.a6-kpi.c-ok { background: linear-gradient(150deg,#e7f9f2 0%,#fff 60%); border-color: #cdeee0; }
+.a6-kpi.c-ok::before { background: radial-gradient(circle,#18b382,transparent 70%); }
+.a6-kpi.c-violet { background: linear-gradient(150deg,#f2eeff 0%,#fff 60%); border-color: #e0d8fb; }
+.a6-kpi.c-violet::before { background: radial-gradient(circle,#7c5cff,transparent 70%); }
+.a6-kpi.c-gold { background: linear-gradient(150deg,#fdf6e6 0%,#fff 60%); border-color: #f2e2b8; }
+.a6-kpi.c-gold::before { background: radial-gradient(circle,#d9b54a,transparent 70%); }
+.a6-kpi.c-warn { background: linear-gradient(150deg,#fdf1e2 0%,#fff 60%); border-color: #f5ddb3; }
+.a6-kpi.c-warn::before { background: radial-gradient(circle,#e0a83e,transparent 70%); }
+.a6-kpi-ic { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 14px rgba(0,0,0,.1); color: #fff; }
+.a6-kpi-ic.blue { background: linear-gradient(135deg,#4f8cff,#2f5fff); }
+.a6-kpi-ic.ok { background: linear-gradient(135deg,#4ad0a0,#189a72); }
+.a6-kpi-ic.gold { background: linear-gradient(135deg,#e8c976,#b8862a); }
+.a6-kpi-ic.violet { background: linear-gradient(135deg,#a794ff,#7c5cff); }
+.a6-kpi-ic.warn { background: linear-gradient(135deg,#f0c26e,#c07d1f); }
+.a6-kpi-trend { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+.a6-kpi-trend.up { color: var(--a6-ok); background: var(--a6-ok-soft); }
+.a6-kpi-trend.flat { color: var(--a6-dim); background: var(--a6-surface-2); }
+.a6-kpi-k { font-size: 11px; color: var(--a6-muted); font-weight: 700; position: relative; z-index: 1; }
+.a6-kpi-v { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; position: relative; z-index: 1; }
+.a6-kpi-sub { font-size: 10.5px; color: var(--a6-dim); position: relative; z-index: 1; }
+
+/* --- Panel cards --- */
+.a6-card { background: var(--a6-surface); border: 1px solid var(--a6-border); border-radius: 18px; box-shadow: 0 2px 8px rgba(15,21,38,.03); }
+.a6-card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+.a6-card-hover:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15,21,38,.08); }
+
+/* --- Radar (état vide trajets) --- */
+.a6-radar { position: relative; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+.a6-radar-ring { position: absolute; border-radius: 50%; border: 1.5px solid rgba(47,95,255,.35); animation: a6RadarPulse 2.4s ease-out infinite; }
+.a6-radar-ring:nth-child(2) { animation-delay: .8s; }
+.a6-radar-ring:nth-child(3) { animation-delay: 1.6s; }
+@keyframes a6RadarPulse { 0% { width: 20px; height: 20px; opacity: 1; } 100% { width: 90px; height: 90px; opacity: 0; } }
+.a6-radar-ic { position: relative; z-index: 1; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg,#eef3ff,#fff); box-shadow: 0 8px 20px rgba(47,95,255,.15); display: flex; align-items: center; justify-content: center; color: var(--a6-blue-deep); }
+
+/* --- Area chart --- */
+.a6-area-path { stroke-dasharray: 900; stroke-dashoffset: 900; animation: a6Draw 1.4s cubic-bezier(.2,.8,.3,1) forwards; }
+@keyframes a6Draw { to { stroke-dashoffset: 0; } }
+.a6-area-fill { opacity: 0; animation: a6Fade 1s ease .4s forwards; }
+@keyframes a6Fade { to { opacity: 1; } }
+.a6-area-dot { opacity: 0; animation: a6Pop .3s ease forwards; transform-box: fill-box; transform-origin: center; }
+@keyframes a6Pop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+
+/* --- Pulse dot --- */
+.a6-dot-pulse { animation: a6Pulse 1.6s ease-in-out infinite; }
+@keyframes a6Pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* --- Boutons --- */
+.a6-btn-primary { position: relative; overflow: hidden; background: linear-gradient(120deg,var(--a6-blue),var(--a6-blue-deep)); color: #fff; box-shadow: 0 6px 14px rgba(47,95,255,.3); }
+.a6-btn-ok { position: relative; overflow: hidden; background: linear-gradient(120deg,var(--a6-ok),#12b382); color: #fff; box-shadow: 0 8px 18px rgba(24,154,114,.3); }
+.a6-shine::after { content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent); transform: skewX(-20deg); animation: a6Shine 3.4s ease-in-out infinite; }
+@keyframes a6Shine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
+
+/* --- Slide-over panel --- */
+.a6-overlay { position: fixed; inset: 0; background: rgba(10,14,28,.55); backdrop-filter: blur(2px); z-index: 60; animation: a6Fade .25s ease forwards; opacity: 0; }
+.a6-panel { position: fixed; top: 0; right: 0; width: min(640px,100vw); height: 100dvh; background: var(--a6-surface); z-index: 61;
+  box-shadow: -20px 0 60px rgba(15,21,38,.25); overflow-y: auto; animation: a6SlideIn .38s cubic-bezier(.2,.9,.25,1); }
+@keyframes a6SlideIn { from { transform: translateX(102%); } to { transform: translateX(0); } }
+.a6-panel-head { position: relative; overflow: hidden; padding: 24px 26px 20px;
+  background: linear-gradient(120deg,var(--a6-blue-soft) 0%,#f3f0ff 100%); border-bottom: 1px solid var(--a6-border); }
+.a6-panel-head::before { content: ''; position: absolute; top: -60px; right: -40px; width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(47,95,255,.16), transparent 70%); }
+.a6-tab { position: relative; padding: 14px 2px; margin-right: 24px; font-size: 12.8px; font-weight: 700; color: var(--a6-dim); transition: color .2s ease; white-space: nowrap; }
+.a6-tab.active { color: var(--a6-blue-deep); }
+.a6-tab::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2.5px; background: var(--a6-blue); border-radius: 2px; transform: scaleX(0); transition: transform .25s ease; }
+.a6-tab.active::after { transform: scaleX(1); }
+.a6-view { animation: a6FadeSlide .3s ease; }
+@keyframes a6FadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Statuts unifiés --- */
+.a6-badge { font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-block; white-space: nowrap; }
+.a6-badge.new { background: var(--a6-blue-soft); color: var(--a6-blue-deep); }
+.a6-badge.attribuer { background: var(--a6-warn-soft); color: var(--a6-warn); }
+.a6-badge.attribuee { background: var(--a6-violet-soft); color: #5334d6; }
+.a6-badge.encours { background: var(--a6-gold-soft); color: var(--a6-gold); }
+.a6-badge.terminee { background: var(--a6-ok-soft); color: var(--a6-ok); }
+.a6-badge.annulee { background: var(--a6-red-soft); color: var(--a6-red); }
+
+/* --- Chips filtres --- */
+.a6-chip { font-size: 11.5px; font-weight: 600; padding: 8px 13px; border-radius: 9px; border: 1px solid var(--a6-border); background: var(--a6-surface); color: var(--a6-muted); white-space: nowrap; }
+.a6-chip.active { background: var(--a6-blue-soft); color: var(--a6-blue-deep); border-color: #c9d6f5; }
+
+/* --- Table --- */
+.a6-table { width: 100%; border-collapse: collapse; }
+.a6-table th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--a6-dim); padding: 12px 14px; border-bottom: 1px solid var(--a6-border); background: var(--a6-surface-2); }
+.a6-table td { padding: 13px 14px; border-bottom: 1px solid var(--a6-border-soft); font-size: 12.8px; vertical-align: middle; }
+.a6-table tr.row:hover { background: var(--a6-surface-2); cursor: pointer; }
+
+/* --- Photos EDL --- */
+.a6-photo { overflow: hidden; border-radius: 12px; border: 1px solid var(--a6-border); }
+.a6-photo img { transition: transform .3s ease; }
+.a6-photo:hover img { transform: scale(1.08); }
