@@ -344,39 +344,19 @@ function AdminDashboard() {
 
       {/* === DUO : graphe demandes + feed live === */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <AdminSection
-          title={
-            <span className="inline-flex items-center gap-2">
-              <TrendingUp size={16} className="text-[color:var(--admin-accent)]" /> Demandes — 7 derniers jours
+        <div className="lg:col-span-2 a6-card a6-card-hover p-5">
+          <div className="flex items-center justify-between mb-1">
+            <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+              <TrendingUp size={16} className="text-[var(--a6-blue)]" /> Demandes — 7 derniers jours
+            </p>
+            <span className="a6-badge new">
+              {demandes7j.reduce((s, d) => s + d.count, 0)} au total
             </span>
-          }
-          description={`Total: ${demandes7j.reduce((s, d) => s + d.count, 0)} demande(s)`}
-        >
-          <div className="flex items-end justify-between gap-1.5 h-32 mt-2">
-            {demandes7j.map((d) => {
-              const h = Math.round((d.count / maxBar) * 100);
-              const date = new Date(d.day);
-              const label = date.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3);
-              return (
-                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
-                  <div className="w-full relative flex items-end h-full">
-                    <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-[color:var(--admin-accent)] to-[color:var(--admin-accent-strong)] transition-all"
-                      style={{ height: `${Math.max(h, 4)}%` }}
-                      title={`${d.count} demande${d.count > 1 ? "s" : ""}`}
-                    />
-                    {d.count > 0 && (
-                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-[color:var(--admin-text)]">
-                        {d.count}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-[color:var(--admin-muted)] capitalize">{label}</span>
-                </div>
-              );
-            })}
           </div>
-        </AdminSection>
+          <p className="text-[11.5px] text-[var(--a6-dim)] mb-2">Volume quotidien réel des demandes reçues</p>
+          <AreaChartV6 data={chartData} />
+        </div>
+
 
         <AdminSection
           title={
