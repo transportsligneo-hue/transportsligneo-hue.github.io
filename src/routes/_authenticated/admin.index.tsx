@@ -264,7 +264,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 adm6">
       <AdminPageHeader
         eyebrow="Centre de contrôle"
         title="Tableau de bord"
@@ -280,37 +280,59 @@ function AdminDashboard() {
         }
       />
 
-      {/* === Carte trajets en cours === */}
-      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
-
-
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <AdminStatCard icon={Activity} label="Missions actives" value={stats.missionsEnCours} accent="success" />
-        <AdminStatCard icon={Truck} label="Missions terminées" value={stats.missionsTerminees} accent="info" />
-        <AdminStatCard
-          icon={Users}
+        <KpiCardV6
+          label="Missions actives"
+          value={stats.missionsEnCours}
+          icon={Activity}
+          tone="ok"
+          trend={stats.missionsEnCours > 0 ? { label: "en direct", positive: true } : undefined}
+        />
+        <KpiCardV6 label="Missions terminées" value={stats.missionsTerminees} icon={Truck} tone="blue" />
+        <KpiCardV6
           label="Convoyeurs validés"
           value={stats.convoyeurs}
-          hint={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
-          accent="default"
+          icon={Users}
+          tone="violet"
+          sub={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
         />
-        <AdminStatCard
-          icon={Briefcase}
+        <KpiCardV6
           label="Clients"
           value={stats.clients}
-          hint={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
-          accent="info"
+          icon={Briefcase}
+          tone="blue"
+          sub={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
         />
-        <AdminStatCard
-          icon={Euro}
+        <KpiCardV6
           label="CA réalisé"
           value={`${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
-          hint={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
-          accent="success"
+          icon={Euro}
+          tone="gold"
+          sub={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
         />
-        <AdminStatCard icon={Clock} label="Demandes nouvelles" value={stats.demandesNouvelles} accent="warning" />
+        <KpiCardV6
+          label="Demandes nouvelles"
+          value={stats.demandesNouvelles}
+          icon={Clock}
+          tone="warn"
+          series={serieDemandes}
+          sub="7 derniers jours"
+        />
       </section>
+
+      {/* === Carte trajets en cours === */}
+      {stats.trajetsActifs > 0 ? (
+        <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
+      ) : (
+        <div className="a6-card a6-card-hover p-5">
+          <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+            <RouteIcon size={16} className="text-[var(--a6-blue)]" /> Trajets en cours (temps réel)
+          </p>
+          <RadarEmptyV6 />
+        </div>
+      )}
+
 
       {/* === ALERTES === */}
       {alertes.length > 0 && (
