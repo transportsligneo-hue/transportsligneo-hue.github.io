@@ -241,17 +241,21 @@ function AdminDashboard() {
   );
 
   const hubCards = [
-    { to: "/admin/demandes", title: "Demandes", icon: ClipboardList, count: stats.demandes, accent: "warning" as const },
-    { to: "/admin/trajets", title: "Trajets", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
-    { to: "/admin/attributions", title: "Missions", icon: Truck, count: stats.missionsEnCours, accent: "success" as const },
+    { to: "/admin/missions", title: "Missions", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
     { to: "/admin/convoyeurs", title: "Convoyeurs", icon: Users, count: stats.convoyeurs, accent: "default" as const },
     { to: "/admin/clients", title: "Clients", icon: Briefcase, count: stats.clients, accent: "info" as const },
     { to: "/admin/devis", title: "Devis", icon: Receipt, count: stats.devisTotal, accent: "danger" as const },
+    { to: "/admin/factures", title: "Factures", icon: ClipboardList, count: stats.devisEnvoyes, accent: "warning" as const },
     { to: "/admin/documents", title: "Documents", icon: FolderOpen, count: stats.docsEnAttente, accent: "warning" as const },
     { to: "/admin/notifications", title: "Notifications", icon: BellRing, count: notifs.filter((n) => !n.lu).length, accent: "default" as const },
   ];
 
-  const maxBar = Math.max(1, ...demandes7j.map((d) => d.count));
+  const chartData = demandes7j.map((d) => ({
+    label: new Date(d.day).toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3),
+    value: d.count,
+  }));
+  const serieDemandes = demandes7j.map((d) => d.count);
+
 
   const toneAlerteIcon: Record<Alerte["tone"], string> = {
     warning: "bg-[color:var(--admin-warning-soft)] text-amber-700",
