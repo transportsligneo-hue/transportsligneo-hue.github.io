@@ -23,12 +23,15 @@ import {
 } from "lucide-react";
 import {
   AdminPageHeader,
-  AdminStatCard,
   AdminBadge,
   AdminSection,
   AdminEmpty,
 } from "@/components/admin/ui";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
+import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
+import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
+
 
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -213,7 +216,7 @@ function AdminDashboard() {
     () =>
       [
         stats.demandesNouvelles > 0 && {
-          to: "/admin/demandes",
+          to: "/admin/missions",
           icon: FileText,
           title: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""} demande${stats.demandesNouvelles > 1 ? "s" : ""}`,
           tone: "warning" as const,
@@ -241,17 +244,21 @@ function AdminDashboard() {
   );
 
   const hubCards = [
-    { to: "/admin/demandes", title: "Demandes", icon: ClipboardList, count: stats.demandes, accent: "warning" as const },
-    { to: "/admin/trajets", title: "Trajets", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
-    { to: "/admin/attributions", title: "Missions", icon: Truck, count: stats.missionsEnCours, accent: "success" as const },
+    { to: "/admin/missions", title: "Missions", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
     { to: "/admin/convoyeurs", title: "Convoyeurs", icon: Users, count: stats.convoyeurs, accent: "default" as const },
     { to: "/admin/clients", title: "Clients", icon: Briefcase, count: stats.clients, accent: "info" as const },
     { to: "/admin/devis", title: "Devis", icon: Receipt, count: stats.devisTotal, accent: "danger" as const },
+    { to: "/admin/factures", title: "Factures", icon: ClipboardList, count: stats.devisEnvoyes, accent: "warning" as const },
     { to: "/admin/documents", title: "Documents", icon: FolderOpen, count: stats.docsEnAttente, accent: "warning" as const },
     { to: "/admin/notifications", title: "Notifications", icon: BellRing, count: notifs.filter((n) => !n.lu).length, accent: "default" as const },
   ];
 
-  const maxBar = Math.max(1, ...demandes7j.map((d) => d.count));
+  const chartData = demandes7j.map((d) => ({
+    label: new Date(d.day).toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3),
+    value: d.count,
+  }));
+  const serieDemandes = demandes7j.map((d) => d.count);
+
 
   const toneAlerteIcon: Record<Alerte["tone"], string> = {
     warning: "bg-[color:var(--admin-warning-soft)] text-amber-700",
@@ -260,7 +267,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 adm6">
       <AdminPageHeader
         eyebrow="Centre de contrôle"
         title="Tableau de bord"
@@ -276,37 +283,59 @@ function AdminDashboard() {
         }
       />
 
-      {/* === Carte trajets en cours === */}
-      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
-
-
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <AdminStatCard icon={Activity} label="Missions actives" value={stats.missionsEnCours} accent="success" />
-        <AdminStatCard icon={Truck} label="Missions terminées" value={stats.missionsTerminees} accent="info" />
-        <AdminStatCard
-          icon={Users}
+        <KpiCardV6
+          label="Missions actives"
+          value={stats.missionsEnCours}
+          icon={Activity}
+          tone="ok"
+          trend={stats.missionsEnCours > 0 ? { label: "en direct", positive: true } : undefined}
+        />
+        <KpiCardV6 label="Missions terminées" value={stats.missionsTerminees} icon={Truck} tone="blue" />
+        <KpiCardV6
           label="Convoyeurs validés"
           value={stats.convoyeurs}
-          hint={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
-          accent="default"
+          icon={Users}
+          tone="violet"
+          sub={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
         />
-        <AdminStatCard
-          icon={Briefcase}
+        <KpiCardV6
           label="Clients"
           value={stats.clients}
-          hint={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
-          accent="info"
+          icon={Briefcase}
+          tone="blue"
+          sub={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
         />
-        <AdminStatCard
-          icon={Euro}
+        <KpiCardV6
           label="CA réalisé"
           value={`${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
-          hint={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
-          accent="success"
+          icon={Euro}
+          tone="gold"
+          sub={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
         />
-        <AdminStatCard icon={Clock} label="Demandes nouvelles" value={stats.demandesNouvelles} accent="warning" />
+        <KpiCardV6
+          label="Demandes nouvelles"
+          value={stats.demandesNouvelles}
+          icon={Clock}
+          tone="warn"
+          series={serieDemandes}
+          sub="7 derniers jours"
+        />
       </section>
+
+      {/* === Carte trajets en cours === */}
+      {stats.trajetsActifs > 0 ? (
+        <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
+      ) : (
+        <div className="a6-card a6-card-hover p-5">
+          <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+            <RouteIcon size={16} className="text-[var(--a6-blue)]" /> Trajets en cours (temps réel)
+          </p>
+          <RadarEmptyV6 />
+        </div>
+      )}
+
 
       {/* === ALERTES === */}
       {alertes.length > 0 && (
@@ -340,39 +369,19 @@ function AdminDashboard() {
 
       {/* === DUO : graphe demandes + feed live === */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <AdminSection
-          title={
-            <span className="inline-flex items-center gap-2">
-              <TrendingUp size={16} className="text-[color:var(--admin-accent)]" /> Demandes — 7 derniers jours
+        <div className="lg:col-span-2 a6-card a6-card-hover p-5">
+          <div className="flex items-center justify-between mb-1">
+            <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+              <TrendingUp size={16} className="text-[var(--a6-blue)]" /> Demandes — 7 derniers jours
+            </p>
+            <span className="a6-badge new">
+              {demandes7j.reduce((s, d) => s + d.count, 0)} au total
             </span>
-          }
-          description={`Total: ${demandes7j.reduce((s, d) => s + d.count, 0)} demande(s)`}
-        >
-          <div className="flex items-end justify-between gap-1.5 h-32 mt-2">
-            {demandes7j.map((d) => {
-              const h = Math.round((d.count / maxBar) * 100);
-              const date = new Date(d.day);
-              const label = date.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3);
-              return (
-                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
-                  <div className="w-full relative flex items-end h-full">
-                    <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-[color:var(--admin-accent)] to-[color:var(--admin-accent-strong)] transition-all"
-                      style={{ height: `${Math.max(h, 4)}%` }}
-                      title={`${d.count} demande${d.count > 1 ? "s" : ""}`}
-                    />
-                    {d.count > 0 && (
-                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-[color:var(--admin-text)]">
-                        {d.count}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-[color:var(--admin-muted)] capitalize">{label}</span>
-                </div>
-              );
-            })}
           </div>
-        </AdminSection>
+          <p className="text-[11.5px] text-[var(--a6-dim)] mb-2">Volume quotidien réel des demandes reçues</p>
+          <AreaChartV6 data={chartData} />
+        </div>
+
 
         <AdminSection
           title={
@@ -453,7 +462,7 @@ function AdminDashboard() {
       <AdminSection
         title="Dernières demandes"
         actions={
-          <Link to="/admin/demandes" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
+          <Link to="/admin/missions" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
             Tout voir <ArrowRight size={12} />
           </Link>
         }
@@ -477,7 +486,7 @@ function AdminDashboard() {
                 {recentDemandes.map((d) => (
                   <tr key={d.id}>
                     <td>
-                      <Link to="/admin/demandes" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
+                      <Link to="/admin/missions" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
                         {d.prenom} {d.nom}
                       </Link>
                       <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
@@ -502,7 +511,7 @@ function AdminDashboard() {
                     </td>
                     <td className="text-right">
                       <Link
-                        to="/admin/demandes"
+                        to="/admin/missions"
                         className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
                       >
                         Ouvrir <ChevronRight size={12} />
