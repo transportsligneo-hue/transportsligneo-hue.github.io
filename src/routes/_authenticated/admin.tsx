@@ -100,15 +100,14 @@ function AdminLayout() {
     // Activité commerciale
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
-    { to: "/admin/demandes", label: "Demandes", icon: FileText, group: "Activité" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
 
     // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
-    { to: "/admin/trajets", label: "Trajets", icon: RouteIcon, group: "Opérations" },
-    { to: "/admin/attributions", label: "Attributions", icon: Send, group: "Opérations" },
+    { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
     { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
+
 
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
