@@ -216,7 +216,7 @@ function AdminDashboard() {
     () =>
       [
         stats.demandesNouvelles > 0 && {
-          to: "/admin/demandes",
+          to: "/admin/missions",
           icon: FileText,
           title: `${stats.demandesNouvelles} nouvelle${stats.demandesNouvelles > 1 ? "s" : ""} demande${stats.demandesNouvelles > 1 ? "s" : ""}`,
           tone: "warning" as const,
@@ -462,7 +462,7 @@ function AdminDashboard() {
       <AdminSection
         title="Dernières demandes"
         actions={
-          <Link to="/admin/demandes" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
+          <Link to="/admin/missions" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
             Tout voir <ArrowRight size={12} />
           </Link>
         }
@@ -486,7 +486,7 @@ function AdminDashboard() {
                 {recentDemandes.map((d) => (
                   <tr key={d.id}>
                     <td>
-                      <Link to="/admin/demandes" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
+                      <Link to="/admin/missions" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
                         {d.prenom} {d.nom}
                       </Link>
                       <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
@@ -511,7 +511,7 @@ function AdminDashboard() {
                     </td>
                     <td className="text-right">
                       <Link
-                        to="/admin/demandes"
+                        to="/admin/missions"
                         className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
                       >
                         Ouvrir <ChevronRight size={12} />
