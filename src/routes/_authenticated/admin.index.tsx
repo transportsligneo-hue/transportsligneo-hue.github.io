@@ -23,12 +23,15 @@ import {
 } from "lucide-react";
 import {
   AdminPageHeader,
-  AdminStatCard,
   AdminBadge,
   AdminSection,
   AdminEmpty,
 } from "@/components/admin/ui";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
+import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
+import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
+
 
 
 export const Route = createFileRoute("/_authenticated/admin/")({
