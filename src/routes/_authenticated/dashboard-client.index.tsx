@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight, Loader2, FileText, Inbox } from "lucide-react";
-import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import {
+  Truck, Clock, CheckCircle, Calendar, MapPin, PlusCircle, ArrowRight,
+  Loader2, FileText, Inbox, ArrowUpRight,
+} from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
@@ -74,6 +76,16 @@ interface Stats {
   aVenir: number;
   demandes: number;
 }
+
+const V3_STATUS: Record<string, { cls: string; label: string }> = {
+  en_attente: { cls: "wait", label: "En attente" },
+  confirmee: { cls: "progress", label: "Confirmée" },
+  en_cours: { cls: "progress", label: "En route" },
+  livree: { cls: "done", label: "Livrée" },
+  terminee: { cls: "done", label: "Terminée" },
+  annulee: { cls: "danger", label: "Annulée" },
+  refuse: { cls: "danger", label: "Refusée" },
+};
 
 function ClientDashboard() {
   const { user } = useAuth();
@@ -188,93 +200,129 @@ function ClientDashboard() {
     return () => { cancelled = true; };
   }, [user]);
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="animate-spin text-v3-blue" size={28} />
+      </div>
+    );
+  }
 
   const hasPendingButNoMission = !lastMission && items.length > 0;
+  const displayName = prenom || (user?.email?.split("@")[0] ?? "");
 
   return (
-    <div className="space-y-8">
-      {/* Welcome */}
-      <div className="card-premium rounded p-6 md:p-8 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/5 blur-3xl" />
-        <div className="relative">
-          <p className="text-xs uppercase tracking-[0.3em] text-primary/80 mb-2">Bienvenue</p>
-          <h1 className="font-heading text-2xl md:text-3xl text-cream tracking-wide">
-            {prenom ? `Bonjour, ${prenom}` : "Bonjour"}
+    <div className="v3-aurora -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-full font-v3-body">
+      {/* Breadcrumb */}
+      <div className="text-[12px] text-v3-dim mb-3">
+        Espace client <span className="text-v3-muted font-semibold">/ Vue d'ensemble</span>
+      </div>
+
+      {/* Page head */}
+      <div className="flex flex-wrap items-end justify-between gap-5 mb-8">
+        <div className="min-w-0">
+          <div className="v3-eyebrow"><span className="dot" />Espace client</div>
+          <h1 className="v3-h1">
+            Bonjour<span className="electric-text">{displayName ? `, ${displayName}` : ""}</span>
           </h1>
-          <p className="text-cream/70 text-sm mt-2">Voici un aperçu de vos convoyages.</p>
+          <p className="v3-sub">Voici un aperçu de vos convoyages et de leur suivi en temps réel.</p>
+        </div>
+        <Link
+          to="/dashboard-client/nouvelle-reservation"
+          className="v3-btn-primary inline-flex items-center gap-2"
+        >
+          <PlusCircle size={14} /> Réserver un convoyage
+        </Link>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <KpiCard
+          tone="warn" label="Demandes en attente" value={stats.demandes} trendLabel="à traiter"
+          icon={<Inbox size={18} />}
+        />
+        <KpiCard
+          tone="blue" label="Convoyages planifiés" value={stats.aVenir} trendLabel="à venir"
+          icon={<Calendar size={18} />}
+        />
+        <KpiCard
+          tone="violet" label="En cours" value={stats.enCours} trendLabel="live"
+          icon={<Truck size={18} />}
+        />
+        <KpiCard
+          tone="ok" label="Terminés" value={stats.terminees} trendLabel={`+${stats.terminees}`}
+          icon={<CheckCircle size={18} />}
+        />
+      </div>
+
+      {/* Suivi + CTA */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 mb-8">
+        <ActiveMissionsMap
+          title="Suivi de vos convoyages"
+          emptyMessage="Aucun convoyage en cours actuellement."
+        />
+        <div className="v3-cta-gold p-6 flex flex-col justify-center text-center">
+          <h3 className="font-v3-display text-[17px] font-semibold text-v3 m-0">
+            Un véhicule à faire convoyer ?
+          </h3>
+          <p className="text-v3-muted text-[13px] mt-1.5 mb-4">
+            Réservez en moins de 2 minutes, réponse de notre équipe sous 1h ouvrée.
+          </p>
           <Link
             to="/dashboard-client/nouvelle-reservation"
-            className="inline-flex items-center gap-2 mt-5 px-6 py-3 bg-primary text-navy font-heading text-sm tracking-[0.15em] uppercase hover:bg-gold-light transition-colors"
+            className="v3-btn-gold inline-flex items-center gap-2 self-center"
           >
-            <PlusCircle size={16} /> Réserver un convoyage
+            <PlusCircle size={14} /> Réserver un convoyage
           </Link>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-        <StatCard icon={Clock} label="En cours" value={stats.enCours} accent="text-primary" />
-        <StatCard icon={Calendar} label="À venir" value={stats.aVenir} accent="text-blue-300" />
-        <StatCard icon={CheckCircle} label="Terminées" value={stats.terminees} accent="text-green-300" />
-        <StatCard icon={Inbox} label="Demandes" value={stats.demandes} accent="text-[#e7c76a]" />
+      {/* Dernière mission */}
+      <div className="v3-section-head">
+        <h2>{lastMission ? "Dernière mission" : "Vos missions"}</h2>
+        <Link to="/dashboard-client/missions" className="v3-link inline-flex items-center gap-1">
+          Tout voir <ArrowUpRight size={14} />
+        </Link>
       </div>
-
-      {/* Carte trajets en cours */}
-      <ActiveMissionsMap
-        title="Suivi de vos convoyages"
-        emptyMessage="Aucun convoyage en cours actuellement."
-      />
-
-
-      {/* Last mission OU bloc rassurant */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-heading text-lg text-cream tracking-wider">
-            {lastMission ? "Dernière mission" : "Vos missions"}
-          </h2>
-          <Link to="/dashboard-client/missions" className="text-xs text-primary hover:text-gold-light transition-colors uppercase tracking-wider">
-            Voir tout →
-          </Link>
-        </div>
+      <div className="mb-8">
         {lastMission ? (
           <Link
             to="/dashboard-client/missions/$missionId"
             params={{ missionId: lastMission.id }}
-            className="block card-premium p-5 rounded hover:border-primary/40 transition-all group"
+            className="v3-card v3-card-hover block p-5 group"
           >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="text-cream/60 text-xs uppercase tracking-wider">{lastMission.numero}</p>
-                <p className="text-cream font-heading text-base mt-1 flex items-center gap-2">
-                  <MapPin size={14} className="text-primary" />
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="min-w-0">
+                <div className="v3-mono-id">{lastMission.numero}</div>
+                <p className="font-v3-display text-[15px] font-semibold text-v3 mt-1 flex items-center gap-2 truncate">
+                  <MapPin size={14} className="text-v3-blue shrink-0" />
                   {lastMission.ville_depart} → {lastMission.ville_arrivee}
                 </p>
               </div>
-              <StatusBadge kind={missionStatusKind(lastMission.statut)} size="md">
-                {missionStatusLabel(lastMission.statut)}
-              </StatusBadge>
+              <span className={`v3-status ${(V3_STATUS[lastMission.statut] ?? { cls: "neutral" }).cls}`}>
+                {(V3_STATUS[lastMission.statut] ?? { label: lastMission.statut }).label}
+              </span>
             </div>
-            <div className="flex items-center justify-between text-xs text-cream/70">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center justify-between text-[12px] text-v3-muted">
+              <span className="inline-flex items-center gap-1.5">
                 <Calendar size={12} />
                 {new Date(lastMission.date_prise_en_charge).toLocaleDateString("fr-FR")}
               </span>
-              <span className="font-heading text-primary text-base">{Number(lastMission.prix_total).toFixed(2)} €</span>
-              <ArrowRight size={14} className="text-cream/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <span className="v3-price text-[15px]">{Number(lastMission.prix_total).toFixed(2)} €</span>
+              <ArrowRight size={14} className="text-v3-dim group-hover:text-v3-blue group-hover:translate-x-1 transition-all" />
             </div>
           </Link>
         ) : hasPendingButNoMission ? (
-          <div className="card-premium p-6 rounded">
+          <div className="v3-card p-6">
             <div className="flex items-start gap-3">
-              <div className="rounded-full bg-amber-500/15 border border-amber-500/30 p-2 mt-0.5">
-                <Clock size={16} className="text-amber-300" />
+              <div className="w-9 h-9 rounded-xl bg-[var(--v3-warn-soft)] text-[color:var(--v3-warn)] flex items-center justify-center shrink-0">
+                <Clock size={16} />
               </div>
-              <div className="flex-1">
-                <p className="font-heading text-base text-cream tracking-wide">
+              <div className="min-w-0">
+                <p className="font-v3-display text-[15px] font-semibold text-v3">
                   Votre demande est en cours de validation
                 </p>
-                <p className="text-cream/60 text-sm mt-1 leading-relaxed">
+                <p className="text-v3-muted text-[13px] mt-1 leading-relaxed">
                   Une fois validée par notre équipe, elle apparaîtra ici comme mission en cours
                   et vous pourrez suivre son avancement en temps réel.
                 </p>
@@ -282,14 +330,14 @@ function ClientDashboard() {
             </div>
           </div>
         ) : (
-          <div className="card-premium p-8 rounded text-center">
-            <Truck className="text-cream/20 mx-auto mb-3" size={32} />
-            <p className="text-cream/70 text-sm">Aucune mission pour le moment.</p>
+          <div className="v3-card p-12 text-center">
+            <Truck className="text-v3-dim mx-auto mb-3" size={36} />
+            <p className="text-v3-muted text-sm">Aucune mission pour le moment.</p>
             <Link
               to="/dashboard-client/nouvelle-reservation"
-              className="inline-block mt-4 text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
+              className="inline-flex items-center gap-1.5 mt-4 text-v3-blue text-sm font-semibold hover:underline"
             >
-              Réserver maintenant →
+              <PlusCircle size={14} /> Réserver maintenant
             </Link>
           </div>
         )}
@@ -297,35 +345,34 @@ function ClientDashboard() {
 
       {/* Mes demandes en cours */}
       {items.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-heading text-lg text-cream tracking-wider">Mes demandes</h2>
-            <Link
-              to="/dashboard-client/devis"
-              className="text-primary text-xs uppercase tracking-wider hover:text-gold-light transition-colors"
-            >
-              Tout voir →
+        <>
+          <div className="v3-section-head">
+            <h2>Mes demandes</h2>
+            <Link to="/dashboard-client/devis" className="v3-link inline-flex items-center gap-1">
+              Tout voir <ArrowUpRight size={14} />
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="v3-card overflow-hidden">
             {items.map(it => (
               <Link
                 key={it.id}
                 to={it.linkTo}
-                className="card-premium p-4 md:p-5 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-primary/40 transition-colors cursor-pointer"
+                className="v3-trow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-cream/60 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                      <FileText size={12} className="text-primary" /> {it.numero}
-                    </p>
-                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${it.status.cls}`}>
+                    <span className="v3-mono-id inline-flex items-center gap-1.5">
+                      <FileText size={11} className="text-v3-blue" /> {it.numero}
+                    </span>
+                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border ${it.status.cls}`}>
                       {it.status.label}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider text-cream/60">· {it.trajetType}</span>
+                    <span className="text-[10.5px] uppercase tracking-wider text-v3-dim">· {it.trajetType}</span>
                   </div>
-                  <p className="text-cream font-heading text-sm mt-1.5 truncate">{it.depart} → {it.arrivee}</p>
-                  <p className="text-cream/70 text-xs mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                  <p className="font-v3-display text-[14px] font-semibold text-v3 mt-1.5 truncate">
+                    {it.depart} → {it.arrivee}
+                  </p>
+                  <p className="text-v3-muted text-[12px] mt-1 flex flex-wrap gap-x-3 gap-y-1">
                     <span>
                       <Calendar size={11} className="inline mr-1" />
                       {new Date(it.created_at).toLocaleDateString("fr-FR")}
@@ -337,18 +384,18 @@ function ClientDashboard() {
                     {it.distance_km ? <span>{it.distance_km} km</span> : null}
                   </p>
                 </div>
-                <div className="text-left sm:text-right shrink-0 flex sm:block items-center justify-between gap-2">
+                <div className="shrink-0 flex sm:block items-center justify-between gap-2 text-left sm:text-right">
                   {it.prix != null ? (
-                    <p className="font-heading text-primary text-xl">{it.prix.toFixed(0)} €</p>
+                    <p className="v3-price text-[18px]">{it.prix.toFixed(0)} €</p>
                   ) : (
-                    <p className="text-cream/60 text-[11px] uppercase tracking-wider">Prix à venir</p>
+                    <p className="text-v3-dim text-[11px] uppercase tracking-wider">Prix à venir</p>
                   )}
-                  <ArrowRight size={14} className="text-cream/30 hidden sm:inline mt-1" />
+                  <ArrowRight size={14} className="text-v3-dim hidden sm:inline mt-1" />
                 </div>
               </Link>
             ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -356,19 +403,19 @@ function ClientDashboard() {
 
 function devisStatusInfo(d: DevisRow): { label: string; cls: string } {
   if (d.mission_id || d.statut === "convertit") {
-    return { label: "Mission créée", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+    return { label: "Mission créée", cls: "bg-blue-50 text-blue-700 border-blue-200" };
   }
   if (d.paid_at) {
-    return { label: "Payé", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+    return { label: "Payé", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
   }
   switch (d.statut) {
     case "accepte":
-      return { label: "Validé — à payer", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+      return { label: "Validé — à payer", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
     case "refuse":
-      return { label: "Refusé", cls: "bg-red-500/15 text-red-300 border-red-500/30" };
+      return { label: "Refusé", cls: "bg-red-50 text-red-700 border-red-200" };
     case "envoye":
     default:
-      return { label: "En attente", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+      return { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200" };
   }
 }
 
@@ -376,25 +423,36 @@ function demandeStatusInfo(statut: string): { label: string; cls: string } {
   switch (statut) {
     case "convertie":
     case "convertit":
-      return { label: "Mission créée", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+      return { label: "Mission créée", cls: "bg-blue-50 text-blue-700 border-blue-200" };
     case "en_traitement":
     case "en_cours":
-      return { label: "En cours de traitement", cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" };
+      return { label: "En cours de traitement", cls: "bg-blue-50 text-blue-700 border-blue-200" };
     case "refusee":
     case "annulee":
-      return { label: "Refusée", cls: "bg-red-500/15 text-red-300 border-red-500/30" };
+      return { label: "Refusée", cls: "bg-red-50 text-red-700 border-red-200" };
     case "nouvelle":
     default:
-      return { label: "Demande envoyée", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+      return { label: "Demande envoyée", cls: "bg-amber-50 text-amber-700 border-amber-200" };
   }
 }
 
-function StatCard({ icon: Icon, label, value, accent }: { icon: typeof Truck; label: string; value: number; accent: string }) {
+function KpiCard({
+  tone, icon, label, value, trendLabel,
+}: {
+  tone: "blue" | "gold" | "ok" | "warn" | "violet";
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  trendLabel?: string;
+}) {
   return (
-    <div className="card-premium p-4 md:p-5 rounded">
-      <Icon className={`${accent} opacity-70 mb-2`} size={20} />
-      <p className={`font-heading text-2xl md:text-3xl ${accent}`}>{value}</p>
-      <p className="text-cream/70 text-[10px] md:text-xs uppercase tracking-wider mt-1">{label}</p>
+    <div className={`v3-kpi-grad ${tone} p-5 sm:p-6`}>
+      <div className="flex justify-between items-start mb-3.5 relative z-[1]">
+        <div className={`v3-kpi-icon ${tone}`}>{icon}</div>
+        {trendLabel && <span className="v3-kpi-trend flat">{trendLabel}</span>}
+      </div>
+      <div className="v3-kpi-label relative z-[1]">{label}</div>
+      <div className="v3-kpi-value relative z-[1]">{value}</div>
     </div>
   );
 }
