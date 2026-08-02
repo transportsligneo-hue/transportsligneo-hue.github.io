@@ -356,7 +356,15 @@ export function MissionUnifiedPanel({
               {!attributionId ? (
                 <div className="a6-card p-4">
                   <RadarEmptyV6 title="Aucun convoyeur attribué" subtitle="Le suivi GPS et l'état des lieux apparaîtront après attribution." />
+                  <Link
+                    to="/admin/attributions"
+                    search={{ trajet: mission.id }}
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]"
+                  >
+                    <UserPlus size={14} /> Attribuer cette mission
+                  </Link>
                 </div>
+
               ) : (
                 <div className="rounded-2xl bg-[#0b1026] p-4">
                   <InspectionPreuvesBlock attributionId={attributionId} />

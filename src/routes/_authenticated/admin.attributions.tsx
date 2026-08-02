@@ -30,8 +30,12 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    trajet: typeof search.trajet === "string" ? search.trajet : undefined,
+  }),
   component: AdminAttributions,
 });
+
 
 interface Attribution {
   id: string;
