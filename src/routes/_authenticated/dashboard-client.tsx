@@ -123,8 +123,11 @@ function ClientLayout() {
   }
 
   return (
-    <ProSidebar items={navItems}>
-      <Outlet />
-    </ProSidebar>
+    <div className="dashboard-shell-light" data-account-type="b2b_standard">
+      <ProSidebar items={navItems}>
+        <Outlet />
+      </ProSidebar>
+    </div>
   );
 }
+

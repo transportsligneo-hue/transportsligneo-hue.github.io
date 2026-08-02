@@ -37,8 +37,14 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .maybeSingle();
 
-    const email = profile?.email;
-    if (!email) throw new Error("Profil client incomplet");
+    // L'email peut venir du profil ou du token JWT (comptes flotte créés par un admin)
+    const email = (profile?.email || (context.claims?.email as string | undefined) || "").trim();
+    if (!email) throw new Error("Profil client incomplet : aucune adresse email");
+
+    // La policy RLS d'insertion exige nom ET prénom non vides.
+    const nom = (profile?.nom || profile?.societe || email.split("@")[0] || "Client").trim();
+    const prenom = (profile?.prenom || profile?.societe || "Pro").trim();
+
 
     // Génère group_id + group_reference
     const groupId = crypto.randomUUID();
@@ -57,10 +63,11 @@ export const createGroupedMission = createServerFn({ method: "POST" })
 
     const rows = data.vehicles.map((v) => ({
       user_id: userId,
-      nom: profile?.nom || "Client",
-      prenom: profile?.prenom || "",
+      nom,
+      prenom,
       email,
       telephone: profile?.telephone || "",
+
       depart: data.depart,
       arrivee: v.arrivee,
       date_souhaitee: data.date,

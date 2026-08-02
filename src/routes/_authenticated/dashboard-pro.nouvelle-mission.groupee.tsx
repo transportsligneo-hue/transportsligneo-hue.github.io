@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
-import { ArrowLeft, Check, Search, Loader2, Layers, MapPin, Calendar, ChevronRight } from "lucide-react";
+import { ArrowLeft, Check, Search, Loader2, Layers, MapPin, Calendar, ChevronRight, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
@@ -39,6 +39,9 @@ function GroupedMissionFlow() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const [showAdhoc, setShowAdhoc] = useState(false);
+  const [adhoc, setAdhoc] = useState({ immatriculation: "", marque: "", modele: "" });
+
 
   const [depart, setDepart] = useState("");
   const [commonArrivee, setCommonArrivee] = useState("");
@@ -130,6 +133,24 @@ function GroupedMissionFlow() {
       return next;
     });
   };
+
+  // Véhicules saisis à la volée (hors parc) : ajoutés localement à la sélection
+  const addAdhocVehicle = () => {
+    const id = crypto.randomUUID();
+    const v: Vehicle = {
+      id,
+      immatriculation: adhoc.immatriculation.trim() || null,
+      marque: adhoc.marque.trim() || null,
+      modele: adhoc.modele.trim() || null,
+      energie: null,
+      statut: "actif",
+    };
+    setVehicles((prev) => [v, ...prev]);
+    setSelected((prev) => new Set(prev).add(id));
+    setAdhoc({ immatriculation: "", marque: "", modele: "" });
+    setSearch("");
+  };
+
 
   const toggleAllVisible = () => {
     setSelected((prev) => {
@@ -280,7 +301,51 @@ function GroupedMissionFlow() {
               >
                 {allVisibleAvailableSelected ? "Tout désélectionner" : "Tout sélectionner"}
               </button>
+              <button
+                type="button"
+                onClick={() => setShowAdhoc((s) => !s)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#7c5cff] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#5334d6]"
+              >
+                <Plus className="h-3.5 w-3.5" /> Ajouter un véhicule
+              </button>
             </div>
+
+            {showAdhoc && (
+              <div className="mt-4 rounded-xl border border-[#e0d8fb] bg-[#faf8ff] p-4">
+                <p className="text-xs font-semibold text-[#5334d6] mb-3">
+                  Véhicule hors parc (ajouté uniquement à cette mission groupée)
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <input
+                    value={adhoc.immatriculation}
+                    onChange={(e) => setAdhoc({ ...adhoc, immatriculation: e.target.value.toUpperCase() })}
+                    placeholder="Immatriculation"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
+                  />
+                  <input
+                    value={adhoc.marque}
+                    onChange={(e) => setAdhoc({ ...adhoc, marque: e.target.value })}
+                    placeholder="Marque"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
+                  />
+                  <input
+                    value={adhoc.modele}
+                    onChange={(e) => setAdhoc({ ...adhoc, modele: e.target.value })}
+                    placeholder="Modèle"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
+                  />
+                  <button
+                    type="button"
+                    onClick={addAdhocVehicle}
+                    disabled={!adhoc.immatriculation.trim() && !adhoc.marque.trim()}
+                    className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                  >
+                    Ajouter à la liste
+                  </button>
+                </div>
+              </div>
+            )}
+
             {orgIds.length > 1 && (
               <p className="mt-2 text-xs text-slate-500">
                 Véhicules chargés depuis {orgIds.length} organisations actives.
@@ -288,8 +353,11 @@ function GroupedMissionFlow() {
             )}
             <div className="mt-4 divide-y divide-slate-100">
               {filtered.length === 0 && (
-                <div className="py-10 text-center text-sm text-slate-500">Aucun véhicule dans votre parc.</div>
+                <div className="py-10 text-center text-sm text-slate-500">
+                  Aucun véhicule dans votre parc — utilisez « Ajouter un véhicule » pour en saisir plusieurs.
+                </div>
               )}
+
               {filtered.map((v) => {
                 const disabled = v.statut === "en_mission" || v.statut === "indispo";
                 const checked = selected.has(v.id);

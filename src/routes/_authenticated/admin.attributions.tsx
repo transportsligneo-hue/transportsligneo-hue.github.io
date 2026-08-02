@@ -30,8 +30,12 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    trajet: typeof search.trajet === "string" ? search.trajet : undefined,
+  }),
   component: AdminAttributions,
 });
+
 
 interface Attribution {
   id: string;
@@ -353,6 +357,20 @@ function AdminAttributions() {
     fetchAttributions();
     fetchOptions();
   }, [fetchAttributions, fetchOptions]);
+
+  // Deep-link depuis le panneau Missions (admin) : ?trajet=<id> ouvre directement l'attribution
+  const { trajet: trajetParam } = Route.useSearch();
+  const [deepLinkDone, setDeepLinkDone] = useState(false);
+  useEffect(() => {
+    if (!trajetParam || deepLinkDone || trajetsDisponibles.length === 0) return;
+    const target = trajetsDisponibles.find((t) => t.id === trajetParam);
+    if (target) {
+      setAssignTrajet(target);
+      setDeepLinkDone(true);
+    }
+  }, [trajetParam, trajetsDisponibles, deepLinkDone]);
+
+
 
   useEffect(() => {
     const channel = supabase
