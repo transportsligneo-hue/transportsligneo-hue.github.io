@@ -280,7 +280,7 @@ function ClientDashboard() {
       {/* Dernière mission */}
       <div className="v3-section-head">
         <h2>{lastMission ? "Dernière mission" : "Vos missions"}</h2>
-        <Link to="/dashboard-client/missions" className="v3-link inline-flex items-center gap-1">
+        <Link to="/dashboard-client/missions" className="text-v3-blue text-[12.5px] font-semibold inline-flex items-center gap-1 hover:underline">
           Tout voir <ArrowUpRight size={14} />
         </Link>
       </div>
@@ -348,7 +348,7 @@ function ClientDashboard() {
         <>
           <div className="v3-section-head">
             <h2>Mes demandes</h2>
-            <Link to="/dashboard-client/devis" className="v3-link inline-flex items-center gap-1">
+            <Link to="/dashboard-client/devis" className="text-v3-blue text-[12.5px] font-semibold inline-flex items-center gap-1 hover:underline">
               Tout voir <ArrowUpRight size={14} />
             </Link>
           </div>
