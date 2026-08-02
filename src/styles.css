@@ -2468,6 +2468,52 @@
     border-radius: var(--v3-radius);
   }
 
+  /* Gradient KPI cards (V6 client dashboards) */
+  .v3-kpi-grad {
+    position: relative; overflow: hidden;
+    border-radius: var(--v3-radius);
+    border: 1px solid transparent;
+    background: var(--v3-surface);
+    transition: transform 200ms cubic-bezier(.2,.8,.3,1), box-shadow 200ms ease;
+  }
+  .v3-kpi-grad:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(15,21,38,0.12); }
+  .v3-kpi-grad::before {
+    content: ''; position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px; border-radius: 50%;
+    filter: blur(10px); opacity: 0.5;
+  }
+  .v3-kpi-grad.blue   { background: linear-gradient(150deg, #eef3ff 0%, #ffffff 60%); border-color: #dce6fd; }
+  .v3-kpi-grad.blue::before   { background: radial-gradient(circle, #4f8cff, transparent 70%); }
+  .v3-kpi-grad.ok     { background: linear-gradient(150deg, #e7f9f2 0%, #ffffff 60%); border-color: #cdeee0; }
+  .v3-kpi-grad.ok::before     { background: radial-gradient(circle, #18b382, transparent 70%); }
+  .v3-kpi-grad.violet { background: linear-gradient(150deg, #f2eeff 0%, #ffffff 60%); border-color: #e0d8fb; }
+  .v3-kpi-grad.violet::before { background: radial-gradient(circle, #7c5cff, transparent 70%); }
+  .v3-kpi-grad.warn   { background: linear-gradient(150deg, #fdf1e2 0%, #ffffff 60%); border-color: #f5ddb3; }
+  .v3-kpi-grad.warn::before   { background: radial-gradient(circle, #e0a83e, transparent 70%); }
+  .v3-kpi-grad.gold   { background: linear-gradient(150deg, #fdf6e6 0%, #ffffff 60%); border-color: #f2e2b8; }
+  .v3-kpi-grad.gold::before   { background: radial-gradient(circle, #d9ab45, transparent 70%); }
+
+  /* Gold CTA panel + button */
+  .v3-cta-gold {
+    position: relative; overflow: hidden;
+    background: linear-gradient(150deg, #fdf6e6, #ffffff);
+    border: 1px solid #f2e2b8;
+    border-radius: var(--v3-radius);
+  }
+  .v3-btn-gold {
+    position: relative; overflow: hidden;
+    padding: 12px 22px; border-radius: 11px; border: none; cursor: pointer;
+    background: linear-gradient(120deg, #e8c976, #b8862a);
+    color: #fff; font-weight: 700; font-size: 13px;
+    box-shadow: 0 10px 22px rgba(184,134,42,0.3);
+  }
+  .v3-btn-gold::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg); animation: v3-shine 3.4s ease-in-out infinite;
+  }
+
+
   /* Shimmer on primary btn (already defined base .v3-btn-primary earlier) */
   .v3-btn-primary { position: relative; overflow: hidden; }
   .v3-btn-primary::after {
