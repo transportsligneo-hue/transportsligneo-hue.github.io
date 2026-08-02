@@ -181,13 +181,23 @@ function ProDashboard() {
         </div>
         <div className="flex gap-2.5">
           <Link to="/dashboard-pro/documents" className="v3-btn-ghost"><FileText size={14} /> Exporter</Link>
-          <Link
-            to="/dashboard-pro/nouvelle-demande"
-            className="v3-btn-primary inline-flex items-center gap-2"
-          >
-            <PlusCircle size={14} /> {isFlotte ? "Mission groupée" : "Nouvelle demande"}
-          </Link>
+          {isFlotte ? (
+            <Link
+              to="/dashboard-pro/nouvelle-mission/groupee"
+              className="v3-btn-primary inline-flex items-center gap-2"
+            >
+              <PlusCircle size={14} /> Mission groupée
+            </Link>
+          ) : (
+            <Link
+              to="/dashboard-pro/nouvelle-mission"
+              className="v3-btn-primary inline-flex items-center gap-2"
+            >
+              <PlusCircle size={14} /> Nouvelle mission
+            </Link>
+          )}
         </div>
+
       </div>
 
       {/* KPIs */}
@@ -239,19 +249,26 @@ function ProDashboard() {
             ))}
           </div>
         </div>
-        <div className="v3-card v3-cta p-6 flex flex-col justify-center">
+        <div className="v3-cta-gold p-6 flex flex-col justify-center text-center">
           <h3 className="font-v3-display text-[17px] font-semibold text-v3 m-0">
             {isFlotte ? "Programmer un lot de convoyages ?" : "Besoin d'un devis rapide ?"}
           </h3>
           <p className="text-v3-muted text-[13px] mt-1.5 mb-4">
             {isFlotte
-              ? "Créez une mission groupée pour votre flotte en quelques minutes."
+              ? "Créez une mission groupée pour plusieurs véhicules de votre parc en quelques minutes."
               : "Créez une demande en moins de 2 minutes, réponse sous 1h ouvrée."}
           </p>
-          <Link to="/dashboard-pro/nouvelle-demande" className="v3-btn-primary inline-flex items-center gap-2 self-start">
-            <PlusCircle size={14} /> {isFlotte ? "Nouvelle mission groupée" : "Nouvelle demande"}
-          </Link>
+          {isFlotte ? (
+            <Link to="/dashboard-pro/nouvelle-mission/groupee" className="v3-btn-gold inline-flex items-center gap-2 self-center">
+              <PlusCircle size={14} /> Nouvelle mission groupée
+            </Link>
+          ) : (
+            <Link to="/dashboard-pro/nouvelle-mission" className="v3-btn-gold inline-flex items-center gap-2 self-center">
+              <PlusCircle size={14} /> Nouvelle mission
+            </Link>
+          )}
         </div>
+
       </div>
 
       {/* Carte trajets en cours */}
@@ -440,16 +457,17 @@ function KpiCard({
   trendLabel?: string;
 }) {
   return (
-    <div className="v3-card v3-card-hover p-5 sm:p-6">
-      <div className="flex justify-between items-start mb-3.5">
+    <div className={`v3-kpi-grad ${tone} p-5 sm:p-6`}>
+      <div className="flex justify-between items-start mb-3.5 relative z-[1]">
         <div className={`v3-kpi-icon ${tone}`}>{icon}</div>
         {trendLabel && <span className={`v3-kpi-trend ${trend}`}>{trendLabel}</span>}
       </div>
-      <div className="v3-kpi-label">{label}</div>
-      <div className="v3-kpi-value">{value}</div>
+      <div className="v3-kpi-label relative z-[1]">{label}</div>
+      <div className="v3-kpi-value relative z-[1]">{value}</div>
     </div>
   );
 }
+
 
 function MiniListCard({
   title, icon: Icon, linkTo, empty, children,
