@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   X, MapPin, CalendarDays, Car, User2, Phone, Mail, Banknote, Gavel,
-  Send, CheckCircle2, XCircle, Radar, ArrowRightCircle, Ban, Loader2,
+  Send, CheckCircle2, XCircle, Radar, ArrowRightCircle, Ban, Loader2, UserPlus,
 } from "lucide-react";
+
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
