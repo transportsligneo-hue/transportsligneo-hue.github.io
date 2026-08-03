@@ -15,6 +15,7 @@ import {
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
 import ScreenCaptureGuard from "@/components/convoyeur/ScreenCaptureGuard";
+import OfflineOutboxBadge from "@/components/convoyeur/OfflineOutboxBadge";
 
 export const Route = createFileRoute("/_authenticated/convoyeur")({
   component: ConvoyeurLayout,
@@ -90,6 +91,7 @@ function ConvoyeurLayout() {
 
   return (
     <ConvoyeurSidebar items={navItems}>
+      <OfflineOutboxBadge />
       <ScreenCaptureGuard />
       {isPending && (
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex items-start gap-3">

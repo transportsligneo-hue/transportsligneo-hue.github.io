@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { writeWithOutbox } from "@/lib/offline-outbox";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
@@ -346,10 +347,12 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
-    const { error } = await supabase.from("attributions").update({ statut }).eq("id", id);
-    if (error) {
-      toast.error("Mise à jour impossible", { description: error.message });
-      return false;
+    const { queued } = await writeWithOutbox(
+      { kind: "update", table: "attributions", values: { statut }, match: { id } },
+      `Statut ${statut}`,
+    );
+    if (queued) {
+      toast.info("Hors ligne — la mise à jour partira dès le retour du réseau.");
     }
     if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
     if (statut === "termine") {
