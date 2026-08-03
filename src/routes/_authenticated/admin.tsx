@@ -32,6 +32,9 @@ import { verifyAdminAccess } from "@/lib/admin-guard.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
+    // Le SSR n'a pas de session : on laisse le client faire la vérification,
+    // sinon un simple refresh renvoie vers l'accueil.
+    if (typeof window === "undefined") return;
     try {
       await verifyAdminAccess();
     } catch {

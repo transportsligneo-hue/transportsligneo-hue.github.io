@@ -9,6 +9,7 @@ import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 export const Route = createFileRoute("/_authenticated/dashboard-pro")({
   component: ProLayout,
   beforeLoad: async () => {
+    if (typeof window === "undefined") return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw redirect({ to: "/login" });
   },
