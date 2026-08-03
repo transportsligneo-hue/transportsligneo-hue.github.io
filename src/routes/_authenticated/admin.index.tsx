@@ -286,14 +286,16 @@ function AdminDashboard() {
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         <KpiCardV6
+          to="/admin/missions"
           label="Missions actives"
           value={stats.missionsEnCours}
           icon={Activity}
           tone="ok"
           trend={stats.missionsEnCours > 0 ? { label: "en direct", positive: true } : undefined}
         />
-        <KpiCardV6 label="Missions terminées" value={stats.missionsTerminees} icon={Truck} tone="blue" />
+        <KpiCardV6 to="/admin/historique" label="Missions terminées" value={stats.missionsTerminees} icon={Truck} tone="blue" />
         <KpiCardV6
+          to="/admin/convoyeurs"
           label="Convoyeurs validés"
           value={stats.convoyeurs}
           icon={Users}
@@ -301,6 +303,7 @@ function AdminDashboard() {
           sub={stats.convoyeursEnAttente > 0 ? `+${stats.convoyeursEnAttente} en attente` : undefined}
         />
         <KpiCardV6
+          to="/admin/clients"
           label="Clients"
           value={stats.clients}
           icon={Briefcase}
@@ -308,6 +311,7 @@ function AdminDashboard() {
           sub={stats.clientsB2B > 0 ? `${stats.clientsB2B} pro` : undefined}
         />
         <KpiCardV6
+          to="/admin/factures"
           label="CA réalisé"
           value={`${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
           icon={Euro}
@@ -315,6 +319,7 @@ function AdminDashboard() {
           sub={`${stats.caMois.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € ce mois`}
         />
         <KpiCardV6
+          to="/admin/demandes"
           label="Demandes nouvelles"
           value={stats.demandesNouvelles}
           icon={Clock}
