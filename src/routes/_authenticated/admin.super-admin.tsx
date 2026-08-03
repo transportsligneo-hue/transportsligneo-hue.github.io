@@ -15,6 +15,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/admin/super-admin")({
   beforeLoad: async () => {
+    if (typeof window === "undefined") return;
     try {
       await verifySuperAdminAccess();
     } catch {
