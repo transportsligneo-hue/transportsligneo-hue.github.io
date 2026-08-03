@@ -45,6 +45,8 @@ export interface UnifiedMission {
   statutPublication: string | null;
   isRoundTrip: boolean;
   legType: string | null;
+  groupId?: string | null;
+  legIndex?: number | null;
   isTest: boolean;
   createdAt: string;
   pricingMode?: "fixe" | "enchere" | null;
