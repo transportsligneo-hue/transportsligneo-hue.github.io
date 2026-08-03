@@ -10,7 +10,7 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
-import { formatTrajetRef } from "@/lib/mission-number";
+import { displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 
@@ -49,13 +49,14 @@ function AdminMissionsUnified() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: trajetsData }, { data: demandesData }] = await Promise.all([
+    const [{ data: trajetsData }, { data: demandesData }, { data: attributionsData }] = await Promise.all([
       supabase.from("trajets").select("*").order("created_at", { ascending: false }),
       supabase
         .from("demandes_convoyage")
         .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
+      supabase.from("attributions").select("trajet_id, numero_mission, created_at"),
     ]);
 
     const trajets = ((trajetsData ?? []) as unknown as TrajetRow[]).filter(
@@ -77,15 +78,36 @@ function AdminMissionsUnified() {
 
     const convertedDemandeIds = new Set(trajets.map((t) => t.demande_id).filter(Boolean) as string[]);
 
+    // Vrais numéros de mission (attributions) : un aller-retour partage le numéro de base
+    const attrRows = (attributionsData ?? []) as unknown as { trajet_id: string | null; numero_mission: string | null; created_at: string }[];
+    const numeroByTrajet = new Map<string, string>();
+    attrRows.forEach((a) => {
+      if (!a.trajet_id || !a.numero_mission) return;
+      const cur = numeroByTrajet.get(a.trajet_id);
+      if (!cur) numeroByTrajet.set(a.trajet_id, a.numero_mission);
+    });
+    // Numéro de base par groupe A/R : on prend celui de l'aller, sinon le plus petit
+    const baseByGroup = new Map<string, string>();
+    trajets.forEach((t) => {
+      if (!t.mission_group_id) return;
+      const num = numeroByTrajet.get(t.id);
+      if (!num) return;
+      const base = stripLegSuffix(num);
+      const cur = baseByGroup.get(t.mission_group_id);
+      if (!cur || (t.leg_index ?? 1) === 1 || base < cur) baseByGroup.set(t.mission_group_id, base);
+    });
+
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
-      const ref = formatTrajetRef({
+      const baseNumero = (t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null) ?? numeroByTrajet.get(t.id) ?? null;
+      const ref = displayTrajetRef({
         id: t.id,
         createdAt: t.created_at,
         groupId: t.mission_group_id,
         isRoundTrip: isAR,
         legType: t.leg_type,
         legIndex: t.leg_index,
+        baseNumero,
       });
       return {
       kind: "trajet",
@@ -192,6 +214,17 @@ function AdminMissionsUnified() {
     });
   }, [rows, filter, search]);
 
+  // Alternance de surbrillance : un aller-retour (2 volets) partage la même bande
+  const banded = useMemo(() => {
+    let band = false;
+    let lastKey: string | null = null;
+    return visible.map((m) => {
+      const key = m.groupId ?? `${m.kind}-${m.id}`;
+      if (key !== lastKey) { band = !band; lastKey = key; }
+      return { m, band };
+    });
+  }, [visible]);
+
   // Garde le panneau synchronisé avec les données rafraîchies
   useEffect(() => {
     if (!selected) return;
@@ -260,15 +293,21 @@ function AdminMissionsUnified() {
                 </tr>
               </thead>
               <tbody>
-                {visible.map((m) => (
-                  <tr key={`${m.kind}-${m.id}`} className="row" onClick={() => setSelected(m)}>
+                {banded.map(({ m, band }) => (
+                  <tr
+                    key={`${m.kind}-${m.id}`}
+                    className={`row ${band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"}`}
+                    onClick={() => setSelected(m)}
+                  >
                     <td>
                       <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{m.ref}</p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        {m.isRoundTrip && (
+                        {m.isRoundTrip ? (
                           <span className="a6-badge attribuee">
                             {m.legType === "retour" || m.legIndex === 2 ? "Restitution" : "Livraison"}
                           </span>
+                        ) : (
+                          <span className="a6-badge">Livraison simple</span>
                         )}
                         {m.isTest && <span className="a6-badge annulee">Test</span>}
                       </div>
