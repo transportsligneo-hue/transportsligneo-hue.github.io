@@ -267,9 +267,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    const uid = currentUserIdRef.current;
+    if (uid && typeof window !== "undefined") {
+      try { localStorage.removeItem(PROFILE_CACHE_PREFIX + uid); } catch { /* ignore */ }
+    }
     await supabase.auth.signOut();
     // onAuthStateChange remettra les états à zéro
   }, []);
+
 
   const refresh = useCallback(async () => {
     if (user) await hydrateForUser(user);
