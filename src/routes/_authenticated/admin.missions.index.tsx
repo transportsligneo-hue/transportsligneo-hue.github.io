@@ -10,6 +10,7 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
+import { formatTrajetRef } from "@/lib/mission-number";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 
