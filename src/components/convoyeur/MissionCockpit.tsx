@@ -8,6 +8,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { writeWithOutbox } from "@/lib/offline-outbox";
 import type { ReactNode } from "react";
 import {
   Camera,
@@ -266,19 +267,27 @@ export function MissionCockpit({
   async function persistEtape(etape: string, notes?: string) {
     const previousEtape = optimisticEtape ?? currentEtape;
     setOptimisticEtape(etape);
-    const [{ error: attributionError }, { error: historyError }] = await Promise.all([
-      supabase.from("attributions").update({ etape_courante: etape }).eq("id", attributionId),
-      supabase.from("mission_etape_history" as never).insert({
-        attribution_id: attributionId,
-        etape,
-        notes: notes ?? null,
-        created_by: userId,
-      } as never),
-    ]);
-
-    if (attributionError || historyError) {
+    try {
+      const [a, h] = await Promise.all([
+        writeWithOutbox(
+          { kind: "update", table: "attributions", values: { etape_courante: etape }, match: { id: attributionId } },
+          `Étape ${etape}`,
+        ),
+        writeWithOutbox(
+          {
+            kind: "insert",
+            table: "mission_etape_history",
+            values: { attribution_id: attributionId, etape, notes: notes ?? null, created_by: userId },
+          },
+          `Historique ${etape}`,
+        ),
+      ]);
+      if (a.queued || h.queued) {
+        toast.info("Hors ligne — l'étape sera envoyée au retour du réseau.");
+      }
+    } catch (err) {
       setOptimisticEtape(previousEtape);
-      throw attributionError ?? historyError;
+      throw err;
     }
   }
 

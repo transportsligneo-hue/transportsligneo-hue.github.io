@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { writeWithOutbox } from "@/lib/offline-outbox";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
@@ -1103,15 +1104,23 @@ export function EdlPremiumFlow({
     try {
       if (stepId === "send_admin") {
         // Marquer attribution comme prête pour validation admin
-        await supabase.from("attributions")
-          .update({ etape_courante: "en_validation_admin" })
-          .eq("id", attributionId);
-        await supabase.from("mission_etape_history").insert({
-          attribution_id: attributionId,
-          etape: "envoi_validation_admin",
-          notes: "EDL complet, envoyé pour validation",
-          created_by: userId,
-        });
+        await writeWithOutbox(
+          { kind: "update", table: "attributions", values: { etape_courante: "en_validation_admin" }, match: { id: attributionId } },
+          "Envoi validation admin",
+        );
+        await writeWithOutbox(
+          {
+            kind: "insert",
+            table: "mission_etape_history",
+            values: {
+              attribution_id: attributionId,
+              etape: "envoi_validation_admin",
+              notes: "EDL complet, envoyé pour validation",
+              created_by: userId,
+            },
+          },
+          "Historique validation admin",
+        );
         setState(stepId, { status: "success" });
         toast.success("Envoyé à l'admin pour validation");
       } else if (stepId === "admin_validated") {
@@ -1142,21 +1151,25 @@ export function EdlPremiumFlow({
     if (type === "arrivee") {
       // On marque seulement l'EDL arrivée comme faite. Le selfie final et
       // l'envoi à l'admin sont déclenchés depuis le cockpit mission · pas ici.
-      const [{ error: attributionError }, { error: historyError }] = await Promise.all([
-        supabase.from("attributions")
-          .update({ etape_courante: "edl_arrivee_fait" })
-          .eq("id", attributionId),
-        supabase.from("mission_etape_history").insert({
-          attribution_id: attributionId,
-          etape: "edl_arrivee_fait",
-          notes: "EDL arrivée terminé, en attente du selfie final puis envoi admin",
-          created_by: userId,
-        }),
+      await Promise.all([
+        writeWithOutbox(
+          { kind: "update", table: "attributions", values: { etape_courante: "edl_arrivee_fait" }, match: { id: attributionId } },
+          "EDL arrivée",
+        ),
+        writeWithOutbox(
+          {
+            kind: "insert",
+            table: "mission_etape_history",
+            values: {
+              attribution_id: attributionId,
+              etape: "edl_arrivee_fait",
+              notes: "EDL arrivée terminé, en attente du selfie final puis envoi admin",
+              created_by: userId,
+            },
+          },
+          "Historique EDL arrivée",
+        ),
       ]);
-
-      if (attributionError || historyError) {
-        throw attributionError ?? historyError;
-      }
     }
   }, [attributionId, inspectionId, type, userId]);
 
