@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   X, MapPin, CalendarDays, Car, User2, Phone, Mail, Banknote, Gavel,
-  Send, CheckCircle2, XCircle, Radar, ArrowRightCircle, Ban, Loader2, UserPlus,
+  Send, CheckCircle2, XCircle, Radar, ArrowRightCircle, Ban, Loader2, UserPlus, ExternalLink,
 } from "lucide-react";
 
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
@@ -186,6 +186,27 @@ export function MissionUnifiedPanel({
               <X size={17} />
             </button>
           </div>
+
+          {isTrajet && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Link
+                to="/admin/attributions"
+                search={{ trajet: mission.id }}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]"
+              >
+                <UserPlus size={13} /> Attribution
+              </Link>
+              {attributionId && (
+                <Link
+                  to="/admin/missions/$missionId"
+                  params={{ missionId: attributionId }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold border border-[var(--a6-border)] bg-white text-[var(--a6-text)]"
+                >
+                  <ExternalLink size={13} /> Fiche mission complète
+                </Link>
+              )}
+            </div>
+          )}
         </header>
 
         <nav className="px-6 border-b border-[var(--a6-border)] flex overflow-x-auto">
@@ -368,9 +389,27 @@ export function MissionUnifiedPanel({
                 </div>
 
               ) : (
-                <div className="rounded-2xl bg-[#0b1026] p-4">
-                  <InspectionPreuvesBlock attributionId={attributionId} />
-                </div>
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      to="/admin/missions/$missionId"
+                      params={{ missionId: attributionId }}
+                      className="flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]"
+                    >
+                      <ExternalLink size={14} /> Ouvrir la fiche mission complète
+                    </Link>
+                    <Link
+                      to="/admin/attributions"
+                      search={{ trajet: mission.id }}
+                      className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--a6-border)] bg-white"
+                    >
+                      <UserPlus size={14} /> Gérer l'attribution
+                    </Link>
+                  </div>
+                  <div className="rounded-2xl bg-[#0b1026] p-4">
+                    <InspectionPreuvesBlock attributionId={attributionId} />
+                  </div>
+                </>
               )}
               <div className="a6-card p-4">
                 <p className="font-bold text-[13px] inline-flex items-center gap-2 mb-2">
