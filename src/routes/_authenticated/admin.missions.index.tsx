@@ -143,10 +143,18 @@ function AdminMissionsUnified() {
       }));
 
     setRows(
-      [...demandeMissions, ...trajetMissions].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      ),
+      [...demandeMissions, ...trajetMissions].sort((a, b) => {
+        const ta = new Date(a.createdAt).getTime();
+        const tb = new Date(b.createdAt).getTime();
+        if (tb !== ta) return tb - ta;
+        // Même groupe (aller-retour) : aller d'abord, puis retour
+        if (a.groupId && a.groupId === b.groupId) {
+          return (a.legIndex ?? 1) - (b.legIndex ?? 1);
+        }
+        return 0;
+      }),
     );
+
     setLoading(false);
   }, []);
 
