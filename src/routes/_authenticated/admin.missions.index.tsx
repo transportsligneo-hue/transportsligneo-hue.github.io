@@ -94,9 +94,7 @@ function AdminMissionsUnified() {
       if (!num) return;
       const base = stripLegSuffix(num);
       const cur = baseByGroup.get(t.mission_group_id);
-      if (!cur || (t.leg_index ?? 1) === 1 || base < cur) {
-        if (!cur || (t.leg_index ?? 1) === 1 || base < cur) baseByGroup.set(t.mission_group_id, base);
-      }
+      if (!cur || (t.leg_index ?? 1) === 1 || base < cur) baseByGroup.set(t.mission_group_id, base);
     });
 
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
@@ -216,6 +214,17 @@ function AdminMissionsUnified() {
     });
   }, [rows, filter, search]);
 
+  // Alternance de surbrillance : un aller-retour (2 volets) partage la même bande
+  const banded = useMemo(() => {
+    let band = false;
+    let lastKey: string | null = null;
+    return visible.map((m) => {
+      const key = m.groupId ?? `${m.kind}-${m.id}`;
+      if (key !== lastKey) { band = !band; lastKey = key; }
+      return { m, band };
+    });
+  }, [visible]);
+
   // Garde le panneau synchronisé avec les données rafraîchies
   useEffect(() => {
     if (!selected) return;
@@ -284,15 +293,21 @@ function AdminMissionsUnified() {
                 </tr>
               </thead>
               <tbody>
-                {visible.map((m) => (
-                  <tr key={`${m.kind}-${m.id}`} className="row" onClick={() => setSelected(m)}>
+                {banded.map(({ m, band }) => (
+                  <tr
+                    key={`${m.kind}-${m.id}`}
+                    className={`row ${band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"}`}
+                    onClick={() => setSelected(m)}
+                  >
                     <td>
                       <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{m.ref}</p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        {m.isRoundTrip && (
+                        {m.isRoundTrip ? (
                           <span className="a6-badge attribuee">
                             {m.legType === "retour" || m.legIndex === 2 ? "Restitution" : "Livraison"}
                           </span>
+                        ) : (
+                          <span className="a6-badge">Livraison simple</span>
                         )}
                         {m.isTest && <span className="a6-badge annulee">Test</span>}
                       </div>
