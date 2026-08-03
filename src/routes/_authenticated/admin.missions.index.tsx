@@ -76,10 +76,14 @@ function AdminMissionsUnified() {
 
     const convertedDemandeIds = new Set(trajets.map((t) => t.demande_id).filter(Boolean) as string[]);
 
-    const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => ({
+    const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
+      const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
+      const base = `TRJ-${(t.mission_group_id ?? t.id).slice(0, 8).toUpperCase()}`;
+      const suffix = isAR ? (t.leg_type === "retour" || t.leg_index === 2 ? "-R" : "-A") : "";
+      return {
       kind: "trajet",
       id: t.id,
-      ref: `TRJ-${t.id.slice(0, 8).toUpperCase()}`,
+      ref: `${base}${suffix}`,
       status: trajetToUnified(t.statut),
       depart: t.depart,
       arrivee: t.arrivee,
@@ -95,8 +99,10 @@ function AdminMissionsUnified() {
       prixConvoyeur: t.prix_convoyeur ?? t.tarif_convoyeur,
       prixSuggere: t.prix_suggere,
       statutPublication: t.statut_publication,
-      isRoundTrip: !!t.mission_group_id || t.type_mission === "aller_retour",
+      isRoundTrip: isAR,
       legType: t.leg_type,
+      groupId: t.mission_group_id,
+      legIndex: t.leg_index,
       isTest: !!t.is_test_data,
       createdAt: t.created_at,
       pricingMode: t.pricing_mode,
@@ -105,7 +111,9 @@ function AdminMissionsUnified() {
       prixConvoyeurMin: t.prix_convoyeur_min,
       prixConvoyeurMax: t.prix_convoyeur_max,
       margeIndicativePct: t.marge_indicative_pct,
-    }));
+      };
+    });
+
 
     const demandeMissions: UnifiedMission[] = ((demandesData ?? []) as unknown as DemandeRow[])
       .filter((d) => !convertedDemandeIds.has(d.id))
