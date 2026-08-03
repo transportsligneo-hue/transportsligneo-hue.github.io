@@ -32,3 +32,30 @@ export function formatTrajetRef(opts: {
   const isRetour = opts.legType === "retour" || opts.legIndex === 2;
   return `${base}${isRetour ? "R" : "A"}`;
 }
+
+/** Retire un éventuel suffixe A/R d'un numéro de mission (MIS-TLG-2026-082R → …-082) */
+export function stripLegSuffix(numero: string): string {
+  return numero.replace(/([-#]?\d+)[AR]$/i, "$1");
+}
+
+/**
+ * Référence affichée : privilégie le vrai numéro de mission (attribution)
+ * et applique le suffixe A / R pour les livraisons + restitutions.
+ */
+export function displayTrajetRef(opts: {
+  id: string;
+  createdAt: string;
+  groupId?: string | null;
+  isRoundTrip?: boolean;
+  legType?: string | null;
+  legIndex?: number | null;
+  baseNumero?: string | null;
+}): string {
+  if (opts.baseNumero) {
+    const base = stripLegSuffix(opts.baseNumero);
+    if (!opts.isRoundTrip) return base;
+    const isRetour = opts.legType === "retour" || opts.legIndex === 2;
+    return `${base}${isRetour ? "R" : "A"}`;
+  }
+  return formatTrajetRef(opts);
+}
