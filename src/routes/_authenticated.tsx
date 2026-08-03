@@ -7,6 +7,8 @@ export const Route = createFileRoute("/_authenticated")({
     // Les accès réels restent protégés côté backend/RLS ; ici on évite surtout
     // le spinner blanc au retour de l'appareil photo mobile pendant l'EDL.
     if (typeof window === "undefined") return;
+    // Hors ligne : on ne bloque jamais l'accès (session locale + cache profil).
+    if (navigator.onLine === false) return;
     const { data } = await supabase.auth.getSession();
     if (!data.session?.user) {
       throw redirect({
@@ -14,6 +16,7 @@ export const Route = createFileRoute("/_authenticated")({
         search: { redirect: location.href } as never,
       });
     }
+
   },
   component: () => <Outlet />,
 });
