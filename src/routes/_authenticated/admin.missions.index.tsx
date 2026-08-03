@@ -78,12 +78,18 @@ function AdminMissionsUnified() {
 
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
-      const base = `TRJ-${(t.mission_group_id ?? t.id).slice(0, 8).toUpperCase()}`;
-      const suffix = isAR ? (t.leg_type === "retour" || t.leg_index === 2 ? "-R" : "-A") : "";
+      const ref = formatTrajetRef({
+        id: t.id,
+        createdAt: t.created_at,
+        groupId: t.mission_group_id,
+        isRoundTrip: isAR,
+        legType: t.leg_type,
+        legIndex: t.leg_index,
+      });
       return {
       kind: "trajet",
       id: t.id,
-      ref: `${base}${suffix}`,
+      ref,
       status: trajetToUnified(t.statut),
       depart: t.depart,
       arrivee: t.arrivee,
@@ -120,7 +126,7 @@ function AdminMissionsUnified() {
       .map((d) => ({
         kind: "demande",
         id: d.id,
-        ref: `DEM-${d.id.slice(0, 8).toUpperCase()}`,
+        ref: `DEM-TLG-${new Date(d.created_at).getFullYear()}-#${d.id.replace(/-/g, "").slice(-3).toUpperCase()}`,
         status: "nouvelle",
         depart: d.depart,
         arrivee: d.arrivee,
