@@ -25,7 +25,7 @@ import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueB
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
-import { missionNumberOf } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -45,7 +45,7 @@ interface Attribution {
   etape_courante?: string | null;
   numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null; is_test_data?: boolean | null };
+  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null; is_test_data?: boolean | null; mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null };
   convoyeur?: { nom: string; prenom: string };
 }
 
@@ -304,10 +304,23 @@ function AdminAttributions() {
     }
   };
 
+  const arBaseByGroup = useMemo(() => {
+    const map = new Map<string, string>();
+    attributions.forEach((a) => {
+      const gid = a.trajet?.mission_group_id;
+      if (!gid || !a.numero_mission) return;
+      const base = stripLegSuffix(a.numero_mission);
+      const isAller = (a.trajet?.leg_index ?? 1) === 1 || a.trajet?.leg_type === "aller";
+      const cur = map.get(gid);
+      if (!cur || isAller || base < cur) map.set(gid, isAller ? base : cur ?? base);
+    });
+    return map;
+  }, [attributions]);
+
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, is_test_data), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, statut, statut_publication, client_nom, is_test_data, mission_group_id, leg_type, leg_index), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -605,7 +618,7 @@ function AdminAttributions() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-pro-text font-semibold">
-                      {missionNumberOf(a)}
+                      {attributionRef(a, arBaseByGroup)}
                     </p>
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                       {statutLabels[a.statut] ?? a.statut}
@@ -937,4 +950,22 @@ function AdminAttributions() {
       )}
     </div>
   );
+}
+
+
+function attributionRef(
+  a: Attribution,
+  baseByGroup: Map<string, string>,
+): string {
+  const gid = a.trajet?.mission_group_id ?? null;
+  if (!gid) return missionNumberOf(a);
+  return displayTrajetRef({
+    id: a.trajet_id,
+    createdAt: a.created_at,
+    groupId: gid,
+    isRoundTrip: true,
+    legType: a.trajet?.leg_type ?? null,
+    legIndex: a.trajet?.leg_index ?? null,
+    baseNumero: baseByGroup.get(gid) ?? a.numero_mission ?? null,
+  });
 }
