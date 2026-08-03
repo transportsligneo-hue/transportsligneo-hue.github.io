@@ -239,13 +239,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const { data: { session: existing } } = await supabase.auth.getSession();
+        // Hors ligne, getSession() peut tenter un refresh réseau : on borne l'attente.
+        const { data: { session: existing } } = await withTimeout(supabase.auth.getSession(), 6000)
+          .catch(() => ({ data: { session: null } }) as Awaited<ReturnType<typeof supabase.auth.getSession>>);
         setSession(existing);
         setUser(existing?.user ?? null);
         await hydrateForUser(existing?.user ?? null);
       } finally {
         setIsInitializing(false);
       }
+
     };
     void boot();
 
