@@ -52,6 +52,42 @@ function computeHomeRoute(p: ResolvedProfile, isAuthenticated: boolean): string 
   return "/dashboard-client";
 }
 
+/* ---------- Cache local du profil : permet l'accès hors connexion ---------- */
+const PROFILE_CACHE_PREFIX = "ligneo_profile_cache_";
+
+function readCachedProfile(userId: string): ResolvedProfile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_PREFIX + userId);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ResolvedProfile;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(userId: string, p: ResolvedProfile) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(PROFILE_CACHE_PREFIX + userId, JSON.stringify(p));
+  } catch {
+    /* quota — ignore */
+  }
+}
+
+/** Rejette après `ms` pour ne jamais bloquer l'UI sur un réseau mort. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -68,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /** Charge en une seule passe rôle + profile + statut convoyeur (si applicable). */
   const loadProfile = useCallback(async (userId: string): Promise<ResolvedProfile> => {
+
     try {
       const [rolesRes, profileRes] = await Promise.all([
         supabase
