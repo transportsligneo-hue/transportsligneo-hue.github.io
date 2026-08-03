@@ -1,3 +1,13 @@
+/**
+ * Affichage normalisé d'un numéro de mission : le numéro d'origine stocké en base
+ * (MIS-TLG-2026-075) est affiché avec un dièse devant la séquence → MIS-TLG-2026-#075.
+ */
+export function displayNumero(numero: string): string {
+  return numero.replace(/-#?(\d+)([AR])?$/i, (_m, digits: string, suffix?: string) =>
+    `-#${digits}${suffix ? suffix.toUpperCase() : ""}`,
+  );
+}
+
 /** Numéro mission MIS-TLG-YYYY-#XXX dérivé déterministe depuis created_at + id */
 export function formatMissionNumber(id: string, createdAt: string): string {
   const year = new Date(createdAt).getFullYear();
@@ -11,8 +21,9 @@ export function missionNumberOf(row: {
   created_at: string;
   numero_mission?: string | null;
 }): string {
-  return row.numero_mission || formatMissionNumber(row.id, row.created_at);
+  return row.numero_mission ? displayNumero(row.numero_mission) : formatMissionNumber(row.id, row.created_at);
 }
+
 
 /**
  * Référence d'un trajet, suffixée A (livraison) / R (restitution)
@@ -52,10 +63,11 @@ export function displayTrajetRef(opts: {
   baseNumero?: string | null;
 }): string {
   if (opts.baseNumero) {
-    const base = stripLegSuffix(opts.baseNumero);
+    const base = displayNumero(stripLegSuffix(opts.baseNumero));
     if (!opts.isRoundTrip) return base;
     const isRetour = opts.legType === "retour" || opts.legIndex === 2;
     return `${base}${isRetour ? "R" : "A"}`;
   }
+
   return formatTrajetRef(opts);
 }
