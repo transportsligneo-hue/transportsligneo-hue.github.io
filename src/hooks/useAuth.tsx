@@ -102,22 +102,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const currentUserIdRef = useRef<string | null>(null);
 
-  /** Charge en une seule passe rôle + profile + statut convoyeur (si applicable). */
-  const loadProfile = useCallback(async (userId: string): Promise<ResolvedProfile> => {
-
+  /**
+   * Charge en une seule passe rôle + profile + statut convoyeur (si applicable).
+   * Retourne `null` si le réseau est indisponible → on retombera sur le cache local.
+   */
+  const loadProfile = useCallback(async (userId: string): Promise<ResolvedProfile | null> => {
     try {
-      const [rolesRes, profileRes] = await Promise.all([
-        supabase
-          .from("user_roles")
-          .select("role, actif")
-          .eq("user_id", userId)
-          .eq("actif", true),
-        supabase
-          .from("profiles")
-          .select("type_client")
-          .eq("user_id", userId)
-          .maybeSingle(),
-      ]);
+      const [rolesRes, profileRes] = await withTimeout(
+        Promise.all([
+          supabase
+            .from("user_roles")
+            .select("role, actif")
+            .eq("user_id", userId)
+            .eq("actif", true),
+          supabase
+            .from("profiles")
+            .select("type_client")
+            .eq("user_id", userId)
+            .maybeSingle(),
+        ]),
+        8000,
+      );
+
+      if (rolesRes.error) throw rolesRes.error;
 
       const activeRoles = ((rolesRes.data as Array<{ role: string; actif?: boolean | null }> | null) ?? []);
       const role = getHighestActiveRole(activeRoles);
@@ -159,8 +166,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { role, roleActif, typeClient, convoyeurStatut, orgRole };
     } catch (err) {
-      console.warn("[useAuth] loadProfile error:", err);
-      return { role: null, roleActif: true, typeClient: null, convoyeurStatut: null, orgRole: null };
+      console.warn("[useAuth] loadProfile error (offline ?):", err);
+      return null;
     }
   }, []);
 
@@ -176,17 +183,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setIsLoading(true);
+      // 1) Cache local → l'app est utilisable immédiatement, même sans réseau.
+      const cached = readCachedProfile(userId);
+      if (cached) {
+        setProfile(cached);
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
+
+      // 2) Hors ligne : on s'arrête là (le cache fait foi).
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (!cached) setIsLoading(false);
+        return;
+      }
+
+      // 3) Rafraîchissement réseau (en arrière-plan si on avait un cache).
       const resolved = await loadProfile(userId);
 
       // Race-guard : un autre auth state change a pu arriver entretemps
       if (currentUserIdRef.current !== userId) return;
 
-      setProfile(resolved);
+      if (resolved) {
+        setProfile(resolved);
+        writeCachedProfile(userId, resolved);
+      }
       setIsLoading(false);
     },
     [loadProfile],
   );
+
 
   useEffect(() => {
     // 1) S'abonner AVANT de charger la session pour ne rater aucun event.
