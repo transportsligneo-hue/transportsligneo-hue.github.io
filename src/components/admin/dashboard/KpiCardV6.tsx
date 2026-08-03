@@ -1,4 +1,6 @@
 import type { LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 
 export type KpiTone = "blue" | "ok" | "violet" | "gold" | "warn";
 
@@ -11,6 +13,8 @@ interface Props {
   trend?: { label: string; positive?: boolean };
   /** Série pour la mini-courbe. Si absente/plate → ligne plate. */
   series?: number[];
+  /** Destination : rend la carte cliquable. */
+  to?: string;
 }
 
 const STROKE: Record<KpiTone, string> = {
@@ -42,10 +46,10 @@ function Sparkline({ series, tone }: { series: number[]; tone: KpiTone }) {
   );
 }
 
-export function KpiCardV6({ label, value, icon: Icon, tone, sub, trend, series }: Props) {
+export function KpiCardV6({ label, value, icon: Icon, tone, sub, trend, series, to }: Props) {
   const cardTone = tone === "blue" ? "c-blue" : tone === "ok" ? "c-ok" : tone === "violet" ? "c-violet" : tone === "gold" ? "c-gold" : "c-warn";
-  return (
-    <div className={`a6-kpi ${cardTone}`}>
+  const inner = (
+    <>
       <div className="flex items-center justify-between mb-3 relative z-[1]">
         <span className={`a6-kpi-ic ${tone}`}>
           <Icon size={18} />
@@ -58,6 +62,22 @@ export function KpiCardV6({ label, value, icon: Icon, tone, sub, trend, series }
       <p className="a6-kpi-v">{value}</p>
       {sub && <p className="a6-kpi-sub mt-1">{sub}</p>}
       <Sparkline series={series && series.length >= 2 ? series : [0, 0, 0, 0, 0, 0, 0]} tone={tone} />
-    </div>
+    </>
   );
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`a6-kpi ${cardTone} group block text-left transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--a6-blue,#2F5FFF)]`}
+      >
+        <span className="absolute top-3 right-3 z-[2] opacity-0 group-hover:opacity-100 transition-opacity text-[var(--a6-dim)]">
+          <ArrowUpRight size={14} />
+        </span>
+        {inner}
+      </Link>
+    );
+  }
+
+  return <div className={`a6-kpi ${cardTone}`}>{inner}</div>;
 }
