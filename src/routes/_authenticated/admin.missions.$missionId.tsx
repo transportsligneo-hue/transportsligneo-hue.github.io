@@ -43,7 +43,7 @@ import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBl
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
-import { missionNumberOf } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
@@ -221,6 +221,37 @@ function AdminMissionDetail() {
     setContactTel2(trajet.arrivee_contact_telephone2 ?? "");
     setContactInstr(trajet.arrivee_contact_instructions ?? "");
   }, [trajet]);
+
+  // Numéro de base partagé pour un aller-retour (les 2 volets affichent 075A / 075R)
+  const [groupBaseNumero, setGroupBaseNumero] = useState<string | null>(null);
+  const groupId = trajet?.mission_group_id ?? null;
+  useEffect(() => {
+    if (!groupId) { setGroupBaseNumero(null); return; }
+    let cancelled = false;
+    (async () => {
+      const { data: legs } = await supabase
+        .from("trajets")
+        .select("id, leg_index, leg_type, created_at")
+        .eq("mission_group_id", groupId);
+      const ids = (legs ?? []).map((l) => l.id);
+      if (!ids.length) return;
+      const { data: attrs } = await supabase
+        .from("attributions")
+        .select("trajet_id, numero_mission")
+        .in("trajet_id", ids);
+      const legById = new Map((legs ?? []).map((l) => [l.id, l]));
+      let base: string | null = null;
+      (attrs ?? []).forEach((a) => {
+        if (!a.trajet_id || !a.numero_mission) return;
+        const num = stripLegSuffix(a.numero_mission);
+        const leg = legById.get(a.trajet_id);
+        const isAller = (leg?.leg_index ?? 1) === 1 || leg?.leg_type === "aller";
+        if (!base || isAller || num < base) base = isAller ? num : base ?? num;
+      });
+      if (!cancelled) setGroupBaseNumero(base);
+    })();
+    return () => { cancelled = true; };
+  }, [groupId]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -640,7 +671,16 @@ function AdminMissionDetail() {
     );
   }
 
-  const missionNumber = missionNumberOf(attribution);
+  const missionNumber = trajet.mission_group_id
+    ? displayTrajetRef({
+        id: trajet.id,
+        createdAt: attribution.created_at,
+        groupId: trajet.mission_group_id,
+        isRoundTrip: true,
+        legType: trajet.leg_type,
+        baseNumero: groupBaseNumero ?? attribution.numero_mission,
+      })
+    : missionNumberOf(attribution);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
     day: "2-digit",
