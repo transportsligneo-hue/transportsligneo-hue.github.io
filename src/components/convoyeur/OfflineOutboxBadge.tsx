@@ -12,7 +12,12 @@ export default function OfflineOutboxBadge() {
   const online = useOnlineStatus();
   const [pending, setPending] = useState(0);
 
-  useEffect(() => subscribeOutbox(setPending), []);
+  useEffect(() => {
+    const unsub = subscribeOutbox(setPending);
+    return () => {
+      unsub();
+    };
+  }, []);
 
   useEffect(() => {
     if (online) {
