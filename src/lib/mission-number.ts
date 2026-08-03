@@ -63,10 +63,11 @@ export function displayTrajetRef(opts: {
   baseNumero?: string | null;
 }): string {
   if (opts.baseNumero) {
-    const base = stripLegSuffix(opts.baseNumero);
+    const base = displayNumero(stripLegSuffix(opts.baseNumero));
     if (!opts.isRoundTrip) return base;
     const isRetour = opts.legType === "retour" || opts.legIndex === 2;
     return `${base}${isRetour ? "R" : "A"}`;
   }
+
   return formatTrajetRef(opts);
 }
