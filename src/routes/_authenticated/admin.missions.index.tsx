@@ -258,7 +258,11 @@ function AdminMissionsUnified() {
                     <td>
                       <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{m.ref}</p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        {m.isRoundTrip && <span className="a6-badge attribuee">A/R</span>}
+                        {m.isRoundTrip && (
+                          <span className="a6-badge attribuee">
+                            {m.legType === "retour" || m.legIndex === 2 ? "Restitution" : "Livraison"}
+                          </span>
+                        )}
                         {m.isTest && <span className="a6-badge annulee">Test</span>}
                       </div>
                     </td>
