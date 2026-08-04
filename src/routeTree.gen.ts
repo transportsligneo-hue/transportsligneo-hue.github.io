@@ -118,6 +118,7 @@ import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as AuthenticatedAdminAssistantIaRouteImport } from './routes/_authenticated/admin.assistant-ia'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
+import { Route as AuthenticatedDashboardProNouvelleMissionIndexRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.index'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
 import { Route as AuthenticatedAdminMissionsIndexRouteImport } from './routes/_authenticated/admin.missions.index'
@@ -753,6 +754,12 @@ const AuthenticatedAdminAcceptationsRoute =
     path: '/acceptations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedDashboardProNouvelleMissionIndexRoute =
+  AuthenticatedDashboardProNouvelleMissionIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardProNouvelleMissionRoute,
+  } as any)
 const AuthenticatedDashboardProMissionsIndexRoute =
   AuthenticatedDashboardProMissionsIndexRouteImport.update({
     id: '/',
@@ -1024,6 +1031,7 @@ export interface FileRoutesByFullPath {
   '/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
+  '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1104,7 +1112,6 @@ export interface FileRoutesByTo {
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
-  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
@@ -1151,6 +1158,7 @@ export interface FileRoutesByTo {
   '/admin/missions': typeof AuthenticatedAdminMissionsIndexRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
+  '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1287,6 +1295,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
+  '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1423,6 +1432,7 @@ export interface FileRouteTypes {
     | '/admin/missions/'
     | '/dashboard-client/missions/'
     | '/dashboard-pro/missions/'
+    | '/dashboard-pro/nouvelle-mission/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1503,7 +1513,6 @@ export interface FileRouteTypes {
     | '/dashboard-pro/documents'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
-    | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/societe'
     | '/entreprise/factures'
     | '/entreprise/membres'
@@ -1550,6 +1559,7 @@ export interface FileRouteTypes {
     | '/admin/missions'
     | '/dashboard-client/missions'
     | '/dashboard-pro/missions'
+    | '/dashboard-pro/nouvelle-mission'
   id:
     | '__root__'
     | '/'
@@ -1685,6 +1695,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/missions/'
     | '/_authenticated/dashboard-client/missions/'
     | '/_authenticated/dashboard-pro/missions/'
+    | '/_authenticated/dashboard-pro/nouvelle-mission/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2502,6 +2513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcceptationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/dashboard-pro/nouvelle-mission/': {
+      id: '/_authenticated/dashboard-pro/nouvelle-mission/'
+      path: '/'
+      fullPath: '/dashboard-pro/nouvelle-mission/'
+      preLoaderRoute: typeof AuthenticatedDashboardProNouvelleMissionIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardProNouvelleMissionRoute
+    }
     '/_authenticated/dashboard-pro/missions/': {
       id: '/_authenticated/dashboard-pro/missions/'
       path: '/'
@@ -2893,12 +2911,15 @@ const AuthenticatedDashboardProMissionsRouteWithChildren =
 
 interface AuthenticatedDashboardProNouvelleMissionRouteChildren {
   AuthenticatedDashboardProNouvelleMissionGroupeeRoute: typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
+  AuthenticatedDashboardProNouvelleMissionIndexRoute: typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
 }
 
 const AuthenticatedDashboardProNouvelleMissionRouteChildren: AuthenticatedDashboardProNouvelleMissionRouteChildren =
   {
     AuthenticatedDashboardProNouvelleMissionGroupeeRoute:
       AuthenticatedDashboardProNouvelleMissionGroupeeRoute,
+    AuthenticatedDashboardProNouvelleMissionIndexRoute:
+      AuthenticatedDashboardProNouvelleMissionIndexRoute,
   }
 
 const AuthenticatedDashboardProNouvelleMissionRouteWithChildren =
