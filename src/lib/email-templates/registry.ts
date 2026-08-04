@@ -40,11 +40,13 @@ import { template as devisOtpCode } from './devis-otp-code'
 import { template as convoyeurDocumentStatus } from './convoyeur-document-status'
 import { template as vehiculeDocumentExpiration } from './vehicule-document-expiration'
 import { template as invite } from './invite'
+import { template as invitationConvoyeur } from './invitation-convoyeur'
 
 
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'invitation-convoyeur': invitationConvoyeur,
   'demande-confirmation': demandeConfirmation,
   'inscription-convoyeur': inscriptionConvoyeur,
   'devis-client': devisClient,
