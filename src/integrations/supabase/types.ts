@@ -1089,7 +1089,7 @@ export type Database = {
           training_status: string
           type_convoyeur: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           ville: string | null
         }
         Insert: {
@@ -1114,7 +1114,7 @@ export type Database = {
           training_status?: string
           type_convoyeur?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           ville?: string | null
         }
         Update: {
@@ -1139,7 +1139,7 @@ export type Database = {
           training_status?: string
           type_convoyeur?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           ville?: string | null
         }
         Relationships: [
