@@ -144,6 +144,7 @@ import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './route
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
 import { Route as AuthenticatedAdminConvoyeursConvoyeurIdRouteImport } from './routes/_authenticated/admin.convoyeurs.$convoyeurId'
 import { Route as AuthenticatedAdminClientsClientIdRouteImport } from './routes/_authenticated/admin.clients.$clientId'
+import { Route as AuthenticatedConvoyeurFormationModuleIdRouteImport } from './routes/_authenticated/convoyeur.formation.module.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -904,6 +905,12 @@ const AuthenticatedAdminClientsClientIdRoute =
     path: '/$clientId',
     getParentRoute: () => AuthenticatedAdminClientsRoute,
   } as any)
+const AuthenticatedConvoyeurFormationModuleIdRoute =
+  AuthenticatedConvoyeurFormationModuleIdRouteImport.update({
+    id: '/module/$id',
+    path: '/module/$id',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -1040,6 +1047,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1167,6 +1175,7 @@ export interface FileRoutesByTo {
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1305,6 +1314,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/_authenticated/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1443,6 +1453,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions/'
     | '/dashboard-pro/missions/'
     | '/dashboard-pro/nouvelle-mission/'
+    | '/convoyeur/formation/module/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1570,6 +1581,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/missions'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-mission'
+    | '/convoyeur/formation/module/$id'
   id:
     | '__root__'
     | '/'
@@ -1707,6 +1719,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/missions/'
     | '/_authenticated/dashboard-pro/missions/'
     | '/_authenticated/dashboard-pro/nouvelle-mission/'
+    | '/_authenticated/convoyeur/formation/module/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2706,6 +2719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsClientIdRouteImport
       parentRoute: typeof AuthenticatedAdminClientsRoute
     }
+    '/_authenticated/convoyeur/formation/module/$id': {
+      id: '/_authenticated/convoyeur/formation/module/$id'
+      path: '/module/$id'
+      fullPath: '/convoyeur/formation/module/$id'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationModuleIdRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
   }
 }
 
@@ -2840,12 +2860,15 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedConvoyeurFormationRouteChildren {
   AuthenticatedConvoyeurFormationIndexRoute: typeof AuthenticatedConvoyeurFormationIndexRoute
+  AuthenticatedConvoyeurFormationModuleIdRoute: typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 
 const AuthenticatedConvoyeurFormationRouteChildren: AuthenticatedConvoyeurFormationRouteChildren =
   {
     AuthenticatedConvoyeurFormationIndexRoute:
       AuthenticatedConvoyeurFormationIndexRoute,
+    AuthenticatedConvoyeurFormationModuleIdRoute:
+      AuthenticatedConvoyeurFormationModuleIdRoute,
   }
 
 const AuthenticatedConvoyeurFormationRouteWithChildren =
