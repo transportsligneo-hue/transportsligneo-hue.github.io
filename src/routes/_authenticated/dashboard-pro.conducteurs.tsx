@@ -83,15 +83,15 @@ function ConducteursPage() {
     const convoyeurs = (convRes.data ?? []) as Array<Record<string, unknown>>;
 
     // Nombre de missions effectuées pour cette flotte
-    const userIds = convoyeurs.map((c) => c["user_id"] as string).filter(Boolean);
+    const convoyeurIds = convoyeurs.map((c) => c["id"] as string).filter(Boolean);
     const counts: Record<string, number> = {};
-    if (userIds.length) {
-      const { data: missions } = await supabase
-        .from("missions")
+    if (convoyeurIds.length) {
+      const { data: attributions } = await supabase
+        .from("attributions")
         .select("convoyeur_id")
-        .in("convoyeur_id", convoyeurs.map((c) => c["id"] as string));
-      for (const m of (missions ?? []) as Array<{ convoyeur_id: string | null }>) {
-        if (m.convoyeur_id) counts[m.convoyeur_id] = (counts[m.convoyeur_id] ?? 0) + 1;
+        .in("convoyeur_id", convoyeurIds);
+      for (const a of (attributions ?? []) as Array<{ convoyeur_id: string | null }>) {
+        if (a.convoyeur_id) counts[a.convoyeur_id] = (counts[a.convoyeur_id] ?? 0) + 1;
       }
     }
 
