@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, HelpCircle, MessageSquareQuote, FolderOpen, Search, X, Menu } from "lucide-react";
+import { BookOpen, HelpCircle, FolderOpen, Search, X, Menu } from "lucide-react";
 import { useTraining } from "@/lib/formation/useTraining";
 import { TrainingSidebar } from "@/components/formation/TrainingSidebar";
 import { extractGlossary, plainText } from "@/lib/formation/types";
@@ -55,12 +55,6 @@ function FormationLayout() {
           className="rounded-lg border border-pro-border bg-white px-3 py-2 text-xs font-medium text-pro-text flex items-center gap-1.5 hover:border-[#2F5FFF]/40"
         >
           <HelpCircle size={14} /> FAQ
-        </Link>
-        <Link
-          to="/convoyeur/formation/temoignages"
-          className="rounded-lg border border-pro-border bg-white px-3 py-2 text-xs font-medium text-pro-text flex items-center gap-1.5 hover:border-[#2F5FFF]/40"
-        >
-          <MessageSquareQuote size={14} /> Ils en parlent
         </Link>
         <button
           type="button"
