@@ -24,7 +24,6 @@ import {
   Award,
 } from "lucide-react";
 
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
@@ -88,22 +87,10 @@ export default function MobileHomeScreen() {
       <RouteThread />
 
       {/* Topbar (overlay transparent sur hero) */}
-      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-between px-5 pt-4 pb-4"
+      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-end px-5 pt-4 pb-4"
         style={{ background: "linear-gradient(180deg, rgba(4,7,18,0.55) 0%, rgba(4,7,18,0.15) 70%, transparent 100%)" }}
       >
-        <Link to="/" className="flex items-center gap-2.5 min-w-0" aria-label="Accueil">
-          <span className="shrink-0 w-9 h-9 rounded-[10px] overflow-hidden bg-[#0a1230]"
-            style={{ boxShadow: "0 0 16px rgba(63,123,255,0.55), 0 0 0 1px rgba(122,163,255,0.4)" }}
-          >
-            <img src={logoLigneo} alt="Ligneo" className="w-full h-full object-cover" loading="eager" />
-          </span>
-          <span
-            className="font-black tracking-[0.02em] text-[13.5px] leading-none text-white"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
-          >
-            TRANSPORTS <span className="text-[#2F5FFF]">LIGNEO</span>
-          </span>
-        </Link>
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => (isAuthenticated ? navigate({ to: "/notifications" }) : navigate({ to: "/login" }))}
@@ -192,10 +179,49 @@ export default function MobileHomeScreen() {
         </div>
       </section>
 
+
+      {/* === Actions (alignées sur le PC : Estimer + téléphone) === */}
+      <div className="relative z-[3] flex gap-2.5 px-[18px] -mt-8">
+        <button
+          type="button"
+          className="mhome-estimer"
+          onClick={() => document.getElementById("mobile-devis")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+        >
+          <Zap size={14} className="mhome-bolt" strokeWidth={2.4} />
+          Estimer mon trajet
+        </button>
+        <a href="tel:+33782456181" className="mhome-phone" aria-label="Appeler 07 82 45 61 81">
+          <Phone size={17} strokeWidth={2} />
+        </a>
+      </div>
+
       {/* === Carte "Estimer mon trajet" (chevauche le hero) · vrai simulateur === */}
-      <div id="mobile-devis" className="relative z-[3] mx-[18px] -mt-[56px] scroll-mt-20">
+      <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20">
         <MobileDevisGenerator />
       </div>
+
+      {/* Bande de statistiques (alignée sur le PC) */}
+      <div className="relative z-[2] flex justify-around px-[18px] pt-6 pb-1">
+        {[
+          { v: "5000+", l: "Véhicules convoyés" },
+          { v: "6+ ans", l: "D'expérience" },
+          { v: "100%", l: "Digitalisé" },
+          { v: "7j/7", l: "Disponible" },
+        ].map((s) => (
+          <div key={s.l} className="text-center">
+            <div
+              className="text-[20px] font-extrabold text-[#6ea1ff]"
+              style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 14px rgba(91,143,255,0.5)" }}
+            >
+              {s.v}
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.05em] text-[#9aa6c9] mt-1 font-semibold">
+              {s.l}
+            </div>
+          </div>
+        ))}
+      </div>
+
 
       {/* Bande fonctionnalités */}
       <div className="relative z-[1] flex justify-between gap-3 px-[26px] pt-5 pb-1">

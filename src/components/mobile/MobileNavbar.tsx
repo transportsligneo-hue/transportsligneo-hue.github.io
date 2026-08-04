@@ -4,15 +4,27 @@ import { User, Phone } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 
-const links = [
+type NavAccent = "b2b" | "driver" | undefined;
+const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Process" },
-  { to: "/pro", label: "B2B" },
+  { to: "/pro", label: "B2B", accent: "b2b" },
+  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "driver" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+const SteeringIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <rect x="3" y="11" width="18" height="7" rx="2" />
+    <path d="M5 11V8a7 7 0 0 1 14 0v3" />
+    <circle cx="8" cy="14.5" r="1" />
+    <circle cx="16" cy="14.5" r="1" />
+  </svg>
+);
+
 
 const HIDDEN_PREFIXES = [
   "/convoyeur",
@@ -71,6 +83,13 @@ export default function MobileNavbar() {
         <div className="flex items-center justify-between px-4 h-14">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" />
+            <span
+              className="font-extrabold text-[12.5px] tracking-[0.02em] uppercase text-white"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              Transports{" "}
+              <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">Ligneo</span>
+            </span>
           </Link>
           <div className="flex items-center gap-2 shrink-0">
             <a href="tel:+33782456181" className="mnav-phone" aria-label="Appeler 07 82 45 61 81">
@@ -84,20 +103,26 @@ export default function MobileNavbar() {
         </div>
         <nav>
           <ul className="flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
-            {links.map((l) => (
-              <li key={l.to} className="shrink-0">
-                <Link
-                  to={l.to}
-                  activeOptions={{ exact: true }}
-                  activeProps={{ className: "mnav-link mnav-link-active" }}
-                  inactiveProps={{ className: "mnav-link" }}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+            {links.map((l) => {
+              const accent =
+                l.accent === "b2b" ? " mnav-link-b2b" : l.accent === "driver" ? " mnav-link-driver" : "";
+              return (
+                <li key={l.to} className="shrink-0">
+                  <Link
+                    to={l.to}
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: `mnav-link mnav-link-active${accent}` }}
+                    inactiveProps={{ className: `mnav-link${accent}` }}
+                  >
+                    {l.accent === "driver" && <SteeringIcon />}
+                    {l.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
+
       </div>
     </header>
   );
