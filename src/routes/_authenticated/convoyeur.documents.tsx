@@ -185,6 +185,18 @@ function ConvoyeurDocuments() {
         </p>
       </div>
 
+      {!convoyeurId && (
+        <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 flex items-start gap-2">
+          <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-pro-text">
+            Votre fiche convoyeur n'est pas encore créée : l'envoi de documents est indisponible.
+            Contactez l'équipe Transports Ligneo pour finaliser votre inscription.
+          </p>
+        </div>
+      )}
+
+
+
       {/* Photo de profil */}
       <div className="bg-white rounded-2xl border border-pro-border p-4 sm:p-5 flex items-center gap-4 shadow-sm">
         <div className="w-16 h-16 rounded-full overflow-hidden bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center shrink-0">
