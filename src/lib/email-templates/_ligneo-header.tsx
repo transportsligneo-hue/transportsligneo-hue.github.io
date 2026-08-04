@@ -13,7 +13,7 @@ import {
 
 /**
  * Gabarit email Transports Ligneo — v6 (charte site 2026).
- * Fond bleu clair, carte blanche 600px, en-tête bleu marine dégradé,
+ * Fond blanc forcé, carte blanche 600px, en-tête bleu marine dégradé,
  * accents bleu électrique / or, typographie Poppins avec repli Arial.
  *
  * Toutes les templates s'appuient sur ce composant : modifier ce fichier
@@ -104,7 +104,10 @@ export function LigneoEmailShell({
 
   return (
     <Html lang="fr" dir="ltr">
-      <Head />
+      <Head>
+        <meta name="color-scheme" content="light only" />
+        <meta name="supported-color-schemes" content="light only" />
+      </Head>
       <Preview>{preview}</Preview>
       <Body style={bodyStyle}>
         <Container style={outerContainer}>
@@ -348,6 +351,7 @@ const bodyStyle = {
   fontFamily: FONT_STACK_BODY,
   color: TEXT_DARK,
   backgroundImage: `linear-gradient(${PAGE_BG}, ${PAGE_BG})`,
+  colorScheme: 'light only',
 }
 
 const outerContainer = {
@@ -358,6 +362,7 @@ const outerContainer = {
 
 const card = {
   backgroundColor: '#ffffff',
+  backgroundImage: 'linear-gradient(#ffffff, #ffffff)',
   borderRadius: '16px',
   overflow: 'hidden' as const,
   border: `1px solid ${CARD_BORDER}`,
@@ -383,6 +388,7 @@ const brandCell = {
 
 const clientBrandBar = {
   backgroundColor: CARD_BG,
+  backgroundImage: `linear-gradient(${CARD_BG}, ${CARD_BG})`,
   borderBottom: `1px solid ${CARD_BORDER}`,
   padding: '12px 32px',
   textAlign: 'center' as const,
@@ -410,6 +416,8 @@ const clientBrandName = {
 }
 
 const contentWrap = {
+  backgroundColor: '#ffffff',
+  backgroundImage: 'linear-gradient(#ffffff, #ffffff)',
   padding: '36px 32px 8px',
   fontFamily: FONT_STACK_BODY,
 }
@@ -483,6 +491,8 @@ const signatureStyle = {
 }
 
 const footerBar = {
+  backgroundColor: '#ffffff',
+  backgroundImage: 'linear-gradient(#ffffff, #ffffff)',
   padding: '8px 32px 32px',
   fontFamily: FONT_STACK_BODY,
 }
@@ -509,6 +519,7 @@ const divider = {
 
 const recapCard = {
   backgroundColor: CARD_BG,
+  backgroundImage: `linear-gradient(${CARD_BG}, ${CARD_BG})`,
   border: `1px solid ${CARD_BORDER}`,
   borderRadius: '12px',
   padding: '18px 20px',
@@ -571,7 +582,14 @@ export function SimpleCard({
   const bg = tone === 'warn' ? '#fef3e2' : CARD_BG
   const border = tone === 'warn' ? '#f3d9b0' : CARD_BORDER
   return (
-    <Section style={{ ...recapCard, backgroundColor: bg, border: `1px solid ${border}` }}>
+    <Section
+      style={{
+        ...recapCard,
+        backgroundColor: bg,
+        backgroundImage: `linear-gradient(${bg}, ${bg})`,
+        border: `1px solid ${border}`,
+      }}
+    >
       {title ? (
         <Text
           style={{
