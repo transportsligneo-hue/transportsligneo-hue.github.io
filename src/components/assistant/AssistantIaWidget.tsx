@@ -1,25 +1,40 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { MessageCircle, Send, X, Phone } from "lucide-react";
+import { Send, X, Phone } from "lucide-react";
 
 /**
- * Assistant IA flottant (site public).
- * Bulle en bas à droite + panneau de discussion.
- * Aucune donnée sensible n'est stockée localement hormis l'id de conversation.
+ * Vroomy 🚗 — assistant IA flottant de Transports Ligneo (site public).
+ * Même backend/API que l'assistant précédent : /api/public/assistant-chat.
+ * Seuls le nom, la mascotte et le ton changent.
  */
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
-const QUICK_REPLIES = [
-  "💰 Combien coûte un convoyage ?",
-  "📦 Où en est ma mission ?",
-  "🚗 Devenir convoyeur",
+const QUICK_REPLIES: Array<{ icon: string; label: string }> = [
+  { icon: "💰", label: "Combien coûte un convoyage ?" },
+  { icon: "📦", label: "Où en est ma mission ?" },
+  { icon: "🚗", label: "Devenir convoyeur" },
 ];
 
 const WELCOME =
-  "Bonjour 👋 Je suis l'assistant Transports Ligneo. Je peux répondre à vos questions sur nos services, nos tarifs, nos délais ou le suivi d'une mission.";
+  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Je peux vous aider sur nos services, nos tarifs, nos délais ou le suivi d'une mission.";
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
+
+/** Face de Vroomy : carrosserie arrondie, phares-yeux, calandre-sourire, deux roues. */
+function VroomyFace({ size = 28 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" focusable="false">
+      <rect x="4" y="12" width="24" height="12" rx="5" fill="#ffffff" />
+      <rect x="8" y="8" width="16" height="8" rx="4" fill="#ffffff" />
+      <circle cx="11" cy="17" r="2.4" fill="#182655" />
+      <circle cx="21" cy="17" r="2.4" fill="#182655" />
+      <path d="M12.5 20.6 Q16 23.4 19.5 20.6" stroke="#182655" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.75" />
+      <circle cx="9" cy="25.5" r="2.2" fill="#182655" />
+      <circle cx="23" cy="25.5" r="2.2" fill="#182655" />
+    </svg>
+  );
+}
 
 function sessionToken() {
   if (typeof window === "undefined") return "";
@@ -89,7 +104,7 @@ export default function AssistantIaWidget() {
             role: "assistant",
             content:
               data.reply ??
-              "Je ne parviens pas à répondre pour le moment. Vous pouvez appeler le 07 82 45 61 81.",
+              "Panne sèche de mon côté 😅 Je ne parviens pas à répondre pour le moment. Vous pouvez appeler le 07 82 45 61 81.",
           },
         ]);
         if (data.handoff) setHandoff(true);
@@ -99,7 +114,7 @@ export default function AssistantIaWidget() {
           {
             role: "assistant",
             content:
-              "Connexion interrompue. Réessayez dans un instant, ou appelez-nous au 07 82 45 61 81.",
+              "Connexion interrompue en pleine route. Réessayez dans un instant, ou appelez-nous au 07 82 45 61 81.",
           },
         ]);
         setHandoff(true);
@@ -148,100 +163,132 @@ export default function AssistantIaWidget() {
     <>
       <button
         type="button"
-        className="aiw-bubble"
-        aria-label="Ouvrir l'assistant Transports Ligneo"
+        className="vrm-launcher"
+        aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         onClick={() => setOpen((o) => !o)}
         style={{ display: open ? "none" : undefined }}
       >
-        <MessageCircle strokeWidth={2} />
-        {notif && <span className="aiw-notif">1</span>}
+        <VroomyFace size={34} />
+        {notif && <span className="vrm-badge">1</span>}
       </button>
 
-      <div className={`aiw-panel${open ? " aiw-open" : ""}`} role="dialog" aria-label="Assistant Transports Ligneo">
-        <div className="aiw-head">
-          <div className="aiw-head-info">
-            <div className="aiw-name">Assistant Ligneo</div>
-            <div className="aiw-status">
-              <span className="aiw-dot" />
-              En ligne — réponse instantanée
-            </div>
+      <div className={`vrm-panel${open ? " vrm-open" : ""}`} role="dialog" aria-label="Vroomy, assistant Transports Ligneo">
+        <div className="vrm-head">
+          <div className="vrm-speed" aria-hidden="true">
+            <span />
+            <span />
+            <span />
           </div>
-          <button type="button" className="aiw-close" onClick={() => setOpen(false)} aria-label="Fermer">
-            <X size={15} />
-          </button>
+          <div className="vrm-head-row">
+            <div className="vrm-id">
+              <div className="vrm-avatar">
+                <VroomyFace size={28} />
+              </div>
+              <div>
+                <h2 className="vrm-title">Vroomy 🚗</h2>
+                <div className="vrm-status">
+                  <span className="vrm-dot" />
+                  En ligne — réponse instantanée
+                </div>
+              </div>
+            </div>
+            <button type="button" className="vrm-close" onClick={() => setOpen(false)} aria-label="Fermer">
+              <X size={16} />
+            </button>
+          </div>
+          <p className="vrm-tagline">Toujours prêt à rouler avec vous ! 💨</p>
         </div>
 
-        <div className="aiw-body" ref={bodyRef}>
+        <div className="vrm-body" ref={bodyRef}>
           {messages.map((m, i) => (
-            <div key={i} className={`aiw-msg ${m.role === "user" ? "aiw-user" : "aiw-bot"}`}>
-              {m.content}
+            <div key={i} className={`vrm-row${m.role === "user" ? " vrm-user" : ""}`}>
+              {m.role === "assistant" && (
+                <div className="vrm-msg-avatar">
+                  <VroomyFace size={16} />
+                </div>
+              )}
+              <div className="vrm-bubble">{m.content}</div>
             </div>
           ))}
 
           {messages.length === 1 && (
-            <div className="aiw-quick">
+            <div className="vrm-chips">
               {QUICK_REPLIES.map((q) => (
-                <button key={q} type="button" className="aiw-quick-btn" onClick={() => void send(q)}>
-                  {q}
+                <button
+                  key={q.label}
+                  type="button"
+                  className="vrm-chip"
+                  onClick={() => void send(q.label)}
+                >
+                  <span className="vrm-ic">{q.icon}</span>
+                  {q.label}
                 </button>
               ))}
             </div>
           )}
 
           {typing && (
-            <div className="aiw-typing">
-              <span />
-              <span />
-              <span />
+            <div className="vrm-row">
+              <div className="vrm-msg-avatar">
+                <VroomyFace size={16} />
+              </div>
+              <div className="vrm-typing" aria-label="Vroomy est en train d'écrire">
+                <span />
+                <span />
+                <span />
+              </div>
             </div>
           )}
 
           {handoff && !leadSent && (
-            <div className="aiw-handoff">
-              <div className="aiw-handoff-title">Être rappelé(e) par un conseiller</div>
+            <div className="vrm-handoff">
+              <div className="vrm-handoff-title">Être rappelé(e) par un conseiller</div>
               <input
-                className="aiw-field"
+                className="vrm-field"
                 placeholder="Votre nom"
                 value={lead.nom}
                 onChange={(e) => setLead((l) => ({ ...l, nom: e.target.value }))}
               />
               <input
-                className="aiw-field"
+                className="vrm-field"
                 placeholder="Votre téléphone"
                 inputMode="tel"
                 value={lead.telephone}
                 onChange={(e) => setLead((l) => ({ ...l, telephone: e.target.value }))}
               />
-              <button type="button" className="aiw-quick-btn" onClick={() => void sendLead()}>
+              <button type="button" className="vrm-chip" onClick={() => void sendLead()}>
+                <span className="vrm-ic">📞</span>
                 Demander un rappel
               </button>
-              <a className="aiw-call" href="tel:+33782456181">
+              <a className="vrm-call" href="tel:+33782456181">
                 <Phone size={13} /> Appeler le 07 82 45 61 81
               </a>
             </div>
           )}
         </div>
 
-        <form
-          className="aiw-input-row"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void send(input);
-          }}
-        >
-          <input
-            ref={inputRef}
-            className="aiw-input"
-            placeholder="Écrivez votre message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            maxLength={1200}
-          />
-          <button type="submit" className="aiw-send" disabled={typing || !input.trim()} aria-label="Envoyer">
-            <Send size={15} />
-          </button>
-        </form>
-        <div className="aiw-footer-note">Réponses générées par IA · Transports Ligneo</div>
+        <div className="vrm-footer">
+          <form
+            className="vrm-input-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void send(input);
+            }}
+          >
+            <input
+              ref={inputRef}
+              className="vrm-input"
+              placeholder="Écrivez à Vroomy..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              maxLength={1200}
+            />
+            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer">
+              <Send size={18} />
+            </button>
+          </form>
+          <p className="vrm-fine">Réponses générées par IA · Transports Ligneo</p>
+        </div>
       </div>
     </>
   );
