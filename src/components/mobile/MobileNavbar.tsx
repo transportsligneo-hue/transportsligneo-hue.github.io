@@ -4,15 +4,27 @@ import { User, Phone } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 
-const links = [
+type NavAccent = "b2b" | "driver" | undefined;
+const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Process" },
-  { to: "/pro", label: "B2B" },
+  { to: "/pro", label: "B2B", accent: "b2b" },
+  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "driver" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+const SteeringIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <rect x="3" y="11" width="18" height="7" rx="2" />
+    <path d="M5 11V8a7 7 0 0 1 14 0v3" />
+    <circle cx="8" cy="14.5" r="1" />
+    <circle cx="16" cy="14.5" r="1" />
+  </svg>
+);
+
 
 const HIDDEN_PREFIXES = [
   "/convoyeur",
