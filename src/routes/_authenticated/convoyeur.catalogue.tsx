@@ -112,6 +112,7 @@ function ConvoyeurCatalogue() {
         const row = data as { id?: string; has_completed_training?: boolean } | null;
         setConvoyeurId(row?.id ?? null);
         setHasTraining(Boolean(row?.has_completed_training));
+        setTrainingLoaded(true);
       });
   }, [user]);
 
