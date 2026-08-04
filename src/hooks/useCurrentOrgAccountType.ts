@@ -1,8 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import catFranceLogo from "@/assets/logo-cat.png";
 
 export type OrgAccountType = "b2b_standard" | "flotte";
+
+function resolveOrganizationLogo(name: string | null | undefined, logoUrl: string | null | undefined) {
+  if (logoUrl) return logoUrl;
+  return name?.toLocaleLowerCase("fr-FR").includes("cat france") ? catFranceLogo : null;
+}
 
 /**
  * Retourne le account_type de l'organisation "principale" de l'utilisateur pro.
@@ -51,7 +57,12 @@ export function useCurrentOrgAccountType() {
           profile?.societe ||
           [profile?.prenom, profile?.nom].filter(Boolean).join(" ").trim() ||
           null;
-        return { orgId: null, accountType: fallbackType, logoUrl: null, name: fallbackName };
+        return {
+          orgId: null,
+          accountType: fallbackType,
+          logoUrl: resolveOrganizationLogo(fallbackName, null),
+          name: fallbackName,
+        };
 
       }
 
@@ -63,11 +74,12 @@ export function useCurrentOrgAccountType() {
 
       const accountType = (org?.account_type as OrgAccountType | null) ??
         ((profile?.type_client as string | null) === "flotte" ? "flotte" : "b2b_standard");
+      const name = org?.commercial_name ?? org?.legal_name ?? profile?.societe ?? null;
       return {
         orgId,
         accountType,
-        logoUrl: (org as { logo_url?: string | null } | null)?.logo_url ?? null,
-        name: org?.commercial_name ?? org?.legal_name ?? profile?.societe ?? null,
+        logoUrl: resolveOrganizationLogo(name, (org as { logo_url?: string | null } | null)?.logo_url),
+        name,
       };
     },
   });
