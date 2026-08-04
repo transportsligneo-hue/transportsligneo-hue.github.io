@@ -167,36 +167,40 @@ function ProDashboard() {
 
   return (
     <div className="v3-aurora -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-full font-v3-body">
-      {/* Breadcrumb */}
-      <div className="text-[12px] text-v3-dim mb-3">
-        {spaceLabel} <span className="text-v3-muted font-semibold">/ Vue d'ensemble</span>
+      <div className="mb-8">
+        <FleetPageHeader
+          breadcrumb="Vue d'ensemble"
+          eyebrow={eyebrowLabel}
+          title={isFlotte ? "Parc" : "Bonjour,"}
+          highlight={orgName || (isFlotte ? "CAT France" : user?.email?.split("@")[0] ?? "Client")}
+          subtitle={heroSub}
+          badge={isFlotte ? "Flotte partenaire" : null}
+          stats={
+            isFlotte
+              ? [
+                  { label: "Véhicules en mission", value: vehicleStats.enMission },
+                  { label: "Disponibles", value: vehicleStats.dispo },
+                  { label: "Immobilisés", value: vehicleStats.indispo },
+                  { label: "Parc total", value: vehicleStats.total, tone: "accent" as const },
+                ]
+              : undefined
+          }
+          actions={
+            <>
+              <Link to="/dashboard-pro/documents" className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]">
+                <FileText size={14} /> Exporter
+              </Link>
+              <Link
+                to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
+                className="flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+              >
+                <PlusCircle size={14} /> {isFlotte ? "Mission groupée" : "Nouvelle mission"}
+              </Link>
+            </>
+          }
+        />
       </div>
 
-      {/* Page head */}
-      <div className="flex flex-wrap items-end justify-between gap-5 mb-8">
-        <div className="min-w-0">
-          <div className="v3-eyebrow"><span className="dot" />{eyebrowLabel}</div>
-          <h1 className="v3-h1">{heroTitle}</h1>
-          <p className="v3-sub">{heroSub}</p>
-        </div>
-        <div className="flex gap-2.5">
-          <Link to="/dashboard-pro/documents" className="v3-btn-ghost"><FileText size={14} /> Exporter</Link>
-          {isFlotte ? (
-            <Link
-              to="/dashboard-pro/nouvelle-mission/groupee"
-              className="v3-btn-primary inline-flex items-center gap-2"
-            >
-              <PlusCircle size={14} /> Mission groupée
-            </Link>
-          ) : (
-            <Link
-              to="/dashboard-pro/nouvelle-mission"
-              className="v3-btn-primary inline-flex items-center gap-2"
-            >
-              <PlusCircle size={14} /> Nouvelle mission
-            </Link>
-          )}
-        </div>
 
       </div>
 
