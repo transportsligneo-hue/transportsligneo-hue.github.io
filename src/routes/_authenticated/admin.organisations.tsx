@@ -295,6 +295,7 @@ function AdminOrganisations() {
                         src={o.logo_url}
                         name={o.legal_name}
                         isCompany
+                        kind={o.account_type === "flotte" ? "flotte" : "b2b"}
                         size="sm"
                       />
                       <div>
