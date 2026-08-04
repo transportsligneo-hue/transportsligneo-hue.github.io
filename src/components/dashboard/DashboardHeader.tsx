@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 type Variant = "light" | "dark";
 
