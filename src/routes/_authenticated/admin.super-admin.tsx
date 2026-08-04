@@ -91,41 +91,45 @@ function SuperAdminPage() {
 
   return (
     <div className="space-y-6" data-org-theme="super_admin">
-      {/* === HERO Super Admin (v3 aurora violet) === */}
-      <section className="v3-aurora relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-[#1a0b2e] via-[#2a1150] to-[#0b1026] px-6 py-8 md:px-8 md:py-10 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.35),transparent_55%)] pointer-events-none" />
+      {/* === HERO Super Admin (lisible) === */}
+      <section className="relative overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-br from-[#f8f7ff] via-[#eeebff] to-[#e4e0ff] px-6 py-8 md:px-8 md:py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.12),transparent_55%)] pointer-events-none" />
         <div className="relative flex flex-wrap items-start justify-between gap-6">
           <div className="min-w-0 space-y-3">
-            <div className="v3-eyebrow inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-purple-200/90">
-              <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-300 opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-purple-300" /></span>
+            <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-purple-700">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-600 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-600" />
+              </span>
               Zone de contrôle privilégiée
             </div>
-            <h1 className="font-[Playfair_Display,serif] text-3xl md:text-4xl font-semibold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
               Super Admin
             </h1>
-            <p className="text-sm text-purple-100/75 max-w-2xl">
+            <p className="text-sm text-slate-600 max-w-2xl">
               Gestion des rôles sensibles et journal d'audit sécurité. Chaque action est tracée et immuable.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-300/40 bg-purple-500/15 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-purple-100">
-            <Crown size={13} className="text-purple-200" /> Niveau maximum
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-300 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-purple-700 shadow-sm">
+            <Crown size={13} className="text-purple-600" /> Niveau maximum
           </div>
         </div>
 
         <div className="relative mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "Super Admins", value: counts.sa, tone: "from-purple-500/20 to-purple-500/5 border-purple-400/30" },
-            { label: "Admins", value: counts.ad, tone: "from-blue-500/20 to-blue-500/5 border-blue-400/30" },
-            { label: "Managers", value: counts.mg, tone: "from-slate-400/20 to-slate-400/5 border-slate-300/30" },
-            { label: "Événements audit", value: counts.events, tone: "from-amber-400/20 to-amber-400/5 border-amber-300/30" },
+            { label: "Super Admins", value: counts.sa, tone: "bg-purple-50 border-purple-200 text-purple-700" },
+            { label: "Admins", value: counts.ad, tone: "bg-blue-50 border-blue-200 text-blue-700" },
+            { label: "Managers", value: counts.mg, tone: "bg-slate-50 border-slate-200 text-slate-700" },
+            { label: "Événements audit", value: counts.events, tone: "bg-amber-50 border-amber-200 text-amber-700" },
           ].map((k) => (
-            <div key={k.label} className={`rounded-xl border bg-gradient-to-br ${k.tone} px-4 py-3 backdrop-blur-sm`}>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-purple-100/70">{k.label}</div>
-              <div className="mt-1 font-[Space_Grotesk,sans-serif] text-2xl font-semibold text-white tabular-nums">{k.value}</div>
+            <div key={k.label} className={`rounded-xl border px-4 py-3 ${k.tone}`}>
+              <div className="text-[10px] font-bold uppercase tracking-[0.16em] opacity-80">{k.label}</div>
+              <div className="mt-1 text-2xl font-semibold tabular-nums">{k.value}</div>
             </div>
           ))}
         </div>
       </section>
+
 
       {/* Ajouter un rôle via email */}
       <Card>
