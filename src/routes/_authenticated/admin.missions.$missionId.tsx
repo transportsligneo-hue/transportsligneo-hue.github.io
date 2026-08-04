@@ -569,7 +569,15 @@ function AdminMissionDetail() {
     if (!attribution || !trajet || generatingFacture) return;
     setGeneratingFacture(true);
     try {
-      const ttc = Number(trajet.prix ?? 0);
+      // Livraison + restitution = UNE seule facture au tarif de base global
+      const basis = await resolveGroupInvoiceBasis(trajet.id);
+      if (basis.existing) {
+        setLinkedFactureId(basis.existing.id);
+        toast.info("Facture déjà émise pour cette mission", { description: basis.existing.numero });
+        return;
+      }
+
+      const ttc = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
       const tvaTaux = 20;
       const ht = +(ttc / (1 + tvaTaux / 100)).toFixed(2);
       const tva = +(ttc - ht).toFixed(2);
@@ -594,9 +602,9 @@ function AdminMissionDetail() {
           type_facture: "particulier",
           date_facture: today.toISOString().slice(0, 10),
           date_mission: trajet.date_trajet,
-          designation: "Convoyage véhicule",
-          depart: trajet.depart,
-          arrivee: trajet.arrivee,
+          designation: basis.designation,
+          depart: basis.depart ?? trajet.depart,
+          arrivee: basis.arrivee ?? trajet.arrivee,
           prix_ht: ht,
           tva_taux: tvaTaux,
           prix_tva: tva,
@@ -610,6 +618,7 @@ function AdminMissionDetail() {
       setLinkedFactureId(inserted.id);
       toast.success("Facture créée", { description: `Numéro ${numero}` });
     } catch (e) {
+
       toast.error("Création impossible", { description: (e as Error).message });
     } finally {
       setGeneratingFacture(false);
