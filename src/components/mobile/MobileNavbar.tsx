@@ -83,6 +83,13 @@ export default function MobileNavbar() {
         <div className="flex items-center justify-between px-4 h-14">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" />
+            <span
+              className="font-extrabold text-[12.5px] tracking-[0.02em] uppercase text-white"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              Transports{" "}
+              <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">Ligneo</span>
+            </span>
           </Link>
           <div className="flex items-center gap-2 shrink-0">
             <a href="tel:+33782456181" className="mnav-phone" aria-label="Appeler 07 82 45 61 81">
@@ -96,20 +103,26 @@ export default function MobileNavbar() {
         </div>
         <nav>
           <ul className="flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
-            {links.map((l) => (
-              <li key={l.to} className="shrink-0">
-                <Link
-                  to={l.to}
-                  activeOptions={{ exact: true }}
-                  activeProps={{ className: "mnav-link mnav-link-active" }}
-                  inactiveProps={{ className: "mnav-link" }}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+            {links.map((l) => {
+              const accent =
+                l.accent === "b2b" ? " mnav-link-b2b" : l.accent === "driver" ? " mnav-link-driver" : "";
+              return (
+                <li key={l.to} className="shrink-0">
+                  <Link
+                    to={l.to}
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: `mnav-link mnav-link-active${accent}` }}
+                    inactiveProps={{ className: `mnav-link${accent}` }}
+                  >
+                    {l.accent === "driver" && <SteeringIcon />}
+                    {l.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
+
       </div>
     </header>
   );
