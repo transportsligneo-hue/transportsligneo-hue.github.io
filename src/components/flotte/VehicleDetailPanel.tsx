@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { confirmToast } from "@/lib/confirm-toast";
 import {
   X, FileText, ShieldCheck, Wrench, Loader2, Gauge, MapPin,
+  Upload, Trash2, Download, Plus, AlertCircle,
 } from "lucide-react";
+
 
 export type FleetVehicle = {
   id: string;
