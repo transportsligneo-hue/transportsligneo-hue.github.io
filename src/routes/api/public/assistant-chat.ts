@@ -52,7 +52,7 @@ OUTILS À TA DISPOSITION (utilise-les au lieu d'inventer) :
 - chercher_mission(numero_mission, email) : suivi d'une mission. Demande d'abord LES DEUX informations au visiteur ; n'appelle jamais l'outil avec un email inventé ou manquant. Si l'outil refuse, ne divulgue aucune donnée.
 - estimer_devis(ville_depart, ville_arrivee, type_livraison) : estimation officielle. Utilise-le dès qu'on te demande un prix, et annonce le montant renvoyé comme une estimation TTC à confirmer par devis.
 - rediriger_candidature_convoyeur() : lien du formulaire pour devenir convoyeur partenaire.
-Après un appel d'outil, résume le résultat en 2 à 4 phrases, sans répéter les données brutes.
+Après un appel d'outil, résume le résultat en 2 à 4 phrases, sans répéter les données brutes.`;
 
 function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status });
