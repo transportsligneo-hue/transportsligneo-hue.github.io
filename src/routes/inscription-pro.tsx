@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, CheckCircle, Building2, Hash } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
-import { notifyAdmin } from "@/lib/admin-notifications";
+import { finalizeSignup } from "@/lib/signup-finalize";
 
 export const Route = createFileRoute("/inscription-pro")({
   component: InscriptionPro,
@@ -87,14 +87,7 @@ function InscriptionPro() {
           } as never).eq("user_id", authData.user.id);
         }
 
-        void notifyAdmin({
-          type: "client_action",
-          titre: "Nouvelle inscription pro (B2B)",
-          message: `${form.societe} · ${form.prenom} ${form.nom} · ${form.email}`,
-          link: "/admin/clients",
-          entityType: "user",
-          entityId: authData.user.id,
-        });
+        await finalizeSignup(authData.user.id, "pro");
 
         setSuccess(true);
         if (authData.session) {
