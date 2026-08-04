@@ -29,8 +29,6 @@ export const LIGNEO_LOGO_URL = 'https://transportsligneo.fr/logo-ligneo.png'
 // Palette — miroir du site
 const NAVY = '#0a1638'
 const NAVY_2 = '#132a6b'
-void NAVY_2
-void BLUE_LIGHT
 const BLUE = '#2f5fff'
 const BLUE_LIGHT = '#6ea1ff'
 const GOLD = '#b8862a'
@@ -42,6 +40,8 @@ const TEXT_DARK = '#0f1526'
 const TEXT_BODY = '#4b5468'
 const TEXT_MUTED = '#9aa2ba'
 const BORDER = '#eaeaee'
+void NAVY_2
+void BLUE_LIGHT
 
 const FONT_STACK_HEAD = "'Poppins', 'Segoe UI', Arial, Helvetica, sans-serif"
 const FONT_STACK_BODY = "'Inter', 'Segoe UI', Arial, Helvetica, sans-serif"
