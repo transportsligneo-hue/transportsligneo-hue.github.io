@@ -6,11 +6,23 @@ import {
   Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye, RotateCcw,
   User as UserIcon, Camera,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   getVisibleConvoyeurDocTypes,
   isConvoyeurDocApproved,
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
+
+/** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
+function safeFileName(name: string) {
+  const cleaned = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_");
+  return cleaned.slice(-80) || "fichier";
+}
+
 
 export const Route = createFileRoute("/_authenticated/convoyeur/documents")({
   component: ConvoyeurDocuments,
