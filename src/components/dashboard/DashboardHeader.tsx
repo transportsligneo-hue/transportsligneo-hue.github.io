@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 type Variant = "light" | "dark";
 
@@ -232,6 +233,9 @@ export function DashboardHeader({
     : "bg-white border border-pro-border shadow-xl";
 
   const initial = (user?.email ?? "U").charAt(0).toUpperCase();
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const orgLogoUrl = orgInfo?.logoUrl ?? null;
+  const orgName = orgInfo?.name ?? null;
 
   const typeLabel: Record<SearchResult["type"], string> = {
     demande: "Demande",
@@ -422,15 +426,24 @@ export function DashboardHeader({
             onClick={() => setProfileOpen((v) => !v)}
             className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-md transition-colors ${iconBtn}`}
           >
-            <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-                isDark
-                  ? "bg-primary text-navy"
-                  : "bg-pro-accent text-white"
-              }`}
-            >
-              {initial}
-            </div>
+            {orgLogoUrl ? (
+              <img
+                src={orgLogoUrl}
+                alt={orgName ?? "Logo"}
+                className="w-7 h-7 rounded-full object-contain bg-white border border-pro-border"
+                loading="lazy"
+              />
+            ) : (
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
+                  isDark
+                    ? "bg-primary text-navy"
+                    : "bg-pro-accent text-white"
+                }`}
+              >
+                {initial}
+              </div>
+            )}
             <ChevronDown size={14} className="hidden sm:inline" />
           </button>
 
