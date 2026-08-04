@@ -291,6 +291,11 @@ function ConvoyeurCatalogue() {
       ? enriched.find((e) => e.t.id === openTrajet.id)?.dist ?? null
       : null;
 
+  // Verrou formation : pas d'accès au catalogue tant que l'Académie Ligneo n'est pas validée
+  if (trainingLoaded && !hasTraining) {
+    return <CatalogueTrainingGate />;
+  }
+
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
       <div
