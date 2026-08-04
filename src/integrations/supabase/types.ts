@@ -911,6 +911,7 @@ export type Database = {
           permis_numero: string | null
           permis_photo_url: string | null
           prenom: string
+          site_id: string | null
           statut: string
           telephone: string
           training_completed_at: string | null
@@ -935,6 +936,7 @@ export type Database = {
           permis_numero?: string | null
           permis_photo_url?: string | null
           prenom: string
+          site_id?: string | null
           statut?: string
           telephone: string
           training_completed_at?: string | null
@@ -959,6 +961,7 @@ export type Database = {
           permis_numero?: string | null
           permis_photo_url?: string | null
           prenom?: string
+          site_id?: string | null
           statut?: string
           telephone?: string
           training_completed_at?: string | null
@@ -974,6 +977,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "convoyeurs_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
             referencedColumns: ["id"]
           },
         ]
@@ -1897,6 +1907,81 @@ export type Database = {
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_driver_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          method: string
+          nom: string
+          organization_id: string
+          permis_date_obtention: string | null
+          permis_doc_url: string | null
+          permis_numero: string | null
+          prenom: string
+          site_id: string | null
+          status: string
+          telephone: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          method?: string
+          nom: string
+          organization_id: string
+          permis_date_obtention?: string | null
+          permis_doc_url?: string | null
+          permis_numero?: string | null
+          prenom: string
+          site_id?: string | null
+          status?: string
+          telephone?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          method?: string
+          nom?: string
+          organization_id?: string
+          permis_date_obtention?: string | null
+          permis_doc_url?: string | null
+          permis_numero?: string | null
+          prenom?: string
+          site_id?: string | null
+          status?: string
+          telephone?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_driver_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_driver_invitations_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
             referencedColumns: ["id"]
           },
         ]
