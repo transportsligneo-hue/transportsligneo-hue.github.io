@@ -184,16 +184,13 @@ function AdminAttributions() {
   const handleEmitFacture = async (a: Attribution) => {
     setInvoicingId(a.id);
     try {
-      // 1. Refuse si une facture existe déjà
-      const { data: existing } = await supabase
-        .from("factures")
-        .select("id, numero")
-        .eq("attribution_id", a.id)
-        .maybeSingle();
-      if (existing) {
-        toast.info("Facture déjà émise", { description: existing.numero });
+      // 1. Refuse si une facture existe déjà (y compris sur l'autre segment d'un aller-retour)
+      const basis = await resolveGroupInvoiceBasis(a.trajet_id);
+      if (basis.existing) {
+        toast.info("Facture déjà émise", { description: basis.existing.numero });
         return;
       }
+
       // 2. Charge trajet
       const { data: trajet, error: tErr } = await supabase
         .from("trajets")
