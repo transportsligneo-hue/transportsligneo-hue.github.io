@@ -13,6 +13,8 @@ import {
   type CatalogTrajet,
 } from "@/components/convoyeur/CatalogueMissionCard";
 import { MissionDetailSheet } from "@/components/convoyeur/MissionDetailSheet";
+import { CatalogueTrainingGate } from "@/components/convoyeur/CatalogueTrainingGate";
+import { TrainingStatusBadge } from "@/components/convoyeur/TrainingStatusBadge";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { haversineKm } from "@/lib/geo/haversine";
 
@@ -339,9 +341,12 @@ function ConvoyeurCatalogue() {
                 une contre-offre. Trié en temps réel.
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-100">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-              Temps réel
+            <div className="flex flex-wrap items-center gap-2">
+              <TrainingStatusBadge statut="validee" />
+              <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-100">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                Temps réel
+              </div>
             </div>
           </div>
 
@@ -351,15 +356,6 @@ function ConvoyeurCatalogue() {
               Votre compte doit être validé pour candidater aux missions. Complétez
               vos documents dans l'onglet "Documents".
             </div>
-          )}
-          {validated && !hasTraining && (
-            <Link
-              to="/convoyeur/formation"
-              className="block rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 hover:bg-amber-500/15"
-            >
-              <strong>Formation obligatoire à finaliser.</strong> Terminez les
-              modules avant de postuler aux missions.
-            </Link>
           )}
 
           {/* Filtres */}
