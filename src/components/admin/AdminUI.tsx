@@ -264,7 +264,7 @@ export function Button({
   ...rest
 }: BtnProps) {
   const variants: Record<BtnVariant, string> = {
-    primary: "bg-pro-accent text-white hover:bg-pro-accent-hover",
+    primary: "admin-btn-blue text-white",
     secondary: "bg-white text-pro-text border border-pro-border hover:bg-pro-bg-soft",
     ghost: "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text",
     danger: "bg-red-600 text-white hover:bg-red-700",
