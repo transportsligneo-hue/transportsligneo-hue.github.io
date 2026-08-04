@@ -293,14 +293,31 @@ function FleetPage() {
       </div>
 
       {/* Grille véhicules */}
-      {loading ? (
+      {loading || orgLoading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="animate-spin text-[#2f5fff]" size={24} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-[#eaeaee] bg-white p-10 text-center">
           <Car className="mx-auto mb-3 text-[#a3a4ac]" size={30} />
-          <p className="text-[13px] text-[#70727d]">Aucun véhicule.</p>
+          {vehicles.length === 0 ? (
+            <>
+              <p className="text-[13px] font-semibold">Aucun véhicule dans le parc pour l'instant</p>
+              <p className="mt-1 text-[12.5px] text-[#70727d]">
+                Ajoutez votre premier véhicule pour suivre ses documents et son entretien.
+              </p>
+              {canManage && (
+                <button
+                  onClick={openCreate}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-black"
+                >
+                  <Plus size={14} /> Ajouter un véhicule
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="text-[13px] text-[#70727d]">Aucun véhicule ne correspond à ce filtre.</p>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
