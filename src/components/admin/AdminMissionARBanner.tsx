@@ -187,37 +187,37 @@ export function AdminMissionARBanner({
   };
 
   return (
-    <div className="rounded-xl border border-indigo-400/30 bg-gradient-to-br from-indigo-500/10 to-amber-500/5 p-4">
+    <div className="rounded-xl border border-indigo-300/70 bg-indigo-50/80 p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-3">
         <MissionLegBadge leg={legType as "aller" | "retour"} />
-        <div className="text-sm text-white/85">
-          <span className="font-medium">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
-          <span className="text-white/50"> · fait partie d'un groupe livraison + restitution</span>
+        <div className="text-sm text-pro-text">
+          <span className="font-semibold">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
+          <span className="text-pro-text-soft"> · fait partie d'un groupe livraison + restitution</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           {loading ? (
-            <span className="inline-flex items-center gap-1 text-xs text-white/60">
+            <span className="inline-flex items-center gap-1 text-xs text-pro-muted">
               <Loader2 size={12} className="animate-spin" /> Recherche du jumeau…
             </span>
           ) : twin?.attributionId ? (
             <Link
               to="/admin/missions/$missionId"
               params={{ missionId: twin.attributionId }}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-300 hover:text-indigo-100 underline-offset-2 hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline-offset-2 hover:underline"
             >
               <ArrowLeftRight size={12} />
               Voir la mission {twin.leg_type === "retour" ? "Retour" : "Aller"}
-              {twin.numero ? <span className="font-mono text-[11px] text-white/60">{twin.numero}</span> : null}
+              {twin.numero ? <span className="font-mono text-[11px] text-pro-text-soft">{twin.numero}</span> : null}
             </Link>
           ) : twin ? (
-            <span className="text-xs text-white/50">Jumelle sans attribution</span>
+            <span className="text-xs text-pro-muted">Jumelle sans attribution</span>
           ) : null}
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs uppercase tracking-wide text-white/60">Prix ce sens</span>
+          <span className="text-xs uppercase tracking-wide font-semibold text-pro-muted">Prix ce sens</span>
           {editing ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -226,19 +226,19 @@ export function AdminMissionARBanner({
                 min="0"
                 value={priceInput}
                 onChange={(e) => setPriceInput(e.target.value)}
-                className="w-24 px-2 py-1 rounded bg-black/30 border border-white/15 text-white text-sm"
+                className="w-24 px-2 py-1 rounded bg-white border border-pro-border text-pro-text text-sm"
               />
-              <span className="text-white/60 text-sm">€</span>
+              <span className="text-pro-text-soft text-sm">€</span>
               <button
                 onClick={savePrice}
                 disabled={saving}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-500 hover:bg-emerald-600 text-white text-xs disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs disabled:opacity-50"
               >
                 {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Enregistrer
               </button>
               <button
                 onClick={() => { setEditing(false); setPriceInput(String(currentPrix ?? "")); }}
-                className="px-2 py-1 rounded text-xs text-white/60 hover:text-white"
+                className="px-2 py-1 rounded text-xs text-pro-muted hover:text-pro-text"
               >
                 Annuler
               </button>
@@ -246,15 +246,15 @@ export function AdminMissionARBanner({
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white hover:text-indigo-300"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-pro-text hover:text-indigo-700"
               title="Modifier le prix de ce sens"
             >
               {Number(currentPrix ?? 0).toFixed(2)} €
-              {locked ? <Lock size={11} className="text-amber-400" /> : null}
+              {locked ? <Lock size={11} className="text-amber-600" /> : null}
             </button>
           )}
           {locked && !editing ? (
-            <span className="text-[10px] uppercase tracking-wider text-amber-300/90">figé manuellement</span>
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-700">figé manuellement</span>
           ) : null}
         </div>
 
@@ -262,7 +262,7 @@ export function AdminMissionARBanner({
           <button
             onClick={doCancelLeg}
             disabled={!!working}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs border border-red-400/40 text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-red-300 bg-white text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
             {working === "cancel" ? <Loader2 size={12} className="animate-spin" /> : <Ban size={12} />}
             Annuler ce sens
@@ -270,7 +270,7 @@ export function AdminMissionARBanner({
           <button
             onClick={doUnlink}
             disabled={!!working}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs border border-white/20 text-white/80 hover:bg-white/5 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-pro-border bg-white text-pro-text hover:bg-pro-bg-soft disabled:opacity-50"
           >
             {working === "unlink" ? <Loader2 size={12} className="animate-spin" /> : <Unlink size={12} />}
             Dissocier
@@ -278,5 +278,6 @@ export function AdminMissionARBanner({
         </div>
       </div>
     </div>
+
   );
 }
