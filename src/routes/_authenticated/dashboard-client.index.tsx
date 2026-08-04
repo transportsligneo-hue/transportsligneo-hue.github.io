@@ -7,6 +7,7 @@ import {
   Loader2, FileText, Inbox, ArrowUpRight,
 } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
@@ -213,27 +214,22 @@ function ClientDashboard() {
 
   return (
     <div className="v3-aurora -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-full font-v3-body">
-      {/* Breadcrumb */}
-      <div className="text-[12px] text-v3-dim mb-3">
-        Espace client <span className="text-v3-muted font-semibold">/ Vue d'ensemble</span>
-      </div>
+      <ClientPageHeader
+        breadcrumb="Vue d'ensemble"
+        eyebrow="Espace client"
+        title={`Bonjour${displayName ? `, ${displayName}` : ""}`}
+        subtitle="Voici un aperçu de vos convoyages et de leur suivi en temps réel."
+        actions={
+          <Link
+            to="/dashboard-client/nouvelle-reservation"
+            className="client-btn-blue inline-flex items-center gap-2 rounded-[9px] px-4 py-2.5 text-[12.5px] font-semibold"
+          >
+            <PlusCircle size={14} /> Réserver un convoyage
+          </Link>
+        }
+      />
 
-      {/* Page head */}
-      <div className="flex flex-wrap items-end justify-between gap-5 mb-8">
-        <div className="min-w-0">
-          <div className="v3-eyebrow"><span className="dot" />Espace client</div>
-          <h1 className="v3-h1">
-            Bonjour<span className="electric-text">{displayName ? `, ${displayName}` : ""}</span>
-          </h1>
-          <p className="v3-sub">Voici un aperçu de vos convoyages et de leur suivi en temps réel.</p>
-        </div>
-        <Link
-          to="/dashboard-client/nouvelle-reservation"
-          className="v3-btn-primary inline-flex items-center gap-2"
-        >
-          <PlusCircle size={14} /> Réserver un convoyage
-        </Link>
-      </div>
+      <div className="h-6" />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
