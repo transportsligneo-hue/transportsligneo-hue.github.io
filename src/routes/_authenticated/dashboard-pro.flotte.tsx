@@ -10,6 +10,9 @@ import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import { lookupPlate } from "@/lib/plate.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
