@@ -112,14 +112,14 @@ function ProMissionsIndex() {
       .select("id, numero, depart, arrivee, date_souhaitee, created_at, statut, prix_estime, mission_id")
       .or(orFilter)
       .is("mission_id", null)
-      .not("statut", "in", "(refuse,convertit)")
+      .not("statut", "in", "(refuse,convertit,converti,accepte,termine,terminee,annule,annulee,expire,expiree,archive,archivee)")
       .order("created_at", { ascending: false });
 
     const demandePending = supabase
       .from("demandes_convoyage")
       .select("id, depart, arrivee, date_souhaitee, created_at, statut, prix_estime")
       .or(orFilter)
-      .not("statut", "in", "(refusee,annulee,convertie)")
+      .not("statut", "in", "(refusee,annulee,convertie,converti,terminee,termine,livree,en_cours,validee,acceptee,archivee,archive)")
       .order("created_at", { ascending: false });
 
     Promise.all([loadMissionRows(), devisPending, demandePending]).then(([missionRows, dRes, demRes]) => {
