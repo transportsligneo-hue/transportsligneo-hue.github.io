@@ -548,3 +548,97 @@ const recapValue = {
   padding: '6px 0',
   textAlign: 'right' as const,
 }
+
+const footnoteStyle = {
+  fontSize: '12.5px',
+  color: TEXT_MUTED,
+  lineHeight: '1.6',
+  margin: '0 0 8px',
+  fontFamily: FONT_STACK_BODY,
+}
+
+// ---------- Carte simple (titre + sous-titre) ----------
+
+export function SimpleCard({
+  title,
+  subtitle,
+  tone = 'default',
+}: {
+  title?: React.ReactNode
+  subtitle?: React.ReactNode
+  tone?: 'default' | 'warn'
+}) {
+  const bg = tone === 'warn' ? '#fef3e2' : CARD_BG
+  const border = tone === 'warn' ? '#f3d9b0' : CARD_BORDER
+  return (
+    <Section style={{ ...recapCard, backgroundColor: bg, border: `1px solid ${border}` }}>
+      {title ? (
+        <Text
+          style={{
+            fontFamily: FONT_STACK_BODY,
+            fontSize: '14px',
+            fontWeight: 700,
+            color: TEXT_DARK,
+            margin: '0 0 4px',
+            lineHeight: '1.45',
+          }}
+        >
+          {title}
+        </Text>
+      ) : null}
+      {subtitle ? (
+        <Text style={{ fontFamily: FONT_STACK_BODY, fontSize: '13px', color: '#70727d', margin: 0, lineHeight: '1.55' }}>
+          {subtitle}
+        </Text>
+      ) : null}
+    </Section>
+  )
+}
+
+// ---------- Code à usage unique ----------
+
+export function CodeBox({ code }: { code: string }) {
+  return (
+    <Section style={{ ...recapCard, textAlign: 'center' as const }}>
+      <Text
+        style={{
+          fontFamily: FONT_STACK_HEAD,
+          fontSize: '32px',
+          fontWeight: 800,
+          color: TEXT_DARK,
+          letterSpacing: '0.15em',
+          margin: 0,
+        }}
+      >
+        {code}
+      </Text>
+    </Section>
+  )
+}
+
+// ---------- Ligne montant (label + gros montant doré) ----------
+
+export function AmountRow({ label = 'Montant TTC', amount }: { label?: string; amount: React.ReactNode }) {
+  return (
+    <Section style={{ margin: '0 0 20px' }}>
+      <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={recapTable}>
+        <tbody>
+          <tr>
+            <td style={recapLabel}>{label}</td>
+            <td
+              align="right"
+              style={{
+                fontFamily: FONT_STACK_HEAD,
+                fontSize: '24px',
+                fontWeight: 800,
+                color: GOLD,
+              }}
+            >
+              {amount}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Section>
+  )
+}
