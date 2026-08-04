@@ -239,6 +239,17 @@ function AdminUtilisateurs() {
                           src={u.logo_url || u.avatar_url}
                           name={u.societe || `${u.prenom} ${u.nom}`.trim() || u.email || "?"}
                           isCompany={!!u.societe || u.type_client === "b2b" || u.type_client === "flotte"}
+                          kind={
+                            u.role === "admin" || u.role === "super_admin"
+                              ? "admin"
+                              : u.role === "convoyeur"
+                                ? "convoyeur"
+                                : u.type_client === "flotte"
+                                  ? "flotte"
+                                  : u.type_client === "b2b"
+                                    ? "b2b"
+                                    : "particulier"
+                          }
                           size="sm"
                         />
                         <div className="min-w-0">

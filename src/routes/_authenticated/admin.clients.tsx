@@ -200,6 +200,7 @@ function AdminClients() {
                       src={c.avatar_url}
                       name={c.societe || `${c.prenom} ${c.nom}`.trim()}
                       isCompany={!!c.societe || c.type_client === "b2b" || c.type_client === "flotte"}
+                      kind={c.type_client === "flotte" ? "flotte" : c.type_client === "b2b" ? "b2b" : "particulier"}
                       size="sm"
                     />
                     <div className="min-w-0">
