@@ -24,7 +24,7 @@ export const InvitationConvoyeurEmail = ({ prenom, nom, inviteUrl, expiresLabel 
         ? `Ce lien d'activation est strictement personnel et valable jusqu'au ${expiresLabel}. Pour votre sécurité, ne le transférez pas.`
         : "Ce lien d'activation est strictement personnel et valable 7 jours. Pour votre sécurité, ne le transférez pas."
     }
-    signature="Bien cordialement,\nL'équipe Réseau & Opérations\nTransports Ligneo"
+    signature={"Bien cordialement,\nL'équipe Réseau & Opérations\nTransports Ligneo"}
   >
     <InfoParagraph>
       Votre parcours d'intégration vous permet de créer vos identifiants, compléter votre profil
@@ -37,12 +37,14 @@ export const InvitationConvoyeurEmail = ({ prenom, nom, inviteUrl, expiresLabel 
         { label: '2. Dossier', value: 'Complétez votre profil et vos disponibilités' },
         { label: '3. Documents', value: 'Déposez vos justificatifs professionnels' },
         { label: '4. Validation', value: 'Notre équipe étudie et active votre dossier' },
+        { label: '5. Formation', value: 'Suivez la formation Académie Ligneo (obligatoire)' },
+        { label: '6. Missions', value: 'Accédez au catalogue de missions' },
       ]}
     />
     <HighlightBox
-      label="Une équipe dédiée à vos côtés"
-      value="Un accompagnement humain, du dossier à la première mission"
-      meta="Après validation, vous accéderez au catalogue de missions et au suivi opérationnel depuis votre espace convoyeur."
+      label="Formation Académie Ligneo — étape obligatoire"
+      value="Une courte formation en ligne avant l'accès au catalogue de missions"
+      meta="Une fois votre dossier validé, vous suivez depuis votre espace convoyeur la formation Académie Ligneo (procédures d'état des lieux, prise en charge, livraison et qualité de service). Elle se termine par un examen ; sa réussite délivre votre attestation et débloque immédiatement l'accès au catalogue de missions et au suivi opérationnel."
       tone="navy"
     />
     <SimpleCard
