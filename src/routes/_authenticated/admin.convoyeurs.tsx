@@ -856,6 +856,57 @@ function AdminConvoyeurs() {
           {creating ? "Création..." : "Créer le compte"}
         </Button>
       </Modal>
+
+      {/* Modal invitation convoyeur */}
+      <Modal open={showInvite} onClose={() => setShowInvite(false)} title="Ajouter un convoyeur">
+        <p className="text-sm text-pro-text-soft mb-4">
+          Le convoyeur reçoit un email d'invitation avec un lien personnel pour créer son compte
+          et finaliser son profil.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Prénom">
+            <TextInput
+              value={inviteForm.prenom}
+              onChange={(e) => setInviteForm({ ...inviteForm, prenom: e.target.value })}
+              placeholder="Jean"
+            />
+          </FormField>
+          <FormField label="Nom">
+            <TextInput
+              value={inviteForm.nom}
+              onChange={(e) => setInviteForm({ ...inviteForm, nom: e.target.value })}
+              placeholder="Dupont"
+            />
+          </FormField>
+        </div>
+        <div className="mt-3">
+          <FormField label="Email" required>
+            <TextInput
+              type="email"
+              value={inviteForm.email}
+              onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+              placeholder="jean.dupont@email.fr"
+            />
+          </FormField>
+        </div>
+        <div className="mt-3">
+          <FormField label="Téléphone">
+            <TextInput
+              value={inviteForm.telephone}
+              onChange={(e) => setInviteForm({ ...inviteForm, telephone: e.target.value })}
+              placeholder="06 12 34 56 78"
+            />
+          </FormField>
+        </div>
+        <div className="flex justify-end gap-2 mt-5">
+          <Button variant="secondary" onClick={() => setShowInvite(false)}>
+            Annuler
+          </Button>
+          <Button icon={<Send size={14} />} onClick={createInvitation} disabled={inviting}>
+            {inviting ? "Envoi..." : "Envoyer l'invitation"}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
