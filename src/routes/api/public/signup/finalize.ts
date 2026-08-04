@@ -12,6 +12,9 @@ import { sendTransactionalEmailServer, getAdminNotificationEmail } from "@/serve
  *
  * Sécurité : on n'accepte que des comptes créés il y a moins de 30 minutes,
  * encore non confirmés, et une seule fois (aucun document déjà présent).
+ *
+ * Observabilité : chaque exécution écrit une ligne dans `signup_events`
+ * (documents reçus/rejetés, emails envoyés avec code d'erreur, notification).
  */
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -29,6 +32,51 @@ const KINDS = new Set(["convoyeur", "client", "pro", "flotte"]);
 
 function ok(body: unknown, status = 200) {
   return Response.json(body, { status });
+}
+
+interface EmailLog {
+  template: string;
+  recipient: string;
+  status: "sent" | "failed";
+  code?: string;
+  at: string;
+}
+
+interface RejectedDoc {
+  type: string;
+  reason: string;
+  detail?: string;
+}
+
+async function logEmail(
+  templateName: string,
+  recipientEmail: string,
+  templateData: Record<string, unknown>,
+  idempotencyKey: string,
+  out: EmailLog[],
+): Promise<void> {
+  const at = new Date().toISOString();
+  try {
+    const res = await sendTransactionalEmailServer({
+      templateName,
+      recipientEmail,
+      idempotencyKey,
+      templateData,
+    });
+    if (res.success) {
+      console.info(`[signup/finalize] email ok template=${templateName} to=${recipientEmail} key=${idempotencyKey}`);
+      out.push({ template: templateName, recipient: recipientEmail, status: "sent", at });
+    } else {
+      console.error(
+        `[signup/finalize] email FAILED template=${templateName} to=${recipientEmail} code=${res.reason} key=${idempotencyKey}`,
+      );
+      out.push({ template: templateName, recipient: recipientEmail, status: "failed", code: res.reason ?? "unknown", at });
+    }
+  } catch (e) {
+    const code = e instanceof Error ? e.message.slice(0, 200) : "exception";
+    console.error(`[signup/finalize] email EXCEPTION template=${templateName} to=${recipientEmail} code=${code}`);
+    out.push({ template: templateName, recipient: recipientEmail, status: "failed", code, at });
+  }
 }
 
 export const Route = createFileRoute("/api/public/signup/finalize")({
@@ -62,7 +110,12 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
         const nom = meta['nom'] ?? "";
         const email = user.email ?? "";
 
+        const emails: EmailLog[] = [];
+        const rejected: RejectedDoc[] = [];
         let uploaded = 0;
+        let expected = 0;
+        let notificationCreated = false;
+        let errorMessage: string | null = null;
 
         if (kind === "convoyeur") {
           if (meta['role'] !== "convoyeur") return ok({ error: "role_mismatch" }, 403);
@@ -82,12 +135,22 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
             if ((count ?? 0) === 0) {
               let permisPath: string | null = null;
               for (const docType of ALLOWED_DOC_TYPES) {
-                if (uploaded >= MAX_FILES) break;
                 const file = form.get(`doc_${docType}`);
                 if (!(file instanceof File) || file.size === 0) continue;
-                if (file.size > MAX_FILE_BYTES) continue;
+                expected += 1;
+                if (uploaded >= MAX_FILES) {
+                  rejected.push({ type: docType, reason: "too_many_files" });
+                  continue;
+                }
+                if (file.size > MAX_FILE_BYTES) {
+                  rejected.push({ type: docType, reason: "file_too_large", detail: `${Math.round(file.size / 1024)} Ko` });
+                  continue;
+                }
                 const mime = file.type || "application/octet-stream";
-                if (!mime.startsWith("image/") && mime !== "application/pdf") continue;
+                if (!mime.startsWith("image/") && mime !== "application/pdf") {
+                  rejected.push({ type: docType, reason: "unsupported_type", detail: mime });
+                  continue;
+                }
 
                 const ext = (file.name.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "").slice(0, 5) || "jpg";
                 const path = `${userId}/${docType}-${Date.now()}.${ext}`;
@@ -96,7 +159,11 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
                 const { error: upErr } = await supabaseAdmin.storage
                   .from("convoyeur-documents")
                   .upload(path, buffer, { contentType: mime, upsert: true });
-                if (upErr) continue;
+                if (upErr) {
+                  console.error(`[signup/finalize] upload FAILED type=${docType} user=${userId} code=${upErr.message}`);
+                  rejected.push({ type: docType, reason: "storage_error", detail: upErr.message.slice(0, 200) });
+                  continue;
+                }
 
                 await supabaseAdmin.from("documents_convoyeurs").insert({
                   convoyeur_id: convoyeur.id,
@@ -115,27 +182,22 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
                   .eq("id", convoyeur.id);
               }
             }
+          } else {
+            errorMessage = "Fiche convoyeur introuvable (trigger handle_new_user).";
+            console.error(`[signup/finalize] convoyeur row missing user=${userId}`);
           }
 
           const adminEmail = await getAdminNotificationEmail();
-          await Promise.all([
-            sendTransactionalEmailServer({
-              templateName: "inscription-convoyeur",
-              recipientEmail: email,
-              idempotencyKey: `inscription-candidat-${userId}`,
-              templateData: { prenom },
-            }).catch(() => null),
-            sendTransactionalEmailServer({
-              templateName: "inscription-convoyeur",
-              recipientEmail: adminEmail,
-              idempotencyKey: `inscription-admin-${userId}`,
-              templateData: {
-                prenom: `${prenom} ${nom} (${email} · ${meta['telephone'] ?? ""} · ${meta['ville'] ?? ""})`,
-              },
-            }).catch(() => null),
-          ]);
+          await logEmail("inscription-convoyeur", email, { prenom }, `inscription-candidat-${userId}`, emails);
+          await logEmail(
+            "inscription-convoyeur",
+            adminEmail,
+            { prenom: `${prenom} ${nom} (${email} · ${meta['telephone'] ?? ""} · ${meta['ville'] ?? ""})` },
+            `inscription-admin-${userId}`,
+            emails,
+          );
 
-          await supabaseAdmin.from("admin_notifications").insert({
+          const { error: notifErr } = await supabaseAdmin.from("admin_notifications").insert({
             type: "driver_action",
             titre: "Nouvelle inscription convoyeur",
             message: `${prenom} ${nom} · ${email} · ${meta['ville'] ?? ""}`,
@@ -144,34 +206,66 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
             entity_id: userId,
             metadata: { documents: uploaded },
           });
+          if (notifErr) {
+            console.error(`[signup/finalize] notification FAILED user=${userId} code=${notifErr.message}`);
+            errorMessage = errorMessage ?? notifErr.message.slice(0, 200);
+          } else {
+            notificationCreated = true;
+          }
+        } else {
+          // Clients (particulier / pro B2B / flotte)
+          await logEmail("welcome-client", email, { prenom }, `welcome-${userId}`, emails);
 
-          return ok({ success: true, uploaded });
+          const label =
+            kind === "flotte" ? "Nouvelle inscription flotte"
+            : kind === "pro" ? "Nouvelle inscription pro (B2B)"
+            : "Nouvelle inscription client";
+
+          const { error: notifErr } = await supabaseAdmin.from("admin_notifications").insert({
+            type: "client_action",
+            titre: label,
+            message: `${meta['societe'] ? `${meta['societe']} · ` : ""}${prenom} ${nom} · ${email}`,
+            link: "/admin/clients",
+            entity_type: "user",
+            entity_id: userId,
+            metadata: { kind },
+          });
+          if (notifErr) {
+            console.error(`[signup/finalize] notification FAILED user=${userId} code=${notifErr.message}`);
+            errorMessage = notifErr.message.slice(0, 200);
+          } else {
+            notificationCreated = true;
+          }
         }
 
-        // Clients (particulier / pro B2B / flotte)
-        await sendTransactionalEmailServer({
-          templateName: "welcome-client",
-          recipientEmail: email,
-          idempotencyKey: `welcome-${userId}`,
-          templateData: { prenom },
-        }).catch(() => null);
+        const emailsFailed = emails.filter((e) => e.status === "failed").length;
+        const status =
+          errorMessage || emailsFailed > 0 || rejected.length > 0
+            ? emails.length > 0 && emailsFailed === emails.length && !notificationCreated
+              ? "failed"
+              : "partial"
+            : "ok";
 
-        const label =
-          kind === "flotte" ? "Nouvelle inscription flotte"
-          : kind === "pro" ? "Nouvelle inscription pro (B2B)"
-          : "Nouvelle inscription client";
+        const { error: logErr } = await supabaseAdmin.from("signup_events").insert({
+          user_id: userId,
+          email,
+          full_name: `${prenom} ${nom}`.trim() || null,
+          kind,
+          documents_expected: expected,
+          documents_uploaded: uploaded,
+          documents_rejected: rejected,
+          emails,
+          notification_created: notificationCreated,
+          status,
+          error_message: errorMessage,
+        } as never);
+        if (logErr) console.error(`[signup/finalize] signup_events insert failed code=${logErr.message}`);
 
-        await supabaseAdmin.from("admin_notifications").insert({
-          type: "client_action",
-          titre: label,
-          message: `${meta['societe'] ? `${meta['societe']} · ` : ""}${prenom} ${nom} · ${email}`,
-          link: "/admin/clients",
-          entity_type: "user",
-          entity_id: userId,
-          metadata: { kind },
-        });
+        console.info(
+          `[signup/finalize] done user=${userId} kind=${kind} status=${status} docs=${uploaded}/${expected} emails_failed=${emailsFailed} notif=${notificationCreated}`,
+        );
 
-        return ok({ success: true });
+        return ok({ success: status !== "failed", status, uploaded, expected, rejected, emails, notificationCreated });
       },
     },
   },
