@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, Phone, RefreshCw, Loader2 } from "lucide-react";
+import { Phone, RefreshCw, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/assistant-ia")({
   component: AdminAssistantIa,
