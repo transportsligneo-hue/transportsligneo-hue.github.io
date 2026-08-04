@@ -197,7 +197,7 @@ function FleetPage() {
     fetchVehicles();
   };
 
-  if (!orgId && !loading) {
+  if (!orgId && !orgLoading && !loading) {
     return (
       <div className="rounded-2xl border border-[#eaeaee] bg-white p-8 text-center">
         <Car className="mx-auto mb-3 text-[#a3a4ac]" size={32} />
@@ -213,7 +213,8 @@ function FleetPage() {
         <div>
           <h1 className="text-[26px] font-extrabold tracking-[-0.02em]">Parc véhicules</h1>
           <p className="mt-1 text-[13px] text-[#70727d]">
-            Suivi des véhicules, documents, entretien et coûts de possession.
+            {orgName ? `${orgName} — ` : ""}
+            {actifs.length} véhicule{actifs.length > 1 ? "s" : ""} · documents, entretien et coûts de possession.
           </p>
         </div>
         {canManage && (
