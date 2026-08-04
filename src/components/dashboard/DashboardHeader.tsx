@@ -48,8 +48,10 @@ export function DashboardHeader({
   enableGlobalSearch = false,
   notifications,
 }: Props) {
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
+  const [ownAvatar, setOwnAvatar] = useState<string | null>(null);
   const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
