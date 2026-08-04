@@ -128,7 +128,10 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     attributionIds,
     totalTtc,
     depart: legs[0]?.depart ?? current?.depart ?? null,
-    arrivee: isGroup ? (itineraire ?? legs[legs.length - 1]?.arrivee ?? null) : (current?.arrivee ?? null),
+    arrivee: isGroup
+      ? (uniquePoints.slice(1).join(" → ") || legs[legs.length - 1]?.arrivee || null)
+      : (current?.arrivee ?? null),
+
     itineraire,
     designation: isGroup
       ? "Convoyage véhicule — livraison + restitution"
