@@ -29,6 +29,8 @@ export const LIGNEO_LOGO_URL = 'https://transportsligneo.fr/logo-ligneo.png'
 // Palette — miroir du site
 const NAVY = '#0a1638'
 const NAVY_2 = '#132a6b'
+void NAVY_2
+void BLUE_LIGHT
 const BLUE = '#2f5fff'
 const BLUE_LIGHT = '#6ea1ff'
 const GOLD = '#b8862a'
@@ -235,7 +237,7 @@ export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
     <Section style={headerSection}>
       <Text style={brandCell}>
-        TRANSPORTS <span style={{ color: BLUE_LIGHT }}>LIGNEO</span>
+        TRANSPORTS <span style={{ color: BLUE }}>LIGNEO</span>
       </Text>
       {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
     </Section>
