@@ -50,7 +50,7 @@ const roleConfig: Record<
  */
 export function LigneoBrand({ role, compact = false, variant = "light" }: Props) {
   const cfg = roleConfig[role];
-  const wordmarkColor = variant === "dark" ? "text-cream" : "text-pro-text";
+  const wordmarkColor = variant === "dark" ? "text-white" : "text-pro-text";
   const tagColor = variant === "dark" ? "text-cream/60" : "text-pro-muted";
 
   return (
