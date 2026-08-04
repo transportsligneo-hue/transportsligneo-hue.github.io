@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, MapPin,
-  Ban, RotateCcw, AlertTriangle, Clock, ShieldCheck, Search as SearchIcon,
+  Ban, RotateCcw, AlertTriangle, Clock, ShieldCheck, Search as SearchIcon, Send, Trash2, Copy,
 } from "lucide-react";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -60,6 +60,19 @@ interface Convoyeur {
   account_status?: string | null;
 }
 
+interface Invitation {
+  id: string;
+  email: string;
+  nom: string | null;
+  prenom: string | null;
+  telephone: string | null;
+  token: string;
+  status: string;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+}
+
 interface DocLite { convoyeur_id: string; type_document: string; statut_validation: string | null }
 
 const STATUT_FILTERS: Array<{ value: string; label: string }> = [
@@ -84,6 +97,10 @@ function AdminConvoyeurs() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [selected, setSelected] = useState<Convoyeur | null>(null);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ nom: "", prenom: "", email: "", telephone: "" });
+  const [inviting, setInviting] = useState(false);
   const [docs, setDocs] = useState<Array<{ type_document: string; nom_fichier: string; url_fichier: string; statut_validation: string }>>([]);
   const [missionsCount, setMissionsCount] = useState<number>(0);
   const [busy, setBusy] = useState<string | null>(null);
@@ -101,6 +118,11 @@ function AdminConvoyeurs() {
     ]);
     if (convs) setConvoyeurs(convs as Convoyeur[]);
     if (docsData) setAllDocs(docsData as DocLite[]);
+    const { data: invs } = await supabase
+      .from("convoyeur_invitations" as never)
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (invs) setInvitations(invs as unknown as Invitation[]);
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -287,6 +309,101 @@ function AdminConvoyeurs() {
     fetchAll();
   };
 
+  const sendInvitationEmail = async (inv: {
+    email: string;
+    prenom: string | null;
+    nom: string | null;
+    token: string;
+    expires_at?: string;
+  }) => {
+    const inviteUrl = `${window.location.origin}/invitation-convoyeur/${inv.token}`;
+    await sendTransactionalEmail({
+      templateName: "invitation-convoyeur",
+      recipientEmail: inv.email,
+      idempotencyKey: `invitation-convoyeur-${inv.token}`,
+      skipProfileLookup: true,
+      templateData: {
+        prenom: inv.prenom,
+        nom: inv.nom,
+        inviteUrl,
+        expiresLabel: inv.expires_at
+          ? new Date(inv.expires_at).toLocaleDateString("fr-FR")
+          : null,
+      },
+    });
+  };
+
+  const createInvitation = async () => {
+    if (!inviteForm.email.includes("@")) {
+      toast.error("Email invalide");
+      return;
+    }
+    setInviting(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_create_convoyeur_invitation" as never, {
+        _email: inviteForm.email.trim().toLowerCase(),
+        _nom: inviteForm.nom.trim() || null,
+        _prenom: inviteForm.prenom.trim() || null,
+        _telephone: inviteForm.telephone.trim() || null,
+      } as never);
+      const row = Array.isArray(data) ? (data[0] as { token: string } | undefined) : undefined;
+      if (error || !row?.token) {
+        toast.error(error?.message ?? "Erreur lors de la création de l'invitation");
+        return;
+      }
+      await sendInvitationEmail({
+        email: inviteForm.email.trim().toLowerCase(),
+        prenom: inviteForm.prenom.trim() || null,
+        nom: inviteForm.nom.trim() || null,
+        token: row.token,
+      });
+      toast.success("Invitation envoyée");
+      setInviteForm({ nom: "", prenom: "", email: "", telephone: "" });
+      setShowInvite(false);
+      fetchAll();
+    } catch (err) {
+      console.error("[admin.convoyeurs] invitation", err);
+      toast.error("Erreur lors de l'envoi de l'invitation");
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  const resendInvitation = async (inv: Invitation) => {
+    setBusy(inv.id);
+    try {
+      const { data, error } = await supabase.rpc("admin_create_convoyeur_invitation" as never, {
+        _email: inv.email,
+        _nom: inv.nom,
+        _prenom: inv.prenom,
+        _telephone: inv.telephone,
+      } as never);
+      const row = Array.isArray(data) ? (data[0] as { token: string } | undefined) : undefined;
+      if (error || !row?.token) {
+        toast.error("Impossible de renvoyer l'invitation");
+        return;
+      }
+      await sendInvitationEmail({ email: inv.email, prenom: inv.prenom, nom: inv.nom, token: row.token });
+      toast.success("Invitation renvoyée");
+      fetchAll();
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const cancelInvitation = async (inv: Invitation) => {
+    if (!(await confirmToast(`Annuler l'invitation de ${inv.email} ?`))) return;
+    setBusy(inv.id);
+    const { error } = await supabase
+      .from("convoyeur_invitations" as never)
+      .update({ status: "cancelled" } as never)
+      .eq("id", inv.id);
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    toast.success("Invitation annulée");
+    fetchAll();
+  };
+
   const createConvoyeur = async () => {
     if (!form.nom || !form.prenom || !form.email || !form.password) {
       setCreateError("Remplissez tous les champs obligatoires.");
@@ -338,8 +455,11 @@ function AdminConvoyeurs() {
         subtitle={`${enriched.length} convoyeur${enriched.length > 1 ? "s" : ""} · ${kpis.aVerifier} à vérifier`}
         actions={
           <>
-            <Button icon={<UserPlus size={14} />} onClick={() => setShowCreate(true)}>
-              Ajouter
+            <Button icon={<Send size={14} />} onClick={() => setShowInvite(true)}>
+              Ajouter un convoyeur
+            </Button>
+            <Button variant="secondary" icon={<UserPlus size={14} />} onClick={() => setShowCreate(true)}>
+              Créer directement
             </Button>
             <IconButton onClick={fetchAll} title="Actualiser">
               <RefreshCw size={15} />
@@ -396,6 +516,86 @@ function AdminConvoyeurs() {
           ))}
         </Select>
       </div>
+
+      {invitations.filter((i) => i.status === "pending" || i.status === "accepted").length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-pro-text mb-2">Invitations</h2>
+          <Table>
+            <THead>
+              <TH>Invité</TH>
+              <TH className="hidden sm:table-cell">Envoyée le</TH>
+              <TH>Statut</TH>
+              <TH className="text-right">Actions</TH>
+            </THead>
+            <tbody>
+              {invitations
+                .filter((i) => i.status === "pending" || i.status === "accepted")
+                .slice(0, 20)
+                .map((inv) => {
+                  const expired = inv.status === "pending" && new Date(inv.expires_at) < new Date();
+                  return (
+                    <TR key={inv.id}>
+                      <TD>
+                        <p className="font-medium text-pro-text">
+                          {[inv.prenom, inv.nom].filter(Boolean).join(" ") || inv.email}
+                        </p>
+                        <p className="text-xs text-pro-muted">{inv.email}</p>
+                      </TD>
+                      <TD className="hidden sm:table-cell text-pro-text-soft text-sm">
+                        {new Date(inv.created_at).toLocaleDateString("fr-FR")}
+                      </TD>
+                      <TD>
+                        {inv.status === "accepted" ? (
+                          <Badge tone="success">Acceptée</Badge>
+                        ) : expired ? (
+                          <Badge tone="danger">Expirée</Badge>
+                        ) : (
+                          <Badge tone="warning">En attente</Badge>
+                        )}
+                      </TD>
+                      <TD>
+                        <div className="flex items-center justify-end gap-1">
+                          {inv.status === "pending" && (
+                            <>
+                              <IconButton
+                                title="Copier le lien"
+                                tone="neutral"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    `${window.location.origin}/invitation-convoyeur/${inv.token}`,
+                                  );
+                                  toast.success("Lien copié");
+                                }}
+                              >
+                                <Copy size={15} />
+                              </IconButton>
+                              <IconButton
+                                title="Renvoyer l'invitation"
+                                tone="neutral"
+                                disabled={busy === inv.id}
+                                onClick={() => resendInvitation(inv)}
+                              >
+                                <Send size={15} />
+                              </IconButton>
+                              <IconButton
+                                title="Annuler l'invitation"
+                                tone="danger"
+                                disabled={busy === inv.id}
+                                onClick={() => cancelInvitation(inv)}
+                              >
+                                <Trash2 size={15} />
+                              </IconButton>
+                            </>
+                          )}
+                        </div>
+                      </TD>
+                    </TR>
+                  );
+                })}
+            </tbody>
+          </Table>
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <EmptyState icon={IdCard} title="Aucun convoyeur" description="Aucun résultat pour ce filtre." />
@@ -655,6 +855,57 @@ function AdminConvoyeurs() {
         >
           {creating ? "Création..." : "Créer le compte"}
         </Button>
+      </Modal>
+
+      {/* Modal invitation convoyeur */}
+      <Modal open={showInvite} onClose={() => setShowInvite(false)} title="Ajouter un convoyeur">
+        <p className="text-sm text-pro-text-soft mb-4">
+          Le convoyeur reçoit un email d'invitation avec un lien personnel pour créer son compte
+          et finaliser son profil.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Prénom">
+            <TextInput
+              value={inviteForm.prenom}
+              onChange={(e) => setInviteForm({ ...inviteForm, prenom: e.target.value })}
+              placeholder="Jean"
+            />
+          </FormField>
+          <FormField label="Nom">
+            <TextInput
+              value={inviteForm.nom}
+              onChange={(e) => setInviteForm({ ...inviteForm, nom: e.target.value })}
+              placeholder="Dupont"
+            />
+          </FormField>
+        </div>
+        <div className="mt-3">
+          <FormField label="Email" required>
+            <TextInput
+              type="email"
+              value={inviteForm.email}
+              onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+              placeholder="jean.dupont@email.fr"
+            />
+          </FormField>
+        </div>
+        <div className="mt-3">
+          <FormField label="Téléphone">
+            <TextInput
+              value={inviteForm.telephone}
+              onChange={(e) => setInviteForm({ ...inviteForm, telephone: e.target.value })}
+              placeholder="06 12 34 56 78"
+            />
+          </FormField>
+        </div>
+        <div className="flex justify-end gap-2 mt-5">
+          <Button variant="secondary" onClick={() => setShowInvite(false)}>
+            Annuler
+          </Button>
+          <Button icon={<Send size={14} />} onClick={createInvitation} disabled={inviting}>
+            {inviting ? "Envoi..." : "Envoyer l'invitation"}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

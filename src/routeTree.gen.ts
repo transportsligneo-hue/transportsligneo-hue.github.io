@@ -36,6 +36,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
+import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
@@ -283,6 +284,12 @@ const ScanTokenRoute = ScanTokenRouteImport.update({
   path: '/scan/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvitationConvoyeurTokenRoute =
+  InvitationConvoyeurTokenRouteImport.update({
+    id: '/invitation-convoyeur/$token',
+    path: '/invitation-convoyeur/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -970,6 +977,7 @@ export interface FileRoutesByFullPath {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1104,6 +1112,7 @@ export interface FileRoutesByTo {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1243,6 +1252,7 @@ export interface FileRoutesById {
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1385,6 +1395,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/invitation-convoyeur/$token'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1519,6 +1530,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/invitation-convoyeur/$token'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1657,6 +1669,7 @@ export interface FileRouteTypes {
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/invitation-convoyeur/$token'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
@@ -1789,6 +1802,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
@@ -2000,6 +2014,13 @@ declare module '@tanstack/react-router' {
       path: '/scan/$token'
       fullPath: '/scan/$token'
       preLoaderRoute: typeof ScanTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitation-convoyeur/$token': {
+      id: '/invitation-convoyeur/$token'
+      path: '/invitation-convoyeur/$token'
+      fullPath: '/invitation-convoyeur/$token'
+      preLoaderRoute: typeof InvitationConvoyeurTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -3237,6 +3258,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,

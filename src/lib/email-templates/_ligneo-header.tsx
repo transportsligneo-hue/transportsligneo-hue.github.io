@@ -40,6 +40,8 @@ const TEXT_DARK = '#0f1526'
 const TEXT_BODY = '#4b5468'
 const TEXT_MUTED = '#9aa2ba'
 const BORDER = '#eaeaee'
+void NAVY_2
+void BLUE_LIGHT
 
 const FONT_STACK_HEAD = "'Poppins', 'Segoe UI', Arial, Helvetica, sans-serif"
 const FONT_STACK_BODY = "'Inter', 'Segoe UI', Arial, Helvetica, sans-serif"
@@ -127,7 +129,7 @@ export function LigneoEmailShell({
                       />
                     </td>
                     <td style={brandCell}>
-                      TRANSPORTS <span style={{ color: BLUE_LIGHT }}>LIGNEO</span>
+                      TRANSPORTS <span style={{ color: BLUE }}>LIGNEO</span>
                     </td>
                   </tr>
                 </tbody>
@@ -235,7 +237,7 @@ export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
     <Section style={headerSection}>
       <Text style={brandCell}>
-        TRANSPORTS <span style={{ color: BLUE_LIGHT }}>LIGNEO</span>
+        TRANSPORTS <span style={{ color: BLUE }}>LIGNEO</span>
       </Text>
       {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
     </Section>
@@ -370,16 +372,17 @@ const card = {
 }
 
 const headerSection = {
-  backgroundColor: NAVY,
-  backgroundImage: `linear-gradient(135deg, ${NAVY}, ${NAVY_2})`,
-  padding: '28px 32px',
+  backgroundColor: '#ffffff',
+  backgroundImage: 'linear-gradient(#ffffff, #ffffff)',
+  borderBottom: `1px solid ${CARD_BORDER}`,
+  padding: '24px 32px',
 }
 
 const brandCell = {
   fontFamily: FONT_STACK_HEAD,
   fontWeight: 800,
   fontSize: '16px',
-  color: '#ffffff',
+  color: NAVY,
   letterSpacing: '0.02em',
   verticalAlign: 'middle' as const,
   paddingLeft: '12px',
@@ -458,8 +461,8 @@ const introStyle = {
 
 const primaryButtonStyle = {
   display: 'inline-block',
-  backgroundColor: BLUE,
-  backgroundImage: `linear-gradient(120deg, ${BLUE}, #1c3fc4)`,
+  backgroundColor: '#0066ff',
+  backgroundImage: 'linear-gradient(#0066ff, #0066ff)',
   color: '#ffffff',
   fontFamily: FONT_STACK_BODY,
   fontWeight: 700,
