@@ -3,57 +3,67 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  Car, Plus, Search, Loader2, Pencil, Trash2, X, Save, AlertCircle, CheckCircle2,
+  Car, Plus, Search, Loader2, Pencil, Trash2, X, Save, AlertCircle, AlertTriangle, CheckCircle2,
 } from "lucide-react";
 import { confirmToast } from "@/lib/confirm-toast";
+import VehicleDetailPanel, {
+  docStatus, worstDocStatus, type FleetVehicle,
+} from "@/components/flotte/VehicleDetailPanel";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
 });
 
-type Vehicle = {
-  id: string;
-  organization_id: string;
-  vin: string | null;
-  immatriculation: string | null;
-  marque: string | null;
-  modele: string | null;
-  energie: string | null;
-  type_vehicule: string | null;
-  couleur: string | null;
-  kilometrage: number | null;
-  statut: "actif" | "en_mission" | "indispo" | "archive";
-  notes: string | null;
-  archived_at: string | null;
-  created_at: string;
-};
-
-const STATUT_LABEL: Record<Vehicle["statut"], { label: string; cls: string }> = {
-  actif:      { label: "Actif",      cls: "bg-emerald-100 text-emerald-700" },
-  en_mission: { label: "En mission", cls: "bg-blue-100 text-blue-700" },
-  indispo:    { label: "Indispo",    cls: "bg-amber-100 text-amber-700" },
-  archive:    { label: "Archivé",    cls: "bg-slate-200 text-slate-700" },
-};
+type Vehicle = FleetVehicle;
 
 const EMPTY: Partial<Vehicle> = {
   vin: "", immatriculation: "", marque: "", modele: "",
   energie: "", type_vehicule: "", couleur: "", kilometrage: null,
   statut: "actif", notes: "",
+  assurance_expire_le: null, controle_technique_expire_le: null, carte_grise_expire_le: null,
+  mise_en_circulation: null, assurance_cout_annuel: null,
+  prochaine_revision_km: null, intervalle_revision_km: 20000,
 };
+
+const FILTERS = [
+  { id: "tous", label: "Tous" },
+  { id: "actif", label: "Disponibles" },
+  { id: "en_mission", label: "En mission" },
+  { id: "indispo", label: "Immobilisés" },
+  { id: "archive", label: "Archivés" },
+];
+
+const STATUS_META: Record<Vehicle["statut"], { label: string; dot: string }> = {
+  actif: { label: "Disponible", dot: "bg-[#16a34a]" },
+  en_mission: { label: "En mission", dot: "bg-[#2f5fff]" },
+  indispo: { label: "Immobilisé", dot: "bg-[#dc2626]" },
+  archive: { label: "Archivé", dot: "bg-[#a3a4ac]" },
+};
+
+const DOT_CLS: Record<string, string> = {
+  ok: "bg-[#16a34a]",
+  warn: "bg-[#d97706] fleet-dot-warn",
+  expired: "bg-[#dc2626]",
+  unknown: "bg-[#d5d6dc]",
+};
+
+const vehicleLabel = (v: Vehicle) =>
+  v.immatriculation || v.vin || [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
 
 function FleetPage() {
   const { user } = useAuth();
   const [orgId, setOrgId] = useState<string | null>(null);
   const [orgRole, setOrgRole] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [sites, setSites] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("tous");
   const [draft, setDraft] = useState<Partial<Vehicle> | null>(null);
+  const [selected, setSelected] = useState<Vehicle | null>(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // Récupère l'organisation principale de l'utilisateur
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -68,7 +78,6 @@ function FleetPage() {
         setOrgId(row.organization_id);
         setOrgRole(row.member_role);
       } else {
-        // Pas d'organisation → on arrête le chargement pour afficher l'état vide.
         setLoading(false);
       }
     })();
@@ -77,22 +86,21 @@ function FleetPage() {
   const fetchVehicles = useCallback(async () => {
     if (!orgId) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("vehicles")
-      .select("*")
-      .eq("organization_id", orgId)
-      .order("created_at", { ascending: false });
-    if (error) {
-      setErr(error.message);
-    } else if (data) {
-      setVehicles(data as Vehicle[]);
+    const [{ data, error }, { data: siteRows }] = await Promise.all([
+      supabase.from("vehicles").select("*").eq("organization_id", orgId)
+        .order("created_at", { ascending: false }),
+      supabase.from("organization_sites").select("id, nom").eq("organization_id", orgId),
+    ]);
+    if (error) setErr(error.message);
+    else if (data) setVehicles(data as Vehicle[]);
+    if (siteRows) {
+      setSites(Object.fromEntries((siteRows as { id: string; nom: string | null }[]).map((s) => [s.id, s.nom ?? ""])));
     }
     setLoading(false);
   }, [orgId]);
 
   useEffect(() => { void fetchVehicles(); }, [fetchVehicles]);
 
-  // Realtime
   useEffect(() => {
     if (!orgId) return;
     const ch = supabase
@@ -105,23 +113,37 @@ function FleetPage() {
     return () => { supabase.removeChannel(ch); };
   }, [orgId, fetchVehicles]);
 
+  // garde le panneau synchronisé avec les données fraîches
+  useEffect(() => {
+    if (!selected) return;
+    const fresh = vehicles.find((v) => v.id === selected.id);
+    if (fresh && fresh !== selected) setSelected(fresh);
+  }, [vehicles]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return vehicles.filter((v) => {
       if (statutFilter !== "tous" && v.statut !== statutFilter) return false;
+      if (statutFilter === "tous" && v.statut === "archive") return false;
       if (!q) return true;
       return [v.vin, v.immatriculation, v.marque, v.modele]
         .filter(Boolean).some((x) => String(x).toLowerCase().includes(q));
     });
   }, [vehicles, search, statutFilter]);
 
-  const kpi = useMemo(() => {
-    const total = vehicles.length;
-    const actifs = vehicles.filter((v) => v.statut === "actif").length;
-    const enMission = vehicles.filter((v) => v.statut === "en_mission").length;
-    const indispo = vehicles.filter((v) => v.statut === "indispo").length;
-    return { total, actifs, enMission, indispo };
-  }, [vehicles]);
+  const actifs = useMemo(() => vehicles.filter((v) => v.statut !== "archive"), [vehicles]);
+
+  const alerts = useMemo(
+    () => actifs.filter((v) => ["warn", "expired"].includes(worstDocStatus(v))),
+    [actifs],
+  );
+
+  const kpi = useMemo(() => ({
+    total: actifs.length,
+    dispo: actifs.filter((v) => v.statut === "actif").length,
+    enMission: actifs.filter((v) => v.statut === "en_mission").length,
+    docs: alerts.length,
+  }), [actifs, alerts]);
 
   const canManage = orgRole === "admin" || orgRole === "owner";
 
@@ -143,6 +165,13 @@ function FleetPage() {
       kilometrage: draft.kilometrage ?? null,
       statut: (draft.statut || "actif") as Vehicle["statut"],
       notes: (draft.notes || null) as string | null,
+      assurance_expire_le: draft.assurance_expire_le || null,
+      controle_technique_expire_le: draft.controle_technique_expire_le || null,
+      carte_grise_expire_le: draft.carte_grise_expire_le || null,
+      mise_en_circulation: draft.mise_en_circulation || null,
+      assurance_cout_annuel: draft.assurance_cout_annuel ?? null,
+      prochaine_revision_km: draft.prochaine_revision_km ?? null,
+      intervalle_revision_km: draft.intervalle_revision_km ?? 20000,
     };
     let error;
     if (draft.id) {
@@ -157,7 +186,7 @@ function FleetPage() {
   };
 
   const archive = async (v: Vehicle) => {
-    if (!(await confirmToast(`Archiver le véhicule ${v.immatriculation || v.vin || "?"} ?`))) return;
+    if (!(await confirmToast(`Archiver le véhicule ${vehicleLabel(v)} ?`))) return;
     await supabase.from("vehicles")
       .update({ statut: "archive", archived_at: new Date().toISOString() })
       .eq("id", v.id);
@@ -166,176 +195,195 @@ function FleetPage() {
 
   if (!orgId && !loading) {
     return (
-      <div className="bg-white border border-pro-border rounded-xl p-8 text-center">
-        <Car className="mx-auto text-pro-muted mb-3" size={32} />
-        <p className="text-pro-text-soft">Aucune organisation associée à votre compte.</p>
+      <div className="rounded-2xl border border-[#eaeaee] bg-white p-8 text-center">
+        <Car className="mx-auto mb-3 text-[#a3a4ac]" size={32} />
+        <p className="text-[#70727d]">Aucune organisation associée à votre compte.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5" data-org-theme="flotte">
-      {/* Hero violet Flotte */}
-      <section
-        className="relative overflow-hidden rounded-2xl border border-white/10 p-6 sm:p-7 text-white"
-        style={{
-          background:
-            "linear-gradient(120deg,#3b1f78 0%,#5b2ea8 45%,#7c3aed 100%)",
-          boxShadow: "0 18px 40px -18px rgba(90,45,168,.55)",
-        }}
-      >
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-40 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(600px 200px at 90% -10%, rgba(255,255,255,.25), transparent 60%)",
-          }}
-        />
-        <div className="relative flex flex-wrap items-end justify-between gap-4">
+    <div className="-m-2 rounded-2xl bg-[#f7f7f9] p-4 sm:p-6 font-[Inter,ui-sans-serif,system-ui] text-[#14161c]">
+      {/* En-tête */}
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-[26px] font-extrabold tracking-[-0.02em]">Parc véhicules</h1>
+          <p className="mt-1 text-[13px] text-[#70727d]">
+            Suivi des véhicules, documents, entretien et coûts de possession.
+          </p>
+        </div>
+        {canManage && (
+          <button
+            onClick={openCreate}
+            className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-black"
+          >
+            <Plus size={14} /> Ajouter un véhicule
+          </button>
+        )}
+      </div>
+
+      {/* Bannière d'alerte */}
+      {alerts.length > 0 && (
+        <div className="mb-6 flex items-center gap-3.5 rounded-xl border border-[#eaeaee] border-l-[3px] border-l-[#d97706] bg-white px-4 py-3.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-[#fef3e2]">
+            <AlertTriangle size={16} className="text-[#d97706]" />
+          </span>
           <div className="min-w-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/25 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
-              <span className="h-1.5 w-1.5 rounded-full bg-white" />
-              Flotte partenaire
-            </span>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-semibold flex items-center gap-2 tracking-tight">
-              <Car size={24} /> Parc véhicules
-            </h1>
-            <p className="mt-1 text-sm text-white/80 max-w-xl">
-              Pilotez votre parc : VIN, immatriculations, statut opérationnel et disponibilités.
+            <b className="text-[13px] font-semibold">
+              {alerts.length} véhicule{alerts.length > 1 ? "s" : ""} avec des documents à surveiller
+            </b>
+            <p className="mt-0.5 truncate text-[12px] text-[#70727d]">
+              {alerts.slice(0, 4).map((v) => vehicleLabel(v)).join(" · ")}
+              {alerts.length > 4 ? ` · +${alerts.length - 4}` : ""}
             </p>
           </div>
-          {canManage && (
-            <button
-              onClick={openCreate}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-[#3b1f78] text-sm font-semibold shadow-lg shadow-black/10 hover:bg-white/95"
-            >
-              <Plus size={16} /> Ajouter un véhicule
-            </button>
-          )}
+          <button
+            onClick={() => setSelected(alerts[0])}
+            className="ml-auto whitespace-nowrap text-[12px] font-semibold text-[#14161c] hover:underline"
+          >
+            Voir le détail →
+          </button>
         </div>
-      </section>
+      )}
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Indicateurs */}
+      <div className="mb-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#eaeaee] bg-[#eaeaee] sm:grid-cols-4">
         {[
-          { label: "Total", value: kpi.total, cls: "text-pro-text" },
-          { label: "Actifs", value: kpi.actifs, cls: "text-emerald-700" },
-          { label: "En mission", value: kpi.enMission, cls: "text-blue-700" },
-          { label: "Indispo", value: kpi.indispo, cls: "text-amber-700" },
-        ].map((k) => (
-          <div key={k.label} className="bg-white border border-pro-border rounded-xl p-4">
-            <p className="text-xs text-pro-muted uppercase tracking-wider">{k.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${k.cls}`}>{k.value}</p>
+          { k: "Parc total", v: kpi.total, cls: "" },
+          { k: "Disponibles", v: kpi.dispo, cls: "" },
+          { k: "En mission", v: kpi.enMission, cls: "text-[#2f5fff]" },
+          { k: "Documents à surveiller", v: kpi.docs, cls: kpi.docs > 0 ? "text-[#d97706]" : "" },
+        ].map((s) => (
+          <div key={s.k} className="bg-white px-5 py-5">
+            <p className="mb-2.5 text-[11.5px] font-medium text-[#70727d]">{s.k}</p>
+            <p className={`text-[30px] font-extrabold leading-none tracking-[-0.02em] ${s.cls}`}>{s.v}</p>
           </div>
         ))}
       </div>
 
-      {/* Filtres */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
+      {/* Barre d'outils */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#a3a4ac]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher VIN, immat, marque…"
-            className="w-full pl-9 pr-3 py-2 bg-white border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pro-accent/30"
+            placeholder="Rechercher une plaque ou un modèle…"
+            className="w-full rounded-[9px] border border-[#eaeaee] bg-white py-2.5 pl-9 pr-3 text-[13px] outline-none placeholder:text-[#a3a4ac] focus:border-[#2f5fff]/40"
           />
         </div>
-        <select
-          value={statutFilter}
-          onChange={(e) => setStatutFilter(e.target.value)}
-          className="px-3 py-2 bg-white border border-pro-border rounded-lg text-sm"
-        >
-          <option value="tous">Tous statuts</option>
-          <option value="actif">Actifs</option>
-          <option value="en_mission">En mission</option>
-          <option value="indispo">Indispo</option>
-          <option value="archive">Archivés</option>
-        </select>
+        {FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setStatutFilter(f.id)}
+            className={`rounded-lg border px-3.5 py-2 text-[12px] font-medium transition ${
+              statutFilter === f.id
+                ? "border-[#14161c] bg-[#14161c] text-white"
+                : "border-[#eaeaee] bg-white text-[#70727d] hover:text-[#14161c]"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
-      {/* Liste */}
+      {/* Grille véhicules */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="animate-spin text-pro-accent" size={26} />
+          <Loader2 className="animate-spin text-[#2f5fff]" size={24} />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white border border-pro-border rounded-xl p-10 text-center">
-          <Car className="mx-auto text-pro-muted mb-3" size={32} />
-          <p className="text-pro-text-soft">Aucun véhicule.</p>
+        <div className="rounded-2xl border border-[#eaeaee] bg-white p-10 text-center">
+          <Car className="mx-auto mb-3 text-[#a3a4ac]" size={30} />
+          <p className="text-[13px] text-[#70727d]">Aucun véhicule.</p>
         </div>
       ) : (
-        <div className="bg-white border border-pro-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-pro-bg-soft text-pro-text-soft">
-                <tr>
-                  <th className="text-left px-3 py-2 font-medium">Immat.</th>
-                  <th className="text-left px-3 py-2 font-medium">VIN</th>
-                  <th className="text-left px-3 py-2 font-medium">Marque / Modèle</th>
-                  <th className="text-left px-3 py-2 font-medium">Km</th>
-                  <th className="text-left px-3 py-2 font-medium">Statut</th>
-                  <th className="px-3 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((v) => (
-                  <tr key={v.id} className="border-t border-pro-border hover:bg-pro-bg-soft/40">
-                    <td className="px-3 py-2 font-medium">{v.immatriculation || "—"}</td>
-                    <td className="px-3 py-2 font-mono text-xs">{v.vin || "—"}</td>
-                    <td className="px-3 py-2">{[v.marque, v.modele].filter(Boolean).join(" ") || "—"}</td>
-                    <td className="px-3 py-2">{v.kilometrage != null ? `${v.kilometrage.toLocaleString("fr-FR")} km` : "—"}</td>
-                    <td className="px-3 py-2">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${STATUT_LABEL[v.statut].cls}`}>
-                        {STATUT_LABEL[v.statut].label}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-right whitespace-nowrap">
-                      {canManage && (
-                        <>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((v) => {
+            const st = STATUS_META[v.statut];
+            return (
+              <div
+                key={v.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelected(v)}
+                onKeyDown={(e) => { if (e.key === "Enter") setSelected(v); }}
+                className="group cursor-pointer rounded-[14px] border border-[#eaeaee] bg-white p-[18px] transition duration-150 hover:-translate-y-0.5 hover:border-[#dedee4] hover:shadow-[0_8px_20px_rgba(20,22,28,0.06)]"
+              >
+                <div className="mb-4 flex items-start justify-between">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#eaeaee] bg-[#fbfbfc]">
+                    <Car size={17} />
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-[#70727d]">
+                      <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />
+                      {st.label}
+                    </span>
+                    {canManage && (
+                      <span className="flex opacity-0 transition group-hover:opacity-100">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEdit(v); }}
+                          className="rounded p-1 text-[#a3a4ac] hover:bg-[#f2f2f5] hover:text-[#14161c]"
+                          title="Modifier"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        {v.statut !== "archive" && (
                           <button
-                            onClick={() => openEdit(v)}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-pro-text-soft hover:bg-pro-bg-soft"
-                            title="Modifier"
+                            onClick={(e) => { e.stopPropagation(); archive(v); }}
+                            className="rounded p-1 text-[#a3a4ac] hover:bg-[#fdeaea] hover:text-[#dc2626]"
+                            title="Archiver"
                           >
-                            <Pencil size={14} />
+                            <Trash2 size={13} />
                           </button>
-                          {v.statut !== "archive" && (
-                            <button
-                              onClick={() => archive(v)}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded text-red-600 hover:bg-red-50"
-                              title="Archiver"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className="mb-1 text-[15px] font-bold tracking-[-0.01em]">
+                  {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
+                </p>
+                <p className="mb-4 font-mono text-[11px] tracking-[0.02em] text-[#a3a4ac]">
+                  {v.immatriculation || v.vin || "—"}
+                </p>
+                <div className="flex flex-wrap gap-3.5 border-t border-[#eaeaee] pt-3.5">
+                  <DocDot label="Assurance" date={v.assurance_expire_le} />
+                  <DocDot label="CT" date={v.controle_technique_expire_le} />
+                  <DocDot label="Carte grise" date={v.carte_grise_expire_le} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Drawer édition */}
+      {!canManage && (
+        <p className="mt-4 flex items-center gap-1.5 text-[11.5px] text-[#a3a4ac]">
+          <CheckCircle2 size={12} /> Lecture seule — seuls les administrateurs de l'organisation peuvent modifier la flotte.
+        </p>
+      )}
+
+      {/* Panneau latéral fiche véhicule */}
+      <VehicleDetailPanel
+        vehicle={selected}
+        siteName={selected?.site_id ? sites[selected.site_id] : null}
+        onClose={() => setSelected(null)}
+      />
+
+      {/* Modale édition */}
       {draft && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-2 sm:p-6">
-          <div className="bg-white w-full sm:max-w-lg rounded-xl shadow-pro-elevated overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-pro-border">
-              <h2 className="font-semibold text-pro-text">
-                {draft.id ? "Modifier le véhicule" : "Ajouter un véhicule"}
-              </h2>
-              <button onClick={() => setDraft(null)} className="p-1 rounded hover:bg-pro-bg-soft">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-2 sm:items-center sm:p-6">
+          <div className="w-full overflow-hidden rounded-xl bg-white shadow-2xl sm:max-w-2xl">
+            <div className="flex items-center justify-between border-b border-[#eaeaee] px-4 py-3">
+              <h2 className="font-semibold">{draft.id ? "Modifier le véhicule" : "Ajouter un véhicule"}</h2>
+              <button onClick={() => setDraft(null)} className="rounded p-1 hover:bg-[#f2f2f5]">
                 <X size={18} />
               </button>
             </div>
-            <div className="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+            <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
               {err && (
-                <div className="flex items-start gap-2 px-3 py-2 bg-red-50 text-red-700 rounded text-sm">
+                <div className="flex items-start gap-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700">
                   <AlertCircle size={16} className="mt-0.5 shrink-0" />
                   <span>{err}</span>
                 </div>
@@ -347,44 +395,59 @@ function FleetPage() {
                 <Field label="Modèle" value={draft.modele || ""} onChange={(v) => setDraft({ ...draft, modele: v })} />
                 <Field label="Énergie" value={draft.energie || ""} onChange={(v) => setDraft({ ...draft, energie: v })} />
                 <Field label="Couleur" value={draft.couleur || ""} onChange={(v) => setDraft({ ...draft, couleur: v })} />
-                <Field
-                  label="Kilométrage"
-                  type="number"
-                  value={draft.kilometrage?.toString() || ""}
-                  onChange={(v) => setDraft({ ...draft, kilometrage: v ? Number(v) : null })}
-                />
+                <Field label="Kilométrage" type="number" value={draft.kilometrage?.toString() || ""}
+                  onChange={(v) => setDraft({ ...draft, kilometrage: v ? Number(v) : null })} />
                 <div>
-                  <label className="block text-xs font-medium text-pro-text-soft mb-1">Statut</label>
+                  <label className="mb-1 block text-xs font-medium text-[#70727d]">Statut</label>
                   <select
                     value={draft.statut || "actif"}
                     onChange={(e) => setDraft({ ...draft, statut: e.target.value as Vehicle["statut"] })}
-                    className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm"
+                    className="w-full rounded-lg border border-[#eaeaee] px-3 py-2 text-sm"
                   >
-                    <option value="actif">Actif</option>
+                    <option value="actif">Disponible</option>
                     <option value="en_mission">En mission</option>
-                    <option value="indispo">Indispo</option>
+                    <option value="indispo">Immobilisé</option>
                     <option value="archive">Archivé</option>
                   </select>
                 </div>
               </div>
+
+              <p className="pt-1 text-[11px] font-semibold uppercase tracking-wider text-[#a3a4ac]">Documents & entretien</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Assurance expire le" type="date" value={draft.assurance_expire_le || ""}
+                  onChange={(v) => setDraft({ ...draft, assurance_expire_le: v || null })} />
+                <Field label="Contrôle technique expire le" type="date" value={draft.controle_technique_expire_le || ""}
+                  onChange={(v) => setDraft({ ...draft, controle_technique_expire_le: v || null })} />
+                <Field label="Carte grise expire le" type="date" value={draft.carte_grise_expire_le || ""}
+                  onChange={(v) => setDraft({ ...draft, carte_grise_expire_le: v || null })} />
+                <Field label="Mise en circulation" type="date" value={draft.mise_en_circulation || ""}
+                  onChange={(v) => setDraft({ ...draft, mise_en_circulation: v || null })} />
+                <Field label="Assurance annuelle (€)" type="number" value={draft.assurance_cout_annuel?.toString() || ""}
+                  onChange={(v) => setDraft({ ...draft, assurance_cout_annuel: v ? Number(v) : null })} />
+                <Field label="Prochaine révision (km)" type="number" value={draft.prochaine_revision_km?.toString() || ""}
+                  onChange={(v) => setDraft({ ...draft, prochaine_revision_km: v ? Number(v) : null })} />
+                <Field label="Intervalle de révision (km)" type="number" value={draft.intervalle_revision_km?.toString() || ""}
+                  onChange={(v) => setDraft({ ...draft, intervalle_revision_km: v ? Number(v) : null })} />
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-pro-text-soft mb-1">Notes</label>
+                <label className="mb-1 block text-xs font-medium text-[#70727d]">Notes</label>
                 <textarea
                   value={draft.notes || ""}
                   onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm resize-none"
+                  className="w-full resize-none rounded-lg border border-[#eaeaee] px-3 py-2 text-sm"
                 />
               </div>
             </div>
-            <div className="px-4 py-3 border-t border-pro-border flex justify-end gap-2 bg-pro-bg-soft">
-              <button onClick={() => setDraft(null)} className="px-3 py-2 rounded-lg bg-white border border-pro-border text-sm">
+            <div className="flex justify-end gap-2 border-t border-[#eaeaee] bg-[#fbfbfc] px-4 py-3">
+              <button onClick={() => setDraft(null)} className="rounded-lg border border-[#eaeaee] bg-white px-3 py-2 text-sm">
                 Annuler
               </button>
               <button
                 onClick={save}
                 disabled={saving}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-pro-text text-white text-sm font-medium disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#14161c] px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                 Enregistrer
@@ -393,13 +456,17 @@ function FleetPage() {
           </div>
         </div>
       )}
-
-      {!canManage && (
-        <p className="text-xs text-pro-muted flex items-center gap-1.5">
-          <CheckCircle2 size={12} /> Lecture seule — seuls les administrateurs de l'organisation peuvent modifier la flotte.
-        </p>
-      )}
     </div>
+  );
+}
+
+function DocDot({ label, date }: { label: string; date: string | null }) {
+  const st = docStatus(date);
+  return (
+    <span className="flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
+      <span className={`h-1.5 w-1.5 rounded-full ${DOT_CLS[st]}`} />
+      {label}
+    </span>
   );
 }
 
@@ -408,12 +475,12 @@ function Field({ label, value, onChange, type = "text" }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-pro-text-soft mb-1">{label}</label>
+      <label className="mb-1 block text-xs font-medium text-[#70727d]">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-pro-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pro-accent/30"
+        className="w-full rounded-lg border border-[#eaeaee] px-3 py-2 text-sm outline-none focus:border-[#2f5fff]/40"
       />
     </div>
   );
