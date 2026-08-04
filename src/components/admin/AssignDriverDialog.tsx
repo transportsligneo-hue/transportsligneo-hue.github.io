@@ -226,6 +226,7 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
           id: selected,
           label: f ? f.commercial_name ?? f.legal_name : selected,
         });
+        await notifyClientAssignment(f ? f.commercial_name ?? f.legal_name : "Flotte partenaire");
       }
       onClose();
     } finally {
