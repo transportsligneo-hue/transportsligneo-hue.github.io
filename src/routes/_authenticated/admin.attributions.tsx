@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
+
 import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2, ExternalLink, Shield } from "lucide-react";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionReport } from "@/components/MissionReport";
@@ -184,16 +186,13 @@ function AdminAttributions() {
   const handleEmitFacture = async (a: Attribution) => {
     setInvoicingId(a.id);
     try {
-      // 1. Refuse si une facture existe déjà
-      const { data: existing } = await supabase
-        .from("factures")
-        .select("id, numero")
-        .eq("attribution_id", a.id)
-        .maybeSingle();
-      if (existing) {
-        toast.info("Facture déjà émise", { description: existing.numero });
+      // 1. Refuse si une facture existe déjà (y compris sur l'autre segment d'un aller-retour)
+      const basis = await resolveGroupInvoiceBasis(a.trajet_id);
+      if (basis.existing) {
+        toast.info("Facture déjà émise", { description: basis.existing.numero });
         return;
       }
+
       // 2. Charge trajet
       const { data: trajet, error: tErr } = await supabase
         .from("trajets")
@@ -232,8 +231,8 @@ function AdminAttributions() {
       trajet.client_email = clientEmail;
       trajet.client_nom = clientNom || trajet.client_nom;
 
-      const prixHT = Number(trajet.prix ?? 0) > 0 ? Number(trajet.prix) / 1.2 : 0;
-      const prixTTC = Number(trajet.prix ?? 0);
+      const prixTTC = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
+      const prixHT = prixTTC > 0 ? prixTTC / 1.2 : 0;
       const prixTVA = +(prixTTC - prixHT).toFixed(2);
       const isB2B = false; // par défaut particulier (B2B = via factures B2B flow)
 
@@ -257,9 +256,12 @@ function AdminAttributions() {
           date_mission: trajet.date_trajet,
           date_echeance: echeance.toISOString().slice(0, 10),
           mode_paiement: "Virement bancaire",
-          designation: "Prestation de convoyage automobile",
-          depart: trajet.depart,
-          arrivee: trajet.arrivee,
+          designation: basis.isGroup
+            ? "Prestation de convoyage automobile — livraison + restitution"
+            : "Prestation de convoyage automobile",
+          depart: basis.depart ?? trajet.depart,
+          arrivee: basis.arrivee ?? trajet.arrivee,
+
           prix_ht: +prixHT.toFixed(2),
           prix_tva: prixTVA,
           prix_ttc: prixTTC,
