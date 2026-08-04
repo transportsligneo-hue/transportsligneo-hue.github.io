@@ -8,6 +8,8 @@ export type FleetHeaderStat = {
 
 type Props = {
   breadcrumb: string;
+  /** Racine du fil d'Ariane (par défaut « Espace Flotte ») */
+  space?: string;
   eyebrow: string;
   title: ReactNode;
   /** Mot-clé souligné en bleu */
@@ -20,6 +22,7 @@ type Props = {
 
 export default function FleetPageHeader({
   breadcrumb,
+  space = "Espace Flotte",
   eyebrow,
   title,
   highlight,
@@ -28,12 +31,13 @@ export default function FleetPageHeader({
   actions,
   stats,
 }: Props) {
+
   return (
     <header className="fleet-header relative overflow-hidden rounded-[18px] border border-[#eaeaee] bg-white px-5 py-6 sm:px-[30px]">
       <span className="fleet-header-orb pointer-events-none absolute -right-10 -top-10 h-[140px] w-[140px] rounded-full" />
 
       <div className="mb-3.5 flex items-center gap-1.5 text-[12px] text-[#a3a4ac]">
-        Espace Flotte <span className="opacity-50">/</span>
+        {space} <span className="opacity-50">/</span>
         <span className="font-semibold text-[#14161c]">{breadcrumb}</span>
       </div>
 
@@ -85,11 +89,13 @@ export default function FleetPageHeader({
 
 export function FleetHeaderButton({
   variant = "solid",
+  accent = "violet",
   children,
   onClick,
   type = "button",
 }: {
   variant?: "solid" | "ghost";
+  accent?: "violet" | "blue";
   children: ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
@@ -100,7 +106,7 @@ export function FleetHeaderButton({
       onClick={onClick}
       className={
         variant === "solid"
-          ? "flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
+          ? `flex items-center gap-1.5 rounded-[9px] ${accent === "blue" ? "client-btn-blue" : "fleet-btn-violet"} px-4 py-2.5 text-[12.5px] font-semibold transition-colors`
           : "flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
       }
     >

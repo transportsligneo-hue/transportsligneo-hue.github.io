@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -178,11 +179,14 @@ function ClientMissions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes missions</h1>
-          <p className="text-cream/50 text-sm mt-1">{missions.length} mission{missions.length > 1 ? "s" : ""}</p>
-        </div>
+      <ClientPageHeader
+        breadcrumb="Mes missions"
+        eyebrow="Suivi des convoyages"
+        title="Mes"
+        highlight="missions"
+        subtitle={`${missions.length} mission${missions.length > 1 ? "s" : ""} enregistrée${missions.length > 1 ? "s" : ""} sur votre compte.`}
+      />
+      <div className="flex items-center justify-end flex-wrap gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           {/* View switcher */}
           <div className="inline-flex rounded border border-primary/20 bg-navy/40 p-0.5">
@@ -241,6 +245,12 @@ function ClientMissions() {
         <div className="card-premium p-10 rounded text-center">
           <Truck className="text-cream/20 mx-auto mb-3" size={36} />
           <p className="text-cream/50 text-sm">Aucune mission dans cette catégorie.</p>
+          <Link
+            to="/dashboard-client/nouvelle-reservation"
+            className="client-btn-blue mt-4 inline-flex items-center gap-2 rounded-[9px] px-4 py-2.5 text-[12.5px] font-semibold"
+          >
+            <PlusCircle size={14} /> Réserver un convoyage
+          </Link>
         </div>
       ) : view === "list" ? (
         <div className="grid gap-3">

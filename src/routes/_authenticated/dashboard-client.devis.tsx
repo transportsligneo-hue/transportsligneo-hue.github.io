@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState } from "react";
 import { Loader2, CreditCard, FileText, X, FileCheck2, Download, Receipt, PenLine, History } from "lucide-react";
 import { toast } from "sonner";
@@ -262,10 +263,13 @@ function MesFacturesEtDevis() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes devis &amp; factures</h1>
-        <p className="text-cream/60 text-sm mt-1">Historique complet — vos devis et factures restent visibles en permanence</p>
-      </div>
+      <ClientPageHeader
+        breadcrumb="Factures & devis"
+        eyebrow="Documents commerciaux"
+        title="Mes devis &"
+        highlight="factures"
+        subtitle="Historique complet — vos devis et factures restent visibles en permanence."
+      />
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-primary/15">
@@ -292,6 +296,7 @@ function MesFacturesEtDevis() {
           <div className="card-premium rounded p-8 text-center">
             <FileText className="mx-auto text-cream/30 mb-3" size={40} />
             <p className="text-cream/70">Aucun devis pour le moment.</p>
+            <p className="text-cream/50 text-xs mt-1">Vos demandes de devis apparaîtront ici dès leur création.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -372,6 +377,7 @@ function MesFacturesEtDevis() {
           <div className="card-premium rounded p-8 text-center">
             <Receipt className="mx-auto text-cream/30 mb-3" size={40} />
             <p className="text-cream/70">Aucune facture émise pour le moment.</p>
+            <p className="text-cream/50 text-xs mt-1">Une facture est générée dès qu'un convoyage est confirmé.</p>
             <p className="text-cream/50 text-xs mt-1">Les factures apparaissent ici une fois la mission terminée.</p>
           </div>
         ) : (

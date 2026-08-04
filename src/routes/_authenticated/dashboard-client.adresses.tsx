@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { FavoriteAddressesManager } from "@/components/dashboard-pro/FavoriteAddressesManager";
 import { Loader2 } from "lucide-react";
@@ -20,14 +21,13 @@ function ClientAdressesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">
-          Mes adresses favorites
-        </h1>
-        <p className="text-cream/60 text-sm mt-1">
-          Enregistrez vos adresses récurrentes pour les réutiliser en 1&nbsp;clic dans le simulateur.
-        </p>
-      </div>
+      <ClientPageHeader
+        breadcrumb="Mes adresses"
+        eyebrow="Carnet d'adresses"
+        title="Mes adresses"
+        highlight="favorites"
+        subtitle="Enregistrez vos adresses récurrentes pour les réutiliser en 1 clic dans le simulateur."
+      />
 
       <FavoriteAddressesManager
         clientUserId={user.id}
