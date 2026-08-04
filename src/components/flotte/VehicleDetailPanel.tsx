@@ -407,7 +407,7 @@ export default function VehicleDetailPanel({
                         <button
                           disabled={busy}
                           onClick={() => fileRef.current?.click()}
-                          className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-3 py-1.5 text-[12px] font-semibold transition disabled:opacity-50"
                         >
                           {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Ajouter
                         </button>
@@ -504,7 +504,7 @@ export default function VehicleDetailPanel({
                               Annuler
                             </button>
                             <button disabled={busy} onClick={saveMaintenance}
-                              className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50">
+                              className="inline-flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-3 py-1.5 text-[12px] font-semibold disabled:opacity-50">
                               {busy && <Loader2 size={13} className="animate-spin" />} Enregistrer
                             </button>
                           </div>

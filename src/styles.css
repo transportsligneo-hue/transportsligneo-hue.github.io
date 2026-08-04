@@ -3736,3 +3736,21 @@
   0%,100% { box-shadow:0 0 0 1px rgba(124,92,255,.3), 0 4px 14px rgba(124,92,255,.45), 0 0 16px rgba(124,92,255,.35); }
   50% { box-shadow:0 0 0 1px rgba(124,92,255,.5), 0 4px 18px rgba(124,92,255,.6), 0 0 26px rgba(124,92,255,.55); }
 }
+
+/* Boutons Flotte — violet néon dynamique */
+.fleet-btn-violet {
+  position: relative;
+  background: linear-gradient(120deg, #8f6cff, #7c5cff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(124,92,255,.35), 0 0 14px rgba(124,92,255,.25);
+  transition: transform .18s ease, box-shadow .25s ease, filter .2s ease;
+  animation: fleetNeonPulse 2.8s ease-in-out infinite;
+}
+.fleet-btn-violet:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(124,92,255,.5), 0 0 26px rgba(124,92,255,.45);
+}
+.fleet-btn-violet:active { transform: translateY(0); }
+.fleet-btn-violet:disabled { animation: none; opacity: .5; box-shadow: none; }

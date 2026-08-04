@@ -338,7 +338,7 @@ function GroupedMissionFlow() {
                     type="button"
                     onClick={addAdhocVehicle}
                     disabled={!adhoc.immatriculation.trim() && !adhoc.marque.trim()}
-                    className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                    className="rounded-lg fleet-btn-violet px-3 py-2 text-xs font-semibold disabled:opacity-40"
                   >
                     Ajouter à la liste
                   </button>
