@@ -676,7 +676,7 @@ function AdminMissionDetail() {
             className="mt-4"
             variant="secondary"
             icon={<ArrowLeft size={14} />}
-            onClick={() => navigate({ to: "/admin/attributions", search: {} })}
+            onClick={() => navigate({ to: "/admin/attributions", search: { trajet: undefined } })}
           >
             Retour aux attributions
           </Button>
