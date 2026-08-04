@@ -172,7 +172,7 @@ export function computeOptionSupplements(
 ): { total: number; lines: { key: OptionKey; label: string; amount: number }[] } {
   const labels: Record<OptionKey, string> = {
     recharge_electrique: "Recharge électrique",
-    plein_essence: "Plein d'essence",
+    plein_essence: "Appoint carburant",
     nettoyage: "Nettoyage véhicule",
     express: "Convoyage express",
   };
