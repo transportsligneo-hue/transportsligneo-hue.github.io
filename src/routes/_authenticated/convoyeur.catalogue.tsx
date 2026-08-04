@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,8 @@ import {
   type CatalogTrajet,
 } from "@/components/convoyeur/CatalogueMissionCard";
 import { MissionDetailSheet } from "@/components/convoyeur/MissionDetailSheet";
+import { CatalogueTrainingGate } from "@/components/convoyeur/CatalogueTrainingGate";
+import { TrainingStatusBadge } from "@/components/convoyeur/TrainingStatusBadge";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { haversineKm } from "@/lib/geo/haversine";
 
@@ -90,6 +92,7 @@ function ConvoyeurCatalogue() {
   const { user, convoyeurStatut } = useAuth();
   const validated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
   const [hasTraining, setHasTraining] = useState(false);
+  const [trainingLoaded, setTrainingLoaded] = useState(false);
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<CatalogTrajet[]>([]);
   const [myOffers, setMyOffers] = useState<Record<string, MyOffer>>({});
@@ -111,6 +114,7 @@ function ConvoyeurCatalogue() {
         const row = data as { id?: string; has_completed_training?: boolean } | null;
         setConvoyeurId(row?.id ?? null);
         setHasTraining(Boolean(row?.has_completed_training));
+        setTrainingLoaded(true);
       });
   }, [user]);
 
@@ -289,6 +293,11 @@ function ConvoyeurCatalogue() {
       ? enriched.find((e) => e.t.id === openTrajet.id)?.dist ?? null
       : null;
 
+  // Verrou formation : pas d'accès au catalogue tant que l'Académie Ligneo n'est pas validée
+  if (trainingLoaded && !hasTraining) {
+    return <CatalogueTrainingGate />;
+  }
+
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
       <div
@@ -332,9 +341,12 @@ function ConvoyeurCatalogue() {
                 une contre-offre. Trié en temps réel.
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-100">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-              Temps réel
+            <div className="flex flex-wrap items-center gap-2">
+              <TrainingStatusBadge statut="validee" />
+              <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-100">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                Temps réel
+              </div>
             </div>
           </div>
 
@@ -344,15 +356,6 @@ function ConvoyeurCatalogue() {
               Votre compte doit être validé pour candidater aux missions. Complétez
               vos documents dans l'onglet "Documents".
             </div>
-          )}
-          {validated && !hasTraining && (
-            <Link
-              to="/convoyeur/formation"
-              className="block rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 hover:bg-amber-500/15"
-            >
-              <strong>Formation obligatoire à finaliser.</strong> Terminez les
-              modules avant de postuler aux missions.
-            </Link>
           )}
 
           {/* Filtres */}

@@ -6,6 +6,7 @@ import { moduleStatus, STATUS_LABEL } from "@/lib/formation/types";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateAttestationPdf } from "@/lib/formation/attestation-pdf";
+import { TrainingStatusBadge, resolveTrainingStatut } from "@/components/convoyeur/TrainingStatusBadge";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
   head: () => ({
@@ -71,9 +72,15 @@ function FormationHome() {
   return (
     <div className="space-y-4">
       <section className="rounded-2xl overflow-hidden border border-pro-border bg-[#0B1338] text-white p-6">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-[#E7C76A] font-semibold flex items-center gap-2">
-          <GraduationCap size={14} /> Espace formation interne
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-[#E7C76A] font-semibold flex items-center gap-2">
+            <GraduationCap size={14} /> Espace formation interne
+          </p>
+          <TrainingStatusBadge
+            statut={resolveTrainingStatut(allDone, completedCount)}
+            percent={percent}
+          />
+        </div>
         <h1 className="mt-2 text-2xl font-semibold">Bienvenue {firstName} 👋</h1>
         <p className="mt-2 text-sm text-white/75 max-w-2xl leading-relaxed">
           « Cette formation, c'est ce qui garantit la même qualité de service sur chaque mission Ligneo. Elle couvre
