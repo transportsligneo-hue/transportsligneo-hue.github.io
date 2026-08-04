@@ -287,7 +287,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                 <AdminField label="Recharge électrique">
                   <input type="number" step="0.01" className={inp} value={form.sup_recharge} onChange={(e) => setForm({ ...form, sup_recharge: e.target.value })} placeholder="15" />
                 </AdminField>
-                <AdminField label="Plein d'essence">
+                <AdminField label="Appoint carburant">
                   <input type="number" step="0.01" className={inp} value={form.sup_plein} onChange={(e) => setForm({ ...form, sup_plein: e.target.value })} placeholder="10" />
                 </AdminField>
                 <AdminField label="Nettoyage">

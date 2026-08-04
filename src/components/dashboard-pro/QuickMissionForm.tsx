@@ -66,7 +66,7 @@ const ENERGIES = [
 
 const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Zap }[] = [
   { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
-  { key: "plein_essence", label: "Plein d'essence", desc: "Faire le plein avant livraison", Icon: Fuel },
+  { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
   { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
 ];
 

@@ -68,7 +68,7 @@ interface Demande {
 
 const OPTION_LABELS: Record<string, string> = {
   recharge_electrique: "⚡ Recharge électrique",
-  plein_essence: "⛽ Plein de carburant",
+  plein_essence: "⛽ Appoint carburant",
   lavage: "🧽 Lavage",
   express: "⚡ Express",
   aller_retour: "↔ Aller-retour",
