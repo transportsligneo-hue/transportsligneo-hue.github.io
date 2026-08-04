@@ -360,7 +360,7 @@ const card = {
   backgroundColor: '#ffffff',
   borderRadius: '16px',
   overflow: 'hidden' as const,
-  boxShadow: '0 8px 24px rgba(15,21,38,0.06)',
+  border: `1px solid ${CARD_BORDER}`,
   padding: 0,
 }
 
