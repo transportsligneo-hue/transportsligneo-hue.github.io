@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,10 +49,13 @@ function ClientDocuments() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mes documents</h1>
-        <p className="text-cream/50 text-sm mt-1">Factures, attestations et photos d'état des lieux</p>
-      </div>
+      <ClientPageHeader
+        breadcrumb="Mes documents"
+        eyebrow="Pièces & justificatifs"
+        title="Mes"
+        highlight="documents"
+        subtitle="Factures, attestations et photos d'état des lieux de vos convoyages."
+      />
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,13 +125,14 @@ function ClientProfil() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Mon profil</h1>
-          <p className="text-cream/50 text-sm mt-1">Gérez vos informations personnelles et votre mot de passe</p>
-        </div>
-        <PushNotificationToggle />
-      </div>
+      <ClientPageHeader
+        breadcrumb="Mon profil"
+        eyebrow="Compte & sécurité"
+        title="Mon"
+        highlight="profil"
+        subtitle="Gérez vos informations personnelles et votre mot de passe."
+        actions={<PushNotificationToggle />}
+      />
 
       {/* Profile */}
       <form onSubmit={saveProfile} className="card-premium p-6 rounded space-y-5">

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,12 +36,13 @@ function NouvelleReservation() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl text-primary tracking-[0.1em] uppercase">Devis instantané</h1>
-        <p className="text-cream/50 text-sm mt-1">
-          Estimateur — vos coordonnées sont déjà renseignées.
-        </p>
-      </div>
+      <ClientPageHeader
+        breadcrumb="Nouvelle réservation"
+        eyebrow="Devis instantané"
+        title="Nouvelle"
+        highlight="réservation"
+        subtitle="Estimateur en ligne — vos coordonnées sont déjà renseignées."
+      />
       {/* Pas de wrapper card-premium : le DevisGenerator a son propre fond navy
           et le wrapping écrasait le contraste sur le shell client lumineux. */}
       <DevisGenerator
