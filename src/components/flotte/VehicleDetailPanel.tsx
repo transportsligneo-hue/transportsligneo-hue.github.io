@@ -1,0 +1,398 @@
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  X, FileText, ShieldCheck, Wrench, Loader2, Gauge, MapPin,
+} from "lucide-react";
+
+export type FleetVehicle = {
+  id: string;
+  organization_id: string;
+  site_id: string | null;
+  vin: string | null;
+  immatriculation: string | null;
+  marque: string | null;
+  modele: string | null;
+  energie: string | null;
+  type_vehicule: string | null;
+  couleur: string | null;
+  kilometrage: number | null;
+  statut: "actif" | "en_mission" | "indispo" | "archive";
+  notes: string | null;
+  archived_at: string | null;
+  created_at: string;
+  assurance_expire_le: string | null;
+  controle_technique_expire_le: string | null;
+  carte_grise_expire_le: string | null;
+  mise_en_circulation: string | null;
+  assurance_cout_annuel: number | null;
+  prochaine_revision_km: number | null;
+  intervalle_revision_km: number | null;
+};
+
+type Maintenance = {
+  id: string;
+  effectue_le: string;
+  kilometrage: number | null;
+  type_intervention: string;
+  cout: number | null;
+  garage: string | null;
+  notes: string | null;
+};
+
+type HistoryRow = {
+  id: string;
+  occurred_at: string;
+  type: string;
+  from_address: string | null;
+  to_address: string | null;
+  mission: { numero: string; ville_depart: string; ville_arrivee: string; prix_total: number; statut: string } | null;
+};
+
+export type DocStatus = "ok" | "warn" | "expired" | "unknown";
+
+export function docStatus(date: string | null | undefined): DocStatus {
+  if (!date) return "unknown";
+  const d = new Date(date).getTime();
+  const now = Date.now();
+  if (Number.isNaN(d)) return "unknown";
+  if (d < now) return "expired";
+  if (d - now < 30 * 24 * 3600 * 1000) return "warn";
+  return "ok";
+}
+
+export function worstDocStatus(v: FleetVehicle): DocStatus {
+  const all = [v.assurance_expire_le, v.controle_technique_expire_le, v.carte_grise_expire_le].map(docStatus);
+  if (all.includes("expired")) return "expired";
+  if (all.includes("warn")) return "warn";
+  if (all.every((s) => s === "unknown")) return "unknown";
+  return "ok";
+}
+
+const fmtDate = (d?: string | null) =>
+  d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const fmtEur = (n: number) =>
+  n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+
+const TABS = [
+  { id: "general", label: "Général" },
+  { id: "documents", label: "Documents" },
+  { id: "entretien", label: "Entretien & TCO" },
+  { id: "historique", label: "Historique" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
+
+export default function VehicleDetailPanel({
+  vehicle,
+  siteName,
+  onClose,
+}: {
+  vehicle: FleetVehicle | null;
+  siteName?: string | null;
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<TabId>("general");
+  const [maint, setMaint] = useState<Maintenance[]>([]);
+  const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { setTab("general"); }, [vehicle?.id]);
+
+  useEffect(() => {
+    if (!vehicle) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [m, h] = await Promise.all([
+        supabase.from("vehicle_maintenances").select("*")
+          .eq("vehicle_id", vehicle.id).order("effectue_le", { ascending: false }),
+        supabase.from("vehicle_movements")
+          .select("id, occurred_at, type, from_address, to_address, mission:missions(numero, ville_depart, ville_arrivee, prix_total, statut)")
+          .eq("vehicle_id", vehicle.id).order("occurred_at", { ascending: false }).limit(30),
+      ]);
+      if (cancelled) return;
+      setMaint((m.data ?? []) as Maintenance[]);
+      setHistory((h.data ?? []) as unknown as HistoryRow[]);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [vehicle?.id]);
+
+  const year = new Date().getFullYear();
+
+  const tco = useMemo(() => {
+    const entretien = maint
+      .filter((m) => new Date(m.effectue_le).getFullYear() === year)
+      .reduce((s, m) => s + Number(m.cout ?? 0), 0);
+    const assurance = Number(vehicle?.assurance_cout_annuel ?? 0);
+    const convoyage = history
+      .filter((h) => h.mission && new Date(h.occurred_at).getFullYear() === year)
+      .reduce((s, h) => s + Number(h.mission?.prix_total ?? 0), 0);
+    const total = entretien + assurance + convoyage;
+    const km = vehicle?.kilometrage ?? 0;
+    return { entretien, assurance, convoyage, total, parKm: km > 0 ? total / km : 0 };
+  }, [maint, history, vehicle, year]);
+
+  const gauge = useMemo(() => {
+    const km = vehicle?.kilometrage ?? 0;
+    const next = vehicle?.prochaine_revision_km ?? null;
+    const interval = vehicle?.intervalle_revision_km ?? 20000;
+    if (!next || !km) return null;
+    const start = next - interval;
+    const pct = Math.max(0, Math.min(100, ((km - start) / interval) * 100));
+    return { pct, next, remaining: next - km };
+  }, [vehicle]);
+
+  const open = !!vehicle;
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        className={`fixed inset-0 z-50 bg-[#14161c]/40 transition-opacity duration-250 ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      />
+      <aside
+        className="fixed top-0 right-0 z-[51] h-screen w-full sm:w-[600px] max-w-full overflow-y-auto border-l border-[#eaeaee] bg-white shadow-[-24px_0_60px_rgba(20,22,28,0.12)] transition-transform duration-300 ease-[cubic-bezier(.2,.9,.25,1)]"
+        style={{ transform: open ? "translateX(0)" : "translateX(105%)" }}
+        aria-hidden={!open}
+      >
+        {vehicle && (
+          <>
+            <header className="px-7 pt-6 pb-5 border-b border-[#eaeaee]">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#a3a4ac] mb-2.5">
+                    Fiche véhicule
+                  </p>
+                  <h2 className="text-xl font-extrabold tracking-[-0.02em] text-[#14161c] mb-2">
+                    {[vehicle.marque, vehicle.modele].filter(Boolean).join(" ") || "Véhicule"}
+                  </h2>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-[11px] text-[#a3a4ac]">{vehicle.immatriculation || "—"}</span>
+                    <StatusPill statut={vehicle.statut} />
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="h-8 w-8 rounded-[9px] border border-[#eaeaee] bg-white text-[#70727d] flex items-center justify-center transition hover:bg-[#14161c] hover:text-white"
+                  aria-label="Fermer"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </header>
+
+            <nav className="sticky top-0 z-[2] flex px-7 border-b border-[#eaeaee] bg-white">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`relative mr-6 py-3.5 text-[12.5px] font-semibold transition-colors ${tab === t.id ? "text-[#14161c]" : "text-[#a3a4ac] hover:text-[#70727d]"}`}
+                >
+                  {t.label}
+                  <span
+                    className={`absolute -bottom-px left-0 h-0.5 w-full bg-[#14161c] transition-transform duration-200 ${tab === t.id ? "scale-x-100" : "scale-x-0"}`}
+                  />
+                </button>
+              ))}
+            </nav>
+
+            <div key={tab} className="px-7 pt-6 pb-9 animate-[fleetFade_.25s_ease]">
+              {tab === "general" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Marque / Modèle" value={[vehicle.marque, vehicle.modele].filter(Boolean).join(" ") || "—"} />
+                  <Field label="Immatriculation" value={vehicle.immatriculation || "—"} mono />
+                  <Field label="VIN" value={vehicle.vin || "—"} mono />
+                  <Field label="Énergie" value={vehicle.energie || "—"} />
+                  <Field label="Site de rattachement" value={siteName || "—"} />
+                  <Field label="Mise en circulation" value={fmtDate(vehicle.mise_en_circulation)} />
+                  <Field
+                    label="Kilométrage actuel"
+                    value={vehicle.kilometrage != null ? `${vehicle.kilometrage.toLocaleString("fr-FR")} km` : "—"}
+                  />
+                  <Field label="Couleur" value={vehicle.couleur || "—"} />
+                  {vehicle.notes && (
+                    <div className="col-span-2">
+                      <Field label="Notes" value={vehicle.notes} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {tab === "documents" && (
+                <div>
+                  <DocRow name="Assurance" date={vehicle.assurance_expire_le} icon={<ShieldCheck size={15} />} />
+                  <DocRow name="Contrôle technique" date={vehicle.controle_technique_expire_le} icon={<Wrench size={15} />} />
+                  <DocRow name="Carte grise" date={vehicle.carte_grise_expire_le} icon={<FileText size={15} />} />
+                  <p className="mt-4 text-[11.5px] text-[#a3a4ac]">
+                    Les dates se renseignent depuis le formulaire d'édition du véhicule.
+                  </p>
+                </div>
+              )}
+
+              {tab === "entretien" && (
+                <div>
+                  {loading ? (
+                    <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
+                  ) : (
+                    <>
+                      <p className="mb-1 text-[11px] font-medium text-[#a3a4ac]">Historique des interventions</p>
+                      {maint.length === 0 ? (
+                        <p className="py-3 text-[13px] text-[#70727d]">Aucune intervention enregistrée.</p>
+                      ) : (
+                        maint.map((m) => (
+                          <div key={m.id} className="flex gap-3 border-b border-[#eaeaee] py-3.5">
+                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#16a34a]" />
+                            <div className="min-w-0">
+                              <b className="text-[13px] font-semibold text-[#14161c]">{m.type_intervention}</b>
+                              <p className="mt-0.5 text-[11.5px] text-[#70727d]">
+                                {fmtDate(m.effectue_le)}
+                                {m.kilometrage != null && ` · ${m.kilometrage.toLocaleString("fr-FR")} km`}
+                                {m.cout != null && ` · ${fmtEur(Number(m.cout))}`}
+                                {m.garage && ` · ${m.garage}`}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+
+                      {gauge && (
+                        <div className="mt-6">
+                          <p className="flex items-center gap-1.5 text-[11px] font-medium text-[#a3a4ac]">
+                            <Gauge size={12} /> Prochaine révision à {gauge.next.toLocaleString("fr-FR")} km
+                          </p>
+                          <div className="mt-2.5 h-1.5 overflow-hidden rounded bg-[#eaeaee]">
+                            <div
+                              className="h-full rounded bg-[#d97706] transition-[width] duration-700"
+                              style={{ width: `${gauge.pct}%` }}
+                            />
+                          </div>
+                          <p className="mt-1.5 text-[11.5px] text-[#70727d]">
+                            {gauge.remaining > 0
+                              ? `${gauge.remaining.toLocaleString("fr-FR")} km restants`
+                              : "Révision dépassée"}
+                          </p>
+                        </div>
+                      )}
+
+                      <p className="mt-7 mb-2 text-[11px] font-medium text-[#a3a4ac]">
+                        Coût total de possession — {year}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <TcoItem k="Entretien cumulé" v={fmtEur(tco.entretien)} />
+                        <TcoItem k="Assurance annuelle" v={fmtEur(tco.assurance)} />
+                        <TcoItem k="Coûts de convoyage" v={fmtEur(tco.convoyage)} />
+                        <TcoItem
+                          k="Coût au kilomètre"
+                          v={tco.parKm ? `${tco.parKm.toFixed(3).replace(".", ",")} €` : "—"}
+                        />
+                      </div>
+                      <div className="mt-3.5 rounded-[14px] border-[1.5px] border-[#14161c] p-5 text-center">
+                        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-[#a3a4ac]">
+                          TCO consolidé {year}
+                        </p>
+                        <p className="text-[30px] font-extrabold tracking-[-0.02em] text-[#14161c]">
+                          {fmtEur(tco.total)}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {tab === "historique" && (
+                <div>
+                  {loading ? (
+                    <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
+                  ) : history.length === 0 ? (
+                    <p className="text-[13px] text-[#70727d]">Aucun convoyage enregistré pour ce véhicule.</p>
+                  ) : (
+                    history.map((h) => (
+                      <div key={h.id} className="flex gap-3 border-b border-[#eaeaee] py-3.5">
+                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#2f5fff]" />
+                        <div className="min-w-0">
+                          <b className="text-[13px] font-semibold text-[#14161c]">
+                            {h.mission?.numero || h.type}
+                          </b>
+                          <p className="mt-0.5 flex items-center gap-1 text-[11.5px] text-[#70727d]">
+                            <MapPin size={11} />
+                            {h.mission
+                              ? `${h.mission.ville_depart} → ${h.mission.ville_arrivee}`
+                              : `${h.from_address || "—"} → ${h.to_address || "—"}`}
+                          </p>
+                          <p className="mt-0.5 text-[11.5px] text-[#a3a4ac]">
+                            {fmtDate(h.occurred_at)}
+                            {h.mission ? ` · ${fmtEur(Number(h.mission.prix_total))}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </aside>
+    </>
+  );
+}
+
+function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <span className="mb-1.5 block text-[11px] font-medium text-[#a3a4ac]">{label}</span>
+      <p className={`text-sm font-semibold text-[#14161c] break-words ${mono ? "font-mono text-[13px]" : ""}`}>{value}</p>
+    </div>
+  );
+}
+
+function TcoItem({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="rounded-xl border border-[#eaeaee] p-3.5">
+      <p className="mb-1.5 text-[11px] text-[#a3a4ac]">{k}</p>
+      <p className="text-[17px] font-bold text-[#14161c]">{v}</p>
+    </div>
+  );
+}
+
+function DocRow({ name, date, icon }: { name: string; date: string | null; icon: React.ReactNode }) {
+  const st = docStatus(date);
+  const badge =
+    st === "ok"
+      ? { cls: "bg-[#e9f7ee] text-[#16a34a]", label: "À jour" }
+      : st === "warn"
+        ? { cls: "bg-[#fef3e2] text-[#d97706]", label: "À renouveler" }
+        : st === "expired"
+          ? { cls: "bg-[#fdeaea] text-[#dc2626]", label: "Expiré" }
+          : { cls: "bg-[#f2f2f5] text-[#70727d]", label: "Non renseigné" };
+  return (
+    <div className={`mb-2 flex items-center justify-between rounded-xl border p-3.5 ${st === "warn" ? "border-[#f3d9b0]" : st === "expired" ? "border-[#f3bcbc]" : "border-[#eaeaee]"}`}>
+      <div className="flex items-center gap-3">
+        <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] border border-[#eaeaee] bg-[#fbfbfc] text-[#70727d]">
+          {icon}
+        </span>
+        <div>
+          <p className="text-[13px] font-semibold text-[#14161c]">{name}</p>
+          <p className="mt-0.5 text-[11.5px] text-[#70727d]">Expire le {fmtDate(date)}</p>
+        </div>
+      </div>
+      <span className={`rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold ${badge.cls}`}>{badge.label}</span>
+    </div>
+  );
+}
+
+export function StatusPill({ statut }: { statut: FleetVehicle["statut"] }) {
+  const map: Record<FleetVehicle["statut"], { label: string; dot: string }> = {
+    actif: { label: "Disponible", dot: "bg-[#16a34a]" },
+    en_mission: { label: "En mission", dot: "bg-[#2f5fff]" },
+    indispo: { label: "Immobilisé", dot: "bg-[#dc2626]" },
+    archive: { label: "Archivé", dot: "bg-[#a3a4ac]" },
+  };
+  const s = map[statut];
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#eaeaee] bg-[#fbfbfc] px-2.5 py-1 text-[11px] font-semibold text-[#14161c]">
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  );
+}

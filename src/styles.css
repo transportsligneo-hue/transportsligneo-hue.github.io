@@ -3707,3 +3707,14 @@
 .a6-photo { overflow: hidden; border-radius: 12px; border: 1px solid var(--a6-border); }
 .a6-photo img { transition: transform .3s ease; }
 .a6-photo:hover img { transform: scale(1.08); }
+
+/* --- Parc véhicules (Espace Flotte) --- */
+@keyframes fleetFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fleetGlowPulse { 0%, 100% { opacity: .25; transform: scale(.85); } 50% { opacity: .65; transform: scale(1.35); } }
+.fleet-dot-warn { position: relative; z-index: 1; }
+.fleet-dot-warn::before {
+  content: ""; position: absolute; inset: -6px; border-radius: 9999px;
+  background: #d97706; filter: blur(4px); opacity: .5; z-index: -1;
+  animation: fleetGlowPulse 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .fleet-dot-warn::before { animation: none; } }

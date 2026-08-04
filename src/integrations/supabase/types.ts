@@ -3958,6 +3958,53 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_maintenances: {
+        Row: {
+          cout: number | null
+          created_at: string
+          effectue_le: string
+          garage: string | null
+          id: string
+          kilometrage: number | null
+          notes: string | null
+          type_intervention: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          cout?: number | null
+          created_at?: string
+          effectue_le?: string
+          garage?: string | null
+          id?: string
+          kilometrage?: number | null
+          notes?: string | null
+          type_intervention?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          cout?: number | null
+          created_at?: string
+          effectue_le?: string
+          garage?: string | null
+          id?: string
+          kilometrage?: number | null
+          notes?: string | null
+          type_intervention?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_maintenances_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_movements: {
         Row: {
           created_at: string
@@ -4029,16 +4076,23 @@ export type Database = {
       vehicles: {
         Row: {
           archived_at: string | null
+          assurance_cout_annuel: number | null
+          assurance_expire_le: string | null
+          carte_grise_expire_le: string | null
+          controle_technique_expire_le: string | null
           couleur: string | null
           created_at: string
           energie: string | null
           id: string
           immatriculation: string | null
+          intervalle_revision_km: number | null
           kilometrage: number | null
           marque: string | null
+          mise_en_circulation: string | null
           modele: string | null
           notes: string | null
           organization_id: string
+          prochaine_revision_km: number | null
           site_id: string | null
           statut: string
           type_vehicule: string | null
@@ -4047,16 +4101,23 @@ export type Database = {
         }
         Insert: {
           archived_at?: string | null
+          assurance_cout_annuel?: number | null
+          assurance_expire_le?: string | null
+          carte_grise_expire_le?: string | null
+          controle_technique_expire_le?: string | null
           couleur?: string | null
           created_at?: string
           energie?: string | null
           id?: string
           immatriculation?: string | null
+          intervalle_revision_km?: number | null
           kilometrage?: number | null
           marque?: string | null
+          mise_en_circulation?: string | null
           modele?: string | null
           notes?: string | null
           organization_id: string
+          prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
           type_vehicule?: string | null
@@ -4065,16 +4126,23 @@ export type Database = {
         }
         Update: {
           archived_at?: string | null
+          assurance_cout_annuel?: number | null
+          assurance_expire_le?: string | null
+          carte_grise_expire_le?: string | null
+          controle_technique_expire_le?: string | null
           couleur?: string | null
           created_at?: string
           energie?: string | null
           id?: string
           immatriculation?: string | null
+          intervalle_revision_km?: number | null
           kilometrage?: number | null
           marque?: string | null
+          mise_en_circulation?: string | null
           modele?: string | null
           notes?: string | null
           organization_id?: string
+          prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
           type_vehicule?: string | null
