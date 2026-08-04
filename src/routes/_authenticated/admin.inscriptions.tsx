@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";

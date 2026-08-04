@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, Building2, Plus, Trash2, UserCircle2 } from "lucide-react";

@@ -3,6 +3,7 @@
  * Filtre par type, marquage lu/non-lu, lien direct vers l'entité.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {

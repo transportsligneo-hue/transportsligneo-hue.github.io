@@ -3,6 +3,7 @@
  * Onglets : Suivi convoyeurs · Modules (édition contenu / checklist / quiz).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
