@@ -72,6 +72,10 @@ export interface LigneoEmailShellProps {
   clientName?: string | null
   /** Thème d'espace client — colorise le chip sous l'en-tête. */
   accountTheme?: 'flotte' | 'b2b' | 'default' | null
+  /** Couleur de l'étiquette (ex: alerte orange). */
+  taglineTone?: 'blue' | 'warn'
+  /** Petit texte discret affiché sous les CTA (mentions, sécurité). */
+  footnote?: React.ReactNode
 }
 
 export function LigneoEmailShell({
