@@ -138,6 +138,7 @@ function RootComponent() {
             <MobileNavbar />
             <Outlet />
             <PublicMobileBottomNav />
+            <AssistantIaWidget />
             <PwaProvider />
             <PwaSplash />
             <BiometricEnrollPrompt />
