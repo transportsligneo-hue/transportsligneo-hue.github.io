@@ -879,6 +879,19 @@ function AdminMissionDetail() {
         onGroupChanged={fetchAll}
       />
 
+      <MissionPriceCard
+        trajetId={trajet.id}
+        groupId={trajet.mission_group_id}
+        legType={trajet.leg_type}
+        currentPrix={trajet.prix ?? null}
+        currentPrixConvoyeur={trajet.prix_convoyeur ?? trajet.tarif_convoyeur ?? null}
+        onSaved={({ prix, prixConvoyeur }) =>
+          setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
+        }
+      />
+
+
+
       {/* === Timeline progression === */}
       <Card>
         <h3 className="text-sm font-semibold text-pro-text-soft uppercase tracking-wider mb-4">
