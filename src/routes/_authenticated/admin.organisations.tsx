@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, Building2, Plus, Trash2, UserCircle2 } from "lucide-react";
@@ -209,22 +210,19 @@ function AdminOrganisations() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-pro-accent/10 flex items-center justify-center">
-            <Building2 className="text-pro-accent" size={22} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Organisations & clients</h1>
-            <p className="text-sm text-pro-muted">
-              Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro.
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} className="gap-2">
-          <Plus size={16} /> Nouvelle organisation
-        </Button>
-      </header>
+      <AdminSectionHeader
+        breadcrumb="Organisations"
+        eyebrow="Comptes professionnels"
+        title="Organisations &"
+        highlight="clients"
+        subtitle="Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro."
+        actions={
+          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+            <Plus size={16} /> Nouvelle organisation
+          </Button>
+        }
+      />
+
 
       <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">

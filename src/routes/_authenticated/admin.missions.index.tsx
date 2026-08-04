@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Search, Route as RouteIcon, ArrowRight } from "lucide-react";
@@ -236,20 +237,21 @@ function AdminMissionsUnified() {
 
   return (
     <div className="adm6">
-      <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
-        <div>
-          <h1 className="a6-title">Missions</h1>
-          <p className="a6-sub mt-1">
-            Demandes, trajets et attributions réunis dans un seul flux — {rows.length} mission{rows.length > 1 ? "s" : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <CreateTestMissionButton onCreated={fetchAll} />
-          <button onClick={fetchAll} className="w-9 h-9 rounded-lg border border-[var(--a6-border)] bg-white flex items-center justify-center text-[var(--a6-muted)] hover:text-[var(--a6-blue)]">
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          </button>
-        </div>
-      </div>
+      <AdminSectionHeader
+        breadcrumb="Missions"
+        eyebrow="Flux opérationnel"
+        title="Missions"
+        subtitle={`Demandes, trajets et attributions réunis dans un seul flux — ${rows.length} mission${rows.length > 1 ? "s" : ""}`}
+        actions={
+          <>
+            <CreateTestMissionButton onCreated={fetchAll} />
+            <button onClick={fetchAll} className="w-9 h-9 rounded-lg border border-[#eaeaee] bg-white flex items-center justify-center text-[#70727d] hover:text-[#2f5fff]">
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            </button>
+          </>
+        }
+      />
+
 
       {/* Filtres */}
       <div className="flex items-center gap-2 flex-wrap mb-4">

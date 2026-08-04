@@ -3,6 +3,7 @@
  * Onglets : Suivi convoyeurs · Modules (édition contenu / checklist / quiz).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,12 +78,14 @@ function AdminFormation() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-pro-border bg-white p-5 shadow-pro-card">
-        <p className="text-[11px] uppercase tracking-wider text-pro-muted font-semibold">Administration</p>
-        <h1 className="text-2xl font-semibold text-pro-text mt-1 flex items-center gap-2">
-          <GraduationCap size={22} className="text-pro-accent" /> Formation convoyeurs
-        </h1>
-      </div>
+      <AdminSectionHeader
+        breadcrumb="Formation"
+        eyebrow="Académie Ligneo"
+        title="Formation"
+        highlight="convoyeurs"
+        subtitle="Suivi des modules, progression et validation des convoyeurs."
+      />
+
 
       <div className="flex gap-1 border-b border-pro-border overflow-x-auto">
         {(

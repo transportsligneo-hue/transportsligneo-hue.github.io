@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, Flame, ThermometerSun, Snowflake, Building2, Truck } from "lucide-react";
@@ -87,12 +88,14 @@ function AdminB2BLeads() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-pro-text">CRM B2B — Leads flotte</h1>
-        <p className="mt-1 text-sm text-pro-muted">
-          Pipeline commercial des partenariats flotte. Triés par score de qualification.
-        </p>
-      </div>
+      <AdminSectionHeader
+        breadcrumb="Leads B2B"
+        eyebrow="Pipeline commercial"
+        title="CRM B2B —"
+        highlight="Leads flotte"
+        subtitle="Pipeline commercial des partenariats flotte. Triés par score de qualification."
+      />
+
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">

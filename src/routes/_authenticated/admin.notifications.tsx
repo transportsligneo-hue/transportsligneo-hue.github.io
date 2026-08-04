@@ -3,6 +3,7 @@
  * Filtre par type, marquage lu/non-lu, lien direct vers l'entité.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -103,20 +104,21 @@ function AdminNotifications() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold text-pro-text flex items-center gap-2">
-            <Bell size={22} className="text-pro-gold" /> Notifications
-          </h1>
-          <p className="text-sm text-pro-muted mt-1">Toutes les actions importantes de la plateforme.</p>
-        </div>
-        <button
-          onClick={markAllRead}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-pro-bg-soft hover:bg-pro-border text-pro-text transition"
-        >
-          <CheckCheck size={14} /> Tout marquer comme lu
-        </button>
-      </div>
+      <AdminSectionHeader
+        breadcrumb="Notifications"
+        eyebrow="Alertes plateforme"
+        title="Notifications"
+        subtitle="Toutes les actions importantes de la plateforme."
+        actions={
+          <button
+            onClick={markAllRead}
+            className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
+          >
+            <CheckCheck size={14} /> Tout marquer comme lu
+          </button>
+        }
+      />
+
 
       <div className="flex items-center gap-2 flex-wrap bg-white border border-pro-border rounded-xl p-2">
         <Filter size={14} className="text-pro-muted ml-2" />

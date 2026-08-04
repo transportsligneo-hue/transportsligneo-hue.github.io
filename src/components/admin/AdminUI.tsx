@@ -1,5 +1,6 @@
 import { type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type ButtonHTMLAttributes } from "react";
 import { Search, X } from "lucide-react";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 
 /* ============= PageHeader ============= */
 export function PageHeader({
@@ -7,25 +8,34 @@ export function PageHeader({
   subtitle,
   actions,
   logo,
+  eyebrow,
 }: {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
   logo?: ReactNode;
+  eyebrow?: string;
 }) {
   return (
-    <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-      <div className="flex items-start gap-3 min-w-0">
-        {logo && <div className="shrink-0 pt-0.5">{logo}</div>}
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold text-pro-text truncate">{title}</h1>
-          {subtitle && <p className="text-pro-muted text-sm mt-1">{subtitle}</p>}
-        </div>
-      </div>
-      {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
-    </div>
+    <AdminSectionHeader
+      breadcrumb={title}
+      eyebrow={eyebrow ?? "Espace administration"}
+      title={
+        logo ? (
+          <span className="inline-flex items-center gap-3 align-middle">
+            <span className="shrink-0">{logo}</span>
+            {title}
+          </span>
+        ) : (
+          title
+        )
+      }
+      subtitle={subtitle}
+      actions={actions}
+    />
   );
 }
+
 
 /* ============= Card ============= */
 export function Card({
