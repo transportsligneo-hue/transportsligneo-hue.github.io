@@ -8,6 +8,8 @@ export type FleetHeaderStat = {
 
 type Props = {
   breadcrumb: string;
+  /** Racine du fil d'Ariane (par défaut « Espace Flotte ») */
+  space?: string;
   eyebrow: string;
   title: ReactNode;
   /** Mot-clé souligné en bleu */
@@ -20,6 +22,7 @@ type Props = {
 
 export default function FleetPageHeader({
   breadcrumb,
+  space = "Espace Flotte",
   eyebrow,
   title,
   highlight,
@@ -28,6 +31,7 @@ export default function FleetPageHeader({
   actions,
   stats,
 }: Props) {
+
   return (
     <header className="fleet-header relative overflow-hidden rounded-[18px] border border-[#eaeaee] bg-white px-5 py-6 sm:px-[30px]">
       <span className="fleet-header-orb pointer-events-none absolute -right-10 -top-10 h-[140px] w-[140px] rounded-full" />
