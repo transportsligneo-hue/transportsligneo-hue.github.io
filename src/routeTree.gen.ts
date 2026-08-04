@@ -121,6 +121,7 @@ import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardProNouvelleMissionIndexRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.index'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
+import { Route as AuthenticatedConvoyeurFormationIndexRouteImport } from './routes/_authenticated/convoyeur.formation.index'
 import { Route as AuthenticatedAdminMissionsIndexRouteImport } from './routes/_authenticated/admin.missions.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -772,6 +773,12 @@ const AuthenticatedDashboardClientMissionsIndexRoute =
     path: '/missions/',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedConvoyeurFormationIndexRoute =
+  AuthenticatedConvoyeurFormationIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
 const AuthenticatedAdminMissionsIndexRoute =
   AuthenticatedAdminMissionsIndexRouteImport.update({
     id: '/missions/',
@@ -968,7 +975,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
+  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1029,6 +1036,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
+  '/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
@@ -1097,7 +1105,6 @@ export interface FileRoutesByTo {
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1156,6 +1163,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions': typeof AuthenticatedAdminMissionsIndexRoute
+  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
@@ -1232,7 +1240,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/_authenticated/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/_authenticated/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
+  '/_authenticated/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1293,6 +1301,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
+  '/_authenticated/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
@@ -1430,6 +1439,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/missions/'
+    | '/convoyeur/formation/'
     | '/dashboard-client/missions/'
     | '/dashboard-pro/missions/'
     | '/dashboard-pro/nouvelle-mission/'
@@ -1498,7 +1508,6 @@ export interface FileRouteTypes {
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
     | '/convoyeur/finances'
-    | '/convoyeur/formation'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
@@ -1557,6 +1566,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/missions'
+    | '/convoyeur/formation'
     | '/dashboard-client/missions'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-mission'
@@ -1693,6 +1703,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/admin/missions/'
+    | '/_authenticated/convoyeur/formation/'
     | '/_authenticated/dashboard-client/missions/'
     | '/_authenticated/dashboard-pro/missions/'
     | '/_authenticated/dashboard-pro/nouvelle-mission/'
@@ -2534,6 +2545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/convoyeur/formation/': {
+      id: '/_authenticated/convoyeur/formation/'
+      path: '/'
+      fullPath: '/convoyeur/formation/'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationIndexRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
     '/_authenticated/admin/missions/': {
       id: '/_authenticated/admin/missions/'
       path: '/missions'
@@ -2820,13 +2838,28 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedConvoyeurFormationRouteChildren {
+  AuthenticatedConvoyeurFormationIndexRoute: typeof AuthenticatedConvoyeurFormationIndexRoute
+}
+
+const AuthenticatedConvoyeurFormationRouteChildren: AuthenticatedConvoyeurFormationRouteChildren =
+  {
+    AuthenticatedConvoyeurFormationIndexRoute:
+      AuthenticatedConvoyeurFormationIndexRoute,
+  }
+
+const AuthenticatedConvoyeurFormationRouteWithChildren =
+  AuthenticatedConvoyeurFormationRoute._addFileChildren(
+    AuthenticatedConvoyeurFormationRouteChildren,
+  )
+
 interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurCatalogueRoute: typeof AuthenticatedConvoyeurCatalogueRoute
   AuthenticatedConvoyeurDisponibilitesRoute: typeof AuthenticatedConvoyeurDisponibilitesRoute
   AuthenticatedConvoyeurDisponiblesRoute: typeof AuthenticatedConvoyeurDisponiblesRoute
   AuthenticatedConvoyeurDocumentsRoute: typeof AuthenticatedConvoyeurDocumentsRoute
   AuthenticatedConvoyeurFinancesRoute: typeof AuthenticatedConvoyeurFinancesRoute
-  AuthenticatedConvoyeurFormationRoute: typeof AuthenticatedConvoyeurFormationRoute
+  AuthenticatedConvoyeurFormationRoute: typeof AuthenticatedConvoyeurFormationRouteWithChildren
   AuthenticatedConvoyeurHistoriqueRoute: typeof AuthenticatedConvoyeurHistoriqueRoute
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
   AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
@@ -2842,7 +2875,8 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
       AuthenticatedConvoyeurDisponiblesRoute,
     AuthenticatedConvoyeurDocumentsRoute: AuthenticatedConvoyeurDocumentsRoute,
     AuthenticatedConvoyeurFinancesRoute: AuthenticatedConvoyeurFinancesRoute,
-    AuthenticatedConvoyeurFormationRoute: AuthenticatedConvoyeurFormationRoute,
+    AuthenticatedConvoyeurFormationRoute:
+      AuthenticatedConvoyeurFormationRouteWithChildren,
     AuthenticatedConvoyeurHistoriqueRoute:
       AuthenticatedConvoyeurHistoriqueRoute,
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
