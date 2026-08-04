@@ -22,7 +22,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  AdminPageHeader,
   AdminBadge,
   AdminSection,
   AdminEmpty,
@@ -268,20 +267,11 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6 adm6">
-      <AdminPageHeader
-        eyebrow="Centre de contrôle"
-        title="Tableau de bord"
-        subtitle="Vue temps réel de l'activité Transports Ligneo"
-        status={
-          <span className="inline-flex items-center gap-2 text-xs text-[color:var(--admin-muted)]">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            Données en direct
-          </span>
-        }
-      />
+      <div className="mb-6 space-y-1">
+        <h1 className="text-xl font-semibold text-[color:var(--admin-text)]">Tableau de bord</h1>
+        <p className="text-sm text-[color:var(--admin-muted)]">Vue temps réel de l'activité Transports Ligneo</p>
+      </div>
+
 
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">

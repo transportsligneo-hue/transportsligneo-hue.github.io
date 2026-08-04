@@ -7,7 +7,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Loader2, Check, AlertCircle } from "lucide-react";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import { useAiSettings } from "@/lib/ai/context";
 import { AI_CAPABILITIES, type AiCapability, type AssistanceLevel } from "@/lib/ai/types";
 import { updateAiSettings, getAiUsageStats, type AiUsageStats } from "@/lib/ai/settings.functions";
@@ -61,17 +61,13 @@ function AiSettingsPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <header className="flex items-center gap-4">
-          <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-900 shadow-lg">
-            <Sparkles className="h-6 w-6" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-serif font-semibold text-slate-900">Paramètres IA</h1>
-            <p className="text-sm text-slate-600">
-              Activez ou désactivez chaque capacité individuellement. Les changements sont appliqués immédiatement.
-            </p>
-          </div>
-        </header>
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold text-slate-900">Paramètres IA</h1>
+          <p className="text-sm text-slate-500">
+            Activez ou désactivez chaque capacité individuellement. Les changements sont appliqués immédiatement.
+          </p>
+        </div>
+
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-center gap-2">
