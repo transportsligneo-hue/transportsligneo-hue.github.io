@@ -680,3 +680,19 @@ export function StatusPill({ statut }: { statut: FleetVehicle["statut"] }) {
     </span>
   );
 }
+
+function MiniField({
+  label, value, onChange, type = "text",
+}: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-medium text-[#a3a4ac]">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-[9px] border border-[#eaeaee] bg-white px-2.5 py-2 text-[12.5px] outline-none focus:border-[#2f5fff]/40"
+      />
+    </label>
+  );
+}
