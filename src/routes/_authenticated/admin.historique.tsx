@@ -108,17 +108,14 @@ function AdminHistorique() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-pro-accent/10 flex items-center justify-center">
-            <History className="text-pro-accent" size={22} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Historique d'activité</h1>
-            <p className="text-sm text-pro-muted">Toutes les actions de la plateforme, chronologiquement.</p>
-          </div>
-        </div>
-      </header>
+      <AdminSectionHeader
+        breadcrumb="Historique"
+        eyebrow="Journal de la plateforme"
+        title="Historique"
+        highlight="d'activité"
+        subtitle="Toutes les actions de la plateforme, chronologiquement."
+      />
+
 
       <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
