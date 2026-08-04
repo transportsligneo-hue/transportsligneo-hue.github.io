@@ -287,7 +287,24 @@ function InscriptionConvoyeur() {
   if (!prerequisOk) {
     return (
       <div className="auth-shell flex items-center justify-center px-4 py-12">
-        <div className="max-w-2xl w-full">
+        {/* Lien de connexion en haut à droite */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 py-5">
+          <Link to="/" className="auth-link-lg text-[13px]">
+            <ChevronLeft size={14} className="arrow-back rotate-180" />
+            Retour au site
+          </Link>
+          <div className="flex items-center gap-2 md:gap-3 text-[13px]">
+            <span className="text-white/55 hidden sm:inline">Déjà un compte ?</span>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 font-semibold text-white bg-white/[0.08] border border-blue-300/25 px-4 py-2 rounded-full hover:bg-white/[0.14] hover:border-blue-300/50 transition-all"
+            >
+              Se connecter
+            </Link>
+          </div>
+        </div>
+
+        <div className="max-w-2xl w-full pt-8">
           <div className="text-center mb-8">
             <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
             <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
@@ -318,7 +335,12 @@ function InscriptionConvoyeur() {
             </button>
           </div>
           <div className="text-center mt-6">
-            <Link to="/" className="block text-white/60 text-xs hover:text-primary transition-colors">← Retour au site</Link>
+            <p className="text-[13px] text-white/55">
+              Vous avez déjà un compte convoyeur ?{" "}
+              <Link to="/login" className="text-white font-bold underline hover:text-blue-200 transition-colors">
+                Connectez-vous ici
+              </Link>
+            </p>
           </div>
         </div>
       </div>
