@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { LigneoEmailShell, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, CodeBox } from './_ligneo-header'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -7,15 +7,14 @@ interface ReauthenticationEmailProps {
 
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <LigneoEmailShell
-    preview="Votre code de vérification"
-    tagline="Code de vérification"
-    icon="🔐"
-    title="Confirmez votre identité"
+    preview="Code à usage unique — valable 10 minutes."
+    tagline="Vérification de sécurité"
+    title="Votre code de vérification"
     greeting="Bonjour,"
-    intro="Utilisez le code ci-dessous pour confirmer votre identité. Ce code expirera sous peu pour votre sécurité."
-    signature={"Si vous n'avez pas fait cette demande, vous pouvez ignorer cet email."}
+    intro="Pour confirmer qu'il s'agit bien de vous, saisissez ce code sur la page en cours :"
+    footnote="Ce code est valable 10 minutes. Ne le partagez avec personne."
   >
-    <HighlightBox label="Code de vérification" value={token} tone="gold" />
+    <CodeBox code={token} />
   </LigneoEmailShell>
 )
 
