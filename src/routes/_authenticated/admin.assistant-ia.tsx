@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone, RefreshCw, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/admin/AdminUI";
 
 export const Route = createFileRoute("/_authenticated/admin/assistant-ia")({
   component: AdminAssistantIa,
@@ -76,21 +77,20 @@ function AdminAssistantIa() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Assistant IA — conversations</h1>
-          <p className="text-sm text-slate-500">
-            {list.length} conversation(s) · {rappels} demande(s) de rappel
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void convs.refetch()}
-          className="admin-btn-blue inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
-        >
-          <RefreshCw className="h-4 w-4" /> Actualiser
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="Espace administration"
+        title="Assistant IA — conversations"
+        subtitle={`${list.length} conversation(s) · ${rappels} demande(s) de rappel`}
+        actions={
+          <button
+            type="button"
+            onClick={() => void convs.refetch()}
+            className="admin-btn-blue inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
+          >
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </button>
+        }
+      />
 
 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">

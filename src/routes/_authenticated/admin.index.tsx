@@ -30,6 +30,7 @@ import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
+import { PageHeader } from "@/components/admin/AdminUI";
 
 
 
@@ -267,10 +268,11 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6 adm6">
-      <div className="mb-6 space-y-1">
-        <h1 className="text-xl font-semibold text-[color:var(--admin-text)]">Tableau de bord</h1>
-        <p className="text-sm text-[color:var(--admin-muted)]">Vue temps réel de l'activité Transports Ligneo</p>
-      </div>
+      <PageHeader
+        eyebrow="Espace administration"
+        title="Tableau de bord"
+        subtitle="Vue temps réel de l'activité Transports Ligneo"
+      />
 
 
       {/* === KPI === */}
