@@ -151,7 +151,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
               "Lovable-API-Key": apiKey,
               "X-Lovable-AIG-SDK": "fetch",
             },
-            body: JSON.stringify({ model: MODEL, messages, max_completion_tokens: 600 }),
+            body: JSON.stringify({ model: MODEL, messages, max_tokens: 700 }),
           });
 
           if (res.status === 429) {
