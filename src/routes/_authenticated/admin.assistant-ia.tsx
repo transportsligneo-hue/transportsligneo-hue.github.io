@@ -76,24 +76,22 @@ function AdminAssistantIa() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            <MessageCircle className="h-6 w-6 text-primary" />
-            Assistant IA — conversations
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl font-semibold text-slate-900">Assistant IA — conversations</h1>
+          <p className="text-sm text-slate-500">
             {list.length} conversation(s) · {rappels} demande(s) de rappel
           </p>
         </div>
         <button
           type="button"
           onClick={() => void convs.refetch()}
-          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+          className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
         >
           <RefreshCw className="h-4 w-4" /> Actualiser
         </button>
-      </header>
+      </div>
+
 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
         <div className="max-h-[70vh] space-y-2 overflow-y-auto rounded-xl border p-2">
