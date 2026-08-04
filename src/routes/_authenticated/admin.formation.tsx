@@ -123,7 +123,7 @@ function AdminFormation() {
           <Loader2 className="animate-spin text-pro-accent" />
         </div>
       ) : tab === "suivi" ? (
-        <SuiviTab modules={modules} drivers={drivers} progress={progress} />
+        <SuiviTab modules={trainingModules} drivers={drivers} progress={progress} />
       ) : (
         <ModulesTab modules={modules} onSaved={load} />
       )}
