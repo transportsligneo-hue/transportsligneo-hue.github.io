@@ -45,7 +45,8 @@ type Driver = {
   has_completed_training: boolean;
   training_completed_at: string | null;
 };
-type ProgressRow = { user_id: string; module_id: string; completed: boolean; quiz_score: number | null; attempts_count: number };
+type TrainingModule = { id: string; title: string; sort_order: number | null };
+type ProgressRow = { convoyeur_id: string; module_id: string; status: string | null; score: number | null };
 
 type Tab = "suivi" | "modules";
 
