@@ -1,30 +1,26 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, RecapCard, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props { prenom?: string; numero?: string; convoyeur?: string; heureLivraison?: string; kilometrage?: string; lieu?: string }
 
 const Email = ({ prenom, numero, convoyeur, heureLivraison, kilometrage, lieu }: Props) => (
   <LigneoEmailShell
-    preview="Livraison terminée — Transports Ligneo"
-    tagline="Livraison terminée"
-    icon="✓"
-    title="Livraison terminée"
+    preview="État des lieux d'arrivée disponible."
+    tagline="Livré"
+    title="Véhicule livré avec succès ✓"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
-    intro="Votre véhicule a été livré avec succès. Merci de votre confiance."
-    primaryCta={{ label: 'Télécharger tous les documents', href: 'https://transportsligneo.fr/dashboard-client/documents' }}
-    secondaryCta={{ label: 'Télécharger la facture', href: 'https://transportsligneo.fr/dashboard-client/documents' }}
+    primaryCta={{ label: "Voir l'état des lieux", href: 'https://transportsligneo.fr/dashboard-client/documents' }}
   >
-    <RecapCard
-      rows={[
-        heureLivraison && { label: 'Date de livraison', value: heureLivraison },
-        kilometrage && { label: 'Kilométrage', value: kilometrage },
-        lieu && { label: 'Lieu de livraison', value: lieu },
-        convoyeur && { label: 'Convoyeur', value: convoyeur },
-        numero && { label: 'N° de mission', value: numero },
-      ].filter(Boolean) as any}
+    <SimpleCard
+      title={numero}
+      subtitle={[
+        heureLivraison ? `Livré le ${heureLivraison}` : 'Livré',
+        lieu,
+        kilometrage,
+        convoyeur,
+      ].filter(Boolean).join(' · ')}
     />
-    <HighlightBox label="Mission terminée" value="Merci pour votre confiance." tone="success" />
   </LigneoEmailShell>
 )
 
@@ -32,5 +28,5 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) => `Livraison terminée${d.numero ? ` — ${d.numero}` : ''} — Transports Ligneo`,
   displayName: 'Mission livrée (client)',
-  previewData: { prenom: 'Jean', numero: 'MIS-2026-0001', convoyeur: 'Thomas D.', heureLivraison: '20/06/2026 12:40', kilometrage: '15 842 km', lieu: 'LE MANS (72)' },
+  previewData: { prenom: 'Morgane', numero: 'MIS-TLG-2026-114', convoyeur: 'Olivier G.', heureLivraison: '15/08/2026 à 14:22', kilometrage: '15 842 km', lieu: 'Tours (37)' },
 } satisfies TemplateEntry
