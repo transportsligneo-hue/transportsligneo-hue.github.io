@@ -966,6 +966,62 @@ export type Database = {
         }
         Relationships: []
       }
+      convoyeur_invitations: {
+        Row: {
+          accepted_at: string | null
+          convoyeur_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          nom: string | null
+          prenom: string | null
+          status: string
+          telephone: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          convoyeur_id?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          nom?: string | null
+          prenom?: string | null
+          status?: string
+          telephone?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          convoyeur_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          nom?: string | null
+          prenom?: string | null
+          status?: string
+          telephone?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convoyeur_invitations_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       convoyeurs: {
         Row: {
           account_status: string
@@ -4742,6 +4798,7 @@ export type Database = {
           statut_publication: string
         }[]
       }
+      accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
       admin_cancel_mission_leg: {
@@ -4771,6 +4828,19 @@ export type Database = {
       admin_counter_offer: {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined
+      }
+      admin_create_convoyeur_invitation: {
+        Args: {
+          _email: string
+          _nom?: string
+          _prenom?: string
+          _telephone?: string
+        }
+        Returns: {
+          convoyeur_id: string
+          invitation_id: string
+          token: string
+        }[]
       }
       admin_create_test_mission: {
         Args: { _target_convoyeur_id?: string }
@@ -4964,6 +5034,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_convoyeur_invitation: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expired: boolean
+          nom: string
+          prenom: string
+          status: string
+          telephone: string
+        }[]
       }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
