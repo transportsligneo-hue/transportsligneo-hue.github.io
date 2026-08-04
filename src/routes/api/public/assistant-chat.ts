@@ -287,6 +287,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
         return Response.json({
           conversation_id: conversationId,
           reply,
+          cards,
           handoff,
           remaining: Math.max(0, MAX_MESSAGES - ((conv?.message_count ?? 0) + 1)),
         });
