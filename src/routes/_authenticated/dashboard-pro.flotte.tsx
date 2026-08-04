@@ -9,6 +9,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
