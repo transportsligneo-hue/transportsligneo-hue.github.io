@@ -1,6 +1,6 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, RecapCard, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props {
   prenom?: string
@@ -17,29 +17,26 @@ const LABELS: Record<string, string> = {
 }
 
 const Email = ({ prenom, document, statut, motif }: Props) => {
-  const title = LABELS[statut ?? ''] ?? 'Mise à jour de vos documents'
   const refused = statut !== 'approuve'
+  const title = refused ? 'Un document doit être mis à jour' : 'Document validé ✓'
   return (
     <LigneoEmailShell
-      preview={`${title}${document ? ` — ${document}` : ''}`}
-      tagline="Dossier convoyeur"
-      icon={refused ? '📄' : '✅'}
+      preview={refused ? 'Action requise sur votre dossier convoyeur.' : 'Votre document a été validé.'}
+      tagline={refused ? '⚠ Documents' : 'Documents'}
+      taglineTone={refused ? 'warn' : 'blue'}
       title={title}
       greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
       intro={
         refused
-          ? "Un document de votre dossier convoyeur nécessite une action de votre part. Merci de le déposer à nouveau depuis votre espace convoyeur pour poursuivre la validation."
+          ? "Un document de votre dossier convoyeur nécessite une action de votre part. Merci de le déposer à nouveau depuis votre espace convoyeur."
           : 'Votre document a bien été validé par notre équipe. Votre dossier avance, merci !'
       }
-      primaryCta={{ label: 'Mettre à jour mes documents', href: 'https://transportsligneo.fr/convoyeur/documents' }}
+      primaryCta={{ label: refused ? 'Mettre à jour mes documents' : 'Voir mon dossier', href: 'https://transportsligneo.fr/convoyeur/documents' }}
     >
-      <RecapCard
-        rows={[
-          document && { label: 'Document', value: document },
-          statut && { label: 'Statut', value: LABELS[statut] ?? statut },
-        ].filter(Boolean) as any}
+      <SimpleCard
+        title={document || 'Document'}
+        subtitle={[LABELS[statut ?? ''] ?? statut, motif].filter(Boolean).join(' · ')}
       />
-      {motif ? <HighlightBox label="Motif" value={motif} tone={refused ? 'danger' : 'success'} /> : null}
     </LigneoEmailShell>
   )
 }
