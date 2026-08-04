@@ -107,18 +107,22 @@ function AdminInscriptions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-pro-text">Suivi des inscriptions</h1>
-          <p className="text-sm text-pro-muted">Documents reçus, e-mails envoyés, notification admin et horodatage.</p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-pro-border text-sm hover:bg-pro-bg-soft transition"
-        >
-          {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Actualiser
-        </button>
-      </div>
+      <AdminSectionHeader
+        breadcrumb="Inscriptions"
+        eyebrow="Onboarding"
+        title="Suivi des"
+        highlight="inscriptions"
+        subtitle="Documents reçus, e-mails envoyés, notification admin et horodatage."
+        actions={
+          <button
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
+          >
+            {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Actualiser
+          </button>
+        }
+      />
+
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
