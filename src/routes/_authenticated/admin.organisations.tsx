@@ -217,7 +217,7 @@ function AdminOrganisations() {
         highlight="clients"
         subtitle="Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro."
         actions={
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Button onClick={() => setCreateOpen(true)} className="gap-2 admin-btn-blue text-white border-transparent hover:text-white">
             <Plus size={16} /> Nouvelle organisation
           </Button>
         }
@@ -510,7 +510,7 @@ function CreateOrgDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={submit} disabled={saving}>
+          <Button onClick={submit} disabled={saving} className="admin-btn-blue text-white border-transparent hover:text-white">
             {saving && <Loader2 className="animate-spin mr-2" size={14} />}
             Créer
           </Button>

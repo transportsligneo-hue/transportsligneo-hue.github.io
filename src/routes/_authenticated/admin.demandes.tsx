@@ -515,7 +515,7 @@ function DemandeDrawer({
                     placeholder="Ex. 290"
                   />
                 </div>
-                <Button size="sm" onClick={() => void savePrix()} disabled={savingPrix}>
+                <Button size="sm" onClick={() => void savePrix()} disabled={savingPrix} className="admin-btn-blue text-white border-transparent hover:text-white">
                   {savingPrix ? "Enregistrement…" : "Enregistrer le prix"}
                 </Button>
               </div>
