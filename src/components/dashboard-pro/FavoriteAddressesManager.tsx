@@ -185,7 +185,7 @@ export function FavoriteAddressesManager({ clientUserId, clientEmail, variant = 
   const inp = variant === "admin"
     ? "w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/30"
     : "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30";
-  const primaryBtn = variant === "admin" ? "admin-btn-primary" : "inline-flex items-center gap-1.5 rounded-lg bg-[#0b1026] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0b1026]/90";
+  const primaryBtn = variant === "admin" ? "admin-btn-primary" : "inline-flex items-center gap-1.5 rounded-lg fleet-btn-violet px-3 py-2 text-sm font-semibold";
   const ghostBtn = variant === "admin" ? "admin-btn-ghost" : "inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-600 hover:bg-slate-50";
 
   const filteredItems = items.filter(a => {
@@ -201,7 +201,7 @@ export function FavoriteAddressesManager({ clientUserId, clientEmail, variant = 
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-2.5 py-1 text-xs rounded-md transition ${filter === f ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+              className={`px-2.5 py-1 text-xs rounded-md transition ${filter === f ? "fleet-btn-violet" : "text-slate-600 hover:bg-slate-100"}`}
             >
               {f === "all" ? "Toutes" : f === "depart" ? "Départ" : "Arrivée"}
             </button>
