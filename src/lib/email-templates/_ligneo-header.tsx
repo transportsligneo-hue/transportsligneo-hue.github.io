@@ -192,6 +192,8 @@ export function LigneoEmailShell({
                 </Section>
               ) : null}
 
+              {footnote ? <Text style={footnoteStyle}>{footnote}</Text> : null}
+
               <Text style={signatureStyle}>
                 {signature || `Cordialement,\nL'équipe ${LIGNEO_SITE}`}
               </Text>
