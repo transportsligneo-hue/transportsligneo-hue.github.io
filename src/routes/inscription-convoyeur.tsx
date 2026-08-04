@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { sendTransactionalEmail } from "@/lib/email/send";
-import { notifyAdmin } from "@/lib/admin-notifications";
+import { finalizeSignup } from "@/lib/signup-finalize";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
   Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
@@ -167,87 +166,32 @@ function InscriptionConvoyeur() {
       }
 
       const userId = authData.user.id;
-      let permisPhotoUrl: string | null = null;
 
-      if (permisFile && authData.session) {
-        try {
-          const ext = permisFile.name.split(".").pop() || "jpg";
-          const filePath = `${userId}/permis-${Date.now()}.${ext}`;
-          const { error: uploadError } = await supabase.storage
-            .from("convoyeur-permis").upload(filePath, permisFile, { upsert: true });
-          if (!uploadError) permisPhotoUrl = filePath;
-        } catch (e) { console.warn("[inscription] upload permis:", e); }
+      // Les champs métier sont déjà posés par le trigger handle_new_user à partir
+      // des métadonnées ; on ne complète ici que si une session existe.
+      if (authData.session) {
+        await supabase.from("convoyeurs").update({
+          ville: form.ville, disponibilite: form.disponibilite,
+          permis: form.permis, message: form.message,
+          permis_numero: form.permis_numero,
+          annees_experience: parseInt(form.annees_experience, 10) || 0,
+          type_convoyeur: form.type_convoyeur,
+        }).eq("user_id", userId);
       }
 
-      const { data: convoyeurRow } = authData.session
-        ? await supabase.from("convoyeurs").update({
-            ville: form.ville, disponibilite: form.disponibilite,
-            permis: form.permis, message: form.message,
-            permis_numero: form.permis_numero,
-            annees_experience: parseInt(form.annees_experience, 10) || 0,
-            permis_photo_url: permisPhotoUrl,
-            type_convoyeur: form.type_convoyeur,
-          }).eq("user_id", userId).select("id").maybeSingle()
-        : { data: null };
-
-      const convoyeurId = convoyeurRow?.id ?? null;
-      if (convoyeurId && authData.session) {
-        const uploadDoc = async (file: File | null, type: string) => {
-          if (!file) return;
-          try {
-            const ext = file.name.split(".").pop() || "jpg";
-            const path = `${userId}/${type}-${Date.now()}.${ext}`;
-            const { error: upErr } = await supabase.storage
-              .from("convoyeur-documents").upload(path, file, { upsert: true });
-            if (upErr) return;
-            await supabase.from("documents_convoyeurs").insert({
-              convoyeur_id: convoyeurId,
-              type_document: type,
-              nom_fichier: file.name,
-              url_fichier: path,
-              statut_validation: "en_attente",
-            });
-          } catch (e) { console.warn(`[inscription] doc ${type}:`, e); }
-        };
-        await Promise.all([
-          uploadDoc(permisFile, "permis"),
-          uploadDoc(permisVersoFile, "permis_verso"),
-          uploadDoc(cniFile, "identite"),
-          uploadDoc(ribFile, "rib"),
-          uploadDoc(kbisFile, "kbis"),
-          uploadDoc(rcProFile, "assurance"),
-          uploadDoc(photoProfilFile, "photo_profil"),
-        ]);
-      }
-
-      // Email de confirmation au candidat
-      try {
-        await sendTransactionalEmail({
-          templateName: "inscription-convoyeur",
-          recipientEmail: form.email,
-          idempotencyKey: `inscription-candidat-${userId}`,
-          templateData: { prenom: form.prenom },
-        });
-      } catch (e) { console.warn("[inscription] email candidat:", e); }
-
-      // Notification interne équipe
-      try {
-        await sendTransactionalEmail({
-          templateName: "inscription-convoyeur",
-          recipientEmail: "contact@transportsligneo.fr",
-          idempotencyKey: `inscription-admin-${userId}`,
-          templateData: { prenom: `${form.prenom} ${form.nom} (${form.email} · ${form.telephone} · ${form.ville})` },
-        });
-      } catch (e) { console.warn("[inscription] email admin:", e); }
-
-      void notifyAdmin({
-        type: "driver_action",
-        titre: "Nouvelle inscription convoyeur",
-        message: `${form.prenom} ${form.nom} · ${form.email} · ${form.ville}`,
-        link: "/admin/convoyeurs",
-        entityType: "convoyeur",
-        entityId: userId,
+      // Upload des documents + emails + notification admin côté serveur :
+      // sans confirmation d'email il n'y a pas de session, donc rien ne pouvait
+      // passer par le navigateur (storage RLS + endpoint email authentifié).
+      await finalizeSignup(userId, "convoyeur", {
+        permis: permisFile,
+        permis_verso: permisVersoFile,
+        identite: cniFile,
+        rib: ribFile,
+        kbis: kbisFile,
+        assurance: rcProFile,
+        photo_profil: photoProfilFile,
       });
+
 
       if (authData.session) {
         await supabase.auth.signOut();

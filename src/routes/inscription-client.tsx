@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
-import { notifyAdmin } from "@/lib/admin-notifications";
-import { sendTransactionalEmail } from "@/lib/email/send";
+import { finalizeSignup } from "@/lib/signup-finalize";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
@@ -86,27 +85,9 @@ function InscriptionClient() {
           }).eq("user_id", authData.user.id);
         }
 
-        // Notification admin (push + visible /admin)
-        void notifyAdmin({
-          type: "client_action",
-          titre: "Nouvelle inscription client",
-          message: `${form.prenom} ${form.nom} · ${form.email}`,
-          link: "/admin/clients",
-          entityType: "user",
-          entityId: authData.user.id,
-        });
-
-        // Email de bienvenue (best-effort, fixed-to admin not required car welcome a recipientEmail)
-        if (authData.session) {
-          void sendTransactionalEmail({
-            templateName: "welcome-client",
-            recipientEmail: form.email,
-            idempotencyKey: `welcome-${authData.user.id}`,
-            templateData: { prenom: form.prenom },
-          }).catch(() => {});
-        }
-
-
+        // Emails + notification admin côté serveur (aucune session tant que
+        // l'email n'est pas confirmé).
+        await finalizeSignup(authData.user.id, "client");
 
         setSuccess(true);
         if (authData.session) {

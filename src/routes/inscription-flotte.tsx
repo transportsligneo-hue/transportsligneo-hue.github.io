@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Mail, Phone, Lock, CheckCircle, Building2, Hash, Car, MapPin } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
+import { finalizeSignup } from "@/lib/signup-finalize";
 
 export const Route = createFileRoute("/inscription-flotte")({
   component: InscriptionFlotte,
@@ -130,6 +131,8 @@ function InscriptionFlotte() {
           type_client: "flotte",
         } as never).eq("user_id", authData.user.id);
       }
+
+      if (authData.user) await finalizeSignup(authData.user.id, "flotte");
 
       setSuccess(true);
       if (authData.session) {
