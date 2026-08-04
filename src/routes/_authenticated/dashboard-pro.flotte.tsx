@@ -9,6 +9,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
+import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
@@ -52,7 +53,9 @@ const vehicleLabel = (v: Vehicle) =>
 
 function FleetPage() {
   const { user } = useAuth();
-  const [orgId, setOrgId] = useState<string | null>(null);
+  const { data: orgInfo, isLoading: orgLoading } = useCurrentOrgAccountType();
+  const orgId = orgInfo?.orgId ?? null;
+  const orgName = orgInfo?.name ?? null;
   const [orgRole, setOrgRole] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [sites, setSites] = useState<Record<string, string>>({});
@@ -74,14 +77,15 @@ function FleetPage() {
         .eq("status", "active")
         .limit(1);
       const row = (mems ?? [])[0] as { organization_id: string; member_role: string } | undefined;
-      if (row) {
-        setOrgId(row.organization_id);
-        setOrgRole(row.member_role);
-      } else {
-        setLoading(false);
-      }
+      // Pas de membership explicite : le compte pro reste gestionnaire de son parc
+      setOrgRole(row?.member_role ?? "admin");
     })();
   }, [user]);
+
+  useEffect(() => {
+    if (!orgLoading && !orgId) setLoading(false);
+  }, [orgLoading, orgId]);
+
 
   const fetchVehicles = useCallback(async () => {
     if (!orgId) return;
@@ -193,7 +197,7 @@ function FleetPage() {
     fetchVehicles();
   };
 
-  if (!orgId && !loading) {
+  if (!orgId && !orgLoading && !loading) {
     return (
       <div className="rounded-2xl border border-[#eaeaee] bg-white p-8 text-center">
         <Car className="mx-auto mb-3 text-[#a3a4ac]" size={32} />
@@ -209,7 +213,8 @@ function FleetPage() {
         <div>
           <h1 className="text-[26px] font-extrabold tracking-[-0.02em]">Parc véhicules</h1>
           <p className="mt-1 text-[13px] text-[#70727d]">
-            Suivi des véhicules, documents, entretien et coûts de possession.
+            {orgName ? `${orgName} — ` : ""}
+            {actifs.length} véhicule{actifs.length > 1 ? "s" : ""} · documents, entretien et coûts de possession.
           </p>
         </div>
         {canManage && (
@@ -288,14 +293,31 @@ function FleetPage() {
       </div>
 
       {/* Grille véhicules */}
-      {loading ? (
+      {loading || orgLoading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="animate-spin text-[#2f5fff]" size={24} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-[#eaeaee] bg-white p-10 text-center">
           <Car className="mx-auto mb-3 text-[#a3a4ac]" size={30} />
-          <p className="text-[13px] text-[#70727d]">Aucun véhicule.</p>
+          {vehicles.length === 0 ? (
+            <>
+              <p className="text-[13px] font-semibold">Aucun véhicule dans le parc pour l'instant</p>
+              <p className="mt-1 text-[12.5px] text-[#70727d]">
+                Ajoutez votre premier véhicule pour suivre ses documents et son entretien.
+              </p>
+              {canManage && (
+                <button
+                  onClick={openCreate}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-black"
+                >
+                  <Plus size={14} /> Ajouter un véhicule
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="text-[13px] text-[#70727d]">Aucun véhicule ne correspond à ce filtre.</p>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
