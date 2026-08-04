@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, HelpCircle, MessageSquareQuote, FolderOpen, Search, X, Menu } from "lucide-react";
+import { BookOpen, HelpCircle, FolderOpen, Search, X, Menu } from "lucide-react";
 import { useTraining } from "@/lib/formation/useTraining";
 import { TrainingSidebar } from "@/components/formation/TrainingSidebar";
 import { extractGlossary, plainText } from "@/lib/formation/types";
