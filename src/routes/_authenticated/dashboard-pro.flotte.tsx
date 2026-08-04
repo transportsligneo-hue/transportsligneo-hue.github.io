@@ -64,6 +64,7 @@ function FleetPage() {
   const [statutFilter, setStatutFilter] = useState<string>("tous");
   const [draft, setDraft] = useState<Partial<Vehicle> | null>(null);
   const [selected, setSelected] = useState<Vehicle | null>(null);
+  const [panelTab, setPanelTab] = useState<"general" | "documents" | "entretien" | "historique">("general");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -151,6 +152,8 @@ function FleetPage() {
 
   const canManage = orgRole === "admin" || orgRole === "owner";
 
+  const openDocs = (v: Vehicle) => { setPanelTab("documents"); setSelected(v); };
+
   const openCreate = () => { setDraft({ ...EMPTY }); setErr(null); };
   const openEdit = (v: Vehicle) => { setDraft({ ...v }); setErr(null); };
 
@@ -233,21 +236,26 @@ function FleetPage() {
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-[#fef3e2]">
             <AlertTriangle size={16} className="text-[#d97706]" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <b className="text-[13px] font-semibold">
               {alerts.length} véhicule{alerts.length > 1 ? "s" : ""} avec des documents à surveiller
             </b>
-            <p className="mt-0.5 truncate text-[12px] text-[#70727d]">
-              {alerts.slice(0, 4).map((v) => vehicleLabel(v)).join(" · ")}
-              {alerts.length > 4 ? ` · +${alerts.length - 4}` : ""}
-            </p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {alerts.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => openDocs(v)}
+                  className={`rounded-full border px-2.5 py-1 text-[11.5px] font-semibold transition hover:bg-[#f2f2f5] ${
+                    worstDocStatus(v) === "expired"
+                      ? "border-[#f3bcbc] text-[#dc2626]"
+                      : "border-[#f3d9b0] text-[#b45309]"
+                  }`}
+                >
+                  {vehicleLabel(v)} →
+                </button>
+              ))}
+            </div>
           </div>
-          <button
-            onClick={() => setSelected(alerts[0])}
-            className="ml-auto whitespace-nowrap text-[12px] font-semibold text-[#14161c] hover:underline"
-          >
-            Voir le détail →
-          </button>
         </div>
       )}
 
@@ -328,7 +336,7 @@ function FleetPage() {
                 key={v.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => setSelected(v)}
+                onClick={() => { setPanelTab("general"); setSelected(v); }}
                 onKeyDown={(e) => { if (e.key === "Enter") setSelected(v); }}
                 className="group cursor-pointer rounded-[14px] border border-[#eaeaee] bg-white p-[18px] transition duration-150 hover:-translate-y-0.5 hover:border-[#dedee4] hover:shadow-[0_8px_20px_rgba(20,22,28,0.06)]"
               >
@@ -391,6 +399,7 @@ function FleetPage() {
         vehicle={selected}
         siteName={selected?.site_id ? sites[selected.site_id] : null}
         canManage={canManage}
+        initialTab={panelTab}
         onEdit={(v) => { setSelected(null); openEdit(v); }}
         onClose={() => setSelected(null)}
       />
