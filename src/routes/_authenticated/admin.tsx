@@ -1,5 +1,4 @@
-import {
-  ClipboardList, createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -24,6 +23,7 @@ import {
   GraduationCap,
   Sparkles,
   Crown,
+  ClipboardList,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
