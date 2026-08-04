@@ -33,7 +33,7 @@ const BLUE = '#2f5fff'
 const BLUE_LIGHT = '#6ea1ff'
 const GOLD = '#b8862a'
 const GOLD_LIGHT = '#e8c976'
-const PAGE_BG = '#eef1f8'
+const PAGE_BG = '#ffffff'
 const CARD_BG = '#f7f9fc'
 const CARD_BORDER = '#e7ebf3'
 const TEXT_DARK = '#0f1526'
@@ -360,7 +360,7 @@ const card = {
   backgroundColor: '#ffffff',
   borderRadius: '16px',
   overflow: 'hidden' as const,
-  boxShadow: '0 8px 24px rgba(15,21,38,0.06)',
+  border: `1px solid ${CARD_BORDER}`,
   padding: 0,
 }
 
