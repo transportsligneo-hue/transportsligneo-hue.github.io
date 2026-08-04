@@ -92,6 +92,8 @@ export function LigneoEmailShell({
   clientLogoUrl,
   clientName,
   accountTheme,
+  taglineTone,
+  footnote,
 }: LigneoEmailShellProps) {
   const themeChip =
     accountTheme === 'flotte'
