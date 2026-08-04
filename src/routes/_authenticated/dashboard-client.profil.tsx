@@ -3,8 +3,8 @@ import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle, Building2 } from "lucide-react";
-import { LogoUploader } from "@/components/LogoUploader";
+import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/profil")({
@@ -172,45 +172,8 @@ function ClientProfil() {
         </div>
       </form>
 
-      {/* Entreprise (optionnel) */}
-      <form onSubmit={saveProfile} className="card-premium p-6 rounded space-y-5">
-        <h2 className="font-heading text-base text-cream tracking-wider flex items-center gap-2">
-          <Building2 size={16} className="text-primary" /> Informations entreprise
-          <span className="text-cream/40 text-[10px] uppercase tracking-wider ml-1">(optionnel)</span>
-        </h2>
-        <p className="text-cream/40 text-xs -mt-3">Affichées sur vos devis et factures si renseignées.</p>
 
-        {user && (
-          <LogoUploader
-            ownerUserId={user.id}
-            value={logoUrl}
-            onChange={handleLogoChange}
-            variant="dark"
-            label="Logo de l'entreprise"
-          />
-        )}
 
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Raison sociale</label>
-          <input type="text" value={form.societe} onChange={(e) => setForm({ ...form, societe: e.target.value })} className={inputClass} />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">SIRET</label>
-            <input type="text" value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="14 chiffres" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">N° TVA intra.</label>
-            <input type="text" value={form.tva_intra} onChange={(e) => setForm({ ...form, tva_intra: e.target.value })} placeholder="FR..." className={inputClass} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end pt-2 border-t border-primary/10">
-          <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60">
-            {saving && <Loader2 size={12} className="animate-spin" />} Enregistrer
-          </button>
-        </div>
-      </form>
 
       {/* Password */}
       <form onSubmit={changePassword} className="card-premium p-6 rounded space-y-5">
