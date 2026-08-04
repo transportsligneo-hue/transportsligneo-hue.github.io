@@ -3,7 +3,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { Send, X, Phone } from "lucide-react";
 
 /**
- * Vroomy 🚗 — assistant IA flottant de Transports Ligneo (site public).
+ * Vroomy — assistant flottant de Transports Ligneo (site public).
  * Même backend/API que l'assistant précédent : /api/public/assistant-chat.
  * Seuls le nom, la mascotte et le ton changent.
  */
@@ -13,7 +13,7 @@ type ChatMsg = { role: "user" | "assistant"; content: string };
 const QUICK_REPLIES: Array<{ icon: string; label: string }> = [
   { icon: "💰", label: "Combien coûte un convoyage ?" },
   { icon: "📦", label: "Où en est ma mission ?" },
-  { icon: "🚗", label: "Devenir convoyeur" },
+  { icon: "👋", label: "Devenir convoyeur" },
 ];
 
 const WELCOME =
@@ -185,7 +185,7 @@ export default function AssistantIaWidget() {
                 <VroomyFace size={28} />
               </div>
               <div>
-                <h2 className="vrm-title">Vroomy 🚗</h2>
+                <h2 className="vrm-title">Vroomy</h2>
                 <div className="vrm-status">
                   <span className="vrm-dot" />
                   En ligne — réponse instantanée
@@ -287,7 +287,7 @@ export default function AssistantIaWidget() {
               <Send size={18} />
             </button>
           </form>
-          <p className="vrm-fine">Réponses générées par IA · Transports Ligneo</p>
+          <p className="vrm-fine">Transports Ligneo</p>
         </div>
       </div>
     </>
