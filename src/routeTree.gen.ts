@@ -56,6 +56,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
@@ -115,6 +116,7 @@ import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
+import { Route as AuthenticatedAdminAssistantIaRouteImport } from './routes/_authenticated/admin.assistant-ia'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
@@ -384,6 +386,11 @@ const B2bTransportPonctuelRetourRoute =
     path: '/retour',
     getParentRoute: () => B2bTransportPonctuelRoute,
   } as any)
+const ApiPublicAssistantChatRoute = ApiPublicAssistantChatRouteImport.update({
+  id: '/api/public/assistant-chat',
+  path: '/api/public/assistant-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAlertesDocumentsVehiculesRoute =
   ApiPublicAlertesDocumentsVehiculesRouteImport.update({
     id: '/api/public/alertes-documents-vehicules',
@@ -734,6 +741,12 @@ const AuthenticatedAdminAttributionsRoute =
     path: '/attributions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAssistantIaRoute =
+  AuthenticatedAdminAssistantIaRouteImport.update({
+    id: '/assistant-ia',
+    path: '/assistant-ia',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAcceptationsRoute =
   AuthenticatedAdminAcceptationsRouteImport.update({
     id: '/acceptations',
@@ -918,6 +931,7 @@ export interface FileRoutesByFullPath {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -977,6 +991,7 @@ export interface FileRoutesByFullPath {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1044,6 +1059,7 @@ export interface FileRoutesByTo {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1102,6 +1118,7 @@ export interface FileRoutesByTo {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1177,6 +1194,7 @@ export interface FileRoutesById {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1236,6 +1254,7 @@ export interface FileRoutesById {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1311,6 +1330,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
+    | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1370,6 +1390,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/assistant-chat'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -1437,6 +1458,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
+    | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1495,6 +1517,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/assistant-chat'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
@@ -1569,6 +1592,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
+    | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
     | '/_authenticated/admin/b2b-leads'
@@ -1628,6 +1652,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/assistant-chat'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1696,6 +1721,7 @@ export interface RootRouteChildren {
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
+  ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
@@ -2041,6 +2067,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/transport-ponctuel/retour'
       preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
       parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/public/assistant-chat': {
+      id: '/api/public/assistant-chat'
+      path: '/api/public/assistant-chat'
+      fullPath: '/api/public/assistant-chat'
+      preLoaderRoute: typeof ApiPublicAssistantChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/alertes-documents-vehicules': {
       id: '/api/public/alertes-documents-vehicules'
@@ -2455,6 +2488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAttributionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/assistant-ia': {
+      id: '/_authenticated/admin/assistant-ia'
+      path: '/assistant-ia'
+      fullPath: '/admin/assistant-ia'
+      preLoaderRoute: typeof AuthenticatedAdminAssistantIaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/acceptations': {
       id: '/_authenticated/admin/acceptations'
       path: '/acceptations'
@@ -2694,6 +2734,7 @@ const AuthenticatedAdminOrganisationsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAcceptationsRoute: typeof AuthenticatedAdminAcceptationsRoute
+  AuthenticatedAdminAssistantIaRoute: typeof AuthenticatedAdminAssistantIaRoute
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
@@ -2725,6 +2766,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAcceptationsRoute: AuthenticatedAdminAcceptationsRoute,
+  AuthenticatedAdminAssistantIaRoute: AuthenticatedAdminAssistantIaRoute,
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
@@ -3055,6 +3097,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
+  ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
@@ -3072,3 +3115,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

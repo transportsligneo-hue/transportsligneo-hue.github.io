@@ -4,6 +4,7 @@ import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import MobileNavbar from "@/components/mobile/MobileNavbar";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
+import AssistantIaWidget from "@/components/assistant/AssistantIaWidget";
 import PwaSplash from "@/components/pwa/PwaSplash";
 import BiometricLock from "@/components/BiometricLock";
 import BiometricEnrollPrompt from "@/components/BiometricEnrollPrompt";
@@ -137,6 +138,7 @@ function RootComponent() {
             <MobileNavbar />
             <Outlet />
             <PublicMobileBottomNav />
+            <AssistantIaWidget />
             <PwaProvider />
             <PwaSplash />
             <BiometricEnrollPrompt />
