@@ -231,8 +231,8 @@ function AdminAttributions() {
       trajet.client_email = clientEmail;
       trajet.client_nom = clientNom || trajet.client_nom;
 
-      const prixHT = Number(trajet.prix ?? 0) > 0 ? Number(trajet.prix) / 1.2 : 0;
-      const prixTTC = Number(trajet.prix ?? 0);
+      const prixTTC = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
+      const prixHT = prixTTC > 0 ? prixTTC / 1.2 : 0;
       const prixTVA = +(prixTTC - prixHT).toFixed(2);
       const isB2B = false; // par défaut particulier (B2B = via factures B2B flow)
 
@@ -256,9 +256,12 @@ function AdminAttributions() {
           date_mission: trajet.date_trajet,
           date_echeance: echeance.toISOString().slice(0, 10),
           mode_paiement: "Virement bancaire",
-          designation: "Prestation de convoyage automobile",
-          depart: trajet.depart,
-          arrivee: trajet.arrivee,
+          designation: basis.isGroup
+            ? "Prestation de convoyage automobile — livraison + restitution"
+            : "Prestation de convoyage automobile",
+          depart: basis.depart ?? trajet.depart,
+          arrivee: basis.arrivee ?? trajet.arrivee,
+
           prix_ht: +prixHT.toFixed(2),
           prix_tva: prixTVA,
           prix_ttc: prixTTC,
