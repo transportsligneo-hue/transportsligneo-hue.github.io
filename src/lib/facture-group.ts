@@ -51,7 +51,10 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
       .from("trajets")
       .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id")
       .eq("mission_group_id", current.mission_group_id);
-    const rows = ((siblings ?? []) as LegRow[]).slice();
+    let rows = ((siblings ?? []) as LegRow[]).slice();
+    // Écarte les trajets "simple" résiduels quand les segments aller/retour existent
+    const hasLegs = rows.some((r) => r.leg_type === "aller" || r.leg_type === "retour");
+    if (hasLegs) rows = rows.filter((r) => r.leg_type === "aller" || r.leg_type === "retour");
     if (rows.length) {
       rows.sort((a, b) => {
         const ai = a.leg_index ?? (a.leg_type === "retour" ? 2 : 1);
@@ -80,14 +83,17 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     }
   }
 
-  const totalTtc = round2(Math.max(sumLegs, devisTotal));
+  // Le devis prime (tarif de base global) ; à défaut, somme des segments
+  const totalTtc = round2(devisTotal > 0 ? devisTotal : sumLegs);
 
   const points: string[] = [];
   legs.forEach((l, i) => {
     if (i === 0 && l.depart) points.push(l.depart);
     if (l.arrivee) points.push(l.arrivee);
   });
-  const itineraire = points.length ? points.join(" → ") : null;
+  const uniquePoints = points.filter((p, i) => i === 0 || p !== points[i - 1]);
+  const itineraire = uniquePoints.length ? uniquePoints.join(" → ") : null;
+
 
   // Facture déjà émise sur un segment du groupe ?
   let existing: { id: string; numero: string } | null = null;
