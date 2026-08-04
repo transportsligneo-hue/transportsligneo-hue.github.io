@@ -422,15 +422,24 @@ export function DashboardHeader({
             onClick={() => setProfileOpen((v) => !v)}
             className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-md transition-colors ${iconBtn}`}
           >
-            <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-                isDark
-                  ? "bg-primary text-navy"
-                  : "bg-pro-accent text-white"
-              }`}
-            >
-              {initial}
-            </div>
+            {orgLogoUrl ? (
+              <img
+                src={orgLogoUrl}
+                alt={orgName ?? "Logo"}
+                className="w-7 h-7 rounded-full object-contain bg-white border border-pro-border"
+                loading="lazy"
+              />
+            ) : (
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
+                  isDark
+                    ? "bg-primary text-navy"
+                    : "bg-pro-accent text-white"
+                }`}
+              >
+                {initial}
+              </div>
+            )}
             <ChevronDown size={14} className="hidden sm:inline" />
           </button>
 
