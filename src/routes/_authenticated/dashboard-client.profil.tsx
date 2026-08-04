@@ -17,7 +17,7 @@ function ClientProfil() {
     prenom: "", nom: "", email: "", telephone: "",
     societe: "", siret: "", tva_intra: "",
   });
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [, setLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
@@ -88,14 +88,8 @@ function ClientProfil() {
     setTimeout(() => setSavedMsg(""), 6000);
   };
 
-  const handleLogoChange = async (url: string | null) => {
-    if (!user) return;
-    setLogoUrl(url);
-    await supabase
-      .from("profiles")
-      .update({ logo_url: url } as never)
-      .eq("user_id", user.id);
-  };
+
+
 
   const changePassword = async (e: FormEvent) => {
     e.preventDefault();
