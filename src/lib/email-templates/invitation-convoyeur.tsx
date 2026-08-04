@@ -83,7 +83,7 @@ export const InvitationConvoyeurEmail = ({
         label="Statut de votre formation"
         value={statut.label}
         meta={statut.meta}
-        tone="light"
+        tone="gold"
       />
       <SimpleCard
         title="Besoin d'assistance ?"
