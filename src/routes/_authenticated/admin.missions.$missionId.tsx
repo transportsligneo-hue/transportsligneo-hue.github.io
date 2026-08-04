@@ -47,6 +47,7 @@ import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
+import { MissionPriceCard } from "@/components/admin/MissionPriceCard";
 import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
