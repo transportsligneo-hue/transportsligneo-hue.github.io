@@ -3754,3 +3754,99 @@
 }
 .fleet-btn-violet:active { transform: translateY(0); }
 .fleet-btn-violet:disabled { animation: none; opacity: .5; box-shadow: none; }
+
+/* ===== Assistant IA flottant (site public) ===== */
+.aiw-bubble {
+  position: fixed; bottom: 26px; right: 26px; width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, #2f5fff, #4f8cff);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;
+  box-shadow: 0 12px 30px rgba(47, 95, 255, 0.5); z-index: 90; color: #fff;
+}
+.aiw-bubble svg { width: 26px; height: 26px; }
+.aiw-bubble::before {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 1.5px solid rgba(79, 140, 255, 0.5); animation: aiwRingPulse 2.4s ease-out infinite;
+}
+@keyframes aiwRingPulse { 0% { transform: scale(0.85); opacity: 0.9; } 100% { transform: scale(1.25); opacity: 0; } }
+.aiw-notif {
+  position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%;
+  background: #d9b54a; border: 2px solid #061238; font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; color: #061238;
+}
+.aiw-panel {
+  position: fixed; bottom: 26px; right: 26px; width: 380px; max-width: calc(100vw - 24px);
+  height: 560px; max-height: 78vh; background: #0a1230; border: 1px solid rgba(122, 163, 255, 0.2);
+  border-radius: 22px; overflow: hidden; z-index: 91; color: #fff;
+  box-shadow: 0 30px 70px rgba(4, 8, 22, 0.6); display: flex; flex-direction: column;
+  opacity: 0; transform: translateY(20px) scale(0.96); pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.aiw-panel.aiw-open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+@media (max-width: 640px) {
+  .aiw-bubble { bottom: 88px; right: 16px; }
+  .aiw-panel { bottom: 88px; right: 12px; left: 12px; width: auto; max-height: 70vh; }
+}
+.aiw-head {
+  position: relative; overflow: hidden; padding: 18px 20px;
+  background: linear-gradient(120deg, rgba(47, 95, 255, 0.35), rgba(20, 45, 140, 0.5));
+  border-bottom: 1px solid rgba(122, 163, 255, 0.2); display: flex; align-items: center; gap: 12px;
+}
+.aiw-head::before {
+  content: ''; position: absolute; top: -40px; right: -20px; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(217, 181, 74, 0.2), transparent 70%);
+}
+.aiw-head-info { flex: 1; position: relative; z-index: 1; }
+.aiw-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; }
+.aiw-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #4ad0a0; margin-top: 2px; }
+.aiw-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ad0a0; box-shadow: 0 0 6px #4ad0a0; animation: aiwPulseD 1.6s ease-in-out infinite; }
+@keyframes aiwPulseD { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.aiw-close {
+  width: 30px; height: 30px; border-radius: 9px; background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(122, 163, 255, 0.2); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; position: relative; z-index: 1; color: #fff;
+}
+.aiw-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.aiw-msg { max-width: 86%; font-size: 13px; line-height: 1.5; padding: 11px 14px; border-radius: 14px; white-space: pre-wrap; }
+.aiw-bot { align-self: flex-start; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(122, 163, 255, 0.2); border-bottom-left-radius: 4px; }
+.aiw-user { align-self: flex-end; background: linear-gradient(120deg, #2f5fff, #4f8cff); border-bottom-right-radius: 4px; }
+.aiw-quick { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.aiw-quick-btn {
+  text-align: left; font-size: 12.5px; font-weight: 600; color: #4f8cff; background: rgba(63, 123, 255, 0.1);
+  border: 1px solid rgba(122, 163, 255, 0.3); padding: 10px 13px; border-radius: 11px; cursor: pointer; transition: all 0.15s ease;
+}
+.aiw-quick-btn:hover { background: rgba(63, 123, 255, 0.2); border-color: rgba(122, 163, 255, 0.5); }
+.aiw-typing {
+  align-self: flex-start; display: flex; gap: 4px; padding: 12px 16px; background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(122, 163, 255, 0.2); border-radius: 14px; border-bottom-left-radius: 4px;
+}
+.aiw-typing span { width: 6px; height: 6px; border-radius: 50%; background: #9aa6c9; animation: aiwTypingDot 1.2s ease-in-out infinite; }
+.aiw-typing span:nth-child(2) { animation-delay: 0.15s; }
+.aiw-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes aiwTypingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+.aiw-handoff {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px;
+  background: rgba(217, 181, 74, 0.08); border: 1px solid rgba(217, 181, 74, 0.28);
+}
+.aiw-handoff-title { font-size: 12px; font-weight: 700; color: #d9b54a; }
+.aiw-field {
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(122, 163, 255, 0.2); border-radius: 10px;
+  padding: 9px 12px; font-size: 12.5px; color: #fff;
+}
+.aiw-field::placeholder { color: #9aa6c9; }
+.aiw-call { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #d9b54a; font-weight: 600; }
+.aiw-input-row {
+  display: flex; align-items: center; gap: 8px; padding: 14px 16px;
+  border-top: 1px solid rgba(122, 163, 255, 0.2); background: rgba(6, 10, 30, 0.5);
+}
+.aiw-input {
+  flex: 1; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(122, 163, 255, 0.2);
+  border-radius: 999px; padding: 11px 16px; font-size: 13px; color: #fff;
+}
+.aiw-input::placeholder { color: #9aa6c9; }
+.aiw-send {
+  width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #2f5fff, #4f8cff); border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #fff;
+  box-shadow: 0 6px 16px rgba(47, 95, 255, 0.4);
+}
+.aiw-send:disabled { opacity: 0.45; cursor: not-allowed; }
+.aiw-footer-note { text-align: center; font-size: 10px; color: #9aa6c9; padding: 0 0 10px; background: rgba(6, 10, 30, 0.5); }
