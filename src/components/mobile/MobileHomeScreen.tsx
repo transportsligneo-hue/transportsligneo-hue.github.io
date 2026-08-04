@@ -88,24 +88,10 @@ export default function MobileHomeScreen() {
       <RouteThread />
 
       {/* Topbar (overlay transparent sur hero) */}
-      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-between px-5 pt-4 pb-4"
+      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-end px-5 pt-4 pb-4"
         style={{ background: "linear-gradient(180deg, rgba(4,7,18,0.55) 0%, rgba(4,7,18,0.15) 70%, transparent 100%)" }}
       >
-        <Link to="/" className="flex items-center gap-2.5 min-w-0" aria-label="Accueil">
-          <span className="shrink-0 w-9 h-9 rounded-[10px] overflow-hidden bg-[#0a1230]"
-            style={{ boxShadow: "0 0 16px rgba(63,123,255,0.55), 0 0 0 1px rgba(122,163,255,0.4)" }}
-          >
-            <img src={logoLigneo} alt="Ligneo" className="w-full h-full object-cover" loading="eager" />
-          </span>
-          <span
-            className="font-black tracking-[0.02em] text-[13.5px] leading-none text-white"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
-          >
-            TRANSPORTS{" "}
-            <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.75)]">LIGNEO</span>
 
-          </span>
-        </Link>
         <div className="flex items-center gap-2">
           <button
             onClick={() => (isAuthenticated ? navigate({ to: "/notifications" }) : navigate({ to: "/login" }))}
