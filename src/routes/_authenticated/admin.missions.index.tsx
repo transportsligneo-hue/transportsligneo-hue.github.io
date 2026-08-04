@@ -28,7 +28,7 @@ interface TrajetRow {
   mission_group_id: string | null; leg_type: string | null; leg_index: number | null;
   pricing_mode: "fixe" | "enchere" | null; prix_client_ttc: number | null;
   prix_convoyeur_fixe: number | null; prix_convoyeur_min: number | null; prix_convoyeur_max: number | null;
-  marge_indicative_pct: number | null; type_mission: string | null;
+  marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
 }
 
 interface DemandeRow {
