@@ -1,4 +1,5 @@
-import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import {
+  ClipboardList, createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -97,6 +98,7 @@ function AdminLayout() {
     { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
     { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Comptes" },
     { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Comptes" },
+    { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Comptes" },
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Comptes" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Comptes" },
 
