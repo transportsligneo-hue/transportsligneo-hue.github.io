@@ -116,6 +116,7 @@ import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
+import { Route as AuthenticatedAdminAssistantIaRouteImport } from './routes/_authenticated/admin.assistant-ia'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
@@ -740,6 +741,12 @@ const AuthenticatedAdminAttributionsRoute =
     path: '/attributions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAssistantIaRoute =
+  AuthenticatedAdminAssistantIaRouteImport.update({
+    id: '/assistant-ia',
+    path: '/assistant-ia',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAcceptationsRoute =
   AuthenticatedAdminAcceptationsRouteImport.update({
     id: '/acceptations',
@@ -924,6 +931,7 @@ export interface FileRoutesByFullPath {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1051,6 +1059,7 @@ export interface FileRoutesByTo {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1185,6 +1194,7 @@ export interface FileRoutesById {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
@@ -1320,6 +1330,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
+    | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1447,6 +1458,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
+    | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
@@ -1580,6 +1592,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
+    | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
     | '/_authenticated/admin/b2b-leads'
@@ -2475,6 +2488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAttributionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/assistant-ia': {
+      id: '/_authenticated/admin/assistant-ia'
+      path: '/assistant-ia'
+      fullPath: '/admin/assistant-ia'
+      preLoaderRoute: typeof AuthenticatedAdminAssistantIaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/acceptations': {
       id: '/_authenticated/admin/acceptations'
       path: '/acceptations'
@@ -2714,6 +2734,7 @@ const AuthenticatedAdminOrganisationsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAcceptationsRoute: typeof AuthenticatedAdminAcceptationsRoute
+  AuthenticatedAdminAssistantIaRoute: typeof AuthenticatedAdminAssistantIaRoute
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
@@ -2745,6 +2766,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAcceptationsRoute: AuthenticatedAdminAcceptationsRoute,
+  AuthenticatedAdminAssistantIaRoute: AuthenticatedAdminAssistantIaRoute,
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
