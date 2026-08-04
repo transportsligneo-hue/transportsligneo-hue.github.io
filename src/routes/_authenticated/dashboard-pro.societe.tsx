@@ -84,10 +84,13 @@ function ProSociete() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-pro-text">Ma société</h1>
-        <p className="text-pro-muted text-sm mt-0.5">Informations de facturation et de contact</p>
-      </div>
+      <FleetPageHeader
+        breadcrumb="Ma société"
+        eyebrow="Paramètres"
+        title="Ma"
+        highlight="société"
+        subtitle="Informations de facturation et de contact."
+      />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-pro-border p-6 space-y-5">
         <div className="flex items-center gap-3 pb-4 border-b border-pro-border">
