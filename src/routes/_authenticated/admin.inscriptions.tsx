@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   RefreshCw, Check, X, AlertTriangle, Mail, FileCheck2, Bell, Loader2, Search,
@@ -178,9 +178,8 @@ function AdminInscriptions() {
                 const failed = (r.emails ?? []).filter((e) => e.status === "failed").length;
                 const isOpen = open === r.id;
                 return (
-                  <>
+                  <Fragment key={r.id}>
                     <tr
-                      key={r.id}
                       onClick={() => setOpen(isOpen ? null : r.id)}
                       className="border-t border-pro-border cursor-pointer hover:bg-pro-bg-soft/40"
                     >
@@ -209,7 +208,7 @@ function AdminInscriptions() {
                       <td className="px-4 py-3 text-xs text-pro-muted whitespace-nowrap">{fmt(r.created_at)}</td>
                     </tr>
                     {isOpen && (
-                      <tr key={`${r.id}-d`} className="border-t border-pro-border bg-pro-bg-soft/30">
+                      <tr className="border-t border-pro-border bg-pro-bg-soft/30">
                         <td colSpan={7} className="px-4 py-4 space-y-3">
                           <div>
                             <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-1">Détail des e-mails</p>
@@ -255,7 +254,7 @@ function AdminInscriptions() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
             </tbody>
