@@ -9,6 +9,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
+import FleetPageHeader, { FleetHeaderButton } from "@/components/flotte/FleetPageHeader";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { lookupPlate } from "@/lib/plate.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -246,24 +247,29 @@ function FleetPage() {
 
   return (
     <div className="-m-2 rounded-2xl bg-[#f7f7f9] p-4 sm:p-6 font-[Inter,ui-sans-serif,system-ui] text-[#14161c]">
-      {/* En-tête */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-[26px] font-extrabold tracking-[-0.02em]">Parc véhicules</h1>
-          <p className="mt-1 text-[13px] text-[#70727d]">
-            {orgName ? `${orgName} — ` : ""}
-            {actifs.length} véhicule{actifs.length > 1 ? "s" : ""} · documents, entretien et coûts de possession.
-          </p>
-        </div>
-        {canManage && (
-          <button
-            onClick={openCreate}
-            className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-black"
-          >
-            <Plus size={14} /> Ajouter un véhicule
-          </button>
-        )}
+      <div className="mb-6">
+        <FleetPageHeader
+          breadcrumb="Parc véhicules"
+          eyebrow={orgName ? `Parc ${orgName}` : "Gestion de parc"}
+          title="Parc"
+          highlight="véhicules"
+          badge="Flotte partenaire"
+          subtitle={`${orgName ? `${orgName} — ` : ""}${actifs.length} véhicule${actifs.length > 1 ? "s" : ""} · documents, entretien et coûts de possession.`}
+          stats={[
+            { label: "Disponibles", value: kpi.dispo },
+            { label: "En mission", value: kpi.enMission, tone: "accent" as const },
+            { label: "À surveiller", value: kpi.docs, tone: "warn" as const },
+          ]}
+          actions={
+            canManage ? (
+              <FleetHeaderButton onClick={openCreate}>
+                <Plus size={14} /> Ajouter un véhicule
+              </FleetHeaderButton>
+            ) : undefined
+          }
+        />
       </div>
+
 
       {/* Bannière d'alerte */}
       {alerts.length > 0 && (

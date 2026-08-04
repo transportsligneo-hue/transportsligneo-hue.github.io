@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -254,11 +255,15 @@ function ProDocuments() {
 
   return (
     <div className="space-y-5">
+      <FleetPageHeader
+        breadcrumb="Factures & devis"
+        eyebrow="Documents commerciaux"
+        title="Factures &"
+        highlight="devis"
+        subtitle="Tous vos documents commerciaux, au même endroit."
+      />
       <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-pro-text">Factures & devis</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Tous vos documents commerciaux</p>
-        </div>
+        <div />
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
           displayMode === "exempt"
             ? "bg-slate-100 text-slate-700"

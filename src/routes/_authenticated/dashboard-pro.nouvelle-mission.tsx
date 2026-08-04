@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, Layers, ArrowRight } from "lucide-react";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission")({
   component: NouvelleMissionChoice,
@@ -8,15 +9,14 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mis
 function NouvelleMissionChoice() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <p className="text-xs text-slate-400">Espace Flotte · Nouvelle mission</p>
-        <h1 className="mt-1 text-[26px] font-semibold tracking-tight text-slate-900">
-          Que souhaitez-vous créer&nbsp;?
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Choisissez le type de mission adapté à votre besoin.
-        </p>
-      </div>
+      <FleetPageHeader
+        breadcrumb="Nouvelle mission"
+        eyebrow="Créer une demande"
+        title="Que souhaitez-vous"
+        highlight="créer ?"
+        subtitle="Choisissez le type de mission adapté à votre besoin."
+      />
+
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Link

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -181,18 +182,21 @@ function ProMissionsIndex() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-pro-text">Missions & demandes</h1>
-          <p className="text-pro-muted text-sm mt-0.5">Suivi complet de votre activité</p>
-        </div>
-        <Link
-          to="/dashboard-pro/nouvelle-demande"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover shadow-sm"
-        >
-          <PlusCircle size={16} /> Nouvelle mission
-        </Link>
-      </div>
+      <FleetPageHeader
+        breadcrumb="Missions"
+        eyebrow="Suivi d'activité"
+        title="Toutes vos"
+        highlight="missions"
+        subtitle="De la demande à la livraison, en un seul endroit."
+        actions={
+          <Link
+            to="/dashboard-pro/nouvelle-demande"
+            className="flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+          >
+            <PlusCircle size={14} /> Nouvelle mission
+          </Link>
+        }
+      />
 
       <div className="bg-white rounded-xl border border-pro-border p-3 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">

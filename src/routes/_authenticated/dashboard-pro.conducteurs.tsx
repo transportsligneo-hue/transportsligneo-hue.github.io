@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,36 +64,19 @@ function ConducteursPage() {
 
   return (
     <div className="space-y-5">
-      {/* Hero violet */}
-      <div className="relative overflow-hidden rounded-2xl border border-pro-border bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-white to-white" aria-hidden="true" />
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-violet-200/40 blur-3xl" aria-hidden="true" />
-        <div className="relative p-5 sm:p-6 flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-sm shrink-0">
-            <Users size={22} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-violet-700 bg-violet-100 border border-violet-200 rounded-full px-2 py-0.5">
-                Flotte partenaire
-              </span>
-            </div>
-            <h1 className="text-2xl font-semibold text-pro-text mt-1.5">Mes conducteurs</h1>
-            <p className="text-pro-muted text-sm mt-0.5">
-              Convoyeurs rattachés à votre flotte, prêts à prendre des missions Ligneo.
-            </p>
-          </div>
-          <div className="hidden sm:flex flex-col items-end shrink-0">
-            <span className="text-3xl font-semibold text-pro-text leading-none">{rows.length}</span>
-            <span className="text-[11px] uppercase tracking-wider text-pro-muted mt-1">
-              conducteur{rows.length > 1 ? "s" : ""}
-            </span>
-            {actifs > 0 && (
-              <span className="text-[11px] text-violet-700 mt-1">{actifs} actif{actifs > 1 ? "s" : ""}</span>
-            )}
-          </div>
-        </div>
-      </div>
+      <FleetPageHeader
+        breadcrumb="Conducteurs"
+        eyebrow="Convoyeurs rattachés"
+        title="Mes"
+        highlight="conducteurs"
+        badge="Flotte partenaire"
+        subtitle="Convoyeurs rattachés à votre flotte, prêts à prendre des missions Ligneo."
+        stats={[
+          { label: "Conducteurs", value: rows.length },
+          { label: "Actifs", value: actifs, tone: "accent" as const },
+        ]}
+      />
+
 
       {/* Search */}
       <div className="relative max-w-md">

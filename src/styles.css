@@ -3718,3 +3718,21 @@
   animation: fleetGlowPulse 1.8s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .fleet-dot-warn::before { animation: none; } }
+
+/* ===== En-têtes Espace Flotte ===== */
+.fleet-header { animation: fleetHeaderIn .5s cubic-bezier(.2,.8,.3,1); }
+@keyframes fleetHeaderIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.fleet-header-orb { background: radial-gradient(circle, #eef2ff, transparent 70%); opacity:.6; }
+.fleet-header .font-grotesk { font-family:'Space Grotesk','Inter',sans-serif; }
+.fleet-header-dot::after { content:''; position:absolute; inset:-4px; border-radius:9999px; background:#2f5fff; opacity:.25; animation: fleetSoftPulse 2.2s ease-in-out infinite; }
+@keyframes fleetSoftPulse { 0%,100% { transform:scale(.7); opacity:.35; } 50% { transform:scale(1.4); opacity:0; } }
+.fleet-header-hl::after { content:''; position:absolute; left:0; bottom:1px; width:100%; height:7px; background:#eef2ff; z-index:-1; border-radius:3px; transform:scaleX(0); transform-origin:left; animation: fleetUnderlineIn .6s .2s cubic-bezier(.2,.8,.3,1) forwards; }
+@keyframes fleetUnderlineIn { to { transform:scaleX(1); } }
+.fleet-header-badge { position:relative; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#fff;
+  background:linear-gradient(120deg,#8f6cff,#7c5cff); padding:5px 12px; border-radius:999px; margin-left:10px; vertical-align:middle;
+  animation: fleetNeonPulse 2.4s ease-in-out infinite; }
+.fleet-header-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:#fff; box-shadow:0 0 6px #fff; flex-shrink:0; }
+@keyframes fleetNeonPulse {
+  0%,100% { box-shadow:0 0 0 1px rgba(124,92,255,.3), 0 4px 14px rgba(124,92,255,.45), 0 0 16px rgba(124,92,255,.35); }
+  50% { box-shadow:0 0 0 1px rgba(124,92,255,.5), 0 4px 18px rgba(124,92,255,.6), 0 0 26px rgba(124,92,255,.55); }
+}
