@@ -4,6 +4,8 @@ import { Bell, Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+
 
 type Variant = "light" | "dark";
 
