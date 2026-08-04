@@ -407,12 +407,23 @@ export function Modal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
-      onClick={onClose}
+      onMouseDown={(e) => {
+        // Ne ferme que si le clic commence ET finit sur le fond (évite les
+        // fermetures accidentelles lors d'une sélection de texte / drag)
+        if (e.target !== e.currentTarget) return;
+        const target = e.currentTarget;
+        const onUp = (ev: MouseEvent) => {
+          if (ev.target === target) onClose();
+          window.removeEventListener("mouseup", onUp);
+        };
+        window.addEventListener("mouseup", onUp);
+      }}
     >
       <div
         className={`bg-white rounded-xl shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden flex flex-col`}
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       >
+
         <div className="px-5 py-4 border-b border-pro-border flex items-center justify-between">
           <h3 className="text-pro-text font-semibold">{title}</h3>
           <button
