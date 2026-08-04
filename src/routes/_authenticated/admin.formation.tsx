@@ -53,21 +53,24 @@ type Tab = "suivi" | "modules";
 function AdminFormation() {
   const [tab, setTab] = useState<Tab>("suivi");
   const [modules, setModules] = useState<ModuleRow[]>([]);
+  const [trainingModules, setTrainingModules] = useState<TrainingModule[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [mods, convs, prog] = await Promise.all([
+    const [mods, tmods, convs, prog] = await Promise.all([
       supabase.from("modules").select("*").order("order_index"),
+      supabase.from("formation_modules").select("id, title, sort_order").eq("is_active", true).order("sort_order"),
       supabase
         .from("convoyeurs")
         .select("id, user_id, nom, prenom, email, statut, training_status, has_completed_training, training_completed_at")
         .order("created_at", { ascending: false }),
-      supabase.from("module_progress").select("user_id, module_id, completed, quiz_score, attempts_count"),
+      supabase.from("formation_progress").select("convoyeur_id, module_id, status, score"),
     ]);
     setModules((mods.data as unknown as ModuleRow[]) ?? []);
+    setTrainingModules((tmods.data as unknown as TrainingModule[]) ?? []);
     setDrivers((convs.data as unknown as Driver[]) ?? []);
     setProgress((prog.data as unknown as ProgressRow[]) ?? []);
     setLoading(false);
