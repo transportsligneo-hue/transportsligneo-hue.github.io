@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
 const TOUR = [
   { title: "Votre parcours", text: "8 modules à suivre dans l'ordre. Votre progression est enregistrée automatiquement." },
   { title: "Reprise automatique", text: "À chaque reconnexion, vous repartez du dernier module non terminé." },
-  { title: "Quiz et validation", text: "Chaque module se valide par un quiz (80% minimum), tentatives illimitées." },
+  { title: "Quiz et validation", text: "Chaque module se valide par un quiz (100% minimum), tentatives illimitées." },
   { title: "Besoin d'aide ?", text: "La FAQ et l'équipe Ligneo sont accessibles depuis chaque page." },
 ];
 

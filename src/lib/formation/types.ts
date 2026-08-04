@@ -29,7 +29,7 @@ export type ModuleProgress = {
   completed_at: string | null;
 };
 
-export const PASS_SCORE = 80;
+export const PASS_SCORE = 100;
 
 export function moduleStatus(p?: ModuleProgress): "todo" | "in_progress" | "done" {
   if (!p) return "todo";
