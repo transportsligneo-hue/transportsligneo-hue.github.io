@@ -390,8 +390,11 @@ function FleetPage() {
       <VehicleDetailPanel
         vehicle={selected}
         siteName={selected?.site_id ? sites[selected.site_id] : null}
+        canManage={canManage}
+        onEdit={(v) => { setSelected(null); openEdit(v); }}
         onClose={() => setSelected(null)}
       />
+
 
       {/* Modale édition */}
       {draft && (
