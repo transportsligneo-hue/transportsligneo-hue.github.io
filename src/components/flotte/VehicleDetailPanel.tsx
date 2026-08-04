@@ -110,12 +110,14 @@ export default function VehicleDetailPanel({
   vehicle,
   siteName,
   canManage = false,
+  initialTab = "general",
   onEdit,
   onClose,
 }: {
   vehicle: FleetVehicle | null;
   siteName?: string | null;
   canManage?: boolean;
+  initialTab?: TabId;
   onEdit?: (v: FleetVehicle) => void;
   onClose: () => void;
 }) {
@@ -132,7 +134,7 @@ export default function VehicleDetailPanel({
   } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { setTab("general"); setError(null); setMaintForm(null); }, [vehicle?.id]);
+  useEffect(() => { setTab(initialTab); setError(null); setMaintForm(null); }, [vehicle?.id, initialTab]);
 
   const reloadDocs = async (vehicleId: string) => {
     const { data } = await supabase
