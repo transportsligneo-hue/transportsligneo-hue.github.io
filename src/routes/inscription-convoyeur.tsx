@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { finalizeSignup } from "@/lib/signup-finalize";
+import { finalizeSignup, validateUploadFile, formatFileSize, MAX_UPLOAD_FILES } from "@/lib/signup-finalize";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
   Upload, BadgeCheck, ChevronLeft, ChevronRight, Check, ShieldCheck,
@@ -58,20 +58,34 @@ function InscriptionConvoyeur() {
   const [error, setError] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [showPwd, setShowPwd] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
-  const makeFileHandler = (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Chaque document ne doit pas dépasser 5 Mo.");
-      return;
-    }
-    setter(file);
-    setError("");
-  };
+  const selectedFiles = () => [permisFile, permisVersoFile, cniFile, ribFile, kbisFile, rcProFile, photoProfilFile].filter(Boolean).length;
+
+  const makeFileHandler = (key: string, setter: (f: File | null) => void, current: File | null) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const invalid = validateUploadFile(file);
+      if (invalid) {
+        e.target.value = "";
+        setter(null);
+        setFileErrors((f) => ({ ...f, [key]: invalid }));
+        return;
+      }
+      if (!current && selectedFiles() >= MAX_UPLOAD_FILES) {
+        e.target.value = "";
+        setFileErrors((f) => ({ ...f, [key]: `Maximum ${MAX_UPLOAD_FILES} documents.` }));
+        return;
+      }
+      setter(file);
+      setFileErrors((f) => { const n = { ...f }; delete n[key]; return n; });
+      setError("");
+    };
 
   const validateStep = (s: number): string | null => {
     if (s === 1) {
@@ -100,6 +114,7 @@ function InscriptionConvoyeur() {
       if (!rcProFile) return "Ajoutez l'attestation RC Pro.";
       if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le Kbis ou l'avis de situation SIRENE.";
       if (!photoProfilFile) return "Ajoutez une photo de profil.";
+      if (Object.keys(fileErrors).length > 0) return "Corrigez les documents refusés avant de continuer.";
     }
     return null;
   };
@@ -182,6 +197,7 @@ function InscriptionConvoyeur() {
       // Upload des documents + emails + notification admin côté serveur :
       // sans confirmation d'email il n'y a pas de session, donc rien ne pouvait
       // passer par le navigateur (storage RLS + endpoint email authentifié).
+      setUploadProgress(0);
       await finalizeSignup(userId, "convoyeur", {
         permis: permisFile,
         permis_verso: permisVersoFile,
@@ -190,7 +206,8 @@ function InscriptionConvoyeur() {
         kbis: kbisFile,
         assurance: rcProFile,
         photo_profil: photoProfilFile,
-      });
+      }, setUploadProgress);
+      setUploadProgress(100);
 
 
       if (authData.session) {
@@ -272,7 +289,7 @@ function InscriptionConvoyeur() {
     );
   }
 
-  const FileUpload = ({ label, file, onChange, hint }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string }) => (
+  const FileUpload = ({ label, file, onChange, hint, errorKey }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string; errorKey?: string }) => (
     <div>
       <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
         <Upload size={12} className="inline mr-1" /> {label}
@@ -281,9 +298,11 @@ function InscriptionConvoyeur() {
         type="file" accept="image/*,application/pdf" onChange={onChange}
         className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
       />
-      {file
-        ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name}</p>
-        : hint && <p className="text-white/40 text-[10px] mt-1">{hint}</p>}
+      {errorKey && fileErrors[errorKey]
+        ? <p className="text-red-300 text-[11px] mt-1">{fileErrors[errorKey]}</p>
+        : file
+          ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name} · {formatFileSize(file.size)}</p>
+          : hint && <p className="text-white/40 text-[10px] mt-1">{hint}</p>}
     </div>
   );
 
@@ -413,8 +432,8 @@ function InscriptionConvoyeur() {
                 <p className="text-[10px] text-white/50 mt-1">Permis B requis depuis 3 ans minimum.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FileUpload label="Permis (recto) *" file={permisFile} onChange={makeFileHandler(setPermisFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
-                <FileUpload label="Permis (verso) *" file={permisVersoFile} onChange={makeFileHandler(setPermisVersoFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+                <FileUpload label="Permis (recto) *" file={permisFile} errorKey="permis" onChange={makeFileHandler("permis", setPermisFile, permisFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+                <FileUpload label="Permis (verso) *" file={permisVersoFile} errorKey="permis_verso" onChange={makeFileHandler("permis_verso", setPermisVersoFile, permisVersoFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
@@ -441,13 +460,13 @@ function InscriptionConvoyeur() {
           {step === 3 && (
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.15em] text-blue-200">Documents officiels</p>
-              <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} onChange={makeFileHandler(setCniFile)} />
+              <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} errorKey="identite" onChange={makeFileHandler("identite", setCniFile, cniFile)} />
               {form.type_convoyeur === "independant" && (
-                <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} onChange={makeFileHandler(setKbisFile)} />
+                <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} errorKey="kbis" onChange={makeFileHandler("kbis", setKbisFile, kbisFile)} />
               )}
-              <FileUpload label="RIB *" file={ribFile} onChange={makeFileHandler(setRibFile)} />
+              <FileUpload label="RIB *" file={ribFile} errorKey="rib" onChange={makeFileHandler("rib", setRibFile, ribFile)} />
               <div>
-                <FileUpload label="Attestation RC Pro *" file={rcProFile} onChange={makeFileHandler(setRcProFile)} />
+                <FileUpload label="Attestation RC Pro *" file={rcProFile} errorKey="assurance" onChange={makeFileHandler("assurance", setRcProFile, rcProFile)} />
                 <p className="text-[11px] text-white/55 mt-1.5">
                   Pas encore d'assurance RC Pro ?{" "}
                   <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous accompagne.
@@ -458,11 +477,11 @@ function InscriptionConvoyeur() {
                   <ImageIcon size={12} className="inline mr-1" /> Photo de profil *
                 </label>
                 <input
-                  type="file" accept="image/*" onChange={makeFileHandler(setPhotoProfilFile)}
+                  type="file" accept="image/*" onChange={makeFileHandler("photo_profil", setPhotoProfilFile, photoProfilFile)}
                   className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
                 />
                 {photoProfilFile
-                  ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {photoProfilFile.name}</p>
+                  ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {photoProfilFile.name} · {formatFileSize(photoProfilFile.size)}</p>
                   : <p className="text-white/40 text-[10px] mt-1">Portrait clair, format carré recommandé.</p>}
               </div>
               <div>
@@ -500,6 +519,18 @@ function InscriptionConvoyeur() {
               <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
                 <ShieldCheck size={14} className="inline text-blue-300 mr-1" />
                 Votre dossier est étudié par notre équipe sous 24 à 48 h ouvrées, pas des semaines. Après validation, vous recevrez le contrat de partenariat à signer électroniquement.
+              </div>
+            </div>
+          )}
+
+          {uploadProgress !== null && (
+            <div className="rounded-xl border border-blue-400/25 bg-blue-500/10 px-4 py-3">
+              <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-blue-100 mb-2">
+                <span>{uploadProgress < 100 ? "Envoi des documents…" : "Documents transmis"}</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-300 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
               </div>
             </div>
           )}
