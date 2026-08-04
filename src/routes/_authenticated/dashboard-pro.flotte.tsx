@@ -10,6 +10,9 @@ import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import { lookupPlate } from "@/lib/plate.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
@@ -66,6 +69,38 @@ function FleetPage() {
   const [selected, setSelected] = useState<Vehicle | null>(null);
   const [panelTab, setPanelTab] = useState<"general" | "documents" | "entretien" | "historique">("general");
   const [saving, setSaving] = useState(false);
+  const [plateBusy, setPlateBusy] = useState(false);
+  const lookupPlateFn = useServerFn(lookupPlate);
+
+  const handlePlateLookup = async () => {
+    const plate = (draft?.immatriculation || "").trim();
+    if (plate.length < 4) {
+      toast.error("Saisissez une plaque valide");
+      return;
+    }
+    setPlateBusy(true);
+    try {
+      const result = await lookupPlateFn({ data: { plate } });
+      if (!result.ok || !result.data) {
+        toast.error(result.error || "Aucune donnée trouvée · remplissez manuellement");
+        return;
+      }
+      const d = result.data;
+      setDraft((prev) => ({
+        ...(prev || {}),
+        marque: prev?.marque || d.marque || prev?.marque || null,
+        modele: prev?.modele || d.modele || prev?.modele || null,
+        vin: prev?.vin || d.vin || prev?.vin || null,
+        energie: prev?.energie || d.carburant || prev?.energie || null,
+      }));
+      toast.success("Informations véhicule récupérées");
+    } catch {
+      toast.error("Service indisponible · remplissez manuellement");
+    } finally {
+      setPlateBusy(false);
+    }
+  };
+
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -423,7 +458,27 @@ function FleetPage() {
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Immatriculation" value={draft.immatriculation || ""} onChange={(v) => setDraft({ ...draft, immatriculation: v })} />
+                <div className="col-span-2">
+                  <label className="mb-1 block text-xs font-medium text-[#70727d]">Immatriculation</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={draft.immatriculation || ""}
+                      onChange={(e) => setDraft({ ...draft, immatriculation: e.target.value.toUpperCase() })}
+                      placeholder="AA-123-BB"
+                      className="w-full rounded-lg border border-[#eaeaee] px-3 py-2 text-sm uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={handlePlateLookup}
+                      disabled={plateBusy}
+                      className="flex shrink-0 items-center gap-1.5 rounded-lg bg-[#1a1c25] px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                    >
+                      {plateBusy ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
+                      Rechercher
+                    </button>
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#70727d]">Renseigne automatiquement marque, modèle, VIN et énergie.</p>
+                </div>
                 <Field label="VIN" value={draft.vin || ""} onChange={(v) => setDraft({ ...draft, vin: v.toUpperCase() })} />
                 <Field label="Marque" value={draft.marque || ""} onChange={(v) => setDraft({ ...draft, marque: v })} />
                 <Field label="Modèle" value={draft.modele || ""} onChange={(v) => setDraft({ ...draft, modele: v })} />
