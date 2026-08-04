@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/docume
   component: DocumentsPage,
 });
 
-type Doc = { id: string; type_document: string; statut: string | null; date_expiration: string | null; created_at: string };
+type Doc = { id: string; type_document: string; nom_fichier: string; statut_validation: string; created_at: string };
 
 function DocumentsPage() {
   const { user } = useAuth();
@@ -28,7 +28,7 @@ function DocumentsPage() {
       if (conv?.id) {
         const { data } = await supabase
           .from("documents_convoyeurs")
-          .select("id, type_document, statut, date_expiration, created_at")
+          .select("id, type_document, nom_fichier, statut_validation, created_at")
           .eq("convoyeur_id", conv.id)
           .order("created_at", { ascending: false });
         setDocs((data as Doc[]) ?? []);
@@ -60,21 +60,20 @@ function DocumentsPage() {
       ) : (
         <ul className="space-y-2">
           {docs.map((d) => {
-            const exp = d.date_expiration ? new Date(d.date_expiration) : null;
-            const expiring = exp ? exp.getTime() - Date.now() < 1000 * 60 * 60 * 24 * 30 : false;
-            const valid = (d.statut ?? "").toLowerCase().includes("valid");
+            const valid = d.statut_validation === "approuve";
+            const refused = d.statut_validation === "refuse";
             return (
               <li key={d.id} className="rounded-xl border border-pro-border bg-white p-4 flex items-center gap-3">
                 <FileText size={16} className="text-pro-muted shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-pro-text capitalize">{d.type_document.replace(/_/g, " ")}</p>
                   <p className="text-xs text-pro-muted">
-                    {exp ? `Expire le ${exp.toLocaleDateString("fr-FR")}` : "Sans date d'expiration"}
+                    {d.nom_fichier} · déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
-                {expiring ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2.5 py-1 text-[11px] font-semibold">
-                    <AlertTriangle size={12} /> À renouveler
+                {refused ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 px-2.5 py-1 text-[11px] font-semibold">
+                    <AlertTriangle size={12} /> Refusé
                   </span>
                 ) : valid ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold">
@@ -82,7 +81,7 @@ function DocumentsPage() {
                   </span>
                 ) : (
                   <span className="rounded-full bg-pro-bg-soft text-pro-muted px-2.5 py-1 text-[11px] font-semibold">
-                    {d.statut ?? "En attente"}
+                    En attente
                   </span>
                 )}
               </li>
