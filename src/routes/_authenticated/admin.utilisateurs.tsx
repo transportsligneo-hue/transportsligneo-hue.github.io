@@ -158,18 +158,14 @@ function AdminUtilisateurs() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-pro-accent/10 flex items-center justify-center">
-            <Users className="text-pro-accent" size={22} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-pro-text">Utilisateurs</h1>
-            <p className="text-sm text-pro-muted">Contrôle total : voir, modifier, suspendre, supprimer.</p>
-          </div>
-        </div>
-        <CreateAccountDialog onCreated={() => void loadUsers()} />
-      </header>
+      <AdminSectionHeader
+        breadcrumb="Utilisateurs"
+        eyebrow="Comptes & accès"
+        title="Utilisateurs"
+        subtitle="Contrôle total : voir, modifier, suspendre, supprimer."
+        actions={<CreateAccountDialog onCreated={() => void loadUsers()} />}
+      />
+
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KpiCard label="Total" value={counts.total} icon={Users} />
