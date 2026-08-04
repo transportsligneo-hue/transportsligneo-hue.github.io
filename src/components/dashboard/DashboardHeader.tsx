@@ -232,6 +232,9 @@ export function DashboardHeader({
     : "bg-white border border-pro-border shadow-xl";
 
   const initial = (user?.email ?? "U").charAt(0).toUpperCase();
+  const { data: orgInfo } = useCurrentOrgAccountType();
+  const orgLogoUrl = orgInfo?.logoUrl ?? null;
+  const orgName = orgInfo?.name ?? null;
 
   const typeLabel: Record<SearchResult["type"], string> = {
     demande: "Demande",
