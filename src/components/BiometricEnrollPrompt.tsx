@@ -8,6 +8,8 @@ import {
 } from "@/lib/biometric";
 
 const DISMISS_KEY = (uid: string) => `ligneo_bio_prompt_dismissed_${uid}`;
+/** Refus global : l'utilisateur ne veut pas de cette option, tous comptes confondus. */
+const DISMISS_GLOBAL_KEY = "ligneo_bio_prompt_dismissed";
 
 export default function BiometricEnrollPrompt() {
   const { user } = useAuth();
@@ -21,7 +23,10 @@ export default function BiometricEnrollPrompt() {
     (async () => {
       if (hasBiometricEnrolled(user.id)) return;
       try {
-        if (localStorage.getItem(DISMISS_KEY(user.id)) === "1") return;
+        if (
+          localStorage.getItem(DISMISS_GLOBAL_KEY) === "1" ||
+          localStorage.getItem(DISMISS_KEY(user.id)) === "1"
+        ) return;
       } catch { /* ignore */ }
       const supported = await isBiometricSupported();
       if (!cancelled && supported) setVisible(true);
@@ -47,14 +52,17 @@ export default function BiometricEnrollPrompt() {
   };
 
   const handleDismiss = () => {
-    try { localStorage.setItem(DISMISS_KEY(user.id), "1"); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(DISMISS_KEY(user.id), "1");
+      localStorage.setItem(DISMISS_GLOBAL_KEY, "1");
+    } catch { /* ignore */ }
     setVisible(false);
   };
 
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-1.5rem)] max-w-md
+    <div className="fixed left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-1.5rem)] max-w-md pointer-events-none
       bottom-[calc(env(safe-area-inset-bottom)+80px)] md:bottom-6">
-      <div className="relative rounded-2xl border border-blue-400/30 bg-[#0a1740]/95 backdrop-blur-xl p-4 pr-10 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-auto relative rounded-2xl border border-blue-400/30 bg-[#0a1740]/95 backdrop-blur-xl p-4 pr-10 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
         <button
           type="button"
           onClick={handleDismiss}
