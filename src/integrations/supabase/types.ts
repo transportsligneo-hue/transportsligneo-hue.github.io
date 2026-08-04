@@ -3475,6 +3475,57 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_events: {
+        Row: {
+          created_at: string
+          documents_expected: number
+          documents_rejected: Json
+          documents_uploaded: number
+          email: string | null
+          emails: Json
+          error_message: string | null
+          full_name: string | null
+          id: string
+          kind: string
+          notification_created: boolean
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          documents_expected?: number
+          documents_rejected?: Json
+          documents_uploaded?: number
+          email?: string | null
+          emails?: Json
+          error_message?: string | null
+          full_name?: string | null
+          id?: string
+          kind: string
+          notification_created?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          documents_expected?: number
+          documents_rejected?: Json
+          documents_uploaded?: number
+          email?: string | null
+          emails?: Json
+          error_message?: string | null
+          full_name?: string | null
+          id?: string
+          kind?: string
+          notification_created?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
