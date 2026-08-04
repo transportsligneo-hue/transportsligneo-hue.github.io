@@ -1,647 +1,648 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
-import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
-import { ArrowLeft, Check, Search, Loader2, Layers, MapPin, Calendar, ChevronRight, Plus } from "lucide-react";
+import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
+import { lookupPlate } from "@/lib/plate.functions";
+import PlacesInput from "@/components/PlacesInput";
+import {
+  ArrowLeft, Layers, Search, Loader2, Plus, X, Check, Zap, Fuel, Sparkle,
+  Clock, Send, Star, ChevronDown,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
-  component: GroupedMissionFlow,
+  component: GroupedMissionForm,
 });
 
-type Vehicle = {
+const VAT_RATE = 0.2;
+
+const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Zap }[] = [
+  { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
+  { key: "plein_essence", label: "Plein d'essence", desc: "Faire le plein avant livraison", Icon: Fuel },
+  { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
+];
+
+interface FavoriteAddress {
   id: string;
-  immatriculation: string | null;
-  marque: string | null;
-  modele: string | null;
-  energie: string | null;
-  statut: "actif" | "en_mission" | "indispo" | "archive";
+  label: string;
+  address: string;
+  ville: string | null;
+  code_postal: string | null;
+  address_type: "depart" | "arrivee" | "both";
+  contact_nom: string | null;
+  contact_tel: string | null;
+  is_default: boolean;
+}
+
+type VehicleRow = {
+  key: string;
+  immat: string;
+  marque: string;
+  modele: string;
+  energie: string;
+  type: string;
+  vin: string;
+  km: string;
+  notes: string;
+  arrivee: string;
+  open: boolean;
+  busy: boolean;
+  options: Partial<Record<OptionKey, boolean>>;
+  optionsOverride: boolean;
 };
 
-type TimeSlot = "matin" | "apres_midi" | "journee";
+const newRow = (): VehicleRow => ({
+  key: crypto.randomUUID(),
+  immat: "", marque: "", modele: "", energie: "", type: "", vin: "", km: "", notes: "",
+  arrivee: "", open: false, busy: false, options: {}, optionsOverride: false,
+});
 
-type Step = 1 | 2 | 3 | 4;
+const fieldCls =
+  "w-full rounded-[9px] border border-slate-200 bg-slate-50/70 px-3 py-2.5 text-[13.5px] text-slate-900 outline-none transition focus:border-[#2f5fff] focus:bg-white";
+const labelCls =
+  "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.03em] text-slate-400";
 
-function GroupedMissionFlow() {
+function eur(n: number) {
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
+}
+
+function GroupedMissionForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const resolvePrice = useServerFn(resolvePersonalizedPrice);
   const createGrouped = useServerFn(createGroupedMission);
 
-  const [step, setStep] = useState<Step>(1);
-  const [orgId, setOrgId] = useState<string | null>(null);
-  const [orgIds, setOrgIds] = useState<string[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState("");
-  const [showAdhoc, setShowAdhoc] = useState(false);
-  const [adhoc, setAdhoc] = useState({ immatriculation: "", marque: "", modele: "" });
+  const [profile, setProfile] = useState<{ email: string; display: "ttc" | "ht" | "exempt" } | null>(null);
+  const [favorites, setFavorites] = useState<FavoriteAddress[]>([]);
 
-
+  // Bloc 1 — trajet commun
   const [depart, setDepart] = useState("");
+  const [contactNom, setContactNom] = useState("");
+  const [contactTel, setContactTel] = useState("");
+  const [sameDest, setSameDest] = useState(true);
   const [commonArrivee, setCommonArrivee] = useState("");
-  const [perVehicle, setPerVehicle] = useState(false);
-  const [arrivees, setArrivees] = useState<Record<string, string>>({});
+
+  // Bloc 2 — véhicules
+  const [rows, setRows] = useState<VehicleRow[]>([newRow(), newRow()]);
+
+  // Bloc 3 — options communes
+  const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
+
+  // Bloc 4 — planning
   const [date, setDate] = useState("");
-  const [timeSlot, setTimeSlot] = useState<TimeSlot>("matin");
+  const [heure, setHeure] = useState("");
+  const [message, setMessage] = useState("");
 
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [pricing, setPricing] = useState(false);
-  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ ref: string; ids: string[] } | null>(null);
+  const [result, setResult] = useState<{ ref: string; count: number } | null>(null);
 
-  // Charge le parc de véhicules
+  // Chargement profil + adresses favorites
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
     (async () => {
-      const [{ data: profile }, { data: mems }] = await Promise.all([
+      const [{ data: p }, { data: fav }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("organization_id")
+          .select("email, pricing_display_mode")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
-          .from("organization_members")
-          .select("organization_id")
-          .eq("user_id", user.id)
-          .eq("status", "active"),
+          .from("client_default_addresses" as never)
+          .select("id, label, address, ville, code_postal, address_type, contact_nom, contact_tel, is_default")
+          .eq("active", true)
+          .order("is_default", { ascending: false }),
       ]);
-
-      const ids = Array.from(new Set([
-        profile?.organization_id,
-        ...((mems ?? []).map((m) => m.organization_id)),
-      ].filter(Boolean))) as string[];
-
-      if (ids.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const oid = ids[0];
-      setOrgId(oid);
-      setOrgIds(ids);
-
-      const [{ data: veh }, { data: org }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("id, immatriculation, marque, modele, energie, statut")
-          .in("organization_id", ids)
-          .neq("statut", "archive")
-          .order("created_at", { ascending: false }),
-        supabase.from("organizations").select("address, commercial_name, legal_name").eq("id", oid).maybeSingle(),
-      ]);
-      setVehicles((veh ?? []) as Vehicle[]);
-      const addr = (org as { address?: string | null } | null)?.address;
-      if (addr) setDepart(addr);
-      setLoading(false);
+      if (cancelled) return;
+      const pp = p as { email?: string; pricing_display_mode?: string } | null;
+      setProfile({
+        email: pp?.email ?? user.email ?? "",
+        display: (pp?.pricing_display_mode as "ttc" | "ht" | "exempt") ?? "ttc",
+      });
+      setFavorites(((fav as unknown as FavoriteAddress[]) ?? []));
     })();
+    return () => { cancelled = true; };
   }, [user]);
 
+  const fullAddress = (f: FavoriteAddress) =>
+    [f.address, [f.code_postal, f.ville].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return vehicles;
-    return vehicles.filter((v) =>
-      [v.immatriculation, v.marque, v.modele].filter(Boolean).some((s) => s!.toLowerCase().includes(q)),
-    );
-  }, [vehicles, search]);
-
-  const selectedVehicles = useMemo(
-    () => vehicles.filter((v) => selected.has(v.id)),
-    [vehicles, selected],
-  );
-
-  const availableVehicleIds = useMemo(
-    () => filtered.filter((v) => v.statut === "actif").map((v) => v.id),
-    [filtered],
-  );
-
-  const allVisibleAvailableSelected = availableVehicleIds.length > 0 && availableVehicleIds.every((id) => selected.has(id));
-
-  const toggle = (id: string, disabled: boolean) => {
-    if (disabled) return;
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  // Véhicules saisis à la volée (hors parc) : ajoutés localement à la sélection
-  const addAdhocVehicle = () => {
-    const id = crypto.randomUUID();
-    const v: Vehicle = {
-      id,
-      immatriculation: adhoc.immatriculation.trim() || null,
-      marque: adhoc.marque.trim() || null,
-      modele: adhoc.modele.trim() || null,
-      energie: null,
-      statut: "actif",
-    };
-    setVehicles((prev) => [v, ...prev]);
-    setSelected((prev) => new Set(prev).add(id));
-    setAdhoc({ immatriculation: "", marque: "", modele: "" });
-    setSearch("");
-  };
-
-
-  const toggleAllVisible = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (allVisibleAvailableSelected) {
-        availableVehicleIds.forEach((id) => next.delete(id));
-      } else {
-        availableVehicleIds.forEach((id) => next.add(id));
-      }
-      return next;
-    });
-  };
-
-  const canGoStep2 = selected.size > 0;
-  const canGoStep3 = (() => {
-    if (!depart.trim() || !date) return false;
-    if (perVehicle) {
-      return selectedVehicles.every((v) => (arrivees[v.id] ?? "").trim().length >= 2);
-    }
-    return commonArrivee.trim().length >= 2;
-  })();
-
-  // Calcul prix à l'entrée de l'étape 3
+  // Préremplissage adresse d'enlèvement par défaut
   useEffect(() => {
-    if (step !== 3) return;
-    void (async () => {
-      setPricing(true);
-      try {
-        const results: Record<string, number> = {};
-        for (const v of selectedVehicles) {
-          const arr = perVehicle ? (arrivees[v.id] ?? "") : commonArrivee;
-          const fallback = calculateBasePrice(depart, arr, "aller_simple").base;
-          try {
-            const r = await resolvePrice({
-              data: { depart, arrivee: arr, isAllerRetour: false, fallbackPrice: fallback },
-            });
-            results[v.id] = r.price;
-          } catch {
-            results[v.id] = fallback;
-          }
-        }
-        setPrices(results);
-      } finally {
-        setPricing(false);
+    if (!favorites.length || depart) return;
+    const def = favorites.find((f) => f.is_default && (f.address_type === "depart" || f.address_type === "both"))
+      ?? favorites.find((f) => f.address_type === "depart" || f.address_type === "both");
+    if (def) {
+      setDepart(fullAddress(def));
+      if (def.contact_nom) setContactNom(def.contact_nom);
+      if (def.contact_tel) setContactTel(def.contact_tel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites]);
+
+  const patchRow = useCallback((key: string, patch: Partial<VehicleRow>) => {
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+  }, []);
+
+  // Récupération auto par plaque (même logique que Mission simple)
+  const fetchPlate = async (row: VehicleRow) => {
+    const plate = row.immat.trim();
+    if (plate.length < 4) {
+      toast.error("Saisissez une plaque valide");
+      return;
+    }
+    patchRow(row.key, { busy: true });
+    try {
+      const result = await lookupPlate({ data: { plate } });
+      if (!result.ok || !result.data) {
+        toast.error(result.error || "Aucune donnée trouvée · remplissez manuellement");
+        return;
       }
+      const d = result.data;
+      const patch: Partial<VehicleRow> = {};
+      if (d.marque) patch.marque = d.marque;
+      if (d.modele) patch.modele = d.modele;
+      if (d.vin) patch.vin = d.vin;
+      if (d.carburant) {
+        const c = d.carburant.toLowerCase();
+        if (c.includes("élec") || c.includes("elec") || c.includes("ev")) patch.energie = "electrique";
+        else if (c.includes("hyb") && c.includes("rech")) patch.energie = "hybride_rechargeable";
+        else if (c.includes("hyb")) patch.energie = "hybride";
+        else if (c.includes("diesel") || c.includes("gazole")) patch.energie = "diesel";
+        else if (c.includes("gpl")) patch.energie = "gpl";
+        else if (c.includes("ess")) patch.energie = "essence";
+      }
+      patchRow(row.key, patch);
+      toast.success("Informations véhicule récupérées");
+    } catch {
+      toast.error("Service indisponible · remplissez manuellement");
+    } finally {
+      patchRow(row.key, { busy: false });
+    }
+  };
+
+  const destFor = useCallback(
+    (r: VehicleRow) => (sameDest ? commonArrivee : r.arrivee),
+    [sameDest, commonArrivee],
+  );
+
+  const filledRows = useMemo(
+    () => rows.filter((r) => r.immat.trim().length >= 4 && destFor(r).trim().length >= 2),
+    [rows, destFor],
+  );
+
+  // Estimation par véhicule — même moteur tarifaire que Mission simple
+  const rowsSignature = filledRows.map((r) => `${r.key}|${destFor(r)}|${JSON.stringify(r.optionsOverride ? r.options : options)}`).join(";");
+  useEffect(() => {
+    if (!profile || !depart) { setPrices({}); return; }
+    if (filledRows.length === 0) { setPrices({}); return; }
+    let cancelled = false;
+    setPricing(true);
+    (async () => {
+      const out: Record<string, number> = {};
+      for (const r of filledRows) {
+        const arr = destFor(r);
+        const opts = r.optionsOverride ? r.options : options;
+        try {
+          const custom = await resolveClientPrice({
+            userId: user?.id ?? null,
+            email: profile.email,
+            depart,
+            arrivee: arr,
+            tripType: "aller",
+          });
+          if (custom) {
+            const sup = computeOptionSupplements(custom.supplements, opts);
+            out[r.key] = Math.round((custom.prix_ttc + sup.total) * 100) / 100;
+            continue;
+          }
+        } catch { /* fallback standard */ }
+        const std = calculateBasePrice(depart, arr, "aller_simple");
+        if (std.base > 0) out[r.key] = std.base;
+      }
+      if (!cancelled) { setPrices(out); setPricing(false); }
     })();
-  }, [step, selectedVehicles, perVehicle, arrivees, commonArrivee, depart, resolvePrice]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [depart, rowsSignature, profile, user]);
 
   const total = useMemo(
-    () => selectedVehicles.reduce((s, v) => s + (prices[v.id] ?? 0), 0),
-    [selectedVehicles, prices],
+    () => filledRows.reduce((s, r) => s + (prices[r.key] ?? 0), 0),
+    [filledRows, prices],
   );
 
+  const canSubmit =
+    depart.trim().length >= 2 &&
+    !!date &&
+    filledRows.length > 0 &&
+    rows.every((r) => (r.immat.trim() ? destFor(r).trim().length >= 2 : true)) &&
+    !submitting;
+
   const submit = async () => {
+    if (!canSubmit) return;
     setSubmitting(true);
     try {
       const res = await createGrouped({
         data: {
           depart,
           date,
-          timeSlot,
+          heure,
+          contactDepartNom: contactNom,
+          contactDepartTel: contactTel,
           message,
-          vehicles: selectedVehicles.map((v) => ({
-            vehicleId: v.id,
-            immatriculation: v.immatriculation,
-            marque: v.marque,
-            modele: v.modele,
-            energie: v.energie,
-            arrivee: perVehicle ? (arrivees[v.id] ?? "") : commonArrivee,
-            prixTtc: prices[v.id] ?? 0,
+          vehicles: filledRows.map((r) => ({
+            vehicleId: null,
+            immatriculation: r.immat.trim().toUpperCase(),
+            vin: r.vin || null,
+            marque: r.marque || null,
+            modele: r.modele || null,
+            energie: r.energie || null,
+            type: r.type || null,
+            km: r.km ? parseInt(r.km, 10) : null,
+            notes: r.notes || null,
+            arrivee: destFor(r),
+            prixTtc: prices[r.key] ?? 0,
+            optionsMeta: Object.fromEntries(
+              Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
+            ) as Record<string, boolean>,
           })),
         },
       });
-      setResult({ ref: res.groupReference, ids: res.demandeIds });
-      setStep(4);
+      setResult({ ref: res.groupReference, count: res.count });
       toast.success(`Mission groupée créée · ${res.groupReference}`);
     } catch (e) {
       console.error("[grouped-mission] submit failed", e);
-      const msg = (e as { message?: string })?.message || String(e);
-      toast.error(`Impossible de créer la mission : ${msg}`);
+      toast.error(`Impossible de créer la mission : ${(e as { message?: string })?.message ?? e}`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <Link
-            to="/dashboard-pro/nouvelle-mission"
-            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-[#2f5fff]"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> Retour au choix
-          </Link>
-          <h1 className="mt-1 text-[24px] font-semibold tracking-tight text-slate-900 flex items-center gap-2">
-            <Layers className="h-6 w-6 text-[#7c5cff]" /> Mission groupée
-          </h1>
+  if (result) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center space-y-5">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e9f7ee] text-[#16a34a]">
+          <Check className="h-7 w-7" />
         </div>
-        <div className="flex items-center gap-2">
-          {([1, 2, 3, 4] as Step[]).map((n) => (
-            <div
-              key={n}
-              className={`h-8 w-8 rounded-full text-xs font-semibold flex items-center justify-center border transition ${
-                step === n
-                  ? "bg-[#7c5cff] text-white border-[#7c5cff]"
-                  : step > n
-                    ? "bg-[#f0ecff] text-[#5334d6] border-[#f0ecff]"
-                    : "bg-white text-slate-400 border-slate-200"
-              }`}
-            >
-              {step > n ? <Check className="h-4 w-4" /> : n}
-            </div>
-          ))}
+        <h1 className="text-2xl font-bold text-slate-900">Mission groupée envoyée</h1>
+        <p className="text-slate-500 text-sm">
+          {result.count} véhicule{result.count > 1 ? "s" : ""} · référence de groupe{" "}
+          <b className="text-slate-900">{result.ref}</b>. Votre demande sera traitée sous 24 h.
+        </p>
+        <div className="flex justify-center gap-3 pt-2">
+          <button
+            onClick={() => navigate({ to: "/dashboard-pro/missions" })}
+            className="fleet-btn-violet rounded-[11px] px-5 py-3 text-[13.5px] font-semibold text-white"
+          >
+            Voir mes missions
+          </button>
+          <button
+            onClick={() => { setResult(null); setRows([newRow(), newRow()]); setPrices({}); }}
+            className="rounded-[11px] border border-slate-200 px-5 py-3 text-[13.5px] font-semibold text-slate-600 hover:border-slate-300"
+          >
+            Nouvelle mission groupée
+          </button>
         </div>
       </div>
+    );
+  }
 
-      {loading && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-        </div>
-      )}
+  return (
+    <div className="max-w-[920px] mx-auto pb-16">
+      <Link
+        to="/dashboard-pro/nouvelle-mission"
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-slate-500 hover:text-slate-900"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> Retour au choix
+      </Link>
+      <div className="mt-3 text-xs text-slate-400">
+        Espace Flotte / Nouvelle mission / <b className="text-slate-900 font-semibold">Mission groupée</b>
+      </div>
+      <h1 className="mt-1.5 flex items-center gap-2 text-[24px] font-extrabold tracking-[-0.02em] text-slate-900">
+        <Layers className="h-6 w-6 text-[#7c5cff]" /> Mission groupée
+      </h1>
+      <p className="mt-1 text-[13.5px] text-slate-500">
+        Convoyez plusieurs véhicules de votre parc en une seule demande.
+      </p>
+      <span className="mt-3 mb-6 inline-flex items-center gap-2 rounded-full bg-[#e9f7ee] px-3.5 py-1.5 text-xs font-semibold text-[#16a34a]">
+        <Zap className="h-3.5 w-3.5" /> ~3× plus rapide qu'une saisie mission par mission
+      </span>
 
-      {!loading && !orgId && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
-          Aucune organisation active liée à votre compte. Impossible de créer une mission groupée.
-        </div>
-      )}
-
-      {!loading && orgId && step === 1 && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                <Search className="h-4 w-4 text-slate-400" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Rechercher par modèle ou plaque…"
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-                />
-              </div>
+      {/* 1 — Trajet commun */}
+      <Card num="1" title="Trajet commun">
+        <span className={labelCls}>Lieu d'enlèvement</span>
+        {favorites.filter((f) => f.address_type !== "arrivee").length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {favorites.filter((f) => f.address_type !== "arrivee").map((f) => (
               <button
+                key={f.id}
                 type="button"
-                onClick={toggleAllVisible}
-                disabled={availableVehicleIds.length === 0}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#7c5cff] hover:text-[#5334d6] disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() => {
+                  setDepart(fullAddress(f));
+                  if (f.contact_nom) setContactNom(f.contact_nom);
+                  if (f.contact_tel) setContactTel(f.contact_tel);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#f0e0b8] bg-[#fbf3e0] px-3 py-1.5 text-xs font-semibold text-[#a8791f]"
               >
-                {allVisibleAvailableSelected ? "Tout désélectionner" : "Tout sélectionner"}
+                <Star className="h-3 w-3" /> {f.label}
               </button>
-              <button
-                type="button"
-                onClick={() => setShowAdhoc((s) => !s)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#7c5cff] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#5334d6]"
-              >
-                <Plus className="h-3.5 w-3.5" /> Ajouter un véhicule
-              </button>
-            </div>
+            ))}
+          </div>
+        )}
+        <PlacesInput value={depart} onChange={setDepart} placeholder="Adresse d'enlèvement" className={fieldCls} />
+        <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
+          <div>
+            <span className={labelCls}>Contact sur place</span>
+            <input className={fieldCls} value={contactNom} onChange={(e) => setContactNom(e.target.value)} placeholder="Nom du contact" />
+          </div>
+          <div>
+            <span className={labelCls}>Téléphone</span>
+            <input className={fieldCls} value={contactTel} onChange={(e) => setContactTel(e.target.value)} placeholder="06 12 34 56 78" />
+          </div>
+        </div>
 
-            {showAdhoc && (
-              <div className="mt-4 rounded-xl border border-[#e0d8fb] bg-[#faf8ff] p-4">
-                <p className="text-xs font-semibold text-[#5334d6] mb-3">
-                  Véhicule hors parc (ajouté uniquement à cette mission groupée)
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                  <input
-                    value={adhoc.immatriculation}
-                    onChange={(e) => setAdhoc({ ...adhoc, immatriculation: e.target.value.toUpperCase() })}
-                    placeholder="Immatriculation"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
-                  />
-                  <input
-                    value={adhoc.marque}
-                    onChange={(e) => setAdhoc({ ...adhoc, marque: e.target.value })}
-                    placeholder="Marque"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
-                  />
-                  <input
-                    value={adhoc.modele}
-                    onChange={(e) => setAdhoc({ ...adhoc, modele: e.target.value })}
-                    placeholder="Modèle"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#7c5cff]"
-                  />
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-[11px] border border-slate-200 bg-slate-50/70 px-4 py-3">
+          <div>
+            <div className="text-[13px] font-semibold text-slate-900">Livraison identique pour tous les véhicules</div>
+            <div className="text-[11.5px] text-slate-500">Désactivez si chaque véhicule a une destination différente</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSameDest((v) => !v)}
+            aria-pressed={sameDest}
+            className={`relative h-[22px] w-[38px] flex-shrink-0 rounded-full transition ${sameDest ? "bg-[#2f5fff]" : "bg-slate-300"}`}
+          >
+            <span className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow transition-all ${sameDest ? "left-[18px]" : "left-0.5"}`} />
+          </button>
+        </div>
+
+        {sameDest && (
+          <div className="mt-4">
+            <span className={labelCls}>Lieu de livraison (commun)</span>
+            <PlacesInput
+              value={commonArrivee}
+              onChange={setCommonArrivee}
+              placeholder="Ex : 5 avenue de la République, Le Mans"
+              className={fieldCls}
+            />
+          </div>
+        )}
+      </Card>
+
+      {/* 2 — Véhicules */}
+      <Card
+        num="2"
+        title="Véhicules à convoyer"
+        badge={`${rows.length} véhicule${rows.length > 1 ? "s" : ""}`}
+      >
+        <div className="flex flex-col gap-2.5">
+          {rows.map((r) => {
+            const info = [r.marque, r.modele].filter(Boolean).join(" ");
+            return (
+              <div key={r.key} className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <div className="flex flex-wrap items-end gap-2.5">
+                  <div className="w-[170px]">
+                    <span className={labelCls}>Immatriculation</span>
+                    <input
+                      className={`${fieldCls} font-mono font-bold tracking-[0.05em] uppercase`}
+                      value={r.immat}
+                      onChange={(e) => patchRow(r.key, { immat: e.target.value.toUpperCase() })}
+                      placeholder="AA-000-AA"
+                    />
+                  </div>
                   <button
                     type="button"
-                    onClick={addAdhocVehicle}
-                    disabled={!adhoc.immatriculation.trim() && !adhoc.marque.trim()}
-                    className="rounded-lg fleet-btn-violet px-3 py-2 text-xs font-semibold disabled:opacity-40"
+                    onClick={() => fetchPlate(r)}
+                    disabled={r.busy}
+                    className="flex items-center gap-1.5 rounded-[9px] bg-[#7c5cff] px-3.5 py-2.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
                   >
-                    Ajouter à la liste
+                    {r.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+                    Récupérer
                   </button>
-                </div>
-              </div>
-            )}
-
-            {orgIds.length > 1 && (
-              <p className="mt-2 text-xs text-slate-500">
-                Véhicules chargés depuis {orgIds.length} organisations actives.
-              </p>
-            )}
-            <div className="mt-4 divide-y divide-slate-100">
-              {filtered.length === 0 && (
-                <div className="py-10 text-center text-sm text-slate-500">
-                  Aucun véhicule dans votre parc — utilisez « Ajouter un véhicule » pour en saisir plusieurs.
-                </div>
-              )}
-
-              {filtered.map((v) => {
-                const disabled = v.statut === "en_mission" || v.statut === "indispo";
-                const checked = selected.has(v.id);
-                return (
-                  <label
-                    key={v.id}
-                    className={`flex items-center gap-4 py-3 px-1 ${
-                      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-slate-50"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 accent-[#7c5cff]"
-                      checked={checked}
-                      disabled={disabled}
-                      onChange={() => toggle(v.id, disabled)}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-900">
-                        {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {v.immatriculation ?? "—"} {v.energie ? `· ${v.energie}` : ""}
-                      </div>
-                    </div>
-                    <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full ${
-                        v.statut === "actif"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : v.statut === "en_mission"
-                            ? "bg-blue-50 text-blue-700"
-                            : "bg-amber-50 text-amber-700"
-                      }`}
-                    >
-                      {v.statut === "actif" ? "Disponible" : v.statut === "en_mission" ? "En mission" : "Indispo"}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="sticky bottom-4 z-10 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-5 py-3 shadow-lg flex items-center justify-between">
-            <span className="text-sm text-slate-600">
-              <strong className="text-slate-900">{selected.size}</strong> véhicule{selected.size > 1 ? "s" : ""} sélectionné{selected.size > 1 ? "s" : ""}
-            </span>
-            <button
-              disabled={!canGoStep2}
-              onClick={() => setStep(2)}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#7c5cff] px-4 py-2 text-sm font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#6a4bef]"
-            >
-              Continuer <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!loading && step === 2 && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
-            <label className="block">
-              <span className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" /> Lieu d'enlèvement commun
-              </span>
-              <input
-                value={depart}
-                onChange={(e) => setDepart(e.target.value)}
-                placeholder="Adresse d'enlèvement"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2f5fff]"
-              />
-            </label>
-
-            <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={perVehicle}
-                onChange={(e) => setPerVehicle(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-[#7c5cff]"
-              />
-              Destinations différentes par véhicule
-            </label>
-
-            {!perVehicle && (
-              <label className="block">
-                <span className="text-xs font-medium text-slate-600">Destination commune</span>
-                <input
-                  value={commonArrivee}
-                  onChange={(e) => setCommonArrivee(e.target.value)}
-                  placeholder="Adresse de livraison"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2f5fff]"
-                />
-              </label>
-            )}
-
-            {perVehicle && (
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-slate-600">Une destination par véhicule</div>
-                {selectedVehicles.map((v) => (
-                  <div key={v.id} className="flex items-center gap-3">
-                    <div className="w-32 shrink-0 text-xs text-slate-500">
-                      {[v.marque, v.modele].filter(Boolean).join(" ") || v.immatriculation || "Véhicule"}
-                    </div>
-                    <input
-                      value={arrivees[v.id] ?? ""}
-                      onChange={(e) => setArrivees((p) => ({ ...p, [v.id]: e.target.value }))}
-                      placeholder="Destination"
-                      className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2f5fff]"
-                    />
+                  <div className={`flex flex-1 min-w-[160px] items-center gap-2 px-1 py-2.5 text-[13px] ${info ? "font-semibold text-slate-900" : "text-slate-400"}`}>
+                    {info ? <Check className="h-3.5 w-3.5 text-[#16a34a]" /> : null}
+                    {info || "En attente de la plaque…"}
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" /> Date de mission
-                </span>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2f5fff]"
-                />
-              </label>
-              <div>
-                <span className="text-xs font-medium text-slate-600">Créneau</span>
-                <div className="mt-1 flex gap-2">
-                  {(
-                    [
-                      ["matin", "Matin"],
-                      ["apres_midi", "Après-midi"],
-                      ["journee", "Journée"],
-                    ] as [TimeSlot, string][]
-                  ).map(([v, l]) => (
+                  {rows.length > 1 && (
                     <button
-                      key={v}
                       type="button"
-                      onClick={() => setTimeSlot(v)}
-                      className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                        timeSlot === v
-                          ? "bg-[#7c5cff] text-white border-[#7c5cff]"
-                          : "border-slate-200 text-slate-600 hover:border-slate-300"
-                      }`}
+                      onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
+                      className="flex h-9 w-9 items-center justify-center rounded-[9px] border border-slate-200 bg-white text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                      aria-label="Retirer ce véhicule"
                     >
-                      {l}
+                      <X className="h-4 w-4" />
                     </button>
-                  ))}
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setStep(1)}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            >
-              <ArrowLeft className="h-4 w-4" /> Retour
-            </button>
-            <button
-              onClick={() => setStep(3)}
-              disabled={!canGoStep3}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#7c5cff] px-4 py-2 text-sm font-medium text-white disabled:opacity-40 hover:bg-[#6a4bef]"
-            >
-              Voir le récapitulatif <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!loading && step === 3 && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100 text-sm font-semibold text-slate-900">
-              Récapitulatif — {selectedVehicles.length} véhicule{selectedVehicles.length > 1 ? "s" : ""}
-            </div>
-            <div className="divide-y divide-slate-100">
-              {selectedVehicles.map((v) => (
-                <div key={v.id} className="px-5 py-3 flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900">
-                      {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
-                      <span className="ml-2 text-xs text-slate-500">{v.immatriculation ?? ""}</span>
-                    </div>
-                    <div className="text-xs text-slate-500 truncate">
-                      {depart} → {perVehicle ? arrivees[v.id] : commonArrivee}
-                    </div>
+                {!sameDest && (
+                  <div className="mt-2.5 border-t border-dashed border-slate-200 pt-2.5">
+                    <span className={labelCls}>Lieu de livraison de ce véhicule</span>
+                    <PlacesInput
+                      value={r.arrivee}
+                      onChange={(v) => patchRow(r.key, { arrivee: v })}
+                      placeholder="Adresse de livraison"
+                      className={fieldCls}
+                    />
                   </div>
-                  <div className="text-sm font-semibold text-[#b8862a]">
-                    {pricing ? "…" : `${(prices[v.id] ?? 0).toFixed(2)} €`}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="px-5 py-3 bg-slate-50 flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-700">Total estimé TTC</span>
-              <span className="text-lg font-semibold text-[#b8862a]">
-                {pricing ? "Calcul…" : `${total.toFixed(2)} €`}
-              </span>
-            </div>
-          </div>
+                )}
 
-          <label className="block">
-            <span className="text-xs font-medium text-slate-600">Message pour l'équipe (facultatif)</span>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2f5fff]"
-            />
-          </label>
-
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setStep(2)}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            >
-              <ArrowLeft className="h-4 w-4" /> Modifier
-            </button>
-            <button
-              onClick={submit}
-              disabled={submitting || pricing}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#7c5cff] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-[#6a4bef]"
-            >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Confirmer la mission groupée
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!loading && step === 4 && result && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white">
-              <Check className="h-7 w-7" />
-            </div>
-            <h2 className="mt-3 text-lg font-semibold text-emerald-900">
-              Mission groupée créée avec succès
-            </h2>
-            <p className="mt-1 text-sm text-emerald-800">
-              Référence : <span className="font-mono font-semibold">{result.ref}</span>
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <div className="text-sm font-semibold text-slate-900 mb-3">Suivi par véhicule</div>
-            <div className="grid gap-2">
-              {selectedVehicles.map((v) => (
-                <div
-                  key={v.id}
-                  className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+                <button
+                  type="button"
+                  onClick={() => patchRow(r.key, { open: !r.open })}
+                  className="mt-2.5 inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#2f5fff]"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900">
-                      {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
-                    </div>
-                    <div className="text-xs text-slate-500">{v.immatriculation ?? ""}</div>
-                  </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-amber-50 text-amber-700">
-                    En attente
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                  <ChevronDown className={`h-3.5 w-3.5 transition ${r.open ? "rotate-180" : ""}`} />
+                  Détails (VIN, kilométrage, notes, options)
+                </button>
 
-          <div className="flex items-center justify-between">
-            <Link
-              to="/dashboard-pro/missions"
-              className="inline-flex items-center gap-2 rounded-lg bg-[#2f5fff] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c3fc4]"
-            >
-              Voir mes missions <ChevronRight className="h-4 w-4" />
-            </Link>
-            <button
-              onClick={() => navigate({ to: "/dashboard-pro/nouvelle-mission" })}
-              className="text-sm text-slate-500 hover:text-slate-900"
-            >
-              Créer une autre mission
-            </button>
+                {r.open && (
+                  <div className="mt-3 border-t border-slate-200 pt-3 space-y-2.5">
+                    <div className="grid gap-2.5 sm:grid-cols-3">
+                      <input className={fieldCls} value={r.vin} onChange={(e) => patchRow(r.key, { vin: e.target.value })} placeholder="VIN / Châssis" />
+                      <input className={fieldCls} value={r.km} onChange={(e) => patchRow(r.key, { km: e.target.value.replace(/\D/g, "") })} placeholder="Kilométrage" inputMode="numeric" />
+                      <input className={fieldCls} value={r.notes} onChange={(e) => patchRow(r.key, { notes: e.target.value })} placeholder="Notes véhicule" />
+                    </div>
+                    <label className="flex items-center gap-2 text-[11.5px] font-semibold text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={r.optionsOverride}
+                        onChange={(e) =>
+                          patchRow(r.key, { optionsOverride: e.target.checked, options: e.target.checked ? { ...options } : {} })
+                        }
+                      />
+                      Options spécifiques à ce véhicule
+                    </label>
+                    {r.optionsOverride && (
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {OPTIONS_DEF.map((o) => (
+                          <button
+                            key={o.key}
+                            type="button"
+                            onClick={() => patchRow(r.key, { options: { ...r.options, [o.key]: !r.options[o.key] } })}
+                            className={`rounded-[9px] border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                              r.options[o.key] ? "border-[#2f5fff] bg-[#eef2ff] text-[#2f5fff]" : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                          >
+                            {o.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setRows((prev) => [...prev, newRow()])}
+          className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-[11px] border-[1.5px] border-dashed border-slate-300 py-3 text-[13px] font-semibold text-slate-500 transition hover:border-[#2f5fff] hover:bg-[#eef2ff] hover:text-[#2f5fff]"
+        >
+          <Plus className="h-4 w-4" /> Ajouter un véhicule
+        </button>
+      </Card>
+
+      {/* 3 — Options communes */}
+      <Card num="3" title="Options communes">
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          {OPTIONS_DEF.map((o) => {
+            const checked = !!options[o.key];
+            return (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => setOptions((p) => ({ ...p, [o.key]: !p[o.key] }))}
+                className={`flex items-start gap-2.5 rounded-[11px] border p-3 text-left transition ${
+                  checked ? "border-[#2f5fff] bg-[#eef2ff]" : "border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                <span className={`mt-0.5 flex h-[17px] w-[17px] flex-shrink-0 items-center justify-center rounded-[5px] border-[1.5px] ${
+                  checked ? "border-[#2f5fff] bg-[#2f5fff] text-white" : "border-slate-300"
+                }`}>
+                  {checked && <Check className="h-3 w-3" />}
+                </span>
+                <span>
+                  <b className="block text-[12.5px] text-slate-900">{o.label}</b>
+                  <span className="text-[11px] text-slate-400">{o.desc}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-2.5 text-[11.5px] text-slate-400">
+          Ces options s'appliquent aux {rows.length} véhicules de la demande. Ajustez-les individuellement dans « Détails » si besoin.
+        </p>
+      </Card>
+
+      {/* 4 — Planning */}
+      <Card num="4" title="Planning">
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <div>
+            <span className={labelCls}>Date souhaitée</span>
+            <input type="date" className={fieldCls} value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          <div>
+            <span className={labelCls}>Heure souhaitée</span>
+            <input type="time" className={fieldCls} value={heure} onChange={(e) => setHeure(e.target.value)} />
           </div>
         </div>
-      )}
+        <div className="mt-3.5">
+          <span className={labelCls}>Informations complémentaires</span>
+          <textarea rows={2} className={fieldCls} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Particularités, accès, conditions…" />
+        </div>
+      </Card>
+
+      {/* Récapitulatif */}
+      <Card title="Récapitulatif & estimation">
+        <table className="w-full border-collapse text-[13px]">
+          <thead>
+            <tr>
+              <th className="border-b border-slate-200 px-2.5 py-2 text-left text-[10.5px] font-bold uppercase text-slate-400">Véhicule</th>
+              <th className="border-b border-slate-200 px-2.5 py-2 text-left text-[10.5px] font-bold uppercase text-slate-400">Trajet</th>
+              <th className="border-b border-slate-200 px-2.5 py-2 text-right text-[10.5px] font-bold uppercase text-slate-400">Prix estimé</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filledRows.map((r) => (
+              <tr key={r.key}>
+                <td className="border-b border-slate-200 px-2.5 py-3 text-slate-900">
+                  {[r.marque, r.modele].filter(Boolean).join(" ") || "Véhicule"}{" "}
+                  <span className="text-[11px] text-slate-400">{r.immat}</span>
+                </td>
+                <td className="border-b border-slate-200 px-2.5 py-3 text-slate-600">
+                  {depart || "—"} → {destFor(r) || "—"}
+                </td>
+                <td className="border-b border-slate-200 px-2.5 py-3 text-right font-semibold text-slate-900">
+                  {prices[r.key] != null ? eur(prices[r.key]) : pricing ? "…" : "Sur devis"}
+                </td>
+              </tr>
+            ))}
+            {rows.length > filledRows.length && (
+              <tr>
+                <td colSpan={3} className="border-b border-slate-200 px-2.5 py-3 italic text-slate-400">
+                  Renseignez les plaques et destinations restantes pour compléter l'estimation
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <div className="flex items-center justify-between px-1 pt-4">
+          <span className="text-[12.5px] text-slate-500">
+            Total estimé ({filledRows.length}/{rows.length} véhicules)
+            {profile?.display === "ht" ? " HT" : ""}
+          </span>
+          <span className="font-heading text-2xl font-extrabold text-slate-900">
+            {eur(profile?.display === "ht" ? Math.round((total / (1 + VAT_RATE)) * 100) / 100 : total)}
+          </span>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-1.5 text-xs text-slate-400">
+            <Clock className="h-3.5 w-3.5" /> Votre demande sera traitée sous 24 h par notre équipe.
+          </span>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!canSubmit}
+            className="fleet-btn-violet flex items-center gap-2 rounded-[11px] px-5 py-3 text-[13.5px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            Créer la mission groupée
+          </button>
+        </div>
+      </Card>
     </div>
+  );
+}
+
+function Card({
+  num, title, badge, children,
+}: { num?: string; title: string; badge?: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-5 md:px-6 md:py-[22px]">
+      <header className="mb-4 flex items-center gap-2.5">
+        {num && (
+          <span className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-slate-900 text-xs font-bold text-white">
+            {num}
+          </span>
+        )}
+        <h3 className="text-[15px] font-bold text-slate-900">{title}</h3>
+        {badge && (
+          <span className="ml-auto rounded-full bg-[#eef2ff] px-3 py-1 text-[11.5px] font-bold text-[#2f5fff]">
+            {badge}
+          </span>
+        )}
+      </header>
+      {children}
+    </section>
   );
 }
