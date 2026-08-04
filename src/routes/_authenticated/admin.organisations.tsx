@@ -128,12 +128,23 @@ function AdminOrganisations() {
         account_type: ((o as { account_type?: string | null }).account_type as "b2b_standard" | "flotte" | null) ?? null,
       }));
 
-      // Profiles B2B/flotte not yet attached to a real organization
-      const linkedUserIds = new Set<string>();
-      // (We can't know directly which profiles correspond to which org owner without org_members,
-      // so just skip those that have organization_id set.)
+      // Profils B2B/flotte pas encore rattachés à une vraie organisation.
+      // Dédoublonnage : on masque aussi les profils dont la société ou le SIRET
+      // correspond déjà à une organisation existante (évite les doublons type "CAT FRANCE").
+      const orgKeys = new Set<string>();
+      (orgs ?? []).forEach((o) => {
+        if (o.siret) orgKeys.add(`s:${o.siret.replace(/\s/g, "")}`);
+        [o.legal_name, o.commercial_name].forEach((n) => {
+          if (n) orgKeys.add(`n:${n.trim().toLocaleLowerCase("fr-FR")}`);
+        });
+      });
+      const isDuplicateOfOrg = (p: { siret?: string | null; societe?: string | null }) =>
+        (p.siret && orgKeys.has(`s:${p.siret.replace(/\s/g, "")}`)) ||
+        (p.societe && orgKeys.has(`n:${p.societe.trim().toLocaleLowerCase("fr-FR")}`));
+
       const profileRows: Row[] = (profiles ?? [])
-        .filter((p: any) => !p.organization_id && !linkedUserIds.has(p.user_id))
+        .filter((p: any) => !p.organization_id && !isDuplicateOfOrg(p))
+
         .map((p: any) => {
           const legal =
             (p.societe && p.societe.trim()) ||
@@ -217,7 +228,7 @@ function AdminOrganisations() {
         highlight="clients"
         subtitle="Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro."
         actions={
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Button onClick={() => setCreateOpen(true)} className="gap-2 admin-btn-blue text-white border-transparent hover:text-white">
             <Plus size={16} /> Nouvelle organisation
           </Button>
         }
@@ -510,7 +521,7 @@ function CreateOrgDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={submit} disabled={saving}>
+          <Button onClick={submit} disabled={saving} className="admin-btn-blue text-white border-transparent hover:text-white">
             {saving && <Loader2 className="animate-spin mr-2" size={14} />}
             Créer
           </Button>

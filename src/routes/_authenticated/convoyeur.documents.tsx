@@ -6,11 +6,23 @@ import {
   Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye, RotateCcw,
   User as UserIcon, Camera,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   getVisibleConvoyeurDocTypes,
   isConvoyeurDocApproved,
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
+
+/** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
+function safeFileName(name: string) {
+  const cleaned = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_");
+  return cleaned.slice(-80) || "fichier";
+}
+
 
 export const Route = createFileRoute("/_authenticated/convoyeur/documents")({
   component: ConvoyeurDocuments,
@@ -82,38 +94,75 @@ function ConvoyeurDocuments() {
   }, [user, reload]);
 
   const handleUpload = async (spec: { key: string }, file: File) => {
-    if (!convoyeurId || !user) return;
-    setUploadingKey(spec.key);
-    const path = `${user.id}/${spec.key}_${Date.now()}_${file.name}`;
-    const { error: upErr } = await supabase.storage.from("convoyeur-documents").upload(path, file, { upsert: false });
-    if (upErr) { console.error(upErr); setUploadingKey(null); return; }
-    // Replace previous of same type
-    const previous = docs[spec.key];
-    if (previous) {
-      await supabase.from("documents_convoyeurs").delete().eq("id", previous.id);
+    if (!user) return;
+    if (!convoyeurId) {
+      toast.error("Votre fiche convoyeur n'est pas encore créée. Contactez le support.");
+      return;
     }
-    await supabase.from("documents_convoyeurs").insert({
-      convoyeur_id: convoyeurId,
-      nom_fichier: file.name,
-      type_document: spec.key,
-      url_fichier: path,
-      statut_validation: "en_attente",
-    });
-    await reload(convoyeurId);
-    setUploadingKey(null);
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (15 Mo maximum).");
+      return;
+    }
+    setUploadingKey(spec.key);
+    try {
+      const path = `${user.id}/${spec.key}_${Date.now()}_${safeFileName(file.name)}`;
+      const { error: upErr } = await supabase.storage
+        .from("convoyeur-documents")
+        .upload(path, file, { upsert: true, contentType: file.type || "application/octet-stream" });
+      if (upErr) throw upErr;
+
+      // Replace previous of same type
+      const previous = docs[spec.key];
+      if (previous) {
+        await supabase.from("documents_convoyeurs").delete().eq("id", previous.id);
+      }
+      const { error: insErr } = await supabase.from("documents_convoyeurs").insert({
+        convoyeur_id: convoyeurId,
+        nom_fichier: file.name,
+        type_document: spec.key,
+        url_fichier: path,
+        statut_validation: "en_attente",
+      });
+      if (insErr) throw insErr;
+      await reload(convoyeurId);
+      toast.success("Document envoyé");
+    } catch (err) {
+      console.error("[convoyeur.documents] upload", err);
+      toast.error(err instanceof Error ? err.message : "Envoi impossible");
+    } finally {
+      setUploadingKey(null);
+    }
   };
 
   const handleAvatar = async (file: File) => {
     if (!user) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Photo trop volumineuse (8 Mo maximum).");
+      return;
+    }
     setUploadingKey("__avatar");
-    const path = `${user.id}/avatar_${Date.now()}_${file.name}`;
-    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (upErr) { console.error(upErr); setUploadingKey(null); return; }
-    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-    await supabase.from("profiles").update({ avatar_url: pub.publicUrl }).eq("user_id", user.id);
-    setAvatarUrl(pub.publicUrl);
-    setUploadingKey(null);
+    try {
+      const path = `${user.id}/avatar_${Date.now()}_${safeFileName(file.name)}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: pub.publicUrl })
+        .eq("user_id", user.id);
+      if (updErr) throw updErr;
+      setAvatarUrl(pub.publicUrl);
+      toast.success("Photo de profil mise à jour");
+    } catch (err) {
+      console.error("[convoyeur.documents] avatar", err);
+      toast.error(err instanceof Error ? err.message : "Envoi de la photo impossible");
+    } finally {
+      setUploadingKey(null);
+    }
   };
+
 
   const openPreview = async (d: DocRow) => {
     if (d.url_fichier.startsWith("http")) { setPreviewUrl(d.url_fichier); return; }
@@ -135,6 +184,18 @@ function ConvoyeurDocuments() {
           Téléversez et tenez à jour vos pièces officielles.
         </p>
       </div>
+
+      {!convoyeurId && (
+        <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 flex items-start gap-2">
+          <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-pro-text">
+            Votre fiche convoyeur n'est pas encore créée : l'envoi de documents est indisponible.
+            Contactez l'équipe Transports Ligneo pour finaliser votre inscription.
+          </p>
+        </div>
+      )}
+
+
 
       {/* Photo de profil */}
       <div className="bg-white rounded-2xl border border-pro-border p-4 sm:p-5 flex items-center gap-4 shadow-sm">

@@ -4,6 +4,8 @@ import { Bell, Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+
 
 type Variant = "light" | "dark";
 
@@ -46,8 +48,10 @@ export function DashboardHeader({
   enableGlobalSearch = false,
   notifications,
 }: Props) {
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
+  const [ownAvatar, setOwnAvatar] = useState<string | null>(null);
   const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -234,8 +238,29 @@ export function DashboardHeader({
 
   const initial = (user?.email ?? "U").charAt(0).toUpperCase();
   const { data: orgInfo } = useCurrentOrgAccountType();
-  const orgLogoUrl = orgInfo?.logoUrl ?? null;
+  const isAdminUser = role === "admin" || role === "super_admin";
   const orgName = orgInfo?.name ?? null;
+
+  // Avatar personnel (photo convoyeur / client) — prioritaire sur le logo d'organisation
+  useEffect(() => {
+    if (!user?.id) { setOwnAvatar(null); return; }
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!cancelled) setOwnAvatar((data as { avatar_url?: string | null } | null)?.avatar_url ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // 1) photo perso  2) admin → logo Transports Ligneo  3) logo organisation  4) initiale
+  const avatarSrc = ownAvatar ?? (isAdminUser ? logoLigneo : orgInfo?.logoUrl ?? null);
+  const avatarAlt = ownAvatar ? "Ma photo" : isAdminUser ? "Transports Ligneo" : orgName ?? "Logo";
+  const avatarClass = ownAvatar ? "object-cover" : "object-contain";
+
 
   const typeLabel: Record<SearchResult["type"], string> = {
     demande: "Demande",
@@ -426,11 +451,11 @@ export function DashboardHeader({
             onClick={() => setProfileOpen((v) => !v)}
             className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-md transition-colors ${iconBtn}`}
           >
-            {orgLogoUrl ? (
+            {avatarSrc ? (
               <img
-                src={orgLogoUrl}
-                alt={orgName ?? "Logo"}
-                className="w-7 h-7 rounded-full object-contain bg-white border border-pro-border"
+                src={avatarSrc}
+                alt={avatarAlt}
+                className={`w-7 h-7 rounded-full ${avatarClass} bg-white border border-pro-border`}
                 loading="lazy"
               />
             ) : (

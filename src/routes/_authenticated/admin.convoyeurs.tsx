@@ -456,8 +456,9 @@ function AdminConvoyeurs() {
         actions={
           <>
             <Button icon={<Send size={14} />} onClick={() => setShowInvite(true)}>
-              Ajouter un convoyeur
+              Inviter un convoyeur (email)
             </Button>
+
             <Button variant="secondary" icon={<UserPlus size={14} />} onClick={() => setShowCreate(true)}>
               Créer directement
             </Button>
