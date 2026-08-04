@@ -44,32 +44,45 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
-        // Verify the caller has a valid Supabase auth token.
-        // In TanStack, there is no Supabase gateway — we validate the JWT ourselves.
-        const authHeader = request.headers.get('Authorization')
-        if (!authHeader?.startsWith('Bearer ')) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const token = authHeader.slice('Bearer '.length).trim()
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
-        if (authError || !user) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        // Server-to-server callers (internal cron / server routes running in this
+        // same worker) authenticate with the service-role key in a dedicated header.
+        // The value never leaves the server, so it cannot be forged from a browser.
+        const internalKey = request.headers.get('x-ligneo-internal-key')
+        const isInternal = !!internalKey && internalKey === supabaseServiceKey
+
+        let user: { id: string; email?: string | null } | null = null
+        let isAdmin = isInternal
+
+        if (!isInternal) {
+          // Verify the caller has a valid Supabase auth token.
+          // In TanStack, there is no Supabase gateway — we validate the JWT ourselves.
+          const authHeader = request.headers.get('Authorization')
+          if (!authHeader?.startsWith('Bearer ')) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
+          }
+
+          const token = authHeader.slice('Bearer '.length).trim()
+          const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token)
+
+          if (authError || !authUser) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
+          }
+          user = authUser
+
+          // Role check — admins may target any recipient. Non-admins may only invoke
+          // templates that have a fixed recipient (template.to), so they cannot use
+          // the platform's verified sender to email arbitrary addresses.
+          const { data: roleRows } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', authUser.id)
+            .eq('actif', true)
+          isAdmin = (roleRows ?? []).some(
+            (r: { role: string }) => r.role === 'admin' || r.role === 'super_admin'
+          )
         }
-
-        // Role check — admins may target any recipient. Non-admins may only invoke
-        // templates that have a fixed recipient (template.to), so they cannot use
-        // the platform's verified sender to email arbitrary addresses.
-        const { data: roleRows } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('actif', true)
-        const isAdmin = (roleRows ?? []).some(
-          (r: { role: string }) => r.role === 'admin' || r.role === 'super_admin'
-        )
 
         // Parse request body
         let templateName: string
