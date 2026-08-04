@@ -3993,3 +3993,25 @@
   .vrm-speed span { animation: none; display: none; }
   .vrm-panel { transition: opacity 0.15s ease; }
 }
+
+/* Boutons Admin — bleu électrique dynamique (pendant du .fleet-btn-violet) */
+.admin-btn-blue {
+  position: relative;
+  background: linear-gradient(120deg, #4f86ff, #2f5fff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(47,95,255,.35), 0 0 14px rgba(47,95,255,.25);
+  transition: transform .18s ease, box-shadow .25s ease, filter .2s ease;
+  animation: adminNeonPulse 2.8s ease-in-out infinite;
+}
+.admin-btn-blue:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(47,95,255,.5), 0 0 26px rgba(47,95,255,.45);
+}
+.admin-btn-blue:active { transform: translateY(0); }
+.admin-btn-blue:disabled { animation: none; opacity: .5; box-shadow: none; }
+@keyframes adminNeonPulse {
+  0%,100% { box-shadow:0 0 0 1px rgba(47,95,255,.3), 0 4px 14px rgba(47,95,255,.45), 0 0 16px rgba(47,95,255,.35); }
+  50% { box-shadow:0 0 0 1px rgba(47,95,255,.5), 0 4px 18px rgba(47,95,255,.6), 0 0 26px rgba(47,95,255,.55); }
+}
