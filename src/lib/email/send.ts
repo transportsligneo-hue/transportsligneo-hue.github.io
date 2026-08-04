@@ -90,7 +90,14 @@ export async function sendTransactionalEmail(params: SendTransactionalEmailParam
     }),
   })
   if (!response.ok) {
-    throw new Error(`Failed to send email: ${response.statusText}`)
+    let detail = response.statusText
+    try {
+      const payload = (await response.json()) as { error?: string }
+      detail = payload.error || detail
+    } catch {
+      // A platform outage can return a non-JSON response.
+    }
+    throw new Error(`Failed to send email (${response.status}): ${detail}`)
   }
   return response.json()
 }
