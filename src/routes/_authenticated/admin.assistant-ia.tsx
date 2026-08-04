@@ -109,7 +109,7 @@ function AdminAssistantIa() {
               type="button"
               onClick={() => setSelected(c.id)}
               className={`w-full rounded-lg border p-3 text-left text-sm transition ${
-                selected === c.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                selected === c.id ? "border-[#2f5fff] bg-[#eff4ff]" : "hover:bg-muted/50"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
