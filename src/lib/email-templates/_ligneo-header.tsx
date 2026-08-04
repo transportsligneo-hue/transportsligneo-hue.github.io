@@ -200,7 +200,15 @@ export function LigneoEmailShell({
               {footnote ? <Text style={footnoteStyle}>{footnote}</Text> : null}
 
               <Text style={signatureStyle}>
-                {signature || `Cordialement,\nL'équipe ${LIGNEO_SITE}`}
+                {(signature || `Cordialement,\nL'équipe ${LIGNEO_SITE}`)
+                  .replace(/\\n/g, '\n')
+                  .split('\n')
+                  .map((line, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 ? <br /> : null}
+                      {line}
+                    </React.Fragment>
+                  ))}
               </Text>
             </Section>
 
