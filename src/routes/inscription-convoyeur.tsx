@@ -351,6 +351,14 @@ function InscriptionConvoyeur() {
           <p className="auth-subtle text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé · validation sous 24 à 48 h.</p>
         </div>
 
+        {inviteOrg && (
+          <div className="mb-6 rounded-xl border border-violet-400/30 bg-violet-500/10 px-4 py-3 text-center text-sm text-white/90">
+            Vous avez été invité(e) par <strong>{inviteOrg}</strong> — votre compte sera automatiquement rattaché à cette flotte après validation.
+          </div>
+        )}
+
+
+
         {/* Stepper */}
         <div className="flex items-center justify-between mb-8 max-w-lg mx-auto">
           {STEPS.map((s, i) => {
