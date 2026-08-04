@@ -109,38 +109,150 @@ type TabId = (typeof TABS)[number]["id"];
 export default function VehicleDetailPanel({
   vehicle,
   siteName,
+  canManage = false,
+  onEdit,
   onClose,
 }: {
   vehicle: FleetVehicle | null;
   siteName?: string | null;
+  canManage?: boolean;
+  onEdit?: (v: FleetVehicle) => void;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<TabId>("general");
   const [maint, setMaint] = useState<Maintenance[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [docs, setDocs] = useState<VehicleDocument[]>([]);
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [docType, setDocType] = useState<string>("assurance");
+  const [maintForm, setMaintForm] = useState<{
+    effectue_le: string; type_intervention: string; kilometrage: string; cout: string; garage: string; notes: string;
+  } | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { setTab("general"); }, [vehicle?.id]);
+  useEffect(() => { setTab("general"); setError(null); setMaintForm(null); }, [vehicle?.id]);
+
+  const reloadDocs = async (vehicleId: string) => {
+    const { data } = await supabase
+      .from("vehicle_documents").select("*")
+      .eq("vehicle_id", vehicleId).order("created_at", { ascending: false });
+    setDocs((data ?? []) as VehicleDocument[]);
+  };
+
+  const reloadMaint = async (vehicleId: string) => {
+    const { data } = await supabase
+      .from("vehicle_maintenances").select("*")
+      .eq("vehicle_id", vehicleId).order("effectue_le", { ascending: false });
+    setMaint((data ?? []) as Maintenance[]);
+  };
 
   useEffect(() => {
     if (!vehicle) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [m, h] = await Promise.all([
+      const [m, h, d] = await Promise.all([
         supabase.from("vehicle_maintenances").select("*")
           .eq("vehicle_id", vehicle.id).order("effectue_le", { ascending: false }),
         supabase.from("vehicle_movements")
           .select("id, occurred_at, type, from_address, to_address, mission:missions(numero, ville_depart, ville_arrivee, prix_total, statut)")
           .eq("vehicle_id", vehicle.id).order("occurred_at", { ascending: false }).limit(30),
+        supabase.from("vehicle_documents").select("*")
+          .eq("vehicle_id", vehicle.id).order("created_at", { ascending: false }),
       ]);
       if (cancelled) return;
       setMaint((m.data ?? []) as Maintenance[]);
       setHistory((h.data ?? []) as unknown as HistoryRow[]);
+      setDocs((d.data ?? []) as VehicleDocument[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [vehicle?.id]);
+
+  const uploadDoc = async (file: File) => {
+    if (!vehicle) return;
+    setError(null);
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic"];
+    if (!allowed.includes(file.type)) {
+      setError("Format non supporté (PDF, JPG, PNG ou WEBP uniquement).");
+      return;
+    }
+    if (file.size > MAX_DOC_MB * 1024 * 1024) {
+      setError(`Fichier trop volumineux (max ${MAX_DOC_MB} Mo).`);
+      return;
+    }
+    setBusy(true);
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${vehicle.organization_id}/${vehicle.id}/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("vehicle-documents").upload(path, file, {
+      contentType: file.type, upsert: false,
+    });
+    if (upErr) { setBusy(false); setError(upErr.message); return; }
+    const { error: insErr } = await supabase.from("vehicle_documents").insert({
+      vehicle_id: vehicle.id,
+      doc_type: docType,
+      nom: file.name,
+      storage_path: path,
+      mime_type: file.type,
+      taille_octets: file.size,
+    });
+    if (insErr) {
+      await supabase.storage.from("vehicle-documents").remove([path]);
+      setError(insErr.message);
+    } else {
+      await reloadDocs(vehicle.id);
+    }
+    setBusy(false);
+  };
+
+  const openDoc = async (d: VehicleDocument) => {
+    const { data, error: e } = await supabase.storage
+      .from("vehicle-documents").createSignedUrl(d.storage_path, 300);
+    if (e || !data?.signedUrl) { setError(e?.message ?? "Lien indisponible."); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const deleteDoc = async (d: VehicleDocument) => {
+    if (!vehicle) return;
+    if (!(await confirmToast(`Supprimer « ${d.nom} » ?`))) return;
+    setBusy(true);
+    await supabase.storage.from("vehicle-documents").remove([d.storage_path]);
+    const { error: e } = await supabase.from("vehicle_documents").delete().eq("id", d.id);
+    if (e) setError(e.message);
+    else await reloadDocs(vehicle.id);
+    setBusy(false);
+  };
+
+  const saveMaintenance = async () => {
+    if (!vehicle || !maintForm) return;
+    if (!maintForm.type_intervention.trim()) { setError("Indiquez le type d'intervention."); return; }
+    setBusy(true); setError(null);
+    const { error: e } = await supabase.from("vehicle_maintenances").insert({
+      vehicle_id: vehicle.id,
+      effectue_le: maintForm.effectue_le || new Date().toISOString().slice(0, 10),
+      type_intervention: maintForm.type_intervention.trim(),
+      kilometrage: maintForm.kilometrage ? Number(maintForm.kilometrage) : null,
+      cout: maintForm.cout ? Number(maintForm.cout) : null,
+      garage: maintForm.garage.trim() || null,
+      notes: maintForm.notes.trim() || null,
+    });
+    if (e) setError(e.message);
+    else { setMaintForm(null); await reloadMaint(vehicle.id); }
+    setBusy(false);
+  };
+
+  const deleteMaintenance = async (m: Maintenance) => {
+    if (!vehicle) return;
+    if (!(await confirmToast(`Supprimer l'intervention « ${m.type_intervention} » ?`))) return;
+    setBusy(true);
+    const { error: e } = await supabase.from("vehicle_maintenances").delete().eq("id", m.id);
+    if (e) setError(e.message);
+    else await reloadMaint(vehicle.id);
+    setBusy(false);
+  };
+
 
   const year = new Date().getFullYear();
 
