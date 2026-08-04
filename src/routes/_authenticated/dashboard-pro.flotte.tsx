@@ -332,7 +332,7 @@ function FleetPage() {
             onClick={() => setStatutFilter(f.id)}
             className={`rounded-lg border px-3.5 py-2 text-[12px] font-medium transition ${
               statutFilter === f.id
-                ? "border-[#14161c] bg-[#14161c] text-white"
+                ? "border-transparent fleet-btn-violet"
                 : "border-[#eaeaee] bg-white text-[#70727d] hover:text-[#14161c]"
             }`}
           >
@@ -358,7 +358,7 @@ function FleetPage() {
               {canManage && (
                 <button
                   onClick={openCreate}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-black"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition"
                 >
                   <Plus size={14} /> Ajouter un véhicule
                 </button>
@@ -542,7 +542,7 @@ function FleetPage() {
               <button
                 onClick={save}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#14161c] px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg fleet-btn-violet px-3 py-2 text-sm font-medium disabled:opacity-50"
               >
                 {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                 Enregistrer

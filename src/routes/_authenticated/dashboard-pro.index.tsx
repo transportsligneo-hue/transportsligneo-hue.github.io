@@ -193,7 +193,7 @@ function ProDashboard() {
               </Link>
               <Link
                 to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
-                className="flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+                className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
               >
                 <PlusCircle size={14} /> {isFlotte ? "Mission groupée" : "Nouvelle mission"}
               </Link>

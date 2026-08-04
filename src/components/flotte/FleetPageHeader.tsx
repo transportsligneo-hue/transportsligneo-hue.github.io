@@ -100,7 +100,7 @@ export function FleetHeaderButton({
       onClick={onClick}
       className={
         variant === "solid"
-          ? "flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-4 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+          ? "flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
           : "flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
       }
     >
