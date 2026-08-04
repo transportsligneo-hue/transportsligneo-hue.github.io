@@ -11,6 +11,7 @@ import { Loader2, Check, AlertCircle } from "lucide-react";
 import { useAiSettings } from "@/lib/ai/context";
 import { AI_CAPABILITIES, type AiCapability, type AssistanceLevel } from "@/lib/ai/types";
 import { updateAiSettings, getAiUsageStats, type AiUsageStats } from "@/lib/ai/settings.functions";
+import { PageHeader } from "@/components/admin/AdminUI";
 
 export const Route = createFileRoute("/_authenticated/admin/parametres-ia")({
   component: AiSettingsPage,
@@ -61,12 +62,11 @@ function AiSettingsPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-slate-900">Paramètres IA</h1>
-          <p className="text-sm text-slate-500">
-            Activez ou désactivez chaque capacité individuellement. Les changements sont appliqués immédiatement.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Espace administration"
+          title="Paramètres IA"
+          subtitle="Activez ou désactivez chaque capacité individuellement. Les changements sont appliqués immédiatement."
+        />
 
 
         {error && (
