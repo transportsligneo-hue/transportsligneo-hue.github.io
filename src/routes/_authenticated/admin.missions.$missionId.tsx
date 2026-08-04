@@ -709,6 +709,7 @@ function AdminMissionDetail() {
       <div className="flex items-center justify-between gap-2">
         <Link
           to="/admin/attributions"
+          search={{ trajet: undefined }}
           className="inline-flex items-center gap-1.5 text-sm text-pro-text-soft hover:text-pro-accent transition-colors"
         >
           <ArrowLeft size={14} />
