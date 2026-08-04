@@ -4,6 +4,7 @@ import { GraduationCap, PlayCircle, Sparkles, ArrowRight, Award, Loader2, X } fr
 import { useTraining } from "@/lib/formation/useTraining";
 import { moduleStatus, STATUS_LABEL } from "@/lib/formation/types";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { generateAttestationPdf } from "@/lib/formation/attestation-pdf";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
@@ -25,10 +26,23 @@ const TOUR = [
 
 function FormationHome() {
   const { modules, progress, percent, completedCount, loading } = useTraining();
-  const { user, profile } = useAuth() as { user: { id: string } | null; profile?: { prenom?: string | null; nom?: string | null } };
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [tourStep, setTourStep] = useState<number | null>(null);
-  const firstName = profile?.prenom || "convoyeur";
+  const [identity, setIdentity] = useState<{ prenom: string; nom: string }>({ prenom: "", nom: "" });
+  const firstName = identity.prenom || "convoyeur";
+
+  useEffect(() => {
+    if (!user?.id) return;
+    void supabase
+      .from("profiles")
+      .select("prenom, nom")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setIdentity({ prenom: data.prenom ?? "", nom: data.nom ?? "" });
+      });
+  }, [user?.id]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,7 +110,7 @@ function FormationHome() {
             onClick={() =>
               user &&
               generateAttestationPdf({
-                fullName: `${profile?.prenom ?? ""} ${profile?.nom ?? ""}`.trim(),
+                fullName: `${identity.prenom} ${identity.nom}`.trim(),
                 userId: user.id,
                 completedAt: new Date(),
                 modulesCount: modules.length,
