@@ -39,6 +39,7 @@ import { template as messageManuel } from './message-manuel'
 import { template as devisOtpCode } from './devis-otp-code'
 import { template as convoyeurDocumentStatus } from './convoyeur-document-status'
 import { template as vehiculeDocumentExpiration } from './vehicule-document-expiration'
+import { template as invite } from './invite'
 
 
 
@@ -74,4 +75,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'devis-otp-code': devisOtpCode,
   'convoyeur-document-status': convoyeurDocumentStatus,
   'vehicule-document-expiration': vehiculeDocumentExpiration,
+  'invite': invite,
 }
