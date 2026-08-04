@@ -136,19 +136,19 @@ function SuiviTab({
   drivers,
   progress,
 }: {
-  modules: ModuleRow[];
+  modules: TrainingModule[];
   drivers: Driver[];
   progress: ProgressRow[];
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const byUser = useMemo(() => {
     const map: Record<string, ProgressRow[]> = {};
-    for (const p of progress) (map[p.user_id] ??= []).push(p);
+    for (const p of progress) (map[p.convoyeur_id] ??= []).push(p);
     return map;
   }, [progress]);
 
   const stats = useMemo(() => {
-    const started = drivers.filter((d) => (byUser[d.user_id ?? ""] ?? []).length > 0).length;
+    const started = drivers.filter((d) => (byUser[d.id] ?? []).length > 0 || d.has_completed_training).length;
     const done = drivers.filter((d) => d.has_completed_training).length;
     return { total: drivers.length, started, done };
   }, [drivers, byUser]);
@@ -172,9 +172,12 @@ function SuiviTab({
 
       <div className="rounded-2xl border border-pro-border bg-white overflow-hidden">
         {drivers.map((d) => {
-          const rows = byUser[d.user_id ?? ""] ?? [];
-          const done = rows.filter((r) => r.completed).length;
-          const pct = modules.length ? Math.round((done / modules.length) * 100) : 0;
+          const rows = byUser[d.id] ?? [];
+          const total = modules.length;
+          const rawDone = rows.filter((r) => r.status === "completed").length;
+          // Un convoyeur validé est considéré à 100 % même si l'historique par module est incomplet.
+          const done = d.has_completed_training ? total : Math.min(rawDone, total);
+          const pct = total ? Math.round((done / total) * 100) : d.has_completed_training ? 100 : 0;
           const open = openId === d.id;
           return (
             <div key={d.id} className="border-b border-pro-border last:border-0">
@@ -191,11 +194,18 @@ function SuiviTab({
                 </div>
                 <div className="hidden sm:block w-40">
                   <div className="h-2 rounded-full bg-pro-bg-soft overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#B8862A] to-[#E7C76A]" style={{ width: `${pct}%` }} />
+                    <div
+                      className={`h-full transition-all ${
+                        d.has_completed_training
+                          ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                          : "bg-gradient-to-r from-[#B8862A] to-[#E7C76A]"
+                      }`}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-pro-text w-16 text-right">
-                  {done}/{modules.length}
+                  {done}/{total}
                 </span>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
@@ -212,11 +222,12 @@ function SuiviTab({
               </button>
               {open && (
                 <ul className="px-4 pb-4 space-y-1.5">
-                  {modules.map((m) => {
+                  {modules.map((m, i) => {
                     const r = rows.find((x) => x.module_id === m.id);
+                    const completed = r?.status === "completed" || d.has_completed_training;
                     return (
                       <li key={m.id} className="flex items-center gap-2 text-xs text-pro-text-soft">
-                        {r?.completed ? (
+                        {completed ? (
                           <CheckCircle2 size={13} className="text-emerald-600" />
                         ) : r ? (
                           <Clock3 size={13} className="text-amber-600" />
@@ -224,15 +235,15 @@ function SuiviTab({
                           <Circle size={13} className="text-pro-muted" />
                         )}
                         <span className="flex-1 truncate">
-                          {m.order_index}. {m.title}
+                          {m.sort_order ?? i + 1}. {m.title}
                         </span>
                         <span className="text-pro-muted">
-                          {r?.quiz_score !== null && r?.quiz_score !== undefined ? `${r.quiz_score}%` : "—"}
-                          {r?.attempts_count ? ` · ${r.attempts_count} tent.` : ""}
+                          {r?.score !== null && r?.score !== undefined ? `${r.score}%` : "—"}
                         </span>
                       </li>
                     );
                   })}
+
                 </ul>
               )}
             </div>
