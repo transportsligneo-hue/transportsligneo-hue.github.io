@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { VROOMY_TOOLS, runVroomyTool, type VroomyCard } from "@/lib/vroomy-tools";
 
 /**
  * Assistant IA public de Transports Ligneo.
