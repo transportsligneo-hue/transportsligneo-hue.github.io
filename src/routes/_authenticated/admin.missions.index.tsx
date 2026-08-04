@@ -28,7 +28,7 @@ interface TrajetRow {
   mission_group_id: string | null; leg_type: string | null; leg_index: number | null;
   pricing_mode: "fixe" | "enchere" | null; prix_client_ttc: number | null;
   prix_convoyeur_fixe: number | null; prix_convoyeur_min: number | null; prix_convoyeur_max: number | null;
-  marge_indicative_pct: number | null; type_mission: string | null;
+  marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
 }
 
 interface DemandeRow {
@@ -90,7 +90,7 @@ function AdminMissionsUnified() {
     const baseByGroup = new Map<string, string>();
     trajets.forEach((t) => {
       if (!t.mission_group_id) return;
-      const num = numeroByTrajet.get(t.id);
+      const num = numeroByTrajet.get(t.id) ?? t.numero_mission;
       if (!num) return;
       const base = stripLegSuffix(num);
       const cur = baseByGroup.get(t.mission_group_id);
@@ -99,7 +99,7 @@ function AdminMissionsUnified() {
 
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
-      const baseNumero = (t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null) ?? numeroByTrajet.get(t.id) ?? null;
+      const baseNumero = (t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null) ?? numeroByTrajet.get(t.id) ?? t.numero_mission ?? null;
       const ref = displayTrajetRef({
         id: t.id,
         createdAt: t.created_at,
