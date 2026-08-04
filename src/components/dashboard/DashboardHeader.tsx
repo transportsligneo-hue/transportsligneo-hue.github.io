@@ -451,11 +451,11 @@ export function DashboardHeader({
             onClick={() => setProfileOpen((v) => !v)}
             className={`flex items-center gap-2 pl-1 pr-2 py-1 rounded-md transition-colors ${iconBtn}`}
           >
-            {orgLogoUrl ? (
+            {avatarSrc ? (
               <img
-                src={orgLogoUrl}
-                alt={orgName ?? "Logo"}
-                className="w-7 h-7 rounded-full object-contain bg-white border border-pro-border"
+                src={avatarSrc}
+                alt={avatarAlt}
+                className={`w-7 h-7 rounded-full ${avatarClass} bg-white border border-pro-border`}
                 loading="lazy"
               />
             ) : (
