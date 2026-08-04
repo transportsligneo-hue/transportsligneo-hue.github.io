@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { finalizeSignup, validateUploadFile, formatFileSize, MAX_UPLOAD_FILES } from "@/lib/signup-finalize";
 import {
@@ -9,8 +9,12 @@ import {
 } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
+import { getFleetInvitation, acceptFleetInvitation } from "@/lib/fleet-drivers.functions";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    invite: typeof search["invite"] === "string" ? (search["invite"] as string) : undefined,
+  }),
   component: InscriptionConvoyeur,
   head: () => ({
     meta: [
@@ -39,6 +43,8 @@ const inputClass = "auth-input !pl-4";
 
 function InscriptionConvoyeur() {
   const navigate = useNavigate();
+  const { invite: inviteToken } = Route.useSearch();
+  const [inviteOrg, setInviteOrg] = useState<string | null>(null);
   const [prerequisOk, setPrerequisOk] = useState(false);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -60,6 +66,27 @@ function InscriptionConvoyeur() {
   const [showPwd, setShowPwd] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
+
+  // Pré-remplissage depuis une invitation flotte
+  useEffect(() => {
+    if (!inviteToken) return;
+    (async () => {
+      try {
+        const inv = await getFleetInvitation({ data: { token: inviteToken } });
+        if (!inv) return;
+        setInviteOrg(inv.organizationName);
+        setForm((f) => ({
+          ...f,
+          email: inv.email,
+          prenom: inv.prenom || f.prenom,
+          nom: inv.nom || f.nom,
+          telephone: inv.telephone || f.telephone,
+        }));
+      } catch (e) {
+        console.warn("[inscription-convoyeur] invitation introuvable", e);
+      }
+    })();
+  }, [inviteToken]);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
@@ -208,6 +235,15 @@ function InscriptionConvoyeur() {
         photo_profil: photoProfilFile,
       }, setUploadProgress);
       setUploadProgress(100);
+
+      // Rattachement automatique à l'organisation Flotte invitante
+      if (inviteToken) {
+        try {
+          await acceptFleetInvitation({ data: { token: inviteToken, email: form.email } });
+        } catch (e) {
+          console.warn("[inscription-convoyeur] rattachement flotte échoué", e);
+        }
+      }
 
 
       if (authData.session) {
