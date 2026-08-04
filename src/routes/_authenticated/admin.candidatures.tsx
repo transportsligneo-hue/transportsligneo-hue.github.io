@@ -27,8 +27,8 @@ interface Offer {
   created_at: string;
   trajet?: {
     id: string; depart: string; arrivee: string; date_trajet: string | null;
-    distance_km: number | null; prix_convoyeur_fixe: number | null; prix_convoyeur: number | null;
-    urgence: string | null; allow_counter_offer: boolean;
+    prix_convoyeur_fixe: number | null; prix_convoyeur: number | null;
+    allow_counter_offer: boolean;
     mission_group_id: string | null; leg_type: string | null; prix_suggere: number | null;
   };
   convoyeur?: {
@@ -52,7 +52,7 @@ function AdminCandidatures() {
     setLoading(true);
     const { data, error } = await supabase
       .from("mission_offres")
-      .select("id,trajet_id,convoyeur_id,prix_propose,prix_suggere_snapshot,type_offre,statut,message,admin_counter_offer,admin_counter_at,created_at, trajet:trajets(id,depart,arrivee,date_trajet,distance_km,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,urgence,allow_counter_offer,mission_group_id,leg_type), convoyeur:convoyeurs(id,nom,prenom,ville)")
+      .select("id,trajet_id,convoyeur_id,prix_propose,prix_suggere_snapshot,type_offre,statut,message,admin_counter_offer,admin_counter_at,created_at, trajet:trajets(id,depart,arrivee,date_trajet,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,allow_counter_offer,mission_group_id,leg_type), convoyeur:convoyeurs(id,nom,prenom,ville)")
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) { toast.error(error.message); setLoading(false); return; }
@@ -222,7 +222,7 @@ function AdminCandidatures() {
                     <span className="font-semibold text-pro-text">{t?.depart}</span>
                     <span className="text-pro-muted">→</span>
                     <span className="font-semibold text-pro-text">{t?.arrivee}</span>
-                    {t?.distance_km && <span className="text-xs text-pro-muted">· {Math.round(t.distance_km)} km</span>}
+                    
                     {isAr && <span className="text-xs font-bold text-amber-700">· Livraison + Restitution</span>}
                   </div>
                   <div className="flex items-center gap-2 text-xs">
