@@ -389,6 +389,7 @@ function AdminClientDetail() {
             src={profile.logo_url}
             name={isB2B && form.societe ? form.societe : fullName}
             isCompany={isB2B}
+            kind={profile.type_client === "flotte" ? "flotte" : isB2B ? "b2b" : "particulier"}
             size="lg"
           />
         }
