@@ -144,7 +144,7 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
         // OR send a template to their OWN authenticated email address.
         // This lets a signed-in client trigger their own devis / confirmation
         // emails without being able to email arbitrary recipients.
-        const userEmail = (user.email || '').toLowerCase()
+        const userEmail = (user?.email || '').toLowerCase()
         const targetsSelf =
           !template.to &&
           !!userEmail &&
