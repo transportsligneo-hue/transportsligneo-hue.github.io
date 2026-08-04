@@ -52,7 +52,9 @@ const vehicleLabel = (v: Vehicle) =>
 
 function FleetPage() {
   const { user } = useAuth();
-  const [orgId, setOrgId] = useState<string | null>(null);
+  const { data: orgInfo, isLoading: orgLoading } = useCurrentOrgAccountType();
+  const orgId = orgInfo?.orgId ?? null;
+  const orgName = orgInfo?.name ?? null;
   const [orgRole, setOrgRole] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [sites, setSites] = useState<Record<string, string>>({});
@@ -74,14 +76,15 @@ function FleetPage() {
         .eq("status", "active")
         .limit(1);
       const row = (mems ?? [])[0] as { organization_id: string; member_role: string } | undefined;
-      if (row) {
-        setOrgId(row.organization_id);
-        setOrgRole(row.member_role);
-      } else {
-        setLoading(false);
-      }
+      // Pas de membership explicite : le compte pro reste gestionnaire de son parc
+      setOrgRole(row?.member_role ?? "admin");
     })();
   }, [user]);
+
+  useEffect(() => {
+    if (!orgLoading && !orgId) setLoading(false);
+  }, [orgLoading, orgId]);
+
 
   const fetchVehicles = useCallback(async () => {
     if (!orgId) return;
