@@ -40,6 +40,8 @@ interface ClientRow {
   avatar_url: string | null;
   societe: string | null;
   type_client: string | null;
+  org_logo_url: string | null;
+  org_name: string | null;
 }
 
 
@@ -97,8 +99,34 @@ function AdminClients() {
 
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("user_id, prenom, nom, email, telephone, created_at, avatar_url, societe, type_client")
+      .select("user_id, prenom, nom, email, telephone, created_at, avatar_url, logo_url, societe, type_client, organization_id")
       .in("user_id", clientUserIds);
+
+    // Rattachement organisation : via profiles.organization_id ou via organization_members
+    const { data: memberships } = await supabase
+      .from("organization_members")
+      .select("user_id, organization_id")
+      .in("user_id", clientUserIds);
+
+    const orgByUser = new Map<string, string>();
+    (memberships ?? []).forEach((m: any) => {
+      if (m.organization_id) orgByUser.set(m.user_id, m.organization_id);
+    });
+    (profiles ?? []).forEach((p: any) => {
+      if (p.organization_id) orgByUser.set(p.user_id, p.organization_id);
+    });
+
+    const orgIds = Array.from(new Set(Array.from(orgByUser.values())));
+    const orgMap = new Map<string, { logo_url: string | null; name: string | null }>();
+    if (orgIds.length > 0) {
+      const { data: orgs } = await supabase
+        .from("organizations")
+        .select("id, logo_url, legal_name, commercial_name")
+        .in("id", orgIds);
+      (orgs ?? []).forEach((o: any) => {
+        orgMap.set(o.id, { logo_url: o.logo_url ?? null, name: o.commercial_name || o.legal_name || null });
+      });
+    }
 
     const { data: missionsRaw } = await supabase
       .from("missions")
@@ -119,9 +147,11 @@ function AdminClients() {
       created_at: p.created_at,
       actif: actifMap.get(p.user_id) ?? true,
       missions_count: countMap.get(p.user_id) ?? 0,
-      avatar_url: p.avatar_url ?? null,
+      avatar_url: p.avatar_url ?? p.logo_url ?? null,
       societe: p.societe ?? null,
       type_client: p.type_client ?? null,
+      org_logo_url: orgMap.get(orgByUser.get(p.user_id) ?? "")?.logo_url ?? null,
+      org_name: orgMap.get(orgByUser.get(p.user_id) ?? "")?.name ?? null,
     }));
 
     rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -197,10 +227,10 @@ function AdminClients() {
                 <TD>
                   <div className="flex items-center gap-2">
                     <ClientLogo
-                      src={c.avatar_url}
-                      name={c.societe || `${c.prenom} ${c.nom}`.trim()}
-                      isCompany={!!c.societe || c.type_client === "b2b" || c.type_client === "flotte"}
-                      kind={c.type_client === "flotte" ? "flotte" : c.type_client === "b2b" ? "b2b" : "particulier"}
+                      src={c.avatar_url || c.org_logo_url}
+                      name={c.org_name || c.societe || `${c.prenom} ${c.nom}`.trim()}
+                      isCompany={!!c.societe || !!c.org_name || c.type_client === "b2b" || c.type_client === "flotte"}
+                      kind={c.org_logo_url || c.type_client === "flotte" ? "flotte" : c.type_client === "b2b" ? "b2b" : "particulier"}
                       size="sm"
                     />
                     <div className="min-w-0">
