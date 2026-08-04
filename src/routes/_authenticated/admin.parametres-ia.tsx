@@ -104,7 +104,7 @@ function AiSettingsPage() {
                 onClick={() => applyPatch({ assistance_level: lvl }, "Niveau d'assistance")}
                 className={`rounded-lg border px-3 py-2 text-sm font-medium capitalize transition ${
                   settings.assistance_level === lvl
-                    ? "border-amber-500 bg-amber-50 text-amber-900"
+                    ? "border-[#2f5fff] bg-[#eff4ff] text-[#1d39a9] shadow-sm"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                 }`}
               >
@@ -209,7 +209,7 @@ function Toggle({
       disabled={busy}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-        checked ? "bg-amber-500" : "bg-slate-300"
+        checked ? "bg-[#2f5fff]" : "bg-slate-300"
       } ${busy ? "opacity-70" : ""}`}
     >
       <span
