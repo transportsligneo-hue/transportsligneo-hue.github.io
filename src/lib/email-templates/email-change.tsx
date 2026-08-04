@@ -10,14 +10,13 @@ interface EmailChangeEmailProps {
 
 export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
   <LigneoEmailShell
-    preview={`Confirmez le changement d'email — ${siteName}`}
-    tagline="Changement d'email"
-    icon="✉"
-    title="Confirmez le changement d'email"
+    preview="Un clic pour valider le changement."
+    tagline="Sécurité du compte"
+    title="Confirmer votre nouvelle adresse"
     greeting="Bonjour,"
-    intro={`Vous avez demandé à changer votre adresse email pour ${siteName}. Confirmez ce changement en cliquant sur le bouton ci-dessous.`}
-    primaryCta={{ label: 'Confirmer le changement', href: confirmationUrl }}
-    signature={"Si vous n'avez pas demandé ce changement, sécurisez votre compte immédiatement."}
+    intro={`Vous avez demandé à changer l'adresse email associée à votre compte ${siteName}. Confirmez ce changement en cliquant ci-dessous.`}
+    primaryCta={{ label: 'Confirmer ce changement', href: confirmationUrl }}
+    footnote="Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement."
   >
     <RecapCard
       rows={[

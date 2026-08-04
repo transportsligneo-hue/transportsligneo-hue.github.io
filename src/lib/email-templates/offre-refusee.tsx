@@ -1,25 +1,20 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props { prenom?: string; numero?: string; motif?: string }
 
 const Email = ({ prenom, numero, motif }: Props) => (
   <LigneoEmailShell
-    preview={`Offre non retenue${numero ? ` — ${numero}` : ''}`}
+    preview="De nouvelles missions sont disponibles au catalogue."
     tagline="Offre non retenue"
-    icon="ℹ"
     title="Offre non retenue"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro={`Nous vous remercions pour votre proposition${numero ? ` sur la mission n° ${numero}` : ''}. Malheureusement, votre offre n'a pas été retenue cette fois-ci.`}
     primaryCta={{ label: 'Voir le catalogue', href: 'https://transportsligneo.fr/convoyeur/catalogue' }}
+    footnote="De nouvelles missions sont publiées quotidiennement dans le catalogue."
   >
-    {motif ? <HighlightBox label="Motif" value={motif} tone="navy" /> : null}
-    <HighlightBox
-      label="Bon à savoir"
-      value="De nouvelles missions sont publiées quotidiennement dans le catalogue."
-      tone="navy"
-    />
+    {motif ? <SimpleCard title="Motif" subtitle={motif} /> : null}
   </LigneoEmailShell>
 )
 

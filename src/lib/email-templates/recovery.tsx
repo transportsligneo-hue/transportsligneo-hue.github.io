@@ -8,14 +8,13 @@ interface RecoveryEmailProps {
 
 export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps) => (
   <LigneoEmailShell
-    preview={`Réinitialisez votre mot de passe — ${siteName}`}
-    tagline="Réinitialisation"
-    icon="🔒"
-    title="Réinitialisez votre mot de passe"
+    preview="Cliquez pour choisir un nouveau mot de passe — lien valable 1h."
+    tagline="Sécurité du compte"
+    title="Réinitialiser votre mot de passe"
     greeting="Bonjour,"
-    intro={`Nous avons reçu une demande de réinitialisation de votre mot de passe pour ${siteName}. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.`}
-    primaryCta={{ label: 'Réinitialiser le mot de passe', href: confirmationUrl }}
-    signature={"Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email — votre mot de passe ne sera pas modifié."}
+    intro={`Vous avez demandé la réinitialisation de votre mot de passe ${siteName}. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.`}
+    primaryCta={{ label: 'Choisir un nouveau mot de passe', href: confirmationUrl }}
+    footnote="Ce lien est valable 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email — votre mot de passe actuel reste inchangé."
   />
 )
 

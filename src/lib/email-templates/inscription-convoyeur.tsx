@@ -1,23 +1,21 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props { prenom?: string }
 
 const Email = ({ prenom }: Props) => (
   <LigneoEmailShell
-    preview="Votre candidature convoyeur a bien été reçue"
-    tagline="Candidature reçue"
-    icon="🧑‍💼"
-    title="Candidature convoyeur reçue"
-    greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
-    intro="Nous avons bien reçu votre inscription en tant que convoyeur professionnel. Notre équipe étudie votre dossier et reviendra vers vous très prochainement."
-    primaryCta={{ label: 'Accéder à mon espace', href: 'https://transportsligneo.fr/convoyeur' }}
+    preview="Votre dossier est en cours d'étude — réponse sous 24 à 48h."
+    tagline="Candidature convoyeur"
+    title={prenom ? `Dossier bien reçu, ${prenom}` : 'Dossier bien reçu'}
+    intro="Merci pour votre candidature pour rejoindre le réseau de convoyeurs Transports Ligneo. Votre dossier est en cours d'étude par notre équipe."
+    primaryCta={{ label: 'Suivre ma candidature', href: 'https://transportsligneo.fr/convoyeur' }}
+    footnote="En attendant, vérifiez que tous vos documents sont bien à jour (permis, pièce d'identité, Kbis/SIRENE, attestation RC Pro) pour accélérer le traitement de votre candidature."
   >
-    <HighlightBox
-      label="Prochaine étape"
-      value="Vérification de vos documents et validation du profil sous 48h ouvrées."
-      tone="navy"
+    <SimpleCard
+      title="Délai de réponse"
+      subtitle="Sous 24 à 48h ouvrées — vous recevrez un email dès que votre dossier sera validé."
     />
   </LigneoEmailShell>
 )
@@ -26,5 +24,5 @@ export const template = {
   component: Email,
   subject: 'Votre candidature convoyeur — Transports Ligneo',
   displayName: 'Inscription convoyeur',
-  previewData: { prenom: 'Thomas' },
+  previewData: { prenom: 'Olivier' },
 } satisfies TemplateEntry

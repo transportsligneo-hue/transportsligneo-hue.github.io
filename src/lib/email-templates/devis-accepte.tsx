@@ -1,6 +1,6 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, HighlightBox, RecapCard } from './_ligneo-header'
+import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props {
   prenom?: string
@@ -8,32 +8,27 @@ interface Props {
   depart?: string
   arrivee?: string
   prix?: number | string
+  dateSignature?: string
 }
 
-const Email = ({ prenom, numero, depart, arrivee, prix }: Props) => (
+const Email = ({ prenom, numero, depart, arrivee, prix, dateSignature }: Props) => (
   <LigneoEmailShell
-    preview={`Devis signé — ${numero ?? ''}`}
-    tagline="Signature confirmée"
-    icon="✍"
-    title="Devis signé"
+    preview="Votre mission va être planifiée."
+    tagline="Devis signé"
+    title="Votre devis est accepté ✓"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
-    intro="Votre devis a été signé électroniquement. Merci pour votre confiance."
     primaryCta={{ label: 'Voir ma mission', href: 'https://transportsligneo.fr/dashboard-client/missions' }}
   >
-    <HighlightBox
-      label="Devis signé avec succès"
-      value="✓ Votre mission entre désormais en préparation."
-      tone="success"
+    <SimpleCard
+      title={[numero, prix && `${prix} €`].filter(Boolean).join(' — ')}
+      subtitle={[
+        dateSignature ? `Signé électroniquement le ${dateSignature}` : 'Signé électroniquement',
+        depart && arrivee ? `${depart} → ${arrivee}` : null,
+      ].filter(Boolean).join(' · ')}
     />
-    {(numero || depart || arrivee || prix) && (
-      <RecapCard
-        rows={[
-          numero && { label: 'Référence', value: numero },
-          depart && arrivee && { label: 'Trajet', value: `${depart} → ${arrivee}` },
-          prix && { label: 'Montant TTC', value: `${prix} €` },
-        ].filter(Boolean) as any}
-      />
-    )}
+    <p style={{ fontSize: 14, lineHeight: 1.65, color: '#4b5468', margin: '0 0 16px' }}>
+      Votre mission va maintenant être attribuée à l'un de nos convoyeurs. Vous recevrez une confirmation dès que ce sera fait.
+    </p>
   </LigneoEmailShell>
 )
 
@@ -41,5 +36,5 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) => `Devis signé${d.numero ? ` — ${d.numero}` : ''} — Transports Ligneo`,
   displayName: 'Devis accepté (client)',
-  previewData: { prenom: 'Jean', numero: 'DEV-2026-0001', depart: 'TOURS (37)', arrivee: 'LE MANS (72)', prix: 180 },
+  previewData: { prenom: 'Morgane', numero: 'DEV-TLG-2026-091', depart: 'La Riche', arrivee: 'Tours', prix: 120, dateSignature: '22/07/2026' },
 } satisfies TemplateEntry

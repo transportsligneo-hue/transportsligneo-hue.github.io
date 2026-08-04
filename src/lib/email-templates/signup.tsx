@@ -10,14 +10,13 @@ interface SignupEmailProps {
 
 export const SignupEmail = ({ siteName, recipient, confirmationUrl }: SignupEmailProps) => (
   <LigneoEmailShell
-    preview={`Confirmez votre email — ${siteName}`}
+    preview={`Un clic pour activer votre compte ${siteName}.`}
     tagline="Confirmation d'inscription"
-    icon="✉"
-    title="Confirmez votre adresse email"
-    greeting="Bienvenue,"
-    intro={`Merci de vous être inscrit sur ${siteName}. Pour finaliser votre inscription, confirmez l'adresse ${recipient} en cliquant sur le bouton ci-dessous.`}
-    primaryCta={{ label: 'Vérifier mon email', href: confirmationUrl }}
-    signature={"Si vous n'avez pas créé de compte, vous pouvez ignorer cet email en toute sécurité."}
+    title="Plus qu'une étape"
+    greeting="Bonjour,"
+    intro={`Merci de vous être inscrit sur ${siteName}. Cliquez ci-dessous pour confirmer votre adresse email${recipient ? ` (${recipient})` : ''} et activer votre compte.`}
+    primaryCta={{ label: 'Confirmer mon adresse email', href: confirmationUrl }}
+    footnote="Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement cet email."
   />
 )
 

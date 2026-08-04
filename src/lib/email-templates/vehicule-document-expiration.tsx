@@ -30,8 +30,8 @@ const Email = ({ prenom, societe, documents = [], clientLogoUrl, clientName }: P
   return (
     <LigneoEmailShell
       preview={`${documents.length} document${documents.length > 1 ? 's' : ''} véhicule à renouveler`}
-      tagline="Alerte documents"
-      icon="⚠️"
+      tagline="⚠ Alerte flotte"
+      taglineTone="warn"
       title="Documents véhicules à renouveler"
       greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
       intro={`Certains documents de votre parc${societe ? ` (${societe})` : ''} arrivent à échéance. Merci de les mettre à jour depuis votre espace Flotte afin de garantir la conformité de vos véhicules.`}

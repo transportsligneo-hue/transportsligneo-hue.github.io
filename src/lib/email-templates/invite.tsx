@@ -7,16 +7,15 @@ interface InviteEmailProps {
   confirmationUrl: string
 }
 
-export const InviteEmail = ({ siteName, confirmationUrl }: InviteEmailProps) => (
+export const InviteEmail = ({ confirmationUrl }: InviteEmailProps) => (
   <LigneoEmailShell
-    preview={`Vous êtes invité à rejoindre ${siteName}`}
+    preview="Rejoignez l'espace de votre entreprise."
     tagline="Invitation"
-    icon="✉"
-    title="Vous êtes invité"
+    title="Vous avez été invité(e)"
     greeting="Bonjour,"
-    intro={`Vous avez été invité à rejoindre ${siteName}. Cliquez sur le bouton ci-dessous pour accepter l'invitation et créer votre compte en quelques instants.`}
+    intro="Un responsable de votre entreprise vous a invité(e) à rejoindre son espace Transports Ligneo pour gérer les convoyages ensemble."
     primaryCta={{ label: "Accepter l'invitation", href: confirmationUrl }}
-    signature={"Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email."}
+    footnote="Cette invitation est valable 7 jours."
   />
 )
 

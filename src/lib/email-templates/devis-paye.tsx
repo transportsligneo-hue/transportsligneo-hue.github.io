@@ -1,6 +1,6 @@
 import * as React from 'react'
 import type { TemplateEntry } from './registry'
-import { LigneoEmailShell, RecapCard, HighlightBox } from './_ligneo-header'
+import { LigneoEmailShell, AmountRow, SimpleCard } from './_ligneo-header'
 
 interface Props {
   prenom?: string
@@ -13,23 +13,19 @@ interface Props {
 
 const Email = ({ prenom, numero, depart, arrivee, prix, facture }: Props) => (
   <LigneoEmailShell
-    preview={`Paiement reçu — ${numero ?? ''}`}
-    tagline="Paiement confirmé"
-    icon="💳"
-    title="Paiement reçu"
+    preview="Merci, votre paiement est confirmé."
+    tagline="Paiement reçu"
+    title="Merci pour votre paiement"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
-    intro="Nous vous confirmons la bonne réception de votre paiement. Votre mission est désormais programmée."
-    primaryCta={{ label: 'Voir la facture', href: 'https://transportsligneo.fr/dashboard-client/documents' }}
+    primaryCta={{ label: 'Voir mon reçu', href: 'https://transportsligneo.fr/dashboard-client/documents' }}
   >
-    {prix ? <HighlightBox label="Paiement confirmé" value={`${prix} €`} tone="success" /> : null}
-    <RecapCard
-      rows={[
-        facture && { label: 'N° de facture', value: facture },
-        numero && { label: 'Référence paiement', value: numero },
-        depart && arrivee && { label: 'Trajet', value: `${depart} → ${arrivee}` },
-        { label: 'Mode de paiement', value: 'Carte bancaire' },
-      ].filter(Boolean) as any}
-    />
+    {prix ? <AmountRow label="Montant réglé" amount={`${prix} €`} /> : null}
+    {(facture || numero || (depart && arrivee)) ? (
+      <SimpleCard
+        title={facture || numero}
+        subtitle={[depart && arrivee ? `${depart} → ${arrivee}` : null, 'Carte bancaire'].filter(Boolean).join(' · ')}
+      />
+    ) : null}
   </LigneoEmailShell>
 )
 
@@ -37,5 +33,5 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) => `Paiement reçu${d.numero ? ` — ${d.numero}` : ''} — Transports Ligneo`,
   displayName: 'Devis payé (client)',
-  previewData: { prenom: 'Jean', numero: 'PAY-2026-0001', facture: 'FAC-2026-0001', depart: 'TOURS', arrivee: 'LE MANS', prix: 180 },
+  previewData: { prenom: 'Morgane', numero: 'PAY-TLG-2026-091', facture: 'FAC-TLG-2026-114', depart: 'La Riche', arrivee: 'Tours', prix: 120 },
 } satisfies TemplateEntry
