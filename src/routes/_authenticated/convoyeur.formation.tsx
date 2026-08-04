@@ -56,12 +56,6 @@ function FormationLayout() {
         >
           <HelpCircle size={14} /> FAQ
         </Link>
-        <Link
-          to="/convoyeur/formation/temoignages"
-          className="rounded-lg border border-pro-border bg-white px-3 py-2 text-xs font-medium text-pro-text flex items-center gap-1.5 hover:border-[#2F5FFF]/40"
-        >
-          <MessageSquareQuote size={14} /> Ils en parlent
-        </Link>
         <button
           type="button"
           onClick={() => setTool(tool === "glossary" ? "none" : "glossary")}
