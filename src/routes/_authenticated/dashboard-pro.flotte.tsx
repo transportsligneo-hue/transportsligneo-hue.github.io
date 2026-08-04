@@ -9,6 +9,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import VehicleDetailPanel, {
   docStatus, worstDocStatus, type FleetVehicle,
 } from "@/components/flotte/VehicleDetailPanel";
+import FleetPageHeader, { FleetHeaderButton } from "@/components/flotte/FleetPageHeader";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { lookupPlate } from "@/lib/plate.functions";
 import { useServerFn } from "@tanstack/react-start";
