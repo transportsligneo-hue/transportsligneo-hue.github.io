@@ -258,7 +258,7 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
           notification_created: notificationCreated,
           status,
           error_message: errorMessage,
-        });
+        } as never);
         if (logErr) console.error(`[signup/finalize] signup_events insert failed code=${logErr.message}`);
 
         console.info(
