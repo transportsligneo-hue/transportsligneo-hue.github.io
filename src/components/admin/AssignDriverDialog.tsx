@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, CheckCircle2, Building2, User, Send, Star } from "lucide-react";
 import { Modal, Button, FormField, SearchInput, Badge } from "./AdminUI";
 import { confirmToast } from "@/lib/confirm-toast";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 interface Convoyeur {
   id: string;
@@ -153,6 +154,53 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
     );
   }, [fleets, search]);
 
+  /** Prévient le client qu'un convoyeur / une flotte a été affecté(e) à sa mission. */
+  async function notifyClientAssignment(convoyeurLabel: string) {
+    try {
+      let email: string | null = null;
+      let prenom: string | null = null;
+      let numero: string | null = null;
+      let date: string | null = trip.date ?? null;
+
+      if (trip.source === "trajet") {
+        const { data } = await supabase
+          .from("trajets")
+          .select("client_email, client_nom, numero_mission, date_trajet")
+          .eq("id", trip.id)
+          .maybeSingle();
+        email = data?.client_email ?? null;
+        prenom = data?.client_nom ?? null;
+        numero = data?.numero_mission ?? null;
+        date = data?.date_trajet ?? date;
+      } else if (trip.source === "mission") {
+        const { data } = await supabase
+          .from("missions")
+          .select("email, prenom, numero, date_prise_en_charge")
+          .eq("id", trip.id)
+          .maybeSingle();
+        email = data?.email ?? null;
+        prenom = data?.prenom ?? null;
+        numero = data?.numero ?? null;
+        date = data?.date_prise_en_charge ?? date;
+      }
+
+      if (!email) return;
+      await sendTransactionalEmail({
+        templateName: "attribution-convoyeur",
+        recipientEmail: email,
+        idempotencyKey: `attribution-${trip.source}-${trip.id}-${selected}`,
+        templateData: {
+          prenom,
+          numero,
+          convoyeur: convoyeurLabel,
+          date: date ? new Date(date).toLocaleDateString("fr-FR") : null,
+        },
+      });
+    } catch {
+      /* email non bloquant */
+    }
+  }
+
   async function handleAssign() {
     if (!selected) return;
     if (tab === "convoyeur") {
@@ -202,11 +250,13 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
             .eq("id", trip.id);
         }
         const c = convoyeurs.find((x) => x.id === selected);
+        const convoyeurLabel = c ? `${c.prenom} ${c.nom}` : selected;
         onAssigned?.({
           type: "convoyeur",
           id: selected,
-          label: c ? `${c.prenom} ${c.nom}` : selected,
+          label: convoyeurLabel,
         });
+        await notifyClientAssignment(convoyeurLabel);
       } else {
         // Flotte
         if (trip.source === "mission") {
@@ -226,6 +276,7 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
           id: selected,
           label: f ? f.commercial_name ?? f.legal_name : selected,
         });
+        await notifyClientAssignment(f ? f.commercial_name ?? f.legal_name : "Flotte partenaire");
       }
       onClose();
     } finally {

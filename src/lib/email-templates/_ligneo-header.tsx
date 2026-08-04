@@ -12,10 +12,12 @@ import {
 } from '@react-email/components'
 
 /**
- * Shell email premium Transports Ligneo — style flyer navy/or.
- * Toutes les templates s'appuient sur ce composant pour une cohérence visuelle
- * absolue (fond navy, filet doré, wordmark Playfair, footer contact doré,
- * bandeau confiance).
+ * Gabarit email Transports Ligneo — v6 (charte site 2026).
+ * Fond bleu clair, carte blanche 600px, en-tête bleu marine dégradé,
+ * accents bleu électrique / or, typographie Poppins avec repli Arial.
+ *
+ * Toutes les templates s'appuient sur ce composant : modifier ce fichier
+ * harmonise l'intégralité des emails transactionnels du site.
  */
 
 export const LIGNEO_SITE = 'Transports Ligneo'
@@ -25,32 +27,30 @@ export const LIGNEO_EMAIL = 'contact@transportsligneo.fr'
 export const LIGNEO_LOGO_URL = 'https://transportsligneo.fr/logo-ligneo.png'
 
 // Palette — miroir du site
-const NAVY = '#0b1026'
-const NAVY_DEEP = '#070a1c'
-const NAVY_SOFT = '#111a3d'
-const GOLD = '#d4af37'
-const GOLD_LIGHT = '#e7c76a'
-const CREAM = '#faf7ef'
-const CREAM_SOFT = '#fdfcf8'
-const TEXT_DARK = '#1a1f36'
-const TEXT_MUTED = '#5b6479'
-const SUCCESS_BG = '#eaf7ee'
-const SUCCESS_BORDER = '#2f9d55'
-const SUCCESS_TEXT = '#186a34'
-const DANGER_BG = '#fdecec'
-const DANGER_BORDER = '#c0392b'
-const DANGER_TEXT = '#7a1b12'
+const NAVY = '#0a1638'
+const NAVY_2 = '#132a6b'
+const BLUE = '#2f5fff'
+const BLUE_LIGHT = '#6ea1ff'
+const GOLD = '#b8862a'
+const GOLD_LIGHT = '#e8c976'
+const PAGE_BG = '#eef1f8'
+const CARD_BG = '#f7f9fc'
+const CARD_BORDER = '#e7ebf3'
+const TEXT_DARK = '#0f1526'
+const TEXT_BODY = '#4b5468'
+const TEXT_MUTED = '#9aa2ba'
+const BORDER = '#eaeaee'
 
-const FONT_STACK_HEAD = "'Playfair Display', Georgia, 'Times New Roman', serif"
-const FONT_STACK_BODY = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
+const FONT_STACK_HEAD = "'Poppins', 'Segoe UI', Arial, Helvetica, sans-serif"
+const FONT_STACK_BODY = "'Inter', 'Segoe UI', Arial, Helvetica, sans-serif"
 
 // ---------- SHELL ----------
 
 export interface LigneoEmailShellProps {
   preview: string
-  /** Petite étiquette gold en haut du bandeau (ex: "Devis disponible"). */
+  /** Petite étiquette en haut du contenu (ex: "Devis disponible"). */
   tagline?: string
-  /** Titre principal en petites capitales (ex: "DEMANDE DE DEVIS REÇUE"). */
+  /** Titre principal. */
   title: string
   /** Icône emoji ou courte string affichée à gauche du titre. */
   icon?: string
@@ -58,19 +58,19 @@ export interface LigneoEmailShellProps {
   greeting?: string
   /** Paragraphe d'intro sous le titre. */
   intro?: React.ReactNode
-  /** Contenu additionnel (Recap, Highlight, etc.). */
+  /** Contenu additionnel (RecapCard, HighlightBox, etc.). */
   children?: React.ReactNode
-  /** Bouton principal (or plein). */
+  /** Bouton principal (bleu). */
   primaryCta?: { label: string; href: string } | null
-  /** Bouton secondaire (contour or). */
+  /** Bouton secondaire (or). */
   secondaryCta?: { label: string; href: string } | null
-  /** Signature finale. Défaut: "L'équipe Transports Ligneo". */
+  /** Signature finale. */
   signature?: string
-  /** URL du logo client (organisation) — affiché en petit sous le wordmark. */
+  /** URL du logo client (organisation). */
   clientLogoUrl?: string | null
-  /** Nom du client / organisation affiché à côté du logo. */
+  /** Nom du client / organisation. */
   clientName?: string | null
-  /** Thème d'espace client — colorise le chip sous le brand bar. */
+  /** Thème d'espace client — colorise le chip sous l'en-tête. */
   accountTheme?: 'flotte' | 'b2b' | 'default' | null
 }
 
@@ -91,51 +91,58 @@ export function LigneoEmailShell({
 }: LigneoEmailShellProps) {
   const themeChip =
     accountTheme === 'flotte'
-      ? { label: 'Espace Flotte partenaire', bg: '#3b1f78', border: '#a78bfa' }
+      ? { label: 'Espace Flotte partenaire', bg: '#f1ecfd', border: '#d9c9fb', color: '#5b2ea8' }
       : accountTheme === 'b2b'
-        ? { label: 'Espace B2B Standard', bg: '#0a3ad1', border: '#5b8dff' }
+        ? { label: 'Espace B2B Standard', bg: '#eef2ff', border: '#d5deff', color: '#1c3fc4' }
         : null
+
   return (
     <Html lang="fr" dir="ltr">
       <Head />
       <Preview>{preview}</Preview>
       <Body style={bodyStyle}>
         <Container style={outerContainer}>
-          {/* Carte navy premium */}
           <Section style={card}>
-            {/* Filet or supérieur */}
-            <Section style={goldTopBar} />
-
-            {/* En-tête wordmark */}
+            {/* En-tête bleu marine */}
             <Section style={headerSection}>
-              <Text style={carGlyph}>🚗</Text>
-              <Text style={wordmark}>TRANSPORTS LIGNEO</Text>
-              <Text style={wordmarkRule}>&nbsp;</Text>
-              {tagline ? <Text style={taglineStyle}>{tagline}</Text> : null}
+              <table role="presentation" cellPadding={0} cellSpacing={0}>
+                <tbody>
+                  <tr>
+                    <td>
+                      <img
+                        src={LIGNEO_LOGO_URL}
+                        width="40"
+                        height="40"
+                        alt="Transports Ligneo"
+                        style={{ borderRadius: '10px', display: 'block' }}
+                      />
+                    </td>
+                    <td style={brandCell}>
+                      TRANSPORTS <span style={{ color: BLUE_LIGHT }}>LIGNEO</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </Section>
 
             {clientLogoUrl || clientName || themeChip ? (
               <Section style={clientBrandBar}>
                 {clientLogoUrl ? (
-                  <img
-                    src={clientLogoUrl}
-                    alt={clientName || 'Logo client'}
-                    style={clientBrandLogo}
-                  />
+                  <img src={clientLogoUrl} alt={clientName || 'Logo client'} style={clientBrandLogo} />
                 ) : null}
                 {clientName ? <Text style={clientBrandName}>{clientName}</Text> : null}
                 {themeChip ? (
                   <Text
                     style={{
                       display: 'inline-block',
-                      marginTop: '6px',
-                      padding: '3px 10px',
+                      margin: '6px 0 0',
+                      padding: '4px 10px',
                       borderRadius: '999px',
                       backgroundColor: themeChip.bg,
                       border: `1px solid ${themeChip.border}`,
-                      color: '#ffffff',
-                      fontSize: '10px',
-                      letterSpacing: '0.16em',
+                      color: themeChip.color,
+                      fontSize: '10.5px',
+                      letterSpacing: '0.05em',
                       textTransform: 'uppercase',
                       fontWeight: 700,
                       fontFamily: FONT_STACK_BODY,
@@ -147,85 +154,60 @@ export function LigneoEmailShell({
               </Section>
             ) : null}
 
-            {/* Zone contenu crème */}
+            {/* Contenu */}
             <Section style={contentWrap}>
-              <Section style={contentInner}>
-                <Text style={titleStyle}>
-                  {icon ? <span style={{ marginRight: 8 }}>{icon}</span> : null}
-                  {title}
-                </Text>
+              {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
+              <Text style={titleStyle}>
+                {icon ? <span style={{ marginRight: 8 }}>{icon}</span> : null}
+                {title}
+              </Text>
 
-                {greeting ? <Text style={greetingStyle}>{greeting}</Text> : null}
-                {intro ? <Text style={introStyle}>{intro}</Text> : null}
+              {greeting ? <Text style={greetingStyle}>{greeting}</Text> : null}
+              {intro ? <Text style={introStyle}>{intro}</Text> : null}
 
-                {children}
+              {children}
 
-                {primaryCta ? (
-                  <Section style={{ textAlign: 'center', margin: '24px 0 8px' }}>
-                    <Button href={primaryCta.href} style={primaryButtonStyle}>
-                      {primaryCta.label}
-                    </Button>
-                  </Section>
-                ) : null}
-                {secondaryCta ? (
-                  <Section style={{ textAlign: 'center', margin: '4px 0 8px' }}>
-                    <Button href={secondaryCta.href} style={secondaryButtonStyle}>
-                      {secondaryCta.label}
-                    </Button>
-                  </Section>
-                ) : null}
+              {primaryCta ? (
+                <Section style={{ margin: '8px 0 20px' }}>
+                  <Button href={primaryCta.href} style={primaryButtonStyle}>
+                    {primaryCta.label}
+                  </Button>
+                </Section>
+              ) : null}
+              {secondaryCta ? (
+                <Section style={{ margin: '0 0 20px' }}>
+                  <Button href={secondaryCta.href} style={secondaryButtonStyle}>
+                    {secondaryCta.label}
+                  </Button>
+                </Section>
+              ) : null}
 
-                <Text style={signatureStyle}>
-                  {signature || `Cordialement,\nL'équipe ${LIGNEO_SITE}`}
-                </Text>
-              </Section>
+              <Text style={signatureStyle}>
+                {signature || `Cordialement,\nL'équipe ${LIGNEO_SITE}`}
+              </Text>
             </Section>
 
-            {/* Footer navy avec contacts dorés */}
+            {/* Pied de page */}
             <Section style={footerBar}>
+              <Hr style={divider} />
               <Text style={footerLine}>
-                <span style={footerIcon}>🌐</span>
-                <a href={`https://${LIGNEO_SITE_URL}`} style={footerLink}>
-                  {LIGNEO_SITE_URL}
-                </a>
+                <b style={{ color: TEXT_BODY }}>{LIGNEO_SITE}</b> — Convoyage automobile — Basé à Tours (37)
               </Text>
               <Text style={footerLine}>
-                <span style={footerIcon}>✉</span>
+                {LIGNEO_TEL} ·{' '}
                 <a href={`mailto:${LIGNEO_EMAIL}`} style={footerLink}>
                   {LIGNEO_EMAIL}
+                </a>{' '}
+                ·{' '}
+                <a href={`https://${LIGNEO_SITE_URL.replace('www.', '')}`} style={footerLink}>
+                  transportsligneo.fr
                 </a>
               </Text>
-              <Text style={footerLine}>
-                <span style={footerIcon}>📞</span>
-                <a href={`tel:+33${LIGNEO_TEL.replace(/\s/g, '').slice(1)}`} style={footerLink}>
-                  {LIGNEO_TEL}
-                </a>
+              <Text style={{ ...footerLine, marginTop: '12px' }}>
+                Vous recevez cet email suite à une action sur votre compte Transports Ligneo.
               </Text>
             </Section>
           </Section>
-
-          {/* Bandeau confiance */}
-          <Section style={trustBar}>
-            <Text style={trustItem}>
-              <span style={trustGold}>◆</span> Plateforme sécurisée et certifiée
-            </Text>
-            <Text style={trustItem}>
-              <span style={trustGold}>◆</span> Convoyage automobile partout en France
-            </Text>
-            <Text style={trustItem}>
-              <span style={trustGold}>◆</span> Suivi en temps réel et transparent
-            </Text>
-            <Text style={trustItem}>
-              <span style={trustGold}>◆</span> Partenaire de confiance à vos côtés
-            </Text>
-          </Section>
-
-          <Text style={legal}>
-            Transports LIGNEO — Basé à TOURS (37) — RCS TOURS 753 320 001 000 70 — contact@transportsligneo.fr — www.transportsligneo.fr
-          </Text>
-          <Text style={legalSmall}>
-            Cet e-mail est envoyé automatiquement, merci de ne pas y répondre.
-          </Text>
         </Container>
       </Body>
     </Html>
@@ -237,9 +219,10 @@ export function LigneoEmailShell({
 export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
     <Section style={headerSection}>
-      <Text style={carGlyph}>🚗</Text>
-      <Text style={wordmark}>TRANSPORTS LIGNEO</Text>
-      {tagline ? <Text style={taglineStyle}>{tagline}</Text> : null}
+      <Text style={brandCell}>
+        TRANSPORTS <span style={{ color: BLUE_LIGHT }}>LIGNEO</span>
+      </Text>
+      {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
     </Section>
   )
 }
@@ -281,29 +264,57 @@ export function HighlightBox({
   meta?: React.ReactNode
   tone?: 'gold' | 'success' | 'danger' | 'navy'
 }) {
-  const styles = {
-    gold: highlightGold,
-    success: highlightSuccess,
-    danger: highlightDanger,
-    navy: highlightNavy,
-  }
-  const labelStyles = {
-    gold: highlightGoldLabel,
-    success: highlightSuccessLabel,
-    danger: highlightDangerLabel,
-    navy: highlightNavyLabel,
-  }
-  const valueStyles = {
-    gold: highlightGoldValue,
-    success: highlightSuccessValue,
-    danger: highlightDangerValue,
-    navy: highlightNavyValue,
-  }
+  const box =
+    tone === 'success'
+      ? { bg: '#e9f7ee', border: '#c3e8d0', color: '#186a34' }
+      : tone === 'danger'
+        ? { bg: '#fdeaea', border: '#f3bcbc', color: '#a3231b' }
+        : tone === 'navy'
+          ? { bg: '#eef2ff', border: '#d5deff', color: '#1c3fc4' }
+          : { bg: '#fef3e2', border: '#f3d9b0', color: '#8a5f13' }
+
   return (
-    <Section style={styles[tone]}>
-      {label ? <Text style={labelStyles[tone]}>{label}</Text> : null}
-      <Text style={valueStyles[tone]}>{value}</Text>
-      {meta ? <Text style={highlightMeta}>{meta}</Text> : null}
+    <Section
+      style={{
+        backgroundColor: box.bg,
+        border: `1px solid ${box.border}`,
+        borderRadius: '12px',
+        padding: '18px 20px',
+        margin: '0 0 20px',
+      }}
+    >
+      {label ? (
+        <Text
+          style={{
+            fontFamily: FONT_STACK_BODY,
+            fontSize: '10.5px',
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: box.color,
+            margin: '0 0 6px',
+          }}
+        >
+          {label}
+        </Text>
+      ) : null}
+      <Text
+        style={{
+          fontFamily: FONT_STACK_HEAD,
+          fontSize: '18px',
+          fontWeight: 700,
+          color: box.color,
+          margin: 0,
+          lineHeight: '1.35',
+        }}
+      >
+        {value}
+      </Text>
+      {meta ? (
+        <Text style={{ fontFamily: FONT_STACK_BODY, fontSize: '13px', color: TEXT_BODY, margin: '6px 0 0' }}>
+          {meta}
+        </Text>
+      ) : null}
     </Section>
   )
 }
@@ -321,9 +332,10 @@ export function Divider() {
 const bodyStyle = {
   backgroundColor: '#ffffff',
   margin: 0,
-  padding: '24px 8px',
+  padding: '32px 8px',
   fontFamily: FONT_STACK_BODY,
   color: TEXT_DARK,
+  backgroundImage: `linear-gradient(${PAGE_BG}, ${PAGE_BG})`,
 }
 
 const outerContainer = {
@@ -333,372 +345,194 @@ const outerContainer = {
 }
 
 const card = {
-  backgroundColor: NAVY,
-  borderRadius: '18px',
-  border: `1px solid ${GOLD}33`,
+  backgroundColor: '#ffffff',
+  borderRadius: '16px',
   overflow: 'hidden' as const,
-  boxShadow: '0 12px 40px rgba(11,16,38,0.18)',
+  boxShadow: '0 8px 24px rgba(15,21,38,0.06)',
   padding: 0,
-}
-
-const goldTopBar = {
-  height: '6px',
-  backgroundColor: GOLD,
-  padding: 0,
-  margin: 0,
-  lineHeight: '6px',
-  fontSize: '1px',
 }
 
 const headerSection = {
   backgroundColor: NAVY,
-  padding: '28px 24px 18px',
-  textAlign: 'center' as const,
-  borderBottom: `1px solid ${GOLD}22`,
+  backgroundImage: `linear-gradient(135deg, ${NAVY}, ${NAVY_2})`,
+  padding: '28px 32px',
 }
 
-const carGlyph = {
-  fontSize: '32px',
-  color: GOLD,
-  margin: '0 0 6px',
-  lineHeight: '1',
-  textAlign: 'center' as const,
-}
-
-const wordmark = {
+const brandCell = {
   fontFamily: FONT_STACK_HEAD,
-  fontSize: '22px',
-  color: GOLD,
-  letterSpacing: '0.22em',
-  fontWeight: 700,
-  margin: '0',
-  textAlign: 'center' as const,
-  lineHeight: '1.2',
-}
-
-const wordmarkRule = {
-  display: 'block',
-  width: '48px',
-  height: '2px',
-  backgroundColor: GOLD,
-  margin: '10px auto 0',
-  fontSize: '1px',
-  lineHeight: '1px',
-  color: NAVY,
-}
-
-const taglineStyle = {
-  fontSize: '11px',
-  color: GOLD_LIGHT,
-  letterSpacing: '0.28em',
-  margin: '12px 0 0',
-  textTransform: 'uppercase' as const,
-  fontFamily: FONT_STACK_BODY,
-  textAlign: 'center' as const,
+  fontWeight: 800,
+  fontSize: '16px',
+  color: '#ffffff',
+  letterSpacing: '0.02em',
+  verticalAlign: 'middle' as const,
+  paddingLeft: '12px',
+  margin: 0,
 }
 
 const clientBrandBar = {
-  backgroundColor: NAVY_DEEP,
-  padding: '10px 24px',
+  backgroundColor: CARD_BG,
+  borderBottom: `1px solid ${CARD_BORDER}`,
+  padding: '12px 32px',
   textAlign: 'center' as const,
-  borderBottom: `1px solid ${GOLD}22`,
 }
+
 const clientBrandLogo = {
-  maxHeight: '32px',
+  maxHeight: '30px',
   maxWidth: '140px',
   display: 'inline-block',
   verticalAlign: 'middle',
   backgroundColor: '#ffffff',
-  padding: '4px 8px',
-  borderRadius: '4px',
-  border: `1px solid ${GOLD}44`,
+  padding: '3px 6px',
+  borderRadius: '6px',
+  border: `1px solid ${CARD_BORDER}`,
 }
+
 const clientBrandName = {
   fontSize: '11px',
-  color: GOLD_LIGHT,
-  letterSpacing: '0.18em',
+  color: TEXT_MUTED,
+  letterSpacing: '0.05em',
   textTransform: 'uppercase' as const,
   margin: '6px 0 0',
   fontFamily: FONT_STACK_BODY,
-  textAlign: 'center' as const,
-  fontWeight: 600,
+  fontWeight: 700,
 }
 
 const contentWrap = {
-  backgroundColor: CREAM_SOFT,
-  padding: '0',
+  padding: '36px 32px 8px',
+  fontFamily: FONT_STACK_BODY,
 }
 
-const contentInner = {
-  padding: '28px 28px 20px',
+const eyebrowStyle = {
+  fontFamily: FONT_STACK_BODY,
+  fontSize: '11px',
+  fontWeight: 700,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase' as const,
+  color: BLUE,
+  margin: '0 0 12px',
 }
 
 const titleStyle = {
   fontFamily: FONT_STACK_HEAD,
-  fontSize: '18px',
-  fontWeight: 700,
-  color: NAVY,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase' as const,
-  margin: '0 0 18px',
+  fontSize: '22px',
+  fontWeight: 800,
+  color: TEXT_DARK,
+  margin: '0 0 16px',
   lineHeight: '1.3',
 }
 
 const greetingStyle = {
-  fontSize: '15px',
+  fontSize: '14px',
   color: TEXT_DARK,
-  margin: '0 0 10px',
+  margin: '0 0 12px',
   fontWeight: 600,
+  lineHeight: '1.6',
 }
 
 const introStyle = {
   fontSize: '14px',
-  color: TEXT_DARK,
+  color: TEXT_BODY,
   lineHeight: '1.65',
-  margin: '0 0 14px',
+  margin: '0 0 16px',
+}
+
+const primaryButtonStyle = {
+  display: 'inline-block',
+  backgroundColor: BLUE,
+  backgroundImage: `linear-gradient(120deg, ${BLUE}, #1c3fc4)`,
+  color: '#ffffff',
+  fontFamily: FONT_STACK_BODY,
+  fontWeight: 700,
+  fontSize: '14px',
+  padding: '14px 28px',
+  borderRadius: '10px',
+  textDecoration: 'none',
+}
+
+const secondaryButtonStyle = {
+  display: 'inline-block',
+  backgroundColor: GOLD,
+  backgroundImage: `linear-gradient(120deg, ${GOLD_LIGHT}, ${GOLD})`,
+  color: '#ffffff',
+  fontFamily: FONT_STACK_BODY,
+  fontWeight: 700,
+  fontSize: '14px',
+  padding: '14px 28px',
+  borderRadius: '10px',
+  textDecoration: 'none',
 }
 
 const signatureStyle = {
-  fontSize: '13px',
-  color: TEXT_MUTED,
-  margin: '24px 0 0',
+  fontSize: '13.5px',
+  color: TEXT_BODY,
+  lineHeight: '1.6',
+  margin: '20px 0 4px',
   whiteSpace: 'pre-line' as const,
-  fontStyle: 'italic' as const,
 }
 
-// Recap
-const recapCard = {
-  backgroundColor: '#ffffff',
-  border: `1px solid ${GOLD}55`,
-  borderLeft: `3px solid ${GOLD}`,
-  borderRadius: '8px',
-  padding: '16px 18px',
-  margin: '4px 0 16px',
+const footerBar = {
+  padding: '8px 32px 32px',
+  fontFamily: FONT_STACK_BODY,
 }
+
+const footerLine = {
+  fontSize: '11.5px',
+  color: TEXT_MUTED,
+  margin: '0 0 6px',
+  lineHeight: '1.6',
+}
+
+const footerLink = {
+  color: BLUE,
+  textDecoration: 'none',
+}
+
+const divider = {
+  borderTop: `1px solid ${BORDER}`,
+  borderBottom: 'none',
+  borderLeft: 'none',
+  borderRight: 'none',
+  margin: '24px 0',
+}
+
+const recapCard = {
+  backgroundColor: CARD_BG,
+  border: `1px solid ${CARD_BORDER}`,
+  borderRadius: '12px',
+  padding: '18px 20px',
+  margin: '0 0 20px',
+}
+
 const recapTitle = {
-  fontSize: '10px',
-  color: NAVY,
-  letterSpacing: '0.22em',
-  textTransform: 'uppercase' as const,
+  fontFamily: FONT_STACK_HEAD,
+  fontSize: '14px',
   fontWeight: 700,
+  color: TEXT_DARK,
   margin: '0 0 10px',
 }
+
 const recapTable = {
   width: '100%',
   borderCollapse: 'collapse' as const,
 }
+
 const recapLabel = {
-  fontSize: '12px',
+  fontFamily: FONT_STACK_BODY,
+  fontSize: '10.5px',
+  fontWeight: 700,
   color: TEXT_MUTED,
-  padding: '4px 12px 4px 0',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+  padding: '6px 12px 6px 0',
   verticalAlign: 'top' as const,
   whiteSpace: 'nowrap' as const,
-  width: '38%',
-  fontWeight: 500,
 }
+
 const recapValue = {
-  fontSize: '13px',
-  color: NAVY,
-  padding: '4px 0',
-  verticalAlign: 'top' as const,
-  fontWeight: 600,
-}
-
-// Highlight - Gold (navy bg + gold border)
-const highlightGold = {
-  backgroundColor: NAVY,
-  border: `2px solid ${GOLD}`,
-  borderRadius: '10px',
-  padding: '18px',
-  margin: '4px 0 18px',
-  textAlign: 'center' as const,
-}
-const highlightGoldLabel = {
-  fontSize: '11px',
-  color: GOLD_LIGHT,
-  letterSpacing: '0.22em',
-  textTransform: 'uppercase' as const,
-  margin: '0 0 8px',
-  fontWeight: 600,
-}
-const highlightGoldValue = {
-  fontSize: '26px',
-  color: GOLD,
-  margin: '0',
-  fontWeight: 700,
-  fontFamily: FONT_STACK_HEAD,
-  letterSpacing: '0.02em',
-}
-
-// Highlight - Success (cream w green tick)
-const highlightSuccess = {
-  backgroundColor: SUCCESS_BG,
-  border: `1px solid ${SUCCESS_BORDER}55`,
-  borderRadius: '10px',
-  padding: '18px',
-  margin: '4px 0 18px',
-  textAlign: 'center' as const,
-}
-const highlightSuccessLabel = {
-  fontSize: '11px',
-  color: SUCCESS_TEXT,
-  letterSpacing: '0.22em',
-  textTransform: 'uppercase' as const,
-  margin: '0 0 6px',
-  fontWeight: 700,
-}
-const highlightSuccessValue = {
-  fontSize: '17px',
-  color: SUCCESS_TEXT,
-  margin: '0',
-  fontWeight: 700,
-}
-
-// Highlight - Danger
-const highlightDanger = {
-  backgroundColor: DANGER_BG,
-  border: `1px solid ${DANGER_BORDER}55`,
-  borderRadius: '10px',
-  padding: '18px',
-  margin: '4px 0 18px',
-  textAlign: 'center' as const,
-}
-const highlightDangerLabel = {
-  fontSize: '11px',
-  color: DANGER_TEXT,
-  letterSpacing: '0.22em',
-  textTransform: 'uppercase' as const,
-  margin: '0 0 6px',
-  fontWeight: 700,
-}
-const highlightDangerValue = {
-  fontSize: '17px',
-  color: DANGER_TEXT,
-  margin: '0',
-  fontWeight: 700,
-}
-
-// Highlight - Navy (subtle info box)
-const highlightNavy = {
-  backgroundColor: CREAM,
-  border: `1px solid ${NAVY}22`,
-  borderRadius: '10px',
-  padding: '16px',
-  margin: '4px 0 18px',
-}
-const highlightNavyLabel = {
-  fontSize: '10px',
-  color: NAVY,
-  letterSpacing: '0.22em',
-  textTransform: 'uppercase' as const,
-  margin: '0 0 6px',
-  fontWeight: 700,
-}
-const highlightNavyValue = {
+  fontFamily: FONT_STACK_BODY,
   fontSize: '14px',
-  color: NAVY,
-  margin: '0',
   fontWeight: 600,
-  lineHeight: '1.5',
-}
-
-const highlightMeta = {
-  fontSize: '12px',
-  color: '#cfd4e4',
-  margin: '8px 0 0',
-}
-
-// Buttons
-const primaryButtonStyle = {
-  backgroundColor: GOLD,
-  backgroundImage: `linear-gradient(180deg, ${GOLD_LIGHT} 0%, ${GOLD} 100%)`,
-  color: NAVY,
-  fontSize: '14px',
-  fontWeight: 700,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase' as const,
-  padding: '13px 26px',
-  borderRadius: '8px',
-  textDecoration: 'none',
-  display: 'inline-block',
-  border: `1px solid ${GOLD}`,
-  fontFamily: FONT_STACK_BODY,
-}
-
-const secondaryButtonStyle = {
-  backgroundColor: 'transparent',
-  color: NAVY,
-  fontSize: '13px',
-  fontWeight: 600,
-  letterSpacing: '0.05em',
-  padding: '11px 22px',
-  borderRadius: '8px',
-  textDecoration: 'none',
-  display: 'inline-block',
-  border: `1px solid ${NAVY}55`,
-  fontFamily: FONT_STACK_BODY,
-}
-
-// Footer bar (in-card)
-const footerBar = {
-  backgroundColor: NAVY_DEEP,
-  padding: '18px 24px 20px',
-  borderTop: `1px solid ${GOLD}33`,
-}
-const footerLine = {
-  fontSize: '12px',
-  color: GOLD_LIGHT,
-  margin: '4px 0',
-  fontFamily: FONT_STACK_BODY,
-  letterSpacing: '0.02em',
-}
-const footerIcon = {
-  color: GOLD,
-  marginRight: '8px',
-  fontSize: '13px',
-}
-const footerLink = {
-  color: GOLD_LIGHT,
-  textDecoration: 'none',
-  fontWeight: 500,
-}
-
-// Trust bar (outside card)
-const trustBar = {
-  padding: '18px 6px 8px',
-  textAlign: 'center' as const,
-}
-const trustItem = {
-  fontSize: '11px',
-  color: TEXT_MUTED,
-  margin: '2px 12px',
-  display: 'inline-block',
-  letterSpacing: '0.02em',
-}
-const trustGold = {
-  color: GOLD,
-  marginRight: '6px',
-  fontSize: '9px',
-}
-
-const legal = {
-  fontSize: '11px',
-  color: '#8a92a6',
-  margin: '10px 0 4px',
-  textAlign: 'center' as const,
-  lineHeight: '1.5',
-}
-const legalSmall = {
-  fontSize: '10px',
-  color: '#a4abbe',
-  margin: '2px 0 0',
-  textAlign: 'center' as const,
-  fontStyle: 'italic' as const,
-}
-
-const divider = {
-  borderColor: `${GOLD}44`,
-  borderStyle: 'solid' as const,
-  borderWidth: '0 0 1px 0',
-  margin: '18px 0',
+  color: TEXT_DARK,
+  padding: '6px 0',
+  textAlign: 'right' as const,
 }

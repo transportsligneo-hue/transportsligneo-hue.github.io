@@ -56,6 +56,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
@@ -382,6 +383,12 @@ const B2bTransportPonctuelRetourRoute =
     id: '/retour',
     path: '/retour',
     getParentRoute: () => B2bTransportPonctuelRoute,
+  } as any)
+const ApiPublicAlertesDocumentsVehiculesRoute =
+  ApiPublicAlertesDocumentsVehiculesRouteImport.update({
+    id: '/api/public/alertes-documents-vehicules',
+    path: '/api/public/alertes-documents-vehicules',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiFactureCheckoutRoute = ApiFactureCheckoutRouteImport.update({
   id: '/api/facture/checkout',
@@ -969,6 +976,7 @@ export interface FileRoutesByFullPath {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1093,6 +1101,7 @@ export interface FileRoutesByTo {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1226,6 +1235,7 @@ export interface FileRoutesById {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1359,6 +1369,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/public/alertes-documents-vehicules'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -1483,6 +1494,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/public/alertes-documents-vehicules'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
@@ -1615,6 +1627,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/public/alertes-documents-vehicules'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1682,6 +1695,7 @@ export interface RootRouteChildren {
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
+  ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
@@ -2027,6 +2041,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/transport-ponctuel/retour'
       preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
       parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/public/alertes-documents-vehicules': {
+      id: '/api/public/alertes-documents-vehicules'
+      path: '/api/public/alertes-documents-vehicules'
+      fullPath: '/api/public/alertes-documents-vehicules'
+      preLoaderRoute: typeof ApiPublicAlertesDocumentsVehiculesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/facture/checkout': {
       id: '/api/facture/checkout'
@@ -3032,6 +3053,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
+  ApiPublicAlertesDocumentsVehiculesRoute:
+    ApiPublicAlertesDocumentsVehiculesRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,

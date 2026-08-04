@@ -14,6 +14,7 @@ import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPre
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
 import { confirmToast } from "@/lib/confirm-toast";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import type { UnifiedMission } from "./mission-unified-types";
 import { UNIFIED_STATUS } from "./mission-unified-types";
 
@@ -129,6 +130,25 @@ export function MissionUnifiedPanel({
         .update({ statut: "annule", etape_courante: null } as never)
         .eq("trajet_id", mission.id)
         .not("statut", "in", "(annule,validee,termine,refusee)");
+    }
+    if (statut === "termine") {
+      try {
+        const { data: t } = await supabase
+          .from("trajets")
+          .select("client_email, client_nom, numero_mission")
+          .eq("id", mission.id)
+          .maybeSingle();
+        if (t?.client_email) {
+          await sendTransactionalEmail({
+            templateName: "mission-terminee-client",
+            recipientEmail: t.client_email,
+            idempotencyKey: `mission-terminee-${mission.id}`,
+            templateData: { prenom: t.client_nom, numero: t.numero_mission },
+          });
+        }
+      } catch {
+        /* email non bloquant */
+      }
     }
     toast.success("Statut mis à jour");
     onChanged();

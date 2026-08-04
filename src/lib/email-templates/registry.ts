@@ -37,6 +37,8 @@ import { template as convoyeurRefuse } from './convoyeur-refuse'
 import { template as convoyeurSuspendu } from './convoyeur-suspendu'
 import { template as messageManuel } from './message-manuel'
 import { template as devisOtpCode } from './devis-otp-code'
+import { template as convoyeurDocumentStatus } from './convoyeur-document-status'
+import { template as vehiculeDocumentExpiration } from './vehicule-document-expiration'
 
 
 
@@ -70,4 +72,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'convoyeur-suspendu': convoyeurSuspendu,
   'message-manuel': messageManuel,
   'devis-otp-code': devisOtpCode,
+  'convoyeur-document-status': convoyeurDocumentStatus,
+  'vehicule-document-expiration': vehiculeDocumentExpiration,
 }
