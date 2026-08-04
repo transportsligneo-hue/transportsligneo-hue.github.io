@@ -7,7 +7,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Loader2, Check, AlertCircle } from "lucide-react";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import { useAiSettings } from "@/lib/ai/context";
 import { AI_CAPABILITIES, type AiCapability, type AssistanceLevel } from "@/lib/ai/types";
 import { updateAiSettings, getAiUsageStats, type AiUsageStats } from "@/lib/ai/settings.functions";
