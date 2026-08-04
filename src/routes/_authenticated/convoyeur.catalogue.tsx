@@ -90,6 +90,7 @@ function ConvoyeurCatalogue() {
   const { user, convoyeurStatut } = useAuth();
   const validated = convoyeurStatut === "valide" || convoyeurStatut === "actif";
   const [hasTraining, setHasTraining] = useState(false);
+  const [trainingLoaded, setTrainingLoaded] = useState(false);
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
   const [trajets, setTrajets] = useState<CatalogTrajet[]>([]);
   const [myOffers, setMyOffers] = useState<Record<string, MyOffer>>({});
