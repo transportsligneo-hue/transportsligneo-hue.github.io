@@ -121,6 +121,7 @@ import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardProNouvelleMissionIndexRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.index'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
+import { Route as AuthenticatedConvoyeurFormationIndexRouteImport } from './routes/_authenticated/convoyeur.formation.index'
 import { Route as AuthenticatedAdminMissionsIndexRouteImport } from './routes/_authenticated/admin.missions.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -138,11 +139,15 @@ import { Route as AuthenticatedFlotteMissionsMissionIdRouteImport } from './rout
 import { Route as AuthenticatedDashboardProNouvelleMissionGroupeeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.groupee'
 import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-pro.missions.$missionId'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
+import { Route as AuthenticatedConvoyeurFormationTemoignagesRouteImport } from './routes/_authenticated/convoyeur.formation.temoignages'
+import { Route as AuthenticatedConvoyeurFormationFaqRouteImport } from './routes/_authenticated/convoyeur.formation.faq'
+import { Route as AuthenticatedConvoyeurFormationDocumentsRouteImport } from './routes/_authenticated/convoyeur.formation.documents'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
 import { Route as AuthenticatedAdminConvoyeursConvoyeurIdRouteImport } from './routes/_authenticated/admin.convoyeurs.$convoyeurId'
 import { Route as AuthenticatedAdminClientsClientIdRouteImport } from './routes/_authenticated/admin.clients.$clientId'
+import { Route as AuthenticatedConvoyeurFormationModuleIdRouteImport } from './routes/_authenticated/convoyeur.formation.module.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -772,6 +777,12 @@ const AuthenticatedDashboardClientMissionsIndexRoute =
     path: '/missions/',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedConvoyeurFormationIndexRoute =
+  AuthenticatedConvoyeurFormationIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
 const AuthenticatedAdminMissionsIndexRoute =
   AuthenticatedAdminMissionsIndexRouteImport.update({
     id: '/missions/',
@@ -867,6 +878,24 @@ const AuthenticatedDashboardClientMissionsMissionIdRoute =
     path: '/missions/$missionId',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
+const AuthenticatedConvoyeurFormationTemoignagesRoute =
+  AuthenticatedConvoyeurFormationTemoignagesRouteImport.update({
+    id: '/temoignages',
+    path: '/temoignages',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
+const AuthenticatedConvoyeurFormationFaqRoute =
+  AuthenticatedConvoyeurFormationFaqRouteImport.update({
+    id: '/faq',
+    path: '/faq',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
+const AuthenticatedConvoyeurFormationDocumentsRoute =
+  AuthenticatedConvoyeurFormationDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
 const AuthenticatedAdminOrganisationsOrgIdRoute =
   AuthenticatedAdminOrganisationsOrgIdRouteImport.update({
     id: '/$orgId',
@@ -896,6 +925,12 @@ const AuthenticatedAdminClientsClientIdRoute =
     id: '/$clientId',
     path: '/$clientId',
     getParentRoute: () => AuthenticatedAdminClientsRoute,
+  } as any)
+const AuthenticatedConvoyeurFormationModuleIdRoute =
+  AuthenticatedConvoyeurFormationModuleIdRouteImport.update({
+    id: '/module/$id',
+    path: '/module/$id',
+    getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -968,7 +1003,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
+  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1012,6 +1047,9 @@ export interface FileRoutesByFullPath {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
+  '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
+  '/convoyeur/formation/temoignages': typeof AuthenticatedConvoyeurFormationTemoignagesRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
@@ -1029,9 +1067,11 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
+  '/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1097,7 +1137,6 @@ export interface FileRoutesByTo {
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1139,6 +1178,9 @@ export interface FileRoutesByTo {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
+  '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
+  '/convoyeur/formation/temoignages': typeof AuthenticatedConvoyeurFormationTemoignagesRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
@@ -1156,9 +1198,11 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions': typeof AuthenticatedAdminMissionsIndexRoute
+  '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1232,7 +1276,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/_authenticated/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
-  '/_authenticated/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRoute
+  '/_authenticated/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
@@ -1276,6 +1320,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/_authenticated/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
+  '/_authenticated/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
+  '/_authenticated/convoyeur/formation/temoignages': typeof AuthenticatedConvoyeurFormationTemoignagesRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
   '/_authenticated/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
@@ -1293,9 +1340,11 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
+  '/_authenticated/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
+  '/_authenticated/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1413,6 +1462,9 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/formation/documents'
+    | '/convoyeur/formation/faq'
+    | '/convoyeur/formation/temoignages'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
     | '/dashboard-pro/nouvelle-mission/groupee'
@@ -1430,9 +1482,11 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/missions/'
+    | '/convoyeur/formation/'
     | '/dashboard-client/missions/'
     | '/dashboard-pro/missions/'
     | '/dashboard-pro/nouvelle-mission/'
+    | '/convoyeur/formation/module/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1498,7 +1552,6 @@ export interface FileRouteTypes {
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
     | '/convoyeur/finances'
-    | '/convoyeur/formation'
     | '/convoyeur/historique'
     | '/convoyeur/missions'
     | '/convoyeur/profil'
@@ -1540,6 +1593,9 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/formation/documents'
+    | '/convoyeur/formation/faq'
+    | '/convoyeur/formation/temoignages'
     | '/dashboard-client/missions/$missionId'
     | '/dashboard-pro/missions/$missionId'
     | '/dashboard-pro/nouvelle-mission/groupee'
@@ -1557,9 +1613,11 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/missions'
+    | '/convoyeur/formation'
     | '/dashboard-client/missions'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-mission'
+    | '/convoyeur/formation/module/$id'
   id:
     | '__root__'
     | '/'
@@ -1676,6 +1734,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/devis/$devisId'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/admin/organisations/$orgId'
+    | '/_authenticated/convoyeur/formation/documents'
+    | '/_authenticated/convoyeur/formation/faq'
+    | '/_authenticated/convoyeur/formation/temoignages'
     | '/_authenticated/dashboard-client/missions/$missionId'
     | '/_authenticated/dashboard-pro/missions/$missionId'
     | '/_authenticated/dashboard-pro/nouvelle-mission/groupee'
@@ -1693,9 +1754,11 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/admin/missions/'
+    | '/_authenticated/convoyeur/formation/'
     | '/_authenticated/dashboard-client/missions/'
     | '/_authenticated/dashboard-pro/missions/'
     | '/_authenticated/dashboard-pro/nouvelle-mission/'
+    | '/_authenticated/convoyeur/formation/module/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2534,6 +2597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/convoyeur/formation/': {
+      id: '/_authenticated/convoyeur/formation/'
+      path: '/'
+      fullPath: '/convoyeur/formation/'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationIndexRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
     '/_authenticated/admin/missions/': {
       id: '/_authenticated/admin/missions/'
       path: '/missions'
@@ -2653,6 +2723,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardClientMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
+    '/_authenticated/convoyeur/formation/temoignages': {
+      id: '/_authenticated/convoyeur/formation/temoignages'
+      path: '/temoignages'
+      fullPath: '/convoyeur/formation/temoignages'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationTemoignagesRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
+    '/_authenticated/convoyeur/formation/faq': {
+      id: '/_authenticated/convoyeur/formation/faq'
+      path: '/faq'
+      fullPath: '/convoyeur/formation/faq'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationFaqRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
+    '/_authenticated/convoyeur/formation/documents': {
+      id: '/_authenticated/convoyeur/formation/documents'
+      path: '/documents'
+      fullPath: '/convoyeur/formation/documents'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationDocumentsRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
     '/_authenticated/admin/organisations/$orgId': {
       id: '/_authenticated/admin/organisations/$orgId'
       path: '/$orgId'
@@ -2687,6 +2778,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/clients/$clientId'
       preLoaderRoute: typeof AuthenticatedAdminClientsClientIdRouteImport
       parentRoute: typeof AuthenticatedAdminClientsRoute
+    }
+    '/_authenticated/convoyeur/formation/module/$id': {
+      id: '/_authenticated/convoyeur/formation/module/$id'
+      path: '/module/$id'
+      fullPath: '/convoyeur/formation/module/$id'
+      preLoaderRoute: typeof AuthenticatedConvoyeurFormationModuleIdRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurFormationRoute
     }
   }
 }
@@ -2820,13 +2918,40 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedConvoyeurFormationRouteChildren {
+  AuthenticatedConvoyeurFormationDocumentsRoute: typeof AuthenticatedConvoyeurFormationDocumentsRoute
+  AuthenticatedConvoyeurFormationFaqRoute: typeof AuthenticatedConvoyeurFormationFaqRoute
+  AuthenticatedConvoyeurFormationTemoignagesRoute: typeof AuthenticatedConvoyeurFormationTemoignagesRoute
+  AuthenticatedConvoyeurFormationIndexRoute: typeof AuthenticatedConvoyeurFormationIndexRoute
+  AuthenticatedConvoyeurFormationModuleIdRoute: typeof AuthenticatedConvoyeurFormationModuleIdRoute
+}
+
+const AuthenticatedConvoyeurFormationRouteChildren: AuthenticatedConvoyeurFormationRouteChildren =
+  {
+    AuthenticatedConvoyeurFormationDocumentsRoute:
+      AuthenticatedConvoyeurFormationDocumentsRoute,
+    AuthenticatedConvoyeurFormationFaqRoute:
+      AuthenticatedConvoyeurFormationFaqRoute,
+    AuthenticatedConvoyeurFormationTemoignagesRoute:
+      AuthenticatedConvoyeurFormationTemoignagesRoute,
+    AuthenticatedConvoyeurFormationIndexRoute:
+      AuthenticatedConvoyeurFormationIndexRoute,
+    AuthenticatedConvoyeurFormationModuleIdRoute:
+      AuthenticatedConvoyeurFormationModuleIdRoute,
+  }
+
+const AuthenticatedConvoyeurFormationRouteWithChildren =
+  AuthenticatedConvoyeurFormationRoute._addFileChildren(
+    AuthenticatedConvoyeurFormationRouteChildren,
+  )
+
 interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurCatalogueRoute: typeof AuthenticatedConvoyeurCatalogueRoute
   AuthenticatedConvoyeurDisponibilitesRoute: typeof AuthenticatedConvoyeurDisponibilitesRoute
   AuthenticatedConvoyeurDisponiblesRoute: typeof AuthenticatedConvoyeurDisponiblesRoute
   AuthenticatedConvoyeurDocumentsRoute: typeof AuthenticatedConvoyeurDocumentsRoute
   AuthenticatedConvoyeurFinancesRoute: typeof AuthenticatedConvoyeurFinancesRoute
-  AuthenticatedConvoyeurFormationRoute: typeof AuthenticatedConvoyeurFormationRoute
+  AuthenticatedConvoyeurFormationRoute: typeof AuthenticatedConvoyeurFormationRouteWithChildren
   AuthenticatedConvoyeurHistoriqueRoute: typeof AuthenticatedConvoyeurHistoriqueRoute
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
   AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
@@ -2842,7 +2967,8 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
       AuthenticatedConvoyeurDisponiblesRoute,
     AuthenticatedConvoyeurDocumentsRoute: AuthenticatedConvoyeurDocumentsRoute,
     AuthenticatedConvoyeurFinancesRoute: AuthenticatedConvoyeurFinancesRoute,
-    AuthenticatedConvoyeurFormationRoute: AuthenticatedConvoyeurFormationRoute,
+    AuthenticatedConvoyeurFormationRoute:
+      AuthenticatedConvoyeurFormationRouteWithChildren,
     AuthenticatedConvoyeurHistoriqueRoute:
       AuthenticatedConvoyeurHistoriqueRoute,
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
@@ -3136,13 +3262,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -3066,6 +3066,154 @@ export type Database = {
           },
         ]
       }
+      module_content_versions: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_by_email: string | null
+          id: string
+          module_id: string
+          module_title: string | null
+          snapshot: Json
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          id?: string
+          module_id: string
+          module_title?: string | null
+          snapshot?: Json
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          id?: string
+          module_id?: string
+          module_title?: string | null
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_content_versions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_progress: {
+        Row: {
+          attempts_count: number
+          case_study_answer: number | null
+          checklist_state: Json
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          module_id: string
+          quiz_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts_count?: number
+          case_study_answer?: number | null
+          checklist_state?: Json
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          quiz_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts_count?: number
+          case_study_answer?: number | null
+          checklist_state?: Json
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          quiz_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          case_study: Json
+          checklist_items: Json
+          content: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          last_updated: string
+          objectives: Json
+          order_index: number
+          quiz_questions: Json
+          resource_label: string | null
+          resource_url: string | null
+          tag: string | null
+          title: string
+          updated_by: string | null
+          video_url: string | null
+        }
+        Insert: {
+          case_study?: Json
+          checklist_items?: Json
+          content?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          last_updated?: string
+          objectives?: Json
+          order_index: number
+          quiz_questions?: Json
+          resource_label?: string | null
+          resource_url?: string | null
+          tag?: string | null
+          title: string
+          updated_by?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          case_study?: Json
+          checklist_items?: Json
+          content?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          last_updated?: string
+          objectives?: Json
+          order_index?: number
+          quiz_questions?: Json
+          resource_label?: string | null
+          resource_url?: string | null
+          tag?: string | null
+          title?: string
+          updated_by?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           category: string
@@ -3388,6 +3536,7 @@ export type Database = {
           facture_mention_active: boolean
           facture_mention_legale: string | null
           id: string
+          last_module_visited: string | null
           logo_url: string | null
           nom: string
           organization_id: string | null
@@ -3398,6 +3547,7 @@ export type Database = {
           societe: string | null
           statut: string
           telephone: string | null
+          training_started_at: string | null
           tva_exemption_note: string | null
           tva_intra: string | null
           type_client: string
@@ -3415,6 +3565,7 @@ export type Database = {
           facture_mention_active?: boolean
           facture_mention_legale?: string | null
           id?: string
+          last_module_visited?: string | null
           logo_url?: string | null
           nom?: string
           organization_id?: string | null
@@ -3425,6 +3576,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          training_started_at?: string | null
           tva_exemption_note?: string | null
           tva_intra?: string | null
           type_client?: string
@@ -3442,6 +3594,7 @@ export type Database = {
           facture_mention_active?: boolean
           facture_mention_legale?: string | null
           id?: string
+          last_module_visited?: string | null
           logo_url?: string | null
           nom?: string
           organization_id?: string | null
@@ -3452,6 +3605,7 @@ export type Database = {
           societe?: string | null
           statut?: string
           telephone?: string | null
+          training_started_at?: string | null
           tva_exemption_note?: string | null
           tva_intra?: string | null
           type_client?: string
@@ -4821,6 +4975,7 @@ export type Database = {
           regime: string
         }[]
       }
+      get_training_modules: { Args: never; Returns: Json }
       has_completed_driver_training: {
         Args: { _user_id?: string }
         Returns: boolean
@@ -4950,6 +5105,10 @@ export type Database = {
           aller: number
           retour: number
         }[]
+      }
+      submit_case_study: {
+        Args: { _choice: number; _module_id: string }
+        Returns: Json
       }
       submit_formation_exam: {
         Args: {
