@@ -42,6 +42,28 @@ type Maintenance = {
   notes: string | null;
 };
 
+type VehicleDocument = {
+  id: string;
+  vehicle_id: string;
+  doc_type: string;
+  nom: string;
+  storage_path: string;
+  mime_type: string | null;
+  taille_octets: number | null;
+  expire_le: string | null;
+  created_at: string;
+};
+
+const DOC_TYPES = [
+  { id: "assurance", label: "Assurance" },
+  { id: "controle_technique", label: "Contrôle technique" },
+  { id: "carte_grise", label: "Carte grise" },
+  { id: "autre", label: "Autre document" },
+];
+
+const MAX_DOC_MB = 15;
+
+
 type HistoryRow = {
   id: string;
   occurred_at: string;
