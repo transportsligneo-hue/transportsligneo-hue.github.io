@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { VROOMY_TOOLS, runVroomyTool, type VroomyCard } from "@/lib/vroomy-tools";
 
 /**
  * Assistant IA public de Transports Ligneo.
@@ -45,7 +46,13 @@ RÈGLES ABSOLUES :
 2. Pour toute donnée personnelle (suivi d'une mission précise, devis déjà émis, facture, compte) : n'essaie pas de deviner. Invite le visiteur à se connecter à son espace client, ou propose d'être rappelé.
 3. Ne demande jamais de données sensibles (numéro de carte bancaire, mot de passe, pièce d'identité) dans le chat.
 4. Si la question est hors sujet (météo, politique, devoirs, autre entreprise…) : décline poliment en une phrase et ramène vers les sujets convoyage.
-5. Si tu ne sais pas répondre, ou si le visiteur demande un humain : propose explicitement soit d'appeler le 07 82 45 61 81, soit de laisser son nom et son numéro pour être rappelé, et termine ta réponse par le marqueur [HANDOFF] sur la dernière ligne.`;
+5. Si tu ne sais pas répondre, ou si le visiteur demande un humain : propose explicitement soit d'appeler le 07 82 45 61 81, soit de laisser son nom et son numéro pour être rappelé, et termine ta réponse par le marqueur [HANDOFF] sur la dernière ligne.
+
+OUTILS À TA DISPOSITION (utilise-les au lieu d'inventer) :
+- chercher_mission(numero_mission, email) : suivi d'une mission. Demande d'abord LES DEUX informations au visiteur ; n'appelle jamais l'outil avec un email inventé ou manquant. Si l'outil refuse, ne divulgue aucune donnée.
+- estimer_devis(ville_depart, ville_arrivee, type_livraison) : estimation officielle. Utilise-le dès qu'on te demande un prix, et annonce le montant renvoyé comme une estimation TTC à confirmer par devis.
+- rediriger_candidature_convoyeur() : lien du formulaire pour devenir convoyeur partenaire.
+Après un appel d'outil, résume le résultat en 2 à 4 phrases, sans répéter les données brutes.`;
 
 function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status });
@@ -142,51 +149,110 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
           { role: "user", content: parsed.message },
         ];
 
+        // --- Appel modèle avec function calling (2 tours max) ---
+        const geminiKey = process.env["GEMINI_API_KEY"];
+        const endpoint = geminiKey
+          ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+          : GATEWAY_URL;
+        const modelId = geminiKey ? "gemini-2.5-flash" : MODEL;
+        const headers: Record<string, string> = geminiKey
+          ? { "Content-Type": "application/json", Authorization: `Bearer ${geminiKey}` }
+          : { "Content-Type": "application/json", "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "fetch" };
+
+        const convo: Array<Record<string, unknown>> = [...messages];
         let reply = "";
+        const cards: VroomyCard[] = [];
+
         try {
-          const res = await fetch(GATEWAY_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Lovable-API-Key": apiKey,
-              "X-Lovable-AIG-SDK": "fetch",
-            },
-            body: JSON.stringify({ model: MODEL, messages, max_tokens: 900, reasoning: { enabled: false } }),
-          });
+          for (let turn = 0; turn < 3; turn++) {
+            const res = await fetch(endpoint, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                model: modelId,
+                messages: convo,
+                tools: VROOMY_TOOLS,
+                max_tokens: 900,
+                ...(geminiKey ? {} : { reasoning: { enabled: false } }),
+              }),
+            });
 
-          if (res.status === 429) {
-            return Response.json({
-              conversation_id: conversationId,
-              reply:
-                "Beaucoup de demandes en ce moment 🙏 Merci de réessayer dans quelques instants, ou appelez-nous au 07 82 45 61 81.",
-              handoff: true,
-            });
-          }
-          if (res.status === 402) {
-            return Response.json({
-              conversation_id: conversationId,
-              reply:
-                "L'assistant est momentanément indisponible. Un conseiller Ligneo peut vous répondre au 07 82 45 61 81.",
-              handoff: true,
-            });
-          }
-          if (!res.ok) {
-            const detail = await res.text();
-            console.error("assistant-chat gateway error", res.status, detail.slice(0, 500));
-            return Response.json({
-              conversation_id: conversationId,
-              reply:
-                "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi appeler le 07 82 45 61 81.",
-              handoff: true,
-            });
-          }
+            if (res.status === 429) {
+              return Response.json({
+                conversation_id: conversationId,
+                reply:
+                  "Beaucoup de demandes en ce moment 🙏 Merci de réessayer dans quelques instants, ou appelez-nous au 07 82 45 61 81.",
+                handoff: true,
+              });
+            }
+            if (res.status === 402) {
+              return Response.json({
+                conversation_id: conversationId,
+                reply:
+                  "L'assistant est momentanément indisponible. Un conseiller Ligneo peut vous répondre au 07 82 45 61 81.",
+                handoff: true,
+              });
+            }
+            if (!res.ok) {
+              const detail = await res.text();
+              console.error("assistant-chat model error", res.status, detail.slice(0, 500));
+              return Response.json({
+                conversation_id: conversationId,
+                reply:
+                  "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi appeler le 07 82 45 61 81.",
+                handoff: true,
+              });
+            }
 
-          const payload = (await res.json()) as {
-            choices?: Array<{ message?: { content?: string } }>;
-          };
-          reply = payload.choices?.[0]?.message?.content?.trim() ?? "";
+            const payload = (await res.json()) as {
+              choices?: Array<{
+                message?: {
+                  content?: string;
+                  tool_calls?: Array<{ id?: string; function?: { name?: string; arguments?: string } }>;
+                };
+              }>;
+            };
+            const msg = payload.choices?.[0]?.message;
+            const toolCalls = msg?.tool_calls ?? [];
+
+            if (toolCalls.length === 0) {
+              reply = msg?.content?.trim() ?? "";
+              break;
+            }
+
+            convo.push({ role: "assistant", content: msg?.content ?? "", tool_calls: toolCalls });
+
+            for (const call of toolCalls) {
+              const name = call.function?.name ?? "";
+              let args: Record<string, unknown> = {};
+              try {
+                args = JSON.parse(call.function?.arguments || "{}") as Record<string, unknown>;
+              } catch {
+                args = {};
+              }
+              const startedAt = Date.now();
+              const result = await runVroomyTool(admin, name, args);
+              if (result.card) cards.push(result.card);
+
+              await admin.from("chat_tool_calls").insert({
+                conversation_id: conversationId,
+                session_token: parsed.session_token,
+                tool_name: name,
+                arguments: args,
+                success: result.success,
+                error_message: result.error ?? null,
+                duration_ms: Date.now() - startedAt,
+              });
+
+              convo.push({
+                role: "tool",
+                tool_call_id: call.id ?? name,
+                content: JSON.stringify(result.payload),
+              });
+            }
+          }
         } catch (err) {
-          console.error("assistant-chat gateway exception", err);
+          console.error("assistant-chat model exception", err);
           return Response.json({
             conversation_id: conversationId,
             reply:
@@ -194,6 +260,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
             handoff: true,
           });
         }
+
 
         if (!reply) {
           reply =
@@ -226,6 +293,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
         return Response.json({
           conversation_id: conversationId,
           reply,
+          cards,
           handoff,
           remaining: Math.max(0, MAX_MESSAGES - ((conv?.message_count ?? 0) + 1)),
         });

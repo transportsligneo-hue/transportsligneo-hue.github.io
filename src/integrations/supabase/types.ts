@@ -715,6 +715,50 @@ export type Database = {
           },
         ]
       }
+      chat_tool_calls: {
+        Row: {
+          arguments: Json
+          conversation_id: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          session_token: string | null
+          success: boolean
+          tool_name: string
+        }
+        Insert: {
+          arguments?: Json
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          session_token?: string | null
+          success?: boolean
+          tool_name: string
+        }
+        Update: {
+          arguments?: Json
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          session_token?: string | null
+          success?: boolean
+          tool_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_tool_calls_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_default_addresses: {
         Row: {
           active: boolean
