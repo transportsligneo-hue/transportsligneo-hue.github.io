@@ -3543,6 +3543,7 @@ export type Database = {
           mission_group_id: string | null
           mission_id: string | null
           modele: string | null
+          numero_mission: string | null
           options_meta: Json
           parent_trajet_id: string | null
           pricing_mode: string
@@ -3614,6 +3615,7 @@ export type Database = {
           mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
+          numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
           pricing_mode?: string
@@ -3685,6 +3687,7 @@ export type Database = {
           mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
+          numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
           pricing_mode?: string
