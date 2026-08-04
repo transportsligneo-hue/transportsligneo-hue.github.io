@@ -162,7 +162,11 @@ export function LigneoEmailShell({
 
             {/* Contenu */}
             <Section style={contentWrap}>
-              {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
+              {tagline ? (
+                <Text style={taglineTone === 'warn' ? { ...eyebrowStyle, color: '#c07d1f' } : eyebrowStyle}>
+                  {tagline}
+                </Text>
+              ) : null}
               <Text style={titleStyle}>
                 {icon ? <span style={{ marginRight: 8 }}>{icon}</span> : null}
                 {title}
