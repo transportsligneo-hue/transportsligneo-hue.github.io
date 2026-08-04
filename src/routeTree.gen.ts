@@ -122,6 +122,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
@@ -771,6 +772,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
+  id: '/api/public/signup/finalize',
+  path: '/api/public/signup/finalize',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
@@ -978,6 +984,7 @@ export interface FileRoutesByFullPath {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1100,6 +1107,7 @@ export interface FileRoutesByTo {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1231,6 +1239,7 @@ export interface FileRoutesById {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1362,6 +1371,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1484,6 +1494,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1614,6 +1625,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1664,6 +1676,7 @@ export interface RootRouteChildren {
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
+  ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -2464,6 +2477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/signup/finalize': {
+      id: '/api/public/signup/finalize'
+      path: '/api/public/signup/finalize'
+      fullPath: '/api/public/signup/finalize'
+      preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-extract': {
       id: '/api/public/scan/handoff-extract'
       path: '/api/public/scan/handoff-extract'
@@ -2997,6 +3017,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
+  ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
