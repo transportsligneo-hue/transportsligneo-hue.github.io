@@ -65,8 +65,12 @@ export function LigneoBrand({ role, compact = false, variant = "light" }: Props)
       </div>
       <div className="min-w-0 flex flex-col">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className={`font-heading text-[13px] tracking-[0.06em] truncate ${wordmarkColor}`}>
-            Transports Ligneo
+          <span
+            className={`font-heading text-[13px] font-extrabold tracking-[0.03em] truncate ${wordmarkColor}`}
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            TRANSPORTS{" "}
+            <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">LIGNEO</span>
           </span>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
