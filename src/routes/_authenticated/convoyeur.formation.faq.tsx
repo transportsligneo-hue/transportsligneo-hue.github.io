@@ -19,7 +19,7 @@ const FAQ = [
   },
   {
     q: "Que se passe-t-il si j'échoue à un quiz ?",
-    a: "Rien de grave : les tentatives sont illimitées. Relisez le module puis relancez le quiz. Le score minimum est de 80%.",
+    a: "Rien de grave : les tentatives sont illimitées. Relisez le module puis relancez le quiz. Le score minimum est de 100%.",
   },
   {
     q: "Dois-je terminer la formation pour accepter des missions ?",
