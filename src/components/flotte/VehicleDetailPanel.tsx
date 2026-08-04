@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { confirmToast } from "@/lib/confirm-toast";
 import {
   X, FileText, ShieldCheck, Wrench, Loader2, Gauge, MapPin,
+  Upload, Trash2, Download, Plus, AlertCircle,
 } from "lucide-react";
+
 
 export type FleetVehicle = {
   id: string;
@@ -38,6 +41,28 @@ type Maintenance = {
   garage: string | null;
   notes: string | null;
 };
+
+type VehicleDocument = {
+  id: string;
+  vehicle_id: string;
+  doc_type: string;
+  nom: string;
+  storage_path: string;
+  mime_type: string | null;
+  taille_octets: number | null;
+  expire_le: string | null;
+  created_at: string;
+};
+
+const DOC_TYPES = [
+  { id: "assurance", label: "Assurance" },
+  { id: "controle_technique", label: "Contrôle technique" },
+  { id: "carte_grise", label: "Carte grise" },
+  { id: "autre", label: "Autre document" },
+];
+
+const MAX_DOC_MB = 15;
+
 
 type HistoryRow = {
   id: string;
@@ -84,38 +109,152 @@ type TabId = (typeof TABS)[number]["id"];
 export default function VehicleDetailPanel({
   vehicle,
   siteName,
+  canManage = false,
+  initialTab = "general",
+  onEdit,
   onClose,
 }: {
   vehicle: FleetVehicle | null;
   siteName?: string | null;
+  canManage?: boolean;
+  initialTab?: TabId;
+  onEdit?: (v: FleetVehicle) => void;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<TabId>("general");
   const [maint, setMaint] = useState<Maintenance[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [docs, setDocs] = useState<VehicleDocument[]>([]);
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [docType, setDocType] = useState<string>("assurance");
+  const [maintForm, setMaintForm] = useState<{
+    effectue_le: string; type_intervention: string; kilometrage: string; cout: string; garage: string; notes: string;
+  } | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { setTab("general"); }, [vehicle?.id]);
+  useEffect(() => { setTab(initialTab); setError(null); setMaintForm(null); }, [vehicle?.id, initialTab]);
+
+  const reloadDocs = async (vehicleId: string) => {
+    const { data } = await supabase
+      .from("vehicle_documents").select("*")
+      .eq("vehicle_id", vehicleId).order("created_at", { ascending: false });
+    setDocs((data ?? []) as VehicleDocument[]);
+  };
+
+  const reloadMaint = async (vehicleId: string) => {
+    const { data } = await supabase
+      .from("vehicle_maintenances").select("*")
+      .eq("vehicle_id", vehicleId).order("effectue_le", { ascending: false });
+    setMaint((data ?? []) as Maintenance[]);
+  };
 
   useEffect(() => {
     if (!vehicle) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [m, h] = await Promise.all([
+      const [m, h, d] = await Promise.all([
         supabase.from("vehicle_maintenances").select("*")
           .eq("vehicle_id", vehicle.id).order("effectue_le", { ascending: false }),
         supabase.from("vehicle_movements")
           .select("id, occurred_at, type, from_address, to_address, mission:missions(numero, ville_depart, ville_arrivee, prix_total, statut)")
           .eq("vehicle_id", vehicle.id).order("occurred_at", { ascending: false }).limit(30),
+        supabase.from("vehicle_documents").select("*")
+          .eq("vehicle_id", vehicle.id).order("created_at", { ascending: false }),
       ]);
       if (cancelled) return;
       setMaint((m.data ?? []) as Maintenance[]);
       setHistory((h.data ?? []) as unknown as HistoryRow[]);
+      setDocs((d.data ?? []) as VehicleDocument[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [vehicle?.id]);
+
+  const uploadDoc = async (file: File) => {
+    if (!vehicle) return;
+    setError(null);
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic"];
+    if (!allowed.includes(file.type)) {
+      setError("Format non supporté (PDF, JPG, PNG ou WEBP uniquement).");
+      return;
+    }
+    if (file.size > MAX_DOC_MB * 1024 * 1024) {
+      setError(`Fichier trop volumineux (max ${MAX_DOC_MB} Mo).`);
+      return;
+    }
+    setBusy(true);
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${vehicle.organization_id}/${vehicle.id}/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("vehicle-documents").upload(path, file, {
+      contentType: file.type, upsert: false,
+    });
+    if (upErr) { setBusy(false); setError(upErr.message); return; }
+    const { error: insErr } = await supabase.from("vehicle_documents").insert({
+      vehicle_id: vehicle.id,
+      doc_type: docType,
+      nom: file.name,
+      storage_path: path,
+      mime_type: file.type,
+      taille_octets: file.size,
+    });
+    if (insErr) {
+      await supabase.storage.from("vehicle-documents").remove([path]);
+      setError(insErr.message);
+    } else {
+      await reloadDocs(vehicle.id);
+    }
+    setBusy(false);
+  };
+
+  const openDoc = async (d: VehicleDocument) => {
+    const { data, error: e } = await supabase.storage
+      .from("vehicle-documents").createSignedUrl(d.storage_path, 300);
+    if (e || !data?.signedUrl) { setError(e?.message ?? "Lien indisponible."); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const deleteDoc = async (d: VehicleDocument) => {
+    if (!vehicle) return;
+    if (!(await confirmToast(`Supprimer « ${d.nom} » ?`))) return;
+    setBusy(true);
+    await supabase.storage.from("vehicle-documents").remove([d.storage_path]);
+    const { error: e } = await supabase.from("vehicle_documents").delete().eq("id", d.id);
+    if (e) setError(e.message);
+    else await reloadDocs(vehicle.id);
+    setBusy(false);
+  };
+
+  const saveMaintenance = async () => {
+    if (!vehicle || !maintForm) return;
+    if (!maintForm.type_intervention.trim()) { setError("Indiquez le type d'intervention."); return; }
+    setBusy(true); setError(null);
+    const { error: e } = await supabase.from("vehicle_maintenances").insert({
+      vehicle_id: vehicle.id,
+      effectue_le: maintForm.effectue_le || new Date().toISOString().slice(0, 10),
+      type_intervention: maintForm.type_intervention.trim(),
+      kilometrage: maintForm.kilometrage ? Number(maintForm.kilometrage) : null,
+      cout: maintForm.cout ? Number(maintForm.cout) : null,
+      garage: maintForm.garage.trim() || null,
+      notes: maintForm.notes.trim() || null,
+    });
+    if (e) setError(e.message);
+    else { setMaintForm(null); await reloadMaint(vehicle.id); }
+    setBusy(false);
+  };
+
+  const deleteMaintenance = async (m: Maintenance) => {
+    if (!vehicle) return;
+    if (!(await confirmToast(`Supprimer l'intervention « ${m.type_intervention} » ?`))) return;
+    setBusy(true);
+    const { error: e } = await supabase.from("vehicle_maintenances").delete().eq("id", m.id);
+    if (e) setError(e.message);
+    else await reloadMaint(vehicle.id);
+    setBusy(false);
+  };
+
 
   const year = new Date().getFullYear();
 
@@ -197,6 +336,11 @@ export default function VehicleDetailPanel({
             </nav>
 
             <div key={tab} className="px-7 pt-6 pb-9 animate-[fleetFade_.25s_ease]">
+              {error && (
+                <div className="mb-4 flex items-start gap-2 rounded-lg bg-[#fdeaea] px-3 py-2 text-[12px] text-[#b91c1c]">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" /> <span>{error}</span>
+                </div>
+              )}
               {tab === "general" && (
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="Marque / Modèle" value={[vehicle.marque, vehicle.modele].filter(Boolean).join(" ") || "—"} />
@@ -215,17 +359,105 @@ export default function VehicleDetailPanel({
                       <Field label="Notes" value={vehicle.notes} />
                     </div>
                   )}
+                  {canManage && onEdit && (
+                    <div className="col-span-2 pt-1">
+                      <button
+                        onClick={() => onEdit(vehicle)}
+                        className="rounded-[9px] border border-[#eaeaee] px-3.5 py-2 text-[12px] font-semibold text-[#14161c] transition hover:bg-[#f2f2f5]"
+                      >
+                        Modifier la fiche
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {tab === "documents" && (
                 <div>
+                  <p className="mb-2 text-[11px] font-medium text-[#a3a4ac]">Échéances réglementaires</p>
                   <DocRow name="Assurance" date={vehicle.assurance_expire_le} icon={<ShieldCheck size={15} />} />
                   <DocRow name="Contrôle technique" date={vehicle.controle_technique_expire_le} icon={<Wrench size={15} />} />
                   <DocRow name="Carte grise" date={vehicle.carte_grise_expire_le} icon={<FileText size={15} />} />
-                  <p className="mt-4 text-[11.5px] text-[#a3a4ac]">
+                  <p className="mt-2 text-[11.5px] text-[#a3a4ac]">
                     Les dates se renseignent depuis le formulaire d'édition du véhicule.
                   </p>
+
+                  <div className="mt-7 flex items-center justify-between">
+                    <p className="text-[11px] font-medium text-[#a3a4ac]">Fichiers ({docs.length})</p>
+                    {canManage && (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={docType}
+                          onChange={(e) => setDocType(e.target.value)}
+                          className="rounded-[9px] border border-[#eaeaee] bg-white px-2 py-1.5 text-[12px] outline-none"
+                        >
+                          {DOC_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                        </select>
+                        <input
+                          ref={fileRef}
+                          type="file"
+                          accept="application/pdf,image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void uploadDoc(f);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          disabled={busy}
+                          onClick={() => fileRef.current?.click()}
+                          className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                        >
+                          {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Ajouter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-2.5">
+                    {docs.length === 0 ? (
+                      <p className="rounded-xl border border-dashed border-[#eaeaee] py-6 text-center text-[12.5px] text-[#70727d]">
+                        Aucun fichier joint pour ce véhicule.
+                      </p>
+                    ) : (
+                      docs.map((d) => (
+                        <div key={d.id} className="mb-2 flex items-center justify-between gap-3 rounded-xl border border-[#eaeaee] p-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] border border-[#eaeaee] bg-[#fbfbfc] text-[#70727d]">
+                              <FileText size={15} />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-semibold text-[#14161c]">{d.nom}</p>
+                              <p className="mt-0.5 text-[11.5px] text-[#70727d]">
+                                {DOC_TYPES.find((t) => t.id === d.doc_type)?.label ?? d.doc_type}
+                                {d.taille_octets ? ` · ${(d.taille_octets / 1024 / 1024).toFixed(1)} Mo` : ""}
+                                {` · ${fmtDate(d.created_at)}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              onClick={() => openDoc(d)}
+                              title="Ouvrir"
+                              className="rounded p-1.5 text-[#70727d] hover:bg-[#f2f2f5] hover:text-[#14161c]"
+                            >
+                              <Download size={14} />
+                            </button>
+                            {canManage && (
+                              <button
+                                onClick={() => deleteDoc(d)}
+                                title="Supprimer"
+                                className="rounded p-1.5 text-[#a3a4ac] hover:bg-[#fdeaea] hover:text-[#dc2626]"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -235,14 +467,57 @@ export default function VehicleDetailPanel({
                     <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
                   ) : (
                     <>
-                      <p className="mb-1 text-[11px] font-medium text-[#a3a4ac]">Historique des interventions</p>
+                      <div className="mb-1 flex items-center justify-between">
+                        <p className="text-[11px] font-medium text-[#a3a4ac]">Historique des interventions</p>
+                        {canManage && !maintForm && (
+                          <button
+                            onClick={() => setMaintForm({
+                              effectue_le: new Date().toISOString().slice(0, 10),
+                              type_intervention: "", kilometrage: "", cout: "", garage: "", notes: "",
+                            })}
+                            className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] px-3 py-1.5 text-[12px] font-semibold text-[#14161c] transition hover:bg-[#f2f2f5]"
+                          >
+                            <Plus size={13} /> Intervention
+                          </button>
+                        )}
+                      </div>
+
+                      {maintForm && (
+                        <div className="mb-4 rounded-xl border border-[#eaeaee] p-3.5">
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <MiniField label="Date" type="date" value={maintForm.effectue_le}
+                              onChange={(v) => setMaintForm({ ...maintForm, effectue_le: v })} />
+                            <MiniField label="Type d'intervention" value={maintForm.type_intervention}
+                              onChange={(v) => setMaintForm({ ...maintForm, type_intervention: v })} />
+                            <MiniField label="Kilométrage" type="number" value={maintForm.kilometrage}
+                              onChange={(v) => setMaintForm({ ...maintForm, kilometrage: v })} />
+                            <MiniField label="Coût (€)" type="number" value={maintForm.cout}
+                              onChange={(v) => setMaintForm({ ...maintForm, cout: v })} />
+                            <MiniField label="Garage" value={maintForm.garage}
+                              onChange={(v) => setMaintForm({ ...maintForm, garage: v })} />
+                            <MiniField label="Notes" value={maintForm.notes}
+                              onChange={(v) => setMaintForm({ ...maintForm, notes: v })} />
+                          </div>
+                          <div className="mt-3 flex justify-end gap-2">
+                            <button onClick={() => setMaintForm(null)}
+                              className="rounded-[9px] border border-[#eaeaee] px-3 py-1.5 text-[12px] font-semibold text-[#70727d]">
+                              Annuler
+                            </button>
+                            <button disabled={busy} onClick={saveMaintenance}
+                              className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50">
+                              {busy && <Loader2 size={13} className="animate-spin" />} Enregistrer
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       {maint.length === 0 ? (
                         <p className="py-3 text-[13px] text-[#70727d]">Aucune intervention enregistrée.</p>
                       ) : (
                         maint.map((m) => (
-                          <div key={m.id} className="flex gap-3 border-b border-[#eaeaee] py-3.5">
+                          <div key={m.id} className="flex items-start gap-3 border-b border-[#eaeaee] py-3.5">
                             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#16a34a]" />
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <b className="text-[13px] font-semibold text-[#14161c]">{m.type_intervention}</b>
                               <p className="mt-0.5 text-[11.5px] text-[#70727d]">
                                 {fmtDate(m.effectue_le)}
@@ -250,10 +525,21 @@ export default function VehicleDetailPanel({
                                 {m.cout != null && ` · ${fmtEur(Number(m.cout))}`}
                                 {m.garage && ` · ${m.garage}`}
                               </p>
+                              {m.notes && <p className="mt-0.5 text-[11.5px] text-[#a3a4ac]">{m.notes}</p>}
                             </div>
+                            {canManage && (
+                              <button
+                                onClick={() => deleteMaintenance(m)}
+                                title="Supprimer"
+                                className="rounded p-1 text-[#a3a4ac] hover:bg-[#fdeaea] hover:text-[#dc2626]"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
                           </div>
                         ))
                       )}
+
 
                       {gauge && (
                         <div className="mt-6">
@@ -394,5 +680,21 @@ export function StatusPill({ statut }: { statut: FleetVehicle["statut"] }) {
       <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
       {s.label}
     </span>
+  );
+}
+
+function MiniField({
+  label, value, onChange, type = "text",
+}: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-medium text-[#a3a4ac]">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-[9px] border border-[#eaeaee] bg-white px-2.5 py-2 text-[12.5px] outline-none focus:border-[#2f5fff]/40"
+      />
+    </label>
   );
 }
