@@ -334,36 +334,41 @@ function AdminConvoyeurs() {
   };
 
   const createInvitation = async () => {
-    if (!inviteForm.email.includes("@")) {
-      toast.error("Email invalide");
+    const email = inviteForm.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Saisissez une adresse email valide");
       return;
     }
     setInviting(true);
     try {
       const { data, error } = await supabase.rpc("admin_create_convoyeur_invitation" as never, {
-        _email: inviteForm.email.trim().toLowerCase(),
+        _email: email,
         _nom: inviteForm.nom.trim() || null,
         _prenom: inviteForm.prenom.trim() || null,
         _telephone: inviteForm.telephone.trim() || null,
       } as never);
-      const row = Array.isArray(data) ? (data[0] as { token: string } | undefined) : undefined;
-      if (error || !row?.token) {
-        toast.error(error?.message ?? "Erreur lors de la création de l'invitation");
-        return;
-      }
+      if (error) throw error;
+      const row = Array.isArray(data)
+        ? (data[0] as { token: string; expires_at?: string } | undefined)
+        : undefined;
+      if (!row?.token) throw new Error("L'invitation a été créée sans lien valide. Réessayez.");
       await sendInvitationEmail({
-        email: inviteForm.email.trim().toLowerCase(),
+        email,
         prenom: inviteForm.prenom.trim() || null,
         nom: inviteForm.nom.trim() || null,
         token: row.token,
+        expires_at: row.expires_at,
       });
-      toast.success("Invitation envoyée");
+      toast.success(`Invitation envoyée à ${email}`);
       setInviteForm({ nom: "", prenom: "", email: "", telephone: "" });
       setShowInvite(false);
       fetchAll();
     } catch (err) {
       console.error("[admin.convoyeurs] invitation", err);
-      toast.error("Erreur lors de l'envoi de l'invitation");
+      const message = err instanceof Error ? err.message : "Erreur lors de l'envoi de l'invitation";
+      toast.error(message.includes("Failed to send email")
+        ? "L'invitation a été créée, mais l'email n'a pas pu être envoyé. Réessayez dans quelques instants."
+        : message);
     } finally {
       setInviting(false);
     }
@@ -378,14 +383,17 @@ function AdminConvoyeurs() {
         _prenom: inv.prenom,
         _telephone: inv.telephone,
       } as never);
-      const row = Array.isArray(data) ? (data[0] as { token: string } | undefined) : undefined;
-      if (error || !row?.token) {
-        toast.error("Impossible de renvoyer l'invitation");
-        return;
-      }
-      await sendInvitationEmail({ email: inv.email, prenom: inv.prenom, nom: inv.nom, token: row.token });
+      if (error) throw error;
+      const row = Array.isArray(data)
+        ? (data[0] as { token: string; expires_at?: string } | undefined)
+        : undefined;
+      if (!row?.token) throw new Error("Le nouveau lien d'invitation est indisponible");
+      await sendInvitationEmail({ email: inv.email, prenom: inv.prenom, nom: inv.nom, token: row.token, expires_at: row.expires_at });
       toast.success("Invitation renvoyée");
       fetchAll();
+    } catch (err) {
+      console.error("[admin.convoyeurs] renvoi invitation", err);
+      toast.error(err instanceof Error ? err.message : "Impossible de renvoyer l'invitation");
     } finally {
       setBusy(null);
     }
