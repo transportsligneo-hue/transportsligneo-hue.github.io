@@ -2001,18 +2001,74 @@
     box-shadow: 0 8px 20px -6px rgba(59,111,255,0.55);
   }
   .mnav-link {
-    display: inline-block; padding: 6px 12px; border-radius: 999px;
-    font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em;
-    text-transform: uppercase; color: rgba(226,232,240,0.68);
-    border: 1px solid transparent; white-space: nowrap;
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    color: rgba(154,166,201,1);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(122,163,255,0.18); white-space: nowrap;
     transition: all .2s;
   }
-  .mnav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .mnav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .mnav-link-b2b { color: #a794ff; border-color: rgba(124,92,255,0.4); background: rgba(124,92,255,0.10); }
+  .mnav-link-driver { color: #4ad0a0; border-color: rgba(74,208,160,0.4); background: rgba(74,208,160,0.10); }
+  .mnav-link-driver svg { width: 12px; height: 12px; }
   .mnav-link-active {
-    color: #0b1026;
-    background: linear-gradient(135deg, #e7c76a, #d4af37);
-    border-color: rgba(212,175,55,0.55);
+    color: #fff; border-color: transparent;
+    background: linear-gradient(120deg, #2f5fff, #4f8cff);
+    box-shadow: 0 6px 16px rgba(47,95,255,0.5);
+    animation: mnavBreathe 3s ease-in-out infinite;
   }
+  .mnav-link-active::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-20deg); animation: mnavShine 3.2s ease-in-out infinite;
+  }
+  @keyframes mnavShine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
+  @keyframes mnavBreathe {
+    0%,100% { box-shadow: 0 6px 16px rgba(47,95,255,0.5); }
+    50% { box-shadow: 0 8px 22px rgba(47,95,255,0.75), 0 0 18px rgba(79,140,255,0.4); }
+  }
+
+  /* ---- Mobile home action buttons (aligned on desktop) ---- */
+  .mhome-estimer {
+    position: relative; overflow: hidden; flex: 1;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; color: #fff;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(rgba(9,16,42,0.9), rgba(9,16,42,0.9)) padding-box,
+      linear-gradient(120deg, #4f8cff, #d9b54a, #4f8cff) border-box;
+    background-size: 100% 100%, 220% 220%;
+    box-shadow: 0 8px 20px rgba(47,95,255,0.25);
+    animation: mhomeBorderDrift 5s ease-in-out infinite;
+  }
+  .mhome-estimer::after {
+    content: ''; position: absolute; top: 0; left: -70%; width: 35%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg); animation: mhomeShine 4s ease-in-out infinite;
+  }
+  .mhome-bolt { color: #d9b54a; filter: drop-shadow(0 0 4px rgba(217,181,74,0.6)); }
+  .mhome-phone {
+    position: relative; overflow: hidden; flex-shrink: 0;
+    width: 52px; display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; color: #fff;
+    background: linear-gradient(135deg, #2f5fff 0%, #4f8cff 50%, #d9b54a 150%);
+    background-size: 220% 220%;
+    box-shadow: 0 8px 20px rgba(47,95,255,0.4);
+    animation: mhomePillDrift 6s ease-in-out infinite;
+  }
+  .mhome-phone::after {
+    content: ''; position: absolute; top: 0; left: -70%; width: 35%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: skewX(-20deg); animation: mhomeShine 4.5s ease-in-out infinite;
+  }
+  @keyframes mhomeShine { 0% { left: -70%; } 50% { left: 130%; } 100% { left: 130%; } }
+  @keyframes mhomeBorderDrift { 0%,100% { background-position: 0 0, 0% 50%; } 50% { background-position: 0 0, 100% 50%; } }
+  @keyframes mhomePillDrift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
 }
