@@ -69,6 +69,38 @@ function FleetPage() {
   const [selected, setSelected] = useState<Vehicle | null>(null);
   const [panelTab, setPanelTab] = useState<"general" | "documents" | "entretien" | "historique">("general");
   const [saving, setSaving] = useState(false);
+  const [plateBusy, setPlateBusy] = useState(false);
+  const lookupPlateFn = useServerFn(lookupPlate);
+
+  const handlePlateLookup = async () => {
+    const plate = (draft?.immatriculation || "").trim();
+    if (plate.length < 4) {
+      toast.error("Saisissez une plaque valide");
+      return;
+    }
+    setPlateBusy(true);
+    try {
+      const result = await lookupPlateFn({ data: { plate } });
+      if (!result.ok || !result.data) {
+        toast.error(result.error || "Aucune donnée trouvée · remplissez manuellement");
+        return;
+      }
+      const d = result.data;
+      setDraft((prev) => ({
+        ...(prev || {}),
+        marque: prev?.marque || d.marque || prev?.marque || null,
+        modele: prev?.modele || d.modele || prev?.modele || null,
+        vin: prev?.vin || d.vin || prev?.vin || null,
+        energie: prev?.energie || d.carburant || prev?.energie || null,
+      }));
+      toast.success("Informations véhicule récupérées");
+    } catch {
+      toast.error("Service indisponible · remplissez manuellement");
+    } finally {
+      setPlateBusy(false);
+    }
+  };
+
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
