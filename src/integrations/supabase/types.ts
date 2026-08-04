@@ -286,6 +286,77 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_conversations: {
+        Row: {
+          contact_email: string | null
+          contact_nom: string | null
+          contact_telephone: string | null
+          created_at: string
+          id: string
+          last_message_at: string
+          message_count: number
+          needs_human: boolean
+          page_origine: string | null
+          session_token: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          message_count?: number
+          needs_human?: boolean
+          page_origine?: string | null
+          session_token: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          message_count?: number
+          needs_human?: boolean
+          page_origine?: string | null
+          session_token?: string
+        }
+        Relationships: []
+      }
+      assistant_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attributions: {
         Row: {
           convoyeur_id: string
