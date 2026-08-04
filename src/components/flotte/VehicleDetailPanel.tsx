@@ -334,6 +334,11 @@ export default function VehicleDetailPanel({
             </nav>
 
             <div key={tab} className="px-7 pt-6 pb-9 animate-[fleetFade_.25s_ease]">
+              {error && (
+                <div className="mb-4 flex items-start gap-2 rounded-lg bg-[#fdeaea] px-3 py-2 text-[12px] text-[#b91c1c]">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" /> <span>{error}</span>
+                </div>
+              )}
               {tab === "general" && (
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="Marque / Modèle" value={[vehicle.marque, vehicle.modele].filter(Boolean).join(" ") || "—"} />
@@ -352,17 +357,105 @@ export default function VehicleDetailPanel({
                       <Field label="Notes" value={vehicle.notes} />
                     </div>
                   )}
+                  {canManage && onEdit && (
+                    <div className="col-span-2 pt-1">
+                      <button
+                        onClick={() => onEdit(vehicle)}
+                        className="rounded-[9px] border border-[#eaeaee] px-3.5 py-2 text-[12px] font-semibold text-[#14161c] transition hover:bg-[#f2f2f5]"
+                      >
+                        Modifier la fiche
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {tab === "documents" && (
                 <div>
+                  <p className="mb-2 text-[11px] font-medium text-[#a3a4ac]">Échéances réglementaires</p>
                   <DocRow name="Assurance" date={vehicle.assurance_expire_le} icon={<ShieldCheck size={15} />} />
                   <DocRow name="Contrôle technique" date={vehicle.controle_technique_expire_le} icon={<Wrench size={15} />} />
                   <DocRow name="Carte grise" date={vehicle.carte_grise_expire_le} icon={<FileText size={15} />} />
-                  <p className="mt-4 text-[11.5px] text-[#a3a4ac]">
+                  <p className="mt-2 text-[11.5px] text-[#a3a4ac]">
                     Les dates se renseignent depuis le formulaire d'édition du véhicule.
                   </p>
+
+                  <div className="mt-7 flex items-center justify-between">
+                    <p className="text-[11px] font-medium text-[#a3a4ac]">Fichiers ({docs.length})</p>
+                    {canManage && (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={docType}
+                          onChange={(e) => setDocType(e.target.value)}
+                          className="rounded-[9px] border border-[#eaeaee] bg-white px-2 py-1.5 text-[12px] outline-none"
+                        >
+                          {DOC_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                        </select>
+                        <input
+                          ref={fileRef}
+                          type="file"
+                          accept="application/pdf,image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void uploadDoc(f);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          disabled={busy}
+                          onClick={() => fileRef.current?.click()}
+                          className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                        >
+                          {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Ajouter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-2.5">
+                    {docs.length === 0 ? (
+                      <p className="rounded-xl border border-dashed border-[#eaeaee] py-6 text-center text-[12.5px] text-[#70727d]">
+                        Aucun fichier joint pour ce véhicule.
+                      </p>
+                    ) : (
+                      docs.map((d) => (
+                        <div key={d.id} className="mb-2 flex items-center justify-between gap-3 rounded-xl border border-[#eaeaee] p-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] border border-[#eaeaee] bg-[#fbfbfc] text-[#70727d]">
+                              <FileText size={15} />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-semibold text-[#14161c]">{d.nom}</p>
+                              <p className="mt-0.5 text-[11.5px] text-[#70727d]">
+                                {DOC_TYPES.find((t) => t.id === d.doc_type)?.label ?? d.doc_type}
+                                {d.taille_octets ? ` · ${(d.taille_octets / 1024 / 1024).toFixed(1)} Mo` : ""}
+                                {` · ${fmtDate(d.created_at)}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              onClick={() => openDoc(d)}
+                              title="Ouvrir"
+                              className="rounded p-1.5 text-[#70727d] hover:bg-[#f2f2f5] hover:text-[#14161c]"
+                            >
+                              <Download size={14} />
+                            </button>
+                            {canManage && (
+                              <button
+                                onClick={() => deleteDoc(d)}
+                                title="Supprimer"
+                                className="rounded p-1.5 text-[#a3a4ac] hover:bg-[#fdeaea] hover:text-[#dc2626]"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -372,14 +465,57 @@ export default function VehicleDetailPanel({
                     <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
                   ) : (
                     <>
-                      <p className="mb-1 text-[11px] font-medium text-[#a3a4ac]">Historique des interventions</p>
+                      <div className="mb-1 flex items-center justify-between">
+                        <p className="text-[11px] font-medium text-[#a3a4ac]">Historique des interventions</p>
+                        {canManage && !maintForm && (
+                          <button
+                            onClick={() => setMaintForm({
+                              effectue_le: new Date().toISOString().slice(0, 10),
+                              type_intervention: "", kilometrage: "", cout: "", garage: "", notes: "",
+                            })}
+                            className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] px-3 py-1.5 text-[12px] font-semibold text-[#14161c] transition hover:bg-[#f2f2f5]"
+                          >
+                            <Plus size={13} /> Intervention
+                          </button>
+                        )}
+                      </div>
+
+                      {maintForm && (
+                        <div className="mb-4 rounded-xl border border-[#eaeaee] p-3.5">
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <MiniField label="Date" type="date" value={maintForm.effectue_le}
+                              onChange={(v) => setMaintForm({ ...maintForm, effectue_le: v })} />
+                            <MiniField label="Type d'intervention" value={maintForm.type_intervention}
+                              onChange={(v) => setMaintForm({ ...maintForm, type_intervention: v })} />
+                            <MiniField label="Kilométrage" type="number" value={maintForm.kilometrage}
+                              onChange={(v) => setMaintForm({ ...maintForm, kilometrage: v })} />
+                            <MiniField label="Coût (€)" type="number" value={maintForm.cout}
+                              onChange={(v) => setMaintForm({ ...maintForm, cout: v })} />
+                            <MiniField label="Garage" value={maintForm.garage}
+                              onChange={(v) => setMaintForm({ ...maintForm, garage: v })} />
+                            <MiniField label="Notes" value={maintForm.notes}
+                              onChange={(v) => setMaintForm({ ...maintForm, notes: v })} />
+                          </div>
+                          <div className="mt-3 flex justify-end gap-2">
+                            <button onClick={() => setMaintForm(null)}
+                              className="rounded-[9px] border border-[#eaeaee] px-3 py-1.5 text-[12px] font-semibold text-[#70727d]">
+                              Annuler
+                            </button>
+                            <button disabled={busy} onClick={saveMaintenance}
+                              className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#14161c] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50">
+                              {busy && <Loader2 size={13} className="animate-spin" />} Enregistrer
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       {maint.length === 0 ? (
                         <p className="py-3 text-[13px] text-[#70727d]">Aucune intervention enregistrée.</p>
                       ) : (
                         maint.map((m) => (
-                          <div key={m.id} className="flex gap-3 border-b border-[#eaeaee] py-3.5">
+                          <div key={m.id} className="flex items-start gap-3 border-b border-[#eaeaee] py-3.5">
                             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#16a34a]" />
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <b className="text-[13px] font-semibold text-[#14161c]">{m.type_intervention}</b>
                               <p className="mt-0.5 text-[11.5px] text-[#70727d]">
                                 {fmtDate(m.effectue_le)}
@@ -387,10 +523,21 @@ export default function VehicleDetailPanel({
                                 {m.cout != null && ` · ${fmtEur(Number(m.cout))}`}
                                 {m.garage && ` · ${m.garage}`}
                               </p>
+                              {m.notes && <p className="mt-0.5 text-[11.5px] text-[#a3a4ac]">{m.notes}</p>}
                             </div>
+                            {canManage && (
+                              <button
+                                onClick={() => deleteMaintenance(m)}
+                                title="Supprimer"
+                                className="rounded p-1 text-[#a3a4ac] hover:bg-[#fdeaea] hover:text-[#dc2626]"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
                           </div>
                         ))
                       )}
+
 
                       {gauge && (
                         <div className="mt-6">
