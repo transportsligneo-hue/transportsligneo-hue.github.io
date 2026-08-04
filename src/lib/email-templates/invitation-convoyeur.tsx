@@ -24,7 +24,7 @@ export const InvitationConvoyeurEmail = ({ prenom, nom, inviteUrl, expiresLabel 
         ? `Ce lien d'activation est strictement personnel et valable jusqu'au ${expiresLabel}. Pour votre sécurité, ne le transférez pas.`
         : "Ce lien d'activation est strictement personnel et valable 7 jours. Pour votre sécurité, ne le transférez pas."
     }
-    signature="Bien cordialement,\nL'équipe Réseau & Opérations\nTransports Ligneo"
+    signature={"Bien cordialement,\nL'équipe Réseau & Opérations\nTransports Ligneo"}
   >
     <InfoParagraph>
       Votre parcours d'intégration vous permet de créer vos identifiants, compléter votre profil
