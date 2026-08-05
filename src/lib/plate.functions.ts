@@ -43,6 +43,26 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
   }
 }
 
+/** Valide réellement un JWT Supabase côté serveur (aucune confiance au header brut). */
+async function verifySupabaseToken(token: string): Promise<boolean> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return false;
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase.auth.getClaims(token);
+    return !error && !!data?.claims?.sub;
+  } catch (err) {
+    console.error("[SIV] token verification failed", err);
+    return false;
+  }
+}
+
+
+
 
 export type PlateLookupResult = {
   ok: boolean;
@@ -113,7 +133,13 @@ export const lookupPlate = createServerFn({ method: "POST" })
       // Anti-abus : soit utilisateur authentifié (Bearer), soit token reCAPTCHA v3 valide.
       // Fail-closed pour protéger la clé RapidAPI (facturation à l'appel).
       const authHeader = getRequestHeader("authorization");
-      const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+      const rawToken =
+        authHeader && authHeader.toLowerCase().startsWith("bearer ")
+          ? authHeader.slice(7).trim()
+          : "";
+      // Le token doit être réellement validé côté serveur, sinon n'importe qui
+      // pourrait forger un header "Bearer xxx" pour contourner le reCAPTCHA.
+      const hasBearer = rawToken ? await verifySupabaseToken(rawToken) : false;
       if (!hasBearer) {
         if (!data.recaptchaToken) {
           console.warn("[SIV] no bearer and no recaptcha token — rejecting");
