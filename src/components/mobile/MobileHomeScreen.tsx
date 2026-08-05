@@ -340,7 +340,7 @@ export default function MobileHomeScreen() {
           </span>
           <span className="flex-1 min-w-0 block">
             <span className="block text-[13.5px] font-bold text-white">Une question ?</span>
-            <span className="block text-[11px] text-[#9aa6c9]">Notre équipe répond 7j/7</span>
+            <span className="block text-[11px] text-[#9aa6c9]">Vroomy vous répond sept jours sur sept</span>
           </span>
         </Link>
         <button
