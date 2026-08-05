@@ -332,7 +332,15 @@ function AdminDevisPage() {
 
   return (
     <div>
-      <PageHeader title="Devis" subtitle="Cycle de vie complet — les devis ne disparaissent jamais (archivage uniquement)." />
+      <PageHeader
+        title="Devis"
+        subtitle="Cycle de vie complet — les devis ne disparaissent jamais (archivage uniquement)."
+        actions={
+          <Link to="/admin/nouveau-devis">
+            <Button icon={<PenLine size={14} />}>Créer un devis</Button>
+          </Link>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
