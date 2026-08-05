@@ -293,11 +293,15 @@ export const attachSignedDevisPdf = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error || !acc) throw new Error("Preuve d'acceptation introuvable");
 
-    const { error: updErr } = await supabase
+    // Écriture privilégiée : le client n'a pas de policy UPDATE sur devis_acceptations.
+    // La ligne ciblée lui appartient (filtre client_user_id sous RLS ci-dessus).
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: updErr } = await supabaseAdmin
       .from("devis_acceptations")
       .update({ pdf_url: data.pdfPath })
       .eq("id", acc.id);
     if (updErr) throw new Error(`Enregistrement du PDF échoué : ${updErr.message}`);
+
     return { ok: true };
   });
 
