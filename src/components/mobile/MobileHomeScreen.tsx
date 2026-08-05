@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
+import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
