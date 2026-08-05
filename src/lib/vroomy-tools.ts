@@ -249,6 +249,63 @@ function estimerDevis(args: {
   return { payload: { ok: true, estimation: data }, card: { type: "devis", data }, success: true };
 }
 
+async function chercherMissionsCatalogue(
+  admin: SupabaseClient,
+  args: { ville?: unknown },
+): Promise<ToolResult> {
+  const ville = typeof args.ville === "string" ? args.ville.trim() : "";
+
+  let query = admin
+    .from("trajets_publies_safe")
+    .select("id,depart,arrivee,date_trajet,marque,modele,prix_convoyeur_fixe,prix_suggere,leg_type,published_at")
+    .in("attribution_mode", ["catalogue", "mixte"])
+    .order("published_at", { ascending: false })
+    .limit(ville ? 40 : 6);
+
+  if (ville) {
+    const safe = ville.replace(/[%,()]/g, "");
+    query = query.or(`depart.ilike.%${safe}%,arrivee.ilike.%${safe}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    return { payload: { ok: false, raison: "Erreur technique" }, card: null, success: false, error: error.message };
+  }
+
+  const missions = (data ?? []).slice(0, 6).map((t) => {
+    const row = t as Record<string, unknown>;
+    return {
+      depart: row.depart ?? null,
+      arrivee: row.arrivee ?? null,
+      date: row.date_trajet ?? null,
+      vehicule: [row.marque, row.modele].filter(Boolean).join(" ") || null,
+      remuneration:
+        (row.prix_convoyeur_fixe as number | null) ?? (row.prix_suggere as number | null) ?? null,
+      type: row.leg_type ?? null,
+    };
+  });
+
+  if (missions.length === 0) {
+    return {
+      payload: {
+        ok: true,
+        total: 0,
+        raison: ville
+          ? `Aucune mission publiée actuellement autour de ${ville}. Inviter à consulter le catalogue régulièrement ou à activer les alertes.`
+          : "Aucune mission publiée au catalogue pour le moment.",
+      },
+      card: null,
+      success: true,
+    };
+  }
+
+  return {
+    payload: { ok: true, total: missions.length, ville: ville || null, missions },
+    card: { type: "catalogue", data: { ville: ville || null, missions } },
+    success: true,
+  };
+}
+
 export async function runVroomyTool(
   admin: SupabaseClient,
   name: string,
