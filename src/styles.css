@@ -3951,9 +3951,18 @@
 }
 @keyframes vrmPing { 0% { transform: scale(0.75); opacity: 0.9; } 80% { transform: scale(1.5); opacity: 0; } 100% { opacity: 0; } }
 .vrm-badge {
-  position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%;
-  background: #f5c451; color: #231603; font-size: 11px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; border: 2px solid #080d1f;
+  position: absolute; top: -9px; right: -9px; z-index: 3;
+  min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px;
+  background: linear-gradient(180deg, #6fa8ff, #2f5fff);
+  color: #fff; font-size: 11.5px; font-weight: 800; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #060b1c;
+  box-shadow: 0 0 0 2px rgba(47,95,255,0.28), 0 0 12px rgba(79,140,255,0.95), 0 0 26px rgba(47,95,255,0.65);
+  animation: vrmBadgePulse 1.8s ease-in-out infinite;
+}
+@keyframes vrmBadgePulse {
+  0%,100% { box-shadow: 0 0 0 2px rgba(47,95,255,0.28), 0 0 12px rgba(79,140,255,0.9), 0 0 26px rgba(47,95,255,0.6); }
+  50% { box-shadow: 0 0 0 3px rgba(47,95,255,0.4), 0 0 18px rgba(111,168,255,1), 0 0 36px rgba(47,95,255,0.8); }
 }
 .vrm-panel {
   position: fixed; bottom: 26px; right: 26px; z-index: 91;
