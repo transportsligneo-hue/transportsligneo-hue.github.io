@@ -10,7 +10,8 @@ import type { TripType } from "./reservation-pricing";
 
 export type VroomyCard =
   | { type: "mission"; data: Record<string, unknown> }
-  | { type: "devis"; data: Record<string, unknown> };
+  | { type: "devis"; data: Record<string, unknown> }
+  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } };
 
 export type ToolResult = {
   /** Renvoyé au modèle pour qu'il formule sa réponse. */
