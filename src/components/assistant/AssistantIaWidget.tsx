@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
+import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+
 
 /**
  * Vroomy — assistant flottant de Transports Ligneo (site public).
@@ -51,20 +54,24 @@ const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
 
-/** Face de Vroomy : carrosserie arrondie, phares-yeux, calandre-sourire, deux roues. */
-function VroomyFace({ size = 28 }: { size?: number }) {
+const PROACTIVE_PREF_KEY = "ligneo_vroomy_proactive_off";
+
+/** Mascotte officielle Vroomy (voiture bleue néon Transports Ligneo). */
+function VroomyFace({ size = 28, alt }: { size?: number; alt?: string }) {
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" focusable="false">
-      <rect x="4" y="12" width="24" height="12" rx="5" fill="#ffffff" />
-      <rect x="8" y="8" width="16" height="8" rx="4" fill="#ffffff" />
-      <circle cx="11" cy="17" r="2.4" fill="#182655" />
-      <circle cx="21" cy="17" r="2.4" fill="#182655" />
-      <path d="M12.5 20.6 Q16 23.4 19.5 20.6" stroke="#182655" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.75" />
-      <circle cx="9" cy="25.5" r="2.2" fill="#182655" />
-      <circle cx="23" cy="25.5" r="2.2" fill="#182655" />
-    </svg>
+    <img
+      src={vroomyMascotte.url}
+      width={size}
+      height={size}
+      className="vrm-mascotte"
+      alt={alt ?? ""}
+      aria-hidden={alt ? undefined : true}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
+
 
 function sessionToken() {
   if (typeof window === "undefined") return "";
@@ -83,17 +90,28 @@ function fmtEur(v: unknown) {
 function VroomyCardView({ card }: { card: VroomyCard }) {
   if (card.type === "devis") {
     const d = card.data as Record<string, unknown>;
+    const trajet = `${String(d.depart)} vers ${String(d.arrivee)}`;
     return (
-      <div className="vrm-card">
+      <section className="vrm-card" aria-label={`Estimation ${trajet}`}>
         <div className="vrm-card-title">Estimation · {String(d.depart)} → {String(d.arrivee)}</div>
         <div className="vrm-card-price">{fmtEur(d.prix_ttc)} TTC</div>
         <div className="vrm-card-meta">
           {d.distance_km ? `${d.distance_km} km · ` : ""}
           {String(d.delai_estime ?? "")} · {String(d.type_livraison ?? "")}
         </div>
-      </div>
+        <button
+          type="button"
+          className="vrm-card-pdf"
+          onClick={() => downloadVroomyDevisPdf(d)}
+          aria-label={`Exporter en PDF l'estimation ${trajet}`}
+        >
+          <FileDown size={13} aria-hidden="true" />
+          Exporter en PDF
+        </button>
+      </section>
     );
   }
+
   if (card.type === "mission") {
     const d = card.data as Record<string, unknown>;
     return (
@@ -140,13 +158,18 @@ export default function AssistantIaWidget() {
   const [typing, setTyping] = useState(false);
   const [handoff, setHandoff] = useState(false);
   const [profil, setProfil] = useState<Profil | null>(null);
+  const [profilAuto, setProfilAuto] = useState(false);
   const [prenom, setPrenom] = useState<string | null>(null);
   const [showCaps, setShowCaps] = useState(true);
   const [leadSent, setLeadSent] = useState(false);
   const [lead, setLead] = useState({ nom: "", telephone: "" });
+  const [proactiveOff, setProactiveOff] = useState(false);
+  const [prefNotice, setPrefNotice] = useState<string | null>(null);
   const convId = useRef<string | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const launcherRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
@@ -161,30 +184,89 @@ export default function AssistantIaWidget() {
     }
   }, [open]);
 
-  /* Détection automatique du profil réel si le visiteur est connecté */
+  /* Lecture de la préférence "relance proactive" */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setProactiveOff(window.localStorage.getItem(PROACTIVE_PREF_KEY) === "1");
+  }, []);
+
+  const toggleProactive = useCallback(() => {
+    setProactiveOff((v) => {
+      const next = !v;
+      if (typeof window !== "undefined") {
+        if (next) window.localStorage.setItem(PROACTIVE_PREF_KEY, "1");
+        else window.localStorage.removeItem(PROACTIVE_PREF_KEY);
+      }
+      setPrefNotice(
+        next
+          ? "Vroomy ne s'ouvrira plus tout seul sur les pages Tarifs et Estimation."
+          : "Vroomy pourra de nouveau vous proposer son aide sur Tarifs et Estimation.",
+      );
+      return next;
+    });
+  }, []);
+
+  /* Détection automatique du profil réel, y compris quand le statut change */
   useEffect(() => {
     let alive = true;
-    void (async () => {
+
+    const detect = async () => {
       const { data } = await supabase.auth.getSession();
       const user = data.session?.user;
-      if (!user || !alive) return;
+      if (!alive) return;
+      if (!user) {
+        // Déconnexion : on repasse en mode visiteur (choix manuel possible)
+        setProfilAuto(false);
+        setProfil(null);
+        setPrenom(null);
+        return;
+      }
       const [{ data: conv }, { data: prof }] = await Promise.all([
         supabase.from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("prenom").eq("id", user.id).maybeSingle(),
       ]);
       if (!alive) return;
       setProfil(conv?.id ? "convoyeur" : "client");
+      setProfilAuto(true);
       const p = (prof as { prenom?: string } | null)?.prenom;
-      if (p) setPrenom(p);
+      setPrenom(p ?? null);
+    };
+
+    void detect();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      void detect();
+    });
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  /* Ré-évaluation du profil à chaque changement de page (statut convoyeur validé, etc.) */
+  useEffect(() => {
+    if (!profilAuto) return;
+    let alive = true;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user || !alive) return;
+      const { data: conv } = await supabase
+        .from("convoyeurs")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+      setProfil(conv?.id ? "convoyeur" : "client");
     })();
     return () => {
       alive = false;
     };
-  }, []);
+  }, [pathname, profilAuto]);
 
   /* Apparition proactive sur les pages tarifs / estimation */
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (proactiveOff) return;
     if (!PROACTIVE_PATHS.some((p) => pathname.startsWith(p))) return;
     if (window.sessionStorage.getItem("ligneo_vroomy_proactive") === "1") return;
     const t = window.setTimeout(() => {
@@ -192,7 +274,23 @@ export default function AssistantIaWidget() {
       setOpen(true);
     }, 18000);
     return () => window.clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, proactiveOff]);
+
+  /* Clavier : Échap ferme le panneau et rend le focus au lanceur */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
+        launcherRef.current?.focus();
+      }
+    };
+    const node = panelRef.current;
+    node?.addEventListener("keydown", onKey);
+    return () => node?.removeEventListener("keydown", onKey);
+  }, [open]);
+
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
@@ -296,16 +394,32 @@ export default function AssistantIaWidget() {
     <>
       <button
         type="button"
+        ref={launcherRef}
         className="vrm-launcher"
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
+        aria-expanded={open}
+        aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
         style={{ display: open ? "none" : undefined }}
       >
-        <VroomyFace size={34} />
-        {notif && <span className="vrm-badge">1</span>}
+        <VroomyFace size={44} />
+        {notif && (
+          <span className="vrm-badge" aria-hidden="true">
+            1
+          </span>
+        )}
+        {notif && <span className="sr-only">1 nouveau message</span>}
       </button>
 
-      <div className={`vrm-panel${open ? " vrm-open" : ""}`} role="dialog" aria-label="Vroomy, assistant Transports Ligneo">
+      <div
+        ref={panelRef}
+        className={`vrm-panel${open ? " vrm-open" : ""}`}
+        role="dialog"
+        aria-modal="false"
+        aria-label="Vroomy, assistant Transports Ligneo"
+        aria-hidden={!open}
+        {...(!open ? { inert: "" as unknown as boolean } : {})}
+      >
         <div className="vrm-head">
           <div className="vrm-speed" aria-hidden="true">
             <span />
@@ -315,32 +429,62 @@ export default function AssistantIaWidget() {
           <div className="vrm-head-row">
             <div className="vrm-id">
               <div className="vrm-avatar">
-                <VroomyFace size={28} />
+                <VroomyFace size={40} alt="Vroomy, la mascotte de Transports Ligneo" />
               </div>
               <div>
                 <h2 className="vrm-title">Vroomy</h2>
                 <div className="vrm-status">
-                  <span className="vrm-dot" />
+                  <span className="vrm-dot" aria-hidden="true" />
                   En ligne — réponse instantanée
                 </div>
               </div>
             </div>
-            <button type="button" className="vrm-close" onClick={() => setOpen(false)} aria-label="Fermer">
-              <X size={16} />
-            </button>
+            <div className="vrm-head-actions">
+              <button
+                type="button"
+                className="vrm-close"
+                onClick={toggleProactive}
+                aria-pressed={proactiveOff}
+                aria-label={
+                  proactiveOff
+                    ? "Réactiver la proposition automatique de Vroomy sur les pages Tarifs et Estimation"
+                    : "Désactiver la proposition automatique de Vroomy sur les pages Tarifs et Estimation"
+                }
+                title={proactiveOff ? "Relance automatique désactivée" : "Désactiver la relance automatique"}
+              >
+                {proactiveOff ? <BellOff size={15} aria-hidden="true" /> : <Bell size={15} aria-hidden="true" />}
+              </button>
+              <button
+                type="button"
+                className="vrm-close"
+                onClick={() => {
+                  setOpen(false);
+                  launcherRef.current?.focus();
+                }}
+                aria-label="Fermer Vroomy"
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <p className="vrm-tagline">Toujours prêt à rouler avec vous ! 💨</p>
+          {prefNotice && (
+            <p className="vrm-pref-note" role="status">
+              {prefNotice}
+            </p>
+          )}
         </div>
 
-        <div className="vrm-body" ref={bodyRef}>
+        <div className="vrm-body" ref={bodyRef} role="log" aria-live="polite" aria-label="Conversation avec Vroomy" tabIndex={0}>
           {messages.map((m, i) => (
             <div key={i} className={`vrm-row${m.role === "user" ? " vrm-user" : ""}`}>
               {m.role === "assistant" && (
                 <div className="vrm-msg-avatar">
-                  <VroomyFace size={16} />
+                  <VroomyFace size={24} />
                 </div>
               )}
               <div className="vrm-bubble">
+                <span className="sr-only">{m.role === "user" ? "Vous : " : "Vroomy : "}</span>
                 {m.content}
                 {m.cards?.map((c, ci) => (
                   <VroomyCardView key={ci} card={c} />
@@ -350,43 +494,52 @@ export default function AssistantIaWidget() {
           ))}
 
           {!profil && (
-            <div className="vrm-roles">
-              <div className="vrm-roles-label">Vous êtes…</div>
+            <div className="vrm-roles" role="group" aria-label="Choisissez votre profil">
+              <div className="vrm-roles-label" id="vrm-roles-label">
+                Vous êtes…
+              </div>
               <div className="vrm-roles-row">
                 <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
-                  <span>🚗</span> Client
+                  <span aria-hidden="true">🚗</span> Client
                 </button>
                 <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span>🧭</span> Convoyeur
+                  <span aria-hidden="true">🧭</span> Convoyeur
                 </button>
               </div>
             </div>
           )}
 
+
           {profil && showCaps && messages.length <= 3 && (
-            <div className="vrm-caps">
+            <section className="vrm-caps" aria-label="Ce que Vroomy sait faire">
               <div className="vrm-caps-head">
                 <span>Ce que Vroomy sait faire</span>
-                <button type="button" onClick={() => setShowCaps(false)} aria-label="Masquer">
-                  <X size={13} />
+                <button
+                  type="button"
+                  onClick={() => setShowCaps(false)}
+                  aria-label="Masquer la liste des capacités de Vroomy"
+                >
+                  <X size={13} aria-hidden="true" />
                 </button>
               </div>
-              {CAPABILITIES[profil].map((c) => (
-                <div key={c.title} className="vrm-cap">
-                  <span className="vrm-cap-ic">
-                    <c.Icon size={14} />
-                  </span>
-                  <div>
-                    <strong>{c.title}</strong>
-                    <em>{c.desc}</em>
-                  </div>
-                </div>
-              ))}
-            </div>
+              <ul className="vrm-cap-list">
+                {CAPABILITIES[profil].map((c) => (
+                  <li key={c.title} className="vrm-cap">
+                    <span className="vrm-cap-ic" aria-hidden="true">
+                      <c.Icon size={14} />
+                    </span>
+                    <div>
+                      <strong>{c.title}</strong>
+                      <em>{c.desc}</em>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {profil && messages.length <= 3 && (
-            <div className="vrm-chips">
+            <div className="vrm-chips" role="group" aria-label="Questions suggérées">
               {QUICK_REPLIES[profil].map((q) => (
                 <button
                   key={q.label}
@@ -394,7 +547,9 @@ export default function AssistantIaWidget() {
                   className="vrm-chip"
                   onClick={() => void send(q.label)}
                 >
-                  <span className="vrm-ic">{q.icon}</span>
+                  <span className="vrm-ic" aria-hidden="true">
+                    {q.icon}
+                  </span>
                   {q.label}
                 </button>
               ))}
@@ -404,9 +559,9 @@ export default function AssistantIaWidget() {
           {typing && (
             <div className="vrm-row">
               <div className="vrm-msg-avatar">
-                <VroomyFace size={16} />
+                <VroomyFace size={24} />
               </div>
-              <div className="vrm-typing" aria-label="Vroomy est en train d'écrire">
+              <div className="vrm-typing" role="status" aria-label="Vroomy est en train d'écrire">
                 <span />
                 <span />
                 <span />
@@ -416,26 +571,40 @@ export default function AssistantIaWidget() {
 
           {handoff && !leadSent && (
             <div className="vrm-handoff">
-              <div className="vrm-handoff-title">Être rappelé(e) par un conseiller</div>
+              <div className="vrm-handoff-title" id="vrm-handoff-title">
+                Être rappelé(e) par un conseiller
+              </div>
+              <label className="sr-only" htmlFor="vrm-lead-nom">
+                Votre nom
+              </label>
               <input
+                id="vrm-lead-nom"
                 className="vrm-field"
                 placeholder="Votre nom"
+                autoComplete="name"
                 value={lead.nom}
                 onChange={(e) => setLead((l) => ({ ...l, nom: e.target.value }))}
               />
+              <label className="sr-only" htmlFor="vrm-lead-tel">
+                Votre téléphone
+              </label>
               <input
+                id="vrm-lead-tel"
                 className="vrm-field"
                 placeholder="Votre téléphone"
                 inputMode="tel"
+                autoComplete="tel"
                 value={lead.telephone}
                 onChange={(e) => setLead((l) => ({ ...l, telephone: e.target.value }))}
               />
               <button type="button" className="vrm-chip" onClick={() => void sendLead()}>
-                <span className="vrm-ic">📞</span>
+                <span className="vrm-ic" aria-hidden="true">
+                  📞
+                </span>
                 Demander un rappel
               </button>
               <a className="vrm-call" href="tel:+33782456181">
-                <Phone size={13} /> Appeler le 07 82 45 61 81
+                <Phone size={13} aria-hidden="true" /> Appeler le 07 82 45 61 81
               </a>
             </div>
           )}
@@ -449,7 +618,11 @@ export default function AssistantIaWidget() {
               void send(input);
             }}
           >
+            <label className="sr-only" htmlFor="vrm-input">
+              Votre message pour Vroomy
+            </label>
             <input
+              id="vrm-input"
               ref={inputRef}
               className="vrm-input"
               placeholder="Écrivez à Vroomy..."
@@ -457,11 +630,18 @@ export default function AssistantIaWidget() {
               onChange={(e) => setInput(e.target.value)}
               maxLength={1200}
             />
-            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer">
-              <Send size={18} />
+            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer le message">
+              <Send size={18} aria-hidden="true" />
             </button>
           </form>
-          <p className="vrm-fine">Transports Ligneo</p>
+
+          <p className="vrm-fine">
+            Transports Ligneo ·{" "}
+            <button type="button" className="vrm-pref-link" onClick={toggleProactive} aria-pressed={proactiveOff}>
+              {proactiveOff ? "Réactiver les propositions automatiques" : "Ne plus me proposer d'aide automatiquement"}
+            </button>
+          </p>
+
         </div>
       </div>
     </>
