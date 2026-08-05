@@ -83,7 +83,7 @@ export default function MobileNavbar() {
           <Link to="/" className="flex min-w-0 items-center gap-2">
             <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 shrink-0 object-contain" />
             <span
-              className="truncate font-extrabold text-[12.5px] tracking-[0.02em] uppercase text-white"
+              className="font-extrabold text-[11px] sm:text-[12.5px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Transports{" "}
