@@ -736,9 +736,8 @@ function AdminConvoyeurs() {
               >
                 Ouvrir la fiche complète
               </Button>
-              {(resolveStatutConvoyeur(selected.statut, docs) === "en_attente" ||
-                resolveStatutConvoyeur(selected.statut, docs) === "en_verif" ||
-                resolveStatutConvoyeur(selected.statut, docs) === "a_corriger") && (
+              {resolveStatutConvoyeur(selected.statut, docs) !== "valide" &&
+                resolveStatutConvoyeur(selected.statut, docs) !== "suspendu" && (
                 <>
                   <Button
                     onClick={() => { updateStatut(selected.id, "valide"); setSelected(null); }}
