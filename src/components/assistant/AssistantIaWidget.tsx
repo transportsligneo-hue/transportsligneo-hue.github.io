@@ -21,16 +21,16 @@ type VroomyCard =
 
 type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
 
-const QUICK_REPLIES: Record<Profil, Array<{ icon: string; label: string }>> = {
+const QUICK_REPLIES: Record<Profil, Array<{ Icon: typeof Search; label: string }>> = {
   client: [
-    { icon: "💰", label: "Combien coûte un convoyage Paris — Lyon ?" },
-    { icon: "📦", label: "Où en est ma mission ?" },
-    { icon: "🛡️", label: "Que couvre l'assurance pendant le convoyage ?" },
+    { Icon: Calculator, label: "Combien coûte un convoyage Paris — Lyon ?" },
+    { Icon: MapPin, label: "Où en est ma mission ?" },
+    { Icon: ShieldCheck, label: "Que couvre l'assurance pendant le convoyage ?" },
   ],
   convoyeur: [
-    { icon: "🧭", label: "Trouve-moi une mission près de Tours" },
-    { icon: "📋", label: "Y a-t-il des missions disponibles aujourd'hui ?" },
-    { icon: "👋", label: "Comment devenir convoyeur partenaire ?" },
+    { Icon: Search, label: "Trouve-moi une mission près de Tours" },
+    { Icon: ClipboardList, label: "Y a-t-il des missions disponibles aujourd'hui ?" },
+    { Icon: GraduationCap, label: "Comment devenir convoyeur partenaire ?" },
   ],
 };
 
