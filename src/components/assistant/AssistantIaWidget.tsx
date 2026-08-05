@@ -511,29 +511,35 @@ export default function AssistantIaWidget() {
 
 
           {profil && showCaps && messages.length <= 3 && (
-            <div className="vrm-caps">
+            <section className="vrm-caps" aria-label="Ce que Vroomy sait faire">
               <div className="vrm-caps-head">
                 <span>Ce que Vroomy sait faire</span>
-                <button type="button" onClick={() => setShowCaps(false)} aria-label="Masquer">
-                  <X size={13} />
+                <button
+                  type="button"
+                  onClick={() => setShowCaps(false)}
+                  aria-label="Masquer la liste des capacités de Vroomy"
+                >
+                  <X size={13} aria-hidden="true" />
                 </button>
               </div>
-              {CAPABILITIES[profil].map((c) => (
-                <div key={c.title} className="vrm-cap">
-                  <span className="vrm-cap-ic">
-                    <c.Icon size={14} />
-                  </span>
-                  <div>
-                    <strong>{c.title}</strong>
-                    <em>{c.desc}</em>
-                  </div>
-                </div>
-              ))}
-            </div>
+              <ul className="vrm-cap-list">
+                {CAPABILITIES[profil].map((c) => (
+                  <li key={c.title} className="vrm-cap">
+                    <span className="vrm-cap-ic" aria-hidden="true">
+                      <c.Icon size={14} />
+                    </span>
+                    <div>
+                      <strong>{c.title}</strong>
+                      <em>{c.desc}</em>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {profil && messages.length <= 3 && (
-            <div className="vrm-chips">
+            <div className="vrm-chips" role="group" aria-label="Questions suggérées">
               {QUICK_REPLIES[profil].map((q) => (
                 <button
                   key={q.label}
@@ -541,7 +547,9 @@ export default function AssistantIaWidget() {
                   className="vrm-chip"
                   onClick={() => void send(q.label)}
                 >
-                  <span className="vrm-ic">{q.icon}</span>
+                  <span className="vrm-ic" aria-hidden="true">
+                    {q.icon}
+                  </span>
                   {q.label}
                 </button>
               ))}
@@ -551,9 +559,9 @@ export default function AssistantIaWidget() {
           {typing && (
             <div className="vrm-row">
               <div className="vrm-msg-avatar">
-                <VroomyFace size={16} />
+                <VroomyFace size={24} />
               </div>
-              <div className="vrm-typing" aria-label="Vroomy est en train d'écrire">
+              <div className="vrm-typing" role="status" aria-label="Vroomy est en train d'écrire">
                 <span />
                 <span />
                 <span />
@@ -563,26 +571,40 @@ export default function AssistantIaWidget() {
 
           {handoff && !leadSent && (
             <div className="vrm-handoff">
-              <div className="vrm-handoff-title">Être rappelé(e) par un conseiller</div>
+              <div className="vrm-handoff-title" id="vrm-handoff-title">
+                Être rappelé(e) par un conseiller
+              </div>
+              <label className="sr-only" htmlFor="vrm-lead-nom">
+                Votre nom
+              </label>
               <input
+                id="vrm-lead-nom"
                 className="vrm-field"
                 placeholder="Votre nom"
+                autoComplete="name"
                 value={lead.nom}
                 onChange={(e) => setLead((l) => ({ ...l, nom: e.target.value }))}
               />
+              <label className="sr-only" htmlFor="vrm-lead-tel">
+                Votre téléphone
+              </label>
               <input
+                id="vrm-lead-tel"
                 className="vrm-field"
                 placeholder="Votre téléphone"
                 inputMode="tel"
+                autoComplete="tel"
                 value={lead.telephone}
                 onChange={(e) => setLead((l) => ({ ...l, telephone: e.target.value }))}
               />
               <button type="button" className="vrm-chip" onClick={() => void sendLead()}>
-                <span className="vrm-ic">📞</span>
+                <span className="vrm-ic" aria-hidden="true">
+                  📞
+                </span>
                 Demander un rappel
               </button>
               <a className="vrm-call" href="tel:+33782456181">
-                <Phone size={13} /> Appeler le 07 82 45 61 81
+                <Phone size={13} aria-hidden="true" /> Appeler le 07 82 45 61 81
               </a>
             </div>
           )}
@@ -596,7 +618,11 @@ export default function AssistantIaWidget() {
               void send(input);
             }}
           >
+            <label className="sr-only" htmlFor="vrm-input">
+              Votre message pour Vroomy
+            </label>
             <input
+              id="vrm-input"
               ref={inputRef}
               className="vrm-input"
               placeholder="Écrivez à Vroomy..."
@@ -604,10 +630,11 @@ export default function AssistantIaWidget() {
               onChange={(e) => setInput(e.target.value)}
               maxLength={1200}
             />
-            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer">
-              <Send size={18} />
+            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer le message">
+              <Send size={18} aria-hidden="true" />
             </button>
           </form>
+
           <p className="vrm-fine">Transports Ligneo</p>
         </div>
       </div>
