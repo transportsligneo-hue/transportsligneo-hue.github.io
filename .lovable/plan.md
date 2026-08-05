@@ -1,76 +1,51 @@
-# Nouvelle mission (Simple / Groupée) + thème clair Flotte/B2B
+# Documents officiels — devis, facture, passage à vide, fiche de mission, EDL, contrat
 
-Référence visuelle : `nouvelle-mission-flotte.html`. L'espace Flotte est déjà fusionné dans `/dashboard-pro` (routes `/flotte/*` redirigent) — j'agis donc sur `dashboard-pro`.
+Objectif : brancher les 6 modèles fournis sur de vraies données, avec une source unique pour les mentions légales, et un workflow de signature sécurisé pour le contrat convoyeur.
 
-## 1. Écran de choix "Nouvelle mission"
+## 1. Informations légales de l'entreprise (préalable bloquant)
 
-- Nouvelle route `dashboard-pro.nouvelle-mission.tsx` : deux cartes (Simple / Groupée), reprend la maquette.
-- Le lien "Nouvelle mission" de la sidebar pointe désormais sur cette route.
-- L'ancien formulaire `dashboard-pro.nouvelle-demande.tsx` **n'est pas modifié** — il est simplement atteint via le bouton "Mission simple". Un bandeau "← Retour au choix" est ajouté en tête.
+- Nouvelle table `company_settings` (ligne unique) : raison sociale, forme juridique, capital, RCS, SIRET, TVA intra, adresse siège, email, téléphone, site, IBAN, BIC, nom + fonction du signataire. Lecture publique limitée aux champs non bancaires, écriture admin uniquement.
+- Nouvelle page Admin `Réglages > Informations légales` (formulaire + indicateur "complet / incomplet").
+- Un module partagé `src/lib/doc-branding.ts` fournit : en-tête navy + liseré or, logo, pied de page mentions légales, palette et typographies — utilisé par TOUS les générateurs PDF.
+- Tant que les champs obligatoires manquent : les boutons de génération devis/facture sont désactivés avec un message explicite dans l'admin.
 
-## 2. Mission groupée (nouveau flux réel)
+## 2. Devis et facture
 
-Nouvelle route `dashboard-pro.nouvelle-mission.groupee.tsx` avec 4 étapes (stepper client, un seul écran, pas de sous-routes).
+- Refonte de `devis-pdf.ts` et `facture-pdf.ts` sur la maquette exacte des modèles 01 et 02 (bloc "Établi pour" / "Référence mission", tableau détail, totaux HT / TVA / TTC, conditions, cartouche signature).
+- Bouton "Générer la facture" sur un devis au statut accepté : crée la facture liée (référence croisée devis ↔ facture), sans ressaisie.
+- Côté clients (Particulier, B2B, Flotte) : la facture liée devient consultable et téléchargeable depuis le devis accepté, même rendu visuel.
+- Les estimateurs (site public et espaces connectés) exportent leur estimation avec la même charte via `doc-branding`.
 
-### Étape 1 — Sélection véhicules
-- Source : table `vehicles` filtrée par `organization_id` du user courant (via `useCurrentOrgAccountType`).
-- Colonnes affichées : modèle, plaque, site (`organization_sites`), statut.
-- Statut dérivé : véhicules avec mission active (`missions` en `attribue`/`en_cours`) → grisés non sélectionnables. Statut `maintenance` sur `vehicles` → grisé.
-- Recherche (modèle/plaque/site) + filtre puce par site.
-- Barre sticky bas : compteur + bouton Continuer.
+## 3. Fiche de mission (modèle 04)
 
-### Étape 2 — Trajet & planning
-- Adresse d'enlèvement commune, pré-remplie depuis `organizations.address` / `organization_sites` principale.
-- Toggle "Destinations différentes par véhicule" : si off → un seul input ; si on → un input par véhicule sélectionné.
-- Date (shadcn DatePicker) + créneau (matin/après-midi/journée) en radio.
+- Générateur `mission-fiche-pdf.ts` conforme au modèle, pré-rempli (véhicule, enlèvement, livraison, convoyeur, contacts).
+- Génération automatique à l'assignation d'un convoyeur, enregistrée dans `mission_documents` ; téléchargement à tout moment côté admin et côté app convoyeur.
 
-### Étape 3 — Récapitulatif
-- Pour chaque véhicule : appelle le server fn existant `resolvePersonalizedPrice` (même moteur que Mission simple) avec le trajet correspondant.
-- Total consolidé TTC affiché en or.
-- Champ message facultatif.
-- "Confirmer la mission groupée" :
-  - Génère une référence `GRP-TLG-YYYY-XXX` (server fn nouveau).
-  - Crée N lignes dans `demandes_convoyage` (une par véhicule), avec un champ `group_reference` renseigné, en réutilisant exactement le pipeline actuel (les triggers existants créent le devis/mission).
+## 4. EDL papier (modèle 05)
 
-### Étape 4 — Confirmation & suivi
-- Écran de succès : référence groupe + liste des véhicules avec statut initial (récupéré via realtime sur `demandes_convoyage`/`missions` filtrés par `group_reference`).
-- Chaque carte véhicule cliquable → détail mission individuelle.
-- Sur `dashboard-pro.missions.index.tsx` : regroupement visuel des missions partageant une même `group_reference` (accordéon "Mission groupée GRP-…"). Non destructif : les missions non groupées s'affichent comme avant.
+- Bouton de téléchargement sur chaque mission (admin + app convoyeur), champs pré-remplis depuis la mission.
+- Nouveau schéma véhicule : illustration vue de dessus dessinée en vectoriel dans le PDF (carrosserie réaliste, vitrage, roues), avec les 4 zones avant / arrière / gauche / droite repérables pour annoter les dommages.
 
-### Détails techniques
+## 5. Passage à vide (modèle 03)
 
-- **Migration DB** : ajouter `group_reference text` sur `demandes_convoyage` et `missions` (nullable, indexé). Trigger existant qui copie les champs demande→mission propagera automatiquement si on ajoute la colonne aux deux et met à jour le trigger, ou plus simplement on repasse un UPDATE après création côté server fn.
-- **Server fn** `createGroupedMission` (`src/lib/grouped-mission.functions.ts`) sous `requireSupabaseAuth` : valide entrée Zod, calcule prix par trajet via l'engine existant, insère N demandes avec `group_reference`, renvoie la référence + IDs.
-- Aucune modification du moteur de prix, ni de la logique d'attribution, ni de l'app convoyeur.
+- Action rapide "Générer un passage à vide" sur la fiche mission admin, mise en avant quand un incident "véhicule non disponible / non roulant" est signalé.
+- Formulaire pré-rempli (convoyeur, dates, lieux) + champs à compléter (véhicule du trajet à vide, motif).
+- PDF numéroté `PAV-…`, attaché à la mission et consultable dans son historique.
 
-## 3. Thème clair Flotte + B2B (dashboards uniquement)
+## 6. Contrat de partenariat convoyeur (modèle 06)
 
-Le layout `dashboard-pro.tsx` monte déjà `[data-org-theme]`. J'ajoute un mode `theme="light"` scopé aux dashboards Flotte/B2B via un wrapper `dashboard-shell-light` sur ces layouts uniquement.
+- Table `convoyeur_contrats` : token à usage unique + expiration, statut, données de signature (nom saisi, case lu et approuvé, horodatage, IP, user agent).
+- Admin : action "Envoyer le contrat pour signature" sur un candidat → email contenant le lien sécurisé (aucun PDF en pièce jointe).
+- Page publique `/contrat/$token` : contrat pré-rempli affiché à l'écran (nom, SIRET, adresse, permis), signature électronique simple en fin de lecture. Aucun PDF accessible avant signature.
+- Après signature : PDF signé téléchargeable depuis l'espace convoyeur, copie envoyée à l'admin, statut "Contrat signé le …" sur la fiche convoyeur.
 
-Nouveau bloc CSS dans `src/styles.css` (namespace `.dashboard-shell-light`) :
-- `--bg: #f6f8fc`, `--surface: #ffffff`, `--border: #e7ebf3`, texte `#0f1526`/`#6b7590`.
-- Accents : bleu `#2f5fff` (primary), or `#b8862a` (montants), violet `#7c5cff` (badges Flotte / groupée).
-- Padding généreux sur `.card`, `.section`.
-- Typos inchangées (Poppins/Inter/Space Grotesk déjà chargées).
+## Détails techniques
 
-Appliqué sur :
-- `src/routes/_authenticated/dashboard-pro.tsx` (layout Flotte/B2B fusionné).
-- Aucun impact sur : site public, app convoyeur (`convoyeur.*`), admin, dashboard-client.
+- Génération PDF : jsPDF côté client comme aujourd'hui, en factorisant l'habillage dans `doc-branding.ts` pour garantir un rendu identique entre tous les documents.
+- Stockage : bucket privé existant pour les documents de mission, lignes dans `mission_documents` (type `fiche_mission`, `passage_a_vide`, `edl_papier`).
+- Sécurité : RLS admin sur `company_settings` et `convoyeur_contrats` ; validation du token contrat côté serveur (server function), jamais côté client.
+- Aucune mention légale codée en dur : toutes proviennent de `company_settings`.
 
-## 4. Ordre d'exécution
+## Livraison par étapes
 
-1. Migration DB (`group_reference`).
-2. Server fn `createGroupedMission`.
-3. Route de choix + redirect sidebar.
-4. Route mission groupée (4 étapes) + bandeau retour sur mission simple.
-5. Regroupement visuel dans `dashboard-pro.missions.index.tsx`.
-6. Thème clair sur layout dashboard-pro.
-7. Test manuel Playwright (compte flotte de test) sur preview.
-
-## Décisions à confirmer
-
-- **Créneau horaire** (matin/après-midi/journée) : je stocke la valeur en clair dans le champ `commentaires` de `demandes_convoyage` (pas de colonne dédiée aujourd'hui), OU je crée une colonne `time_slot`. Je pars sur la **colonne dédiée** pour rester propre.
-- **`group_reference`** : format `GRP-TLG-YYYY-XXX` avec XXX = compteur annuel via séquence PG.
-- **Adresse enlèvement pré-remplie** : je prends `organizations.address` en priorité, sinon le premier `organization_sites` marqué principal.
-
-Dis-moi si l'un de ces points doit changer, sinon je lance dans l'ordre indiqué.
+Étape A : réglages légaux + charte PDF partagée. Étape B : devis/facture + estimateurs. Étape C : fiche de mission auto. Étape D : EDL papier + schéma véhicule. Étape E : passage à vide. Étape F : signature contrat.
