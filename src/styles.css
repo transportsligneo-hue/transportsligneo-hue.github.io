@@ -4189,3 +4189,22 @@
   border-color: #fbdada;
   color: #dc2626;
 }
+
+/* ===== Accueil mobile — section stats & accès rapide ===== */
+@keyframes mhRingPulse {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.28); opacity: 0; }
+}
+.mh-ring { position: relative; }
+.mh-ring::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  border: 1px solid rgba(79,140,255,0.35);
+  animation: mhRingPulse 2.6s ease-out infinite;
+  pointer-events: none;
+}
+.mh-ring-gold::after { border-color: rgba(217,181,74,0.45); }
+.mh-snap-x { scroll-snap-type: x mandatory; }
+.mh-snap-item { scroll-snap-align: start; }
