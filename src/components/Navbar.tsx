@@ -48,7 +48,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
@@ -122,9 +122,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Menu compact */}
         {mobileOpen && (
-          <div className="md:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
+          <div className="2xl:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
             <ul className="flex flex-col items-center gap-6 pt-6">
               {navLinks.map((l) => (
                 <li key={l.to}>

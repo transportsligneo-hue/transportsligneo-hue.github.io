@@ -75,23 +75,23 @@ export default function MobileNavbar() {
 
   return (
     <header
-      className={`md:hidden fixed top-0 left-0 right-0 z-[55] safe-top transition-transform duration-300 ease-out ${
+      className={`2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top transition-transform duration-300 ease-out ${
         hidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
       <div className="mnav-bar">
-        <div className="flex items-center justify-between px-4 h-14">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain" />
+        <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 shrink-0 object-contain" />
             <span
-              className="font-extrabold text-[12.5px] tracking-[0.02em] uppercase text-white"
+              className="truncate font-extrabold text-[12.5px] tracking-[0.02em] uppercase text-white"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Transports{" "}
               <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">Ligneo</span>
             </span>
           </Link>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <a href="tel:+33782456181" className="mnav-phone" aria-label="Appeler 07 82 45 61 81">
               <Phone size={14} strokeWidth={2.4} />
             </a>

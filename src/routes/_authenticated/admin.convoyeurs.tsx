@@ -58,6 +58,8 @@ interface Convoyeur {
   type_convoyeur: string;
   created_at: string;
   account_status?: string | null;
+  has_completed_training?: boolean | null;
+  training_status?: string | null;
 }
 
 interface Invitation {
@@ -186,6 +188,9 @@ function AdminConvoyeurs() {
         if (!d) issues.push(`${getConvoyeurDocLabel(r)} manquant`);
         else if (!isConvoyeurDocApproved(d.statut_validation)) issues.push(`${getConvoyeurDocLabel(r)} non approuvé`);
       }
+      if (!previous.has_completed_training && previous.training_status !== "completed") {
+        issues.push("Formation Académie Ligneo non validée");
+      }
       // Bypass admin : la validation reste possible malgré des documents incomplets
       // (invitation récente, dossier transmis hors plateforme…), après confirmation.
       if (issues.length > 0) {
@@ -197,7 +202,17 @@ function AdminConvoyeurs() {
     }
 
     const wasNotValid = previous.statut !== "valide";
-    await supabase.from("convoyeurs").update({ statut }).eq("id", id);
+    const shouldBypass = statut === "valide" && (
+      !previous.has_completed_training || previous.training_status !== "completed"
+    );
+    const updates = shouldBypass
+      ? { statut, has_completed_training: true, training_status: "completed" }
+      : { statut };
+    const { error: updateError } = await supabase.from("convoyeurs").update(updates).eq("id", id);
+    if (updateError) {
+      toast.error(`Mise à jour impossible : ${updateError.message}`);
+      return;
+    }
 
     if (statut === "valide" && previous.user_id) {
       await supabase.functions.invoke("admin-user-actions", {
