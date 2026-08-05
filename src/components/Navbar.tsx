@@ -62,7 +62,7 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="w-full px-7 py-2.5 flex items-center justify-between gap-6">
+        <div className="w-full px-5 py-2.5 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
             <div
               className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
@@ -99,7 +99,7 @@ export default function Navbar() {
           </ul>
 
           {/* Actions droite : téléphone + Estimer + Connexion */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             <a
               href="tel:+33782456181"
               className="nav-phone-block hidden xl:inline-flex"
