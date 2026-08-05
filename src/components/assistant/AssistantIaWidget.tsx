@@ -73,6 +73,14 @@ export default function AssistantIaWidget() {
     }
   }, [open]);
 
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("ligneo:assistant-open", onOpen);
+    return () => window.removeEventListener("ligneo:assistant-open", onOpen);
+  }, []);
+
+
+
   const send = useCallback(
     async (text: string) => {
       const value = text.trim();
