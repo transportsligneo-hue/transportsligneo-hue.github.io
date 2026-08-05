@@ -31,15 +31,15 @@ export const VROOMY_TOOLS = [
     function: {
       name: "chercher_mission",
       description:
-        "Recherche le suivi d'une mission de convoyage. Nécessite OBLIGATOIREMENT le numéro de mission ET l'email du client, qui doivent correspondre. Ne jamais appeler sans les deux.",
+        "Recherche le suivi d'une mission de convoyage APPARTENANT À L'UTILISATEUR CONNECTÉ. Réservé aux visiteurs authentifiés : si le visiteur n'est pas connecté, l'outil refuse et il faut l'inviter à se connecter à son espace client.",
       parameters: {
         type: "object",
         properties: {
           numero_mission: { type: "string", description: "Numéro de mission, ex. MIS-TLG-2026-#101" },
-          email: { type: "string", description: "Email du client ayant commandé la mission" },
         },
-        required: ["numero_mission", "email"],
+        required: ["numero_mission"],
       },
+
     },
   },
   {
