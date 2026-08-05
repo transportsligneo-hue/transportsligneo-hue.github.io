@@ -185,13 +185,6 @@ export function IncidentReportSheet({
       return;
     }
 
-    await supabase.from("mission_etape_history" as never).insert({
-      attribution_id: attributionId,
-      etape: "incident",
-      notes: `[${typeLabel}] ${titre.trim()}`,
-      created_by: userId,
-    } as never);
-
     const incId = (incident as { id: string }).id;
     await notifyAdmin({
       type: "incident",
