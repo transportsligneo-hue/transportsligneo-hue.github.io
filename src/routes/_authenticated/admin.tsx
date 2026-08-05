@@ -88,7 +88,7 @@ function AdminLayout() {
       icon: Bell,
       group: "Pilotage",
       badge: unreadCount > 0
-        ? <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
         : undefined,
     },
     { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
@@ -132,7 +132,7 @@ function AdminLayout() {
       label: "Super Admin",
       icon: Crown,
       group: "Super Admin",
-      badge: <span className="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-purple-600 text-white uppercase tracking-wider">SA</span>,
+      badge: <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-purple-600 text-white uppercase tracking-wider">SA</span>,
     });
   }
 
