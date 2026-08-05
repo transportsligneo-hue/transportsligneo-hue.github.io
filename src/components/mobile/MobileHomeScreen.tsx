@@ -20,7 +20,8 @@ import {
   LogIn,
   LogOut,
   Bell,
-  
+  Clock,
+  Bot,
   Award,
 } from "lucide-react";
 
@@ -230,87 +231,118 @@ export default function MobileHomeScreen() {
         <FeatureItem icon={<MapPin size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="France" sub="24/48h" />
       </div>
 
-      {/* Accès rapide (scroll horizontal) */}
-      <section className="relative z-[1] pl-[22px] pt-6 pb-1">
-        <div className="flex justify-between items-center pr-[22px] mb-3.5">
-          <h2 className="section-title text-[16px] font-bold tracking-[-0.01em] text-white flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      {/* Accès rapide (scroll horizontal snap) */}
+      <section className="relative z-[1] pt-6 pb-1">
+        <div className="flex justify-between items-center px-[22px] mb-3.5">
+          <h2 className="section-title text-[16px] font-bold tracking-[-0.01em] text-white flex items-center gap-2.5" style={{ fontFamily: "'Poppins', sans-serif" }}>
+            <span className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#d9b54a,#4f8cff)" }} />
             Accès rapide
           </h2>
           <button
             onClick={goEspace}
-            className="text-[11px] font-bold tracking-[0.02em] text-[#4f8cff]"
+            className="text-[11px] font-bold tracking-[0.02em] text-[#4f8cff] flex items-center gap-1"
           >
-            Tout voir
+            Tout voir <ArrowRight size={12} strokeWidth={2.6} />
           </button>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-1.5 pr-[22px] no-scrollbar">
+        <div className="flex gap-3 overflow-x-auto pb-2 px-[22px] no-scrollbar mh-snap-x">
           <QuickCard
-            icon={<FileText size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            icon={<FileText size={18} className="text-white" strokeWidth={2} />}
             title="Mes devis"
             sub="Consulter & gérer"
+            tone="blue"
             onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
           />
           <QuickCard
-            icon={<Truck size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            icon={<Truck size={18} className="text-white" strokeWidth={2} />}
             title="Mes missions"
             sub="Suivi en direct"
+            tone="gold"
             onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })}
           />
           <QuickCard
-            icon={<LogIn size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            icon={<User size={18} className="text-white" strokeWidth={2} />}
             title={espaceLabel}
             sub="Mon compte"
+            tone="green"
             onClick={goEspace}
           />
           <QuickCard
-            icon={<Phone size={15} className="text-[#8fb4ff]" strokeWidth={2} />}
+            icon={<Phone size={18} className="text-white" strokeWidth={2} />}
             title="Contact"
             sub="Équipe 7j/7"
+            tone="blue"
             onClick={() => navigate({ to: "/contact" })}
           />
+          <span aria-hidden className="shrink-0 w-[6px]" />
         </div>
       </section>
 
       {/* Bento stats */}
-      <div className="relative z-[1] mx-[18px] mt-6 grid grid-cols-[1.15fr_1fr] gap-3">
+      <div className="relative z-[1] mx-[18px] mt-5 grid grid-cols-[1.1fr_1fr] gap-3 items-stretch">
         <div
-          className="rounded-[22px] p-[18px] flex flex-col justify-center border border-[rgba(122,163,255,0.24)]"
-          style={{ background: "linear-gradient(150deg, rgba(63,123,255,0.16), rgba(217,181,74,0.08))" }}
+          className="relative overflow-hidden rounded-[22px] p-[18px] flex flex-col justify-end border border-[rgba(122,163,255,0.24)]"
+          style={{ background: "linear-gradient(160deg, rgba(63,123,255,0.18), rgba(10,16,42,0.6))" }}
         >
-          <span className="w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.4)] bg-[rgba(63,123,255,0.2)] flex items-center justify-center mb-3"
-            style={{ boxShadow: "0 0 12px rgba(63,123,255,0.35)" }}
-          >
-            <Truck size={16} className="text-[#8fb4ff]" strokeWidth={2} />
+          <span
+            aria-hidden
+            className="absolute top-4 left-4 w-[130px] h-[130px] rounded-full blur-[10px]"
+            style={{ background: "radial-gradient(circle, rgba(79,140,255,0.3), transparent 70%)" }}
+          />
+          <span className="relative z-[1] w-[48px] h-[48px] rounded-[16px] border border-[rgba(122,163,255,0.4)] bg-white/[0.08] flex items-center justify-center mb-auto">
+            <Truck size={22} className="text-[#4f8cff]" strokeWidth={2} />
           </span>
-          <div className="text-[26px] font-bold leading-none tracking-[-0.01em] text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <div
+            className="relative z-[1] text-[34px] font-extrabold leading-none tracking-[-0.01em] text-white mt-5 mb-1.5"
+            style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 20px rgba(79,140,255,0.5)" }}
+          >
             5000+
           </div>
-          <div className="text-[10px] text-[#9aa6c9]">Véhicules convoyés</div>
+          <div className="relative z-[1] text-[11.5px] text-[#9aa6c9]">Véhicules convoyés</div>
         </div>
-        <div className="flex flex-col gap-3">
-          <MiniStat label="Expérience" value="6+ ans" />
-          <MiniStat label="Inclus" value="Carburant, péage, assurance" />
-          <MiniStat label="Dispo" value="24/7" />
+        <div className="grid grid-rows-3 gap-3">
+          <MiniStat icon={<Clock size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Expérience" value="6+ ans" />
+          <MiniStat icon={<ShieldCheck size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Inclus" value="Carburant, péage, assurance" />
+          <MiniStat icon={<Zap size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Dispo" value="24/7" />
         </div>
       </div>
 
       {/* Contact banner */}
-      <Link
-        to="/contact"
-        className="relative z-[1] mx-[18px] mt-[22px] flex items-center gap-3.5 rounded-[20px] px-[18px] py-4 border border-[rgba(122,163,255,0.22)] active:scale-[0.98] transition-transform"
-        style={{ background: "linear-gradient(120deg, rgba(63,123,255,0.14), rgba(217,181,74,0.08))" }}
+      <div
+        className="relative z-[1] mx-[18px] mt-[22px] overflow-hidden flex items-center gap-3.5 rounded-[20px] px-[18px] py-4 border border-[rgba(122,163,255,0.22)]"
+        style={{ background: "rgba(255,255,255,0.04)" }}
       >
-        <span className="w-10 h-10 rounded-full bg-[rgba(63,123,255,0.22)] flex items-center justify-center shrink-0">
-          <Phone size={18} className="text-[#8fb4ff]" strokeWidth={2} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <div className="text-[12.5px] font-bold text-white">Une question ?</div>
-          <div className="text-[10.3px] text-[#9aa6c9]">Notre équipe répond 7j/7</div>
-        </div>
-        <span className="w-[30px] h-[30px] rounded-full bg-[rgba(122,163,255,0.14)] flex items-center justify-center shrink-0">
-          <ArrowRight size={13} className="text-[#8fb4ff]" strokeWidth={2.4} />
-        </span>
-      </Link>
+        <span
+          aria-hidden
+          className="absolute -top-10 -right-5 w-[120px] h-[120px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(217,181,74,0.18), transparent 70%)" }}
+        />
+        <Link to="/contact" className="relative z-[1] flex items-center gap-3.5 flex-1 min-w-0 active:scale-[0.98] transition-transform">
+          <span className="w-11 h-11 rounded-full bg-[rgba(63,123,255,0.14)] border border-[rgba(122,163,255,0.35)] flex items-center justify-center shrink-0">
+            <Phone size={18} className="text-[#4f8cff]" strokeWidth={2} />
+          </span>
+          <span className="flex-1 min-w-0 block">
+            <span className="block text-[13.5px] font-bold text-white">Une question ?</span>
+            <span className="block text-[11px] text-[#9aa6c9]">Notre équipe répond 7j/7</span>
+          </span>
+        </Link>
+        <button
+          type="button"
+          aria-label="Ouvrir l'assistant"
+          onClick={() => window.dispatchEvent(new CustomEvent("ligneo:assistant-open"))}
+          className="relative z-[1] mh-ring w-[52px] h-[52px] rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform"
+          style={{ background: "linear-gradient(135deg,#2f5fff,#4f8cff)", boxShadow: "0 10px 24px rgba(47,95,255,0.5)" }}
+        >
+          <Bot size={24} className="text-white" strokeWidth={2} />
+          <span
+            className="absolute -top-1 -right-1 w-[19px] h-[19px] rounded-full text-[10px] font-extrabold flex items-center justify-center border-2"
+            style={{ background: "#d9b54a", color: "#061238", borderColor: "#0a1638" }}
+          >
+            1
+          </span>
+        </button>
+      </div>
+
 
 
       {/* Footer minimal */}
