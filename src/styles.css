@@ -2022,7 +2022,7 @@
     animation: mnavPhoneGlow 2.2s ease-in-out infinite;
   }
   .nav-phone-block.mnav-phone-compact .nav-phone-icon {
-    width: 30px; height: 30px;
+    width: 28px; height: 28px;
     box-shadow: 0 0 22px rgba(231,199,106,1);
   }
   .nav-phone-block.mnav-phone-compact .nav-phone-pulse {
