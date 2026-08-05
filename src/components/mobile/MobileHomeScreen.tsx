@@ -160,7 +160,7 @@ export default function MobileHomeScreen() {
             style={{ fontFamily: "'Space Grotesk', sans-serif", textShadow: "0 0 12px rgba(63,123,255,0.6)" }}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#4f8cff]" style={{ boxShadow: "0 0 8px #4f8cff" }} />
-            Convoyage automobile · France &amp; Europe
+            Convoyage et logistique automobile
           </div>
           <h1
             className="text-[35px] leading-[1.06] font-extrabold tracking-[-0.01em] mb-3 text-white"
@@ -181,20 +181,6 @@ export default function MobileHomeScreen() {
       </section>
 
 
-      {/* === Actions (alignées sur le PC : Estimer + téléphone) === */}
-      <div className="relative z-[3] flex gap-2.5 px-[18px] -mt-8">
-        <button
-          type="button"
-          className="mhome-estimer"
-          onClick={() => document.getElementById("mobile-devis")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-        >
-          <Zap size={14} className="mhome-bolt" strokeWidth={2.4} />
-          Estimer mon trajet
-        </button>
-        <a href="tel:+33782456181" className="mhome-phone" aria-label="Appeler 07 82 45 61 81">
-          <Phone size={17} strokeWidth={2} />
-        </a>
-      </div>
 
       {/* === Carte "Estimer mon trajet" (chevauche le hero) · vrai simulateur === */}
       <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20">
