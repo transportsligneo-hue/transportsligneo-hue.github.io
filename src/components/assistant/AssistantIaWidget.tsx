@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
@@ -556,7 +556,7 @@ export default function AssistantIaWidget() {
                   onClick={() => void send(q.label)}
                 >
                   <span className="vrm-ic" aria-hidden="true">
-                    {q.icon}
+                    <q.Icon size={14} strokeWidth={2.2} />
                   </span>
                   {q.label}
                 </button>
