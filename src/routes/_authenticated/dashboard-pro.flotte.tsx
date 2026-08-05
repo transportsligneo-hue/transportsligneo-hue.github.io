@@ -254,6 +254,8 @@ function FleetPage() {
           title="Parc"
           highlight="véhicules"
           badge="Flotte partenaire"
+          logoUrl={orgInfo?.logoUrl ?? null}
+          logoAlt={orgName || "Flotte partenaire"}
           subtitle={`${orgName ? `${orgName} — ` : ""}${actifs.length} véhicule${actifs.length > 1 ? "s" : ""} · documents, entretien et coûts de possession.`}
           stats={[
             { label: "Disponibles", value: kpi.dispo },
