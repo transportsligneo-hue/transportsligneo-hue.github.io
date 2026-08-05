@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { writeWithOutbox } from "@/lib/offline-outbox";
@@ -189,7 +189,7 @@ function ConvoyeurMissions() {
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante, numero_mission, options_completion" as never)
       .eq("convoyeur_id", conv.id)
-      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
+      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refuse", "refusee", "termine"]);
 
     if (error) {
       setLoading(false);
