@@ -125,7 +125,7 @@ async function chercherMission(
           "Accès refusé : le suivi d'une mission est réservé aux clients connectés. Inviter le visiteur à se connecter à son espace client (bouton Connexion), puis à consulter ses missions. Ne demander NI numéro de mission NI email, et ne divulguer aucune information.",
         action: "login_required",
       },
-      card: { type: "login", data: { url: "/connexion" } },
+      card: { type: "login", data: { url: "/login" } },
       success: true,
     };
   }
