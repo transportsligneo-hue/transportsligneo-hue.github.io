@@ -62,7 +62,7 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="max-w-[1720px] mx-auto pl-6 pr-8 py-2.5 flex items-center justify-between gap-4">
+        <div className="w-full px-5 py-2.5 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
             <div
               className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
@@ -79,7 +79,7 @@ export default function Navbar() {
           </Link>
 
           {/* Liens centraux · pilule englobante */}
-          <ul className="r4-nav-pill whitespace-nowrap">
+          <ul className="r4-nav-pill whitespace-nowrap mx-auto">
             {navLinks.map((l) => {
               const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
               return (
@@ -99,7 +99,7 @@ export default function Navbar() {
           </ul>
 
           {/* Actions droite : téléphone + Estimer + Connexion */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             <a
               href="tel:+33782456181"
               className="nav-phone-block hidden xl:inline-flex"

@@ -17,7 +17,8 @@ type Profil = "client" | "convoyeur";
 type VroomyCard =
   | { type: "mission"; data: Record<string, unknown> }
   | { type: "devis"; data: Record<string, unknown> }
-  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } };
+  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } }
+  | { type: "login"; data: { url: string } };
 
 type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
 
@@ -109,6 +110,20 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
           Exporter en PDF
         </button>
       </section>
+    );
+  }
+
+  if (card.type === "login") {
+    return (
+      <div className="vrm-card">
+        <div className="vrm-card-title">Connexion requise</div>
+        <div className="vrm-card-meta">
+          Le suivi de mission est réservé à votre espace client sécurisé.
+        </div>
+        <a className="vrm-card-pdf" href={card.data.url || "/login"}>
+          Se connecter à mon espace
+        </a>
+      </div>
     );
   }
 
@@ -308,9 +323,14 @@ export default function AssistantIaWidget() {
       setMessages((m) => [...m, { role: "user", content: value }]);
       setTyping(true);
       try {
+        const { data: sessData } = await supabase.auth.getSession();
+        const accessToken = sessData.session?.access_token;
         const res = await fetch("/api/public/assistant-chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
           body: JSON.stringify({
             session_token: sessionToken(),
             conversation_id: convId.current,

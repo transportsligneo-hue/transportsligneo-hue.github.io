@@ -11,7 +11,8 @@ import type { TripType } from "./reservation-pricing";
 export type VroomyCard =
   | { type: "mission"; data: Record<string, unknown> }
   | { type: "devis"; data: Record<string, unknown> }
-  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } };
+  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } }
+  | { type: "login"; data: { url: string } };
 
 export type ToolResult = {
   /** Renvoyé au modèle pour qu'il formule sa réponse. */
@@ -107,30 +108,44 @@ function normalizeNumero(v: string) {
   return v.trim().toUpperCase().replace(/\s+/g, "");
 }
 
+export type VroomyAuthUser = { id: string; email: string | null };
+
 async function chercherMission(
   admin: SupabaseClient,
-  args: { numero_mission?: unknown; email?: unknown },
+  args: { numero_mission?: unknown },
+  authUser: VroomyAuthUser | null,
 ): Promise<ToolResult> {
   const numero = typeof args.numero_mission === "string" ? normalizeNumero(args.numero_mission) : "";
-  const email = typeof args.email === "string" ? args.email.trim().toLowerCase() : "";
 
-  if (!numero || !email || !email.includes("@")) {
+  if (!authUser) {
     return {
       payload: {
         ok: false,
         raison:
-          "Informations incomplètes : demander au visiteur son numéro de mission ET l'email utilisé lors de la commande.",
+          "Accès refusé : le suivi d'une mission est réservé aux clients connectés. Inviter le visiteur à se connecter à son espace client (bouton Connexion), puis à consulter ses missions. Ne demander NI numéro de mission NI email, et ne divulguer aucune information.",
+        action: "login_required",
       },
+      card: { type: "login", data: { url: "/login" } },
+      success: true,
+    };
+  }
+
+  if (!numero) {
+    return {
+      payload: { ok: false, raison: "Demander le numéro de la mission à suivre." },
       card: null,
       success: false,
       error: "missing_args",
     };
   }
 
+  const email = (authUser.email ?? "").trim().toLowerCase();
+
+
   const { data: rows, error } = await admin
     .from("missions")
     .select(
-      "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, type_trajet, marque, modele, email, group_reference",
+      "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, type_trajet, marque, modele, email, user_id, group_reference",
     )
     .or(`numero.eq.${numero},group_reference.eq.${numero}`)
     .limit(2);
@@ -148,13 +163,16 @@ async function chercherMission(
     };
   }
 
-  // Contrôle d'accès : l'email doit correspondre au client de la mission.
-  if ((mission.email ?? "").trim().toLowerCase() !== email) {
+  // Contrôle d'accès : la mission doit appartenir à l'utilisateur connecté.
+  const owns =
+    (mission.user_id && mission.user_id === authUser.id) ||
+    (!!email && (mission.email ?? "").trim().toLowerCase() === email);
+  if (!owns) {
     return {
       payload: {
         ok: false,
         raison:
-          "L'email fourni ne correspond pas à cette mission. Ne divulguer AUCUNE information : inviter à vérifier l'email ou à contacter le 07 82 45 61 81.",
+          "Cette mission n'appartient pas au compte connecté. Ne divulguer AUCUNE information : inviter à vérifier le numéro depuis son espace client ou à appeler le 07 82 45 61 81.",
       },
       card: null,
       success: true,
@@ -310,10 +328,11 @@ export async function runVroomyTool(
   admin: SupabaseClient,
   name: string,
   args: Record<string, unknown>,
+  authUser: VroomyAuthUser | null = null,
 ): Promise<ToolResult> {
   switch (name) {
     case "chercher_mission":
-      return chercherMission(admin, args);
+      return chercherMission(admin, args, authUser);
     case "estimer_devis":
       return estimerDevis(args);
     case "chercher_missions_catalogue":

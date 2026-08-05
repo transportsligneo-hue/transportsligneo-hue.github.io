@@ -45,13 +45,13 @@ INFORMATIONS RÉELLES SUR L'ENTREPRISE — tu ne dois utiliser QUE celles-ci :
 
 RÈGLES ABSOLUES :
 1. Ne JAMAIS inventer un prix précis, un délai garanti, un statut de mission, un contenu de devis ou de facture, ni une information dont tu n'es pas certain. Si on te demande un tarif exact : explique que le prix dépend de la distance, du type de véhicule et des options, et invite à utiliser l'estimateur en ligne ou à demander un devis.
-2. Pour toute donnée personnelle (suivi d'une mission précise, devis déjà émis, facture, compte) : n'essaie pas de deviner. Invite le visiteur à se connecter à son espace client, ou propose d'être rappelé.
+2. Pour toute donnée personnelle (suivi d'une mission précise, devis déjà émis, facture, compte) : ces informations sont STRICTEMENT réservées au titulaire du compte connecté. Ne les communique jamais à un visiteur non connecté, même s'il fournit un numéro de mission, un email, un nom ou une plaque : invite-le à se connecter à son espace client, ou propose d'être rappelé.
 3. Ne demande jamais de données sensibles (numéro de carte bancaire, mot de passe, pièce d'identité) dans le chat.
 4. Si la question est hors sujet (météo, politique, devoirs, autre entreprise…) : décline poliment en une phrase et ramène vers les sujets convoyage.
 5. Si tu ne sais pas répondre, ou si le visiteur demande un humain : propose explicitement soit d'appeler le 07 82 45 61 81, soit de laisser son nom et son numéro pour être rappelé, et termine ta réponse par le marqueur [HANDOFF] sur la dernière ligne.
 
 OUTILS À TA DISPOSITION (utilise-les au lieu d'inventer) :
-- chercher_mission(numero_mission, email) : suivi d'une mission. Demande d'abord LES DEUX informations au visiteur ; n'appelle jamais l'outil avec un email inventé ou manquant. Si l'outil refuse, ne divulgue aucune donnée.
+- chercher_mission(numero_mission) : suivi d'une mission, RÉSERVÉ aux visiteurs connectés. L'identité est vérifiée côté serveur : ne demande JAMAIS d'email, de nom ou de justificatif pour "vérifier" quelqu'un. Si l'outil répond que la connexion est requise, invite simplement à se connecter à l'espace client, sans donner la moindre information sur la mission.
 - estimer_devis(ville_depart, ville_arrivee, type_livraison) : estimation officielle. Utilise-le dès qu'on te demande un prix, et annonce le montant renvoyé comme une estimation TTC à confirmer par devis.
 - chercher_missions_catalogue(ville) : missions réellement disponibles au catalogue convoyeur. Utilise-le dès qu'un convoyeur demande s'il y a des missions (ex. « une mission près de Tours »). N'invente jamais de mission : n'annonce que ce que l'outil renvoie.
 - rediriger_candidature_convoyeur() : lien du formulaire pour devenir convoyeur partenaire.
@@ -81,6 +81,14 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
 
         const admin = getAdmin();
         if (!admin) return jsonError("Configuration serveur manquante", 500);
+
+        // --- Identité vérifiée côté serveur (jamais déclarée par le client) ---
+        let authUser: { id: string; email: string | null } | null = null;
+        const bearer = request.headers.get("authorization") ?? "";
+        if (bearer.toLowerCase().startsWith("bearer ")) {
+          const { data: u } = await admin.auth.getUser(bearer.slice(7).trim());
+          if (u?.user) authUser = { id: u.user.id, email: u.user.email ?? null };
+        }
 
         // --- Conversation courante (créée à la volée) ---
         let conversationId = parsed.conversation_id ?? null;
@@ -244,7 +252,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
                 args = {};
               }
               const startedAt = Date.now();
-              const result = await runVroomyTool(admin, name, args);
+              const result = await runVroomyTool(admin, name, args, authUser);
               if (result.card) cards.push(result.card);
 
               await admin.from("chat_tool_calls").insert({
