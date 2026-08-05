@@ -635,7 +635,13 @@ export default function AssistantIaWidget() {
             </button>
           </form>
 
-          <p className="vrm-fine">Transports Ligneo</p>
+          <p className="vrm-fine">
+            Transports Ligneo ·{" "}
+            <button type="button" className="vrm-pref-link" onClick={toggleProactive} aria-pressed={proactiveOff}>
+              {proactiveOff ? "Réactiver les propositions automatiques" : "Ne plus me proposer d'aide automatiquement"}
+            </button>
+          </p>
+
         </div>
       </div>
     </>
