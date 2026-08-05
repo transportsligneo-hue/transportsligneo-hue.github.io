@@ -1,23 +1,12 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Menu, MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { Link } from "@tanstack/react-router";
+import { MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * MobileTarifsScreen · page Tarifs dédiée mobile, ambiance navy/or
  * cohérente avec MobileHomeScreen. Reprend le simulateur réel.
  */
 export default function MobileTarifsScreen() {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
 
   return (
     <div
