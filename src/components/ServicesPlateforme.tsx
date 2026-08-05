@@ -3,9 +3,11 @@ import {
   MapPin, Bell, History, LineChart, UserCheck, BellRing,
   Camera, PenLine, FolderCheck, ScanLine, ShieldCheck, Search, AlertTriangle,
   LayoutDashboard, Building2, Receipt, Headphones, PhoneCall,
+  Bot, Code2, Wrench, Calculator, IdCard, Hash,
 } from "lucide-react";
 
 type Feat = { Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; label: string };
+
 
 const CATS: { title: string; items: Feat[] }[] = [
   {
