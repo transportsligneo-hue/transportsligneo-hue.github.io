@@ -43,6 +43,26 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
   }
 }
 
+/** Valide réellement un JWT Supabase côté serveur (aucune confiance au header brut). */
+async function verifySupabaseToken(token: string): Promise<boolean> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return false;
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase.auth.getClaims(token);
+    return !error && !!data?.claims?.sub;
+  } catch (err) {
+    console.error("[SIV] token verification failed", err);
+    return false;
+  }
+}
+
+
+
 
 export type PlateLookupResult = {
   ok: boolean;
