@@ -2693,73 +2693,79 @@
   }
   .r4-nav-link {
     position: relative; overflow: hidden;
-    padding: 8px 13px; border-radius: 999px;
-    font-size: 11.5px; font-weight: 600;
+    display: inline-flex; align-items: center;
+    padding: 9px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
     color: var(--r4-text-muted);
-    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+    transition: all .25s ease;
   }
-  .r4-nav-link:hover { color: #fff; background: rgba(122,163,255,0.14); transform: translateY(-2px); }
-  .r4-nav-link.is-active {
+  .r4-nav-link:hover {
     color: #fff;
+    background: linear-gradient(120deg, rgba(47,95,255,0.22), rgba(79,140,255,0.14));
+    box-shadow: 0 0 0 1px rgba(122,163,255,0.35), 0 4px 16px rgba(47,95,255,0.3), 0 0 18px rgba(79,140,255,0.25);
+    transform: translateY(-1px);
+  }
+  .r4-nav-link::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 35%; height: 100%;
+    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.3),transparent);
+    transform: skewX(-20deg); opacity: 0; transition: opacity .2s ease;
+  }
+  .r4-nav-link:hover::after { opacity: 1; animation: r4LinkShine 1.4s ease-in-out; }
+  @keyframes r4LinkShine { 0% { left:-60%; } 50%,100% { left:130%; } }
+
+  .r4-nav-link.is-active {
+    color: #fff; font-weight: 700;
     background: linear-gradient(120deg, var(--r4-blue), var(--r4-blue-bright));
-    box-shadow: 0 6px 18px rgba(47,95,255,0.5);
+    box-shadow: 0 4px 16px rgba(47,95,255,0.5), 0 0 20px rgba(79,140,255,0.4);
     animation: r4NavBreathe 3s ease-in-out infinite;
   }
-  .r4-nav-link.is-active::after {
-    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
-    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.45),transparent);
-    transform: skewX(-20deg);
-    animation: r4NavShine 3.2s ease-in-out infinite;
-  }
-  @keyframes r4NavShine { 0% { left:-60%; } 45%,100% { left:130%; } }
+  @keyframes r4NavShine { 0% { left:-60%; } 50%,100% { left:130%; } }
   @keyframes r4NavBreathe {
-    0%,100% { box-shadow: 0 6px 18px rgba(47,95,255,0.5); }
-    50%     { box-shadow: 0 8px 26px rgba(47,95,255,0.75), 0 0 20px rgba(79,140,255,0.4); }
+    0%,100% { box-shadow: 0 4px 16px rgba(47,95,255,0.5), 0 0 20px rgba(79,140,255,0.4); }
+    50%     { box-shadow: 0 6px 20px rgba(47,95,255,0.7), 0 0 28px rgba(79,140,255,0.6); }
   }
 
-  /* Nav link accents : B2B violet néon, Espace Driver vert électrique */
+  /* Nav link accents : B2B violet, Espace Driver vert */
   .r4-nav-link.nav-accent-purple {
-    color: #e9c9ff;
-    text-shadow: 0 0 8px rgba(192,132,252,0.9), 0 0 18px rgba(168,85,247,0.75), 0 0 28px rgba(139,92,246,0.55);
-    animation: neonPulsePurple 2.2s ease-in-out infinite;
+    color: #c9b8ff; font-weight: 700;
+    border: 1px solid rgba(124,92,255,0.45);
+    background: rgba(124,92,255,0.1);
   }
   .r4-nav-link.nav-accent-purple:hover {
     color: #fff;
-    background: rgba(168,85,247,0.22);
-    box-shadow: 0 0 22px rgba(192,132,252,0.75), 0 0 40px rgba(168,85,247,0.5);
+    background: rgba(124,92,255,0.2);
+    box-shadow: 0 0 18px rgba(124,92,255,0.35);
   }
   .r4-nav-link.nav-accent-purple.is-active {
-    background: linear-gradient(120deg,#7c3aed,#a855f7,#c084fc);
-    box-shadow: 0 6px 18px rgba(168,85,247,0.7), 0 0 28px rgba(192,132,252,0.7);
-    color: #fff;
-    text-shadow: none;
-    animation: none;
+    background: linear-gradient(120deg,#7c5cff,#a78bfa);
+    box-shadow: 0 4px 16px rgba(124,92,255,0.55), 0 0 22px rgba(167,139,250,0.5);
+    color: #fff; animation: none;
   }
+
   .r4-nav-link.nav-accent-green {
-    color: #b7ffcf;
-    text-shadow: 0 0 8px rgba(74,222,128,0.95), 0 0 18px rgba(34,197,94,0.75), 0 0 28px rgba(22,163,74,0.5);
-    animation: neonPulseGreen 2.2s ease-in-out infinite;
+    display: inline-flex; align-items: center; gap: 7px;
+    color: #fff; font-weight: 700;
+    background: linear-gradient(120deg, rgba(74,208,160,0.25), rgba(74,208,160,0.12));
+    border: 1px solid rgba(74,208,160,0.55);
+    box-shadow: 0 0 0 1px rgba(74,208,160,0.15), 0 4px 16px rgba(74,208,160,0.3), 0 0 18px rgba(74,208,160,0.25);
+    animation: r4GreenPulse 2.4s ease-in-out infinite;
   }
-  .r4-nav-link.nav-accent-green:hover {
-    color: #fff;
-    background: rgba(34,197,94,0.22);
-    box-shadow: 0 0 22px rgba(74,222,128,0.75), 0 0 40px rgba(34,197,94,0.5);
+  .r4-nav-link.nav-accent-green svg { width: 13px; height: 13px; }
+  .r4-nav-link.nav-accent-green::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 35%; height: 100%;
+    background: linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);
+    transform: skewX(-20deg); opacity: 1; animation: r4NavShine 3.6s ease-in-out infinite;
   }
+  .r4-nav-link.nav-accent-green:hover { color: #fff; transform: translateY(-1px); }
   .r4-nav-link.nav-accent-green.is-active {
-    background: linear-gradient(120deg,#16a34a,#22c55e,#4ade80);
-    box-shadow: 0 6px 18px rgba(34,197,94,0.7), 0 0 28px rgba(74,222,128,0.7);
-    color: #fff;
-    text-shadow: none;
-    animation: none;
+    background: linear-gradient(120deg, rgba(74,208,160,0.45), rgba(53,180,138,0.9));
+    animation: r4GreenPulse 2.4s ease-in-out infinite;
   }
-  @keyframes neonPulsePurple {
-    0%,100% { text-shadow: 0 0 8px rgba(192,132,252,0.9), 0 0 18px rgba(168,85,247,0.7), 0 0 28px rgba(139,92,246,0.4); }
-    50%     { text-shadow: 0 0 12px rgba(216,180,254,1), 0 0 26px rgba(192,132,252,0.95), 0 0 42px rgba(168,85,247,0.7); }
+  @keyframes r4GreenPulse {
+    0%,100% { box-shadow: 0 0 0 1px rgba(74,208,160,0.15), 0 4px 16px rgba(74,208,160,0.3), 0 0 18px rgba(74,208,160,0.25); }
+    50%     { box-shadow: 0 0 0 1px rgba(74,208,160,0.3), 0 6px 20px rgba(74,208,160,0.45), 0 0 26px rgba(74,208,160,0.4); }
   }
-  @keyframes neonPulseGreen {
-    0%,100% { text-shadow: 0 0 8px rgba(74,222,128,0.9), 0 0 18px rgba(34,197,94,0.7), 0 0 28px rgba(22,163,74,0.4); }
-    50%     { text-shadow: 0 0 12px rgba(134,239,172,1), 0 0 26px rgba(74,222,128,0.95), 0 0 42px rgba(34,197,94,0.7); }
-  }
+
 
   /* Bouton "Connexion" — pilule dégradée bleu → or dérivante */
   .r4-btn-connect {
