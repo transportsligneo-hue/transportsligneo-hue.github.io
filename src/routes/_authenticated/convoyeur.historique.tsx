@@ -79,7 +79,7 @@ function ConvoyeurHistorique() {
             <Link
               key={h.id}
               to="/convoyeur/missions"
-              search={{ open: h.id, f: "done" } as never}
+              search={{ open: h.id, f: "done" }}
               className="bg-white rounded-xl border border-pro-border p-4 flex items-center justify-between shadow-sm hover:border-emerald-300 hover:shadow-md transition group"
             >
               <div className="space-y-1 min-w-0 flex-1">

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { writeWithOutbox } from "@/lib/offline-outbox";
@@ -24,6 +24,10 @@ import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
+  validateSearch: (search: Record<string, unknown>): { open?: string; f?: string } => ({
+    open: typeof search.open === "string" && search.open ? search.open : undefined,
+    f: typeof search.f === "string" && search.f ? search.f : undefined,
+  }),
   component: ConvoyeurMissions,
 });
 
@@ -68,6 +72,7 @@ function ConvoyeurMissions() {
   const [loading, setLoading] = useState(true);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [openMissionId, setOpenMissionIdState] = useState<string | null>(null);
+  const navigate = useNavigate();
   const setOpenMissionId = useCallback((id: string | null) => {
     setOpenMissionIdState(id);
     if (typeof window === "undefined") return;
@@ -77,8 +82,10 @@ function ConvoyeurMissions() {
     } else {
       sessionStorage.removeItem("driver:openMissionId");
       localStorage.removeItem("driver:openMissionId");
+      // Retire ?open= de l'URL pour que la fiche ne se ré-ouvre pas.
+      navigate({ to: "/convoyeur/missions", search: (prev: Record<string, unknown>) => ({ ...prev, open: undefined }), replace: true });
     }
-  }, []);
+  }, [navigate]);
   // Persisted in sessionStorage so the camera-suspend/restart on mobile
   // cannot drop us back to the mission page mid-inspection.
   const [inspection, setInspection] = useState<InspectionSession | null>(() => readStoredInspection());
@@ -96,11 +103,10 @@ function ConvoyeurMissions() {
   const [showMap, setShowMap] = useState(false);
   const [missionStartTime, setMissionStartTime] = useState<string | null>(null);
   const [typeConvoyeur, setTypeConvoyeur] = useState<string>("independant");
+  const routeSearch = Route.useSearch();
   const [filter, setFilter] = useState<FilterKey>(() => {
-    if (typeof window === "undefined") return "all";
-    const f = new URLSearchParams(window.location.search).get("f");
     const allowed: FilterKey[] = ["all", "today", "upcoming", "in_progress", "done", "proposed", "accepted"];
-    return (allowed as string[]).includes(f ?? "") ? (f as FilterKey) : "all";
+    return (allowed as string[]).includes(routeSearch.f ?? "") ? (routeSearch.f as FilterKey) : "all";
   });
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
@@ -109,9 +115,8 @@ function ConvoyeurMissions() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const params = new URLSearchParams(window.location.search);
-      const openFromUrl = params.get("open");
-      const storedOpenMissionId = openFromUrl || sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
+      const storedOpenMissionId =
+        routeSearch.open || sessionStorage.getItem("driver:openMissionId") || localStorage.getItem("driver:openMissionId");
       const storedInspection = readStoredInspection();
 
       if (storedOpenMissionId) setOpenMissionIdState(storedOpenMissionId);
@@ -119,22 +124,31 @@ function ConvoyeurMissions() {
     } catch {
       // Ignore storage restoration issues on privacy-restricted devices.
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Ouvre la mission demandée par l'URL (ex. depuis l'Historique), même si
+  // elle est terminée : la navigation client doit toujours ouvrir la fiche.
+  useEffect(() => {
+    if (routeSearch.open) setOpenMissionIdState(routeSearch.open);
+    if (routeSearch.f) {
+      const allowed: FilterKey[] = ["all", "today", "upcoming", "in_progress", "done", "proposed", "accepted"];
+      if ((allowed as string[]).includes(routeSearch.f)) setFilter(routeSearch.f as FilterKey);
+    }
+  }, [routeSearch.open, routeSearch.f]);
 
   // Nettoie l'openMissionId restauré si la mission n'est plus active
   // (évite d'atterrir sur une mission terminée quand on revient depuis
-  // le dashboard).
+  // le dashboard) — sauf si l'URL demande explicitement cette mission.
   useEffect(() => {
     if (!openMissionId || missions.length === 0) return;
     const m = missions.find(x => x.id === openMissionId);
     if (!m) return;
-    if (typeof window === "undefined") return;
-    const openFromUrl = new URLSearchParams(window.location.search).get("open");
-    if (openFromUrl === openMissionId) return;
+    if (routeSearch.open === openMissionId) return;
     if (DONE_STATUTS.has(m.statut)) {
       setOpenMissionId(null);
     }
-  }, [openMissionId, missions, setOpenMissionId]);
+  }, [openMissionId, missions, setOpenMissionId, routeSearch.open]);
 
 
   // Sync inspection state to sessionStorage
@@ -175,7 +189,7 @@ function ConvoyeurMissions() {
       .from("attributions")
       .select("id, statut, trajet_id, etape_courante, numero_mission, options_completion" as never)
       .eq("convoyeur_id", conv.id)
-      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refusee", "termine"]);
+      .in("statut", ["propose", "accepte", "en_cours", "en_attente_validation", "validee", "refuse", "refusee", "termine"]);
 
     if (error) {
       setLoading(false);
