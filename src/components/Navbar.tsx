@@ -90,6 +90,7 @@ export default function Navbar() {
                     activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
                     inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
                   >
+                    {l.accent === "green" && <LockIcon />}
                     {l.label}
                   </Link>
                 </li>
