@@ -1,0 +1,1 @@
+ALTER TABLE public.mission_incidents ADD COLUMN IF NOT EXISTS type_incident text;

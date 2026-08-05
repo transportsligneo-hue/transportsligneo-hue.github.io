@@ -67,7 +67,7 @@ function DevenirConvoyeurPage() {
             <button
               type="button"
               className="dc-btn-primary"
-              onClick={() => navigate({ to: "/inscription-convoyeur" })}
+              onClick={() => navigate({ to: "/inscription-convoyeur", search: {} as never })}
             >
               Je remplis les conditions <ArrowIcon />
             </button>
