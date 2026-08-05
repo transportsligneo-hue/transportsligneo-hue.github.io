@@ -23,6 +23,7 @@ import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
 import { Route as InscriptionFlotteRouteImport } from './routes/inscription-flotte'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
+import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
@@ -218,6 +219,11 @@ const InscriptionConvoyeurRoute = InscriptionConvoyeurRouteImport.update({
 const InscriptionClientRoute = InscriptionClientRouteImport.update({
   id: '/inscription-client',
   path: '/inscription-client',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevenirConvoyeurRoute = DevenirConvoyeurRouteImport.update({
+  id: '/devenir-convoyeur',
+  path: '/devenir-convoyeur',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -951,6 +957,7 @@ export interface FileRoutesByFullPath {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
@@ -1092,6 +1099,7 @@ export interface FileRoutesByTo {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
@@ -1226,6 +1234,7 @@ export interface FileRoutesById {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
@@ -1369,6 +1378,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
@@ -1510,6 +1520,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
@@ -1643,6 +1654,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
@@ -1786,6 +1798,7 @@ export interface RootRouteChildren {
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   InscriptionFlotteRoute: typeof InscriptionFlotteRoute
@@ -1923,6 +1936,13 @@ declare module '@tanstack/react-router' {
       path: '/inscription-client'
       fullPath: '/inscription-client'
       preLoaderRoute: typeof InscriptionClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devenir-convoyeur': {
+      id: '/devenir-convoyeur'
+      path: '/devenir-convoyeur'
+      fullPath: '/devenir-convoyeur'
+      preLoaderRoute: typeof DevenirConvoyeurRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -3241,6 +3261,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommentCaMarcheRoute: CommentCaMarcheRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  DevenirConvoyeurRoute: DevenirConvoyeurRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   InscriptionFlotteRoute: InscriptionFlotteRoute,
@@ -3283,13 +3304,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
