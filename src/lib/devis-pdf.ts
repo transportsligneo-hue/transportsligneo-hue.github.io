@@ -360,6 +360,15 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   const details = [
     `Prise en charge du vehicule a ${d.depart.split(",")[0]}`,
     `Livraison du vehicule a ${d.arrivee.split(",")[0]}`,
+    ...(d.option_trajet ? [`Type de trajet : ${d.option_trajet}`] : []),
+    ...(d.immatriculation || d.marque
+      ? [`Vehicule : ${[d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")}`]
+      : []),
+    ...(d.destinataire_nom
+      ? [`Destinataire : ${[d.destinataire_nom, d.destinataire_tel].filter(Boolean).join(" - ")}`]
+      : []),
+    ...(d.options ?? []),
+    ...(d.pv_digital ? [`PV de livraison digitalise : ${d.pv_digital}`] : []),
     "Peages inclus",
     "Carburant inclus",
     "Assurance tous risques incluse",
