@@ -332,11 +332,16 @@ export const refuseDevis = createServerFn({ method: "POST" })
     const now = new Date().toISOString();
     const motif = data.motif?.trim() || null;
 
-    const { error: updErr } = await supabase
+    // Écriture privilégiée (pas de policy UPDATE client sur `devis`)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: refusedRows, error: updErr } = await supabaseAdmin
       .from("devis")
       .update({ statut: "refuse", refused_at: now, refus_motif: motif })
-      .eq("id", devis.id);
+      .eq("id", devis.id)
+      .select("id");
     if (updErr) throw new Error(`Refus impossible : ${updErr.message}`);
+    if (!refusedRows || refusedRows.length === 0) throw new Error("Refus impossible");
+
 
     // Historique (best-effort — la table peut avoir un trigger auto)
     try {
