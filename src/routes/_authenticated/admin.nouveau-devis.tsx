@@ -184,6 +184,7 @@ function AdminNouveauDevisPage() {
 
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
+    immat ? `Immatriculation : ${immat}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
