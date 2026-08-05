@@ -107,25 +107,39 @@ function normalizeNumero(v: string) {
   return v.trim().toUpperCase().replace(/\s+/g, "");
 }
 
+export type VroomyAuthUser = { id: string; email: string | null };
+
 async function chercherMission(
   admin: SupabaseClient,
-  args: { numero_mission?: unknown; email?: unknown },
+  args: { numero_mission?: unknown },
+  authUser: VroomyAuthUser | null,
 ): Promise<ToolResult> {
   const numero = typeof args.numero_mission === "string" ? normalizeNumero(args.numero_mission) : "";
-  const email = typeof args.email === "string" ? args.email.trim().toLowerCase() : "";
 
-  if (!numero || !email || !email.includes("@")) {
+  if (!authUser) {
     return {
       payload: {
         ok: false,
         raison:
-          "Informations incomplètes : demander au visiteur son numéro de mission ET l'email utilisé lors de la commande.",
+          "Accès refusé : le suivi d'une mission est réservé aux clients connectés. Inviter le visiteur à se connecter à son espace client (bouton Connexion), puis à consulter ses missions. Ne demander NI numéro de mission NI email, et ne divulguer aucune information.",
+        action: "login_required",
       },
+      card: { type: "login", data: { url: "/connexion" } },
+      success: true,
+    };
+  }
+
+  if (!numero) {
+    return {
+      payload: { ok: false, raison: "Demander le numéro de la mission à suivre." },
       card: null,
       success: false,
       error: "missing_args",
     };
   }
+
+  const email = (authUser.email ?? "").trim().toLowerCase();
+
 
   const { data: rows, error } = await admin
     .from("missions")
