@@ -126,15 +126,13 @@ export function AdminSidebar({ items, children }: Props) {
 
             {renderNav(() => setMobileOpen(false))}
 
-            <div className="p-3 border-t border-pro-border">
-              <button
-                onClick={() => logout()}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600"
-              >
-                <LogOut size={17} />
+            <div className="lig-nav p-3 border-t border-pro-border">
+              <button onClick={() => logout()} className="lig-nav-logout">
+                <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion
               </button>
             </div>
+
           </aside>
         </>
       )}
