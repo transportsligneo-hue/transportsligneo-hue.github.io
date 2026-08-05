@@ -91,17 +91,18 @@ export default function MobileNavbar() {
             </span>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact" aria-label="Appeler 07 82 45 61 81">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+            <a
+              href="tel:+33782456181"
+              className="nav-phone-block mnav-phone-compact mnav-phone-dynamic"
+              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+            >
               <span className="nav-phone-icon">
-                <Phone size={13} strokeWidth={2.4} />
+                <Phone size={14} strokeWidth={2.4} />
                 <span className="nav-phone-pulse" aria-hidden="true" />
+                <span className="nav-phone-pulse nav-phone-pulse-delay" aria-hidden="true" />
               </span>
             </a>
-            <button onClick={goEspace} className="r4-btn-connect mnav-connect-compact w-[38px] h-[38px] p-0 justify-center sm:w-auto sm:min-h-[38px] sm:px-[13px] sm:gap-1.5" type="button" aria-label={isAuthenticated ? "Mon espace" : "Connexion"}>
-              <User size={12} />
-              <span className="hidden sm:inline">{isAuthenticated ? "Espace" : "Connexion"}</span>
-            </button>
           </div>
         </div>
         <nav className="px-3 pb-2">
