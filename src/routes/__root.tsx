@@ -7,6 +7,7 @@ import PwaProvider from "@/components/pwa/PwaProvider";
 import AssistantIaWidget from "@/components/assistant/AssistantIaWidget";
 import PwaSplash from "@/components/pwa/PwaSplash";
 import BiometricLock from "@/components/BiometricLock";
+import CookieBanner from "@/components/CookieBanner";
 import BiometricEnrollPrompt from "@/components/BiometricEnrollPrompt";
 import { PricingProvider } from "@/lib/pricing";
 import { AiSettingsProvider } from "@/lib/ai/context";
@@ -143,6 +144,7 @@ function RootComponent() {
             <PwaSplash />
             <BiometricEnrollPrompt />
             <BiometricLock />
+            <CookieBanner />
             <Toaster />
           </AiSettingsProvider>
         </PricingProvider>

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { openCookiePreferences } from "@/lib/cookie-consent";
 
 const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
@@ -206,6 +207,14 @@ export default function Footer() {
       <div className="relative z-10 mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-3 border-t border-[#7aa3ff]/15 px-8 py-5">
         <p className="text-xs text-[#9aa6c9]">
           © {new Date().getFullYear()} <b className="text-white">Transports Ligneo</b> · Tous droits réservés
+          <span className="mx-2 opacity-40">·</span>
+          <button
+            type="button"
+            onClick={() => openCookiePreferences()}
+            className="underline underline-offset-2 transition-colors hover:text-white"
+          >
+            Gérer mes cookies
+          </button>
         </p>
         <button
           onClick={scrollTop}
