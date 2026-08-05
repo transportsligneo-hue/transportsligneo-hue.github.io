@@ -97,7 +97,7 @@ export default function MobileNavbar() {
                 <span className="nav-phone-pulse" aria-hidden="true" />
               </span>
             </a>
-            <button onClick={goEspace} className="r4-btn-connect mnav-connect-compact" type="button" aria-label={isAuthenticated ? "Mon espace" : "Connexion"}>
+            <button onClick={goEspace} className="r4-btn-connect mnav-connect-compact w-[38px] h-[38px] p-0 justify-center sm:w-auto sm:min-h-[38px] sm:px-[13px] sm:gap-1.5" type="button" aria-label={isAuthenticated ? "Mon espace" : "Connexion"}>
               <User size={12} />
               <span className="hidden sm:inline">{isAuthenticated ? "Espace" : "Connexion"}</span>
             </button>
