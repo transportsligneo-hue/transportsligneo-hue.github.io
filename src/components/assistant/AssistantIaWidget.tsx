@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
@@ -507,7 +507,7 @@ export default function AssistantIaWidget() {
                   </span>
                 </button>
                 <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span className="vrm-role-ico" aria-hidden="true"><SteeringWheel size={17} strokeWidth={2} /></span>
+                  <span className="vrm-role-ico" aria-hidden="true"><CarFront size={17} strokeWidth={2} /></span>
                   <span className="vrm-role-txt">
                     Convoyeur
                     <span className="vrm-role-sub">Trouver des missions</span>
