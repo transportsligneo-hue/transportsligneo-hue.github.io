@@ -4067,3 +4067,95 @@
 }
 .client-btn-blue:active { transform: translateY(0); }
 .client-btn-blue:disabled { animation: none; opacity: .5; box-shadow: none; }
+
+/* ==========================================================================
+   Navigation harmonisée (Admin · B2B · Flotte · Client particulier)
+   Item : pastille d'icône + actif en dégradé bleu néon + liseré blanc.
+   L'accent suit le thème d'organisation quand [data-org-theme] est présent.
+   ========================================================================== */
+.lig-nav {
+  --lig-nav-accent: var(--org-accent, #2f5fff);
+  --lig-nav-accent-2: var(--org-accent-strong, #1c3fc4);
+  --lig-nav-accent-soft: var(--org-accent-soft, rgba(47, 95, 255, .1));
+  --lig-nav-accent-glow: var(--org-accent-glow, rgba(47, 95, 255, .45));
+}
+.lig-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  padding: .5rem .625rem;
+  border-radius: .625rem;
+  font-size: .875rem;
+  color: #4a5268;
+  overflow: hidden;
+  transition: background-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.lig-nav-item:hover {
+  background: #f1f3f8;
+  color: #131a2b;
+  transform: translateX(2px);
+}
+.lig-nav-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f5f7fc;
+  border: 1px solid #e3e8f2;
+  color: #7c869b;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.lig-nav-item:hover .lig-nav-ic {
+  background: var(--lig-nav-accent-soft);
+  border-color: transparent;
+  color: var(--lig-nav-accent);
+}
+.lig-nav-item.is-active {
+  background: linear-gradient(120deg, var(--lig-nav-accent) 0%, var(--lig-nav-accent-2) 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 8px 22px var(--lig-nav-accent-glow), 0 0 20px color-mix(in oklab, var(--lig-nav-accent) 25%, transparent);
+}
+.lig-nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #fff;
+  box-shadow: 0 0 10px #fff;
+}
+.lig-nav-item.is-active .lig-nav-ic {
+  background: rgba(255, 255, 255, .14);
+  border-color: rgba(255, 255, 255, .2);
+  color: #fff;
+}
+.lig-nav-item.is-active:hover { transform: translateX(2px); }
+.lig-nav-item.is-active .lig-nav-badge {
+  background: rgba(255, 255, 255, .2) !important;
+  color: #fff !important;
+}
+.lig-nav-logout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  width: 100%;
+  padding: .5rem .625rem;
+  border-radius: .625rem;
+  font-size: .875rem;
+  color: #dc2626;
+  transition: background-color .2s ease, transform .2s ease;
+}
+.lig-nav-logout:hover { background: #fef2f2; transform: translateX(2px); }
+.lig-nav-logout .lig-nav-ic {
+  background: #fef2f2;
+  border-color: #fbdada;
+  color: #dc2626;
+}
