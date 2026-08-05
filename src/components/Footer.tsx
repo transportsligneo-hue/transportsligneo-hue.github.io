@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { openCookiePreferences } from "@/lib/cookie-consent";
 
 const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
