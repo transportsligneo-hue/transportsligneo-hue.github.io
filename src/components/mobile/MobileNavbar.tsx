@@ -47,34 +47,6 @@ export default function MobileNavbar() {
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const listRef = useRef<HTMLUListElement | null>(null);
-  const [slider, setSlider] = useState({ left: 0, width: 0, height: 0 });
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const update = () => {
-      const active = list.querySelector<HTMLElement>(".mnav-link-active");
-      if (!active) {
-        setSlider((s) => ({ ...s, width: 0 }));
-        return;
-      }
-      setSlider({
-        left: active.offsetLeft,
-        width: active.offsetWidth,
-        height: active.offsetHeight,
-      });
-    };
-    const raf = requestAnimationFrame(update);
-    window.addEventListener("resize", update);
-    list.addEventListener("scroll", update, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", update);
-      list.removeEventListener("scroll", update);
-    };
-  }, [pathname]);
-
   useEffect(() => {
     lastY.current = window.scrollY;
     const onScroll = () => {
@@ -106,7 +78,7 @@ export default function MobileNavbar() {
         hidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="mnav-bar">
+      <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2">
             <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 shrink-0 object-contain" />
@@ -119,37 +91,30 @@ export default function MobileNavbar() {
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <a href="tel:+33782456181" className="mnav-phone" aria-label="Appeler 07 82 45 61 81">
-              <Phone size={14} strokeWidth={2.4} />
+            <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact" aria-label="Appeler 07 82 45 61 81">
+              <span className="nav-phone-icon">
+                <Phone size={13} strokeWidth={2.4} />
+                <span className="nav-phone-pulse" aria-hidden="true" />
+              </span>
             </a>
-            <button onClick={goEspace} className="mnav-cta" type="button">
+            <button onClick={goEspace} className="r4-btn-connect mnav-connect-compact" type="button">
               <User size={12} />
               {isAuthenticated ? "Espace" : "Connexion"}
             </button>
           </div>
         </div>
-        <nav>
-          <ul ref={listRef} className="relative flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
-            <span
-              className="mnav-slider"
-              aria-hidden="true"
-              style={{
-                opacity: slider.width ? 1 : 0,
-                width: slider.width,
-                transform: `translateX(${slider.left}px)`,
-                height: slider.height,
-              }}
-            />
+        <nav className="px-3 pb-2">
+          <ul className="r4-nav-pill mnav-pill no-scrollbar">
             {links.map((l) => {
               const accent =
-                l.accent === "b2b" ? " mnav-link-b2b" : l.accent === "driver" ? " mnav-link-driver" : "";
+                l.accent === "b2b" ? " nav-accent-purple" : l.accent === "driver" ? " nav-accent-green" : "";
               return (
-                <li key={l.to} className="relative shrink-0">
+                <li key={l.to}>
                   <Link
                     to={l.to}
                     activeOptions={{ exact: true }}
-                    activeProps={{ className: `mnav-link mnav-link-active${accent}` }}
-                    inactiveProps={{ className: `mnav-link${accent}` }}
+                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accent}` }}
+                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accent}` }}
                   >
                     {l.accent === "driver" && <SteeringIcon />}
                     {l.label}
