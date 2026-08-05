@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
+import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+
 
 /**
  * Vroomy — assistant flottant de Transports Ligneo (site public).
