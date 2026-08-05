@@ -4075,9 +4075,9 @@
    ========================================================================== */
 .lig-nav {
   --lig-nav-accent: var(--org-accent, #2f5fff);
-  --lig-nav-accent-2: var(--org-accent-strong, #1c3fc4);
+  --lig-nav-accent-2: var(--org-accent-hover, #1c3fc4);
   --lig-nav-accent-soft: var(--org-accent-soft, rgba(47, 95, 255, .1));
-  --lig-nav-accent-glow: var(--org-accent-glow, rgba(47, 95, 255, .45));
+  --lig-nav-accent-glow: color-mix(in oklab, var(--lig-nav-accent) 45%, transparent);
 }
 .lig-nav-item {
   position: relative;
