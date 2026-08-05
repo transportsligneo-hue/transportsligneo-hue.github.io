@@ -345,14 +345,25 @@ export default function MobileHomeScreen() {
         </Link>
         <button
           type="button"
-          aria-label="Ouvrir l'assistant"
+          aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
           onClick={() => window.dispatchEvent(new CustomEvent("ligneo:assistant-open"))}
-          className="relative z-[1] mh-ring w-[52px] h-[52px] rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform"
-          style={{ background: "linear-gradient(135deg,#2f5fff,#4f8cff)", boxShadow: "0 10px 24px rgba(47,95,255,0.5)" }}
+          className="relative z-[1] mh-ring w-[58px] h-[58px] rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform overflow-hidden"
+          style={{
+            background: "radial-gradient(circle at 35% 30%, #5b8bff, #3d6bff 60%, #182655 100%)",
+            boxShadow: "0 10px 26px rgba(47,95,255,0.55), inset 0 0 0 1px rgba(255,255,255,0.12)",
+          }}
         >
-          <Bot size={24} className="text-white" strokeWidth={2} />
+          <img
+            src={vroomyMascotte.url}
+            alt="Vroomy"
+            width={44}
+            height={44}
+            className="object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+            loading="lazy"
+            decoding="async"
+          />
           <span
-            className="absolute -top-1 -right-1 w-[19px] h-[19px] rounded-full text-[10px] font-extrabold flex items-center justify-center border-2"
+            className="absolute -top-1 -right-1 w-[20px] h-[20px] rounded-full text-[10px] font-extrabold flex items-center justify-center border-2"
             style={{ background: "#d9b54a", color: "#061238", borderColor: "#0a1638" }}
           >
             1
