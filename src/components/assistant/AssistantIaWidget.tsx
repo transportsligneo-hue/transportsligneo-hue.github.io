@@ -84,6 +84,9 @@ export default function AssistantIaWidget() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [handoff, setHandoff] = useState(false);
+  const [profil, setProfil] = useState<Profil | null>(null);
+  const [prenom, setPrenom] = useState<string | null>(null);
+  const [showCaps, setShowCaps] = useState(true);
   const [leadSent, setLeadSent] = useState(false);
   const [lead, setLead] = useState({ nom: "", telephone: "" });
   const convId = useRef<string | null>(null);
@@ -102,6 +105,39 @@ export default function AssistantIaWidget() {
       inputRef.current?.focus();
     }
   }, [open]);
+
+  /* Détection automatique du profil réel si le visiteur est connecté */
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user || !alive) return;
+      const [{ data: conv }, { data: prof }] = await Promise.all([
+        supabase.from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("prenom").eq("id", user.id).maybeSingle(),
+      ]);
+      if (!alive) return;
+      setProfil(conv?.id ? "convoyeur" : "client");
+      const p = (prof as { prenom?: string } | null)?.prenom;
+      if (p) setPrenom(p);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  /* Apparition proactive sur les pages tarifs / estimation */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!PROACTIVE_PATHS.some((p) => pathname.startsWith(p))) return;
+    if (window.sessionStorage.getItem("ligneo_vroomy_proactive") === "1") return;
+    const t = window.setTimeout(() => {
+      window.sessionStorage.setItem("ligneo_vroomy_proactive", "1");
+      setOpen(true);
+    }, 18000);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
@@ -127,12 +163,15 @@ export default function AssistantIaWidget() {
             conversation_id: convId.current,
             message: value,
             page: typeof window !== "undefined" ? window.location.pathname : undefined,
+            profil: profil ?? undefined,
+            prenom: prenom ?? undefined,
           }),
         });
         const data = (await res.json()) as {
           conversation_id?: string;
           reply?: string;
           handoff?: boolean;
+          cards?: VroomyCard[];
           error?: string;
         };
         if (data.conversation_id) convId.current = data.conversation_id;
@@ -143,6 +182,7 @@ export default function AssistantIaWidget() {
             content:
               data.reply ??
               "Panne sèche de mon côté 😅 Je ne parviens pas à répondre pour le moment. Vous pouvez appeler le 07 82 45 61 81.",
+            cards: data.cards && data.cards.length > 0 ? data.cards : undefined,
           },
         ]);
         if (data.handoff) setHandoff(true);
@@ -161,7 +201,7 @@ export default function AssistantIaWidget() {
         inputRef.current?.focus();
       }
     },
-    [typing],
+    [typing, profil, prenom],
   );
 
   const sendLead = useCallback(async () => {
