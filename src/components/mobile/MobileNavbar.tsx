@@ -91,14 +91,14 @@ export default function MobileNavbar() {
             </span>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <a
               href="tel:+33782456181"
               className="nav-phone-block mnav-phone-compact mnav-phone-dynamic"
               aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
             >
               <span className="nav-phone-icon">
-                <Phone size={14} strokeWidth={2.4} />
+                <Phone size={13} strokeWidth={2.4} />
                 <span className="nav-phone-pulse" aria-hidden="true" />
                 <span className="nav-phone-pulse nav-phone-pulse-delay" aria-hidden="true" />
               </span>
