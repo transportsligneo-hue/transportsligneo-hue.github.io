@@ -514,58 +514,92 @@ function FeatureItem({ icon, title, sub }: { icon: React.ReactNode; title: strin
   return (
     <div className="flex flex-col items-center gap-1.5 flex-1">
       <span
-        className="w-[38px] h-[38px] rounded-full border border-[rgba(122,163,255,0.35)] flex items-center justify-center"
+        className="mh-ring w-[52px] h-[52px] rounded-full border border-[rgba(122,163,255,0.35)] flex items-center justify-center"
         style={{
-          background: "linear-gradient(135deg, rgba(63,123,255,0.32), rgba(47,95,255,0.06))",
-          boxShadow: "0 0 12px rgba(63,123,255,0.25)",
+          background: "rgba(63,123,255,0.12)",
+          boxShadow: "0 0 12px rgba(63,123,255,0.2)",
         }}
       >
         {icon}
       </span>
-      <div className="text-[11px] font-bold text-white">{title}</div>
-      <div className="text-[9px] text-[#9aa6c9]">{sub}</div>
+      <div className="text-[12.5px] font-bold text-white mt-1">{title}</div>
+      <div className="text-[10px] text-[#9aa6c9] text-center">{sub}</div>
     </div>
   );
 }
+
+const QUICK_TONES: Record<string, { badge: string; shadow: string; halo: string }> = {
+  blue: {
+    badge: "linear-gradient(135deg,#2f5fff,#4f8cff)",
+    shadow: "0 8px 18px rgba(47,95,255,0.4)",
+    halo: "radial-gradient(circle, #2f5fff, transparent 70%)",
+  },
+  gold: {
+    badge: "linear-gradient(135deg,#e8c976,#d9b54a)",
+    shadow: "0 8px 18px rgba(217,181,74,0.35)",
+    halo: "radial-gradient(circle, #d9b54a, transparent 70%)",
+  },
+  green: {
+    badge: "linear-gradient(135deg,#6ee0b8,#4ad0a0)",
+    shadow: "0 8px 18px rgba(74,208,160,0.35)",
+    halo: "radial-gradient(circle, #4ad0a0, transparent 70%)",
+  },
+};
 
 function QuickCard({
   icon,
   title,
   sub,
+  tone = "blue",
   onClick,
 }: {
   icon: React.ReactNode;
   title: string;
   sub: string;
+  tone?: "blue" | "gold" | "green";
   onClick: () => void;
 }) {
+  const t = QUICK_TONES[tone] ?? QUICK_TONES.blue;
   return (
     <button
       onClick={onClick}
-      className="shrink-0 w-[130px] text-left rounded-[18px] p-4 border border-[rgba(122,163,255,0.18)] bg-white/[0.04] active:scale-[0.97] transition-transform"
+      className="mh-snap-item relative overflow-hidden shrink-0 w-[150px] text-left rounded-[20px] px-4 py-5 border border-[rgba(122,163,255,0.2)] bg-white/[0.04] active:scale-[0.96] transition-transform"
     >
       <span
-        className="w-8 h-8 rounded-full border border-[rgba(122,163,255,0.4)] flex items-center justify-center mb-3"
-        style={{ background: "linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.08))" }}
+        aria-hidden
+        className="absolute -top-[30px] -right-[30px] w-[90px] h-[90px] rounded-full opacity-50 blur-[4px]"
+        style={{ background: t.halo }}
+      />
+      <span
+        className="relative z-[1] w-[42px] h-[42px] rounded-[13px] flex items-center justify-center mb-3.5"
+        style={{ background: t.badge, boxShadow: t.shadow }}
       >
         {icon}
       </span>
-      <div className="text-[12.5px] font-bold text-white mb-0.5">{title}</div>
-      <div className="text-[9.8px] text-[#9aa6c9] leading-[1.35]">{sub}</div>
+      <div className="relative z-[1] text-[14px] font-bold text-white mb-1">{title}</div>
+      <div className="relative z-[1] text-[11px] text-[#9aa6c9] leading-[1.35]">{sub}</div>
     </button>
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
+function MiniStat({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex-1 flex items-center justify-between rounded-[16px] border border-[rgba(122,163,255,0.16)] bg-white/[0.035] px-3.5 py-3">
-      <span className="text-[8.5px] uppercase tracking-[0.05em] font-semibold text-[#9aa6c9]">{label}</span>
-      <span className="text-[15px] font-bold tabular-nums text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        {value}
-      </span>
+    <div className="h-full flex items-center gap-3 rounded-[16px] border border-[rgba(122,163,255,0.2)] bg-white/[0.04] px-3.5 py-3">
+      {icon ? (
+        <span className="w-[34px] h-[34px] shrink-0 rounded-[10px] border border-[rgba(122,163,255,0.3)] bg-[rgba(63,123,255,0.14)] flex items-center justify-center">
+          {icon}
+        </span>
+      ) : null}
+      <div className="min-w-0">
+        <div className="text-[9.5px] uppercase tracking-[0.05em] font-bold text-[#9aa6c9] mb-0.5">{label}</div>
+        <div className="text-[13px] font-bold leading-[1.2] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          {value}
+        </div>
+      </div>
     </div>
   );
 }
+
 
 /* ==== Drawer menu ==== */
 function MobileMenuDrawer({
