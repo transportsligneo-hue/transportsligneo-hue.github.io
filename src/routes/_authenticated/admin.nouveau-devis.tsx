@@ -73,6 +73,22 @@ function Field({
   );
 }
 
+const OPTIONS_LIST = [
+  { id: "recharge", label: "Recharge / plein de carburant" },
+  { id: "mise_en_main", label: "Mise en main du véhicule" },
+  { id: "lavage_ext", label: "Lavage extérieur" },
+  { id: "lavage_int", label: "Lavage intérieur" },
+  { id: "lavage_full", label: "Lavage extérieur + intérieur" },
+] as const;
+
+const TRAJET_TYPES = [
+  "Aller simple",
+  "Aller-retour",
+  "Livraison + restitution",
+] as const;
+
+const PV_OPTIONS = ["Aucun", "WelcomeAuto", "Model"] as const;
+
 function AdminNouveauDevisPage() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRow[]>([]);
@@ -84,6 +100,19 @@ function AdminNouveauDevisPage() {
   const [arrivee, setArrivee] = useState("");
   const [vehicule, setVehicule] = useState("");
   const [montant, setMontant] = useState("");
+  const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
+  const [immat, setImmat] = useState("");
+  const [modele, setModele] = useState("");
+  const [options, setOptions] = useState<string[]>([]);
+  const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
+  const [destNom, setDestNom] = useState("");
+  const [destTel, setDestTel] = useState("");
+  const [destNote, setDestNote] = useState("");
+
+  const toggleOption = (label: string) =>
+    setOptions((prev) =>
+      prev.includes(label) ? prev.filter((o) => o !== label) : [...prev, label],
+    );
 
   const [generating, setGenerating] = useState(false);
   const [created, setCreated] = useState<CreatedDevis | null>(null);
@@ -151,6 +180,19 @@ function AdminNouveauDevisPage() {
     return Number.isFinite(n) ? n : NaN;
   }, [montant]);
 
+  const pvLabel = pvDigital === "Aucun" ? null : pvDigital;
+
+  const recapMessage = [
+    `Type de trajet : ${typeTrajet}`,
+    immat ? `Immatriculation : ${immat}` : null,
+    options.length ? `Options : ${options.join(", ")}` : null,
+    pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
+    destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
+    destNote ? `Note livraison : ${destNote}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const buildPdfData = (numero: string): DevisData => ({
     numero,
     nom: client?.nom ?? "",
@@ -163,6 +205,14 @@ function AdminNouveauDevisPage() {
     depart,
     arrivee,
     marque: vehicule || null,
+    modele: modele || null,
+    immatriculation: immat || null,
+    option_trajet: typeTrajet,
+    options,
+    pv_digital: pvLabel,
+    destinataire_nom: destNom || null,
+    destinataire_tel: destTel || null,
+    destinataire_note: destNote || null,
     prestation: "Convoyage automobile",
     prix_estime: prix,
     validite_jours: 15,
@@ -187,6 +237,12 @@ function AdminNouveauDevisPage() {
           depart: depart.trim(),
           arrivee: arrivee.trim(),
           marque: vehicule || null,
+          modele: modele || null,
+          option_trajet: typeTrajet,
+          contact_arrivee_nom: destNom || null,
+          contact_arrivee_tel: destTel || null,
+          contact_arrivee_note: destNote || null,
+          message: recapMessage || null,
           prestation: "Convoyage automobile",
           prix_estime: prix,
           statut: "brouillon",
@@ -376,9 +432,114 @@ function AdminNouveauDevisPage() {
           <div className="space-y-4">
             <Field label="Adresse de départ" value={depart} onChange={setDepart} placeholder="Ex : 6 rue du pont libert, 37520 La Riche" />
             <Field label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                Type de trajet
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TRAJET_TYPES.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTypeTrajet(t)}
+                    className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
+                      typeTrajet === t
+                        ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                        : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+          </div>
+        </Card>
+
+        {/* 3. Véhicule */}
+        <Card>
+          <div className="mb-4 flex items-center gap-2.5">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
+              3
+            </span>
+            <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
+            <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
+            <Field label="Immatriculation" value={immat} onChange={setImmat} placeholder="AB-123-CD" />
+          </div>
+        </Card>
+
+        {/* 4. Destinataire */}
+        <Card>
+          <div className="mb-4 flex items-center gap-2.5">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
+              4
+            </span>
+            <h3 className="text-[15px] font-bold text-pro-text">Client livré (destinataire)</h3>
+          </div>
+          <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Véhicule" value={vehicule} onChange={setVehicule} placeholder="Modèle, plaque…" />
-              <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+              <Field label="Nom du destinataire" value={destNom} onChange={setDestNom} placeholder="Nom / société" />
+              <Field label="Téléphone" value={destTel} onChange={setDestTel} placeholder="06 12 34 56 78" />
+            </div>
+            <Field label="Note de livraison" value={destNote} onChange={setDestNote} placeholder="Étage, code, horaires…" />
+          </div>
+        </Card>
+
+        {/* 5. Options */}
+        <Card>
+          <div className="mb-4 flex items-center gap-2.5">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
+              5
+            </span>
+            <h3 className="text-[15px] font-bold text-pro-text">Options de prestation</h3>
+          </div>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {OPTIONS_LIST.map((o) => {
+              const checked = options.includes(o.label);
+              return (
+                <label
+                  key={o.id}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] font-medium transition ${
+                    checked
+                      ? "border-pro-accent bg-pro-accent/5 text-pro-text"
+                      : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleOption(o.label)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  {o.label}
+                </label>
+              );
+            })}
+          </div>
+
+          <div className="mt-5">
+            <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+              PV de livraison digitalisé
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PV_OPTIONS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPvDigital(p)}
+                  className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
+                    pvDigital === p
+                      ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                      : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
             </div>
           </div>
         </Card>

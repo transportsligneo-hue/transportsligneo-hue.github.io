@@ -27,6 +27,16 @@ export interface DevisData {
   carburant?: string | null;
   prestation?: string | null;
   option_trajet?: string | null;
+  /** Immatriculation du vehicule convoye */
+  immatriculation?: string | null;
+  /** Options additionnelles cochees (recharge, lavage, mise en main...) */
+  options?: string[] | null;
+  /** PV de livraison digitalise (WelcomeAuto / Model) */
+  pv_digital?: string | null;
+  /** Destinataire / client livre */
+  destinataire_nom?: string | null;
+  destinataire_tel?: string | null;
+  destinataire_note?: string | null;
   date_souhaitee?: string | null;
   heure_souhaitee?: string | null;
   prix_estime: number;
@@ -350,6 +360,15 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   const details = [
     `Prise en charge du vehicule a ${d.depart.split(",")[0]}`,
     `Livraison du vehicule a ${d.arrivee.split(",")[0]}`,
+    ...(d.option_trajet ? [`Type de trajet : ${d.option_trajet}`] : []),
+    ...(d.immatriculation || d.marque
+      ? [`Vehicule : ${[d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")}`]
+      : []),
+    ...(d.destinataire_nom
+      ? [`Destinataire : ${[d.destinataire_nom, d.destinataire_tel].filter(Boolean).join(" - ")}`]
+      : []),
+    ...(d.options ?? []),
+    ...(d.pv_digital ? [`PV de livraison digitalise : ${d.pv_digital}`] : []),
     "Peages inclus",
     "Carburant inclus",
     "Assurance tous risques incluse",
