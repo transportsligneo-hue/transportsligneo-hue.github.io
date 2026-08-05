@@ -47,6 +47,33 @@ export default function MobileNavbar() {
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const [slider, setSlider] = useState({ left: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const update = () => {
+      const active = list.querySelector<HTMLElement>(".mnav-link-active");
+      if (!active) {
+        setSlider((s) => ({ ...s, width: 0 }));
+        return;
+      }
+      setSlider({
+        left: active.offsetLeft,
+        width: active.offsetWidth,
+        height: active.offsetHeight,
+      });
+    };
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("resize", update);
+    list.addEventListener("scroll", update, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", update);
+      list.removeEventListener("scroll", update);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     lastY.current = window.scrollY;
@@ -102,12 +129,22 @@ export default function MobileNavbar() {
           </div>
         </div>
         <nav>
-          <ul className="flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
+          <ul ref={listRef} className="relative flex gap-1.5 px-3 pb-2 overflow-x-auto no-scrollbar">
+            <span
+              className="mnav-slider"
+              aria-hidden="true"
+              style={{
+                opacity: slider.width ? 1 : 0,
+                width: slider.width,
+                transform: `translateX(${slider.left}px)`,
+                height: slider.height,
+              }}
+            />
             {links.map((l) => {
               const accent =
                 l.accent === "b2b" ? " mnav-link-b2b" : l.accent === "driver" ? " mnav-link-driver" : "";
               return (
-                <li key={l.to} className="shrink-0">
+                <li key={l.to} className="relative shrink-0">
                   <Link
                     to={l.to}
                     activeOptions={{ exact: true }}
