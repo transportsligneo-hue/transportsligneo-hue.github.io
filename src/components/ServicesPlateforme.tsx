@@ -3,9 +3,11 @@ import {
   MapPin, Bell, History, LineChart, UserCheck, BellRing,
   Camera, PenLine, FolderCheck, ScanLine, ShieldCheck, Search, AlertTriangle,
   LayoutDashboard, Building2, Receipt, Headphones, PhoneCall,
+  Bot, Code2, Wrench, Calculator, IdCard, Hash,
 } from "lucide-react";
 
 type Feat = { Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; label: string };
+
 
 const CATS: { title: string; items: Feat[] }[] = [
   {
@@ -19,8 +21,10 @@ const CATS: { title: string; items: Feat[] }[] = [
       { Icon: Users, label: "Multi-comptes (Perso/Pro/Flotte)" },
       { Icon: Star, label: "Adresses favorites" },
       { Icon: BadgeEuro, label: "Tarifs transparents" },
+      { Icon: Hash, label: "Numéro de commande (PO) archivé" },
     ],
   },
+
   {
     title: "Suivi & traçabilité",
     items: [
@@ -52,8 +56,25 @@ const CATS: { title: string; items: Feat[] }[] = [
       { Icon: Receipt, label: "Facturation consolidée" },
       { Icon: Headphones, label: "Support dédié 7j/7" },
       { Icon: PhoneCall, label: "Joignable rapidement" },
+      { Icon: IdCard, label: "Gestion des conducteurs par flotte" },
     ],
   },
+  {
+    title: "Gestion de parc & pilotage",
+    items: [
+      { Icon: Wrench, label: "Gestion de parc avec alertes (CT, entretien, documents)" },
+      { Icon: Calculator, label: "TCO par véhicule" },
+      { Icon: LineChart, label: "Suivi des coûts et des mouvements" },
+    ],
+  },
+  {
+    title: "Intelligence & intégrations",
+    items: [
+      { Icon: Bot, label: "Assistant IA 24/7" },
+      { Icon: Code2, label: "API développeurs" },
+    ],
+  },
+
 ];
 
 export default function ServicesPlateforme() {

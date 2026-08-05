@@ -106,20 +106,16 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
           {headerBlock}
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <nav className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
           {items.map((item) => {
             const active = isActive(item);
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                  active
-                    ? "bg-pro-accent/10 text-pro-accent font-medium"
-                    : "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text"
-                }`}
+                className={`lig-nav-item${active ? " is-active" : ""}`}
               >
-                <item.icon size={17} className={active ? "text-pro-accent" : "text-pro-muted"} />
+                <span className="lig-nav-ic"><item.icon size={15} /></span>
                 <span className="flex-1">{item.label}</span>
                 {item.badge}
               </Link>
@@ -127,15 +123,13 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
           })}
         </nav>
 
-        <div className="p-3 border-t border-pro-border">
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600 transition-colors"
-          >
-            <LogOut size={17} />
+        <div className="lig-nav p-3 border-t border-pro-border">
+          <button onClick={() => logout()} className="lig-nav-logout">
+            <span className="lig-nav-ic"><LogOut size={15} /></span>
             Déconnexion
           </button>
         </div>
+
       </aside>
 
       {/* === Mobile header === */}
@@ -179,7 +173,7 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
 
 
 
-            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+            <nav className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
               {items.map((item) => {
                 const active = isActive(item);
                 return (
@@ -187,28 +181,23 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
                     key={item.to}
                     to={item.to}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm ${
-                      active
-                        ? "bg-pro-accent/10 text-pro-accent font-medium"
-                        : "text-pro-text-soft hover:bg-pro-bg-soft"
-                    }`}
+                    className={`lig-nav-item${active ? " is-active" : ""}`}
                   >
-                    <item.icon size={17} className={active ? "text-pro-accent" : "text-pro-muted"} />
-                    <span>{item.label}</span>
+                    <span className="lig-nav-ic"><item.icon size={15} /></span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge}
                   </Link>
                 );
               })}
             </nav>
 
-            <div className="p-3 border-t border-pro-border">
-              <button
-                onClick={() => logout()}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600"
-              >
-                <LogOut size={17} />
+            <div className="lig-nav p-3 border-t border-pro-border">
+              <button onClick={() => logout()} className="lig-nav-logout">
+                <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion
               </button>
             </div>
+
           </aside>
         </>
       )}

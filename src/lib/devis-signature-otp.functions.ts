@@ -219,12 +219,17 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
       .single();
     if (insertErr) throw new Error(`Enregistrement acceptation échoué : ${insertErr.message}`);
 
-    // Verrouille le devis
-    const { error: updErr } = await supabase
+    // Verrouille le devis — écriture privilégiée : le client n'a pas de policy
+    // UPDATE sur `devis` (sinon l'update ne touchait aucune ligne silencieusement).
+    // La propriété du devis est déjà validée par le SELECT sous RLS ci-dessus.
+    const { data: lockedRows, error: updErr } = await supabaseAdmin
       .from("devis")
       .update({ locked_at: now.toISOString(), accepted_at: now.toISOString(), statut: "accepte" })
-      .eq("id", devis.id);
+      .eq("id", devis.id)
+      .select("id");
     if (updErr) throw new Error(`Verrouillage du devis échoué : ${updErr.message}`);
+    if (!lockedRows || lockedRows.length === 0) throw new Error("Verrouillage du devis échoué");
+
 
     // Notif admin (best-effort)
     try {
@@ -288,11 +293,15 @@ export const attachSignedDevisPdf = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error || !acc) throw new Error("Preuve d'acceptation introuvable");
 
-    const { error: updErr } = await supabase
+    // Écriture privilégiée : le client n'a pas de policy UPDATE sur devis_acceptations.
+    // La ligne ciblée lui appartient (filtre client_user_id sous RLS ci-dessus).
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: updErr } = await supabaseAdmin
       .from("devis_acceptations")
       .update({ pdf_url: data.pdfPath })
       .eq("id", acc.id);
     if (updErr) throw new Error(`Enregistrement du PDF échoué : ${updErr.message}`);
+
     return { ok: true };
   });
 
@@ -323,11 +332,16 @@ export const refuseDevis = createServerFn({ method: "POST" })
     const now = new Date().toISOString();
     const motif = data.motif?.trim() || null;
 
-    const { error: updErr } = await supabase
+    // Écriture privilégiée (pas de policy UPDATE client sur `devis`)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: refusedRows, error: updErr } = await supabaseAdmin
       .from("devis")
       .update({ statut: "refuse", refused_at: now, refus_motif: motif })
-      .eq("id", devis.id);
+      .eq("id", devis.id)
+      .select("id");
     if (updErr) throw new Error(`Refus impossible : ${updErr.message}`);
+    if (!refusedRows || refusedRows.length === 0) throw new Error("Refus impossible");
+
 
     // Historique (best-effort — la table peut avoir un trigger auto)
     try {

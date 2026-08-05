@@ -92,15 +92,22 @@ export const acceptDevis = createServerFn({ method: "POST" })
       throw new Error(`Enregistrement acceptation échoué : ${insertErr.message}`);
     }
 
-    // 2. Verrouille le devis + statut accepté (le devis ne disparaît jamais)
+    // 2. Verrouille le devis + statut accepté (écriture privilégiée : aucune policy
+    //    UPDATE côté client sur `devis` — la propriété est validée par le SELECT RLS ci-dessus)
     const now = new Date().toISOString();
-    const { error: updErr } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: lockedRows, error: updErr } = await supabaseAdmin
       .from("devis")
       .update({ locked_at: now, accepted_at: now, statut: "accepte" })
-      .eq("id", devis.id);
+      .eq("id", devis.id)
+      .select("id");
     if (updErr) {
       throw new Error(`Verrouillage du devis échoué : ${updErr.message}`);
     }
+    if (!lockedRows || lockedRows.length === 0) {
+      throw new Error("Verrouillage du devis échoué");
+    }
+
 
     // 3. Notification admin (best-effort, jamais bloquant) + push
     try {

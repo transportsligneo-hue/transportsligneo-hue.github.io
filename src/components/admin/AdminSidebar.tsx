@@ -42,9 +42,9 @@ export function AdminSidebar({ items, children }: Props) {
   const groupOrder = Object.keys(groups);
 
   const renderNav = (onClick?: () => void) => (
-    <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
+    <nav className="lig-nav flex-1 p-3 space-y-5 overflow-y-auto">
       {groupOrder.map((g) => (
-        <div key={g} className="space-y-0.5">
+        <div key={g} className="space-y-1">
           {g !== "_main" && (
             <p className="px-3 pt-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-pro-muted">
               {g}
@@ -57,16 +57,9 @@ export function AdminSidebar({ items, children }: Props) {
                 key={item.to}
                 to={item.to}
                 onClick={onClick}
-                className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  active
-                    ? "bg-pro-gold-soft text-pro-text font-semibold"
-                    : "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text"
-                }`}
+                className={`lig-nav-item${active ? " is-active" : ""}`}
               >
-                {active && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-pro-gold" />
-                )}
-                <item.icon size={17} className={active ? "text-pro-gold" : "text-pro-muted group-hover:text-pro-text"} />
+                <span className="lig-nav-ic"><item.icon size={15} /></span>
                 <span className="flex-1">{item.label}</span>
                 {item.badge}
               </Link>
@@ -76,6 +69,7 @@ export function AdminSidebar({ items, children }: Props) {
       ))}
     </nav>
   );
+
 
   return (
     <div className="admin-shell min-h-screen flex text-pro-text">
@@ -89,15 +83,13 @@ export function AdminSidebar({ items, children }: Props) {
 
         {renderNav()}
 
-        <div className="p-3 border-t border-pro-border">
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600 transition-colors"
-          >
-            <LogOut size={17} />
+        <div className="lig-nav p-3 border-t border-pro-border">
+          <button onClick={() => logout()} className="lig-nav-logout">
+            <span className="lig-nav-ic"><LogOut size={15} /></span>
             Déconnexion
           </button>
         </div>
+
       </aside>
 
       {/* === Mobile header === */}
@@ -134,15 +126,13 @@ export function AdminSidebar({ items, children }: Props) {
 
             {renderNav(() => setMobileOpen(false))}
 
-            <div className="p-3 border-t border-pro-border">
-              <button
-                onClick={() => logout()}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm text-pro-text-soft hover:bg-red-50 hover:text-red-600"
-              >
-                <LogOut size={17} />
+            <div className="lig-nav p-3 border-t border-pro-border">
+              <button onClick={() => logout()} className="lig-nav-logout">
+                <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion
               </button>
             </div>
+
           </aside>
         </>
       )}
