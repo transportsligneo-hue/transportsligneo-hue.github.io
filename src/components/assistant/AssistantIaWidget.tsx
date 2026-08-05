@@ -500,10 +500,18 @@ export default function AssistantIaWidget() {
               </div>
               <div className="vrm-roles-row">
                 <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
-                  <span aria-hidden="true">🚗</span> Client
+                  <span className="vrm-role-ico" aria-hidden="true"><Building2 size={17} strokeWidth={2} /></span>
+                  <span className="vrm-role-txt">
+                    Client
+                    <span className="vrm-role-sub">Faire convoyer un véhicule</span>
+                  </span>
                 </button>
                 <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span aria-hidden="true">🧭</span> Convoyeur
+                  <span className="vrm-role-ico" aria-hidden="true"><SteeringWheel size={17} strokeWidth={2} /></span>
+                  <span className="vrm-role-txt">
+                    Convoyeur
+                    <span className="vrm-role-sub">Trouver des missions</span>
+                  </span>
                 </button>
               </div>
             </div>
