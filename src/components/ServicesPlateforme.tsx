@@ -70,7 +70,7 @@ const CATS: { title: string; items: Feat[] }[] = [
   {
     title: "Intelligence & intégrations",
     items: [
-      { Icon: Bot, label: "Assistant IA 24/7" },
+      { Icon: Bot, label: "Vroomy, l'assistant IA Ligneo 24/7 (devis, suivi, missions)" },
       { Icon: Code2, label: "API développeurs" },
     ],
   },
