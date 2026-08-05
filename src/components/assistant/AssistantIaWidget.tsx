@@ -90,17 +90,28 @@ function fmtEur(v: unknown) {
 function VroomyCardView({ card }: { card: VroomyCard }) {
   if (card.type === "devis") {
     const d = card.data as Record<string, unknown>;
+    const trajet = `${String(d.depart)} vers ${String(d.arrivee)}`;
     return (
-      <div className="vrm-card">
+      <section className="vrm-card" aria-label={`Estimation ${trajet}`}>
         <div className="vrm-card-title">Estimation · {String(d.depart)} → {String(d.arrivee)}</div>
         <div className="vrm-card-price">{fmtEur(d.prix_ttc)} TTC</div>
         <div className="vrm-card-meta">
           {d.distance_km ? `${d.distance_km} km · ` : ""}
           {String(d.delai_estime ?? "")} · {String(d.type_livraison ?? "")}
         </div>
-      </div>
+        <button
+          type="button"
+          className="vrm-card-pdf"
+          onClick={() => downloadVroomyDevisPdf(d)}
+          aria-label={`Exporter en PDF l'estimation ${trajet}`}
+        >
+          <FileDown size={13} aria-hidden="true" />
+          Exporter en PDF
+        </button>
+      </section>
     );
   }
+
   if (card.type === "mission") {
     const d = card.data as Record<string, unknown>;
     return (
