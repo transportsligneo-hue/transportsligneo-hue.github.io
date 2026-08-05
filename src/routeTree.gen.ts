@@ -107,6 +107,7 @@ import { Route as AuthenticatedAdminNouveauDevisRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
+import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
@@ -705,6 +706,12 @@ const AuthenticatedAdminInscriptionsRoute =
     path: '/inscriptions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminInformationsLegalesRoute =
+  AuthenticatedAdminInformationsLegalesRouteImport.update({
+    id: '/informations-legales',
+    path: '/informations-legales',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHistoriqueRoute =
   AuthenticatedAdminHistoriqueRouteImport.update({
     id: '/historique',
@@ -1079,6 +1086,7 @@ export interface FileRoutesByFullPath {
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -1226,6 +1234,7 @@ export interface FileRoutesByTo {
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -1378,6 +1387,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -1533,6 +1543,7 @@ export interface FileRouteTypes {
     | '/admin/factures'
     | '/admin/formation'
     | '/admin/historique'
+    | '/admin/informations-legales'
     | '/admin/inscriptions'
     | '/admin/messages'
     | '/admin/notifications'
@@ -1680,6 +1691,7 @@ export interface FileRouteTypes {
     | '/admin/factures'
     | '/admin/formation'
     | '/admin/historique'
+    | '/admin/informations-legales'
     | '/admin/inscriptions'
     | '/admin/messages'
     | '/admin/notifications'
@@ -1831,6 +1843,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/formation'
     | '/_authenticated/admin/historique'
+    | '/_authenticated/admin/informations-legales'
     | '/_authenticated/admin/inscriptions'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/notifications'
@@ -2677,6 +2690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInscriptionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/informations-legales': {
+      id: '/_authenticated/admin/informations-legales'
+      path: '/informations-legales'
+      fullPath: '/admin/informations-legales'
+      preLoaderRoute: typeof AuthenticatedAdminInformationsLegalesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/historique': {
       id: '/_authenticated/admin/historique'
       path: '/historique'
@@ -3134,6 +3154,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
+  AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
@@ -3168,6 +3189,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
+  AuthenticatedAdminInformationsLegalesRoute:
+    AuthenticatedAdminInformationsLegalesRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
@@ -3547,13 +3570,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -118,6 +118,7 @@ function AdminLayout() {
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
     { to: "/admin/paiements", label: "Paiements", icon: CreditCard, group: "Finance" },
+    { to: "/admin/informations-legales", label: "Informations légales", icon: Building2, group: "Finance" },
 
     // Système
     { to: "/admin/historique", label: "Historique", icon: History, group: "Système" },

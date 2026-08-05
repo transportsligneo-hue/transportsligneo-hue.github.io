@@ -1,0 +1,638 @@
+import jsPDF from "jspdf";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import {
+  DOC_CREAM,
+  DOC_GOLD,
+  DOC_LINE,
+  DOC_MUTED,
+  DOC_NAVY,
+  DOC_TEXT,
+  DOC_WHITE,
+  dateFmt,
+  drawDocHeader,
+  drawDocLegalFooter,
+  drawKeyValueRow,
+  drawSectionTitle,
+  fetchCompanyInfo,
+  loadImageAsDataUrl,
+  type CompanyInfo,
+} from "@/lib/doc-branding";
+
+async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const c = company ?? (await fetchCompanyInfo());
+  const logo = await loadImageAsDataUrl(logoLigneo);
+  drawDocHeader(doc, { pageW, logoData: logo, title, numero, subtitle, company: c });
+  return { doc, pageW, pageH, company: c };
+}
+
+function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, right: string) {
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.rect(14, y, (pageW - 32) / 2, 26, "S");
+  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, 26, "S");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text(left, 18, y + 6);
+  doc.text(right, pageW / 2 + 6, y + 6);
+}
+
+/* ------------------------------------------------------------------ */
+/* 04 — FICHE DE MISSION                                               */
+/* ------------------------------------------------------------------ */
+
+export interface FicheMissionData {
+  numero: string;
+  vehicule_marque?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_type?: string | null;
+  immatriculation?: string | null;
+  vin?: string | null;
+  carburant?: string | null;
+  boite?: string | null;
+  enlevement_adresse?: string | null;
+  enlevement_contact?: string | null;
+  enlevement_creneau?: string | null;
+  enlevement_instructions?: string | null;
+  livraison_adresse?: string | null;
+  livraison_contact?: string | null;
+  livraison_creneau?: string | null;
+  livraison_instructions?: string | null;
+  convoyeur_nom?: string | null;
+  convoyeur_tel?: string | null;
+  notes?: string | null;
+}
+
+export async function generateFicheMissionPdf(d: FicheMissionData, company?: CompanyInfo | null): Promise<Blob> {
+  const { doc, pageW, pageH, company: c } = await newDoc(
+    "Fiche de mission",
+    d.numero,
+    "À conserver durant toute la durée du convoyage",
+    company,
+  );
+  const w = pageW - 28;
+  let y = 56;
+
+  y = drawSectionTitle(doc, pageW, y, "Véhicule à convoyer");
+  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" — "));
+  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.immatriculation || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "N° de série (VIN)", d.vin || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Kilométrage au départ", "______________ km");
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Enlèvement");
+  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.enlevement_adresse || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.enlevement_contact || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.enlevement_creneau || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.enlevement_instructions || "—");
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Livraison");
+  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.livraison_adresse || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.livraison_contact || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.livraison_creneau || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.livraison_instructions || "—");
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Convoyeur assigné");
+  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Téléphone", d.convoyeur_tel || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Assistance 24/7", c?.telephone || "—");
+
+  y += 5;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("DOCUMENTS À EMPORTER PAR LE CONVOYEUR", 14, y);
+  y += 5;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_TEXT);
+  doc.setFontSize(7.5);
+  doc.text(
+    "[  ] Permis de conduire     [  ] Pièce d'identité     [  ] Ordre de mission (ce document)     [  ] Constat amiable     [  ] Attestation RC Pro",
+    14,
+    y,
+  );
+
+  y += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("NOTES DE MISSION", 14, y);
+  y += 3;
+  doc.setDrawColor(...DOC_LINE);
+  doc.rect(14, y, w, 18, "S");
+  if (d.notes) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...DOC_TEXT);
+    doc.text(doc.splitTextToSize(d.notes, w - 8).slice(0, 4), 18, y + 5);
+  }
+  y += 23;
+
+  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)");
+  drawDocLegalFooter(doc, pageW, pageH, c);
+  return doc.output("blob");
+}
+
+/* ------------------------------------------------------------------ */
+/* 03 — ATTESTATION DE PASSAGE À VIDE                                  */
+/* ------------------------------------------------------------------ */
+
+export interface PassageAVideData {
+  numero: string;
+  convoyeur_nom?: string | null;
+  convoyeur_permis?: string | null;
+  convoyeur_statut?: string | null;
+  convoyeur_siret?: string | null;
+  vehicule_type?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_immat?: string | null;
+  motif?: string | null;
+  depart?: string | null;
+  arrivee?: string | null;
+  date_trajet?: string | null;
+  heures?: string | null;
+  distance_km?: number | null;
+  mission_ref?: string | null;
+}
+
+export async function generatePassageAVidePdf(d: PassageAVideData, company?: CompanyInfo | null): Promise<Blob> {
+  const { doc, pageW, pageH, company: c } = await newDoc(
+    "Attestation de passage à vide",
+    d.numero,
+    "Trajet sans véhicule client transporté",
+    company,
+  );
+  const w = pageW - 28;
+  let y = 58;
+
+  y = drawSectionTitle(doc, pageW, y, "Identité du conducteur");
+  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "N° de permis", d.convoyeur_permis || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Statut", d.convoyeur_statut || "Convoyeur partenaire indépendant");
+  y = drawKeyValueRow(doc, 14, y, w, "N° SIRET", d.convoyeur_siret || "—");
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Véhicule utilisé pour le trajet à vide");
+  y = drawKeyValueRow(doc, 14, y, w, "Type de véhicule", d.vehicule_type || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", d.vehicule_modele || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.vehicule_immat || "—");
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Détail du trajet");
+  y = drawKeyValueRow(doc, 14, y, w, "Motif du trajet à vide", d.motif || "—", { height: 10 });
+  y = drawKeyValueRow(doc, 14, y, w, "Lieu de départ", d.depart || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Lieu d'arrivée", d.arrivee || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Date du trajet", dateFmt(d.date_trajet));
+  y = drawKeyValueRow(doc, 14, y, w, "Heures départ / arrivée", d.heures || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Distance parcourue", d.distance_km ? `${d.distance_km} km` : "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Mission liée", d.mission_ref || "—");
+
+  y += 6;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("OBJET DE L'ATTESTATION", 14, y);
+  y += 5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.8);
+  doc.setTextColor(...DOC_TEXT);
+  const txt =
+    "Ce document atteste que le trajet mentionné ci-dessus a été effectué sans véhicule client à bord, dans le cadre du repositionnement du convoyeur. " +
+    "Il est établi à des fins de justification auprès des organismes d'assurance, de contrôle routier ou de tout tiers intéressé, conformément aux pratiques du secteur du convoyage automobile. " +
+    (c?.assurance_mention ? `Couverture : ${c.assurance_mention}.` : "");
+  doc.text(doc.splitTextToSize(txt, w), 14, y);
+  y += 18;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
+  y += 4;
+  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`);
+
+  drawDocLegalFooter(doc, pageW, pageH, c);
+  return doc.output("blob");
+}
+
+/* ------------------------------------------------------------------ */
+/* 05 — ÉTAT DES LIEUX PAPIER (avec schéma véhicule réaliste)          */
+/* ------------------------------------------------------------------ */
+
+/** Silhouette de voiture vue de dessus, dessinée en vectoriel (carrosserie, vitrage, roues). */
+export function drawCarTopView(doc: jsPDF, x: number, y: number, w: number, h: number) {
+  const r = Math.min(w, h) * 0.22;
+  // Carrosserie
+  doc.setFillColor(244, 246, 251);
+  doc.setDrawColor(...DOC_NAVY);
+  doc.setLineWidth(0.7);
+  doc.roundedRect(x, y, w, h, r, r, "FD");
+
+  // Roues (4)
+  doc.setFillColor(30, 34, 48);
+  const wheelW = w * 0.09;
+  const wheelH = h * 0.13;
+  const wheelInset = -wheelW * 0.35;
+  [
+    [x + wheelInset, y + h * 0.16],
+    [x + w - wheelW - wheelInset, y + h * 0.16],
+    [x + wheelInset, y + h * 0.71],
+    [x + w - wheelW - wheelInset, y + h * 0.71],
+  ].forEach(([wx, wy]) => doc.roundedRect(wx, wy, wheelW, wheelH, 1, 1, "F"));
+
+  // Pare-brise avant (trapèze approché) + lunette arrière
+  doc.setFillColor(200, 214, 236);
+  doc.setDrawColor(...DOC_NAVY);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(x + w * 0.18, y + h * 0.13, w * 0.64, h * 0.1, 1.5, 1.5, "FD");
+  doc.roundedRect(x + w * 0.18, y + h * 0.77, w * 0.64, h * 0.1, 1.5, 1.5, "FD");
+
+  // Habitacle / toit
+  doc.setFillColor(226, 232, 244);
+  doc.roundedRect(x + w * 0.14, y + h * 0.25, w * 0.72, h * 0.5, 2.5, 2.5, "FD");
+  // Ligne médiane du toit
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.line(x + w / 2, y + h * 0.27, x + w / 2, y + h * 0.73);
+  // Rétroviseurs
+  doc.setFillColor(...DOC_NAVY);
+  doc.roundedRect(x - w * 0.05, y + h * 0.3, w * 0.06, h * 0.045, 0.6, 0.6, "F");
+  doc.roundedRect(x + w * 0.99, y + h * 0.3, w * 0.06, h * 0.045, 0.6, 0.6, "F");
+  // Optiques
+  doc.setFillColor(...DOC_GOLD);
+  doc.roundedRect(x + w * 0.08, y + h * 0.03, w * 0.16, h * 0.035, 0.8, 0.8, "F");
+  doc.roundedRect(x + w * 0.76, y + h * 0.03, w * 0.16, h * 0.035, 0.8, 0.8, "F");
+  doc.setFillColor(190, 60, 60);
+  doc.roundedRect(x + w * 0.08, y + h * 0.94, w * 0.16, h * 0.03, 0.8, 0.8, "F");
+  doc.roundedRect(x + w * 0.76, y + h * 0.94, w * 0.16, h * 0.03, 0.8, 0.8, "F");
+
+  // Zones repérables
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("AVANT", x + w / 2, y - 2.5, { align: "center" });
+  doc.text("ARRIÈRE", x + w / 2, y + h + 5, { align: "center" });
+  doc.text("GAUCHE", x - 6, y + h / 2, { align: "center", angle: 90 });
+  doc.text("DROITE", x + w + 6, y + h / 2, { align: "center", angle: 270 });
+}
+
+export interface EdlPapierData {
+  numero: string;
+  client?: string | null;
+  marque_modele?: string | null;
+  immatriculation?: string | null;
+  vin?: string | null;
+  kilometrage?: string | null;
+  carburant?: string | null;
+  depart?: string | null;
+  arrivee?: string | null;
+  date_prevue?: string | null;
+  convoyeur_nom?: string | null;
+}
+
+export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyInfo | null): Promise<Blob> {
+  const { doc, pageW, pageH, company: c } = await newDoc(
+    "État des lieux",
+    d.numero,
+    "Version papier — constat contradictoire départ / arrivée",
+    company,
+  );
+  const w = pageW - 28;
+  let y = 56;
+
+  y = drawSectionTitle(doc, pageW, y, "Véhicule et mission");
+  const half = (w - 4) / 2;
+  let yl = y;
+  yl = drawKeyValueRow(doc, 14, yl, half, "Marque / modèle", d.marque_modele || "—", { labelW: 38 });
+  yl = drawKeyValueRow(doc, 14, yl, half, "Immatriculation", d.immatriculation || "—", { labelW: 38 });
+  yl = drawKeyValueRow(doc, 14, yl, half, "VIN", d.vin || "—", { labelW: 38 });
+  let yr = y;
+  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Kilométrage", d.kilometrage || "____________ km", { labelW: 38 });
+  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Carburant", d.carburant || "—", { labelW: 38 });
+  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Convoyeur", d.convoyeur_nom || "—", { labelW: 38 });
+  y = Math.max(yl, yr);
+  y = drawKeyValueRow(doc, 14, y, w, "Trajet", `${d.depart || "—"} → ${d.arrivee || "—"}`);
+  y = drawKeyValueRow(doc, 14, y, w, "Date prévue", dateFmt(d.date_prevue));
+
+  y += 4;
+  y = drawSectionTitle(doc, pageW, y, "Repérage des dommages");
+  drawCarTopView(doc, 40, y + 6, 55, 90);
+
+  // Légende / grille de constat
+  const gx = 110;
+  let gy = y + 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("Codes dommages", gx, gy);
+  gy += 4;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...DOC_TEXT);
+  ["R — Rayure", "B — Bosse / choc", "E — Éclat", "F — Fissure vitrage", "M — Manquant", "S — Salissure"].forEach((t) => {
+    doc.text(t, gx, gy);
+    gy += 4;
+  });
+
+  gy += 2;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("Observations", gx, gy);
+  gy += 2;
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.25);
+  for (let i = 0; i < 9; i++) {
+    doc.line(gx, gy + 5 + i * 5.5, pageW - 14, gy + 5 + i * 5.5);
+  }
+
+  y = y + 104;
+  y = drawSectionTitle(doc, pageW, y, "Contrôles");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_TEXT);
+  const checks = [
+    "[  ] Carte grise",
+    "[  ] Roue de secours",
+    "[  ] Gilet / triangle",
+    "[  ] Clés (nombre : ___)",
+    "[  ] Niveau carburant : ___/8",
+    "[  ] Propreté intérieure",
+  ];
+  checks.forEach((t, i) => {
+    doc.text(t, 16 + (i % 3) * (w / 3), y + Math.floor(i / 3) * 6);
+  });
+  y += 16;
+
+  signatureBlocks(doc, pageW, y, "Signature au départ (client / convoyeur)", "Signature à l'arrivée (client / convoyeur)");
+
+  drawDocLegalFooter(doc, pageW, pageH, c);
+  return doc.output("blob");
+}
+
+/* ------------------------------------------------------------------ */
+/* 06 — CONTRAT DE PARTENARIAT CONVOYEUR                               */
+/* ------------------------------------------------------------------ */
+
+export interface ContratConvoyeurData {
+  nom_complet: string;
+  siret?: string | null;
+  adresse?: string | null;
+  permis_numero?: string | null;
+  permis_date?: string | null;
+  signature_nom?: string | null;
+  signed_at?: string | null;
+  signature_ip?: string | null;
+}
+
+export interface ContratArticle {
+  titre: string;
+  paragraphes: string[];
+  puces?: string[];
+}
+
+export function buildContratArticles(c?: CompanyInfo | null): ContratArticle[] {
+  const societe = c?.raison_sociale || "Transports Ligneo";
+  return [
+    {
+      titre: "Article 1 — Objet du contrat",
+      paragraphes: [
+        `Le présent contrat a pour objet de définir les conditions dans lesquelles le Convoyeur, prestataire indépendant, réalise pour le compte de ${societe} des missions de convoyage de véhicules automobiles (transfert, livraison, restitution) au bénéfice des clients de la Société.`,
+        "Le présent contrat ne constitue en aucun cas un contrat de travail. Le Convoyeur exerce son activité en toute indépendance, sans lien de subordination juridique avec la Société.",
+      ],
+    },
+    {
+      titre: "Article 2 — Conditions préalables et éligibilité",
+      paragraphes: ["Le Convoyeur déclare et garantit remplir, à la date de signature et pendant toute la durée du contrat, les conditions suivantes :"],
+      puces: [
+        "Être titulaire d'un permis de conduire catégorie B valide depuis au moins 3 ans ;",
+        "Être âgé d'au moins 21 ans ;",
+        "Présenter un casier judiciaire (bulletin n°3) vierge de toute mention incompatible avec l'activité de convoyage ;",
+        "Disposer d'un statut juridique en règle, avec un numéro SIRET actif ;",
+        "Souscrire et maintenir une assurance responsabilité civile professionnelle couvrant le convoyage automobile ;",
+        "Ne faire l'objet d'aucune suspension ou annulation de permis de conduire en cours.",
+      ],
+    },
+    {
+      titre: "Article 3 — Modalités d'attribution des missions",
+      paragraphes: [
+        "Les missions sont proposées au Convoyeur via l'application « Espace Driver », selon ses disponibilités déclarées et sa zone géographique.",
+        "Le Convoyeur demeure libre d'accepter ou de refuser toute mission, sans justification et sans sanction. Une fois la mission acceptée, il s'engage à l'exécuter personnellement selon les modalités convenues.",
+      ],
+    },
+    {
+      titre: "Article 4 — Obligations du convoyeur",
+      paragraphes: ["Dans l'exécution de chaque mission, le Convoyeur s'engage à :"],
+      puces: [
+        "Se présenter aux lieux et horaires convenus avec le client ;",
+        "Réaliser un état des lieux contradictoire au départ et à l'arrivée, avec photos horodatées ;",
+        "Conduire le véhicule confié avec prudence, dans le respect du Code de la route ;",
+        "Ne transporter aucun passager ni marchandise non autorisés ;",
+        "Signaler sans délai tout incident, accident, panne ou anomalie via la fonction de signalement ;",
+        "Restituer le véhicule dans l'état constaté au départ, hors usure normale ;",
+        "Respecter la confidentialité des informations clients.",
+      ],
+    },
+    {
+      titre: "Article 5 — Obligations de la société",
+      paragraphes: ["La Société s'engage à :"],
+      puces: [
+        "Transmettre toutes les informations utiles à l'exécution de la mission (fiche de mission, contacts, instructions) ;",
+        "Régler la rémunération convenue dans les délais fixés à l'Article 6 ;",
+        "Mettre à disposition une assistance téléphonique 24h/24 et 7j/7 en cas d'incident ;",
+        "Maintenir une couverture d'assurance complémentaire pour les véhicules convoyés.",
+      ],
+    },
+    {
+      titre: "Article 6 — Rémunération et facturation",
+      paragraphes: [
+        "Chaque mission fait l'objet d'une rémunération forfaitaire communiquée avant acceptation, calculée selon la distance, le type de véhicule et les contraintes horaires.",
+        "Le Convoyeur émet une facture pour chaque mission ou selon une périodicité convenue. Le règlement intervient par virement bancaire sous 30 jours à compter de la réception de la facture. Les frais annexes engagés dans le cadre strict d'une mission sont pris en charge selon les modalités de la fiche de mission.",
+      ],
+    },
+    {
+      titre: "Article 7 — Assurances et responsabilité",
+      paragraphes: [
+        "Le Convoyeur demeure seul responsable de tout dommage causé de son fait personnel durant l'exécution d'une mission, sous réserve des garanties de son assurance RC Pro convoyage.",
+        "En cas de sinistre, il s'engage à établir un constat contradictoire lorsque cela est possible, à alerter immédiatement l'assistance et à transmettre les documents nécessaires au traitement du dossier.",
+      ],
+    },
+    {
+      titre: "Article 8 — Durée, suspension et résiliation",
+      paragraphes: [
+        "Le contrat est conclu pour une durée indéterminée à compter de sa signature. Chaque Partie peut le résilier à tout moment moyennant un préavis écrit de 15 jours calendaires.",
+        "La Société peut suspendre immédiatement l'accès aux missions en cas de manquement grave aux obligations de l'Article 4, de suspension du permis, d'expiration de l'assurance RC Pro, de comportement dangereux ou de signalements clients répétés et documentés.",
+      ],
+    },
+    {
+      titre: "Article 9 — Indépendance et absence de lien de subordination",
+      paragraphes: [
+        "Le Convoyeur exerce son activité en toute autonomie : il détermine librement son organisation de travail et ses horaires de disponibilité. Il ne bénéficie d'aucune exclusivité et demeure libre de travailler pour d'autres donneurs d'ordre, sous réserve de l'Article 10.",
+      ],
+    },
+    {
+      titre: "Article 10 — Confidentialité et protection des données",
+      paragraphes: [
+        "Le Convoyeur s'engage à conserver strictement confidentielles les informations relatives aux clients de la Société.",
+        "Les données personnelles du Convoyeur sont traitées conformément au RGPD, aux seules fins de gestion de la relation contractuelle. Il dispose d'un droit d'accès, de rectification et de suppression.",
+      ],
+    },
+    {
+      titre: "Article 11 — Propriété intellectuelle",
+      paragraphes: [
+        `Le Convoyeur s'interdit toute utilisation non autorisée de la marque, du nom commercial ou du logo de ${societe}, en dehors du cadre strict de l'exécution de ses missions.`,
+      ],
+    },
+    {
+      titre: "Article 12 — Droit applicable et litiges",
+      paragraphes: [
+        "Le présent contrat est soumis au droit français. À défaut d'accord amiable dans un délai de 30 jours, tout litige sera porté devant les juridictions compétentes du ressort du siège social de la Société.",
+      ],
+    },
+    {
+      titre: "Article 13 — Dispositions finales",
+      paragraphes: [
+        "Le présent contrat constitue l'intégralité de l'accord entre les Parties et annule tout accord antérieur portant sur le même objet. Toute modification devra faire l'objet d'un avenant écrit signé par les deux Parties.",
+      ],
+    },
+  ];
+}
+
+export function buildContratPreambule(d: ContratConvoyeurData, c?: CompanyInfo | null): string[] {
+  const adresse = [c?.adresse_ligne1, [c?.adresse_cp, c?.adresse_ville].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  return [
+    `${c?.raison_sociale || "Transports Ligneo"}, ${c?.forme_juridique || ""}${c?.capital_social ? ` au capital de ${c.capital_social}` : ""}${c?.rcs ? `, immatriculée au RCS de ${c.rcs}` : ""}${adresse ? `, dont le siège social est situé ${adresse}` : ""}${c?.signataire_nom ? `, représentée par ${c.signataire_nom}, agissant en qualité de ${c.signataire_fonction || "représentant légal"}` : ""}. Ci-après désignée « la Société ».`,
+    `${d.nom_complet}, entrepreneur individuel / auto-entrepreneur, immatriculé sous le numéro SIRET ${d.siret || "—"}, domicilié à ${d.adresse || "—"}, titulaire du permis de conduire catégorie B n° ${d.permis_numero || "—"}${d.permis_date ? ` délivré le ${dateFmt(d.permis_date)}` : ""}. Ci-après désigné « le Convoyeur ».`,
+  ];
+}
+
+export async function generateContratConvoyeurPdf(
+  d: ContratConvoyeurData,
+  company?: CompanyInfo | null,
+): Promise<Blob> {
+  const { doc, pageW, pageH, company: c } = await newDoc(
+    "Contrat de partenariat",
+    undefined,
+    "Convoyeur indépendant",
+    company,
+  );
+  const w = pageW - 28;
+  let y = 56;
+
+  const ensure = (need: number) => {
+    if (y + need > pageH - 26) {
+      drawDocLegalFooter(doc, pageW, pageH, c);
+      doc.addPage();
+      drawDocHeader(doc, { pageW, title: "Contrat de partenariat", subtitle: "Convoyeur indépendant", company: c, height: 26 });
+      y = 36;
+    }
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("ENTRE LES SOUSSIGNÉS :", 14, y);
+  y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_TEXT);
+  buildContratPreambule(d, c).forEach((p) => {
+    const lines = doc.splitTextToSize(p, w);
+    ensure(lines.length * 4 + 6);
+    doc.text(lines, 14, y);
+    y += lines.length * 4 + 5;
+  });
+
+  buildContratArticles(c).forEach((a) => {
+    ensure(16);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...DOC_NAVY);
+    doc.text(a.titre.toUpperCase(), 14, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...DOC_TEXT);
+    a.paragraphes.forEach((p) => {
+      const lines = doc.splitTextToSize(p, w);
+      ensure(lines.length * 4 + 3);
+      doc.text(lines, 14, y);
+      y += lines.length * 4 + 2;
+    });
+    (a.puces ?? []).forEach((b) => {
+      const lines = doc.splitTextToSize(b, w - 6);
+      ensure(lines.length * 4 + 2);
+      doc.setTextColor(...DOC_GOLD);
+      doc.text("•", 16, y);
+      doc.setTextColor(...DOC_TEXT);
+      doc.text(lines, 20, y);
+      y += lines.length * 4 + 1;
+    });
+    y += 3;
+  });
+
+  ensure(46);
+  y += 4;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(
+    `Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(d.signed_at || new Date().toISOString())}.`,
+    14,
+    y,
+  );
+  y += 5;
+
+  doc.setFillColor(...DOC_CREAM);
+  doc.setDrawColor(...DOC_LINE);
+  doc.rect(14, y, w, 32, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text(`Pour ${c?.raison_sociale || "Transports Ligneo"}`, 18, y + 6);
+  doc.text("Le Convoyeur", pageW / 2 + 4, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_TEXT);
+  doc.setFontSize(7.5);
+  doc.text(`${c?.signataire_nom || "—"} — ${c?.signataire_fonction || "—"}`, 18, y + 12);
+  doc.text(d.nom_complet, pageW / 2 + 4, y + 12);
+
+  if (d.signed_at) {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DOC_NAVY);
+    doc.text("Signé électroniquement — lu et approuvé", pageW / 2 + 4, y + 19);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...DOC_MUTED);
+    doc.setFontSize(6.8);
+    doc.text(`Nom saisi : ${d.signature_nom || d.nom_complet}`, pageW / 2 + 4, y + 24);
+    doc.text(
+      `Horodatage : ${new Date(d.signed_at).toLocaleString("fr-FR")}${d.signature_ip ? ` — IP ${d.signature_ip}` : ""}`,
+      pageW / 2 + 4,
+      y + 28,
+    );
+  } else {
+    doc.setTextColor(...DOC_MUTED);
+    doc.setFontSize(7);
+    doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
+  }
+
+  drawDocLegalFooter(doc, pageW, pageH, c);
+  return doc.output("blob");
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/** Couleurs réexportées pour les consommateurs. */
+export { DOC_WHITE };
