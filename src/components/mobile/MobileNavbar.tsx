@@ -47,6 +47,33 @@ export default function MobileNavbar() {
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const [slider, setSlider] = useState({ left: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const update = () => {
+      const active = list.querySelector<HTMLElement>(".mnav-link-active");
+      if (!active) {
+        setSlider((s) => ({ ...s, width: 0 }));
+        return;
+      }
+      setSlider({
+        left: active.offsetLeft,
+        width: active.offsetWidth,
+        height: active.offsetHeight,
+      });
+    };
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("resize", update);
+    list.addEventListener("scroll", update, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", update);
+      list.removeEventListener("scroll", update);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     lastY.current = window.scrollY;
