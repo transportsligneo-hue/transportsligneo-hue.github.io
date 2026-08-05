@@ -48,7 +48,7 @@ const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; d
 };
 
 const WELCOME =
-  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
+  "Vrooom, bonjour ! Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
 
 const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
@@ -467,7 +467,7 @@ export default function AssistantIaWidget() {
               </button>
             </div>
           </div>
-          <p className="vrm-tagline">Toujours prêt à rouler avec vous ! 💨</p>
+          <p className="vrm-tagline">Toujours prêt à rouler avec vous.</p>
           {prefNotice && (
             <p className="vrm-pref-note" role="status">
               {prefNotice}
