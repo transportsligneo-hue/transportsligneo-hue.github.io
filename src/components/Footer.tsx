@@ -23,7 +23,7 @@ const legalLinks: { label: string; to: string }[] = [
   { label: "Conditions Générales de Vente", to: "/cgv" },
   { label: "Mentions Légales", to: "/mentions-legales" },
   { label: "Politique de Confidentialité", to: "/confidentialite" },
-  { label: "Devenir convoyeur", to: "/inscription-convoyeur" },
+  { label: "Devenir convoyeur", to: "/devenir-convoyeur" },
   { label: "Espace pro", to: "/login" },
 ];
 
