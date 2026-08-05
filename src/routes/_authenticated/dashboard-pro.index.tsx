@@ -176,6 +176,8 @@ function ProDashboard() {
           highlight={orgName || (isFlotte ? "CAT France" : user?.email?.split("@")[0] ?? "Client")}
           subtitle={heroSub}
           badge={isFlotte ? "Flotte partenaire" : null}
+          logoUrl={isFlotte ? orgInfo?.logoUrl ?? null : null}
+          logoAlt={orgName || "Flotte partenaire"}
           stats={
             isFlotte
               ? [
