@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Vroomy — assistant flottant de Transports Ligneo (site public).
@@ -8,16 +9,45 @@ import { Send, X, Phone } from "lucide-react";
  * Seuls le nom, la mascotte et le ton changent.
  */
 
-type ChatMsg = { role: "user" | "assistant"; content: string };
+type Profil = "client" | "convoyeur";
 
-const QUICK_REPLIES: Array<{ icon: string; label: string }> = [
-  { icon: "💰", label: "Combien coûte un convoyage ?" },
-  { icon: "📦", label: "Où en est ma mission ?" },
-  { icon: "👋", label: "Devenir convoyeur" },
-];
+type VroomyCard =
+  | { type: "mission"; data: Record<string, unknown> }
+  | { type: "devis"; data: Record<string, unknown> }
+  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } };
+
+type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
+
+const QUICK_REPLIES: Record<Profil, Array<{ icon: string; label: string }>> = {
+  client: [
+    { icon: "💰", label: "Combien coûte un convoyage Paris — Lyon ?" },
+    { icon: "📦", label: "Où en est ma mission ?" },
+    { icon: "🛡️", label: "Que couvre l'assurance pendant le convoyage ?" },
+  ],
+  convoyeur: [
+    { icon: "🧭", label: "Trouve-moi une mission près de Tours" },
+    { icon: "📋", label: "Y a-t-il des missions disponibles aujourd'hui ?" },
+    { icon: "👋", label: "Comment devenir convoyeur partenaire ?" },
+  ],
+};
+
+const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; desc: string }>> = {
+  client: [
+    { Icon: Calculator, title: "Estimer un convoyage", desc: "Prix, distance et délai depuis la grille officielle" },
+    { Icon: MapPin, title: "Suivre une mission", desc: "Avec votre numéro de mission et votre email" },
+    { Icon: Phone, title: "Vous faire rappeler", desc: "Un conseiller Ligneo vous recontacte" },
+  ],
+  convoyeur: [
+    { Icon: Search, title: "Chercher une mission", desc: "Dans le vrai catalogue publié, par ville" },
+    { Icon: GraduationCap, title: "Devenir convoyeur", desc: "Prérequis, documents et Académie Ligneo" },
+    { Icon: Phone, title: "Parler à l'équipe", desc: "Rappel par un conseiller Ligneo" },
+  ],
+};
 
 const WELCOME =
-  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Je peux vous aider sur nos services, nos tarifs, nos délais ou le suivi d'une mission.";
+  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
+
+const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
 
