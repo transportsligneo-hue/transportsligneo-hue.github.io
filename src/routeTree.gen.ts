@@ -100,6 +100,7 @@ import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
 import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
+import { Route as AuthenticatedAdminNouveauDevisRouteImport } from './routes/_authenticated/admin.nouveau-devis'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
@@ -652,6 +653,12 @@ const AuthenticatedAdminOrganisationsRoute =
     path: '/organisations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNouveauDevisRoute =
+  AuthenticatedAdminNouveauDevisRouteImport.update({
+    id: '/nouveau-devis',
+    path: '/nouveau-devis',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNotificationsRoute =
   AuthenticatedAdminNotificationsRouteImport.update({
     id: '/notifications',
@@ -992,6 +999,7 @@ export interface FileRoutesByFullPath {
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -1126,6 +1134,7 @@ export interface FileRoutesByTo {
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -1265,6 +1274,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/_authenticated/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
@@ -1407,6 +1417,7 @@ export interface FileRouteTypes {
     | '/admin/inscriptions'
     | '/admin/messages'
     | '/admin/notifications'
+    | '/admin/nouveau-devis'
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
@@ -1541,6 +1552,7 @@ export interface FileRouteTypes {
     | '/admin/inscriptions'
     | '/admin/messages'
     | '/admin/notifications'
+    | '/admin/nouveau-devis'
     | '/admin/organisations'
     | '/admin/paiements'
     | '/admin/parametres'
@@ -1679,6 +1691,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/inscriptions'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/notifications'
+    | '/_authenticated/admin/nouveau-devis'
     | '/_authenticated/admin/organisations'
     | '/_authenticated/admin/paiements'
     | '/_authenticated/admin/parametres'
@@ -2451,6 +2464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrganisationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/nouveau-devis': {
+      id: '/_authenticated/admin/nouveau-devis'
+      path: '/nouveau-devis'
+      fullPath: '/admin/nouveau-devis'
+      preLoaderRoute: typeof AuthenticatedAdminNouveauDevisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/notifications': {
       id: '/_authenticated/admin/notifications'
       path: '/notifications'
@@ -2869,6 +2889,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
+  AuthenticatedAdminNouveauDevisRoute: typeof AuthenticatedAdminNouveauDevisRoute
   AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
   AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
@@ -2902,6 +2923,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
+  AuthenticatedAdminNouveauDevisRoute: AuthenticatedAdminNouveauDevisRoute,
   AuthenticatedAdminOrganisationsRoute:
     AuthenticatedAdminOrganisationsRouteWithChildren,
   AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
