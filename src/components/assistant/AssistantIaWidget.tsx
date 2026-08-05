@@ -54,20 +54,24 @@ const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
 
-/** Face de Vroomy : carrosserie arrondie, phares-yeux, calandre-sourire, deux roues. */
-function VroomyFace({ size = 28 }: { size?: number }) {
+const PROACTIVE_PREF_KEY = "ligneo_vroomy_proactive_off";
+
+/** Mascotte officielle Vroomy (voiture bleue néon Transports Ligneo). */
+function VroomyFace({ size = 28, alt }: { size?: number; alt?: string }) {
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" focusable="false">
-      <rect x="4" y="12" width="24" height="12" rx="5" fill="#ffffff" />
-      <rect x="8" y="8" width="16" height="8" rx="4" fill="#ffffff" />
-      <circle cx="11" cy="17" r="2.4" fill="#182655" />
-      <circle cx="21" cy="17" r="2.4" fill="#182655" />
-      <path d="M12.5 20.6 Q16 23.4 19.5 20.6" stroke="#182655" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.75" />
-      <circle cx="9" cy="25.5" r="2.2" fill="#182655" />
-      <circle cx="23" cy="25.5" r="2.2" fill="#182655" />
-    </svg>
+    <img
+      src={vroomyMascotte.url}
+      width={size}
+      height={size}
+      className="vrm-mascotte"
+      alt={alt ?? ""}
+      aria-hidden={alt ? undefined : true}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
+
 
 function sessionToken() {
   if (typeof window === "undefined") return "";
