@@ -69,7 +69,7 @@ function AdminInformationsLegales() {
       payload[key as string] = (form[key as string] || "").trim();
     });
     const { error } = rowId
-      ? await supabase.from("company_settings").update(payload).eq("id", rowId)
+      ? await supabase.from("company_settings").update(payload as never).eq("id", rowId)
       : await supabase.from("company_settings").insert(payload as never);
     setSaving(false);
     if (error) {
