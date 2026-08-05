@@ -16,6 +16,9 @@ type Props = {
   highlight?: string;
   subtitle?: ReactNode;
   badge?: string | null;
+  /** Logo de l'organisation affiché à côté du titre (à la place du badge) */
+  logoUrl?: string | null;
+  logoAlt?: string;
   actions?: ReactNode;
   stats?: FleetHeaderStat[];
 };
@@ -28,6 +31,8 @@ export default function FleetPageHeader({
   highlight,
   subtitle,
   badge,
+  logoUrl,
+  logoAlt,
   actions,
   stats,
 }: Props) {
