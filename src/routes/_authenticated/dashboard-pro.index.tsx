@@ -193,6 +193,14 @@ function ProDashboard() {
               <Link to="/dashboard-pro/documents" className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]">
                 <FileText size={14} /> Exporter
               </Link>
+              {isFlotte ? (
+                <Link
+                  to="/dashboard-pro/nouvelle-mission"
+                  className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
+                >
+                  <PlusCircle size={14} /> Mission simple
+                </Link>
+              ) : null}
               <Link
                 to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
                 className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
