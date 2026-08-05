@@ -1,27 +1,16 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Menu, MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { Link } from "@tanstack/react-router";
+import { MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
 import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * MobileTarifsScreen · page Tarifs dédiée mobile, ambiance navy/or
  * cohérente avec MobileHomeScreen. Reprend le simulateur réel.
  */
 export default function MobileTarifsScreen() {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
 
   return (
     <div
-      className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-24 pt-[96px]"
+      className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-24 pt-[118px]"
       style={{
         background:
           "radial-gradient(520px 440px at 90% 0%, rgba(63,123,255,0.28), transparent 60%)," +
@@ -30,38 +19,6 @@ export default function MobileTarifsScreen() {
           "linear-gradient(180deg, #0a1230 0%, #0a1230 10%, #070c1f 34%, #060a1a 70%, #050813 100%)",
       }}
     >
-      {/* Topbar */}
-      <header className="safe-top sticky top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-4 pb-3"
-        style={{ background: "linear-gradient(180deg, rgba(4,7,18,0.9) 0%, rgba(4,7,18,0.6) 70%, transparent 100%)", backdropFilter: "blur(10px)" }}
-      >
-        <Link to="/" className="flex items-center gap-2.5 min-w-0" aria-label="Accueil">
-          <span className="shrink-0 w-9 h-9 rounded-[10px] overflow-hidden bg-[#0a1230]"
-            style={{ boxShadow: "0 0 16px rgba(63,123,255,0.5), 0 0 0 1px rgba(122,163,255,0.4)" }}
-          >
-            <img src={logoLigneo} alt="Ligneo" className="w-full h-full object-cover" loading="eager" />
-          </span>
-          <span className="font-black tracking-[0.02em] text-[13.5px] leading-none text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            TRANSPORTS <span className="text-[#2F5FFF]">LIGNEO</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => (isAuthenticated ? navigate({ to: "/notifications" }) : navigate({ to: "/login" }))}
-            aria-label="Notifications"
-            className="relative w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <Bell size={15} className="text-[#cdd7ff]" strokeWidth={2} />
-          </button>
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Menu"
-            className="w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <Menu size={15} className="text-[#cdd7ff]" strokeWidth={2} />
-          </button>
-        </div>
-      </header>
-
       {/* Hero */}
       <section className="relative z-[1] px-[22px] pt-6 pb-2">
         <div className="flex items-center gap-2 uppercase mb-3 text-[10.5px] font-semibold tracking-[0.2em] text-[#4f8cff]"

@@ -80,14 +80,14 @@ export default function MobileNavbar() {
     >
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
-          <Link to="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2 overflow-visible">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-7 w-7 sm:h-9 sm:w-9 shrink-0 object-contain" />
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3 overflow-visible">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
             <span
-              className="font-extrabold text-[10px] sm:text-[12px] tracking-[0.015em] uppercase text-white whitespace-nowrap"
+              className="font-black text-[15px] sm:text-[17px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
-              Transports{" "}
-              <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">Ligneo</span>
+              TRANSPORTS{" "}
+              <span className="text-[#6ea1ff] [text-shadow:0_0_12px_rgba(91,143,255,0.85)]">LIGNEO</span>
             </span>
           </Link>
 
