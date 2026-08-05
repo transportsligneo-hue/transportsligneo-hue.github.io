@@ -98,7 +98,7 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Actions droite : téléphone + Estimer + Connexion */}
+          {/* Actions droite : téléphone + Connexion */}
           <div className="flex items-center gap-2.5 shrink-0">
             <a
               href="tel:+33782456181"
@@ -117,15 +117,6 @@ export default function Navbar() {
                 </span>
               </span>
             </a>
-            <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
-              <svg className="r4-ic-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
-              </svg>
-              Mon espace
-              <svg className="r4-ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </button>
             <button onClick={goToEspace} className="r4-btn-connect" type="button">
               <User size={13} />
               {isAuthenticated ? "Mon espace" : "Connexion"}
@@ -151,10 +142,23 @@ export default function Navbar() {
                 </li>
               ))}
               <li>
-                <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
-                  <Sparkles size={13} />
-                  Estimer
-                </button>
+                <a
+                  href="tel:+33782456181"
+                  className="nav-phone-block"
+                  aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+                >
+                  <span className="nav-phone-icon">
+                    <Phone size={15} strokeWidth={2.25} />
+                    <span className="nav-phone-pulse" aria-hidden="true" />
+                  </span>
+                  <span className="flex flex-col items-start">
+                    <span className="nav-phone-number">07 82 45 61 81</span>
+                    <span className="nav-phone-sub">
+                      <span className="nav-phone-live" aria-hidden="true" />
+                      Disponible 7j/7
+                    </span>
+                  </span>
+                </a>
               </li>
               <li>
                 <button onClick={goToEspace} className="r4-btn-connect" type="button">

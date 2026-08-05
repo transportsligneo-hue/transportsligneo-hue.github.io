@@ -1554,39 +1554,39 @@
     min-height: 46px;
     padding: 0.3rem 1rem 0.3rem 0.35rem;
     border-radius: 999px;
-    border: 1px solid rgba(52,255,183,0.55);
-    background: linear-gradient(120deg, rgba(16,185,129,0.28), rgba(6,40,32,0.6));
+    border: 1px solid rgba(231,199,106,0.55);
+    background: linear-gradient(120deg, rgba(212,175,55,0.28), rgba(60,45,10,0.6));
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.12),
-      0 0 0 1px rgba(52,255,183,0.22),
-      0 8px 26px -12px rgba(16,220,150,0.85),
-      0 0 26px rgba(52,255,183,0.45);
+      0 0 0 1px rgba(231,199,106,0.22),
+      0 8px 26px -12px rgba(220,180,70,0.85),
+      0 0 26px rgba(231,199,106,0.45);
     animation: navPhoneGlow 2.6s ease-in-out infinite;
     transition: border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
     overflow: hidden;
   }
   @keyframes navPhoneGlow {
-    0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(52,255,183,0.22), 0 8px 26px -12px rgba(16,220,150,0.8), 0 0 24px rgba(52,255,183,0.4); }
-    50%     { box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 0 1px rgba(52,255,183,0.5), 0 10px 32px -12px rgba(16,220,150,1), 0 0 44px rgba(52,255,183,0.8); }
+    0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(231,199,106,0.22), 0 8px 26px -12px rgba(220,180,70,0.8), 0 0 24px rgba(231,199,106,0.4); }
+    50%     { box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 0 1px rgba(231,199,106,0.5), 0 10px 32px -12px rgba(220,180,70,1), 0 0 44px rgba(231,199,106,0.8); }
   }
 
   .nav-phone-block::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(120deg, transparent 35%, rgba(140,255,220,0.28) 50%, transparent 65%);
+    background: linear-gradient(120deg, transparent 35%, rgba(255,235,170,0.28) 50%, transparent 65%);
     transform: translateX(-120%);
     transition: transform .9s ease;
     pointer-events: none;
   }
   .nav-phone-block:hover {
-    border-color: rgba(120,255,215,0.95);
+    border-color: rgba(255,225,140,0.95);
     transform: translateY(-1px);
-    background: linear-gradient(120deg, rgba(16,185,129,0.5), rgba(6,70,55,0.65));
+    background: linear-gradient(120deg, rgba(212,175,55,0.5), rgba(90,70,15,0.65));
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.16),
-      0 12px 34px -14px rgba(16,220,150,1),
-      0 0 48px rgba(52,255,183,0.85);
+      0 12px 34px -14px rgba(220,180,70,1),
+      0 0 48px rgba(231,199,106,0.85);
   }
   .nav-phone-block:hover::after { transform: translateX(120%); }
   .nav-phone-icon {
@@ -1597,18 +1597,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #6bffcd, #10b981);
-    border: 1px solid rgba(180,255,230,0.9);
-    color: #032b20;
+    background: linear-gradient(135deg, #e7c76a, #d4af37);
+    border: 1px solid rgba(255,240,190,0.9);
+    color: #2a2005;
     flex-shrink: 0;
-    box-shadow: 0 0 20px rgba(52,255,183,0.95);
+    box-shadow: 0 0 20px rgba(231,199,106,0.95);
   }
 
   .nav-phone-pulse {
     position: absolute;
     inset: -4px;
     border-radius: 999px;
-    border: 1px solid rgba(52,255,183,0.75);
+    border: 1px solid rgba(231,199,106,0.75);
     animation: navPhonePulse 2.2s ease-out infinite;
     pointer-events: none;
   }
@@ -1624,7 +1624,7 @@
     letter-spacing: 0.04em;
     color: #ffffff;
     line-height: 1.1;
-    text-shadow: 0 0 14px rgba(52,255,183,0.9);
+    text-shadow: 0 0 14px rgba(231,199,106,0.9);
   }
 
   .nav-phone-sub {
@@ -1634,7 +1634,7 @@
     font-size: 9px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(150, 255, 220, 0.98);
+    color: rgba(255, 235, 180, 0.98);
     margin-top: 3px;
     line-height: 1;
   }
@@ -1642,14 +1642,14 @@
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: #6bffcd;
-    box-shadow: 0 0 0 0 rgba(107,255,205,0.7);
+    background: #e7c76a;
+    box-shadow: 0 0 0 0 rgba(231,199,106,0.7);
     animation: navPhoneLive 1.8s ease-out infinite;
   }
   @keyframes navPhoneLive {
-    0%   { box-shadow: 0 0 0 0 rgba(107,255,205,0.7); }
-    70%  { box-shadow: 0 0 0 6px rgba(107,255,205,0); }
-    100% { box-shadow: 0 0 0 0 rgba(107,255,205,0); }
+    0%   { box-shadow: 0 0 0 0 rgba(231,199,106,0.7); }
+    70%  { box-shadow: 0 0 0 6px rgba(231,199,106,0); }
+    100% { box-shadow: 0 0 0 0 rgba(231,199,106,0); }
   }
 }
 
