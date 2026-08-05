@@ -158,13 +158,18 @@ export default function AssistantIaWidget() {
   const [typing, setTyping] = useState(false);
   const [handoff, setHandoff] = useState(false);
   const [profil, setProfil] = useState<Profil | null>(null);
+  const [profilAuto, setProfilAuto] = useState(false);
   const [prenom, setPrenom] = useState<string | null>(null);
   const [showCaps, setShowCaps] = useState(true);
   const [leadSent, setLeadSent] = useState(false);
   const [lead, setLead] = useState({ nom: "", telephone: "" });
+  const [proactiveOff, setProactiveOff] = useState(false);
+  const [prefNotice, setPrefNotice] = useState<string | null>(null);
   const convId = useRef<string | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const launcherRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
@@ -179,30 +184,89 @@ export default function AssistantIaWidget() {
     }
   }, [open]);
 
-  /* Détection automatique du profil réel si le visiteur est connecté */
+  /* Lecture de la préférence "relance proactive" */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setProactiveOff(window.localStorage.getItem(PROACTIVE_PREF_KEY) === "1");
+  }, []);
+
+  const toggleProactive = useCallback(() => {
+    setProactiveOff((v) => {
+      const next = !v;
+      if (typeof window !== "undefined") {
+        if (next) window.localStorage.setItem(PROACTIVE_PREF_KEY, "1");
+        else window.localStorage.removeItem(PROACTIVE_PREF_KEY);
+      }
+      setPrefNotice(
+        next
+          ? "Vroomy ne s'ouvrira plus tout seul sur les pages Tarifs et Estimation."
+          : "Vroomy pourra de nouveau vous proposer son aide sur Tarifs et Estimation.",
+      );
+      return next;
+    });
+  }, []);
+
+  /* Détection automatique du profil réel, y compris quand le statut change */
   useEffect(() => {
     let alive = true;
-    void (async () => {
+
+    const detect = async () => {
       const { data } = await supabase.auth.getSession();
       const user = data.session?.user;
-      if (!user || !alive) return;
+      if (!alive) return;
+      if (!user) {
+        // Déconnexion : on repasse en mode visiteur (choix manuel possible)
+        setProfilAuto(false);
+        setProfil(null);
+        setPrenom(null);
+        return;
+      }
       const [{ data: conv }, { data: prof }] = await Promise.all([
         supabase.from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("prenom").eq("id", user.id).maybeSingle(),
       ]);
       if (!alive) return;
       setProfil(conv?.id ? "convoyeur" : "client");
+      setProfilAuto(true);
       const p = (prof as { prenom?: string } | null)?.prenom;
-      if (p) setPrenom(p);
+      setPrenom(p ?? null);
+    };
+
+    void detect();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      void detect();
+    });
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  /* Ré-évaluation du profil à chaque changement de page (statut convoyeur validé, etc.) */
+  useEffect(() => {
+    if (!profilAuto) return;
+    let alive = true;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user || !alive) return;
+      const { data: conv } = await supabase
+        .from("convoyeurs")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+      setProfil(conv?.id ? "convoyeur" : "client");
     })();
     return () => {
       alive = false;
     };
-  }, []);
+  }, [pathname, profilAuto]);
 
   /* Apparition proactive sur les pages tarifs / estimation */
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (proactiveOff) return;
     if (!PROACTIVE_PATHS.some((p) => pathname.startsWith(p))) return;
     if (window.sessionStorage.getItem("ligneo_vroomy_proactive") === "1") return;
     const t = window.setTimeout(() => {
@@ -210,7 +274,23 @@ export default function AssistantIaWidget() {
       setOpen(true);
     }, 18000);
     return () => window.clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, proactiveOff]);
+
+  /* Clavier : Échap ferme le panneau et rend le focus au lanceur */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
+        launcherRef.current?.focus();
+      }
+    };
+    const node = panelRef.current;
+    node?.addEventListener("keydown", onKey);
+    return () => node?.removeEventListener("keydown", onKey);
+  }, [open]);
+
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
