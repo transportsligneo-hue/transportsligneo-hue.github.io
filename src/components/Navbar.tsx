@@ -12,10 +12,20 @@ const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }>
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/pro", label: "B2B", accent: "purple" },
-  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "green" },
+  { to: "/devenir-convoyeur", label: "Espace Driver", accent: "green" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -80,6 +90,7 @@ export default function Navbar() {
                     activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
                     inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
                   >
+                    {l.accent === "green" && <LockIcon />}
                     {l.label}
                   </Link>
                 </li>

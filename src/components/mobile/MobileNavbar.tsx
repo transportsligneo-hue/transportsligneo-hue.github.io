@@ -11,7 +11,7 @@ const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = 
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Process" },
   { to: "/pro", label: "B2B", accent: "b2b" },
-  { to: "/inscription-convoyeur", label: "Espace Driver", accent: "driver" },
+  { to: "/devenir-convoyeur", label: "Espace Driver", accent: "driver" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
