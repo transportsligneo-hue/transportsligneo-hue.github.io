@@ -73,6 +73,22 @@ function Field({
   );
 }
 
+const OPTIONS_LIST = [
+  { id: "recharge", label: "Recharge / plein de carburant" },
+  { id: "mise_en_main", label: "Mise en main du véhicule" },
+  { id: "lavage_ext", label: "Lavage extérieur" },
+  { id: "lavage_int", label: "Lavage intérieur" },
+  { id: "lavage_full", label: "Lavage extérieur + intérieur" },
+] as const;
+
+const TRAJET_TYPES = [
+  "Aller simple",
+  "Aller-retour",
+  "Livraison + restitution",
+] as const;
+
+const PV_OPTIONS = ["Aucun", "WelcomeAuto", "Model"] as const;
+
 function AdminNouveauDevisPage() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRow[]>([]);
@@ -84,6 +100,19 @@ function AdminNouveauDevisPage() {
   const [arrivee, setArrivee] = useState("");
   const [vehicule, setVehicule] = useState("");
   const [montant, setMontant] = useState("");
+  const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
+  const [immat, setImmat] = useState("");
+  const [modele, setModele] = useState("");
+  const [options, setOptions] = useState<string[]>([]);
+  const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
+  const [destNom, setDestNom] = useState("");
+  const [destTel, setDestTel] = useState("");
+  const [destNote, setDestNote] = useState("");
+
+  const toggleOption = (label: string) =>
+    setOptions((prev) =>
+      prev.includes(label) ? prev.filter((o) => o !== label) : [...prev, label],
+    );
 
   const [generating, setGenerating] = useState(false);
   const [created, setCreated] = useState<CreatedDevis | null>(null);
