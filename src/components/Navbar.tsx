@@ -98,7 +98,7 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Actions droite : téléphone + Estimer + Connexion */}
+          {/* Actions droite : téléphone + Connexion */}
           <div className="flex items-center gap-2.5 shrink-0">
             <a
               href="tel:+33782456181"
@@ -117,15 +117,6 @@ export default function Navbar() {
                 </span>
               </span>
             </a>
-            <button onClick={goToEstimer} className="r4-btn-estimer" type="button">
-              <svg className="r4-ic-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
-              </svg>
-              Mon espace
-              <svg className="r4-ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </button>
             <button onClick={goToEspace} className="r4-btn-connect" type="button">
               <User size={13} />
               {isAuthenticated ? "Mon espace" : "Connexion"}
