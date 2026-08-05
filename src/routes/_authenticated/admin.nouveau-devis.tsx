@@ -180,6 +180,18 @@ function AdminNouveauDevisPage() {
     return Number.isFinite(n) ? n : NaN;
   }, [montant]);
 
+  const pvLabel = pvDigital === "Aucun" ? null : pvDigital;
+
+  const recapMessage = [
+    `Type de trajet : ${typeTrajet}`,
+    options.length ? `Options : ${options.join(", ")}` : null,
+    pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
+    destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
+    destNote ? `Note livraison : ${destNote}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const buildPdfData = (numero: string): DevisData => ({
     numero,
     nom: client?.nom ?? "",
@@ -192,6 +204,14 @@ function AdminNouveauDevisPage() {
     depart,
     arrivee,
     marque: vehicule || null,
+    modele: modele || null,
+    immatriculation: immat || null,
+    option_trajet: typeTrajet,
+    options,
+    pv_digital: pvLabel,
+    destinataire_nom: destNom || null,
+    destinataire_tel: destTel || null,
+    destinataire_note: destNote || null,
     prestation: "Convoyage automobile",
     prix_estime: prix,
     validite_jours: 15,
@@ -216,6 +236,12 @@ function AdminNouveauDevisPage() {
           depart: depart.trim(),
           arrivee: arrivee.trim(),
           marque: vehicule || null,
+          modele: modele || null,
+          option_trajet: typeTrajet,
+          contact_arrivee_nom: destNom || null,
+          contact_arrivee_tel: destTel || null,
+          contact_arrivee_note: destNote || null,
+          message: recapMessage || null,
           prestation: "Convoyage automobile",
           prix_estime: prix,
           statut: "brouillon",
