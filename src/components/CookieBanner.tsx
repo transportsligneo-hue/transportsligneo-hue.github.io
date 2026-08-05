@@ -89,7 +89,7 @@ export default function CookieBanner() {
     <div
       role="dialog"
       aria-label="Consentement aux cookies"
-      className="fixed bottom-4 left-4 right-4 z-[9998] mx-auto w-auto max-w-[430px] rounded-2xl border border-white/10 p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:left-auto sm:right-5 sm:bottom-5"
+      className="fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-[9998] mx-auto w-auto max-w-[430px] rounded-2xl border border-white/10 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:bottom-5 sm:left-auto sm:right-5 sm:p-5"
       style={{ background: "linear-gradient(160deg,rgba(11,19,56,0.97),rgba(8,14,42,0.97))" }}
     >
       <div className="flex gap-3.5">
