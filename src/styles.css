@@ -2011,9 +2011,39 @@
     transition: all .2s;
   }
   .mnav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
-  .mnav-link-b2b { color: #a794ff; border-color: rgba(124,92,255,0.4); background: rgba(124,92,255,0.10); }
-  .mnav-link-driver { color: #4ad0a0; border-color: rgba(74,208,160,0.4); background: rgba(74,208,160,0.10); }
+  .mnav-link-b2b {
+    color: #e9c9ff; border-color: rgba(168,85,247,0.55); background: rgba(124,92,255,0.12);
+    text-shadow: 0 0 8px rgba(192,132,252,0.9), 0 0 18px rgba(168,85,247,0.7);
+    box-shadow: 0 0 14px rgba(168,85,247,0.35);
+    animation: neonPulsePurple 2.2s ease-in-out infinite;
+  }
+  .mnav-link-driver {
+    color: #b7ffcf; border-color: rgba(34,197,94,0.55); background: rgba(34,197,94,0.12);
+    text-shadow: 0 0 8px rgba(74,222,128,0.95), 0 0 18px rgba(34,197,94,0.7);
+    box-shadow: 0 0 14px rgba(34,197,94,0.35);
+    animation: neonPulseGreen 2.2s ease-in-out infinite;
+  }
   .mnav-link-driver svg { width: 12px; height: 12px; }
+  .mnav-link-b2b.mnav-link-active {
+    background: linear-gradient(120deg,#7c3aed,#a855f7,#c084fc);
+    box-shadow: 0 6px 18px rgba(168,85,247,0.7), 0 0 28px rgba(192,132,252,0.7);
+    color: #fff; text-shadow: none; border-color: transparent; animation: none;
+  }
+  .mnav-link-driver.mnav-link-active {
+    background: linear-gradient(120deg,#16a34a,#22c55e,#4ade80);
+    box-shadow: 0 6px 18px rgba(34,197,94,0.7), 0 0 28px rgba(74,222,128,0.7);
+    color: #fff; text-shadow: none; border-color: transparent; animation: none;
+  }
+  /* Indicateur gris coulissant le long de la barre de navigation */
+  .mnav-slider {
+    position: absolute; top: 0; left: 0; height: 100%;
+    border-radius: 999px; pointer-events: none;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: transform .38s cubic-bezier(.34,1.2,.64,1), width .38s cubic-bezier(.34,1.2,.64,1), opacity .25s;
+    will-change: transform, width;
+  }
   .mnav-link-active {
     color: #fff; border-color: transparent;
     background: linear-gradient(120deg, #2f5fff, #4f8cff);
