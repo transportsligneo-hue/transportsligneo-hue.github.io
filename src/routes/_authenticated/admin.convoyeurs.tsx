@@ -186,9 +186,13 @@ function AdminConvoyeurs() {
         if (!d) issues.push(`${getConvoyeurDocLabel(r)} manquant`);
         else if (!isConvoyeurDocApproved(d.statut_validation)) issues.push(`${getConvoyeurDocLabel(r)} non approuvé`);
       }
+      // Bypass admin : la validation reste possible malgré des documents incomplets
+      // (invitation récente, dossier transmis hors plateforme…), après confirmation.
       if (issues.length > 0) {
-        toast.error(`Activation impossible — documents non conformes :\n• ${issues.join("\n• ")}`);
-        return;
+        const ok = await confirmToast(
+          `Documents incomplets :\n• ${issues.join("\n• ")}\n\nValider quand même ce convoyeur ?`,
+        );
+        if (!ok) return;
       }
     }
 
@@ -656,7 +660,7 @@ function AdminConvoyeurs() {
                     <IconButton onClick={() => setSelected(c)} title="Aperçu rapide" tone="neutral">
                       <Eye size={15} />
                     </IconButton>
-                    {(c.statutUnifie === "en_attente" || c.statutUnifie === "en_verif" || c.statutUnifie === "a_corriger") && (
+                    {c.statutUnifie !== "valide" && c.statutUnifie !== "suspendu" && (
                       <>
                         <IconButton
                           onClick={() => updateStatut(c.id, "valide")}
@@ -732,9 +736,8 @@ function AdminConvoyeurs() {
               >
                 Ouvrir la fiche complète
               </Button>
-              {(resolveStatutConvoyeur(selected.statut, docs) === "en_attente" ||
-                resolveStatutConvoyeur(selected.statut, docs) === "en_verif" ||
-                resolveStatutConvoyeur(selected.statut, docs) === "a_corriger") && (
+              {resolveStatutConvoyeur(selected.statut, docs) !== "valide" &&
+                resolveStatutConvoyeur(selected.statut, docs) !== "suspendu" && (
                 <>
                   <Button
                     onClick={() => { updateStatut(selected.id, "valide"); setSelected(null); }}
