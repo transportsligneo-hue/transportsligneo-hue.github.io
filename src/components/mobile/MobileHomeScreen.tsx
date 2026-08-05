@@ -21,7 +21,7 @@ import {
   LogOut,
   Bell,
   Clock,
-  Bot,
+  
   Award,
 } from "lucide-react";
 
