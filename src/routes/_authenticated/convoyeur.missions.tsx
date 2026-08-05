@@ -24,6 +24,10 @@ import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
+  validateSearch: (search: Record<string, unknown>): { open?: string; f?: string } => ({
+    open: typeof search.open === "string" && search.open ? search.open : undefined,
+    f: typeof search.f === "string" && search.f ? search.f : undefined,
+  }),
   component: ConvoyeurMissions,
 });
 
