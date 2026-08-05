@@ -80,16 +80,17 @@ export default function MobileNavbar() {
     >
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
-          <Link to="/" className="flex min-w-0 items-center gap-2">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 shrink-0 object-contain" />
+          <Link to="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2 overflow-visible">
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 object-contain" />
             <span
-              className="font-extrabold text-[11px] sm:text-[12.5px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
+              className="font-extrabold text-[10.5px] sm:text-[12px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Transports{" "}
               <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">Ligneo</span>
             </span>
           </Link>
+
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact" aria-label="Appeler 07 82 45 61 81">
               <span className="nav-phone-icon">
