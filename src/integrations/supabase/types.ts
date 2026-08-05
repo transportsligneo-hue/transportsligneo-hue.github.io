@@ -265,6 +265,260 @@ export type Database = {
         }
         Relationships: []
       }
+      api_estimates: {
+        Row: {
+          created_at: string
+          delivery_address: string
+          distance_km: number | null
+          environment: string
+          id: string
+          organization_id: string
+          pickup_address: string
+          pickup_date: string | null
+          price_ht: number
+          price_ttc: number
+          valid_until: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivery_address: string
+          distance_km?: number | null
+          environment: string
+          id?: string
+          organization_id: string
+          pickup_address: string
+          pickup_date?: string | null
+          price_ht: number
+          price_ttc: number
+          valid_until?: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivery_address?: string
+          distance_km?: number | null
+          environment?: string
+          id?: string
+          organization_id?: string
+          pickup_address?: string
+          pickup_date?: string | null
+          price_ht?: number
+          price_ttc?: number
+          valid_until?: string
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_estimates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_internal_config: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          environment: string
+          id: string
+          key_hash: string
+          key_last4: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          revoked_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          environment: string
+          id?: string
+          key_hash: string
+          key_last4: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string
+          organization_id: string
+          revoked_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          id?: string
+          key_hash?: string
+          key_last4?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          revoked_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_rate_counters: {
+        Row: {
+          api_key_id: string
+          count: number
+          window_start: string
+        }
+        Insert: {
+          api_key_id: string
+          count?: number
+          window_start: string
+        }
+        Update: {
+          api_key_id?: string
+          count?: number
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_rate_counters_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_webhook_deliveries: {
+        Row: {
+          attempt: number
+          created_at: string
+          endpoint_id: string | null
+          error: string | null
+          event: string
+          id: string
+          mission_id: string | null
+          organization_id: string
+          payload: Json
+          status_code: number | null
+          success: boolean
+          target_url: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          endpoint_id?: string | null
+          error?: string | null
+          event: string
+          id?: string
+          mission_id?: string | null
+          organization_id: string
+          payload?: Json
+          status_code?: number | null
+          success?: boolean
+          target_url: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          endpoint_id?: string | null
+          error?: string | null
+          event?: string
+          id?: string
+          mission_id?: string | null
+          organization_id?: string
+          payload?: Json
+          status_code?: number | null
+          success?: boolean
+          target_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "api_webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_webhook_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_webhook_endpoints: {
+        Row: {
+          active: boolean
+          created_at: string
+          environment: string
+          events: string[]
+          id: string
+          organization_id: string
+          secret: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          environment?: string
+          events?: string[]
+          id?: string
+          organization_id: string
+          secret: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          environment?: string
+          events?: string[]
+          id?: string
+          organization_id?: string
+          secret?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_webhook_endpoints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           key: string
@@ -4929,6 +5183,14 @@ export type Database = {
       admin_unlink_mission_from_group: {
         Args: { _mission_id: string }
         Returns: undefined
+      }
+      api_emit_event: {
+        Args: { _event: string; _mission_id: string; _payload: Json }
+        Returns: undefined
+      }
+      api_rate_bump: {
+        Args: { _api_key_id: string; _window: string }
+        Returns: number
       }
       auto_archive_old_records: { Args: never; Returns: undefined }
       can_driver_update_attribution: {
