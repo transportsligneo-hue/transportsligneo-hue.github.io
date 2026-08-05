@@ -186,9 +186,13 @@ function AdminConvoyeurs() {
         if (!d) issues.push(`${getConvoyeurDocLabel(r)} manquant`);
         else if (!isConvoyeurDocApproved(d.statut_validation)) issues.push(`${getConvoyeurDocLabel(r)} non approuvé`);
       }
+      // Bypass admin : la validation reste possible malgré des documents incomplets
+      // (invitation récente, dossier transmis hors plateforme…), après confirmation.
       if (issues.length > 0) {
-        toast.error(`Activation impossible — documents non conformes :\n• ${issues.join("\n• ")}`);
-        return;
+        const ok = await confirmToast(
+          `Documents incomplets :\n• ${issues.join("\n• ")}\n\nValider quand même ce convoyeur ?`,
+        );
+        if (!ok) return;
       }
     }
 
