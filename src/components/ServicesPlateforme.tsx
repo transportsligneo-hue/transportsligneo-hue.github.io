@@ -56,8 +56,25 @@ const CATS: { title: string; items: Feat[] }[] = [
       { Icon: Receipt, label: "Facturation consolidée" },
       { Icon: Headphones, label: "Support dédié 7j/7" },
       { Icon: PhoneCall, label: "Joignable rapidement" },
+      { Icon: IdCard, label: "Gestion des conducteurs par flotte" },
     ],
   },
+  {
+    title: "Gestion de parc & pilotage",
+    items: [
+      { Icon: Wrench, label: "Gestion de parc avec alertes (CT, entretien, documents)" },
+      { Icon: Calculator, label: "TCO par véhicule" },
+      { Icon: LineChart, label: "Suivi des coûts et des mouvements" },
+    ],
+  },
+  {
+    title: "Intelligence & intégrations",
+    items: [
+      { Icon: Bot, label: "Assistant IA 24/7" },
+      { Icon: Code2, label: "API développeurs" },
+    ],
+  },
+
 ];
 
 export default function ServicesPlateforme() {
