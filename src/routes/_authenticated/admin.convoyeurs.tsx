@@ -660,7 +660,7 @@ function AdminConvoyeurs() {
                     <IconButton onClick={() => setSelected(c)} title="Aperçu rapide" tone="neutral">
                       <Eye size={15} />
                     </IconButton>
-                    {(c.statutUnifie === "en_attente" || c.statutUnifie === "en_verif" || c.statutUnifie === "a_corriger") && (
+                    {c.statutUnifie !== "valide" && c.statutUnifie !== "suspendu" && (
                       <>
                         <IconButton
                           onClick={() => updateStatut(c.id, "valide")}
