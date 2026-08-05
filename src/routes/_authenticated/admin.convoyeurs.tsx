@@ -58,6 +58,8 @@ interface Convoyeur {
   type_convoyeur: string;
   created_at: string;
   account_status?: string | null;
+  has_completed_training?: boolean | null;
+  training_status?: string | null;
 }
 
 interface Invitation {
