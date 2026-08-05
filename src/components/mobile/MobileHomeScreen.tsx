@@ -182,8 +182,38 @@ export default function MobileHomeScreen() {
 
 
 
-      {/* === Carte "Estimer mon trajet" (chevauche le hero) · vrai simulateur === */}
-      <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20">
+      {/* === Espace perso + Estimateur === */}
+      <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20 space-y-4">
+        <button
+          type="button"
+          onClick={goEspace}
+          className="w-full flex items-center gap-3 rounded-[20px] px-4 py-3.5 border border-white/[0.08] active:scale-[0.98] transition-transform text-left"
+          style={{
+            background: "linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(15,45,128,0.5) 100%)",
+            boxShadow: "0 14px 34px -16px rgba(59,130,246,0.5)",
+          }}
+        >
+          <span
+            className="w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0"
+            style={{ background: "linear-gradient(135deg, #3b82f6, #1d4ed8)", boxShadow: "0 8px 20px -6px rgba(59,130,246,0.55)" }}
+          >
+            {isAuthenticated && user?.email ? (
+              <span className="text-sm font-bold">{user.email[0]?.toUpperCase()}</span>
+            ) : (
+              <LogIn size={18} />
+            )}
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-[14px] text-white font-bold tracking-wide">
+              {espaceLabel}
+            </span>
+            <span className="block text-white/60 text-[11.5px] mt-0.5 truncate">
+              {isAuthenticated ? (user?.email ?? "Tableau de bord") : "Accéder à mon compte"}
+            </span>
+          </span>
+          <ChevronRight size={16} className="text-[#93c5fd] shrink-0" />
+        </button>
+
         <MobileDevisGenerator />
       </div>
 

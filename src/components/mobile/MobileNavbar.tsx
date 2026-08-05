@@ -81,9 +81,9 @@ export default function MobileNavbar() {
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Link to="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2 overflow-visible">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 object-contain" />
+            <img src={logoLigneo} alt="Transports Ligneo" className="h-7 w-7 sm:h-9 sm:w-9 shrink-0 object-contain" />
             <span
-              className="font-extrabold text-[10.5px] sm:text-[12px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
+              className="font-extrabold text-[10px] sm:text-[12px] tracking-[0.015em] uppercase text-white whitespace-nowrap"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Transports{" "}
@@ -92,16 +92,17 @@ export default function MobileNavbar() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact" aria-label="Appeler 07 82 45 61 81">
+            <a
+              href="tel:+33782456181"
+              className="nav-phone-block mnav-phone-compact mnav-phone-dynamic"
+              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+            >
               <span className="nav-phone-icon">
                 <Phone size={13} strokeWidth={2.4} />
                 <span className="nav-phone-pulse" aria-hidden="true" />
+                <span className="nav-phone-pulse nav-phone-pulse-delay" aria-hidden="true" />
               </span>
             </a>
-            <button onClick={goEspace} className="r4-btn-connect mnav-connect-compact w-[38px] h-[38px] p-0 justify-center sm:w-auto sm:min-h-[38px] sm:px-[13px] sm:gap-1.5" type="button" aria-label={isAuthenticated ? "Mon espace" : "Connexion"}>
-              <User size={12} />
-              <span className="hidden sm:inline">{isAuthenticated ? "Espace" : "Connexion"}</span>
-            </button>
           </div>
         </div>
         <nav className="px-3 pb-2">
