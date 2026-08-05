@@ -2689,6 +2689,7 @@ export type Database = {
           resolu_at: string | null
           statut: string
           titre: string
+          type_incident: string | null
           updated_at: string
         }
         Insert: {
@@ -2705,6 +2706,7 @@ export type Database = {
           resolu_at?: string | null
           statut?: string
           titre: string
+          type_incident?: string | null
           updated_at?: string
         }
         Update: {
@@ -2721,6 +2723,7 @@ export type Database = {
           resolu_at?: string | null
           statut?: string
           titre?: string
+          type_incident?: string | null
           updated_at?: string
         }
         Relationships: [
