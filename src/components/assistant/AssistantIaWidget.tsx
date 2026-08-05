@@ -58,13 +58,13 @@ const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace
 const PROACTIVE_PREF_KEY = "ligneo_vroomy_proactive_off";
 
 /** Mascotte officielle Vroomy (voiture bleue néon Transports Ligneo). */
-function VroomyFace({ size = 28, alt }: { size?: number; alt?: string }) {
+function VroomyFace({ size = 28, alt, className }: { size?: number; alt?: string; className?: string }) {
   return (
     <img
       src={vroomyMascotte.url}
       width={size}
       height={size}
-      className="vrm-mascotte"
+      className={`vrm-mascotte${className ? ` ${className}` : ""}`}
       alt={alt ?? ""}
       aria-hidden={alt ? undefined : true}
       loading="lazy"
