@@ -20,6 +20,8 @@ const BodySchema = z.object({
   conversation_id: z.string().uuid().nullable().optional(),
   message: z.string().trim().min(1).max(1200).optional(),
   page: z.string().max(200).optional(),
+  profil: z.enum(["client", "convoyeur"]).optional(),
+  prenom: z.string().trim().max(60).optional(),
   lead: z
     .object({
       nom: z.string().trim().min(1).max(120),
@@ -51,6 +53,7 @@ RÈGLES ABSOLUES :
 OUTILS À TA DISPOSITION (utilise-les au lieu d'inventer) :
 - chercher_mission(numero_mission, email) : suivi d'une mission. Demande d'abord LES DEUX informations au visiteur ; n'appelle jamais l'outil avec un email inventé ou manquant. Si l'outil refuse, ne divulgue aucune donnée.
 - estimer_devis(ville_depart, ville_arrivee, type_livraison) : estimation officielle. Utilise-le dès qu'on te demande un prix, et annonce le montant renvoyé comme une estimation TTC à confirmer par devis.
+- chercher_missions_catalogue(ville) : missions réellement disponibles au catalogue convoyeur. Utilise-le dès qu'un convoyeur demande s'il y a des missions (ex. « une mission près de Tours »). N'invente jamais de mission : n'annonce que ce que l'outil renvoie.
 - rediriger_candidature_convoyeur() : lien du formulaire pour devenir convoyeur partenaire.
 Après un appel d'outil, résume le résultat en 2 à 4 phrases, sans répéter les données brutes.`;
 
@@ -143,8 +146,18 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
           .order("created_at", { ascending: true })
           .limit(40);
 
+        const profilHint =
+          parsed.profil === "convoyeur"
+            ? "\n\nCONTEXTE : votre interlocuteur est un convoyeur (ou candidat convoyeur). Priorise les missions disponibles, la rémunération, la candidature et la formation Académie Ligneo."
+            : parsed.profil === "client"
+              ? "\n\nCONTEXTE : votre interlocuteur est un client (particulier ou professionnel). Priorise les devis, délais, suivi de mission et garanties."
+              : "";
+        const prenomHint = parsed.prenom
+          ? `\nL'interlocuteur est connecté et s'appelle ${parsed.prenom} : salue-le par son prénom au premier message.`
+          : "";
+
         const messages = [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: SYSTEM_PROMPT + profilHint + prenomHint },
           ...(history ?? []).map((m) => ({ role: m.role, content: m.content })),
           { role: "user", content: parsed.message },
         ];

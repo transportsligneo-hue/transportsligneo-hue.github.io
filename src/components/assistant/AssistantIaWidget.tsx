@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Vroomy — assistant flottant de Transports Ligneo (site public).
@@ -8,16 +9,45 @@ import { Send, X, Phone } from "lucide-react";
  * Seuls le nom, la mascotte et le ton changent.
  */
 
-type ChatMsg = { role: "user" | "assistant"; content: string };
+type Profil = "client" | "convoyeur";
 
-const QUICK_REPLIES: Array<{ icon: string; label: string }> = [
-  { icon: "💰", label: "Combien coûte un convoyage ?" },
-  { icon: "📦", label: "Où en est ma mission ?" },
-  { icon: "👋", label: "Devenir convoyeur" },
-];
+type VroomyCard =
+  | { type: "mission"; data: Record<string, unknown> }
+  | { type: "devis"; data: Record<string, unknown> }
+  | { type: "catalogue"; data: { ville: string | null; missions: Array<Record<string, unknown>> } };
+
+type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
+
+const QUICK_REPLIES: Record<Profil, Array<{ icon: string; label: string }>> = {
+  client: [
+    { icon: "💰", label: "Combien coûte un convoyage Paris — Lyon ?" },
+    { icon: "📦", label: "Où en est ma mission ?" },
+    { icon: "🛡️", label: "Que couvre l'assurance pendant le convoyage ?" },
+  ],
+  convoyeur: [
+    { icon: "🧭", label: "Trouve-moi une mission près de Tours" },
+    { icon: "📋", label: "Y a-t-il des missions disponibles aujourd'hui ?" },
+    { icon: "👋", label: "Comment devenir convoyeur partenaire ?" },
+  ],
+};
+
+const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; desc: string }>> = {
+  client: [
+    { Icon: Calculator, title: "Estimer un convoyage", desc: "Prix, distance et délai depuis la grille officielle" },
+    { Icon: MapPin, title: "Suivre une mission", desc: "Avec votre numéro de mission et votre email" },
+    { Icon: Phone, title: "Vous faire rappeler", desc: "Un conseiller Ligneo vous recontacte" },
+  ],
+  convoyeur: [
+    { Icon: Search, title: "Chercher une mission", desc: "Dans le vrai catalogue publié, par ville" },
+    { Icon: GraduationCap, title: "Devenir convoyeur", desc: "Prérequis, documents et Académie Ligneo" },
+    { Icon: Phone, title: "Parler à l'équipe", desc: "Rappel par un conseiller Ligneo" },
+  ],
+};
 
 const WELCOME =
-  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Je peux vous aider sur nos services, nos tarifs, nos délais ou le suivi d'une mission.";
+  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
+
+const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
 
@@ -46,6 +76,61 @@ function sessionToken() {
   return t;
 }
 
+function fmtEur(v: unknown) {
+  return typeof v === "number" ? `${Math.round(v)} €` : "—";
+}
+
+function VroomyCardView({ card }: { card: VroomyCard }) {
+  if (card.type === "devis") {
+    const d = card.data as Record<string, unknown>;
+    return (
+      <div className="vrm-card">
+        <div className="vrm-card-title">Estimation · {String(d.depart)} → {String(d.arrivee)}</div>
+        <div className="vrm-card-price">{fmtEur(d.prix_ttc)} TTC</div>
+        <div className="vrm-card-meta">
+          {d.distance_km ? `${d.distance_km} km · ` : ""}
+          {String(d.delai_estime ?? "")} · {String(d.type_livraison ?? "")}
+        </div>
+      </div>
+    );
+  }
+  if (card.type === "mission") {
+    const d = card.data as Record<string, unknown>;
+    return (
+      <div className="vrm-card">
+        <div className="vrm-card-title">Mission {String(d.numero)}</div>
+        <div className="vrm-card-price">{String(d.statut)}</div>
+        <div className="vrm-card-meta">
+          {String(d.depart)} → {String(d.arrivee)}
+          {d.vehicule ? ` · ${String(d.vehicule)}` : ""}
+        </div>
+      </div>
+    );
+  }
+  const missions = card.data.missions ?? [];
+  return (
+    <div className="vrm-card">
+      <div className="vrm-card-title">
+        Missions disponibles{card.data.ville ? ` · ${card.data.ville}` : ""}
+      </div>
+      {missions.map((m, i) => (
+        <div key={i} className="vrm-mini-mission">
+          <div>
+            <strong>
+              {String(m.depart ?? "?")} → {String(m.arrivee ?? "?")}
+            </strong>
+            <em>
+              {m.date ? String(m.date) : "Date à confirmer"}
+              {m.vehicule ? ` · ${String(m.vehicule)}` : ""}
+            </em>
+          </div>
+          <span>{fmtEur(m.remuneration)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AssistantIaWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
@@ -54,6 +139,9 @@ export default function AssistantIaWidget() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [handoff, setHandoff] = useState(false);
+  const [profil, setProfil] = useState<Profil | null>(null);
+  const [prenom, setPrenom] = useState<string | null>(null);
+  const [showCaps, setShowCaps] = useState(true);
   const [leadSent, setLeadSent] = useState(false);
   const [lead, setLead] = useState({ nom: "", telephone: "" });
   const convId = useRef<string | null>(null);
@@ -72,6 +160,39 @@ export default function AssistantIaWidget() {
       inputRef.current?.focus();
     }
   }, [open]);
+
+  /* Détection automatique du profil réel si le visiteur est connecté */
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user || !alive) return;
+      const [{ data: conv }, { data: prof }] = await Promise.all([
+        supabase.from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("prenom").eq("id", user.id).maybeSingle(),
+      ]);
+      if (!alive) return;
+      setProfil(conv?.id ? "convoyeur" : "client");
+      const p = (prof as { prenom?: string } | null)?.prenom;
+      if (p) setPrenom(p);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  /* Apparition proactive sur les pages tarifs / estimation */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!PROACTIVE_PATHS.some((p) => pathname.startsWith(p))) return;
+    if (window.sessionStorage.getItem("ligneo_vroomy_proactive") === "1") return;
+    const t = window.setTimeout(() => {
+      window.sessionStorage.setItem("ligneo_vroomy_proactive", "1");
+      setOpen(true);
+    }, 18000);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
@@ -97,12 +218,15 @@ export default function AssistantIaWidget() {
             conversation_id: convId.current,
             message: value,
             page: typeof window !== "undefined" ? window.location.pathname : undefined,
+            profil: profil ?? undefined,
+            prenom: prenom ?? undefined,
           }),
         });
         const data = (await res.json()) as {
           conversation_id?: string;
           reply?: string;
           handoff?: boolean;
+          cards?: VroomyCard[];
           error?: string;
         };
         if (data.conversation_id) convId.current = data.conversation_id;
@@ -113,6 +237,7 @@ export default function AssistantIaWidget() {
             content:
               data.reply ??
               "Panne sèche de mon côté 😅 Je ne parviens pas à répondre pour le moment. Vous pouvez appeler le 07 82 45 61 81.",
+            cards: data.cards && data.cards.length > 0 ? data.cards : undefined,
           },
         ]);
         if (data.handoff) setHandoff(true);
@@ -131,7 +256,7 @@ export default function AssistantIaWidget() {
         inputRef.current?.focus();
       }
     },
-    [typing],
+    [typing, profil, prenom],
   );
 
   const sendLead = useCallback(async () => {
@@ -215,13 +340,54 @@ export default function AssistantIaWidget() {
                   <VroomyFace size={16} />
                 </div>
               )}
-              <div className="vrm-bubble">{m.content}</div>
+              <div className="vrm-bubble">
+                {m.content}
+                {m.cards?.map((c, ci) => (
+                  <VroomyCardView key={ci} card={c} />
+                ))}
+              </div>
             </div>
           ))}
 
-          {messages.length === 1 && (
+          {!profil && (
+            <div className="vrm-roles">
+              <div className="vrm-roles-label">Vous êtes…</div>
+              <div className="vrm-roles-row">
+                <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
+                  <span>🚗</span> Client
+                </button>
+                <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
+                  <span>🧭</span> Convoyeur
+                </button>
+              </div>
+            </div>
+          )}
+
+          {profil && showCaps && messages.length <= 3 && (
+            <div className="vrm-caps">
+              <div className="vrm-caps-head">
+                <span>Ce que Vroomy sait faire</span>
+                <button type="button" onClick={() => setShowCaps(false)} aria-label="Masquer">
+                  <X size={13} />
+                </button>
+              </div>
+              {CAPABILITIES[profil].map((c) => (
+                <div key={c.title} className="vrm-cap">
+                  <span className="vrm-cap-ic">
+                    <c.Icon size={14} />
+                  </span>
+                  <div>
+                    <strong>{c.title}</strong>
+                    <em>{c.desc}</em>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {profil && messages.length <= 3 && (
             <div className="vrm-chips">
-              {QUICK_REPLIES.map((q) => (
+              {QUICK_REPLIES[profil].map((q) => (
                 <button
                   key={q.label}
                   type="button"
