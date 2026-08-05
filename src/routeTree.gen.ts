@@ -156,6 +156,7 @@ import { Route as ApiPublicV1MissionsIndexRouteImport } from './routes/api/publi
 import { Route as ApiPublicV1QuotesEstimateRouteImport } from './routes/api/public/v1/quotes/estimate'
 import { Route as ApiPublicV1QuotesQuoteIdRouteImport } from './routes/api/public/v1/quotes/$quoteId'
 import { Route as ApiPublicV1InvoicesInvoiceIdRouteImport } from './routes/api/public/v1/invoices/$invoiceId'
+import { Route as ApiPublicV1InternalMissionEventRouteImport } from './routes/api/public/v1/internal/mission-event'
 import { Route as AuthenticatedConvoyeurFormationModuleIdRouteImport } from './routes/_authenticated/convoyeur.formation.module.$id'
 import { Route as ApiPublicV1MissionsMissionIdIndexRouteImport } from './routes/api/public/v1/missions/$missionId/index'
 import { Route as ApiPublicV1MissionsMissionIdTrackingRouteImport } from './routes/api/public/v1/missions/$missionId/tracking'
@@ -989,6 +990,12 @@ const ApiPublicV1InvoicesInvoiceIdRoute =
     path: '/api/public/v1/invoices/$invoiceId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicV1InternalMissionEventRoute =
+  ApiPublicV1InternalMissionEventRouteImport.update({
+    id: '/api/public/v1/internal/mission-event',
+    path: '/api/public/v1/internal/mission-event',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedConvoyeurFormationModuleIdRoute =
   AuthenticatedConvoyeurFormationModuleIdRouteImport.update({
     id: '/module/$id',
@@ -1157,6 +1164,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/internal/mission-event': typeof ApiPublicV1InternalMissionEventRoute
   '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
   '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
   '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
@@ -1300,6 +1308,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/internal/mission-event': typeof ApiPublicV1InternalMissionEventRoute
   '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
   '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
   '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
@@ -1454,6 +1463,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/_authenticated/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/internal/mission-event': typeof ApiPublicV1InternalMissionEventRoute
   '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
   '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
   '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
@@ -1608,6 +1618,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions/'
     | '/dashboard-pro/nouvelle-mission/'
     | '/convoyeur/formation/module/$id'
+    | '/api/public/v1/internal/mission-event'
     | '/api/public/v1/invoices/$invoiceId'
     | '/api/public/v1/quotes/$quoteId'
     | '/api/public/v1/quotes/estimate'
@@ -1751,6 +1762,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-mission'
     | '/convoyeur/formation/module/$id'
+    | '/api/public/v1/internal/mission-event'
     | '/api/public/v1/invoices/$invoiceId'
     | '/api/public/v1/quotes/$quoteId'
     | '/api/public/v1/quotes/estimate'
@@ -1904,6 +1916,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/missions/'
     | '/_authenticated/dashboard-pro/nouvelle-mission/'
     | '/_authenticated/convoyeur/formation/module/$id'
+    | '/api/public/v1/internal/mission-event'
     | '/api/public/v1/invoices/$invoiceId'
     | '/api/public/v1/quotes/$quoteId'
     | '/api/public/v1/quotes/estimate'
@@ -1965,6 +1978,7 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicV1InternalMissionEventRoute: typeof ApiPublicV1InternalMissionEventRoute
   ApiPublicV1InvoicesInvoiceIdRoute: typeof ApiPublicV1InvoicesInvoiceIdRoute
   ApiPublicV1QuotesQuoteIdRoute: typeof ApiPublicV1QuotesQuoteIdRoute
   ApiPublicV1QuotesEstimateRoute: typeof ApiPublicV1QuotesEstimateRoute
@@ -3006,6 +3020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1InvoicesInvoiceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/internal/mission-event': {
+      id: '/api/public/v1/internal/mission-event'
+      path: '/api/public/v1/internal/mission-event'
+      fullPath: '/api/public/v1/internal/mission-event'
+      preLoaderRoute: typeof ApiPublicV1InternalMissionEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/convoyeur/formation/module/$id': {
       id: '/_authenticated/convoyeur/formation/module/$id'
       path: '/module/$id'
@@ -3510,6 +3531,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicV1InternalMissionEventRoute: ApiPublicV1InternalMissionEventRoute,
   ApiPublicV1InvoicesInvoiceIdRoute: ApiPublicV1InvoicesInvoiceIdRoute,
   ApiPublicV1QuotesQuoteIdRoute: ApiPublicV1QuotesQuoteIdRoute,
   ApiPublicV1QuotesEstimateRoute: ApiPublicV1QuotesEstimateRoute,
