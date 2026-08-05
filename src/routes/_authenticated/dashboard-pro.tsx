@@ -31,6 +31,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
   }
   base.push(
     { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
+    { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
     { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
   );
   return base;

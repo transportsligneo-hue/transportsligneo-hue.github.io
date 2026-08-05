@@ -24,6 +24,7 @@ import { Route as InscriptionFlotteRouteImport } from './routes/inscription-flot
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
+import { Route as DeveloppeursRouteImport } from './routes/developpeurs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
@@ -79,6 +80,7 @@ import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
+import { Route as AuthenticatedDashboardProApiRouteImport } from './routes/_authenticated/dashboard-pro.api'
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
@@ -149,7 +151,15 @@ import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './route
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
 import { Route as AuthenticatedAdminConvoyeursConvoyeurIdRouteImport } from './routes/_authenticated/admin.convoyeurs.$convoyeurId'
 import { Route as AuthenticatedAdminClientsClientIdRouteImport } from './routes/_authenticated/admin.clients.$clientId'
+import { Route as ApiPublicV1QuotesIndexRouteImport } from './routes/api/public/v1/quotes/index'
+import { Route as ApiPublicV1MissionsIndexRouteImport } from './routes/api/public/v1/missions/index'
+import { Route as ApiPublicV1QuotesEstimateRouteImport } from './routes/api/public/v1/quotes/estimate'
+import { Route as ApiPublicV1QuotesQuoteIdRouteImport } from './routes/api/public/v1/quotes/$quoteId'
+import { Route as ApiPublicV1InvoicesInvoiceIdRouteImport } from './routes/api/public/v1/invoices/$invoiceId'
 import { Route as AuthenticatedConvoyeurFormationModuleIdRouteImport } from './routes/_authenticated/convoyeur.formation.module.$id'
+import { Route as ApiPublicV1MissionsMissionIdIndexRouteImport } from './routes/api/public/v1/missions/$missionId/index'
+import { Route as ApiPublicV1MissionsMissionIdTrackingRouteImport } from './routes/api/public/v1/missions/$missionId/tracking'
+import { Route as ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport } from './routes/api/public/v1/missions/$missionId/proof-of-delivery'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -224,6 +234,11 @@ const InscriptionClientRoute = InscriptionClientRouteImport.update({
 const DevenirConvoyeurRoute = DevenirConvoyeurRouteImport.update({
   id: '/devenir-convoyeur',
   path: '/devenir-convoyeur',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeveloppeursRoute = DeveloppeursRouteImport.update({
+  id: '/developpeurs',
+  path: '/developpeurs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -525,6 +540,12 @@ const AuthenticatedDashboardProConducteursRoute =
   AuthenticatedDashboardProConducteursRouteImport.update({
     id: '/conducteurs',
     path: '/conducteurs',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProApiRoute =
+  AuthenticatedDashboardProApiRouteImport.update({
+    id: '/api',
+    path: '/api',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProAdressesRoute =
@@ -939,11 +960,58 @@ const AuthenticatedAdminClientsClientIdRoute =
     path: '/$clientId',
     getParentRoute: () => AuthenticatedAdminClientsRoute,
   } as any)
+const ApiPublicV1QuotesIndexRoute = ApiPublicV1QuotesIndexRouteImport.update({
+  id: '/api/public/v1/quotes/',
+  path: '/api/public/v1/quotes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1MissionsIndexRoute =
+  ApiPublicV1MissionsIndexRouteImport.update({
+    id: '/api/public/v1/missions/',
+    path: '/api/public/v1/missions/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1QuotesEstimateRoute =
+  ApiPublicV1QuotesEstimateRouteImport.update({
+    id: '/api/public/v1/quotes/estimate',
+    path: '/api/public/v1/quotes/estimate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1QuotesQuoteIdRoute =
+  ApiPublicV1QuotesQuoteIdRouteImport.update({
+    id: '/api/public/v1/quotes/$quoteId',
+    path: '/api/public/v1/quotes/$quoteId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1InvoicesInvoiceIdRoute =
+  ApiPublicV1InvoicesInvoiceIdRouteImport.update({
+    id: '/api/public/v1/invoices/$invoiceId',
+    path: '/api/public/v1/invoices/$invoiceId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedConvoyeurFormationModuleIdRoute =
   AuthenticatedConvoyeurFormationModuleIdRouteImport.update({
     id: '/module/$id',
     path: '/module/$id',
     getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
+const ApiPublicV1MissionsMissionIdIndexRoute =
+  ApiPublicV1MissionsMissionIdIndexRouteImport.update({
+    id: '/api/public/v1/missions/$missionId/',
+    path: '/api/public/v1/missions/$missionId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1MissionsMissionIdTrackingRoute =
+  ApiPublicV1MissionsMissionIdTrackingRouteImport.update({
+    id: '/api/public/v1/missions/$missionId/tracking',
+    path: '/api/public/v1/missions/$missionId/tracking',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1MissionsMissionIdProofOfDeliveryRoute =
+  ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport.update({
+    id: '/api/public/v1/missions/$missionId/proof-of-delivery',
+    path: '/api/public/v1/missions/$missionId/proof-of-delivery',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -957,6 +1025,7 @@ export interface FileRoutesByFullPath {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
@@ -1029,6 +1098,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
@@ -1087,6 +1157,14 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
+  '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
+  '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
+  '/api/public/v1/missions/': typeof ApiPublicV1MissionsIndexRoute
+  '/api/public/v1/quotes/': typeof ApiPublicV1QuotesIndexRoute
+  '/api/public/v1/missions/$missionId/proof-of-delivery': typeof ApiPublicV1MissionsMissionIdProofOfDeliveryRoute
+  '/api/public/v1/missions/$missionId/tracking': typeof ApiPublicV1MissionsMissionIdTrackingRoute
+  '/api/public/v1/missions/$missionId/': typeof ApiPublicV1MissionsMissionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1099,6 +1177,7 @@ export interface FileRoutesByTo {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
@@ -1164,6 +1243,7 @@ export interface FileRoutesByTo {
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
@@ -1220,6 +1300,14 @@ export interface FileRoutesByTo {
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
+  '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
+  '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
+  '/api/public/v1/missions': typeof ApiPublicV1MissionsIndexRoute
+  '/api/public/v1/quotes': typeof ApiPublicV1QuotesIndexRoute
+  '/api/public/v1/missions/$missionId/proof-of-delivery': typeof ApiPublicV1MissionsMissionIdProofOfDeliveryRoute
+  '/api/public/v1/missions/$missionId/tracking': typeof ApiPublicV1MissionsMissionIdTrackingRoute
+  '/api/public/v1/missions/$missionId': typeof ApiPublicV1MissionsMissionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1234,6 +1322,7 @@ export interface FileRoutesById {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
@@ -1306,6 +1395,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/_authenticated/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
@@ -1364,6 +1454,14 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/missions/': typeof AuthenticatedDashboardProMissionsIndexRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/': typeof AuthenticatedDashboardProNouvelleMissionIndexRoute
   '/_authenticated/convoyeur/formation/module/$id': typeof AuthenticatedConvoyeurFormationModuleIdRoute
+  '/api/public/v1/invoices/$invoiceId': typeof ApiPublicV1InvoicesInvoiceIdRoute
+  '/api/public/v1/quotes/$quoteId': typeof ApiPublicV1QuotesQuoteIdRoute
+  '/api/public/v1/quotes/estimate': typeof ApiPublicV1QuotesEstimateRoute
+  '/api/public/v1/missions/': typeof ApiPublicV1MissionsIndexRoute
+  '/api/public/v1/quotes/': typeof ApiPublicV1QuotesIndexRoute
+  '/api/public/v1/missions/$missionId/proof-of-delivery': typeof ApiPublicV1MissionsMissionIdProofOfDeliveryRoute
+  '/api/public/v1/missions/$missionId/tracking': typeof ApiPublicV1MissionsMissionIdTrackingRoute
+  '/api/public/v1/missions/$missionId/': typeof ApiPublicV1MissionsMissionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1378,6 +1476,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
@@ -1450,6 +1549,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
+    | '/dashboard-pro/api'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
@@ -1508,6 +1608,14 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions/'
     | '/dashboard-pro/nouvelle-mission/'
     | '/convoyeur/formation/module/$id'
+    | '/api/public/v1/invoices/$invoiceId'
+    | '/api/public/v1/quotes/$quoteId'
+    | '/api/public/v1/quotes/estimate'
+    | '/api/public/v1/missions/'
+    | '/api/public/v1/quotes/'
+    | '/api/public/v1/missions/$missionId/proof-of-delivery'
+    | '/api/public/v1/missions/$missionId/tracking'
+    | '/api/public/v1/missions/$missionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1520,6 +1628,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
@@ -1585,6 +1694,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
+    | '/dashboard-pro/api'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
@@ -1641,6 +1751,14 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-mission'
     | '/convoyeur/formation/module/$id'
+    | '/api/public/v1/invoices/$invoiceId'
+    | '/api/public/v1/quotes/$quoteId'
+    | '/api/public/v1/quotes/estimate'
+    | '/api/public/v1/missions'
+    | '/api/public/v1/quotes'
+    | '/api/public/v1/missions/$missionId/proof-of-delivery'
+    | '/api/public/v1/missions/$missionId/tracking'
+    | '/api/public/v1/missions/$missionId'
   id:
     | '__root__'
     | '/'
@@ -1654,6 +1772,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
     | '/inscription-convoyeur'
@@ -1726,6 +1845,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
     | '/_authenticated/dashboard-pro/adresses'
+    | '/_authenticated/dashboard-pro/api'
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
@@ -1784,6 +1904,14 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/missions/'
     | '/_authenticated/dashboard-pro/nouvelle-mission/'
     | '/_authenticated/convoyeur/formation/module/$id'
+    | '/api/public/v1/invoices/$invoiceId'
+    | '/api/public/v1/quotes/$quoteId'
+    | '/api/public/v1/quotes/estimate'
+    | '/api/public/v1/missions/'
+    | '/api/public/v1/quotes/'
+    | '/api/public/v1/missions/$missionId/proof-of-delivery'
+    | '/api/public/v1/missions/$missionId/tracking'
+    | '/api/public/v1/missions/$missionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1798,6 +1926,7 @@ export interface RootRouteChildren {
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  DeveloppeursRoute: typeof DeveloppeursRoute
   DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
@@ -1836,6 +1965,14 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicV1InvoicesInvoiceIdRoute: typeof ApiPublicV1InvoicesInvoiceIdRoute
+  ApiPublicV1QuotesQuoteIdRoute: typeof ApiPublicV1QuotesQuoteIdRoute
+  ApiPublicV1QuotesEstimateRoute: typeof ApiPublicV1QuotesEstimateRoute
+  ApiPublicV1MissionsIndexRoute: typeof ApiPublicV1MissionsIndexRoute
+  ApiPublicV1QuotesIndexRoute: typeof ApiPublicV1QuotesIndexRoute
+  ApiPublicV1MissionsMissionIdProofOfDeliveryRoute: typeof ApiPublicV1MissionsMissionIdProofOfDeliveryRoute
+  ApiPublicV1MissionsMissionIdTrackingRoute: typeof ApiPublicV1MissionsMissionIdTrackingRoute
+  ApiPublicV1MissionsMissionIdIndexRoute: typeof ApiPublicV1MissionsMissionIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1943,6 +2080,13 @@ declare module '@tanstack/react-router' {
       path: '/devenir-convoyeur'
       fullPath: '/devenir-convoyeur'
       preLoaderRoute: typeof DevenirConvoyeurRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/developpeurs': {
+      id: '/developpeurs'
+      path: '/developpeurs'
+      fullPath: '/developpeurs'
+      preLoaderRoute: typeof DeveloppeursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -2328,6 +2472,13 @@ declare module '@tanstack/react-router' {
       path: '/conducteurs'
       fullPath: '/dashboard-pro/conducteurs'
       preLoaderRoute: typeof AuthenticatedDashboardProConducteursRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/api': {
+      id: '/_authenticated/dashboard-pro/api'
+      path: '/api'
+      fullPath: '/dashboard-pro/api'
+      preLoaderRoute: typeof AuthenticatedDashboardProApiRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/adresses': {
@@ -2820,12 +2971,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsClientIdRouteImport
       parentRoute: typeof AuthenticatedAdminClientsRoute
     }
+    '/api/public/v1/quotes/': {
+      id: '/api/public/v1/quotes/'
+      path: '/api/public/v1/quotes'
+      fullPath: '/api/public/v1/quotes/'
+      preLoaderRoute: typeof ApiPublicV1QuotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/missions/': {
+      id: '/api/public/v1/missions/'
+      path: '/api/public/v1/missions'
+      fullPath: '/api/public/v1/missions/'
+      preLoaderRoute: typeof ApiPublicV1MissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/quotes/estimate': {
+      id: '/api/public/v1/quotes/estimate'
+      path: '/api/public/v1/quotes/estimate'
+      fullPath: '/api/public/v1/quotes/estimate'
+      preLoaderRoute: typeof ApiPublicV1QuotesEstimateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/quotes/$quoteId': {
+      id: '/api/public/v1/quotes/$quoteId'
+      path: '/api/public/v1/quotes/$quoteId'
+      fullPath: '/api/public/v1/quotes/$quoteId'
+      preLoaderRoute: typeof ApiPublicV1QuotesQuoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/invoices/$invoiceId': {
+      id: '/api/public/v1/invoices/$invoiceId'
+      path: '/api/public/v1/invoices/$invoiceId'
+      fullPath: '/api/public/v1/invoices/$invoiceId'
+      preLoaderRoute: typeof ApiPublicV1InvoicesInvoiceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/convoyeur/formation/module/$id': {
       id: '/_authenticated/convoyeur/formation/module/$id'
       path: '/module/$id'
       fullPath: '/convoyeur/formation/module/$id'
       preLoaderRoute: typeof AuthenticatedConvoyeurFormationModuleIdRouteImport
       parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
+    '/api/public/v1/missions/$missionId/': {
+      id: '/api/public/v1/missions/$missionId/'
+      path: '/api/public/v1/missions/$missionId'
+      fullPath: '/api/public/v1/missions/$missionId/'
+      preLoaderRoute: typeof ApiPublicV1MissionsMissionIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/missions/$missionId/tracking': {
+      id: '/api/public/v1/missions/$missionId/tracking'
+      path: '/api/public/v1/missions/$missionId/tracking'
+      fullPath: '/api/public/v1/missions/$missionId/tracking'
+      preLoaderRoute: typeof ApiPublicV1MissionsMissionIdTrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/missions/$missionId/proof-of-delivery': {
+      id: '/api/public/v1/missions/$missionId/proof-of-delivery'
+      path: '/api/public/v1/missions/$missionId/proof-of-delivery'
+      fullPath: '/api/public/v1/missions/$missionId/proof-of-delivery'
+      preLoaderRoute: typeof ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -3095,6 +3302,7 @@ const AuthenticatedDashboardProNouvelleMissionRouteWithChildren =
 
 interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProAdressesRoute: typeof AuthenticatedDashboardProAdressesRoute
+  AuthenticatedDashboardProApiRoute: typeof AuthenticatedDashboardProApiRoute
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
@@ -3110,6 +3318,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
   {
     AuthenticatedDashboardProAdressesRoute:
       AuthenticatedDashboardProAdressesRoute,
+    AuthenticatedDashboardProApiRoute: AuthenticatedDashboardProApiRoute,
     AuthenticatedDashboardProConducteursRoute:
       AuthenticatedDashboardProConducteursRoute,
     AuthenticatedDashboardProDevisInstantaneRoute:
@@ -3261,6 +3470,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommentCaMarcheRoute: CommentCaMarcheRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  DeveloppeursRoute: DeveloppeursRoute,
   DevenirConvoyeurRoute: DevenirConvoyeurRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
@@ -3300,6 +3510,17 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicV1InvoicesInvoiceIdRoute: ApiPublicV1InvoicesInvoiceIdRoute,
+  ApiPublicV1QuotesQuoteIdRoute: ApiPublicV1QuotesQuoteIdRoute,
+  ApiPublicV1QuotesEstimateRoute: ApiPublicV1QuotesEstimateRoute,
+  ApiPublicV1MissionsIndexRoute: ApiPublicV1MissionsIndexRoute,
+  ApiPublicV1QuotesIndexRoute: ApiPublicV1QuotesIndexRoute,
+  ApiPublicV1MissionsMissionIdProofOfDeliveryRoute:
+    ApiPublicV1MissionsMissionIdProofOfDeliveryRoute,
+  ApiPublicV1MissionsMissionIdTrackingRoute:
+    ApiPublicV1MissionsMissionIdTrackingRoute,
+  ApiPublicV1MissionsMissionIdIndexRoute:
+    ApiPublicV1MissionsMissionIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
