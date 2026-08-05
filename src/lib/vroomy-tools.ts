@@ -316,6 +316,8 @@ export async function runVroomyTool(
       return chercherMission(admin, args);
     case "estimer_devis":
       return estimerDevis(args);
+    case "chercher_missions_catalogue":
+      return chercherMissionsCatalogue(admin, args);
     case "rediriger_candidature_convoyeur":
       return {
         payload: {
