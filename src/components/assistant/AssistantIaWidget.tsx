@@ -415,14 +415,19 @@ export default function AssistantIaWidget() {
       <button
         type="button"
         ref={launcherRef}
-        className="vrm-launcher"
+        className="vrm-launcher vrm-chat-launcher"
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
         style={{ display: open ? "none" : undefined }}
       >
-        <VroomyFace size={44} />
+        <span className="vrm-launcher-mascotte">
+          <VroomyFace size={44} />
+        </span>
+        <span className="vrm-chat-bubble" aria-hidden="true">
+          <MessageCircle size={18} strokeWidth={2.4} />
+        </span>
         {notif && (
           <span className="vrm-badge" aria-hidden="true">
             1
