@@ -60,7 +60,16 @@ export default function FleetPageHeader({
                 <span className="fleet-header-hl relative z-0 text-[#2f5fff]">{highlight}</span>
               </>
             ) : null}
-            {badge ? <span className="fleet-header-badge">{badge}</span> : null}
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={logoAlt ?? "Logo"}
+                className="ml-2.5 inline-block h-7 w-auto max-w-[110px] align-middle object-contain"
+                loading="lazy"
+              />
+            ) : badge ? (
+              <span className="fleet-header-badge">{badge}</span>
+            ) : null}
           </h1>
           {subtitle ? (
             <p className="mt-2 max-w-[520px] text-[13.5px] text-[#70727d]">{subtitle}</p>
