@@ -1213,6 +1213,84 @@ export type Database = {
           },
         ]
       }
+      company_settings: {
+        Row: {
+          adresse_cp: string | null
+          adresse_ligne1: string | null
+          adresse_pays: string | null
+          adresse_ville: string | null
+          assurance_mention: string | null
+          banque_nom: string | null
+          bic: string | null
+          capital_social: string | null
+          created_at: string
+          email_contact: string | null
+          forme_juridique: string | null
+          iban: string | null
+          id: string
+          raison_sociale: string | null
+          rcs: string | null
+          signataire_fonction: string | null
+          signataire_nom: string | null
+          singleton: boolean
+          siret: string | null
+          site_web: string | null
+          telephone: string | null
+          tva_intra: string | null
+          updated_at: string
+        }
+        Insert: {
+          adresse_cp?: string | null
+          adresse_ligne1?: string | null
+          adresse_pays?: string | null
+          adresse_ville?: string | null
+          assurance_mention?: string | null
+          banque_nom?: string | null
+          bic?: string | null
+          capital_social?: string | null
+          created_at?: string
+          email_contact?: string | null
+          forme_juridique?: string | null
+          iban?: string | null
+          id?: string
+          raison_sociale?: string | null
+          rcs?: string | null
+          signataire_fonction?: string | null
+          signataire_nom?: string | null
+          singleton?: boolean
+          siret?: string | null
+          site_web?: string | null
+          telephone?: string | null
+          tva_intra?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adresse_cp?: string | null
+          adresse_ligne1?: string | null
+          adresse_pays?: string | null
+          adresse_ville?: string | null
+          assurance_mention?: string | null
+          banque_nom?: string | null
+          bic?: string | null
+          capital_social?: string | null
+          created_at?: string
+          email_contact?: string | null
+          forme_juridique?: string | null
+          iban?: string | null
+          id?: string
+          raison_sociale?: string | null
+          rcs?: string | null
+          signataire_fonction?: string | null
+          signataire_nom?: string | null
+          singleton?: boolean
+          siret?: string | null
+          site_web?: string | null
+          telephone?: string | null
+          tva_intra?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -1263,6 +1341,77 @@ export type Database = {
           volume?: string | null
         }
         Relationships: []
+      }
+      convoyeur_contrats: {
+        Row: {
+          convoyeur_id: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          nom_complet: string | null
+          sent_at: string
+          signature_ip: string | null
+          signature_lu_approuve: boolean
+          signature_nom: string | null
+          signature_user_agent: string | null
+          signed_at: string | null
+          snapshot: Json
+          statut: string
+          token_hash: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          convoyeur_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          nom_complet?: string | null
+          sent_at?: string
+          signature_ip?: string | null
+          signature_lu_approuve?: boolean
+          signature_nom?: string | null
+          signature_user_agent?: string | null
+          signed_at?: string | null
+          snapshot?: Json
+          statut?: string
+          token_hash: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          convoyeur_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          nom_complet?: string | null
+          sent_at?: string
+          signature_ip?: string | null
+          signature_lu_approuve?: boolean
+          signature_nom?: string | null
+          signature_user_agent?: string | null
+          signed_at?: string | null
+          snapshot?: Json
+          statut?: string
+          token_hash?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convoyeur_contrats_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       convoyeur_invitations: {
         Row: {
@@ -5343,6 +5492,27 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_company_public_info: {
+        Args: never
+        Returns: {
+          adresse_cp: string
+          adresse_ligne1: string
+          adresse_pays: string
+          adresse_ville: string
+          assurance_mention: string
+          capital_social: string
+          email_contact: string
+          forme_juridique: string
+          raison_sociale: string
+          rcs: string
+          signataire_fonction: string
+          signataire_nom: string
+          siret: string
+          site_web: string
+          telephone: string
+          tva_intra: string
+        }[]
       }
       get_convoyeur_invitation: {
         Args: { _token: string }
