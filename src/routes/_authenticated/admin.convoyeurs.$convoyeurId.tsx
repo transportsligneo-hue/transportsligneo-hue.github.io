@@ -64,6 +64,8 @@ interface Convoyeur {
   type_convoyeur: string;
   created_at: string;
   account_status?: string | null;
+  has_completed_training?: boolean | null;
+  training_status?: string | null;
 }
 
 interface DocItem {
@@ -122,6 +124,7 @@ function AdminConvoyeurDetail() {
   const [original, setOriginal] = useState<Editable>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [bypassValidation, setBypassValidation] = useState(false);
   const [status, setStatus] = useState<AccountStatus | null>(null);
   const [neighborNav, setNeighborNav] = useState<{
     previous?: { id: string; label: string };
@@ -225,14 +228,25 @@ function AdminConvoyeurDetail() {
           return null;
         })
         .filter(Boolean);
-      if (issues.length) {
-        toast.error(`Validation impossible :\n\n• ${issues.join("\n• ")}`);
+      if (!conv.has_completed_training && conv.training_status !== "completed") {
+        issues.push("Formation Académie Ligneo non validée");
+      }
+      if (issues.length && !bypassValidation) {
+        toast.error(`Validation impossible :\n\n• ${issues.join("\n• ")}\n\nActivez le bypass administrateur pour valider malgré ces éléments.`);
         return;
       }
     }
     const wasNotValid = conv.statut !== "valide";
-    await supabase.from("convoyeurs").update({ statut }).eq("id", conv.id);
-    setConv({ ...conv, statut });
+    const updates = statut === "valide" && bypassValidation
+      ? { statut, has_completed_training: true, training_status: "completed" }
+      : { statut };
+    const { error } = await supabase.from("convoyeurs").update(updates).eq("id", conv.id);
+    if (error) {
+      toast.error(`Mise à jour impossible : ${error.message}`);
+      return;
+    }
+    setConv({ ...conv, ...updates });
+    setBypassValidation(false);
     if (statut === "valide" && wasNotValid) {
       try {
         await sendTransactionalEmail({
@@ -430,10 +444,26 @@ function AdminConvoyeurDetail() {
         title={fullName}
         subtitle={conv.email}
         status={
-          <div className="flex flex-wrap items-center gap-2">
-            <StatutConvoyeurBadge statut={statutUnifie} size="md" />
-            <AdminBadge label={accountState.label} tone={accountState.tone} />
-            {conv.ville && <AdminBadge label={conv.ville} tone="info" />}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatutConvoyeurBadge statut={statutUnifie} size="md" />
+              <AdminBadge label={accountState.label} tone={accountState.tone} />
+              {conv.ville && <AdminBadge label={conv.ville} tone="info" />}
+            </div>
+            {conv.statut !== "valide" && conv.statut !== "suspendu" && (
+              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <input
+                  type="checkbox"
+                  checked={bypassValidation}
+                  onChange={(event) => setBypassValidation(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[color:var(--admin-accent)]"
+                />
+                <span>
+                  <strong>Bypass administrateur</strong>
+                  <span className="block text-amber-700">Valider malgré les documents ou la formation incomplets.</span>
+                </span>
+              </label>
+            )}
           </div>
         }
         actions={
