@@ -27,6 +27,16 @@ export interface DevisData {
   carburant?: string | null;
   prestation?: string | null;
   option_trajet?: string | null;
+  /** Immatriculation du vehicule convoye */
+  immatriculation?: string | null;
+  /** Options additionnelles cochees (recharge, lavage, mise en main...) */
+  options?: string[] | null;
+  /** PV de livraison digitalise (WelcomeAuto / Model) */
+  pv_digital?: string | null;
+  /** Destinataire / client livre */
+  destinataire_nom?: string | null;
+  destinataire_tel?: string | null;
+  destinataire_note?: string | null;
   date_souhaitee?: string | null;
   heure_souhaitee?: string | null;
   prix_estime: number;
