@@ -21,8 +21,10 @@ const CATS: { title: string; items: Feat[] }[] = [
       { Icon: Users, label: "Multi-comptes (Perso/Pro/Flotte)" },
       { Icon: Star, label: "Adresses favorites" },
       { Icon: BadgeEuro, label: "Tarifs transparents" },
+      { Icon: Hash, label: "Numéro de commande (PO) archivé" },
     ],
   },
+
   {
     title: "Suivi & traçabilité",
     items: [
