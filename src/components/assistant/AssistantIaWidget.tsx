@@ -394,16 +394,32 @@ export default function AssistantIaWidget() {
     <>
       <button
         type="button"
+        ref={launcherRef}
         className="vrm-launcher"
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
+        aria-expanded={open}
+        aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
         style={{ display: open ? "none" : undefined }}
       >
-        <VroomyFace size={34} />
-        {notif && <span className="vrm-badge">1</span>}
+        <VroomyFace size={44} />
+        {notif && (
+          <span className="vrm-badge" aria-hidden="true">
+            1
+          </span>
+        )}
+        {notif && <span className="sr-only">1 nouveau message</span>}
       </button>
 
-      <div className={`vrm-panel${open ? " vrm-open" : ""}`} role="dialog" aria-label="Vroomy, assistant Transports Ligneo">
+      <div
+        ref={panelRef}
+        className={`vrm-panel${open ? " vrm-open" : ""}`}
+        role="dialog"
+        aria-modal="false"
+        aria-label="Vroomy, assistant Transports Ligneo"
+        aria-hidden={!open}
+        {...(!open ? { inert: "" as unknown as boolean } : {})}
+      >
         <div className="vrm-head">
           <div className="vrm-speed" aria-hidden="true">
             <span />
@@ -413,32 +429,62 @@ export default function AssistantIaWidget() {
           <div className="vrm-head-row">
             <div className="vrm-id">
               <div className="vrm-avatar">
-                <VroomyFace size={28} />
+                <VroomyFace size={40} alt="Vroomy, la mascotte de Transports Ligneo" />
               </div>
               <div>
                 <h2 className="vrm-title">Vroomy</h2>
                 <div className="vrm-status">
-                  <span className="vrm-dot" />
+                  <span className="vrm-dot" aria-hidden="true" />
                   En ligne — réponse instantanée
                 </div>
               </div>
             </div>
-            <button type="button" className="vrm-close" onClick={() => setOpen(false)} aria-label="Fermer">
-              <X size={16} />
-            </button>
+            <div className="vrm-head-actions">
+              <button
+                type="button"
+                className="vrm-close"
+                onClick={toggleProactive}
+                aria-pressed={proactiveOff}
+                aria-label={
+                  proactiveOff
+                    ? "Réactiver la proposition automatique de Vroomy sur les pages Tarifs et Estimation"
+                    : "Désactiver la proposition automatique de Vroomy sur les pages Tarifs et Estimation"
+                }
+                title={proactiveOff ? "Relance automatique désactivée" : "Désactiver la relance automatique"}
+              >
+                {proactiveOff ? <BellOff size={15} aria-hidden="true" /> : <Bell size={15} aria-hidden="true" />}
+              </button>
+              <button
+                type="button"
+                className="vrm-close"
+                onClick={() => {
+                  setOpen(false);
+                  launcherRef.current?.focus();
+                }}
+                aria-label="Fermer Vroomy"
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <p className="vrm-tagline">Toujours prêt à rouler avec vous ! 💨</p>
+          {prefNotice && (
+            <p className="vrm-pref-note" role="status">
+              {prefNotice}
+            </p>
+          )}
         </div>
 
-        <div className="vrm-body" ref={bodyRef}>
+        <div className="vrm-body" ref={bodyRef} role="log" aria-live="polite" aria-label="Conversation avec Vroomy" tabIndex={0}>
           {messages.map((m, i) => (
             <div key={i} className={`vrm-row${m.role === "user" ? " vrm-user" : ""}`}>
               {m.role === "assistant" && (
                 <div className="vrm-msg-avatar">
-                  <VroomyFace size={16} />
+                  <VroomyFace size={24} />
                 </div>
               )}
               <div className="vrm-bubble">
+                <span className="sr-only">{m.role === "user" ? "Vous : " : "Vroomy : "}</span>
                 {m.content}
                 {m.cards?.map((c, ci) => (
                   <VroomyCardView key={ci} card={c} />
@@ -448,18 +494,21 @@ export default function AssistantIaWidget() {
           ))}
 
           {!profil && (
-            <div className="vrm-roles">
-              <div className="vrm-roles-label">Vous êtes…</div>
+            <div className="vrm-roles" role="group" aria-label="Choisissez votre profil">
+              <div className="vrm-roles-label" id="vrm-roles-label">
+                Vous êtes…
+              </div>
               <div className="vrm-roles-row">
                 <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
-                  <span>🚗</span> Client
+                  <span aria-hidden="true">🚗</span> Client
                 </button>
                 <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span>🧭</span> Convoyeur
+                  <span aria-hidden="true">🧭</span> Convoyeur
                 </button>
               </div>
             </div>
           )}
+
 
           {profil && showCaps && messages.length <= 3 && (
             <div className="vrm-caps">
