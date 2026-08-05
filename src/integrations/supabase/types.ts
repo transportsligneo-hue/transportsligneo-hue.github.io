@@ -318,6 +318,24 @@ export type Database = {
           },
         ]
       }
+      api_internal_config: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -5164,6 +5182,10 @@ export type Database = {
       }
       admin_unlink_mission_from_group: {
         Args: { _mission_id: string }
+        Returns: undefined
+      }
+      api_emit_event: {
+        Args: { _event: string; _mission_id: string; _payload: Json }
         Returns: undefined
       }
       api_rate_bump: {
