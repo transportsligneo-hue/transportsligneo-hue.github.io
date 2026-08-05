@@ -3014,7 +3014,11 @@
 @keyframes v4Shine { 0%{left:-60%;} 45%{left:130%;} 100%{left:130%;} }
 @keyframes v4PulseD { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-.r4-page .v4-hero { padding:80px 32px 50px; text-align:center; }
+/* Le header est en position fixed (~98px) : on décale le hero pour ne rien couper */
+.r4-page .v4-hero { padding:150px 32px 50px; text-align:center; }
+@media (max-width: 860px) {
+  .r4-page .v4-hero { padding:120px 20px 40px; }
+}
 .r4-page .v4-hero-eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600;
   letter-spacing:0.2em; color:var(--v4-blue-bright); text-transform:uppercase; margin-bottom:20px; }
 .r4-page .v4-hero-eyebrow .dot{ width:6px;height:6px;border-radius:50%; background:var(--v4-blue-bright); box-shadow:0 0 8px var(--v4-blue-bright); }
