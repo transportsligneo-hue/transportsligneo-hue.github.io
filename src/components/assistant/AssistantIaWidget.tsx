@@ -439,7 +439,7 @@ export default function AssistantIaWidget() {
         aria-modal="false"
         aria-label="Vroomy, assistant Transports Ligneo"
         aria-hidden={!open}
-        {...(!open ? { inert: "" as unknown as boolean } : {})}
+        inert={!open}
       >
         <div className="vrm-head">
           <div className="vrm-speed" aria-hidden="true">
