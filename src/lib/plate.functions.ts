@@ -113,7 +113,13 @@ export const lookupPlate = createServerFn({ method: "POST" })
       // Anti-abus : soit utilisateur authentifié (Bearer), soit token reCAPTCHA v3 valide.
       // Fail-closed pour protéger la clé RapidAPI (facturation à l'appel).
       const authHeader = getRequestHeader("authorization");
-      const hasBearer = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+      const rawToken =
+        authHeader && authHeader.toLowerCase().startsWith("bearer ")
+          ? authHeader.slice(7).trim()
+          : "";
+      // Le token doit être réellement validé côté serveur, sinon n'importe qui
+      // pourrait forger un header "Bearer xxx" pour contourner le reCAPTCHA.
+      const hasBearer = rawToken ? await verifySupabaseToken(rawToken) : false;
       if (!hasBearer) {
         if (!data.recaptchaToken) {
           console.warn("[SIV] no bearer and no recaptcha token — rejecting");
