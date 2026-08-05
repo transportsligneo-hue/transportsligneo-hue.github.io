@@ -144,6 +144,7 @@ function RootComponent() {
             <PwaSplash />
             <BiometricEnrollPrompt />
             <BiometricLock />
+            <CookieBanner />
             <Toaster />
           </AiSettingsProvider>
         </PricingProvider>
