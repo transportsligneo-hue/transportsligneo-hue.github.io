@@ -219,12 +219,17 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
       .single();
     if (insertErr) throw new Error(`Enregistrement acceptation échoué : ${insertErr.message}`);
 
-    // Verrouille le devis
-    const { error: updErr } = await supabase
+    // Verrouille le devis — écriture privilégiée : le client n'a pas de policy
+    // UPDATE sur `devis` (sinon l'update ne touchait aucune ligne silencieusement).
+    // La propriété du devis est déjà validée par le SELECT sous RLS ci-dessus.
+    const { data: lockedRows, error: updErr } = await supabaseAdmin
       .from("devis")
       .update({ locked_at: now.toISOString(), accepted_at: now.toISOString(), statut: "accepte" })
-      .eq("id", devis.id);
+      .eq("id", devis.id)
+      .select("id");
     if (updErr) throw new Error(`Verrouillage du devis échoué : ${updErr.message}`);
+    if (!lockedRows || lockedRows.length === 0) throw new Error("Verrouillage du devis échoué");
+
 
     // Notif admin (best-effort)
     try {
