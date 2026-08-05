@@ -67,6 +67,24 @@ export const VROOMY_TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "chercher_missions_catalogue",
+      description:
+        "Recherche les missions de convoyage réellement disponibles au catalogue convoyeur (missions publiées, non encore attribuées). Utilise-le quand un convoyeur ou un candidat demande s'il y a des missions disponibles, éventuellement près d'une ville.",
+      parameters: {
+        type: "object",
+        properties: {
+          ville: {
+            type: "string",
+            description: "Ville de départ ou d'arrivée recherchée, ex. Tours. Facultatif.",
+          },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "rediriger_candidature_convoyeur",
       description:
         "Retourne le lien du formulaire de candidature pour devenir convoyeur partenaire Transports Ligneo.",
