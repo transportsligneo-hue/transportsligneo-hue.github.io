@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList, MessageCircle } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
@@ -58,13 +58,13 @@ const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace
 const PROACTIVE_PREF_KEY = "ligneo_vroomy_proactive_off";
 
 /** Mascotte officielle Vroomy (voiture bleue néon Transports Ligneo). */
-function VroomyFace({ size = 28, alt }: { size?: number; alt?: string }) {
+function VroomyFace({ size = 28, alt, className }: { size?: number; alt?: string; className?: string }) {
   return (
     <img
       src={vroomyMascotte.url}
       width={size}
       height={size}
-      className="vrm-mascotte"
+      className={`vrm-mascotte${className ? ` ${className}` : ""}`}
       alt={alt ?? ""}
       aria-hidden={alt ? undefined : true}
       loading="lazy"
@@ -423,17 +423,13 @@ export default function AssistantIaWidget() {
         style={{ display: open ? "none" : undefined }}
       >
         <span className="vrm-launcher-mascotte">
-          <VroomyFace size={44} />
-        </span>
-        <span className="vrm-chat-bubble" aria-hidden="true">
-          <MessageCircle size={18} strokeWidth={2.4} />
+          <VroomyFace size={48} alt="Vroomy" />
         </span>
         {notif && (
           <span className="vrm-badge" aria-hidden="true">
             1
           </span>
         )}
-        {notif && <span className="sr-only">1 nouveau message</span>}
       </button>
 
       <div
@@ -443,7 +439,7 @@ export default function AssistantIaWidget() {
         aria-modal="false"
         aria-label="Vroomy, assistant Transports Ligneo"
         aria-hidden={!open}
-        {...(!open ? { inert: "" as unknown as boolean } : {})}
+        inert={!open ? true : undefined}
       >
         <div className="vrm-head">
           <div className="vrm-speed" aria-hidden="true">
