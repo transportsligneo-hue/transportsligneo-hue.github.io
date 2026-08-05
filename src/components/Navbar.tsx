@@ -62,7 +62,7 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="max-w-[1720px] mx-auto pl-6 pr-8 py-2.5 flex items-center justify-between gap-4">
+        <div className="w-full px-7 py-2.5 flex items-center justify-between gap-6">
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
             <div
               className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
@@ -79,7 +79,7 @@ export default function Navbar() {
           </Link>
 
           {/* Liens centraux · pilule englobante */}
-          <ul className="r4-nav-pill whitespace-nowrap">
+          <ul className="r4-nav-pill whitespace-nowrap mx-auto">
             {navLinks.map((l) => {
               const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
               return (
