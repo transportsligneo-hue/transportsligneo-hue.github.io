@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
@@ -21,16 +21,16 @@ type VroomyCard =
 
 type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
 
-const QUICK_REPLIES: Record<Profil, Array<{ icon: string; label: string }>> = {
+const QUICK_REPLIES: Record<Profil, Array<{ Icon: typeof Search; label: string }>> = {
   client: [
-    { icon: "💰", label: "Combien coûte un convoyage Paris — Lyon ?" },
-    { icon: "📦", label: "Où en est ma mission ?" },
-    { icon: "🛡️", label: "Que couvre l'assurance pendant le convoyage ?" },
+    { Icon: Calculator, label: "Combien coûte un convoyage Paris — Lyon ?" },
+    { Icon: MapPin, label: "Où en est ma mission ?" },
+    { Icon: ShieldCheck, label: "Que couvre l'assurance pendant le convoyage ?" },
   ],
   convoyeur: [
-    { icon: "🧭", label: "Trouve-moi une mission près de Tours" },
-    { icon: "📋", label: "Y a-t-il des missions disponibles aujourd'hui ?" },
-    { icon: "👋", label: "Comment devenir convoyeur partenaire ?" },
+    { Icon: Search, label: "Trouve-moi une mission près de Tours" },
+    { Icon: ClipboardList, label: "Y a-t-il des missions disponibles aujourd'hui ?" },
+    { Icon: GraduationCap, label: "Comment devenir convoyeur partenaire ?" },
   ],
 };
 
@@ -48,7 +48,7 @@ const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; d
 };
 
 const WELCOME =
-  "Vrooom, bonjour 👋 Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
+  "Vrooom, bonjour ! Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
 
 const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
@@ -467,7 +467,7 @@ export default function AssistantIaWidget() {
               </button>
             </div>
           </div>
-          <p className="vrm-tagline">Toujours prêt à rouler avec vous ! 💨</p>
+          <p className="vrm-tagline">Toujours prêt à rouler avec vous.</p>
           {prefNotice && (
             <p className="vrm-pref-note" role="status">
               {prefNotice}
@@ -500,10 +500,18 @@ export default function AssistantIaWidget() {
               </div>
               <div className="vrm-roles-row">
                 <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
-                  <span aria-hidden="true">🚗</span> Client
+                  <span className="vrm-role-ico" aria-hidden="true"><Building2 size={17} strokeWidth={2} /></span>
+                  <span className="vrm-role-txt">
+                    Client
+                    <span className="vrm-role-sub">Faire convoyer un véhicule</span>
+                  </span>
                 </button>
                 <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span aria-hidden="true">🧭</span> Convoyeur
+                  <span className="vrm-role-ico" aria-hidden="true"><CarFront size={17} strokeWidth={2} /></span>
+                  <span className="vrm-role-txt">
+                    Convoyeur
+                    <span className="vrm-role-sub">Trouver des missions</span>
+                  </span>
                 </button>
               </div>
             </div>
@@ -548,7 +556,7 @@ export default function AssistantIaWidget() {
                   onClick={() => void send(q.label)}
                 >
                   <span className="vrm-ic" aria-hidden="true">
-                    {q.icon}
+                    <q.Icon size={14} strokeWidth={2.2} />
                   </span>
                   {q.label}
                 </button>
