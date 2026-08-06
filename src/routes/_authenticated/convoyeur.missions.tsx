@@ -21,6 +21,7 @@ import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/Pr
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
+import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
@@ -660,7 +661,7 @@ function ConvoyeurMissions() {
           depart: t?.depart ?? null,
           arrivee: t?.arrivee ?? null,
           date_prevue: t?.date_trajet ?? null,
-          convoyeur_nom: convoyeurNom,
+          convoyeur_nom: driverDisplayName,
         }}
       />
     ) : null;
