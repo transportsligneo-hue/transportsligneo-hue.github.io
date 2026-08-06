@@ -346,7 +346,7 @@ function edlField(doc: jsPDF, x: number, y: number, w: number, label: string, va
     doc.setLineWidth(0.25);
     doc.line(x + lw, y + 0.8, x + w, y + 0.8);
   }
-  return y + 6.2;
+  return y + 5.4;
 }
 
 /**
@@ -358,16 +358,16 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   const variant: EdlPapierVariant = d.variant ?? "livraison";
   const isLivraison = variant === "livraison";
   const { doc, pageW, pageH, company: c } = await newDoc(
-    `État des lieux (${isLivraison ? "Livraison" : "Restitution"})`,
+    "État des lieux",
     d.numero,
-    isLivraison ? "À l'arrivée du véhicule" : "À la sortie du véhicule",
+    isLivraison ? "Livraison — à l'arrivée du véhicule" : "Restitution — à la sortie du véhicule",
     company,
   );
   const w = pageW - 28;
-  let y = 54;
+  let y = 52;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(...DOC_MUTED);
   doc.text("Ce document est établi contradictoirement entre les parties.", 14, y);
   doc.text(
@@ -375,9 +375,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
       ? "Il décrit l'état du véhicule à la livraison, avant remise au client."
       : "Il décrit l'état du véhicule à la restitution.",
     14,
-    y + 4,
+    y + 3.6,
   );
-  y += 12;
+  y += 9;
 
   /* 1 — Informations générales */
   y = drawSectionTitle(doc, pageW, y, "1. Informations générales");
@@ -402,7 +402,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.text(q, qx + 4.4, yl);
     qx += 4.4 + doc.getTextWidth(q) + 5;
   });
-  yl += 6.2;
+  yl += 5.4;
 
   yr = edlField(doc, xR, yr, colW, "Immatriculation", d.immatriculation);
   yr = edlField(doc, xR, yr, colW, "Marque / Modèle", d.marque_modele);
@@ -424,28 +424,28 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.text(e, ex + 4.2, yr);
     ex += 4.2 + doc.getTextWidth(e) + 4;
   });
-  yr += 6.2;
+  yr += 5.4;
 
-  y = Math.max(yl, yr) + 2;
+  y = Math.max(yl, yr) + 1;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(...DOC_MUTED);
-  doc.text(`Trajet : ${d.depart || "—"}  →  ${d.arrivee || "—"}`, 14, y);
-  y += 6;
+  doc.text(`Trajet : ${d.depart || "—"}  >  ${d.arrivee || "—"}`, 14, y);
+  y += 5;
 
   /* 2 — État extérieur */
   y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule");
   const schemaTop = y + 4;
-  drawCarTopView(doc, 34, schemaTop, 48, 74);
+  drawCarTopView(doc, 42, schemaTop, 30, 34);
 
   // Légende
-  const lx = 108;
-  let ly = schemaTop + 2;
+  const lx = 105;
+  let ly = schemaTop + 1;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("LÉGENDE", lx, ly);
-  ly += 5;
+  ly += 4.4;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
@@ -458,18 +458,18 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     "( • )  Impact (gravillon)",
   ].forEach((t) => {
     doc.text(t, lx, ly);
-    ly += 4.6;
+    ly += 4.2;
   });
 
-  y = schemaTop + 80;
+  y = schemaTop + 41;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("Commentaires extérieurs :", 14, y);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 2; i++) doc.line(14, y + 5 + i * 5.5, pageW - 14, y + 5 + i * 5.5);
-  y += 16;
+  doc.line(14, y + 4.5, pageW - 14, y + 4.5);
+  y += 10;
 
   /* 3 — Équipements */
   y = drawSectionTitle(doc, pageW, y, "3. État des équipements et accessoires");
@@ -493,13 +493,13 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.setDrawColor(...DOC_LINE);
     doc.setLineWidth(0.15);
     doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
-    return yy + 6;
+    return yy + 4.8;
   };
-  let ye1 = y + 3;
+  let ye1 = y + 2;
   EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
-  let ye2 = y + 3;
+  let ye2 = y + 2;
   EDL_EQUIPEMENTS_R.forEach((l) => { ye2 = rowEq(xR, ye2, l); });
-  y = Math.max(ye1, ye2) + 2;
+  y = Math.max(ye1, ye2) + 1;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
@@ -507,37 +507,38 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.text("Commentaires intérieurs / équipements :", 14, y);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  doc.line(14, y + 5, pageW - 14, y + 5);
-  y += 11;
+  doc.line(14, y + 4.5, pageW - 14, y + 4.5);
+  y += 9;
 
   /* 4 — Observations */
   y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires");
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 3; i++) doc.line(14, y + 3 + i * 5.5, pageW - 14, y + 3 + i * 5.5);
-  y += 21;
+  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 5.2, pageW - 14, y + 3 + i * 5.2);
+  y += 13;
 
   /* Signatures */
-  const sigH = 30;
-  const sigY = Math.min(y, pageH - 26 - sigH);
+  const sigH = 24;
+  const sigY = Math.min(y, pageH - 28 - sigH);
   signatureBlocks(doc, pageW, sigY, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
-  doc.text(`Nom : ${d.convoyeur_nom || "................................."}`, 18, sigY + 12);
-  doc.text(`Nom : ${d.client || "................................."}`, pageW / 2 + 6, sigY + 12);
-  doc.text("Signature :", 18, sigY + 19);
-  doc.text("Signature :", pageW / 2 + 6, sigY + 19);
+  doc.text(`Nom : ${d.convoyeur_nom || "..............................."}`, 18, sigY + 11);
+  doc.text(`Nom : ${d.client || "..............................."}`, pageW / 2 + 6, sigY + 11);
+  doc.text("Signature :", 18, sigY + 18);
+  doc.text("Signature :", pageW / 2 + 6, sigY + 18);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...DOC_GOLD);
-  doc.text("BON POUR ACCORD", pageW / 2, sigY - 2, { align: "center" });
+  doc.text("BON POUR ACCORD", pageW / 2, sigY + sigH + 3.5, { align: "center" });
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.2);
   doc.setTextColor(...DOC_MUTED);
   doc.text(
     "Le véhicule est pris en charge en l'état, conformément aux observations ci-dessus.",
     pageW / 2,
-    sigY + sigH + 4,
+    sigY + sigH + 7,
     { align: "center" },
   );
 
