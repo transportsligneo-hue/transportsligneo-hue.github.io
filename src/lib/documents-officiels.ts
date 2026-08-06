@@ -281,99 +281,270 @@ export function drawCarTopView(doc: jsPDF, x: number, y: number, w: number, h: n
   doc.text("DROITE", x + w + 6, y + h / 2, { align: "center", angle: 270 });
 }
 
+export type EdlPapierVariant = "restitution" | "livraison";
+
 export interface EdlPapierData {
   numero: string;
+  variant?: EdlPapierVariant;
   client?: string | null;
+  societe?: string | null;
   marque_modele?: string | null;
   immatriculation?: string | null;
   vin?: string | null;
-  kilometrage?: string | null;
+  kilometrage_depart?: string | null;
+  kilometrage_arrivee?: string | null;
   carburant?: string | null;
+  lieu?: string | null;
   depart?: string | null;
   arrivee?: string | null;
   date_prevue?: string | null;
   convoyeur_nom?: string | null;
 }
 
+const EDL_ENERGIES = ["Essence", "Diesel", "Hybride", "Électrique"];
+
+const EDL_EQUIPEMENTS_L = [
+  "Clé principale",
+  "Clé de secours",
+  "Carte grise (copie)",
+  "Carnet d'entretien",
+  "Triangle de signalisation",
+  "Gilet de sécurité",
+  "Roue de secours / Kit anticrevaison",
+  "Cric",
+];
+const EDL_EQUIPEMENTS_R = ["Extincteur", "Tapis de sol", "Floquage ou pub sur le véhicule"];
+
+/** Case à cocher vectorielle (cochée si `checked`). */
+function drawCheckbox(doc: jsPDF, x: number, y: number, size = 3.2, checked = false) {
+  doc.setDrawColor(...DOC_NAVY);
+  doc.setLineWidth(0.25);
+  doc.setFillColor(...DOC_WHITE);
+  doc.rect(x, y, size, size, "FD");
+  if (checked) {
+    doc.setDrawColor(...DOC_NAVY);
+    doc.setLineWidth(0.5);
+    doc.line(x + 0.7, y + size / 2, x + size * 0.42, y + size - 0.7);
+    doc.line(x + size * 0.42, y + size - 0.7, x + size - 0.6, y + 0.7);
+  }
+}
+
+/** Ligne « Label : valeur » ou « Label : ______ » à remplir à la main. */
+function edlField(doc: jsPDF, x: number, y: number, w: number, label: string, value?: string | null) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text(`${label} :`, x, y);
+  const lw = doc.getTextWidth(`${label} :`) + 2;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_TEXT);
+  const v = (value ?? "").toString().trim();
+  if (v) {
+    doc.text(doc.splitTextToSize(v, w - lw)[0], x + lw, y);
+  } else {
+    doc.setDrawColor(...DOC_LINE);
+    doc.setLineWidth(0.25);
+    doc.line(x + lw, y + 0.8, x + w, y + 0.8);
+  }
+  return y + 6.2;
+}
+
+/**
+ * 05 — État des lieux papier (modèles « Restitution » et « Livraison »).
+ * Toutes les données véhicule/mission connues sont pré-remplies ; le reste
+ * est laissé sous forme de champs à compléter à la main.
+ */
 export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyInfo | null): Promise<Blob> {
+  const variant: EdlPapierVariant = d.variant ?? "livraison";
+  const isLivraison = variant === "livraison";
   const { doc, pageW, pageH, company: c } = await newDoc(
-    "État des lieux",
+    `État des lieux (${isLivraison ? "Livraison" : "Restitution"})`,
     d.numero,
-    "Version papier — constat contradictoire départ / arrivée",
+    isLivraison ? "À l'arrivée du véhicule" : "À la sortie du véhicule",
     company,
   );
   const w = pageW - 28;
-  let y = 56;
+  let y = 54;
 
-  y = drawSectionTitle(doc, pageW, y, "Véhicule et mission");
-  const half = (w - 4) / 2;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text("Ce document est établi contradictoirement entre les parties.", 14, y);
+  doc.text(
+    isLivraison
+      ? "Il décrit l'état du véhicule à la livraison, avant remise au client."
+      : "Il décrit l'état du véhicule à la restitution.",
+    14,
+    y + 4,
+  );
+  y += 12;
+
+  /* 1 — Informations générales */
+  y = drawSectionTitle(doc, pageW, y, "1. Informations générales");
+  const colW = (w - 8) / 2;
+  const xR = 14 + colW + 8;
   let yl = y;
-  yl = drawKeyValueRow(doc, 14, yl, half, "Marque / modèle", d.marque_modele || "—", { labelW: 38 });
-  yl = drawKeyValueRow(doc, 14, yl, half, "Immatriculation", d.immatriculation || "—", { labelW: 38 });
-  yl = drawKeyValueRow(doc, 14, yl, half, "VIN", d.vin || "—", { labelW: 38 });
   let yr = y;
-  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Kilométrage", d.kilometrage || "____________ km", { labelW: 38 });
-  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Carburant", d.carburant || "—", { labelW: 38 });
-  yr = drawKeyValueRow(doc, 18 + half, yr, half, "Convoyeur", d.convoyeur_nom || "—", { labelW: 38 });
-  y = Math.max(yl, yr);
-  y = drawKeyValueRow(doc, 14, y, w, "Trajet", `${d.depart || "—"} → ${d.arrivee || "—"}`);
-  y = drawKeyValueRow(doc, 14, y, w, "Date prévue", dateFmt(d.date_prevue));
+  yl = edlField(doc, 14, yl, colW, "Date et heure de l'état des lieux", d.date_prevue ? dateFmt(d.date_prevue) : null);
+  yl = edlField(doc, 14, yl, colW, "Société", d.societe || d.client || null);
+  yl = edlField(doc, 14, yl, colW, "Lieu", d.lieu || (isLivraison ? d.arrivee : d.depart) || null);
+  yl = edlField(doc, 14, yl, colW, "Effectué par (Nom / Prénom)", d.convoyeur_nom || null);
+  // Qualité
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("Qualité :", 14, yl);
+  let qx = 14 + doc.getTextWidth("Qualité :") + 3;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_TEXT);
+  ["Convoyeur", "Réceptionnaire", "Autre"].forEach((q) => {
+    drawCheckbox(doc, qx, yl - 3, 3.2, false);
+    doc.text(q, qx + 4.4, yl);
+    qx += 4.4 + doc.getTextWidth(q) + 5;
+  });
+  yl += 6.2;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Repérage des dommages");
-  drawCarTopView(doc, 40, y + 6, 55, 90);
+  yr = edlField(doc, xR, yr, colW, "Immatriculation", d.immatriculation);
+  yr = edlField(doc, xR, yr, colW, "Marque / Modèle", d.marque_modele);
+  yr = edlField(doc, xR, yr, colW, "Kilométrage départ", d.kilometrage_depart ? `${d.kilometrage_depart} km` : null);
+  yr = edlField(doc, xR, yr, colW, "Kilométrage arrivée", d.kilometrage_arrivee ? `${d.kilometrage_arrivee} km` : null);
+  yr = edlField(doc, xR, yr, colW, "N° de châssis (VIN)", d.vin);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("Carburant / Énergie :", xR, yr);
+  let ex = xR + doc.getTextWidth("Carburant / Énergie :") + 3;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_TEXT);
+  const energie = (d.carburant || "").toLowerCase();
+  EDL_ENERGIES.forEach((e) => {
+    const checked = energie.length > 0 && e.toLowerCase().startsWith(energie.slice(0, 4));
+    drawCheckbox(doc, ex, yr - 3, 3.2, checked);
+    doc.text(e, ex + 4.2, yr);
+    ex += 4.2 + doc.getTextWidth(e) + 4;
+  });
+  yr += 6.2;
 
-  // Légende / grille de constat
-  const gx = 110;
-  let gy = y + 4;
+  y = Math.max(yl, yr) + 2;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(`Trajet : ${d.depart || "—"}  →  ${d.arrivee || "—"}`, 14, y);
+  y += 6;
+
+  /* 2 — État extérieur */
+  y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule");
+  const schemaTop = y + 4;
+  drawCarTopView(doc, 34, schemaTop, 48, 74);
+
+  // Légende
+  const lx = 108;
+  let ly = schemaTop + 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
-  doc.text("Codes dommages", gx, gy);
-  gy += 4;
+  doc.text("LÉGENDE", lx, ly);
+  ly += 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
-  ["R — Rayure", "B — Bosse / choc", "E — Éclat", "F — Fissure vitrage", "M — Manquant", "S — Salissure"].forEach((t) => {
-    doc.text(t, gx, gy);
-    gy += 4;
+  [
+    "(R)  Rayure",
+    "(C)  Coup",
+    "(E)  Enfoncement",
+    "(M)  Manquant / Cassé",
+    "(T)  Tache",
+    "( • )  Impact (gravillon)",
+  ].forEach((t) => {
+    doc.text(t, lx, ly);
+    ly += 4.6;
   });
 
-  gy += 2;
+  y = schemaTop + 80;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
-  doc.text("Observations", gx, gy);
-  gy += 2;
+  doc.text("Commentaires extérieurs :", 14, y);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 9; i++) {
-    doc.line(gx, gy + 5 + i * 5.5, pageW - 14, gy + 5 + i * 5.5);
-  }
-
-  y = y + 104;
-  y = drawSectionTitle(doc, pageW, y, "Contrôles");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...DOC_TEXT);
-  const checks = [
-    "[  ] Carte grise",
-    "[  ] Roue de secours",
-    "[  ] Gilet / triangle",
-    "[  ] Clés (nombre : ___)",
-    "[  ] Niveau carburant : ___/8",
-    "[  ] Propreté intérieure",
-  ];
-  checks.forEach((t, i) => {
-    doc.text(t, 16 + (i % 3) * (w / 3), y + Math.floor(i / 3) * 6);
-  });
+  for (let i = 0; i < 2; i++) doc.line(14, y + 5 + i * 5.5, pageW - 14, y + 5 + i * 5.5);
   y += 16;
 
-  signatureBlocks(doc, pageW, y, "Signature au départ (client / convoyeur)", "Signature à l'arrivée (client / convoyeur)");
+  /* 3 — Équipements */
+  y = drawSectionTitle(doc, pageW, y, "3. État des équipements et accessoires");
+  const colEq = (w - 8) / 2;
+  const headerCols = (x: number, yy: number) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...DOC_MUTED);
+    ["OK", "NOK", "N/A"].forEach((lbl, i) => {
+      doc.text(lbl, x + colEq - 24 + i * 9, yy, { align: "center" });
+    });
+  };
+  headerCols(14, y - 1);
+  headerCols(xR, y - 1);
+  const rowEq = (x: number, yy: number, label: string) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...DOC_TEXT);
+    doc.text(doc.splitTextToSize(label, colEq - 32)[0], x, yy);
+    for (let i = 0; i < 3; i++) drawCheckbox(doc, x + colEq - 25.6 + i * 9, yy - 2.8, 3.2, false);
+    doc.setDrawColor(...DOC_LINE);
+    doc.setLineWidth(0.15);
+    doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
+    return yy + 6;
+  };
+  let ye1 = y + 3;
+  EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
+  let ye2 = y + 3;
+  EDL_EQUIPEMENTS_R.forEach((l) => { ye2 = rowEq(xR, ye2, l); });
+  y = Math.max(ye1, ye2) + 2;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("Commentaires intérieurs / équipements :", 14, y);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.25);
+  doc.line(14, y + 5, pageW - 14, y + 5);
+  y += 11;
+
+  /* 4 — Observations */
+  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires");
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.25);
+  for (let i = 0; i < 3; i++) doc.line(14, y + 3 + i * 5.5, pageW - 14, y + 3 + i * 5.5);
+  y += 21;
+
+  /* Signatures */
+  const sigH = 30;
+  const sigY = Math.min(y, pageH - 26 - sigH);
+  signatureBlocks(doc, pageW, sigY, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...DOC_TEXT);
+  doc.text(`Nom : ${d.convoyeur_nom || "................................."}`, 18, sigY + 12);
+  doc.text(`Nom : ${d.client || "................................."}`, pageW / 2 + 6, sigY + 12);
+  doc.text("Signature :", 18, sigY + 19);
+  doc.text("Signature :", pageW / 2 + 6, sigY + 19);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...DOC_GOLD);
+  doc.text("BON POUR ACCORD", pageW / 2, sigY - 2, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(
+    "Le véhicule est pris en charge en l'état, conformément aux observations ci-dessus.",
+    pageW / 2,
+    sigY + sigH + 4,
+    { align: "center" },
+  );
 
   drawDocLegalFooter(doc, pageW, pageH, c);
   return doc.output("blob");
 }
+
 
 /* ------------------------------------------------------------------ */
 /* 06 — CONTRAT DE PARTENARIAT CONVOYEUR                               */
