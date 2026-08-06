@@ -2,9 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ClipboardCheck, FileText, CreditCard, ShieldCheck, Camera, PenLine,
-  ChevronRight, Upload, Loader2,
+  ChevronRight, Upload, Loader2, Printer,
 } from "lucide-react";
 import { toast } from "sonner";
+import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
+
+export interface EdlPapierContext {
+  numero: string;
+  client?: string | null;
+  marque_modele?: string | null;
+  immatriculation?: string | null;
+  vin?: string | null;
+  kilometrage_depart?: string | null;
+  carburant?: string | null;
+  depart?: string | null;
+  arrivee?: string | null;
+  date_prevue?: string | null;
+  convoyeur_nom?: string | null;
+}
 
 interface Props {
   attributionId: string;
@@ -12,6 +27,8 @@ interface Props {
   inspectionDepartDone: boolean;
   inspectionArriveeDone: boolean;
   carteGriseAvailable: boolean;
+  /** Données mission/véhicule pour pré-remplir l'état des lieux papier. */
+  edlContext?: EdlPapierContext | null;
 }
 
 type DocStatus = "valide" | "attente" | "manquant";
@@ -56,7 +73,7 @@ const STATUS_ACCENT: Record<DocStatus, DocItem["accent"]> = {
 export function MissionV3DocsPane({
   attributionId, userId,
   inspectionDepartDone, inspectionArriveeDone,
-  carteGriseAvailable,
+  carteGriseAvailable, edlContext,
 }: Props) {
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [photoCount, setPhotoCount] = useState(0);
@@ -116,6 +133,21 @@ export function MissionV3DocsPane({
 
   const triggerFile = (key: string) => fileRefs.current[key]?.click();
 
+  const [edlBusy, setEdlBusy] = useState<EdlPapierVariant | null>(null);
+  const downloadEdlPapier = async (variant: EdlPapierVariant) => {
+    if (!edlContext || edlBusy) return;
+    setEdlBusy(variant);
+    try {
+      const blob = await generateEdlPapierPdf({ ...edlContext, variant });
+      const ref = (edlContext.numero || "mission").replace(/[^a-zA-Z0-9-]/g, "");
+      downloadBlob(blob, `EDL-${variant === "livraison" ? "Livraison" : "Restitution"}-${ref}.pdf`);
+    } catch {
+      toast.error("Génération du PDF impossible");
+    } finally {
+      setEdlBusy(null);
+    }
+  };
+
   const pvEnlev = findDoc(["pv_enlevement", "pv_depart"]);
   const contrat = findDoc(["contrat"]);
   const attest = findDoc(["assurance", "attestation_assurance"]);
@@ -161,6 +193,26 @@ export function MissionV3DocsPane({
       icon: Camera,
       accent: photoCount > 0 ? "green" : "pink",
     },
+    ...(edlContext
+      ? ([
+          {
+            key: "edl_papier_restitution",
+            label: "État des lieux papier — Enlèvement",
+            status: "valide" as DocStatus,
+            icon: Printer,
+            accent: "cyan" as const,
+            onOpen: () => downloadEdlPapier("restitution"),
+          },
+          {
+            key: "edl_papier_livraison",
+            label: "État des lieux papier — Livraison",
+            status: "valide" as DocStatus,
+            icon: Printer,
+            accent: "cyan" as const,
+            onOpen: () => downloadEdlPapier("livraison"),
+          },
+        ] as DocItem[])
+      : []),
     {
       key: "sig_client",
       label: "Signature client (état des lieux)",
@@ -220,7 +272,9 @@ export function MissionV3DocsPane({
           const acc = ACCENT[item.accent];
           const statusAcc = ACCENT[STATUS_ACCENT[item.status]];
           const Icon = item.icon;
-          const isUploading = uploadingKey === item.key;
+          const isUploading = uploadingKey === item.key
+            || (item.key === "edl_papier_livraison" && edlBusy === "livraison")
+            || (item.key === "edl_papier_restitution" && edlBusy === "restitution");
           const clickable = item.onOpen ?? item.onUpload;
           return (
             <div key={item.key} className="v3-doc-item" role="button" tabIndex={0}

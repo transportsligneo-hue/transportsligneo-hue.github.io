@@ -21,6 +21,7 @@ import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/Pr
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
+import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
@@ -645,6 +646,23 @@ function ConvoyeurMissions() {
         inspectionDepartDone={!!openMission.inspectionDepart}
         inspectionArriveeDone={!!openMission.inspectionArrivee}
         carteGriseAvailable={!!(t?.carte_grise_recto_url || t?.carte_grise_verso_url || t?.vin)}
+        edlContext={{
+          numero: openMission.numero_mission
+            ? displayNumero(openMission.numero_mission)
+            : `MIS-${openMission.id.slice(0, 8).toUpperCase()}`,
+          client: clientNom,
+          marque_modele: [t?.marque, t?.modele].filter(Boolean).join(" ") || null,
+          immatriculation: t?.immatriculation ?? null,
+          vin: t?.vin ?? null,
+          kilometrage_depart: (t as { vehicule_km?: number | null } | null)?.vehicule_km != null
+            ? String((t as { vehicule_km?: number | null }).vehicule_km)
+            : null,
+          carburant: (t as { vehicule_energie?: string | null } | null)?.vehicule_energie ?? null,
+          depart: t?.depart ?? null,
+          arrivee: t?.arrivee ?? null,
+          date_prevue: t?.date_trajet ?? null,
+          convoyeur_nom: driverDisplayName,
+        }}
       />
     ) : null;
 
