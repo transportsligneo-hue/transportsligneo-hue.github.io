@@ -434,7 +434,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   y += 5;
 
   /* 2 — État extérieur */
-  y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule");
+  y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule") - 1;
   const schemaTop = y + 4;
   drawCarTopView(doc, 42, schemaTop, 30, 34);
 
@@ -461,7 +461,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     ly += 4.2;
   });
 
-  y = schemaTop + 41;
+  y = schemaTop + 38;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
@@ -469,10 +469,10 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
   doc.line(14, y + 4.5, pageW - 14, y + 4.5);
-  y += 10;
+  y += 7;
 
   /* 3 — Équipements */
-  y = drawSectionTitle(doc, pageW, y, "3. État des équipements et accessoires");
+  y = drawSectionTitle(doc, pageW, y, "3. État des équipements et accessoires") - 1;
   const colEq = (w - 8) / 2;
   const headerCols = (x: number, yy: number) => {
     doc.setFont("helvetica", "bold");
@@ -493,7 +493,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.setDrawColor(...DOC_LINE);
     doc.setLineWidth(0.15);
     doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
-    return yy + 4.8;
+    return yy + 4.4;
   };
   let ye1 = y + 2;
   EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
@@ -508,14 +508,14 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
   doc.line(14, y + 4.5, pageW - 14, y + 4.5);
-  y += 9;
+  y += 6;
 
   /* 4 — Observations */
-  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires");
+  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 1;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
   for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 5.2, pageW - 14, y + 3 + i * 5.2);
-  y += 13;
+  y += 12;
 
   /* Signatures */
   const sigH = 24;
