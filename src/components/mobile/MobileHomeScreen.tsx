@@ -10,7 +10,6 @@ import {
   Truck,
   FileText,
   User,
-  Menu,
   X,
   Home,
   Tag,
@@ -19,7 +18,6 @@ import {
   MessageSquare,
   LogIn,
   LogOut,
-  Bell,
   Clock,
   
   Award,
@@ -89,29 +87,8 @@ export default function MobileHomeScreen() {
       {/* Fil de route décoratif */}
       <RouteThread />
 
-      {/* Topbar (overlay transparent sur hero) */}
-      <header className="safe-top absolute top-0 left-0 right-0 z-[5] flex items-center justify-end px-5 pt-4 pb-4"
-        style={{ background: "linear-gradient(180deg, rgba(4,7,18,0.55) 0%, rgba(4,7,18,0.15) 70%, transparent 100%)" }}
-      >
+      {/* Topbar retirée : la navigation est gérée par MobileNavbar */}
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => (isAuthenticated ? navigate({ to: "/notifications" }) : navigate({ to: "/login" }))}
-            aria-label="Notifications"
-            className="relative w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <Bell size={15} className="text-[#cdd7ff]" strokeWidth={2} />
-            <span className="absolute top-1.5 right-2 w-1.5 h-1.5 rounded-full bg-[#ff5c7a]" style={{ boxShadow: "0 0 6px #ff5c7a" }} />
-          </button>
-          <button
-            onClick={() => setMenuOpen(true)}
-            aria-label="Menu"
-            className="w-[34px] h-[34px] rounded-full border border-[rgba(122,163,255,0.25)] bg-[rgba(122,163,255,0.1)] flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <Menu size={15} className="text-[#cdd7ff]" strokeWidth={2} />
-          </button>
-        </div>
-      </header>
 
       <MobileMenuDrawer
         open={menuOpen}
