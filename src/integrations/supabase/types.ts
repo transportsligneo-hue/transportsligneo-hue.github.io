@@ -1347,61 +1347,94 @@ export type Database = {
           convoyeur_id: string | null
           created_at: string
           created_by: string | null
+          decline_reason: string | null
+          declined_at: string | null
           email: string
+          expired_at: string | null
           expires_at: string
           id: string
+          last_reminder_at: string | null
           nom_complet: string | null
+          provider: string
           sent_at: string
           signature_ip: string | null
+          signature_link: string | null
           signature_lu_approuve: boolean
           signature_nom: string | null
           signature_user_agent: string | null
           signed_at: string | null
+          signed_pdf_path: string | null
           snapshot: Json
           statut: string
-          token_hash: string
+          token_hash: string | null
           updated_at: string
           user_id: string | null
+          yousign_document_id: string | null
+          yousign_environment: string | null
+          yousign_signature_request_id: string | null
+          yousign_signer_id: string | null
         }
         Insert: {
           convoyeur_id?: string | null
           created_at?: string
           created_by?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
           email: string
+          expired_at?: string | null
           expires_at: string
           id?: string
+          last_reminder_at?: string | null
           nom_complet?: string | null
+          provider?: string
           sent_at?: string
           signature_ip?: string | null
+          signature_link?: string | null
           signature_lu_approuve?: boolean
           signature_nom?: string | null
           signature_user_agent?: string | null
           signed_at?: string | null
+          signed_pdf_path?: string | null
           snapshot?: Json
           statut?: string
-          token_hash: string
+          token_hash?: string | null
           updated_at?: string
           user_id?: string | null
+          yousign_document_id?: string | null
+          yousign_environment?: string | null
+          yousign_signature_request_id?: string | null
+          yousign_signer_id?: string | null
         }
         Update: {
           convoyeur_id?: string | null
           created_at?: string
           created_by?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
           email?: string
+          expired_at?: string | null
           expires_at?: string
           id?: string
+          last_reminder_at?: string | null
           nom_complet?: string | null
+          provider?: string
           sent_at?: string
           signature_ip?: string | null
+          signature_link?: string | null
           signature_lu_approuve?: boolean
           signature_nom?: string | null
           signature_user_agent?: string | null
           signed_at?: string | null
+          signed_pdf_path?: string | null
           snapshot?: Json
           statut?: string
-          token_hash?: string
+          token_hash?: string | null
           updated_at?: string
           user_id?: string | null
+          yousign_document_id?: string | null
+          yousign_environment?: string | null
+          yousign_signature_request_id?: string | null
+          yousign_signer_id?: string | null
         }
         Relationships: [
           {
