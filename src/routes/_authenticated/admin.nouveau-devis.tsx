@@ -520,11 +520,44 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
-            <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
-            <Field label="Immatriculation" value={immat} onChange={setImmat} placeholder="AB-123-CD" />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                Immatriculation
+              </label>
+              <div className="flex gap-2">
+                <input
+                  value={immat}
+                  onChange={(e) => setImmat(e.target.value.toUpperCase())}
+                  placeholder="AB-123-CD"
+                  className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                />
+                <button
+                  type="button"
+                  onClick={handleSivLookup}
+                  disabled={sivLoading}
+                  className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                  Rechercher
+                </button>
+              </div>
+              {sivMsg && (
+                <p
+                  className={`mt-2 text-[12px] font-medium ${
+                    sivMsg.type === "ok" ? "text-emerald-600" : "text-red-600"
+                  }`}
+                >
+                  {sivMsg.text}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
+              <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
+            </div>
           </div>
+
         </Card>
 
         {/* 4. Destinataire */}
