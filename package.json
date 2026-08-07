@@ -11,6 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
     "@cloudflare/vite-plugin": "^1.25.5",
     "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "^5.2.2",
@@ -86,6 +87,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.9.1",
     "@types/node": "^22.16.5",
