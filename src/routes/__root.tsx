@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
+import MobileAppGate, { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 import MobileNavbar from "@/components/mobile/MobileNavbar";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
