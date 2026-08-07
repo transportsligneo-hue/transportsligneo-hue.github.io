@@ -2783,7 +2783,12 @@
     border: 1px solid rgba(122,163,255,0.18);
     border-radius: 999px;
     box-shadow: none; filter: none;
+    max-width: 100%;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
   }
+  .r4-nav-pill::-webkit-scrollbar { display: none; }
+
   .r4-nav-pill > li { list-style: none; display: flex; filter: none; }
   .r4-nav-pill > li::marker { content: none; }
   .r4-nav-link {
