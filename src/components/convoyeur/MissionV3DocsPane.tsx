@@ -194,26 +194,6 @@ export function MissionV3DocsPane({
       icon: Camera,
       accent: photoCount > 0 ? "green" : "pink",
     },
-    ...(edlContext
-      ? ([
-          {
-            key: "edl_papier_restitution",
-            label: "État des lieux papier — Enlèvement",
-            status: "valide" as DocStatus,
-            icon: Printer,
-            accent: "cyan" as const,
-            onOpen: () => downloadEdlPapier("restitution"),
-          },
-          {
-            key: "edl_papier_livraison",
-            label: "État des lieux papier — Livraison",
-            status: "valide" as DocStatus,
-            icon: Printer,
-            accent: "cyan" as const,
-            onOpen: () => downloadEdlPapier("livraison"),
-          },
-        ] as DocItem[])
-      : []),
     {
       key: "sig_client",
       label: "Signature client (état des lieux)",
