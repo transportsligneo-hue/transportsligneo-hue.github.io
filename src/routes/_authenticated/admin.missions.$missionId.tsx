@@ -40,6 +40,7 @@ import {
 import { RoleBadge } from "@/components/brand/LigneoBrand";
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionDocuments } from "@/components/MissionDocuments";
+import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";

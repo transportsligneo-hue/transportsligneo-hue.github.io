@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
+import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 
 export interface EdlPapierContext {
   numero: string;
@@ -263,6 +264,15 @@ export function MissionV3DocsPane({
           <div className="v3-doc-summary-pill">{validated}/{total} validés</div>
         </div>
         <div className="v3-doc-progress"><div className="v3-doc-progress-fill" style={{ width: `${pct}%` }} /></div>
+      </div>
+
+      <div className="v3-doc-summary">
+        <div className="v3-doc-summary-head">
+          <div className="v3-doc-summary-title">Documents officiels</div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <MissionDocsOfficielsPanel attributionId={attributionId} userId={userId} variant="dark" />
+        </div>
       </div>
 
       {loading ? (
