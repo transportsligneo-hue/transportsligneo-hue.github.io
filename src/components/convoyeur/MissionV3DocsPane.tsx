@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
+import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 
 export interface EdlPapierContext {
   numero: string;
@@ -193,26 +194,6 @@ export function MissionV3DocsPane({
       icon: Camera,
       accent: photoCount > 0 ? "green" : "pink",
     },
-    ...(edlContext
-      ? ([
-          {
-            key: "edl_papier_restitution",
-            label: "État des lieux papier — Enlèvement",
-            status: "valide" as DocStatus,
-            icon: Printer,
-            accent: "cyan" as const,
-            onOpen: () => downloadEdlPapier("restitution"),
-          },
-          {
-            key: "edl_papier_livraison",
-            label: "État des lieux papier — Livraison",
-            status: "valide" as DocStatus,
-            icon: Printer,
-            accent: "cyan" as const,
-            onOpen: () => downloadEdlPapier("livraison"),
-          },
-        ] as DocItem[])
-      : []),
     {
       key: "sig_client",
       label: "Signature client (état des lieux)",
@@ -263,6 +244,15 @@ export function MissionV3DocsPane({
           <div className="v3-doc-summary-pill">{validated}/{total} validés</div>
         </div>
         <div className="v3-doc-progress"><div className="v3-doc-progress-fill" style={{ width: `${pct}%` }} /></div>
+      </div>
+
+      <div className="v3-doc-summary">
+        <div className="v3-doc-summary-head">
+          <div className="v3-doc-summary-title">Documents officiels</div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <MissionDocsOfficielsPanel attributionId={attributionId} userId={userId} variant="dark" />
+        </div>
       </div>
 
       {loading ? (
