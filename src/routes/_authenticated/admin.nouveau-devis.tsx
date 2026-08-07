@@ -135,6 +135,7 @@ function AdminNouveauDevisPage() {
       let query = supabase
         .from("profiles")
         .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client")
+        .in("type_client", ["flotte", "b2b", "particulier"])
         .order("created_at", { ascending: false })
         .limit(q.length >= 2 ? 12 : 50);
       if (q.length >= 2) {
