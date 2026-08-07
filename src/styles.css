@@ -2004,19 +2004,21 @@
   }
   /* Barre de liens mobile : mêmes boutons que le desktop, en plus compact */
   .mnav-pill {
-    display: flex; flex-wrap: wrap;
-    overflow: visible;
-    justify-content: center; flex: 1 1 auto;
-    gap: 5px; padding: 6px 8px;
-    border-radius: 20px;
-    max-width: 100%;
+    overflow-x: auto; overflow-y: hidden;
+    justify-content: flex-start; flex: 1 1 auto;
+    gap: 5px; padding: 4px 10px;
+    scroll-padding-inline: 10px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
-  .mnav-pill > li { flex: 0 0 auto; max-width: 100%; }
+  .mnav-pill > li { flex: 0 0 auto; scroll-snap-align: center; }
+  .mnav-pill > li:first-child { margin-left: 2px; }
+  .mnav-pill > li:last-child { margin-right: 2px; }
   .mnav-pill .r4-nav-link {
-    min-height: 32px; padding: 0 11px;
-    font-size: 11.5px; letter-spacing: 0.01em;
+    min-height: 34px; padding: 0 12px;
+    font-size: 12px; letter-spacing: 0.02em;
   }
-
   .mnav-pill .r4-nav-link.nav-accent-green svg { width: 12px; height: 12px; }
 
   /* Bouton téléphone mobile — glass bleu électrique, sobre et pro */
