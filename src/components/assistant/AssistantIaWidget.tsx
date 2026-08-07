@@ -425,11 +425,10 @@ export default function AssistantIaWidget() {
         <span className="vrm-launcher-mascotte">
           <VroomyFace size={48} alt="Vroomy" />
         </span>
-        {notif && (
-          <span className="vrm-badge" aria-hidden="true">
-            1
-          </span>
-        )}
+        <span className="vrm-chat-bubble" aria-hidden="true">
+          <MessageCircle size={18} strokeWidth={2.4} />
+        </span>
+
       </button>
 
       <div
