@@ -23,6 +23,7 @@ import {
   Clock,
   
   Award,
+  MessageCircle,
 } from "lucide-react";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
