@@ -215,9 +215,10 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         .from("mission-documents")
         .upload(path, blob, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
+      const uid = userId || (await supabase.auth.getUser()).data.user?.id || "";
       const { error: insErr } = await supabase.from("mission_documents").insert({
         attribution_id: attributionId,
-        uploaded_by: userId || null,
+        uploaded_by: uid,
         type_document: PV_TYPE,
         nom_fichier: filename,
         url_fichier: path,
