@@ -74,12 +74,14 @@ function Field({
 }
 
 const OPTIONS_LIST = [
-  { id: "recharge", label: "Recharge / plein de carburant" },
+  { id: "recharge_elec", label: "Recharge électrique (véhicule électrique)" },
+  { id: "carburant_thermique", label: "Plein de carburant (véhicule thermique)" },
   { id: "mise_en_main", label: "Mise en main du véhicule" },
   { id: "lavage_ext", label: "Lavage extérieur" },
   { id: "lavage_int", label: "Lavage intérieur" },
   { id: "lavage_full", label: "Lavage extérieur + intérieur" },
 ] as const;
+
 
 const TRAJET_TYPES = [
   "Aller simple",
