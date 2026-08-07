@@ -87,8 +87,7 @@ const OPTIONS_LIST = [
 
 
 const TRAJET_TYPES = [
-  "Aller simple",
-  "Aller-retour",
+  "Livraison simple",
   "Livraison + restitution",
 ] as const;
 
