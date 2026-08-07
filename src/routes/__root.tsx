@@ -153,6 +153,8 @@ function RootComponent() {
           <AiSettingsProvider>
             <CursorSpotlight />
             <MobileAppGate />
+            <NativeAppInit />
+
             <PublicChrome />
             <Outlet />
             <PublicMobileBottomNav />
