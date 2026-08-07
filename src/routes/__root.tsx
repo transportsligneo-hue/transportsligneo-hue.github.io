@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import MobileAppGate, { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
+import NativeAppInit from "@/components/mobile/NativeAppInit";
 import MobileNavbar from "@/components/mobile/MobileNavbar";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import PwaProvider from "@/components/pwa/PwaProvider";
@@ -152,6 +153,8 @@ function RootComponent() {
           <AiSettingsProvider>
             <CursorSpotlight />
             <MobileAppGate />
+            <NativeAppInit />
+
             <PublicChrome />
             <Outlet />
             <PublicMobileBottomNav />

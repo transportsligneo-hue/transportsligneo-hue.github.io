@@ -27,6 +27,21 @@ const config: CapacitorConfig = {
       "*.supabase.co",
     ],
   },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 1200,
+      backgroundColor: "#0b1026",
+      showSpinner: false,
+      androidScaleType: "CENTER_CROP",
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+    Geolocation: {},
+    Camera: {},
+  },
   ios: {
     contentInset: "always",
     backgroundColor: "#0b1026",
@@ -36,5 +51,6 @@ const config: CapacitorConfig = {
   },
   appendUserAgent: "LigneoDriverApp",
 };
+
 
 export default config;
