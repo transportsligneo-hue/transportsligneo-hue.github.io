@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
+import { lookupPlate } from "@/lib/plate.functions";
 import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 import {
   Loader2,
@@ -74,12 +77,14 @@ function Field({
 }
 
 const OPTIONS_LIST = [
-  { id: "recharge", label: "Recharge / plein de carburant" },
+  { id: "recharge_elec", label: "Recharge électrique (véhicule électrique)" },
+  { id: "carburant_thermique", label: "Plein de carburant (véhicule thermique)" },
   { id: "mise_en_main", label: "Mise en main du véhicule" },
   { id: "lavage_ext", label: "Lavage extérieur" },
   { id: "lavage_int", label: "Lavage intérieur" },
   { id: "lavage_full", label: "Lavage extérieur + intérieur" },
 ] as const;
+
 
 const TRAJET_TYPES = [
   "Aller simple",
@@ -122,28 +127,78 @@ function AdminNouveauDevisPage() {
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Recherche client (debounce)
+  // Chargement de la liste des clients (affichée par défaut) + recherche
   useEffect(() => {
     if (client) return;
     const q = search.trim();
-    if (q.length < 2) {
-      setResults([]);
-      return;
-    }
     const t = setTimeout(async () => {
       setSearching(true);
-      const { data } = await supabase
+      let query = supabase
         .from("profiles")
         .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client")
-        .or(
+        .order("created_at", { ascending: false })
+        .limit(q.length >= 2 ? 12 : 50);
+      if (q.length >= 2) {
+        query = query.or(
           `nom.ilike.%${q}%,prenom.ilike.%${q}%,email.ilike.%${q}%,societe.ilike.%${q}%`,
-        )
-        .limit(8);
+        );
+      }
+      const { data, error } = await query;
+      if (error) toast.error("Impossible de charger les clients");
       setResults((data ?? []) as ClientRow[]);
       setSearching(false);
-    }, 300);
+    }, q ? 300 : 0);
     return () => clearTimeout(t);
   }, [search, client]);
+
+  // Recherche plaque (SIV)
+  const lookupPlateFn = useServerFn(lookupPlate);
+  const [sivLoading, setSivLoading] = useState(false);
+  const [sivMsg, setSivMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const handleSivLookup = async () => {
+    const plate = immat.trim().toUpperCase();
+    setSivMsg(null);
+    if (plate.length < 4) {
+      setSivMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        if (d.marque) setVehicule(d.marque);
+        if (d.modele) setModele(d.modele);
+        const carb = (d.carburant ?? "").toLowerCase();
+        const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
+        setSivMsg({
+          type: "ok",
+          text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
+            d.carburant ? ` · ${d.carburant}` : ""
+          }`,
+        });
+        // Aligne l'option énergie (recharge élec / plein carburant) sur le carburant détecté
+        if (carb) {
+          const elecLabel = OPTIONS_LIST[0].label;
+          const thermLabel = OPTIONS_LIST[1].label;
+          setOptions((prev) => {
+            const had = prev.includes(elecLabel) || prev.includes(thermLabel);
+            const cleaned = prev.filter((o) => o !== elecLabel && o !== thermLabel);
+            return had ? [...cleaned, isElec ? elecLabel : thermLabel] : cleaned;
+          });
+        }
+
+      }
+    } catch {
+      setSivMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivLoading(false);
+    }
+  };
+
 
   const selectClient = async (c: ClientRow) => {
     setClient(c);
@@ -465,11 +520,44 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
-            <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
-            <Field label="Immatriculation" value={immat} onChange={setImmat} placeholder="AB-123-CD" />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                Immatriculation
+              </label>
+              <div className="flex gap-2">
+                <input
+                  value={immat}
+                  onChange={(e) => setImmat(e.target.value.toUpperCase())}
+                  placeholder="AB-123-CD"
+                  className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                />
+                <button
+                  type="button"
+                  onClick={handleSivLookup}
+                  disabled={sivLoading}
+                  className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                  Rechercher
+                </button>
+              </div>
+              {sivMsg && (
+                <p
+                  className={`mt-2 text-[12px] font-medium ${
+                    sivMsg.type === "ok" ? "text-emerald-600" : "text-red-600"
+                  }`}
+                >
+                  {sivMsg.text}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
+              <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
+            </div>
           </div>
+
         </Card>
 
         {/* 4. Destinataire */}
