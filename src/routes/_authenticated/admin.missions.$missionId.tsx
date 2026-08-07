@@ -1113,6 +1113,17 @@ function AdminMissionDetail() {
             <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
+          {/* Documents officiels */}
+          <Card>
+            <div className="flex items-center gap-2 mb-3">
+              <FileText size={15} className="text-pro-accent" />
+              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+                Documents officiels
+              </h3>
+            </div>
+            <MissionDocsOfficielsPanel attributionId={attribution.id} isAdmin />
+          </Card>
+
           {/* Documents */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
@@ -1123,6 +1134,7 @@ function AdminMissionDetail() {
             </div>
             <MissionDocuments attributionId={attribution.id} userId="" isAdmin />
           </Card>
+
 
           {/* PV de livraison digitalisés (plateformes partenaires) */}
           <Card>
