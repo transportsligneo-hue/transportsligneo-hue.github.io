@@ -59,7 +59,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export default function ContratYousignCard(props: Props) {
-  const { company } = useCompanyInfo();
+  const { data: company } = useCompanyInfo();
   const fetchContrat = useServerFn(getContratConvoyeur);
   const sendContrat = useServerFn(sendContratYousign);
   const relancer = useServerFn(relancerContratYousign);
