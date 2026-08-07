@@ -124,28 +124,76 @@ function AdminNouveauDevisPage() {
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Recherche client (debounce)
+  // Chargement de la liste des clients (affichée par défaut) + recherche
   useEffect(() => {
     if (client) return;
     const q = search.trim();
-    if (q.length < 2) {
-      setResults([]);
-      return;
-    }
     const t = setTimeout(async () => {
       setSearching(true);
-      const { data } = await supabase
+      let query = supabase
         .from("profiles")
         .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client")
-        .or(
+        .order("created_at", { ascending: false })
+        .limit(q.length >= 2 ? 12 : 50);
+      if (q.length >= 2) {
+        query = query.or(
           `nom.ilike.%${q}%,prenom.ilike.%${q}%,email.ilike.%${q}%,societe.ilike.%${q}%`,
-        )
-        .limit(8);
+        );
+      }
+      const { data, error } = await query;
+      if (error) toast.error("Impossible de charger les clients");
       setResults((data ?? []) as ClientRow[]);
       setSearching(false);
-    }, 300);
+    }, q ? 300 : 0);
     return () => clearTimeout(t);
   }, [search, client]);
+
+  // Recherche plaque (SIV)
+  const lookupPlateFn = useServerFn(lookupPlate);
+  const [sivLoading, setSivLoading] = useState(false);
+  const [sivMsg, setSivMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const handleSivLookup = async () => {
+    const plate = immat.trim().toUpperCase();
+    setSivMsg(null);
+    if (plate.length < 4) {
+      setSivMsg({ type: "err", text: "Saisis une plaque valide" });
+      return;
+    }
+    setSivLoading(true);
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        if (d.marque) setVehicule(d.marque);
+        if (d.modele) setModele(d.modele);
+        const carb = (d.carburant ?? "").toLowerCase();
+        const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
+        setSivMsg({
+          type: "ok",
+          text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
+            d.carburant ? ` · ${d.carburant}` : ""
+          }`,
+        });
+        // Pré-coche l'option énergie correspondante
+        const elecLabel = OPTIONS_LIST[0].label;
+        const thermLabel = OPTIONS_LIST[1].label;
+        if (carb) {
+          setOptions((prev) => {
+            const cleaned = prev.filter((o) => o !== elecLabel && o !== thermLabel);
+            return isElec ? cleaned : cleaned;
+          });
+        }
+      }
+    } catch {
+      setSivMsg({ type: "err", text: "Erreur réseau" });
+    } finally {
+      setSivLoading(false);
+    }
+  };
+
 
   const selectClient = async (c: ClientRow) => {
     setClient(c);
