@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureLocationPermission } from "@/lib/native/bridge";
 
 interface UseGpsTrackingOptions {
   attributionId: string | null;
