@@ -23,6 +23,7 @@ import {
   Clock,
   
   Award,
+  MessageCircle,
 } from "lucide-react";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
@@ -358,7 +359,10 @@ export default function MobileHomeScreen() {
               decoding="async"
             />
           </span>
-          <span className="vrm-badge" aria-hidden="true">1</span>
+          <span className="vrm-chat-bubble" aria-hidden="true">
+            <MessageCircle size={16} strokeWidth={2.4} />
+          </span>
+
         </button>
 
       </div>

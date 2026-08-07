@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList } from "lucide-react";
+import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
@@ -425,11 +425,10 @@ export default function AssistantIaWidget() {
         <span className="vrm-launcher-mascotte">
           <VroomyFace size={48} alt="Vroomy" />
         </span>
-        {notif && (
-          <span className="vrm-badge" aria-hidden="true">
-            1
-          </span>
-        )}
+        <span className="vrm-chat-bubble" aria-hidden="true">
+          <MessageCircle size={18} strokeWidth={2.4} />
+        </span>
+
       </button>
 
       <div
