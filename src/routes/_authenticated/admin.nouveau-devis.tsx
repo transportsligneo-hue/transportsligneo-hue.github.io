@@ -474,10 +474,6 @@ function AdminNouveauDevisPage() {
                     </li>
                   ))}
                 </ul>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
               )}
             </div>
           )}
