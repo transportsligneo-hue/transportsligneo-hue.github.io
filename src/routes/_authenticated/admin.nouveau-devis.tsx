@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
+import { lookupPlate } from "@/lib/plate.functions";
 import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 import {
   Loader2,
