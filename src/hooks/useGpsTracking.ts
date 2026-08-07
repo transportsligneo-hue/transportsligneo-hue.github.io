@@ -28,14 +28,19 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
 
   useEffect(() => {
     if (!active || !attributionId || !navigator.geolocation) return;
+    let cancelled = false;
 
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      sendPosition,
-      (err) => console.warn("GPS error:", err.message),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-    );
+    void ensureLocationPermission().then((ok) => {
+      if (!ok || cancelled) return;
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        sendPosition,
+        (err) => console.warn("GPS error:", err.message),
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      );
+    });
 
     return () => {
+      cancelled = true;
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
@@ -43,3 +48,4 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
     };
   }, [active, attributionId, sendPosition]);
 }
+
