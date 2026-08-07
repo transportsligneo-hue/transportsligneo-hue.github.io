@@ -12,6 +12,7 @@ import {
   isConvoyeurDocApproved,
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
+import MonContratCard from "@/components/convoyeur/MonContratCard";
 
 /** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
 function safeFileName(name: string) {
@@ -241,6 +242,8 @@ function ConvoyeurDocuments() {
           </p>
         </div>
       </div>
+
+      <MonContratCard />
 
       {/* Liste fixe */}
       <div className="space-y-3">

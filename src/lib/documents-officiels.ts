@@ -683,6 +683,12 @@ export function buildContratPreambule(d: ContratConvoyeurData, c?: CompanyInfo |
   ];
 }
 
+/** Nombre de pages du dernier contrat généré (utile pour placer le champ de signature). */
+let lastContratPageCount = 1;
+export function getLastContratPageCount() {
+  return lastContratPageCount;
+}
+
 export async function generateContratConvoyeurPdf(
   d: ContratConvoyeurData,
   company?: CompanyInfo | null,
@@ -794,6 +800,7 @@ export async function generateContratConvoyeurPdf(
   }
 
   drawDocLegalFooter(doc, pageW, pageH, c);
+  lastContratPageCount = doc.getNumberOfPages();
   return doc.output("blob");
 }
 
