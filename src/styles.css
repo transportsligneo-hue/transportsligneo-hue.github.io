@@ -2948,7 +2948,8 @@
     position: sticky; top: 0; z-index: 50;
     display: block; padding: 0; width: 100%;
     border-bottom: 1px solid rgba(122,163,255,0.28);
-    background: linear-gradient(90deg, rgba(12,28,86,0.86), rgba(20,50,150,0.72) 45%, rgba(12,28,86,0.86));
+    background: linear-gradient(90deg, rgba(12,28,86,0.94), rgba(20,50,150,0.86) 45%, rgba(12,28,86,0.94));
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
     backdrop-filter: blur(18px) saturate(160%);
     box-shadow: 0 1px 0 rgba(122,163,255,0.35), 0 10px 34px -18px rgba(47,95,255,0.55);
   }
@@ -2958,6 +2959,7 @@
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--r4-border);
     border-radius: 24px;
+    -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
   }
 
