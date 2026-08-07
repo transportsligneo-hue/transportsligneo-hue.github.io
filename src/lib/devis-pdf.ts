@@ -2,6 +2,12 @@ import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
+import {
+  fetchCompanyInfo,
+  companyLegalLine1,
+  companyLegalLine2,
+  type CompanyInfo,
+} from "@/lib/doc-branding";
 
 
 export interface DevisData {
@@ -164,21 +170,29 @@ function drawFooter(doc: jsPDF, pageW: number, pageH: number) {
   });
 }
 
-function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
-  // Bandeau émetteur simplifié — informations légales retirées en attendant validation officielle.
+function drawSocietyBlock(doc: jsPDF, pageW: number, y: number, company?: CompanyInfo | null) {
+  // Bandeau émetteur — mentions légales dynamiques (company_settings), aucune donnée codée en dur.
+  const l1 = companyLegalLine1(company);
+  const l2 = companyLegalLine2(company);
+  const h = l1 || l2 ? 14 : 10;
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, pageW - 28, 10, 1, 1, "S");
+  doc.roundedRect(14, y, pageW - 28, h, 1, 1, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Transports Ligneo", 20, y + 6.5);
+  doc.text((company?.raison_sociale || "Transports Ligneo"), 20, y + 5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(6.5);
   doc.setTextColor(...MUTED);
-  doc.text("Convoyage automobile", pageW / 2, y + 6.5, { align: "center" });
-  doc.setTextColor(...TEXT);
-  doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
+  if (l1) doc.text(l1, 20, y + 9);
+  if (l2) doc.text(doc.splitTextToSize(l2, pageW - 48)[0], 20, y + 12.2);
+  if (!l1 && !l2) {
+    doc.setFontSize(8);
+    doc.text("Convoyage automobile", pageW / 2, y + 6.5, { align: "center" });
+    doc.setTextColor(...TEXT);
+    doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
+  }
 }
 
 function drawInfoRow(doc: jsPDF, x: number, y: number, w: number, label: string, value: string) {
@@ -226,7 +240,8 @@ function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
   doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
-export async function generateDevisPdf(d: DevisData): Promise<Blob> {
+export async function generateDevisPdf(d: DevisData, company?: CompanyInfo | null): Promise<Blob> {
+  const co = company ?? (await fetchCompanyInfo().catch(() => null));
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -500,7 +515,7 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   // Cartouche "Signature électronique" (OTP e-mail) — nouvelle page dédiée
   if (d.otpProof) {
     // Termine d'abord la page courante (société + footer)
-    drawSocietyBlock(doc, pageW, pageH - 40);
+    drawSocietyBlock(doc, pageW, pageH - 42, co);
     drawFooter(doc, pageW, pageH);
     doc.addPage();
     const cpageW = doc.internal.pageSize.getWidth();
@@ -583,7 +598,7 @@ export async function generateDevisPdf(d: DevisData): Promise<Blob> {
   }
 
   // Société block + footer (placé juste au-dessus du footer pour éviter tout chevauchement)
-  drawSocietyBlock(doc, pageW, pageH - 40);
+  drawSocietyBlock(doc, pageW, pageH - 42, co);
   drawFooter(doc, pageW, pageH);
 
   return doc.output("blob");
