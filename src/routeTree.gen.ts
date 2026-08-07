@@ -59,6 +59,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
+import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
@@ -422,6 +423,11 @@ const B2bTransportPonctuelRetourRoute =
     path: '/retour',
     getParentRoute: () => B2bTransportPonctuelRoute,
   } as any)
+const ApiPublicYousignWebhookRoute = ApiPublicYousignWebhookRouteImport.update({
+  id: '/api/public/yousign-webhook',
+  path: '/api/public/yousign-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAssistantChatRoute = ApiPublicAssistantChatRouteImport.update({
   id: '/api/public/assistant-chat',
   path: '/api/public/assistant-chat',
@@ -1135,6 +1141,7 @@ export interface FileRoutesByFullPath {
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1280,6 +1287,7 @@ export interface FileRoutesByTo {
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1436,6 +1444,7 @@ export interface FileRoutesById {
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1592,6 +1601,7 @@ export interface FileRouteTypes {
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -1737,6 +1747,7 @@ export interface FileRouteTypes {
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/admin'
@@ -1892,6 +1903,7 @@ export interface FileRouteTypes {
     | '/api/facture/checkout'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1978,6 +1990,7 @@ export interface RootRouteChildren {
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
+  ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
@@ -2353,6 +2366,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/b2b/transport-ponctuel/retour'
       preLoaderRoute: typeof B2bTransportPonctuelRetourRouteImport
       parentRoute: typeof B2bTransportPonctuelRoute
+    }
+    '/api/public/yousign-webhook': {
+      id: '/api/public/yousign-webhook'
+      path: '/api/public/yousign-webhook'
+      fullPath: '/api/public/yousign-webhook'
+      preLoaderRoute: typeof ApiPublicYousignWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/assistant-chat': {
       id: '/api/public/assistant-chat'
@@ -3541,6 +3561,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
+  ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
@@ -3570,13 +3591,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

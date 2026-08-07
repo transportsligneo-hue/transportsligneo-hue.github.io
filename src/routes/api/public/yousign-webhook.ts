@@ -10,6 +10,18 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const BUCKET = "contrats-convoyeurs";
 
+async function notifyAdmin(
+  admin: any,
+  _fn: string,
+  args: { p_type: string; p_title: string; p_message: string; p_link: string | null },
+) {
+  try {
+    await admin.rpc("create_admin_notification", args as never);
+  } catch {
+    /* la notification admin ne doit jamais faire échouer le webhook */
+  }
+}
+
 function verify(rawBody: string, header: string | null, secret: string): boolean {
   if (!header) return false;
   const provided = header.startsWith("sha256=") ? header.slice(7) : header;
@@ -85,12 +97,12 @@ export const Route = createFileRoute("/api/public/yousign-webhook")({
             })
             .eq("id", contrat.id);
 
-          await supabaseAdmin.rpc("create_admin_notification", {
+          await notifyAdmin(supabaseAdmin, "create_admin_notification", {
             p_type: "contrat_signe",
             p_title: "Contrat de partenariat signé",
             p_message: `${contrat.nom_complet ?? "Un convoyeur"} a signé son contrat de partenariat.`,
             p_link: contrat.convoyeur_id ? `/admin/convoyeurs/${contrat.convoyeur_id}` : null,
-          } as never).catch?.(() => {});
+          });
         } else if (eventName === "signature_request.declined") {
           const reason: string | null =
             payload?.data?.signer?.decline_reason ?? sr?.decline_reason ?? null;
@@ -98,23 +110,23 @@ export const Route = createFileRoute("/api/public/yousign-webhook")({
             .from("convoyeur_contrats")
             .update({ statut: "refuse", declined_at: now, decline_reason: reason })
             .eq("id", contrat.id);
-          await supabaseAdmin.rpc("create_admin_notification", {
+          await notifyAdmin(supabaseAdmin, "create_admin_notification", {
             p_type: "contrat_refuse",
             p_title: "Contrat de partenariat refusé",
             p_message: `${contrat.nom_complet ?? "Un convoyeur"} a refusé de signer son contrat.${reason ? ` Motif : ${reason}` : ""}`,
             p_link: contrat.convoyeur_id ? `/admin/convoyeurs/${contrat.convoyeur_id}` : null,
-          } as never).catch?.(() => {});
+          });
         } else if (eventName === "signature_request.expired") {
           await supabaseAdmin
             .from("convoyeur_contrats")
             .update({ statut: "expire", expired_at: now })
             .eq("id", contrat.id);
-          await supabaseAdmin.rpc("create_admin_notification", {
+          await notifyAdmin(supabaseAdmin, "create_admin_notification", {
             p_type: "contrat_expire",
             p_title: "Contrat de partenariat expiré",
             p_message: `La demande de signature de ${contrat.nom_complet ?? "un convoyeur"} a expiré.`,
             p_link: contrat.convoyeur_id ? `/admin/convoyeurs/${contrat.convoyeur_id}` : null,
-          } as never).catch?.(() => {});
+          });
         }
 
         return new Response("ok");

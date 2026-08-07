@@ -124,7 +124,7 @@ export const sendContratYousign = createServerFn({ method: "POST" })
         yousign_signature_request_id: request.id,
         yousign_document_id: doc.id,
         expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
-        snapshot: data.snapshot ?? {},
+        snapshot: (data.snapshot ?? {}) as never,
         sent_at: new Date().toISOString(),
         created_by: context.userId,
       }])
