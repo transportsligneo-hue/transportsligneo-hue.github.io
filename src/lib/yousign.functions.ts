@@ -113,7 +113,7 @@ export const sendContratYousign = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: inserted, error: insErr } = await supabaseAdmin
       .from("convoyeur_contrats")
-      .insert({
+      .insert([{
         convoyeur_id: conv.id,
         user_id: conv.user_id,
         email: conv.email,
@@ -127,7 +127,7 @@ export const sendContratYousign = createServerFn({ method: "POST" })
         snapshot: data.snapshot ?? {},
         sent_at: new Date().toISOString(),
         created_by: context.userId,
-      })
+      }])
       .select("id")
       .single();
     if (insErr) throw new Error(insErr.message);
