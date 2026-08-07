@@ -73,13 +73,29 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
 
               // 4. Auto-create facture (payée) — numéro aligné sur le devis (DEV-TLG-YYYY-### → FAC-TLG-YYYY-###)
               if (devis) {
+                // Idempotence : ne pas recréer la facture si le webhook est rejoué
+                const { data: existingFacture } = await supabaseAdmin
+                  .from("factures")
+                  .select("id")
+                  .eq("stripe_session_id", sessionId)
+                  .maybeSingle();
+
                 const prixTtc = Number(devis.prix_estime ?? 0);
                 const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
                 const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
                 const factureNumero = /^DEV-TLG-\d{4}-\d{3}$/.test(devis.numero ?? "")
                   ? (devis.numero as string).replace("DEV-TLG", "FAC-TLG")
                   : undefined;
-                await supabaseAdmin.from("factures").insert({
+                const vehiculeLabel = [devis.marque, devis.modele].filter(Boolean).join(" ");
+                const designation = [
+                  "Convoyage automobile par conducteur professionnel",
+                  vehiculeLabel || null,
+                  devis.option_trajet === "aller_retour" ? "Livraison + restitution" : "Livraison simple",
+                ]
+                  .filter(Boolean)
+                  .join(" — ");
+
+                if (!existingFacture) await supabaseAdmin.from("factures").insert({
                   ...(factureNumero && { numero: factureNumero }),
                   mission_id: missionId,
                   client_email: devis.email,
@@ -87,6 +103,12 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                   client_prenom: devis.prenom,
                   type_facture: "particulier",
                   date_mission: devis.date_souhaitee ?? null,
+                  depart: devis.depart ?? null,
+                  arrivee: devis.arrivee ?? null,
+                  distance_km: devis.distance_km ?? null,
+                  designation,
+                  reference_label: "Devis",
+                  reference_client: devis.numero ?? null,
                   prix_ht: prixHt,
                   tva_taux: 20,
                   prix_tva: prixTva,
@@ -94,7 +116,12 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                   statut: "payee",
                   mode_paiement: "carte",
                   date_paiement: new Date().toISOString().slice(0, 10),
+                  paid_at: new Date().toISOString(),
+                  amount_paid_cents: amount || Math.round(prixTtc * 100),
+                  stripe_session_id: sessionId ?? null,
+                  stripe_payment_intent_id: paymentIntentId ?? null,
                 } as any);
+
 
                 // Aligner la séquence FAC-TLG pour éviter les collisions futures
                 if (factureNumero) {

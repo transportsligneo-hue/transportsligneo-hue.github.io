@@ -3,6 +3,12 @@ import jsPDF from "jspdf";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
+import {
+  fetchCompanyInfo,
+  companyLegalLine1,
+  companyLegalLine2,
+  type CompanyInfo,
+} from "@/lib/doc-branding";
 
 
 
@@ -167,21 +173,29 @@ function drawFooter(doc: jsPDF, pageW: number, pageH: number) {
   });
 }
 
-function drawSocietyBlock(doc: jsPDF, pageW: number, y: number) {
-  // Bandeau émetteur simplifié — informations légales retirées en attendant validation officielle.
+function drawSocietyBlock(doc: jsPDF, pageW: number, y: number, company?: CompanyInfo | null) {
+  // Bandeau émetteur — mentions légales dynamiques (company_settings), aucune donnée codée en dur.
+  const l1 = companyLegalLine1(company);
+  const l2 = companyLegalLine2(company);
+  const h = l1 || l2 ? 14 : 10;
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, pageW - 28, 10, 1, 1, "S");
+  doc.roundedRect(14, y, pageW - 28, h, 1, 1, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Transports Ligneo", 20, y + 6.5);
+  doc.text((company?.raison_sociale || "Transports Ligneo"), 20, y + 5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(6.5);
   doc.setTextColor(...MUTED);
-  doc.text("Convoyage automobile", pageW / 2, y + 6.5, { align: "center" });
-  doc.setTextColor(...TEXT);
-  doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
+  if (l1) doc.text(l1, 20, y + 9);
+  if (l2) doc.text(doc.splitTextToSize(l2, pageW - 48)[0], 20, y + 12.2);
+  if (!l1 && !l2) {
+    doc.setFontSize(8);
+    doc.text("Convoyage automobile", pageW / 2, y + 6.5, { align: "center" });
+    doc.setTextColor(...TEXT);
+    doc.text("contact@transportsligneo.fr", pageW - 20, y + 6.5, { align: "right" });
+  }
 }
 
 function drawInfoRow(doc: jsPDF, x: number, y: number, w: number, label: string, value: string, valueColor?: [number, number, number]) {
@@ -228,7 +242,8 @@ function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
   doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
-export async function generateFacturePdf(f: FactureData): Promise<Blob> {
+export async function generateFacturePdf(f: FactureData, company?: CompanyInfo | null): Promise<Blob> {
+  const co = company ?? (await fetchCompanyInfo().catch(() => null));
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -479,7 +494,7 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Pour Transports Ligneo", pageW - 18, sigBaseY, { align: "right" });
+  doc.text(`Pour ${co?.raison_sociale || "Transports Ligneo"}`, pageW - 18, sigBaseY, { align: "right" });
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
@@ -490,11 +505,11 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text("Olivier G.", pageW - 18, sigBaseY + 24, { align: "right" });
+  doc.text(co?.signataire_nom || "Olivier G.", pageW - 18, sigBaseY + 24, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
-  doc.text("Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
+  doc.text(co?.signataire_fonction || "Gerant", pageW - 18, sigBaseY + 28.5, { align: "right" });
 
   // Sceau doré central (façon template)
   drawGoldSeal(doc, pageW / 2, sigBaseY + 14, 14);
@@ -521,21 +536,21 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
     doc.text("Titulaire :", 66, y + 4);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
-    doc.text("Transports Ligneo", 66, y + 8.5);
+    doc.text(co?.raison_sociale || "Transports Ligneo", 66, y + 8.5);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.text("Banque :", 100, y + 4);
     doc.setFont("helvetica", "bold");
-    doc.text(f.banque || "Credit Mutuel", 100, y + 8.5);
+    doc.text(f.banque || co?.banque_nom || "Credit Mutuel", 100, y + 8.5);
     doc.setFont("helvetica", "normal");
     doc.text("IBAN :", 130, y + 4);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
-    doc.text(f.iban || "FR76 1562 9020 0100 0200 1234 567", 130, y + 8.5);
+    doc.text(f.iban || co?.iban || "FR76 1562 9020 0100 0200 1234 567", 130, y + 8.5);
     doc.setFont("helvetica", "normal");
     doc.text("BIC :", pageW - 30, y + 4);
     doc.setFont("helvetica", "bold");
-    doc.text(f.bic || "CMCIFR2A", pageW - 30, y + 8.5);
+    doc.text(f.bic || co?.bic || "CMCIFR2A", pageW - 30, y + 8.5);
   }
 
   // ===== Mention légale (exonération TVA + mention configurée) =====
@@ -556,7 +571,7 @@ export async function generateFacturePdf(f: FactureData): Promise<Blob> {
     });
   }
 
-  drawSocietyBlock(doc, pageW, pageH - 40);
+  drawSocietyBlock(doc, pageW, pageH - 42, co);
   drawFooter(doc, pageW, pageH);
 
 
