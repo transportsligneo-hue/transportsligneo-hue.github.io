@@ -450,7 +450,7 @@ function AdminNouveauDevisPage() {
                 <Loader2 size={15} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-pro-muted" />
               )}
               {results.length > 0 && (
-                <ul className="mt-2 divide-y divide-pro-border overflow-hidden rounded-xl border border-pro-border">
+                <ul className="mt-2 max-h-72 divide-y divide-pro-border overflow-y-auto overflow-x-hidden rounded-xl border border-pro-border bg-white shadow-sm">
                   {results.map((c) => (
                     <li key={c.user_id}>
                       <button
@@ -461,12 +461,19 @@ function AdminNouveauDevisPage() {
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
                           {initials(c)}
                         </span>
-                        <span className="min-w-0">
+                        <span className="min-w-0 flex-1">
                           <span className="block truncate text-[13px] font-semibold text-pro-text">
                             {c.societe || `${c.prenom} ${c.nom}`}
                           </span>
                           <span className="block truncate text-[11.5px] text-pro-muted">{c.email}</span>
                         </span>
+                        <span className="shrink-0 rounded-full border border-pro-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pro-muted">
+                          {c.type_client === "flotte" ? "Flotte" : c.type_client === "b2b" ? "B2B" : "Particulier"}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
                       </button>
                     </li>
                   ))}
