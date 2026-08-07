@@ -180,15 +180,17 @@ function AdminNouveauDevisPage() {
             d.carburant ? ` · ${d.carburant}` : ""
           }`,
         });
-        // Pré-coche l'option énergie correspondante
-        const elecLabel = OPTIONS_LIST[0].label;
-        const thermLabel = OPTIONS_LIST[1].label;
+        // Aligne l'option énergie (recharge élec / plein carburant) sur le carburant détecté
         if (carb) {
+          const elecLabel = OPTIONS_LIST[0].label;
+          const thermLabel = OPTIONS_LIST[1].label;
           setOptions((prev) => {
+            const had = prev.includes(elecLabel) || prev.includes(thermLabel);
             const cleaned = prev.filter((o) => o !== elecLabel && o !== thermLabel);
-            return isElec ? cleaned : cleaned;
+            return had ? [...cleaned, isElec ? elecLabel : thermLabel] : cleaned;
           });
         }
+
       }
     } catch {
       setSivMsg({ type: "err", text: "Erreur réseau" });
