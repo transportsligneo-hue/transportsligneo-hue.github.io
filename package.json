@@ -11,7 +11,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/camera": "^8.2.2",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/geolocation": "^8.2.1",
+    "@capacitor/push-notifications": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@cloudflare/vite-plugin": "^1.25.5",
     "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "^5.2.2",
