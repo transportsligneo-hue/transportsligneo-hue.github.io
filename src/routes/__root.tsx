@@ -124,8 +124,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function PublicMobileBottomNav() {
   const { user } = useAuth();
-  if (user) return null;
+  const isApp = useIsMobileAppShell();
+  if (user || isApp) return null;
   return <MobileBottomNav />;
+}
+
+/** Chrome public (navbar vitrine, bandeau cookies, assistant) — masqué dans l'app native. */
+function PublicChrome() {
+  const isApp = useIsMobileAppShell();
+  if (isApp) return null;
+  return (
+    <>
+      <MobileNavbar />
+      <AssistantIaWidget />
+      <CookieBanner />
+    </>
+  );
 }
 
 function RootComponent() {
@@ -137,17 +151,21 @@ function RootComponent() {
         <PricingProvider>
           <AiSettingsProvider>
             <CursorSpotlight />
-            <MobileNavbar />
+            <MobileAppGate />
+            <PublicChrome />
             <Outlet />
             <PublicMobileBottomNav />
-            <AssistantIaWidget />
             <PwaProvider />
             <PwaSplash />
             <BiometricEnrollPrompt />
             <BiometricLock />
-            <CookieBanner />
             <Toaster />
           </AiSettingsProvider>
+        </PricingProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
         </PricingProvider>
       </AuthProvider>
     </QueryClientProvider>
