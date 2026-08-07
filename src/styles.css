@@ -4516,10 +4516,10 @@
   position: absolute; bottom: -2px; right: -2px; z-index: 3;
   width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: #ffffff;
-  color: #0b1330;
-  border: 2px solid #0b1330;
-  box-shadow: 0 6px 16px rgba(6, 11, 28, 0.55);
+  background: radial-gradient(circle at 35% 30%, #6b9aff 0%, #3d6bff 55%, #1a2f7a 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 16px rgba(6, 11, 28, 0.55), 0 0 10px rgba(61, 107, 255, 0.45);
 }
 .vrm-launcher--inline .vrm-chat-bubble { width: 28px; height: 28px; }
 .vrm-chat-launcher::after {
