@@ -2006,58 +2006,65 @@
   .mnav-pill {
     overflow-x: auto; overflow-y: hidden;
     justify-content: flex-start; flex: 1 1 auto;
-    gap: 5px; padding: 4px;
+    gap: 5px; padding: 4px 10px;
+    scroll-padding-inline: 10px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
   }
-  .mnav-pill > li { flex: 0 0 auto; }
+  .mnav-pill > li { flex: 0 0 auto; scroll-snap-align: center; }
+  .mnav-pill > li:first-child { margin-left: 2px; }
+  .mnav-pill > li:last-child { margin-right: 2px; }
   .mnav-pill .r4-nav-link {
     min-height: 34px; padding: 0 12px;
     font-size: 12px; letter-spacing: 0.02em;
   }
   .mnav-pill .r4-nav-link.nav-accent-green svg { width: 12px; height: 12px; }
+
+  /* Bouton téléphone mobile — glass bleu électrique, sobre et pro */
   .nav-phone-block.mnav-phone-compact {
-    padding: 0; width: 38px; height: 38px;
-    justify-content: center; gap: 0; border-radius: 12px;
-    border-color: rgba(231,199,106,0.75);
-    background: linear-gradient(135deg, rgba(212,175,55,0.32), rgba(90,70,15,0.55));
+    padding: 0 12px 0 8px; height: 36px; width: auto;
+    justify-content: center; gap: 8px; border-radius: 999px;
+    border: 1px solid rgba(122,163,255,0.55);
+    background: linear-gradient(135deg, rgba(47,95,255,0.30), rgba(10,22,60,0.75));
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.14),
-      0 0 0 1px rgba(231,199,106,0.28),
-      0 10px 28px -10px rgba(220,180,70,0.95),
-      0 0 32px rgba(231,199,106,0.55);
-    animation: mnavPhoneGlow 2.2s ease-in-out infinite;
+      0 8px 22px -12px rgba(47,95,255,0.95);
+    animation: none;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .nav-phone-block.mnav-phone-compact .mnav-phone-label {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #dfe8ff; white-space: nowrap;
   }
   .nav-phone-block.mnav-phone-compact .nav-phone-icon {
-    width: 28px; height: 28px;
-    box-shadow: 0 0 22px rgba(231,199,106,1);
+    width: 24px; height: 24px; border-radius: 999px;
+    background: linear-gradient(135deg, #4f8cff, #2f5fff);
+    box-shadow: 0 0 14px rgba(79,140,255,0.75);
   }
   .nav-phone-block.mnav-phone-compact .nav-phone-pulse {
-    inset: -6px;
-    border-color: rgba(231,199,106,0.9);
-    animation: mnavPhonePulse 1.8s ease-out infinite;
+    inset: -4px;
+    border-color: rgba(122,163,255,0.75);
+    animation: mnavPhonePulse 2.2s ease-out infinite;
   }
   .nav-phone-block.mnav-phone-compact .nav-phone-pulse-delay {
-    animation-delay: 0.6s;
-    border-color: rgba(255,235,170,0.75);
-  }
-  @keyframes mnavPhoneGlow {
-    0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 0 0 1px rgba(231,199,106,0.28), 0 10px 28px -10px rgba(220,180,70,0.9), 0 0 28px rgba(231,199,106,0.5); transform: scale(1); }
-    50%     { box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(231,199,106,0.5), 0 12px 34px -10px rgba(220,180,70,1.1), 0 0 46px rgba(231,199,106,0.85); transform: scale(1.04); }
+    animation-delay: 1.1s;
+    border-color: rgba(160,195,255,0.55);
   }
   @keyframes mnavPhonePulse {
-    0%   { transform: scale(0.85); opacity: 0.95; }
-    60%  { transform: scale(1.45); opacity: 0; }
-    100% { transform: scale(1.45); opacity: 0; }
+    0%   { transform: scale(0.9); opacity: 0.7; }
+    70%  { transform: scale(1.35); opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
   }
+  .nav-phone-block.mnav-phone-compact:active,
   .nav-phone-block.mnav-phone-compact:hover {
-    transform: translateY(-2px) scale(1.06);
-    border-color: rgba(255,235,170,0.95);
-    background: linear-gradient(135deg, rgba(212,175,55,0.55), rgba(120,95,25,0.65));
+    transform: translateY(-1px);
+    border-color: rgba(160,195,255,0.9);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.18),
-      0 14px 36px -12px rgba(220,180,70,1.15),
-      0 0 54px rgba(231,199,106,1);
+      0 10px 28px -12px rgba(47,95,255,1);
   }
+
 
   .mnav-phone {
     display: inline-flex; align-items: center; justify-content: center;
