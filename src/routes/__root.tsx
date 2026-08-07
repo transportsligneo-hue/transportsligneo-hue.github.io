@@ -166,9 +166,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-        </PricingProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-}
 
