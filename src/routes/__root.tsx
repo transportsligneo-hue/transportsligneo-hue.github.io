@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import MobileAppGate, { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
