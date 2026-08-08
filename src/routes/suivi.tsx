@@ -38,6 +38,7 @@ const STATUT_LABEL: Record<string, { label: string; color: string }> = {
 
 function SuiviPage() {
   const [numero, setNumero] = useState("");
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,17 +46,24 @@ function SuiviPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const value = numero.trim();
-    if (value.length < 3) {
-      setError("Veuillez saisir un numéro de mission valide.");
+    const codeValue = code.trim();
+    if (value.length < 3 || codeValue.length < 4) {
+      setError("Numéro ou code incorrect.");
       return;
     }
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const res = await trackMissionPublic({ data: { numero: value } });
+      const res = await trackMissionPublic({ data: { numero: value, code: codeValue } });
       setResult(res);
-      if (!res.found) setError("Aucune mission ne correspond à ce numéro.");
+      if (!res.found) {
+        setError(
+          res.blocked
+            ? "Trop de tentatives. Réessayez dans une dizaine de minutes."
+            : "Numéro ou code incorrect.",
+        );
+      }
     } catch {
       setError("Le suivi est momentanément indisponible. Réessayez dans quelques instants.");
     } finally {
@@ -78,8 +86,9 @@ function SuiviPage() {
             Où en est <span className="v4-accent">mon véhicule</span> ?
           </h1>
           <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
-            Saisissez votre numéro de mission (indiqué sur votre confirmation) pour connaître le statut
-            de votre convoyage. Aucune information personnelle n'est affichée sur cette page.
+            Saisissez votre numéro de mission et votre code confidentiel (tous deux indiqués sur votre
+            confirmation) pour connaître le statut de votre convoyage. Aucune information personnelle
+            n'est affichée sur cette page.
           </p>
 
           <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row">
@@ -94,11 +103,24 @@ function SuiviPage() {
               placeholder="Ex. M-2026-0142"
               className="flex-1 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none"
             />
+            <label htmlFor="code-confidentiel" className="sr-only">
+              Code confidentiel
+            </label>
+            <input
+              id="code-confidentiel"
+              value={code}
+              maxLength={16}
+              autoComplete="off"
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="Code ex. A7K9P2"
+              className="w-full rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] tracking-[0.18em] text-white placeholder:tracking-normal placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none sm:w-[190px]"
+            />
             <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
               <span className="ml-2">Suivre</span>
             </button>
           </form>
+
 
           {error && (
             <div className="mb-6 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-[13.5px] text-[#ffb4b4]">
