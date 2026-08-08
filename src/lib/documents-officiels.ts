@@ -526,7 +526,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.setDrawColor(...DOC_LINE);
     doc.setLineWidth(0.15);
     doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
-    return yy + 4.4;
+    return yy + 4.05;
   };
   let ye1 = y + 6;
   EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
