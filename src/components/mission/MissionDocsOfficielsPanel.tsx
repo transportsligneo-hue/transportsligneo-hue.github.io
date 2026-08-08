@@ -8,7 +8,7 @@ import {
   generateEdlPapierPdf,
   downloadBlob,
 } from "@/lib/documents-officiels";
-import { fetchCompanyInfo, isCompanyComplete, type CompanyInfo } from "@/lib/doc-branding";
+import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
 
 type Variant = "light" | "dark";
 
@@ -37,6 +37,10 @@ interface TrajetLite {
   vin: string | null;
   vehicule_vin: string | null;
   client_nom: string | null;
+  client_email: string | null;
+  arrivee_contact_societe: string | null;
+  arrivee_contact_nom: string | null;
+  arrivee_contact_prenom: string | null;
   contact_depart_nom: string | null;
   contact_depart_tel: string | null;
   contact_depart_note: string | null;
