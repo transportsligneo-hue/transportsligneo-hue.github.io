@@ -8,6 +8,8 @@ import { ReturnTripHelper } from "./ReturnTripHelper";
 import type { CatalogTrajet } from "./CatalogueMissionCard";
 import { inferMissionLevel } from "@/lib/mission-level";
 import { toast } from "sonner";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
+import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 
 
 interface Props {
