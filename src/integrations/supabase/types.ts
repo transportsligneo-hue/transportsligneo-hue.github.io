@@ -1749,6 +1749,7 @@ export type Database = {
           prenom: string
           pricing_display_mode: string | null
           prix_estime: number | null
+          pv_digitalise: string
           recuperation_retour_identique: boolean
           statut: string
           stripe_payment_intent_id: string | null
@@ -1810,6 +1811,7 @@ export type Database = {
           prenom: string
           pricing_display_mode?: string | null
           prix_estime?: number | null
+          pv_digitalise?: string
           recuperation_retour_identique?: boolean
           statut?: string
           stripe_payment_intent_id?: string | null
@@ -1871,6 +1873,7 @@ export type Database = {
           prenom?: string
           pricing_display_mode?: string | null
           prix_estime?: number | null
+          pv_digitalise?: string
           recuperation_retour_identique?: boolean
           statut?: string
           stripe_payment_intent_id?: string | null
