@@ -226,6 +226,30 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     if (prefill.societe !== undefined) setSociete((v) => v || prefill.societe!);
   }, [prefill?.nom, prefill?.prenom, prefill?.email, prefill?.telephone, prefill?.societe]);
 
+  // Reprise d'un parcours guidé Vroomy : pré-remplissage sans perte de saisie
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("ligneo_vroomy_order_prefill");
+      if (raw) window.sessionStorage.removeItem("ligneo_vroomy_order_prefill");
+    } catch { return; }
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as Record<string, string>;
+      if (p.departure) setDeparture((v) => v || p.departure);
+      if (p.arrival) setArrival((v) => v || p.arrival);
+      if (p.vehicleType) setVehicleType((v) => v || p.vehicleType);
+      if (p.date) setDate((v) => v || p.date);
+      if (p.option === "aller-simple" || p.option === "aller-retour" || p.option === "express") setOption(p.option);
+      if (p.comment) setComment((v) => v || p.comment);
+      if (p.nom) setNom((v) => v || p.nom);
+      if (p.telephone) setTelephone((v) => v || p.telephone);
+    } catch { /* prefill invalide : on ignore */ }
+  }, []);
+
+
+
 
   // --- compte client ---
   const [password, setPassword] = useState("");
