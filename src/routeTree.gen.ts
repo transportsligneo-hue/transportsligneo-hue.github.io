@@ -140,6 +140,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
+import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
@@ -902,6 +903,12 @@ const ApiPublicScanHandoffExtractRoute =
     path: '/api/public/scan/handoff-extract',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksGoogleReviewDispatchRoute =
+  ApiPublicHooksGoogleReviewDispatchRouteImport.update({
+    id: '/api/public/hooks/google-review-dispatch',
+    path: '/api/public/hooks/google-review-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
   id: '/api/public/facture/webhook',
   path: '/api/public/facture/webhook',
@@ -1195,6 +1202,7 @@ export interface FileRoutesByFullPath {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1345,6 +1353,7 @@ export interface FileRoutesByTo {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1506,6 +1515,7 @@ export interface FileRoutesById {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1667,6 +1677,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/google-review-dispatch'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -1817,6 +1828,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/google-review-dispatch'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -1977,6 +1989,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/google-review-dispatch'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2050,6 +2063,7 @@ export interface RootRouteChildren {
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
+  ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -2987,6 +3001,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/google-review-dispatch': {
+      id: '/api/public/hooks/google-review-dispatch'
+      path: '/api/public/hooks/google-review-dispatch'
+      fullPath: '/api/public/hooks/google-review-dispatch'
+      preLoaderRoute: typeof ApiPublicHooksGoogleReviewDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/facture/webhook': {
       id: '/api/public/facture/webhook'
       path: '/api/public/facture/webhook'
@@ -3653,6 +3674,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
+  ApiPublicHooksGoogleReviewDispatchRoute:
+    ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
@@ -3676,13 +3699,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
