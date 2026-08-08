@@ -32,6 +32,7 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 import { useMissionGates } from "@/hooks/useMissionGates";
+import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
   EDL_PREMIUM_SEQUENCE,
