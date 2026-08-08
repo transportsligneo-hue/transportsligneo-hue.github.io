@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
 import { missionRequiredNiveau, missionLevelStyle } from "@/lib/mission-level";
-import { niveauLabel } from "@/lib/convoyeur-niveau";
+import { niveauLabel, canAccessNiveau } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 
 
