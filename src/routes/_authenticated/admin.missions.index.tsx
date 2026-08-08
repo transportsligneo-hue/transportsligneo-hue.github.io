@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ClipboardList } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -244,6 +244,12 @@ function AdminMissionsUnified() {
         subtitle={`Demandes, trajets et attributions réunis dans un seul flux — ${rows.length} mission${rows.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <Link
+              to="/admin/attributions"
+              className="h-9 px-3 rounded-lg border border-[#eaeaee] bg-white flex items-center gap-1.5 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
+            >
+              <ClipboardList size={15} /> Attributions
+            </Link>
             <CreateTestMissionButton onCreated={fetchAll} />
             <button onClick={fetchAll} className="w-9 h-9 rounded-lg border border-[#eaeaee] bg-white flex items-center justify-center text-[#70727d] hover:text-[#2f5fff]">
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
