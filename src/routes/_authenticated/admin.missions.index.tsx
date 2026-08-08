@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ClipboardList } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -11,7 +11,8 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
-import { displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 
