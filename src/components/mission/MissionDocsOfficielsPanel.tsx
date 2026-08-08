@@ -186,6 +186,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         numero,
         variant: v,
         client: trajet.client_nom,
+        societe: clientSociete || trajet.client_nom,
         marque_modele: marqueModele,
         immatriculation: immat,
         vin: trajet.vin || trajet.vehicule_vin,
@@ -194,7 +195,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         depart: trajet.depart,
         arrivee: trajet.arrivee,
         date_prevue: trajet.date_trajet,
-        convoyeur_nom: convoyeurNom,
+        convoyeur_nom: (v === "livraison" ? contactArriveeNom : contactDepartNom) || convoyeurNom,
       }, company);
       downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
     } catch {
