@@ -284,8 +284,10 @@ export function drawDocLegalFooter(
   if (l2) doc.text(l2, pageW / 2, top + 13.5, { align: "center" });
 }
 
-/** Titre de section navy pleine largeur. */
+/** Titre de section navy pleine largeur (auto-pagination : jamais orphelin). */
 export function drawSectionTitle(doc: jsPDF, pageW: number, y: number, label: string): number {
+  // un titre doit être suivi d'au moins une ligne de contenu
+  y = docEnsureSpace(doc, y, 7.5 + 12);
   doc.setFillColor(...DOC_NAVY);
   doc.rect(14, y, pageW - 28, 7.5, "F");
   doc.setTextColor(...DOC_WHITE);
@@ -294,6 +296,7 @@ export function drawSectionTitle(doc: jsPDF, pageW: number, y: number, label: st
   doc.text(label.toUpperCase(), 18, y + 5.2);
   return y + 12;
 }
+
 
 /** Ligne "label / valeur" en tableau clair (modèles passage à vide / fiche mission). */
 export function drawKeyValueRow(
