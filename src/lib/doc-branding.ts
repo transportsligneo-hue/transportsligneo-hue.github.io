@@ -374,7 +374,7 @@ export function drawKeyValueRow(
   const maxW = w - labelW - 4;
   const raw = value || "—";
   doc.text(doc.getTextWidth(raw) <= maxW ? raw : clampText(doc, raw, maxW), x + labelW, y + h / 2 + 1);
-
+  return y + h + gap;
 }
 
 
