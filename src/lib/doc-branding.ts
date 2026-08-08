@@ -323,17 +323,25 @@ export function drawDocLegalFooter(
   if (l2) doc.text(l2, pageW / 2, top + 13.5, { align: "center" });
 }
 
-/** Titre de section navy pleine largeur (auto-pagination : jamais orphelin). */
-export function drawSectionTitle(doc: jsPDF, pageW: number, y: number, label: string): number {
+/** Titre de section navy (auto-pagination : jamais orphelin). */
+export function drawSectionTitle(
+  doc: jsPDF,
+  pageW: number,
+  y: number,
+  label: string,
+  opts?: { x?: number; w?: number },
+): number {
+  const x = opts?.x ?? 14;
+  const w = opts?.w ?? pageW - 28;
   // un titre doit être suivi d'au moins une ligne de contenu
-  y = docEnsureSpace(doc, y, 7.5 + 12);
+  y = docEnsureSpace(doc, y, 6.5 + 9);
   doc.setFillColor(...DOC_NAVY);
-  doc.rect(14, y, pageW - 28, 7.5, "F");
+  doc.rect(x, y, w, 6.5, "F");
   doc.setTextColor(...DOC_WHITE);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  doc.text(label.toUpperCase(), 18, y + 5.2);
-  return y + 12;
+  doc.setFontSize(8);
+  doc.text(label.toUpperCase(), x + 4, y + 4.5);
+  return y + 9.5;
 }
 
 
@@ -345,26 +353,30 @@ export function drawKeyValueRow(
   w: number,
   label: string,
   value: string,
-  opts?: { labelW?: number; height?: number },
+  opts?: { labelW?: number; height?: number; gap?: number },
 ): number {
-  const h = opts?.height ?? 8.5;
-  const labelW = opts?.labelW ?? 55;
-  y = docEnsureSpace(doc, y, h + 1.5);
+  const h = opts?.height ?? 6.8;
+  const gap = opts?.gap ?? 1;
+  const labelW = opts?.labelW ?? Math.min(55, w * 0.42);
+  y = docEnsureSpace(doc, y, h + gap);
   doc.setFillColor(...DOC_CREAM);
   doc.rect(x, y, w, h, "F");
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.2);
   doc.rect(x, y, w, h, "S");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.4);
   doc.setTextColor(...DOC_NAVY);
-  doc.text(label, x + 3, y + h / 2 + 1.2);
+  doc.text(label, x + 2.5, y + h / 2 + 1);
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.4);
   doc.setTextColor(...DOC_TEXT);
-  const lines = doc.splitTextToSize(value || "—", w - labelW - 6);
-  doc.text(lines.slice(0, 1), x + labelW, y + h / 2 + 1.2);
-  return y + h + 1.5;
+  const maxW = w - labelW - 4;
+  const raw = value || "—";
+  doc.text(doc.getTextWidth(raw) <= maxW ? raw : clampText(doc, raw, maxW), x + labelW, y + h / 2 + 1);
+  return y + h + gap;
 }
+
 
 export const eurFmt = (n: number) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n || 0);

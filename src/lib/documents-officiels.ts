@@ -29,12 +29,19 @@ async function newDoc(title: string, numero?: string, subtitle?: string, company
   return { doc, pageW, pageH, company: c };
 }
 
-function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, right: string): number {
-  y = docEnsureSpace(doc, y, 34);
+function signatureBlocks(
+  doc: jsPDF,
+  pageW: number,
+  y: number,
+  left: string,
+  right: string,
+  height = 24,
+): number {
+  y = docEnsureSpace(doc, y, height + 6);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
-  doc.rect(14, y, (pageW - 32) / 2, 26, "S");
-  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, 26, "S");
+  doc.rect(14, y, (pageW - 32) / 2, height, "S");
+  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, height, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
@@ -69,6 +76,7 @@ export interface FicheMissionData {
   notes?: string | null;
 }
 
+/** Fiche de mission — mise en page compacte deux colonnes, garantie sur UNE page. */
 export async function generateFicheMissionPdf(d: FicheMissionData, company?: CompanyInfo | null): Promise<Blob> {
   const { doc, pageW, pageH, company: c } = await newDoc(
     "Fiche de mission",
@@ -77,70 +85,81 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
     company,
   );
   const w = pageW - 28;
-  let y = 56;
+  const colW = (w - 6) / 2;
+  const xR = 14 + colW + 6;
+  const kv = (x: number, y: number, label: string, value: string) =>
+    drawKeyValueRow(doc, x, y, colW, label, value, { labelW: colW * 0.42 });
+  let y = 52;
 
+  /* Véhicule */
   y = drawSectionTitle(doc, pageW, y, "Véhicule à convoyer");
-  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" — "));
-  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.immatriculation || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "N° de série (VIN)", d.vin || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Kilométrage au départ", "______________ km");
+  let yl = y;
+  let yr = y;
+  yl = kv(14, yl, "Marque / modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" ") || "—");
+  yl = kv(14, yl, "Immatriculation", d.immatriculation || "—");
+  yl = kv(14, yl, "N° de série (VIN)", d.vin || "—");
+  yr = kv(xR, yr, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
+  yr = kv(xR, yr, "Km au départ", "____________ km");
+  yr = kv(xR, yr, "Assistance 24/7", c?.telephone || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Enlèvement");
-  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.enlevement_adresse || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.enlevement_contact || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.enlevement_creneau || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.enlevement_instructions || "—");
+  /* Enlèvement / Livraison côte à côte */
+  const ySec = y;
+  drawSectionTitle(doc, pageW, ySec, "Enlèvement", { x: 14, w: colW });
+  y = drawSectionTitle(doc, pageW, ySec, "Livraison", { x: xR, w: colW });
+  yl = y;
+  yr = y;
+  yl = kv(14, yl, "Adresse", d.enlevement_adresse || "—");
+  yl = kv(14, yl, "Contact", d.enlevement_contact || "—");
+  yl = kv(14, yl, "Créneau", d.enlevement_creneau || "—");
+  yl = kv(14, yl, "Instructions", d.enlevement_instructions || "—");
+  yr = kv(xR, yr, "Adresse", d.livraison_adresse || "—");
+  yr = kv(xR, yr, "Contact", d.livraison_contact || "—");
+  yr = kv(xR, yr, "Créneau", d.livraison_creneau || "—");
+  yr = kv(xR, yr, "Instructions", d.livraison_instructions || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Livraison");
-  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.livraison_adresse || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.livraison_contact || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.livraison_creneau || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.livraison_instructions || "—");
-
-  y += 4;
+  /* Convoyeur */
   y = drawSectionTitle(doc, pageW, y, "Convoyeur assigné");
-  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Téléphone", d.convoyeur_tel || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Assistance 24/7", c?.telephone || "—");
+  yl = kv(14, y, "Nom et prénom", d.convoyeur_nom || "—");
+  yr = kv(xR, y, "Téléphone", d.convoyeur_tel || "—");
+  y = Math.max(yl, yr) + 4;
 
-  y = docEnsureSpace(doc, y + 5, 14);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("DOCUMENTS À EMPORTER PAR LE CONVOYEUR", 14, y);
-  y += 5;
+  y += 4.5;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...DOC_TEXT);
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.text(
     "[  ] Permis de conduire     [  ] Pièce d'identité     [  ] Ordre de mission (ce document)     [  ] Constat amiable     [  ] Attestation RC Pro",
     14,
     y,
   );
+  y += 6;
 
-  y = docEnsureSpace(doc, y + 8, 26);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("NOTES DE MISSION", 14, y);
-  y += 3;
+  y += 2.5;
   doc.setDrawColor(...DOC_LINE);
-  doc.rect(14, y, w, 18, "S");
+  doc.rect(14, y, w, 16, "S");
   if (d.notes) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...DOC_TEXT);
-    doc.text(doc.splitTextToSize(d.notes, w - 8).slice(0, 4), 18, y + 5);
+    doc.text(doc.splitTextToSize(d.notes, w - 8).slice(0, 3), 18, y + 5);
   }
-  y += 23;
+  y += 20;
 
-  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)");
+  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22);
   finalizeDoc(doc, c);
   return doc.output("blob");
 }
+
 
 /* ------------------------------------------------------------------ */
 /* 03 — ATTESTATION DE PASSAGE À VIDE                                  */
@@ -172,55 +191,62 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
     company,
   );
   const w = pageW - 28;
-  let y = 58;
+  const colW = (w - 6) / 2;
+  const xR = 14 + colW + 6;
+  const kv = (x: number, y: number, label: string, value: string) =>
+    drawKeyValueRow(doc, x, y, colW, label, value, { labelW: colW * 0.44 });
+  let y = 52;
 
-  y = drawSectionTitle(doc, pageW, y, "Identité du conducteur");
-  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "N° de permis", d.convoyeur_permis || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Statut", d.convoyeur_statut || "Convoyeur partenaire indépendant");
-  y = drawKeyValueRow(doc, 14, y, w, "N° SIRET", d.convoyeur_siret || "—");
+  /* Conducteur + véhicule côte à côte */
+  const ySec = y;
+  drawSectionTitle(doc, pageW, ySec, "Identité du conducteur", { x: 14, w: colW });
+  y = drawSectionTitle(doc, pageW, ySec, "Véhicule utilisé", { x: xR, w: colW });
+  let yl = y;
+  let yr = y;
+  yl = kv(14, yl, "Nom et prénom", d.convoyeur_nom || "—");
+  yl = kv(14, yl, "N° de permis", d.convoyeur_permis || "—");
+  yl = kv(14, yl, "Statut", d.convoyeur_statut || "Convoyeur indépendant");
+  yl = kv(14, yl, "N° SIRET", d.convoyeur_siret || "—");
+  yr = kv(xR, yr, "Type de véhicule", d.vehicule_type || "—");
+  yr = kv(xR, yr, "Marque et modèle", d.vehicule_modele || "—");
+  yr = kv(xR, yr, "Immatriculation", d.vehicule_immat || "—");
+  yr = kv(xR, yr, "Mission liée", d.mission_ref || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Véhicule utilisé pour le trajet à vide");
-  y = drawKeyValueRow(doc, 14, y, w, "Type de véhicule", d.vehicule_type || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", d.vehicule_modele || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.vehicule_immat || "—");
-
-  y += 4;
+  /* Détail du trajet */
   y = drawSectionTitle(doc, pageW, y, "Détail du trajet");
-  y = drawKeyValueRow(doc, 14, y, w, "Motif du trajet à vide", d.motif || "—", { height: 10 });
-  y = drawKeyValueRow(doc, 14, y, w, "Lieu de départ", d.depart || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Lieu d'arrivée", d.arrivee || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Date du trajet", dateFmt(d.date_trajet));
-  y = drawKeyValueRow(doc, 14, y, w, "Heures départ / arrivée", d.heures || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Distance parcourue", d.distance_km ? `${d.distance_km} km` : "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Mission liée", d.mission_ref || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Motif du trajet à vide", d.motif || "—");
+  yl = kv(14, y, "Lieu de départ", d.depart || "—");
+  yl = kv(14, yl, "Date du trajet", dateFmt(d.date_trajet));
+  yl = kv(14, yl, "Distance parcourue", d.distance_km ? `${d.distance_km} km` : "—");
+  yr = kv(xR, y, "Lieu d'arrivée", d.arrivee || "—");
+  yr = kv(xR, yr, "Heures départ / arrivée", d.heures || "—");
+  y = Math.max(yl, yr) + 4;
 
-  y += 6;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
   doc.text("OBJET DE L'ATTESTATION", 14, y);
-  y += 5;
+  y += 4.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_TEXT);
   const txt =
     "Ce document atteste que le trajet mentionné ci-dessus a été effectué sans véhicule client à bord, dans le cadre du repositionnement du convoyeur. " +
     "Il est établi à des fins de justification auprès des organismes d'assurance, de contrôle routier ou de tout tiers intéressé, conformément aux pratiques du secteur du convoyage automobile. " +
     (c?.assurance_mention ? `Couverture : ${c.assurance_mention}.` : "");
   const txtLines = doc.splitTextToSize(txt, w);
-  y = docEnsureSpace(doc, y, txtLines.length * 4 + 6);
+  y = docEnsureSpace(doc, y, txtLines.length * 3.8 + 5);
   doc.text(txtLines, 14, y);
-  y += txtLines.length * 4 + 6;
+  y += txtLines.length * 3.8 + 5;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_MUTED);
-  y = docEnsureSpace(doc, y, 40);
   doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
   y += 4;
-  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`);
+  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22);
+
 
   finalizeDoc(doc, c);
   return doc.output("blob");
@@ -467,7 +493,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     ly += 4.2;
   });
 
-  y = schemaTop + 38;
+  y = schemaTop + 42;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
@@ -488,8 +514,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
       doc.text(lbl, x + colEq - 24 + i * 9, yy, { align: "center" });
     });
   };
-  headerCols(14, y - 1);
-  headerCols(xR, y - 1);
+  headerCols(14, y + 1);
+  headerCols(xR, y + 1);
+
   const rowEq = (x: number, yy: number, label: string) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
@@ -499,11 +526,11 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.setDrawColor(...DOC_LINE);
     doc.setLineWidth(0.15);
     doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
-    return yy + 4.4;
+    return yy + 4.05;
   };
-  let ye1 = y + 2;
+  let ye1 = y + 6;
   EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
-  let ye2 = y + 2;
+  let ye2 = y + 6;
   EDL_EQUIPEMENTS_R.forEach((l) => { ye2 = rowEq(xR, ye2, l); });
   y = Math.max(ye1, ye2) + 1;
 
@@ -514,25 +541,28 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
   doc.line(14, y + 4.5, pageW - 14, y + 4.5);
-  y += 6;
+  y += 5.5;
 
   /* 4 — Observations */
-  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 1;
+  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 5.2, pageW - 14, y + 3 + i * 5.2);
-  y += 12;
+  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.8, pageW - 14, y + 3 + i * 4.8);
+  y += 10;
+
 
   /* Signatures */
-  const sigH = 24;
-  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
+  const sigH = 21;
+  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH);
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
-  doc.text(`Nom : ${d.convoyeur_nom || "..............................."}`, 18, sigY + 11);
-  doc.text(`Nom : ${d.client || "..............................."}`, pageW / 2 + 6, sigY + 11);
-  doc.text("Signature :", 18, sigY + 18);
-  doc.text("Signature :", pageW / 2 + 6, sigY + 18);
+  doc.text(`Nom : ${d.convoyeur_nom || "..............................."}`, 18, sigY + 10);
+  doc.text(`Nom : ${d.client || "..............................."}`, pageW / 2 + 6, sigY + 10);
+  doc.text("Signature :", 18, sigY + 16);
+  doc.text("Signature :", pageW / 2 + 6, sigY + 16);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...DOC_GOLD);
