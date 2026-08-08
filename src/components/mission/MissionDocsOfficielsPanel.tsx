@@ -72,6 +72,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
   const [numero, setNumero] = useState<string>("");
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [pvDocs, setPvDocs] = useState<StoredDoc[]>([]);
+  const [clientSociete, setClientSociete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [showPvForm, setShowPvForm] = useState(false);
@@ -133,6 +134,8 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
   const contactDepartNom = trajet?.contact_depart_nom || null;
   const marqueModele =
     [trajet?.marque, trajet?.modele].filter(Boolean).join(" ") || trajet?.vehicule_type || null;
+  const immat = trajet?.immatriculation || trajet?.vehicule_immatriculation || null;
+
 
 
   const guardCompany = () => {
