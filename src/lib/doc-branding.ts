@@ -242,3 +242,73 @@ export const dateFmt = (d?: string | null) => {
     return d;
   }
 };
+
+export interface ClientBillingIdentity {
+  societe: string | null;
+  siret: string | null;
+  tva: string | null;
+  adresse: string | null;
+  logo_url: string | null;
+}
+
+/**
+ * Identité de facturation du client : l'ORGANISATION (société) prime toujours
+ * sur le contact. Rétroactif : résolu au moment de la génération du document,
+ * même pour les devis/factures créés avant le rattachement à une organisation.
+ */
+export async function resolveClientBillingIdentity(opts: {
+  userId?: string | null;
+  email?: string | null;
+}): Promise<ClientBillingIdentity | null> {
+  const { userId, email } = opts;
+  if (!userId && !email) return null;
+  try {
+    let q = supabase
+      .from("profiles")
+      .select("user_id, societe, siret, tva_intra, adresse_facturation, adresse, logo_url, organization_id");
+    q = userId ? q.eq("user_id", userId) : q.eq("email", email!);
+    const { data: profile } = await q.limit(1).maybeSingle();
+    if (!profile) return null;
+
+    let orgId = (profile as any).organization_id as string | null;
+    if (!orgId) {
+      const { data: mem } = await supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", (profile as any).user_id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+      orgId = mem?.organization_id ?? null;
+    }
+
+    if (orgId) {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("legal_name, commercial_name, siret, vat_number, billing_address, logo_url")
+        .eq("id", orgId)
+        .maybeSingle();
+      if (org) {
+        return {
+          societe: (org as any).legal_name || (org as any).commercial_name || null,
+          siret: (org as any).siret || (profile as any).siret || null,
+          tva: (org as any).vat_number || (profile as any).tva_intra || null,
+          adresse: (org as any).billing_address || (profile as any).adresse_facturation || (profile as any).adresse || null,
+          logo_url: (org as any).logo_url || (profile as any).logo_url || null,
+        };
+      }
+    }
+
+    const societe = ((profile as any).societe || "").trim();
+    if (!societe) return null;
+    return {
+      societe,
+      siret: (profile as any).siret || null,
+      tva: (profile as any).tva_intra || null,
+      adresse: (profile as any).adresse_facturation || (profile as any).adresse || null,
+      logo_url: (profile as any).logo_url || null,
+    };
+  } catch {
+    return null;
+  }
+}
