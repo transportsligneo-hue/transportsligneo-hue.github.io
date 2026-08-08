@@ -112,14 +112,28 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);
+
+    // Société du client (organisation / profil) — sinon nom du particulier
+    let soc = (t?.arrivee_contact_societe || "").trim() || null;
+    if (!soc && t?.client_email) {
+      const ident = await resolveClientBillingIdentity({ email: t.client_email });
+      soc = ident?.societe || null;
+    }
+    setClientSociete(soc);
     setLoading(false);
   }, [attributionId]);
 
   useEffect(() => { void reload(); }, [reload]);
 
   const convoyeurNom = convoyeur ? [convoyeur.prenom, convoyeur.nom].filter(Boolean).join(" ") : null;
-  const immat = trajet?.immatriculation || trajet?.vehicule_immatriculation || null;
-  const marqueModele = [trajet?.marque, trajet?.modele].filter(Boolean).join(" ") || null;
+  const contactArriveeNom =
+    [trajet?.arrivee_contact_prenom, trajet?.arrivee_contact_nom].filter(Boolean).join(" ") ||
+    trajet?.contact_arrivee_nom ||
+    null;
+  const contactDepartNom = trajet?.contact_depart_nom || null;
+  const marqueModele =
+    [trajet?.marque, trajet?.modele].filter(Boolean).join(" ") || trajet?.vehicule_type || null;
+
 
   const guardCompany = () => {
     if (!isCompanyComplete(company)) {
