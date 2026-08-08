@@ -242,8 +242,25 @@ function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
   doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
-export async function generateFacturePdf(f: FactureData, company?: CompanyInfo | null): Promise<Blob> {
+export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
+
+  // Facturation au nom de l'organisation (rétroactif) : la société prime sur le contact.
+  const billing = await resolveClientBillingIdentity({
+    userId: fInput.client_user_id ?? null,
+    email: fInput.client_email ?? null,
+  });
+  const f: FactureData = billing?.societe
+    ? {
+        ...fInput,
+        client_societe: fInput.client_societe || billing.societe,
+        client_siret: fInput.client_siret || billing.siret,
+        client_tva: fInput.client_tva || billing.tva,
+        client_adresse: fInput.client_adresse || billing.adresse,
+        client_logo_url: fInput.client_logo_url || billing.logo_url,
+      }
+    : fInput;
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
