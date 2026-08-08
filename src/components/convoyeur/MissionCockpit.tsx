@@ -812,7 +812,29 @@ export function MissionCockpit({
           }}
         />
       )}
+
+      {openChecklist && (
+        <DepartureChecklistSheet
+          attributionId={attributionId}
+          userId={userId}
+          onClose={() => setOpenChecklist(false)}
+          onValidated={async () => {
+            setChecklistDone(true);
+            setOpenChecklist(false);
+            try {
+              await persistEtape("en_route");
+              if ((await onMacroStatusChange("en_cours")) === false) {
+                toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
+              }
+              await Promise.resolve(onUpdated());
+            } catch {
+              toast.error("Impossible de démarrer le trajet, réessayez.");
+            }
+          }}
+        />
+      )}
     </>
+
   );
 }
 
