@@ -3,9 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle,
+  User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle, Trophy,
 } from "lucide-react";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { computeNiveauProgress, niveauLabel } from "@/lib/convoyeur-niveau";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/profil")({
   component: ConvoyeurProfil,
