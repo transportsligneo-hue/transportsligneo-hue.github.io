@@ -1124,7 +1124,7 @@ function AdminMissionDetail() {
                 Documents officiels
               </h3>
             </div>
-            <MissionDocsOfficielsPanel attributionId={attribution.id} isAdmin />
+            <MissionDocsOfficielsPanel attributionId={attribution.id} />
           </Card>
 
           {/* Avis Google */}
