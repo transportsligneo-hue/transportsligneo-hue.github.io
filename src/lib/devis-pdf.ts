@@ -284,18 +284,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   }
 
   y += 8;
-  if (d.societe) {
-    doc.setFontSize(13);
-    doc.text(d.societe, 14, y);
-    y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...TEXT);
-    doc.text(`${d.prenom} ${d.nom}`, 14, y);
-  } else {
-    doc.setFontSize(13);
-    doc.text(`${d.prenom} ${d.nom}`, 14, y);
-  }
+  // Devis au nom de l'entreprise uniquement (pas de nom de contact), comme la facture.
+  doc.setFontSize(13);
+  doc.text(d.societe?.trim() || `${d.prenom} ${d.nom}`.trim() || "Client", 14, y);
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
