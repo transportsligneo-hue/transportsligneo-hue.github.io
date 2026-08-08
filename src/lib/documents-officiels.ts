@@ -448,18 +448,26 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
   doc.text("Carburant / Énergie :", xR, yr);
-  let ex = xR + doc.getTextWidth("Carburant / Énergie :") + 3;
+  const exStart = xR + doc.getTextWidth("Carburant / Énergie :") + 3;
+  let ex = exStart;
+  const exLimit = xR + colW;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_TEXT);
   const energie = (d.carburant || "").toLowerCase();
   EDL_ENERGIES.forEach((e) => {
+    const wItem = 4.2 + doc.getTextWidth(e) + 4;
+    if (ex + wItem > exLimit) {
+      yr += 4.6;
+      ex = exStart;
+    }
     const checked = energie.length > 0 && e.toLowerCase().startsWith(energie.slice(0, 4));
     drawCheckbox(doc, ex, yr - 3, 3.2, checked);
     doc.text(e, ex + 4.2, yr);
-    ex += 4.2 + doc.getTextWidth(e) + 4;
+    ex += wItem;
   });
   yr += 5.4;
+
 
   y = Math.max(yl, yr) + 1;
   doc.setFont("helvetica", "normal");
