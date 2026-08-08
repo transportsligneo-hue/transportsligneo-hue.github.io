@@ -191,55 +191,62 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
     company,
   );
   const w = pageW - 28;
-  let y = 58;
+  const colW = (w - 6) / 2;
+  const xR = 14 + colW + 6;
+  const kv = (x: number, y: number, label: string, value: string) =>
+    drawKeyValueRow(doc, x, y, colW, label, value, { labelW: colW * 0.44 });
+  let y = 52;
 
-  y = drawSectionTitle(doc, pageW, y, "Identité du conducteur");
-  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "N° de permis", d.convoyeur_permis || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Statut", d.convoyeur_statut || "Convoyeur partenaire indépendant");
-  y = drawKeyValueRow(doc, 14, y, w, "N° SIRET", d.convoyeur_siret || "—");
+  /* Conducteur + véhicule côte à côte */
+  const ySec = y;
+  drawSectionTitle(doc, pageW, ySec, "Identité du conducteur", { x: 14, w: colW });
+  y = drawSectionTitle(doc, pageW, ySec, "Véhicule utilisé", { x: xR, w: colW });
+  let yl = y;
+  let yr = y;
+  yl = kv(14, yl, "Nom et prénom", d.convoyeur_nom || "—");
+  yl = kv(14, yl, "N° de permis", d.convoyeur_permis || "—");
+  yl = kv(14, yl, "Statut", d.convoyeur_statut || "Convoyeur indépendant");
+  yl = kv(14, yl, "N° SIRET", d.convoyeur_siret || "—");
+  yr = kv(xR, yr, "Type de véhicule", d.vehicule_type || "—");
+  yr = kv(xR, yr, "Marque et modèle", d.vehicule_modele || "—");
+  yr = kv(xR, yr, "Immatriculation", d.vehicule_immat || "—");
+  yr = kv(xR, yr, "Mission liée", d.mission_ref || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Véhicule utilisé pour le trajet à vide");
-  y = drawKeyValueRow(doc, 14, y, w, "Type de véhicule", d.vehicule_type || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", d.vehicule_modele || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.vehicule_immat || "—");
-
-  y += 4;
+  /* Détail du trajet */
   y = drawSectionTitle(doc, pageW, y, "Détail du trajet");
-  y = drawKeyValueRow(doc, 14, y, w, "Motif du trajet à vide", d.motif || "—", { height: 10 });
-  y = drawKeyValueRow(doc, 14, y, w, "Lieu de départ", d.depart || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Lieu d'arrivée", d.arrivee || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Date du trajet", dateFmt(d.date_trajet));
-  y = drawKeyValueRow(doc, 14, y, w, "Heures départ / arrivée", d.heures || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Distance parcourue", d.distance_km ? `${d.distance_km} km` : "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Mission liée", d.mission_ref || "—");
+  y = drawKeyValueRow(doc, 14, y, w, "Motif du trajet à vide", d.motif || "—");
+  yl = kv(14, y, "Lieu de départ", d.depart || "—");
+  yl = kv(14, yl, "Date du trajet", dateFmt(d.date_trajet));
+  yl = kv(14, yl, "Distance parcourue", d.distance_km ? `${d.distance_km} km` : "—");
+  yr = kv(xR, y, "Lieu d'arrivée", d.arrivee || "—");
+  yr = kv(xR, yr, "Heures départ / arrivée", d.heures || "—");
+  y = Math.max(yl, yr) + 4;
 
-  y += 6;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
   doc.text("OBJET DE L'ATTESTATION", 14, y);
-  y += 5;
+  y += 4.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_TEXT);
   const txt =
     "Ce document atteste que le trajet mentionné ci-dessus a été effectué sans véhicule client à bord, dans le cadre du repositionnement du convoyeur. " +
     "Il est établi à des fins de justification auprès des organismes d'assurance, de contrôle routier ou de tout tiers intéressé, conformément aux pratiques du secteur du convoyage automobile. " +
     (c?.assurance_mention ? `Couverture : ${c.assurance_mention}.` : "");
   const txtLines = doc.splitTextToSize(txt, w);
-  y = docEnsureSpace(doc, y, txtLines.length * 4 + 6);
+  y = docEnsureSpace(doc, y, txtLines.length * 3.8 + 5);
   doc.text(txtLines, 14, y);
-  y += txtLines.length * 4 + 6;
+  y += txtLines.length * 3.8 + 5;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_MUTED);
-  y = docEnsureSpace(doc, y, 40);
   doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
   y += 4;
-  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`);
+  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22);
+
 
   finalizeDoc(doc, c);
   return doc.output("blob");
