@@ -5241,3 +5241,126 @@ html.theme-light .r4-page .v4-quote-card h3 { color: #ffffff; }
   font-size: 11.5px; color: #9aa6d1; text-decoration: underline; text-underline-offset: 3px;
 }
 .vrm-flow-back:hover, .vrm-flow-escape:hover { color: #eef2ff; }
+
+/* ============================================================
+   === ESPACE CONVOYEUR — THÈME CLAIR COMPLET
+   Couvre toutes les surfaces driver (cartes, KPI, chips, statuts,
+   navigation, classes Tailwind arbitraires bleu nuit) quand
+   <html class="theme-light">. Le thème sombre reste par défaut.
+   ============================================================ */
+
+/* Surfaces / cartes premium */
+html.theme-light .driver-card {
+  background: #ffffff;
+  border-color: rgba(15,21,38,0.10);
+  backdrop-filter: none;
+  box-shadow: 0 1px 2px rgba(15,21,38,0.04), 0 14px 34px rgba(15,21,38,0.06);
+}
+html.theme-light .driver-card-active {
+  border-color: rgba(47,95,255,0.45);
+  box-shadow: 0 0 0 1px rgba(47,95,255,0.25), 0 18px 40px -22px rgba(47,95,255,0.35);
+}
+html.theme-light .driver-secondary-cta {
+  background: #ffffff;
+  color: #0f1526;
+  border-color: rgba(15,21,38,0.12);
+  backdrop-filter: none;
+}
+html.theme-light .driver-secondary-cta:hover {
+  background: #f7f9ff;
+  border-color: rgba(47,95,255,0.35);
+}
+html.theme-light .driver-eyebrow { color: #6b7590; }
+html.theme-light .driver-divider-gold { opacity: 0.5; }
+
+/* Chips */
+html.theme-light .driver-chip {
+  background: rgba(47,95,255,0.08);
+  border-color: rgba(47,95,255,0.22);
+  color: #1c3fc4;
+  backdrop-filter: none;
+}
+html.theme-light .driver-chip-blue { background: rgba(47,95,255,0.08); border-color: rgba(47,95,255,0.22); color: #1c3fc4; }
+html.theme-light .driver-chip-emerald { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.28); color: #047857; }
+html.theme-light .driver-chip-purple { background: rgba(124,58,237,0.10); border-color: rgba(124,58,237,0.26); color: #6d28d9; }
+
+/* Statuts */
+html.theme-light .driver-status { backdrop-filter: none; box-shadow: none; }
+html.theme-light .driver-status--pending { color: #8a6206; background: rgba(184,134,42,0.12); border-color: rgba(184,134,42,0.30); }
+html.theme-light .driver-status--upcoming { color: #47506e; background: rgba(15,21,38,0.05); border-color: rgba(15,21,38,0.12); }
+html.theme-light .driver-status--enroute,
+html.theme-light .driver-status--inprogress { color: #1c3fc4; background: rgba(47,95,255,0.10); border-color: rgba(47,95,255,0.30); }
+html.theme-light .driver-status--done { color: #047857; background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.30); }
+
+/* KPI / cartes Brex */
+html.theme-light .brex-tile,
+html.theme-light .brex-card {
+  background: #ffffff;
+  border-color: rgba(15,21,38,0.10);
+  box-shadow: 0 1px 2px rgba(15,21,38,0.04), 0 14px 34px rgba(15,21,38,0.06);
+}
+html.theme-light .brex-tile::after { background: none; }
+html.theme-light .brex-tile-label,
+html.theme-light .brex-label-xs { color: #6b7590; }
+html.theme-light .brex-tile-value,
+html.theme-light .brex-amount { color: #0f1526; }
+html.theme-light .brex-card--active { border-color: rgba(47,95,255,0.45); box-shadow: 0 0 0 1px rgba(47,95,255,0.22), 0 18px 40px -22px rgba(47,95,255,0.30); }
+html.theme-light .brex-divider { background: rgba(15,21,38,0.08); border-color: rgba(15,21,38,0.08); }
+html.theme-light .brex-action {
+  background: #ffffff;
+  color: #0f1526;
+  border-color: rgba(15,21,38,0.12);
+}
+html.theme-light .brex-action--primary { color: #ffffff; }
+html.theme-light .brex-pill { backdrop-filter: none; }
+html.theme-light .brex-pill--muted { background: rgba(15,21,38,0.05); border-color: rgba(15,21,38,0.12); color: #47506e; }
+html.theme-light .brex-pill--blue,
+html.theme-light .brex-pill--live { background: rgba(47,95,255,0.10); border-color: rgba(47,95,255,0.26); color: #1c3fc4; }
+html.theme-light .brex-pill--green { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.28); color: #047857; }
+html.theme-light .brex-pill--amber,
+html.theme-light .brex-pill--gold { background: rgba(184,134,42,0.12); border-color: rgba(184,134,42,0.30); color: #8a6206; }
+html.theme-light .brex-pill--red { background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.28); color: #b91c1c; }
+
+/* Classes Tailwind arbitraires "bleu nuit" utilisées dans les écrans driver */
+html.theme-light .driver-shell [class*="bg-[rgba(4,27,82"],
+html.theme-light .driver-shell [class*="bg-[#041B52"],
+html.theme-light .driver-shell [class*="bg-[#0D2E7A"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+html.theme-light .driver-shell [class*="bg-white/[0.0"],
+html.theme-light .driver-shell [class*="bg-white/[0.1"] {
+  background-color: #ffffff !important;
+}
+html.theme-light .driver-shell [class*="border-[rgba(103,193,255"],
+html.theme-light .driver-shell [class*="border-[#67C1FF"],
+html.theme-light .driver-shell [class*="border-white/1"],
+html.theme-light .driver-shell [class*="border-white/[0."] {
+  border-color: rgba(15,21,38,0.10) !important;
+}
+html.theme-light .driver-shell [class*="text-[#D6E4FF"],
+html.theme-light .driver-shell [class*="text-[#A8C2FF"] { color: #47506e !important; }
+html.theme-light .driver-shell [class*="text-[#67C1FF"],
+html.theme-light .driver-shell [class*="text-[#4EA8FF"],
+html.theme-light .driver-shell [class*="text-[#2F7DFF"] { color: #2f5fff !important; }
+html.theme-light .driver-shell [class*="text-white/"] { color: #6b7590 !important; }
+html.theme-light .driver-shell [class*="ring-[rgba(103,193,255"] { --tw-ring-color: rgba(47,95,255,0.25); }
+
+/* Le CTA principal et les surfaces dégradées bleues gardent leur texte blanc */
+html.theme-light .driver-cta,
+html.theme-light .driver-cta *,
+html.theme-light .brex-action--primary,
+html.theme-light .brex-action--primary * { color: #ffffff !important; }
+
+/* Sidebar / bottom bar driver : items et libellés lisibles */
+html.theme-light .driver-nav-surface [class*="bg-gradient-to-r"] { color: #0f1526 !important; }
+html.theme-light .driver-nav-surface [class*="bg-white/[0."] { background-color: rgba(15,21,38,0.04) !important; }
+html.theme-light .driver-nav-surface [class*="border-[rgba(103,193,255"] { border-color: rgba(15,21,38,0.12) !important; }
+html.theme-light .driver-nav-surface .font-mono { color: #6b7590 !important; }
+
+/* Écran selfie / capture */
+html.theme-light .driver-selfie-shell,
+html.theme-light .driver-selfie-header,
+html.theme-light .driver-selfie-footer { background: #f5f7fc; color: #0f1526; }
+html.theme-light .driver-selfie-stage { background: #e9edf8; }
+html.theme-light .driver-selfie-status { color: #47506e; }
