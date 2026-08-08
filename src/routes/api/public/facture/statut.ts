@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/facture/statut")({
           montant: Number(data.prix_ttc),
           paid: Boolean(data.paid_at) || data.statut === "payee",
           trajet: data.depart && data.arrivee ? `${data.depart} → ${data.arrivee}` : (data.designation ?? null),
-          email: data.client_email ?? null,
+          email: data.client_email ? data.client_email.replace(/^(.).*(@.*)$/, "$1•••$2") : null,
         });
       },
     },
