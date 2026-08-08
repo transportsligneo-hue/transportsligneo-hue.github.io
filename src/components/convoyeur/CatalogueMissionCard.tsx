@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
 import { inferMissionLevel, missionLevelStyle } from "@/lib/mission-level";
+import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 
 export interface CatalogTrajet {
   id: string;
