@@ -514,8 +514,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
       doc.text(lbl, x + colEq - 24 + i * 9, yy, { align: "center" });
     });
   };
-  headerCols(14, y - 1);
-  headerCols(xR, y - 1);
+  headerCols(14, y - 2.5);
+  headerCols(xR, y - 2.5);
+
   const rowEq = (x: number, yy: number, label: string) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
