@@ -2,19 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Route as RouteIcon, Sparkles } from "lucide-react";
+import { Loader2, Route as RouteIcon } from "lucide-react";
 import { toast } from "sonner";
-import {
-  CatalogueFilters,
-  type CatalogueFilterState,
-} from "@/components/convoyeur/CatalogueFilters";
+import type { CatalogueFilterState } from "@/components/convoyeur/CatalogueFilters";
 import {
   CatalogueMissionCard,
   type CatalogTrajet,
 } from "@/components/convoyeur/CatalogueMissionCard";
 import { MissionDetailSheet } from "@/components/convoyeur/MissionDetailSheet";
 import { CatalogueTrainingGate } from "@/components/convoyeur/CatalogueTrainingGate";
-import { TrainingStatusBadge } from "@/components/convoyeur/TrainingStatusBadge";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { haversineKm } from "@/lib/geo/haversine";
 import { geocodeAddress } from "@/lib/geocode";
