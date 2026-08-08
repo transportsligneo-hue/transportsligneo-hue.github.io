@@ -470,9 +470,10 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule") - 1;
   const schemaTop = y + 3;
   // Schéma véhicule officiel (5 vues) — identique au gabarit papier de référence
-  const schemaW = 118;
+  const schemaW = 104;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
-  doc.addImage(EDL_CAR_SCHEMA_PNG, "PNG", 16, schemaTop + 1, schemaW, schemaH, undefined, "FAST");
+  doc.addImage(EDL_CAR_SCHEMA_PNG, "PNG", 18, schemaTop + 1, schemaW, schemaH, undefined, "FAST");
+
 
   // Légende (encadré à droite, comme le gabarit)
   const legendX = 140;
