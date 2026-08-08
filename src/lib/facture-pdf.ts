@@ -192,13 +192,14 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const societe = f.client_societe?.trim();
   const contact = `${f.client_prenom || ""} ${f.client_nom || ""}`.trim();
   if (societe) {
+    // Facture au nom de l'entreprise uniquement (pas de nom de contact)
     clientLines.push({ t: societe, bold: true });
-    if (contact) clientLines.push({ t: `À l'attention de ${contact}` });
   } else if (contact) {
     clientLines.push({ t: contact, bold: true });
   } else {
     clientLines.push({ t: "Client", bold: true });
   }
+
   if (f.client_adresse) {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
