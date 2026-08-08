@@ -257,7 +257,6 @@ export function drawDocHeader(
   // Colonnes strictes : le bloc identité et le bloc titre ne se croisent jamais.
   const leftW = totalAvail * 0.42;
   const rightW = totalAvail - leftW;
-  const rightLeftEdge = rightX - rightW;
 
   // --- Bloc identité (gauche)
   let nameSize = 14;
@@ -310,7 +309,6 @@ export function drawDocHeader(
       doc.text(clampText(doc, subtitle, rightW), rightX, Math.min(metaY, maxSubY), { align: "right" });
     }
   }
-  void rightLeftEdge;
 
 
   doc.setDrawColor(...DOC_GOLD);
