@@ -1,4 +1,5 @@
 import type jsPDF from "jspdf";
+import { SPACE_GROTESK_BOLD_B64, SPACE_GROTESK_REGULAR_B64 } from "./pdf-font-space-grotesk";
 
 /**
  * Applique la typographie du site (Space Grotesk) à un document jsPDF.
@@ -8,12 +9,12 @@ import type jsPDF from "jspdf";
  */
 export function applyLigneoFonts(doc: jsPDF): void {
   try {
-    const mod = require("./pdf-font-space-grotesk") as typeof import("./pdf-font-space-grotesk");
-    registerFonts(doc, mod.SPACE_GROTESK_REGULAR_B64, mod.SPACE_GROTESK_BOLD_B64);
+    registerFonts(doc, SPACE_GROTESK_REGULAR_B64, SPACE_GROTESK_BOLD_B64);
   } catch {
     /* la police reste celle par défaut */
   }
 }
+
 
 function registerFonts(doc: jsPDF, regular: string, bold: string) {
   const d = doc as unknown as {
