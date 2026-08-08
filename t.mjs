@@ -1,0 +1,10 @@
+import {jsPDF} from 'jspdf';
+const m = await import('./src/lib/pdf-font-space-grotesk.ts');
+const d = new jsPDF({unit:'mm',format:'a4'});
+d.addFileToVFS('SG-R.ttf', m.SPACE_GROTESK_REGULAR_B64);
+d.addFont('SG-R.ttf','helvetica','normal');
+d.setFont('helvetica','normal'); d.setFontSize(20);
+d.text('ATTESTATION Éàç — Test 123', 15, 30);
+const fs = await import('fs');
+fs.writeFileSync('/tmp/t.pdf', Buffer.from(d.output('arraybuffer')));
+console.log('ok', d.getFontList());
