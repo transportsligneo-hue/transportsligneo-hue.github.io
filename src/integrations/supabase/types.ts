@@ -3328,6 +3328,65 @@ export type Database = {
         }
         Relationships: []
       }
+      mission_review_requests: {
+        Row: {
+          attribution_id: string
+          auto: boolean
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          recipient_email: string
+          recipient_name: string | null
+          recipient_type: string
+          review_left_at: string | null
+          sent_at: string
+          status: string
+          trajet_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          auto?: boolean
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          recipient_email: string
+          recipient_name?: string | null
+          recipient_type: string
+          review_left_at?: string | null
+          sent_at?: string
+          status?: string
+          trajet_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          auto?: boolean
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          recipient_type?: string
+          review_left_at?: string | null
+          sent_at?: string
+          status?: string
+          trajet_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_review_requests_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_selfies: {
         Row: {
           accuracy: number | null
@@ -4404,6 +4463,7 @@ export type Database = {
           allow_counter_offer: boolean
           archived_at: string | null
           arrivee: string
+          arrivee_contact_email: string | null
           arrivee_contact_instructions: string | null
           arrivee_contact_nom: string | null
           arrivee_contact_prenom: string | null
@@ -4476,6 +4536,7 @@ export type Database = {
           allow_counter_offer?: boolean
           archived_at?: string | null
           arrivee: string
+          arrivee_contact_email?: string | null
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
           arrivee_contact_prenom?: string | null
@@ -4548,6 +4609,7 @@ export type Database = {
           allow_counter_offer?: boolean
           archived_at?: string | null
           arrivee?: string
+          arrivee_contact_email?: string | null
           arrivee_contact_instructions?: string | null
           arrivee_contact_nom?: string | null
           arrivee_contact_prenom?: string | null
