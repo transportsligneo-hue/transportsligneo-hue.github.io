@@ -117,6 +117,7 @@ export function MissionCockpit({
   docsSlot,
 }: Props) {
   const gates = useMissionGates(attributionId);
+  const notifyDeliveryDoneFn = useServerFn(notifyDeliveryDone);
   const [busy, setBusy] = useState(false);
   const [openSelfie, setOpenSelfie] = useState(false);
   const [openIncident, setOpenIncident] = useState(false);
