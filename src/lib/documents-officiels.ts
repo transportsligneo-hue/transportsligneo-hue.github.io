@@ -10,7 +10,8 @@ import {
   DOC_WHITE,
   dateFmt,
   drawDocHeader,
-  drawDocLegalFooter,
+  docEnsureSpace,
+  finalizeDoc,
   drawKeyValueRow,
   drawSectionTitle,
   fetchCompanyInfo,
@@ -28,7 +29,8 @@ async function newDoc(title: string, numero?: string, subtitle?: string, company
   return { doc, pageW, pageH, company: c };
 }
 
-function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, right: string) {
+function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, right: string): number {
+  y = docEnsureSpace(doc, y, 34);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
   doc.rect(14, y, (pageW - 32) / 2, 26, "S");
@@ -38,6 +40,7 @@ function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, rig
   doc.setTextColor(...DOC_NAVY);
   doc.text(left, 18, y + 6);
   doc.text(right, pageW / 2 + 6, y + 6);
+  return y;
 }
 
 /* ------------------------------------------------------------------ */
@@ -103,7 +106,7 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   y = drawKeyValueRow(doc, 14, y, w, "Téléphone", d.convoyeur_tel || "—");
   y = drawKeyValueRow(doc, 14, y, w, "Assistance 24/7", c?.telephone || "—");
 
-  y += 5;
+  y = docEnsureSpace(doc, y + 5, 14);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
@@ -118,7 +121,7 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
     y,
   );
 
-  y += 8;
+  y = docEnsureSpace(doc, y + 8, 26);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
@@ -135,7 +138,7 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   y += 23;
 
   signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)");
-  drawDocLegalFooter(doc, pageW, pageH, c);
+  finalizeDoc(doc, c);
   return doc.output("blob");
 }
 
@@ -206,17 +209,20 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
     "Ce document atteste que le trajet mentionné ci-dessus a été effectué sans véhicule client à bord, dans le cadre du repositionnement du convoyeur. " +
     "Il est établi à des fins de justification auprès des organismes d'assurance, de contrôle routier ou de tout tiers intéressé, conformément aux pratiques du secteur du convoyage automobile. " +
     (c?.assurance_mention ? `Couverture : ${c.assurance_mention}.` : "");
-  doc.text(doc.splitTextToSize(txt, w), 14, y);
-  y += 18;
+  const txtLines = doc.splitTextToSize(txt, w);
+  y = docEnsureSpace(doc, y, txtLines.length * 4 + 6);
+  doc.text(txtLines, 14, y);
+  y += txtLines.length * 4 + 6;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_MUTED);
+  y = docEnsureSpace(doc, y, 40);
   doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
   y += 4;
   signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`);
 
-  drawDocLegalFooter(doc, pageW, pageH, c);
+  finalizeDoc(doc, c);
   return doc.output("blob");
 }
 
@@ -519,8 +525,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
 
   /* Signatures */
   const sigH = 24;
-  const sigY = Math.min(y, pageH - 28 - sigH);
-  signatureBlocks(doc, pageW, sigY, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
+  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
@@ -542,7 +547,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     { align: "center" },
   );
 
-  drawDocLegalFooter(doc, pageW, pageH, c);
+  finalizeDoc(doc, c);
   return doc.output("blob");
 }
 
@@ -704,7 +709,6 @@ export async function generateContratConvoyeurPdf(
 
   const ensure = (need: number) => {
     if (y + need > pageH - 26) {
-      drawDocLegalFooter(doc, pageW, pageH, c);
       doc.addPage();
       drawDocHeader(doc, { pageW, title: "Contrat de partenariat", subtitle: "Convoyeur indépendant", company: c, height: 26 });
       y = 36;
@@ -799,7 +803,7 @@ export async function generateContratConvoyeurPdf(
     doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
   }
 
-  drawDocLegalFooter(doc, pageW, pageH, c);
+  finalizeDoc(doc, c);
   lastContratPageCount = doc.getNumberOfPages();
   return doc.output("blob");
 }
@@ -898,7 +902,6 @@ export async function generateCharteDiscretionPdf(
 
   const ensure = (need: number) => {
     if (y + need > pageH - 26) {
-      drawDocLegalFooter(doc, pageW, pageH, c);
       doc.addPage();
       drawDocHeader(doc, {
         pageW,
@@ -977,7 +980,7 @@ export async function generateCharteDiscretionPdf(
   doc.text("Signature précédée de la mention « Lu et approuvé »", 18, y + 24);
   doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
 
-  drawDocLegalFooter(doc, pageW, pageH, c);
+  finalizeDoc(doc, c);
   lastChartePageCount = doc.getNumberOfPages();
   return doc.output("blob");
 }
