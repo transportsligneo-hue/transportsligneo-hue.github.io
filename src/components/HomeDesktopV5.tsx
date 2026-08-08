@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapLigneo from "@/components/MapLigneo";
+import AvisSection from "@/components/public/AvisSection";
+import DerniersArticles from "@/components/public/DerniersArticles";
+import FaqDynamique from "@/components/public/FaqDynamique";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
