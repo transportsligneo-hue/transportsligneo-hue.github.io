@@ -35,8 +35,8 @@ export const notifyAdminNouvelleOffre = createServerFn({ method: 'POST' })
       templateData: {
         numero: trajet?.numero_mission ?? undefined,
         convoyeur,
-        depart: trajet?.ville_depart ?? undefined,
-        arrivee: trajet?.ville_arrivee ?? undefined,
+        depart: trajet?.depart ?? undefined,
+        arrivee: trajet?.arrivee ?? undefined,
         prixInitial: trajet?.prix_convoyeur ?? undefined,
         prixPropose: data.prixPropose,
         message: data.message ?? undefined,
