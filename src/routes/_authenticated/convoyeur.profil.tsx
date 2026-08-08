@@ -38,19 +38,25 @@ function ConvoyeurProfil() {
     (async () => {
       const { data } = await supabase
         .from("convoyeurs")
-        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut")
+        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut, niveau, missions_terminees, note_moyenne")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
       if (data) {
         setConvoyeurId(data.id);
         setStatut(data.statut ?? "en_attente");
+        setProgression({
+          niveau: (data as { niveau?: string }).niveau ?? "debutant",
+          missions: (data as { missions_terminees?: number }).missions_terminees ?? 0,
+          note: (data as { note_moyenne?: number | null }).note_moyenne ?? null,
+        });
         setForm({
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
           annees_experience: data.annees_experience != null ? String(data.annees_experience) : "",
         });
       }
+
       setLoading(false);
     })();
     return () => { cancelled = true; };
