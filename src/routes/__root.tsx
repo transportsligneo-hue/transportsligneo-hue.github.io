@@ -123,17 +123,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Tunnel de paiement : pas de chrome public, focus total sur le règlement. */
+function useIsCheckoutRoute() {
+  const { pathname } = useRouterState({ select: (s) => s.location });
+  return pathname.startsWith("/paiement");
+}
+
 function PublicMobileBottomNav() {
   const { user } = useAuth();
   const isApp = useIsMobileAppShell();
-  if (user || isApp) return null;
+  const isCheckout = useIsCheckoutRoute();
+  if (user || isApp || isCheckout) return null;
   return <MobileBottomNav />;
 }
 
 /** Chrome public (navbar vitrine, bandeau cookies, assistant) — masqué dans l'app native. */
 function PublicChrome() {
   const isApp = useIsMobileAppShell();
-  if (isApp) return null;
+  const isCheckout = useIsCheckoutRoute();
+  if (isApp || isCheckout) return null;
   return (
     <>
       <MobileNavbar />
