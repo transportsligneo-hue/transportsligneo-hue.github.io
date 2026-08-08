@@ -89,8 +89,8 @@ export function MissionPriceCard({
   const save = async () => {
     const pc = parse(prixClient);
     const pv = parse(prixConvoyeur);
-    if (Number.isNaN(pc) || Number.isNaN(pv)) {
-      toast.error("Prix invalide");
+    if (Number.isNaN(pc) || Number.isNaN(pv) || pc == null) {
+      toast.error("Prix client invalide");
       return;
     }
     setSaving(true);
