@@ -7,6 +7,8 @@ import {
 import { toast } from "sonner";
 import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
+
 
 export interface EdlPapierContext {
   numero: string;
