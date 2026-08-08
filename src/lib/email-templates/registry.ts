@@ -41,6 +41,7 @@ import { template as convoyeurDocumentStatus } from './convoyeur-document-status
 import { template as vehiculeDocumentExpiration } from './vehicule-document-expiration'
 import { template as invite } from './invite'
 import { template as invitationConvoyeur } from './invitation-convoyeur'
+import { template as avisGoogle } from './avis-google'
 
 
 
@@ -78,4 +79,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'convoyeur-document-status': convoyeurDocumentStatus,
   'vehicule-document-expiration': vehiculeDocumentExpiration,
   'invite': invite,
+  'avis-google': avisGoogle,
 }
