@@ -550,8 +550,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   y += 12;
 
   /* Signatures */
-  const sigH = 24;
-  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT");
+  const sigH = 21;
+  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH);
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
