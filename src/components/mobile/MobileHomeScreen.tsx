@@ -100,7 +100,7 @@ export default function MobileHomeScreen() {
       />
 
       {/* === HERO photo (fondu progressif vers le fond) === */}
-      <section className="relative z-[1] h-[430px] overflow-hidden">
+      <section className="mhome-hero relative z-[1] h-[430px] overflow-hidden">
         <img
           src={heroBg}
           alt="Convoyeur Transports Ligneo"
