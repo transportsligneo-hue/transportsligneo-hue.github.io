@@ -44,7 +44,7 @@ export const getContratConvoyeur = createServerFn({ method: "POST" })
     const { data: row } = await context.supabase
       .from("convoyeur_contrats")
       .select(
-        "id, statut, provider, yousign_environment, yousign_signature_request_id, sent_at, signed_at, declined_at, expired_at, last_reminder_at, decline_reason, signed_pdf_path, nom_complet, email",
+        "id, statut, provider, yousign_environment, yousign_signature_request_id, sent_at, signed_at, declined_at, expired_at, last_reminder_at, decline_reason, signed_pdf_path, charte_incluse, charte_signed_at, charte_signed_pdf_path, nom_complet, email",
       )
       .eq("convoyeur_id", data.convoyeurId)
       .order("created_at", { ascending: false })
@@ -61,6 +61,8 @@ export const sendContratYousign = createServerFn({ method: "POST" })
       convoyeurId: string;
       pdfBase64: string;
       pageCount: number;
+      chartePdfBase64?: string;
+      chartePageCount?: number;
       snapshot?: Record<string, unknown>;
     }) => d,
   )
@@ -83,26 +85,37 @@ export const sendContratYousign = createServerFn({ method: "POST" })
     const nomComplet = `${conv.prenom ?? ""} ${conv.nom ?? ""}`.trim() || conv.email;
 
     const request = await ys.createSignatureRequest({
-      name: `Contrat de partenariat convoyeur — ${nomComplet}`,
+      name: `Contrat de partenariat + charte — ${nomComplet}`,
       reminderDays: 5,
     });
 
+    const slug = nomComplet.replace(/\s+/g, "-").toLowerCase();
     let doc: { id: string };
+    let charteDoc: { id: string } | null = null;
     try {
       doc = await ys.uploadDocument(
         request.id,
         b64ToBytes(data.pdfBase64),
-        `contrat-partenariat-${nomComplet.replace(/\s+/g, "-").toLowerCase()}.pdf`,
+        `contrat-partenariat-${slug}.pdf`,
       );
+      if (data.chartePdfBase64) {
+        charteDoc = await ys.uploadDocument(
+          request.id,
+          b64ToBytes(data.chartePdfBase64),
+          `charte-presentation-discretion-${slug}.pdf`,
+        );
+      }
       await ys.addSigner({
         signatureRequestId: request.id,
-        documentId: doc.id,
+        documents: [
+          { documentId: doc.id, page: Math.max(1, data.pageCount || 1) },
+          ...(charteDoc ? [{ documentId: charteDoc.id, page: Math.max(1, data.chartePageCount || 1) }] : []),
+        ],
         firstName: conv.prenom || nomComplet,
         lastName: conv.nom || "Convoyeur",
         email: conv.email,
         phone,
         otpSms,
-        page: Math.max(1, data.pageCount || 1),
       });
       await ys.activateSignatureRequest(request.id);
     } catch (e) {
@@ -123,6 +136,8 @@ export const sendContratYousign = createServerFn({ method: "POST" })
         yousign_environment: env,
         yousign_signature_request_id: request.id,
         yousign_document_id: doc.id,
+        charte_document_id: charteDoc?.id ?? null,
+        charte_incluse: Boolean(charteDoc),
         expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
         snapshot: (data.snapshot ?? {}) as never,
         sent_at: new Date().toISOString(),
@@ -169,20 +184,21 @@ export const relancerContratYousign = createServerFn({ method: "POST" })
 /** Lien de téléchargement temporaire du contrat signé (admin ou convoyeur propriétaire). */
 export const getContratSigneUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { contratId: string }) => d)
+  .inputValidator((d: { contratId: string; document?: "contrat" | "charte" }) => d)
   .handler(async ({ data, context }) => {
     const { data: row } = await context.supabase
       .from("convoyeur_contrats")
-      .select("id, signed_pdf_path, user_id, statut")
+      .select("id, signed_pdf_path, charte_signed_pdf_path, user_id, statut")
       .eq("id", data.contratId)
       .maybeSingle();
     if (!row) throw new Error("Contrat introuvable.");
-    if (!row.signed_pdf_path) throw new Error("Le contrat signé n'est pas encore disponible.");
+    const path = data.document === "charte" ? row.charte_signed_pdf_path : row.signed_pdf_path;
+    if (!path) throw new Error("Le document signé n'est pas encore disponible.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: signed, error } = await supabaseAdmin.storage
       .from(BUCKET)
-      .createSignedUrl(row.signed_pdf_path, 300);
+      .createSignedUrl(path, 300);
     if (error || !signed) throw new Error("Lien de téléchargement indisponible.");
     return { url: signed.signedUrl };
   });
@@ -193,7 +209,7 @@ export const getMonContrat = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data: row } = await context.supabase
       .from("convoyeur_contrats")
-      .select("id, statut, signed_at, sent_at, signed_pdf_path")
+      .select("id, statut, signed_at, sent_at, signed_pdf_path, charte_incluse, charte_signed_at, charte_signed_pdf_path")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(1)

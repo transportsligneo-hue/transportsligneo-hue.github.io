@@ -61,7 +61,7 @@ export const Route = createFileRoute("/api/public/yousign-webhook")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: contrat } = await supabaseAdmin
           .from("convoyeur_contrats")
-          .select("id, convoyeur_id, nom_complet, statut")
+          .select("id, convoyeur_id, nom_complet, statut, charte_incluse, charte_document_id, yousign_document_id")
           .eq("yousign_signature_request_id", signatureRequestId)
           .maybeSingle();
         if (!contrat) return new Response("ok");
@@ -70,22 +70,31 @@ export const Route = createFileRoute("/api/public/yousign-webhook")({
 
         if (eventName === "signature_request.done") {
           let path: string | null = null;
+          let chartePath: string | null = null;
           try {
             const ys = await import("@/lib/yousign.server");
             const detail = await ys.getSignatureRequest(signatureRequestId);
+            const signables = (detail.documents ?? []).filter((d) => d.nature === "signable_document");
             const docId =
-              detail.documents?.find((d) => d.nature === "signable_document")?.id ??
-              detail.documents?.[0]?.id;
-            if (docId) {
-              const bytes = await ys.downloadSignedDocument(signatureRequestId, docId);
-              path = `${contrat.convoyeur_id ?? "sans-convoyeur"}/${contrat.id}.pdf`;
+              (contrat as any).yousign_document_id ?? signables[0]?.id ?? detail.documents?.[0]?.id;
+            const charteId =
+              (contrat as any).charte_document_id ??
+              signables.find((d) => d.id !== docId)?.id ??
+              null;
+
+            const store = async (documentId: string, suffix: string) => {
+              const bytes = await ys.downloadSignedDocument(signatureRequestId, documentId);
+              const p = `${contrat.convoyeur_id ?? "sans-convoyeur"}/${contrat.id}${suffix}.pdf`;
               const up = await supabaseAdmin.storage
                 .from(BUCKET)
-                .upload(path, bytes, { contentType: "application/pdf", upsert: true });
-              if (up.error) path = null;
-            }
+                .upload(p, bytes, { contentType: "application/pdf", upsert: true });
+              return up.error ? null : p;
+            };
+
+            if (docId) path = await store(docId, "");
+            if (charteId && charteId !== docId) chartePath = await store(charteId, "-charte");
           } catch {
-            path = null;
+            path = path ?? null;
           }
 
           await supabaseAdmin
@@ -94,13 +103,15 @@ export const Route = createFileRoute("/api/public/yousign-webhook")({
               statut: "signe",
               signed_at: now,
               ...(path ? { signed_pdf_path: path } : {}),
+              ...((contrat as any).charte_incluse ? { charte_signed_at: now } : {}),
+              ...(chartePath ? { charte_signed_pdf_path: chartePath } : {}),
             })
             .eq("id", contrat.id);
 
           await notifyAdmin(supabaseAdmin, "create_admin_notification", {
             _type: "contrat_signe",
             _titre: "Contrat de partenariat signé",
-            _message: `${contrat.nom_complet ?? "Un convoyeur"} a signé son contrat de partenariat.`,
+            _message: `${contrat.nom_complet ?? "Un convoyeur"} a signé son contrat de partenariat${(contrat as any).charte_incluse ? " et la charte de présentation et discrétion" : ""}.`,
             _link: contrat.convoyeur_id ? `/admin/convoyeurs/${contrat.convoyeur_id}` : null,
           });
         } else if (eventName === "signature_request.declined") {
