@@ -5596,6 +5596,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_privileged_writer: { Args: never; Returns: boolean }
       is_validated_convoyeur: { Args: { _user_id: string }; Returns: boolean }
       log_activity: {
         Args: {
