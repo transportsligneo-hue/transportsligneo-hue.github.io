@@ -305,7 +305,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   y += 8;
   doc.setFontSize(12);
-  if (isB2B && f.client_societe) {
+  if (f.client_societe) {
     doc.text(f.client_societe, 14, y); y += 6;
     if (f.client_fonction) {
       doc.setFont("helvetica", "normal");
@@ -324,7 +324,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.text(lines, 14, y);
     y += lines.length * 4.5;
   }
-  if (isB2B) {
+  if (f.client_societe) {
     if (f.client_siret) { doc.text(`SIRET : ${f.client_siret}`, 14, y); y += 5; }
     if (f.client_tva) { doc.text(`TVA Intracom. : ${f.client_tva}`, 14, y); y += 5; }
     if (f.client_nom || f.client_prenom) {
