@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import AvisSection from "@/components/public/AvisSection";
 import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
+import StoreBadges from "@/components/public/StoreBadges";
 import {
   MapPin,
   Phone,
