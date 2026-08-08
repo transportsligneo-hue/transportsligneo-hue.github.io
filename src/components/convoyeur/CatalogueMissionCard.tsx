@@ -163,17 +163,19 @@ export function CatalogueMissionCard({
           </span>
         )}
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
-            level,
+          title="Niveau minimum requis pour cette mission"
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
+            requis,
           )}`}
         >
-          {level}
+          {locked && <Lock size={9} />} Niveau {level}
         </span>
         {isElectric && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            ⚡ Électrique
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-300/70 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_14px_-4px_rgba(34,211,238,0.8)]">
+            <Zap size={10} strokeWidth={2.8} /> Électrique
           </span>
         )}
+
         {fresh && (
           <span className="ml-auto inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-100">
             Nouveau
