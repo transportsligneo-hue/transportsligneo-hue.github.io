@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { missionRequiredNiveau } from "@/lib/mission-level";
 import { niveauLabel, canAccessNiveau } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { MissionPublisherChip } from "./MissionPublisherChip";
 
 export interface CatalogTrajet {
   id: string;
@@ -164,6 +165,13 @@ export function CatalogueMissionCard({
           <span className="cat2-thermal"><IcoThermal />Thermique</span>
         )}
       </div>
+
+      <MissionPublisherChip
+        compact
+        nom={t.publisher_nom}
+        logoUrl={t.publisher_logo_url}
+        verifie={t.publisher_verifie}
+      />
 
       {/* Itinéraire */}
       <div className="cat2-route">
