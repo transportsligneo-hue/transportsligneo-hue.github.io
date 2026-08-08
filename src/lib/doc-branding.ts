@@ -310,6 +310,7 @@ export function drawKeyValueRow(
 ): number {
   const h = opts?.height ?? 8.5;
   const labelW = opts?.labelW ?? 55;
+  y = docEnsureSpace(doc, y, h + 1.5);
   doc.setFillColor(...DOC_CREAM);
   doc.rect(x, y, w, h, "F");
   doc.setDrawColor(...DOC_LINE);
