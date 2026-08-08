@@ -312,11 +312,30 @@ export function MissionV3DocsPane({
                   {STATUS_LABEL[item.status]}
                 </span>
               </div>
-              {item.onUpload && !item.onOpen ? (
+              {item.uploadType && (
+                <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5">
+                  <DocScanButton
+                    label="Scanner"
+                    maxPages={item.scanPages ?? 4}
+                    mergeToPdf
+                    filenameBase={`${item.uploadType}-${attributionId.slice(0, 8)}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#0A1230] bg-gradient-to-r from-[#2FD8FF] to-[#2F6BFF] disabled:opacity-60"
+                    onFiles={async (files) => {
+                      for (const f of files) await uploadFor(item.key, item.uploadType!, f);
+                    }}
+                  />
+                  <button type="button" aria-label={`Importer ${item.label}`}
+                    onClick={() => item.onUpload?.()}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[rgba(120,180,255,0.2)] text-[#8FB2E8]">
+                    <Upload size={14} />
+                  </button>
+                </div>
+              )}
+              {!item.uploadType && (item.onUpload && !item.onOpen ? (
                 <Upload size={16} className="v3-doc-chev" />
               ) : (
                 <ChevronRight size={18} className="v3-doc-chev" />
-              )}
+              ))}
               {item.onUpload && (
                 <input
                   ref={(el) => { fileRefs.current[item.key] = el; }}
@@ -326,13 +345,11 @@ export function MissionV3DocsPane({
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) {
-                      const docType = item.key === "contrat" ? "contrat" : item.key === "assurance" ? "assurance" : "autre";
-                      void uploadFor(item.key, docType, f);
-                    }
+                    if (f) void uploadFor(item.key, item.uploadType ?? "autre", f);
                     e.target.value = "";
                   }}
                 />
+
               )}
             </div>
           );
