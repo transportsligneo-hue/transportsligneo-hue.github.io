@@ -247,52 +247,71 @@ export function drawDocHeader(
 
   const leftX = logoData ? 47 : 14;
   const rightX = pageW - 14;
-  const gap = 6;
+  const gap = 8;
   const totalAvail = rightX - leftX - gap;
 
   const raison = (company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase();
   const tagline = "CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE";
   const titleTxt = title.toUpperCase();
 
-  // 1) Titre à droite : réduit jusqu'à tenir dans ~55% de la largeur dispo
-  const titleMax = totalAvail * 0.55;
-  let titleSize = 18;
+  // Colonnes strictes : le bloc identité et le bloc titre ne se croisent jamais.
+  const leftW = totalAvail * 0.42;
+  const rightW = totalAvail - leftW;
+  const rightLeftEdge = rightX - rightW;
+
+  // --- Bloc identité (gauche)
+  let nameSize = 14;
   doc.setFont("helvetica", "bold");
-  while (titleSize > 9 && fitTextWidth(doc, titleTxt, titleSize) > titleMax) titleSize -= 0.5;
-  const titleW = Math.min(fitTextWidth(doc, titleTxt, titleSize), titleMax);
-
-  // 2) Bloc gauche : largeur restante réelle
-  const leftAvail = Math.max(24, totalAvail - titleW);
-  let nameSize = 15;
-  while (nameSize > 8 && fitTextWidth(doc, raison, nameSize) > leftAvail) nameSize -= 0.5;
-  let tagSize = 7.5;
-  while (tagSize > 5 && fitTextWidth(doc, tagline, tagSize) > leftAvail) tagSize -= 0.25;
-
+  while (nameSize > 8 && fitTextWidth(doc, raison, nameSize) > leftW) nameSize -= 0.5;
   doc.setTextColor(...DOC_WHITE);
-  doc.setFont("helvetica", "bold");
   doc.setFontSize(nameSize);
-  doc.text(clampText(doc, raison, leftAvail), leftX, h / 2 - 2);
+  doc.text(clampText(doc, raison, leftW), leftX, h / 2 - 1.5);
+
+  let tagSize = 7;
   doc.setFont("helvetica", "normal");
+  while (tagSize > 4.8 && fitTextWidth(doc, tagline, tagSize) > leftW) tagSize -= 0.25;
   doc.setFontSize(tagSize);
   doc.setTextColor(...DOC_GOLD_SOFT);
-  doc.text(clampText(doc, tagline, leftAvail), leftX, h / 2 + 4);
+  doc.text(clampText(doc, tagline, leftW), leftX, h / 2 + 4.5);
 
-  doc.setTextColor(...DOC_WHITE);
+  // --- Bloc titre (droite), sur 1 ou 2 lignes selon la longueur
+  let titleSize = 16;
   doc.setFont("helvetica", "bold");
+  let titleLines: string[] = [titleTxt];
+  while (titleSize > 10 && fitTextWidth(doc, titleTxt, titleSize) > rightW) titleSize -= 0.5;
+  if (fitTextWidth(doc, titleTxt, titleSize) > rightW) {
+    titleSize = 12;
+    doc.setFontSize(titleSize);
+    titleLines = (doc.splitTextToSize(titleTxt, rightW) as string[]).slice(0, 2);
+  }
+
+  const twoLines = titleLines.length > 1;
+  const titleTop = twoLines ? h / 2 - 6 : h / 2 - 1.5;
   doc.setFontSize(titleSize);
-  doc.text(clampText(doc, titleTxt, titleMax), rightX, h / 2 - 2, { align: "right" });
+  doc.setTextColor(...DOC_WHITE);
+  titleLines.forEach((line, i) => {
+    doc.text(clampText(doc, line, rightW), rightX, titleTop + i * (titleSize * 0.42), { align: "right" });
+  });
+
+  let metaY = titleTop + (twoLines ? titleSize * 0.42 : 0) + 5.5;
   if (numero) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...DOC_GOLD);
-    doc.text(clampText(doc, numero, titleMax), rightX, h / 2 + 5, { align: "right" });
+    doc.text(clampText(doc, numero, rightW), rightX, metaY, { align: "right" });
+    metaY += 4.5;
   }
   if (subtitle) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
+    doc.setFontSize(7);
     doc.setTextColor(...DOC_GOLD_SOFT);
-    doc.text(clampText(doc, subtitle, Math.max(titleMax, totalAvail * 0.6)), rightX, h / 2 + 11, { align: "right" });
+    const maxSubY = h - 3;
+    if (metaY <= maxSubY) {
+      doc.text(clampText(doc, subtitle, rightW), rightX, Math.min(metaY, maxSubY), { align: "right" });
+    }
   }
+  void rightLeftEdge;
+
 
   doc.setDrawColor(...DOC_GOLD);
   doc.setLineWidth(0.8);
