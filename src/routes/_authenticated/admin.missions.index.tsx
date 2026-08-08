@@ -246,6 +246,7 @@ function AdminMissionsUnified() {
           <>
             <Link
               to="/admin/attributions"
+              search={{} as never}
               className="h-9 px-3 rounded-lg border border-[#eaeaee] bg-white flex items-center gap-1.5 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
             >
               <ClipboardList size={15} /> Attributions
