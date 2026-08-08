@@ -328,6 +328,16 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   y += 22;
 
   // ===== Modalités de règlement =====
+  const fh = 22;
+  const contentBottom = pageH - M - fh - 8;
+  const ensure = (need: number) => {
+    if (y + need > contentBottom) {
+      doc.addPage();
+      y = M + 12;
+    }
+  };
+
+  ensure(14);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...NAVY);
@@ -352,12 +362,17 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...TEXT);
   for (const m of modalites) {
     const lines = doc.splitTextToSize(`• ${m}`, innerW) as string[];
+    ensure(lines.length * 4.2 + 2);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...TEXT);
     doc.text(lines, M, y);
     y += lines.length * 4.2 + 1.2;
   }
 
   // ===== Statut + signature =====
   y += 10;
+  ensure(30);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
@@ -378,34 +393,43 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...TEXT);
   doc.text(`Pour ${co?.raison_sociale || "Transports Ligneo"}`, rX, y, { align: "right" });
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", rX - 34, y + 3, 32, 16); } catch {}
+    try { doc.addImage(signatureData, "PNG", rX - 34, y + 2, 32, 15); } catch {}
   }
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
     `${co?.signataire_nom || "Olivier G."} — ${co?.signataire_fonction || "Fondateur"}`,
-    rX, y + 23, { align: "right" },
+    rX, y + 22, { align: "right" },
   );
 
-  // ===== Pied de page navy =====
-  const fh = 22;
-  doc.setFillColor(...NAVY);
-  doc.rect(M, pageH - M - fh, innerW, fh, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...GOLD_SOFT);
-  doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), pageW / 2, pageH - M - fh + 7, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.5);
-  doc.setTextColor(...WHITE);
+  // ===== Pied de page navy (toutes les pages) =====
   const l1 = companyLegalLine1(co);
   const l2 = companyLegalLine2(co);
-  if (l1) doc.text((doc.splitTextToSize(l1, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 12.5, { align: "center" });
-  if (l2) doc.text((doc.splitTextToSize(l2, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 17, { align: "center" });
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...NAVY);
+    doc.rect(M, pageH - M - fh, innerW, fh, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GOLD_SOFT);
+    doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), pageW / 2, pageH - M - fh + 7, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...WHITE);
+    if (l1) doc.text((doc.splitTextToSize(l1, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 12.5, { align: "center" });
+    if (l2) doc.text((doc.splitTextToSize(l2, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 17, { align: "center" });
+    if (pages > 1) {
+      doc.setFontSize(6);
+      doc.setTextColor(...GOLD_SOFT);
+      doc.text(`${p}/${pages}`, pageW - M - 4, pageH - M - fh + 17, { align: "right" });
+    }
+  }
 
   return doc.output("blob");
 }
+
 
 
 export function downloadFacturePdf(blob: Blob, numero: string) {
