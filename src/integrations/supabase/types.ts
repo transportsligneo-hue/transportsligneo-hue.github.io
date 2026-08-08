@@ -540,6 +540,45 @@ export type Database = {
         }
         Relationships: []
       }
+      articles: {
+        Row: {
+          contenu: string
+          created_at: string
+          extrait: string | null
+          id: string
+          image_url: string | null
+          published_at: string | null
+          slug: string
+          statut: string
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          contenu?: string
+          created_at?: string
+          extrait?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          slug: string
+          statut?: string
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          contenu?: string
+          created_at?: string
+          extrait?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          slug?: string
+          statut?: string
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assistant_conversations: {
         Row: {
           contact_email: string | null
@@ -683,6 +722,56 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: false
             referencedRelation: "trajets_assigned_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avis_clients: {
+        Row: {
+          commentaire: string
+          created_at: string
+          date_avis: string
+          id: string
+          mission_id: string | null
+          nom_affiche: string
+          note: number
+          statut: string
+          type_client: string | null
+          updated_at: string
+          ville: string | null
+        }
+        Insert: {
+          commentaire: string
+          created_at?: string
+          date_avis?: string
+          id?: string
+          mission_id?: string | null
+          nom_affiche: string
+          note?: number
+          statut?: string
+          type_client?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Update: {
+          commentaire?: string
+          created_at?: string
+          date_avis?: string
+          id?: string
+          mission_id?: string | null
+          nom_affiche?: string
+          note?: number
+          statut?: string
+          type_client?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avis_clients_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
             referencedColumns: ["id"]
           },
         ]
@@ -2518,6 +2607,36 @@ export type Database = {
           },
         ]
       }
+      faq: {
+        Row: {
+          created_at: string
+          id: string
+          ordre: number
+          publie: boolean
+          question: string
+          reponse: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ordre?: number
+          publie?: boolean
+          question: string
+          reponse: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ordre?: number
+          publie?: boolean
+          question?: string
+          reponse?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fleet_driver_invitations: {
         Row: {
           accepted_at: string | null
@@ -3809,6 +3928,36 @@ export type Database = {
           title?: string
           updated_by?: string | null
           video_url?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_abonnes: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -36,6 +37,7 @@ import { Route as AttenteValidationRouteImport } from './routes/attente-validati
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
@@ -45,6 +47,7 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
+import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
@@ -120,6 +123,7 @@ import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminContenuRouteImport } from './routes/_authenticated/admin.contenu'
 import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
@@ -177,6 +181,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TarifsRoute = TarifsRouteImport.update({
   id: '/tarifs',
   path: '/tarifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuiviRoute = SuiviRouteImport.update({
+  id: '/suivi',
+  path: '/suivi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -303,6 +312,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
+  id: '/actualites/',
+  path: '/actualites/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
   id: '/verify-certificat/$token',
   path: '/verify-certificat/$token',
@@ -347,6 +361,11 @@ const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
 const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
   id: '/auth/email-confirmation',
   path: '/auth/email-confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
+  id: '/actualites/$slug',
+  path: '/actualites/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -786,6 +805,12 @@ const AuthenticatedAdminConvoyeursRoute =
     path: '/convoyeurs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminContenuRoute =
+  AuthenticatedAdminContenuRouteImport.update({
+    id: '/contenu',
+    path: '/contenu',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCommunicationRoute =
   AuthenticatedAdminCommunicationRouteImport.update({
     id: '/communication',
@@ -1091,6 +1116,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -1100,6 +1126,7 @@ export interface FileRoutesByFullPath {
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1109,6 +1136,7 @@ export interface FileRoutesByFullPath {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1117,6 +1145,7 @@ export interface FileRoutesByFullPath {
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1251,9 +1280,11 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1263,6 +1294,7 @@ export interface FileRoutesByTo {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1271,6 +1303,7 @@ export interface FileRoutesByTo {
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1404,6 +1437,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -1413,6 +1447,7 @@ export interface FileRoutesById {
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1422,6 +1457,7 @@ export interface FileRoutesById {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1430,6 +1466,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/_authenticated/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1566,6 +1603,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/services'
     | '/sitemap.xml'
+    | '/suivi'
     | '/tarifs'
     | '/unsubscribe'
     | '/admin'
@@ -1575,6 +1613,7 @@ export interface FileRouteTypes {
     | '/entreprise'
     | '/flotte'
     | '/notifications'
+    | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1584,6 +1623,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites/'
     | '/admin/acceptations'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -1592,6 +1632,7 @@ export interface FileRouteTypes {
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
+    | '/admin/contenu'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1726,9 +1767,11 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/services'
     | '/sitemap.xml'
+    | '/suivi'
     | '/tarifs'
     | '/unsubscribe'
     | '/notifications'
+    | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1738,6 +1781,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites'
     | '/admin/acceptations'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -1746,6 +1790,7 @@ export interface FileRouteTypes {
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
+    | '/admin/contenu'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1878,6 +1923,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/services'
     | '/sitemap.xml'
+    | '/suivi'
     | '/tarifs'
     | '/unsubscribe'
     | '/_authenticated/admin'
@@ -1887,6 +1933,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
     | '/_authenticated/notifications'
+    | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -1896,6 +1943,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites/'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
@@ -1904,6 +1952,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/candidatures'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/communication'
+    | '/_authenticated/admin/contenu'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
@@ -2040,14 +2089,17 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SuiviRoute: typeof SuiviRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
+  ActualitesIndexRoute: typeof ActualitesIndexRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
@@ -2096,6 +2148,13 @@ declare module '@tanstack/react-router' {
       path: '/tarifs'
       fullPath: '/tarifs'
       preLoaderRoute: typeof TarifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suivi': {
+      id: '/suivi'
+      path: '/suivi'
+      fullPath: '/suivi'
+      preLoaderRoute: typeof SuiviRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -2273,6 +2332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/actualites/': {
+      id: '/actualites/'
+      path: '/actualites'
+      fullPath: '/actualites/'
+      preLoaderRoute: typeof ActualitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify-certificat/$token': {
       id: '/verify-certificat/$token'
       path: '/verify-certificat/$token'
@@ -2334,6 +2400,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/email-confirmation'
       fullPath: '/auth/email-confirmation'
       preLoaderRoute: typeof AuthEmailConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/$slug': {
+      id: '/actualites/$slug'
+      path: '/actualites/$slug'
+      fullPath: '/actualites/$slug'
+      preLoaderRoute: typeof ActualitesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/notifications': {
@@ -2861,6 +2934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/contenu': {
+      id: '/_authenticated/admin/contenu'
+      path: '/contenu'
+      fullPath: '/admin/contenu'
+      preLoaderRoute: typeof AuthenticatedAdminContenuRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/communication': {
       id: '/_authenticated/admin/communication'
       path: '/communication'
@@ -3268,6 +3348,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
   AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
+  AuthenticatedAdminContenuRoute: typeof AuthenticatedAdminContenuRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRouteWithChildren
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
@@ -3302,6 +3383,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
   AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,
+  AuthenticatedAdminContenuRoute: AuthenticatedAdminContenuRoute,
   AuthenticatedAdminConvoyeursRoute:
     AuthenticatedAdminConvoyeursRouteWithChildren,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
@@ -3650,14 +3732,17 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SuiviRoute: SuiviRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
+  ActualitesIndexRoute: ActualitesIndexRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,

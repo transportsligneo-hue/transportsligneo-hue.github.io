@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import AvisSection from "@/components/public/AvisSection";
+import DerniersArticles from "@/components/public/DerniersArticles";
+import FaqDynamique from "@/components/public/FaqDynamique";
+import StoreBadges from "@/components/public/StoreBadges";
 import {
   MapPin,
   Phone,
@@ -344,7 +348,12 @@ export default function MobileHomeScreen() {
 
       </div>
 
-
+      {/* Contenu public dynamique : avis, actualités, FAQ */}
+      <div className="relative z-[1] r4-page">
+        <AvisSection />
+        <DerniersArticles />
+        <FaqDynamique />
+      </div>
 
       {/* Footer minimal */}
       <footer className="relative z-[1] px-5 pt-10 pb-8 mt-6">
@@ -357,12 +366,19 @@ export default function MobileHomeScreen() {
             <p className="text-white/55 text-[11px] mt-0.5 truncate">07 82 45 61 81 · contact@transportsligneo.fr</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-4 mt-5 text-[10.5px] text-white/45 tracking-wider uppercase">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[10.5px] uppercase tracking-wider text-white/45">
+          <Link to="/suivi" className="hover:text-[#93c5fd] transition-colors">Suivi mission</Link>
+          <span className="text-white/20">·</span>
+          <Link to="/actualites" className="hover:text-[#93c5fd] transition-colors">Actualités</Link>
+          <span className="text-white/20">·</span>
           <Link to="/cgv" className="hover:text-[#93c5fd] transition-colors">CGV</Link>
           <span className="text-white/20">·</span>
           <Link to="/mentions-legales" className="hover:text-[#93c5fd] transition-colors">Mentions</Link>
           <span className="text-white/20">·</span>
           <Link to="/confidentialite" className="hover:text-[#93c5fd] transition-colors">Privacy</Link>
+        </div>
+        <div className="mt-5 flex justify-center">
+          <StoreBadges />
         </div>
         <p className="text-center text-white/30 text-[10px] mt-3 tracking-wider">
           © {new Date().getFullYear()} Transports LIGNEO

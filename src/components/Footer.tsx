@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { openCookiePreferences } from "@/lib/cookie-consent";
+import NewsletterForm from "@/components/public/NewsletterForm";
+import StoreBadges from "@/components/public/StoreBadges";
 
 const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
@@ -14,6 +16,8 @@ const navLinks: { label: string; to: string }[] = [
   { label: "Accueil", to: "/" },
   { label: "Services", to: "/services" },
   { label: "Tarifs", to: "/tarifs" },
+  { label: "Suivre ma mission", to: "/suivi" },
+  { label: "Actualités", to: "/actualites" },
   { label: "À propos", to: "/a-propos" },
   { label: "Contact", to: "/contact" },
 ];
@@ -202,6 +206,32 @@ export default function Footer() {
           </Link>
         </div>
       </div>
+
+      {/* Newsletter + application */}
+      <div className="relative z-10 mx-auto grid max-w-[1180px] gap-8 border-t border-[#7aa3ff]/15 px-8 py-8 md:grid-cols-2">
+        <div>
+          <p
+            className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#d9b54a]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Newsletter
+          </p>
+          <NewsletterForm />
+        </div>
+        <div>
+          <p
+            className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#d9b54a]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Application convoyeur
+          </p>
+          <p className="mb-3 text-[13.5px] text-[#9aa6c9]">
+            Missions, états des lieux et suivi GPS depuis votre mobile.
+          </p>
+          <StoreBadges />
+        </div>
+      </div>
+
 
       {/* Bas */}
       <div className="relative z-10 mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-3 border-t border-[#7aa3ff]/15 px-8 py-5">
