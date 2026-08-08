@@ -53,7 +53,7 @@ export function MissionTwinLink({
   }
   if (!twin) return null;
 
-  const label = twin.leg_type === "retour" ? "Voir la mission Retour" : twin.leg_type === "aller" ? "Voir la mission Aller" : "Voir la mission jumelle";
+  const label = twin.leg_type === "retour" ? "Voir le volet Restitution (R)" : twin.leg_type === "aller" ? "Voir le volet Livraison (L)" : "Voir la mission jumelle";
   const dest = linkTo(twin.id, twin.leg_type);
 
   return (

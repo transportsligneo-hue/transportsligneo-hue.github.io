@@ -190,7 +190,7 @@ export function AdminMissionARBanner({
         <MissionLegBadge leg={legType as "aller" | "retour"} />
         <div className="text-sm text-pro-text">
           <span className="font-semibold">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
-          <span className="text-pro-text-soft"> · fait partie d'un groupe livraison + restitution</span>
+          <span className="text-pro-text-soft"> · mission groupée — L = Livraison, R = Restitution</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           {loading ? (
@@ -204,7 +204,7 @@ export function AdminMissionARBanner({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline-offset-2 hover:underline"
             >
               <ArrowLeftRight size={12} />
-              Voir la mission {twin.leg_type === "retour" ? "Retour" : "Aller"}
+              Voir le volet {twin.leg_type === "retour" ? "Restitution (R)" : "Livraison (L)"}
               {twin.numero ? <span className="font-mono text-[11px] text-pro-text-soft">{twin.numero}</span> : null}
             </Link>
           ) : twin ? (
