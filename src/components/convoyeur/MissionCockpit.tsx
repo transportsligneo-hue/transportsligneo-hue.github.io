@@ -392,6 +392,8 @@ export function MissionCockpit({
           if ((await onMacroStatusChange("en_attente_validation")) === false) {
             toast.warning("Mission envoyée, mais le statut général n'a pas pu être synchronisé.");
           }
+          // Demande d'avis Google automatique (silencieux, anti-doublon serveur).
+          void notifyDeliveryDoneFn({ data: { attributionId } }).catch(() => {});
           await Promise.resolve(onUpdated());
           break;
         case "done":
