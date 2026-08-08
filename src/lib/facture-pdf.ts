@@ -325,9 +325,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
-  y += 20;
+  y += 18;
 
-  // ===== Modalités de règlement =====
+  // ===== Statut / modalités / signature =====
   const fh = 22;
   const contentBottom = pageH - M - fh - 8;
   const ensure = (need: number) => {
@@ -337,12 +337,6 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     }
   };
 
-  ensure(14);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...NAVY);
-  doc.text("MODALITÉS DE RÈGLEMENT", M, y);
-  y += 6;
   const modalites: string[] = [];
   if (isB2B) {
     modalites.push(`Paiement à ${f.conditions_paiement || "30 jours fin de mois"} date de facture, par virement bancaire.`);
@@ -352,56 +346,59 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   } else {
     modalites.push("Paiement à réception de facture.");
   }
-  modalites.push("Retard de paiement : pénalités au taux légal en vigueur + indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).");
-  modalites.push("Pas d'escompte pour paiement anticipé.");
+  modalites.push("Retard de paiement : pénalités au taux légal + indemnité forfaitaire de 40 € (art. L441-10 du Code de commerce). Pas d'escompte pour paiement anticipé.");
   if (tvaExempt && exemptionNote) modalites.push(exemptionNote);
   if (legalMention) modalites.push(legalMention);
 
+  const textW = innerW * 0.6;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...TEXT);
-  for (const m of modalites) {
-    const lines = doc.splitTextToSize(`• ${m}`, innerW) as string[];
-    ensure(lines.length * 4.2 + 2);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...TEXT);
-    doc.text(lines, M, y);
-    y += lines.length * 4.2 + 1.2;
-  }
+  doc.setFontSize(7.5);
+  const wrapped = modalites.map((m) => doc.splitTextToSize(`• ${m}`, textW) as string[]);
+  const blockH = 12 + wrapped.reduce((s, l) => s + l.length * 3.8 + 1, 0);
+  ensure(Math.max(blockH, 32));
 
-  // ===== Statut + signature =====
-  y += 10;
-  ensure(30);
+  const blockY = y;
+  // Statut
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Statut : ", M, y);
+  doc.text("Statut : ", M, blockY);
   const sw = doc.getTextWidth("Statut : ");
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...(isPaid ? GREEN : GOLD));
-  doc.text(isPaid ? "PAYÉE" : "À RÉGLER", M + sw, y);
-  if (isPaid && f.date_paiement) {
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text(`Réglée le ${fmtDate(f.date_paiement)}${f.mode_paiement ? ` par ${f.mode_paiement.toLowerCase()}` : ""}`, M, y + 6);
+  doc.text(isPaid ? "PAYÉE" : "À RÉGLER", M + sw, blockY);
+
+  // Modalités
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...NAVY);
+  doc.text("MODALITÉS DE RÈGLEMENT", M, blockY + 8);
+  let my = blockY + 13.5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...TEXT);
+  for (const lines of wrapped) {
+    doc.text(lines, M, my);
+    my += lines.length * 3.8 + 1;
   }
 
+  // Signature (colonne droite)
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text(`Pour ${co?.raison_sociale || "Transports Ligneo"}`, rX, y, { align: "right" });
+  doc.text(`Pour ${co?.raison_sociale || "Transports Ligneo"}`, rX, blockY, { align: "right" });
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", rX - 34, y + 2, 32, 15); } catch {}
+    try { doc.addImage(signatureData, "PNG", rX - 32, blockY + 2, 30, 14); } catch {}
   }
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text(
     `${co?.signataire_nom || "Olivier G."} — ${co?.signataire_fonction || "Fondateur"}`,
-    rX, y + 22, { align: "right" },
+    rX, blockY + 21, { align: "right" },
   );
+  y = Math.max(my, blockY + 26);
+
 
   // ===== Pied de page navy (toutes les pages) =====
   const l1 = companyLegalLine1(co);
