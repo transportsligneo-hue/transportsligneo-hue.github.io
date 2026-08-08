@@ -440,6 +440,16 @@ function ConvoyeurCatalogue() {
                   const mine = [t, ...(t.groupedLegs ?? [])]
                     .map((leg) => myOffers[leg.id])
                     .find(Boolean);
+                  const requis = missionRequiredNiveau({
+                    niveau_requis: t.niveau_requis,
+                    distance_km: t.distance_km,
+                    urgence: t.urgence,
+                  });
+                  const locked = !canAccessNiveau(driverNiveau, requis);
+                  const openLocked = () =>
+                    toast.info(
+                      `Mission réservée aux convoyeurs ${niveauLabel(requis)}. Continuez à enchaîner les missions pour débloquer ce niveau.`,
+                    );
                   return (
                     <CatalogueMissionCard
                       key={t.id}
@@ -447,12 +457,14 @@ function ConvoyeurCatalogue() {
                       distanceFromMe={dist}
                       myOfferStatus={mine?.statut ?? null}
                       myOfferPrice={mine?.prix_propose ?? null}
-                      canApply={canApply}
-                      onOpen={() => setOpenId(t.id)}
-                      onQuickApply={() => setOpenId(t.id)}
+                      canApply={canApply && !locked}
+                      driverNiveau={driverNiveau}
+                      onOpen={() => (locked ? openLocked() : setOpenId(t.id))}
+                      onQuickApply={() => (locked ? openLocked() : setOpenId(t.id))}
                     />
                   );
                 })}
+
               </div>
             </>
           )}
