@@ -8,7 +8,7 @@ import {
   generateEdlPapierPdf,
   downloadBlob,
 } from "@/lib/documents-officiels";
-import { fetchCompanyInfo, isCompanyComplete, type CompanyInfo } from "@/lib/doc-branding";
+import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
 
 type Variant = "light" | "dark";
 
@@ -37,6 +37,10 @@ interface TrajetLite {
   vin: string | null;
   vehicule_vin: string | null;
   client_nom: string | null;
+  client_email: string | null;
+  arrivee_contact_societe: string | null;
+  arrivee_contact_nom: string | null;
+  arrivee_contact_prenom: string | null;
   contact_depart_nom: string | null;
   contact_depart_tel: string | null;
   contact_depart_note: string | null;
@@ -68,6 +72,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
   const [numero, setNumero] = useState<string>("");
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [pvDocs, setPvDocs] = useState<StoredDoc[]>([]);
+  const [clientSociete, setClientSociete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [showPvForm, setShowPvForm] = useState(false);
@@ -108,14 +113,30 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);
+
+    // Société du client (organisation / profil) — sinon nom du particulier
+    let soc = (t?.arrivee_contact_societe || "").trim() || null;
+    if (!soc && t?.client_email) {
+      const ident = await resolveClientBillingIdentity({ email: t.client_email });
+      soc = ident?.societe || null;
+    }
+    setClientSociete(soc);
     setLoading(false);
   }, [attributionId]);
 
   useEffect(() => { void reload(); }, [reload]);
 
   const convoyeurNom = convoyeur ? [convoyeur.prenom, convoyeur.nom].filter(Boolean).join(" ") : null;
+  const contactArriveeNom =
+    [trajet?.arrivee_contact_prenom, trajet?.arrivee_contact_nom].filter(Boolean).join(" ") ||
+    trajet?.contact_arrivee_nom ||
+    null;
+  const contactDepartNom = trajet?.contact_depart_nom || null;
+  const marqueModele =
+    [trajet?.marque, trajet?.modele].filter(Boolean).join(" ") || trajet?.vehicule_type || null;
   const immat = trajet?.immatriculation || trajet?.vehicule_immatriculation || null;
-  const marqueModele = [trajet?.marque, trajet?.modele].filter(Boolean).join(" ") || null;
+
+
 
   const guardCompany = () => {
     if (!isCompanyComplete(company)) {
@@ -165,6 +186,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         numero,
         variant: v,
         client: trajet.client_nom,
+        societe: clientSociete || trajet.client_nom,
         marque_modele: marqueModele,
         immatriculation: immat,
         vin: trajet.vin || trajet.vehicule_vin,
@@ -173,7 +195,7 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         depart: trajet.depart,
         arrivee: trajet.arrivee,
         date_prevue: trajet.date_trajet,
-        convoyeur_nom: convoyeurNom,
+        convoyeur_nom: (v === "livraison" ? contactArriveeNom : contactDepartNom) || convoyeurNom,
       }, company);
       downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
     } catch {

@@ -651,7 +651,14 @@ function ConvoyeurMissions() {
             ? displayNumero(openMission.numero_mission)
             : `MIS-${openMission.id.slice(0, 8).toUpperCase()}`,
           client: clientNom,
-          marque_modele: [t?.marque, t?.modele].filter(Boolean).join(" ") || null,
+          societe:
+            (t as { arrivee_contact_societe?: string | null } | null)?.arrivee_contact_societe ||
+            (t as { client_nom?: string | null } | null)?.client_nom ||
+            clientNom,
+          marque_modele:
+            [t?.marque, t?.modele].filter(Boolean).join(" ") ||
+            (t as { vehicule_type?: string | null } | null)?.vehicule_type ||
+            null,
           immatriculation: t?.immatriculation ?? null,
           vin: t?.vin ?? null,
           kilometrage_depart: (t as { vehicule_km?: number | null } | null)?.vehicule_km != null
@@ -661,7 +668,11 @@ function ConvoyeurMissions() {
           depart: t?.depart ?? null,
           arrivee: t?.arrivee ?? null,
           date_prevue: t?.date_trajet ?? null,
-          convoyeur_nom: driverDisplayName,
+          convoyeur_nom:
+            [
+              (t as { arrivee_contact_prenom?: string | null } | null)?.arrivee_contact_prenom,
+              (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom,
+            ].filter(Boolean).join(" ") || driverDisplayName,
         }}
       />
     ) : null;

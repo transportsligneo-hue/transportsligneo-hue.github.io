@@ -112,6 +112,7 @@ function AdminLayout() {
     // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
     { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
+    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList, group: "Opérations" },
     { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
 
 
