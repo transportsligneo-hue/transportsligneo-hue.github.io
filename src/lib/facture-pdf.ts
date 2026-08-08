@@ -7,6 +7,7 @@ import {
   fetchCompanyInfo,
   companyLegalLine1,
   companyLegalLine2,
+  resolveClientBillingIdentity,
   type CompanyInfo,
 } from "@/lib/doc-branding";
 

@@ -6,6 +6,7 @@ import {
   fetchCompanyInfo,
   companyLegalLine1,
   companyLegalLine2,
+  resolveClientBillingIdentity,
   type CompanyInfo,
 } from "@/lib/doc-branding";
 
@@ -240,8 +241,24 @@ function drawGoldSeal(doc: jsPDF, cx: number, cy: number, r: number) {
   doc.text("TL", cx, cy + 3.2, { align: "center" });
 }
 
-export async function generateDevisPdf(d: DevisData, company?: CompanyInfo | null): Promise<Blob> {
+export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
+
+  // Devis au nom de l'organisation (rétroactif) : la société prime sur le contact.
+  const billing = await resolveClientBillingIdentity({
+    userId: (dInput as any).client_user_id ?? (dInput as any).user_id ?? null,
+    email: dInput.email ?? null,
+  });
+  const d: DevisData = billing?.societe
+    ? {
+        ...dInput,
+        societe: dInput.societe || billing.societe,
+        siret: dInput.siret || billing.siret,
+        tva_intra: dInput.tva_intra || billing.tva,
+        adresse: dInput.adresse || billing.adresse,
+        logo_url: dInput.logo_url || billing.logo_url,
+      }
+    : dInput;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
