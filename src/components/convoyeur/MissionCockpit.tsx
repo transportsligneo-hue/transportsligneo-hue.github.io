@@ -7,6 +7,8 @@
  *   - signatures et PV désormais portés par l'inspection
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyDeliveryDone } from "@/lib/google-review.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { writeWithOutbox } from "@/lib/offline-outbox";
 import type { ReactNode } from "react";
@@ -30,6 +32,7 @@ import { useMissionGates } from "@/hooks/useMissionGates";
 import { DriverSelfieCapture, hasLocalSelfieDone, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 import { ArriveeSignatureSheet } from "@/components/inspection/ArriveeSignatureSheet";
+import { DepartureChecklistSheet } from "@/components/mission/DepartureChecklistSheet";
 import { MissionContactsBlock } from "@/components/mission/MissionContactsBlock";
 
 type ActionKind =
@@ -114,11 +117,15 @@ export function MissionCockpit({
   docsSlot,
 }: Props) {
   const gates = useMissionGates(attributionId);
+  const notifyDeliveryDoneFn = useServerFn(notifyDeliveryDone);
   const [busy, setBusy] = useState(false);
   const [openSelfie, setOpenSelfie] = useState(false);
   const [openIncident, setOpenIncident] = useState(false);
   const [openSignatureArrivee, setOpenSignatureArrivee] = useState(false);
   const [signaturesArriveeDone, setSignaturesArriveeDone] = useState(false);
+  // Checklist sécurité bloquante avant "En route pour récupérer le véhicule".
+  const [checklistDone, setChecklistDone] = useState(false);
+  const [openChecklist, setOpenChecklist] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
@@ -142,6 +149,22 @@ export function MissionCockpit({
     })();
     return () => { cancelled = true; };
   }, [attributionId]);
+
+  // Checklist de sécurité déjà validée pour cette mission ?
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("mission_departure_checklists" as never)
+        .select("attribution_id")
+        .eq("attribution_id" as never, attributionId as never)
+        .maybeSingle();
+      if (!cancelled && data) setChecklistDone(true);
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
+
+
 
   useEffect(() => {
     setOptimisticEtape(currentEtape);
@@ -306,6 +329,11 @@ export function MissionCockpit({
           onStartInspection("arrivee");
           break;
         case "demarrer":
+          // Checklist sécurité bloquante : gilet jaune, tenue, permis.
+          if (!checklistDone) {
+            setOpenChecklist(true);
+            break;
+          }
           await persistEtape("en_route");
           if ((await onMacroStatusChange("en_cours")) === false) {
             toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
@@ -367,6 +395,8 @@ export function MissionCockpit({
           if ((await onMacroStatusChange("en_attente_validation")) === false) {
             toast.warning("Mission envoyée, mais le statut général n'a pas pu être synchronisé.");
           }
+          // Demande d'avis Google automatique (silencieux, anti-doublon serveur).
+          void notifyDeliveryDoneFn({ data: { attributionId } }).catch(() => {});
           await Promise.resolve(onUpdated());
           break;
         case "done":
@@ -787,7 +817,29 @@ export function MissionCockpit({
           }}
         />
       )}
+
+      {openChecklist && (
+        <DepartureChecklistSheet
+          attributionId={attributionId}
+          userId={userId}
+          onClose={() => setOpenChecklist(false)}
+          onValidated={async () => {
+            setChecklistDone(true);
+            setOpenChecklist(false);
+            try {
+              await persistEtape("en_route");
+              if ((await onMacroStatusChange("en_cours")) === false) {
+                toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
+              }
+              await Promise.resolve(onUpdated());
+            } catch {
+              toast.error("Impossible de démarrer le trajet, réessayez.");
+            }
+          }}
+        />
+      )}
     </>
+
   );
 }
 

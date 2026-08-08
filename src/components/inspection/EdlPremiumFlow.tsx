@@ -32,6 +32,7 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 import { useMissionGates } from "@/hooks/useMissionGates";
+import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import {
   EDL_PREMIUM_SEQUENCE,
@@ -200,11 +201,16 @@ export function EdlPremiumFlow({
         if (!traj?.demande_id || cancelled) return;
         const { data: dem } = await supabase
           .from("demandes_convoyage")
-          .select("carburant")
+          .select("carburant, marque, modele")
           .eq("id", traj.demande_id)
           .maybeSingle();
         if (cancelled) return;
-        setVehicleCarburant((dem?.carburant ?? "").toLowerCase());
+        const d = dem as { carburant?: string | null; marque?: string | null; modele?: string | null } | null;
+        // Si le champ carburant est vide/inconnu, on retombe sur la détection
+        // par marque/modèle (Tesla, Zoé, ID.4, e-208…).
+        const detected = isElectricEnergie(d?.carburant)
+          || (!d?.carburant && guessElectricFromModel(d?.marque, d?.modele));
+        setVehicleCarburant(detected ? "electrique" : (d?.carburant ?? "").toLowerCase());
       } catch { /* silencieux */ }
     })();
     return () => { cancelled = true; };
@@ -212,7 +218,7 @@ export function EdlPremiumFlow({
 
   // Électrique OU hybride rechargeable (PHEV). Un simple "hybride" (non
   // rechargeable) n'a pas de câble et ne déclenche donc pas l'étape.
-  const isElectric = /electr|hybride?\s*rechargeable|phev|plug.?in/i.test(vehicleCarburant ?? "");
+  const isElectric = isElectricEnergie(vehicleCarburant);
 
   const STEPS = useMemo(() => {
     // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).

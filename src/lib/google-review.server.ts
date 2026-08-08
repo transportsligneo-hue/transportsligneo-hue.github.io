@@ -151,3 +151,41 @@ export async function sendGoogleReviewRequestServer(params: {
     ? { ok: true, recipientEmail }
     : { ok: false, error: sent.reason ?? "Échec de l'envoi.", recipientEmail }
 }
+
+/**
+ * Déclenchement automatique à la livraison (fin de mission convoyeur).
+ *
+ * - Respecte les paramètres admin (activation, lien Google, contact livraison).
+ * - Anti-doublon : ne renvoie jamais si une demande existe déjà pour ce
+ *   destinataire (manuelle, automatique ou déjà déclenchée par le cron).
+ * - Si un délai > 0 est configuré, on laisse le job planifié faire l'envoi.
+ */
+export async function triggerGoogleReviewOnDelivery(
+  attributionId: string,
+): Promise<{ sent: ReviewRecipientType[]; skipped: string | null }> {
+  const settings = await getGoogleReviewSettings()
+  if (!settings.auto_enabled || !settings.url) return { sent: [], skipped: 'disabled' }
+  if ((settings.delay_hours ?? 0) > 0) return { sent: [], skipped: 'deferred' }
+
+  const { data: existing } = await supabaseAdmin
+    .from('mission_review_requests')
+    .select('recipient_type')
+    .eq('attribution_id', attributionId)
+  const already = new Set(((existing ?? []) as { recipient_type: string }[]).map((r) => r.recipient_type))
+
+  const targets: ReviewRecipientType[] = ['client']
+  if (settings.send_to_contact) targets.push('contact_livraison')
+
+  const sent: ReviewRecipientType[] = []
+  for (const recipientType of targets) {
+    if (already.has(recipientType)) continue
+    const res = await sendGoogleReviewRequestServer({
+      attributionId,
+      recipientType,
+      auto: true,
+      actorLabel: 'Automatique (livraison)',
+    })
+    if (res.ok) sent.push(recipientType)
+  }
+  return { sent, skipped: null }
+}

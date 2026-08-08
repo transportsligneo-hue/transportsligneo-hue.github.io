@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
 import { inferMissionLevel, missionLevelStyle } from "@/lib/mission-level";
+import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 
 export interface CatalogTrajet {
   id: string;
@@ -102,9 +103,8 @@ export function CatalogueMissionCard({
     distanceKm: t.distance_km,
     urgence: t.urgence,
   });
-  const isElectric =
-    (t.type_carburant ?? "").toLowerCase().includes("électr") ||
-    (t.type_carburant ?? "").toLowerCase().includes("electr");
+  const isElectric = isElectricEnergie(t.type_carburant)
+    || guessElectricFromModel(t.marque, t.modele);
 
   return (
     <div

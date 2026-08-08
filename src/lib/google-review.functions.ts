@@ -25,3 +25,27 @@ export const sendGoogleReviewRequest = createServerFn({ method: 'POST' })
       actorLabel: 'Admin',
     })
   })
+
+/**
+ * Déclenché par l'app convoyeur au moment de la clôture (livraison effectuée).
+ * Silencieux côté UI : n'échoue jamais la clôture de mission.
+ */
+export const notifyDeliveryDone = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { attributionId: string }) => input)
+  .handler(async ({ data, context }) => {
+    // Le convoyeur assigné (ou un admin) uniquement.
+    const { data: attr } = await (context as never as { supabase: any }).supabase
+      .from('attributions')
+      .select('id')
+      .eq('id', data.attributionId)
+      .maybeSingle()
+    if (!attr) return { sent: [], skipped: 'forbidden' as const }
+
+    const { triggerGoogleReviewOnDelivery } = await import('@/lib/google-review.server')
+    try {
+      return await triggerGoogleReviewOnDelivery(data.attributionId)
+    } catch {
+      return { sent: [], skipped: 'error' as const }
+    }
+  })
