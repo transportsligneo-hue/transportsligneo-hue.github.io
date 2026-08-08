@@ -30,6 +30,7 @@ import { useMissionGates } from "@/hooks/useMissionGates";
 import { DriverSelfieCapture, hasLocalSelfieDone, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 import { ArriveeSignatureSheet } from "@/components/inspection/ArriveeSignatureSheet";
+import { DepartureChecklistSheet } from "@/components/mission/DepartureChecklistSheet";
 import { MissionContactsBlock } from "@/components/mission/MissionContactsBlock";
 
 type ActionKind =
