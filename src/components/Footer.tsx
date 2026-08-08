@@ -14,6 +14,8 @@ const navLinks: { label: string; to: string }[] = [
   { label: "Accueil", to: "/" },
   { label: "Services", to: "/services" },
   { label: "Tarifs", to: "/tarifs" },
+  { label: "Suivre ma mission", to: "/suivi" },
+  { label: "Actualités", to: "/actualites" },
   { label: "À propos", to: "/a-propos" },
   { label: "Contact", to: "/contact" },
 ];
