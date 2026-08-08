@@ -31,9 +31,13 @@ export interface CatalogTrajet {
   depart_lng?: number | null;
   niveau_requis?: string | null;
   vehicule_energie?: string | null;
+  publisher_nom?: string | null;
+  publisher_logo_url?: string | null;
+  publisher_verifie?: boolean | null;
   groupedLegs?: CatalogTrajet[];
   isGroupedAr?: boolean;
 }
+
 
 interface Props {
   trajet: CatalogTrajet;
