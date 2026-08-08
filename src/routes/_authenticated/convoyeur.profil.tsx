@@ -3,9 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle,
+  User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle, Trophy,
 } from "lucide-react";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { computeNiveauProgress, niveauLabel } from "@/lib/convoyeur-niveau";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/profil")({
   component: ConvoyeurProfil,
@@ -18,6 +19,11 @@ function ConvoyeurProfil() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
   const [statut, setStatut] = useState<string>("en_attente");
+  const [progression, setProgression] = useState({
+    niveau: "debutant" as string,
+    missions: 0,
+    note: null as number | null,
+  });
 
   const [form, setForm] = useState({
     prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "",
@@ -33,19 +39,25 @@ function ConvoyeurProfil() {
     (async () => {
       const { data } = await supabase
         .from("convoyeurs")
-        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut")
+        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut, niveau, missions_terminees, note_moyenne")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
       if (data) {
         setConvoyeurId(data.id);
         setStatut(data.statut ?? "en_attente");
+        setProgression({
+          niveau: (data as { niveau?: string }).niveau ?? "debutant",
+          missions: (data as { missions_terminees?: number }).missions_terminees ?? 0,
+          note: (data as { note_moyenne?: number | null }).note_moyenne ?? null,
+        });
         setForm({
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
           annees_experience: data.annees_experience != null ? String(data.annees_experience) : "",
         });
       }
+
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -112,6 +124,69 @@ function ConvoyeurProfil() {
           <PushNotificationToggle />
         </div>
       </div>
+
+      {/* Progression de niveau */}
+      {(() => {
+        const p = computeNiveauProgress(progression.niveau, progression.missions, progression.note);
+        const pct = Math.round(p.ratio * 100);
+        return (
+          <div className="bg-white rounded-xl border border-pro-border p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="font-semibold text-sm text-pro-text flex items-center gap-2">
+                  <Trophy size={16} className="text-amber-500" /> Mon niveau convoyeur
+                </h2>
+                <p className="text-pro-text-soft text-xs mt-1">
+                  Votre niveau détermine les missions auxquelles vous pouvez candidater.
+                </p>
+              </div>
+              <span className="text-xs px-3 py-1 rounded-full border font-semibold bg-amber-50 text-amber-700 border-amber-200">
+                {niveauLabel(p.current)}
+              </span>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-pro-border bg-pro-bg-soft px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-pro-muted">Missions terminées</div>
+                <div className="text-lg font-semibold text-pro-text">{p.missionsDone}</div>
+              </div>
+              <div className="rounded-lg border border-pro-border bg-pro-bg-soft px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-pro-muted">Note moyenne</div>
+                <div className="text-lg font-semibold text-pro-text">
+                  {p.noteMoyenne != null ? `${p.noteMoyenne.toFixed(2)} / 5` : "—"}
+                </div>
+              </div>
+            </div>
+
+            {p.next ? (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs text-pro-text-soft">
+                  <span>
+                    Progression vers <strong className="text-pro-text">{niveauLabel(p.next)}</strong>
+                  </span>
+                  <span className="font-semibold text-pro-text">
+                    {p.missionsDone}/{p.missionsTarget} missions
+                  </span>
+                </div>
+                <div className="mt-2 h-2.5 w-full rounded-full bg-pro-bg-soft border border-pro-border overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="text-pro-muted text-[11px] mt-2">
+                  Objectif : {p.missionsTarget} missions terminées et une note moyenne ≥ {p.noteTarget}.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-xs text-emerald-700 font-medium">
+                Niveau maximum atteint — vous avez accès à toutes les missions.
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
 
       {/* Profile form */}
       <form onSubmit={saveProfile} className="bg-white rounded-xl border border-pro-border p-5 sm:p-6 space-y-5 shadow-sm">

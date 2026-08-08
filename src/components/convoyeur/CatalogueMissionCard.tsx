@@ -12,10 +12,13 @@ import {
   Navigation,
   Send,
   FileCheck2,
+  Lock,
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
-import { inferMissionLevel, missionLevelStyle } from "@/lib/mission-level";
+import { missionRequiredNiveau, missionLevelStyle } from "@/lib/mission-level";
+import { niveauLabel, canAccessNiveau } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
+
 
 export interface CatalogTrajet {
   id: string;
@@ -43,6 +46,8 @@ export interface CatalogTrajet {
   published_at: string | null;
   depart_lat?: number | null;
   depart_lng?: number | null;
+  niveau_requis?: string | null;
+  vehicule_energie?: string | null;
   groupedLegs?: CatalogTrajet[];
   isGroupedAr?: boolean;
 }
@@ -53,9 +58,12 @@ interface Props {
   myOfferStatus?: string | null;
   myOfferPrice?: number | null;
   canApply: boolean;
+  /** Niveau du convoyeur connecté (pour verrouiller les missions trop élevées). */
+  driverNiveau?: string | null;
   onOpen: () => void;
   onQuickApply: () => void;
 }
+
 
 function formatDuration(min?: number | null) {
   if (!min || min <= 0) return null;
@@ -89,6 +97,7 @@ export function CatalogueMissionCard({
   myOfferStatus,
   myOfferPrice,
   canApply,
+  driverNiveau,
   onOpen,
   onQuickApply,
 }: Props) {
@@ -99,17 +108,27 @@ export function CatalogueMissionCard({
     ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000
     : false;
   const countdown = useCountdown(t.proposal_expires_at);
-  const level = inferMissionLevel({
-    distanceKm: t.distance_km,
+  // Niveau REQUIS PAR LA MISSION (≠ niveau du convoyeur)
+  const requis = missionRequiredNiveau({
+    niveau_requis: t.niveau_requis,
+    distance_km: t.distance_km,
     urgence: t.urgence,
   });
+  const level = niveauLabel(requis);
+  const locked = !canAccessNiveau(driverNiveau, requis);
   const isElectric = isElectricEnergie(t.type_carburant)
+    || isElectricEnergie(t.vehicule_energie)
     || guessElectricFromModel(t.marque, t.modele);
 
   return (
     <div
       onClick={onOpen}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/40 hover:shadow-[0_20px_50px_-24px_rgba(212,175,55,0.45)]"
+      className={`group relative overflow-hidden rounded-2xl border p-4 backdrop-blur-xl transition-all duration-300 ${
+        locked
+          ? "cursor-not-allowed border-white/10 bg-white/[0.02] opacity-60 saturate-50"
+          : "cursor-pointer border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] hover:-translate-y-0.5 hover:border-amber-300/40 hover:shadow-[0_20px_50px_-24px_rgba(212,175,55,0.45)]"
+      }`}
+
     >
       {/* Halo */}
       <div
@@ -144,17 +163,19 @@ export function CatalogueMissionCard({
           </span>
         )}
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
-            level,
+          title="Niveau minimum requis pour cette mission"
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
+            requis,
           )}`}
         >
-          {level}
+          {locked && <Lock size={9} />} Niveau {level}
         </span>
         {isElectric && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            ⚡ Électrique
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-300/70 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_14px_-4px_rgba(34,211,238,0.8)]">
+            <Zap size={10} strokeWidth={2.8} /> Électrique
           </span>
         )}
+
         {fresh && (
           <span className="ml-auto inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-100">
             Nouveau
@@ -291,7 +312,17 @@ export function CatalogueMissionCard({
           )}
         </div>
 
-        {myOfferStatus ? (
+        {locked ? (
+          <div className="flex max-w-[60%] flex-col items-end gap-1 text-right">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/70">
+              <Lock size={12} /> Verrouillée
+            </span>
+            <span className="text-[10px] leading-tight text-white/50">
+              Réservé aux convoyeurs {level}
+              {requis === "confirme" ? "+" : ""}
+            </span>
+          </div>
+        ) : myOfferStatus ? (
           <div className="text-right">
             <MissionStatusBadge
               status={
@@ -320,6 +351,7 @@ export function CatalogueMissionCard({
             <span className="text-[10px] text-white/50">ou voir détails →</span>
           </div>
         )}
+
       </div>
     </div>
   );
