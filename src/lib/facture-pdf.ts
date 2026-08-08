@@ -232,7 +232,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.text("RÉFÉRENCES", refX, blockTop + 8);
   const refs: [string, string][] = [];
   if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° commande", f.reference_client.trim()]);
-  if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} → ${f.arrivee.split(",")[0]}`]);
+  if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}`]);
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   if (vehLabel) refs.push(["Véhicule", `${vehLabel}${f.vehicule_immatriculation ? ` (${f.vehicule_immatriculation})` : ""}`]);
   if (f.date_mission) refs.push(["Livré le", fmtDate(f.date_mission)]);
@@ -273,7 +273,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const distance = f.distance_km ?? 0;
   const mainDesc = [
-    f.designation || `Convoyage routier${f.depart && f.arrivee ? ` ${f.depart.split(",")[0]} → ${f.arrivee.split(",")[0]}` : ""}${distance ? ` (${distance} km)` : ""}`,
+    f.designation || `Convoyage routier${f.depart && f.arrivee ? ` ${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}` : ""}${distance ? ` (${distance} km)` : ""}`,
     "Inclus : carburant, péages, assurance tous risques",
   ].join(" — ");
   const rows: { desc: string; qty: string; unit: string; total: string; free?: boolean }[] = [
