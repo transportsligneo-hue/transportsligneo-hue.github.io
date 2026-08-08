@@ -17,6 +17,9 @@ import { CatalogueTrainingGate } from "@/components/convoyeur/CatalogueTrainingG
 import { TrainingStatusBadge } from "@/components/convoyeur/TrainingStatusBadge";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { haversineKm } from "@/lib/geo/haversine";
+import { geocodeAddress } from "@/lib/geocode";
+import { canAccessNiveau, niveauLabel } from "@/lib/convoyeur-niveau";
+import { missionRequiredNiveau } from "@/lib/mission-level";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/catalogue")({
   component: ConvoyeurCatalogue,
