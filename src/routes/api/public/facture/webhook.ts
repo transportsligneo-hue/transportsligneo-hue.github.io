@@ -91,20 +91,19 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
               }
 
 
-              // Send confirmation email
+              // Send confirmation email (template registry → file d'attente rendue)
               if (facture?.client_email) {
                 try {
-                  await supabaseAdmin.rpc("enqueue_email", {
-                    queue_name: "transactional_emails",
-                    payload: {
-                      to: facture.client_email,
-                      subject: `Paiement reçu — Facture ${facture.numero}`,
-                      template: "facture-payee",
-                      data: {
-                        numero: facture.numero,
-                        montant: (amount / 100).toFixed(2),
-                        reference: facture.reference_client ?? null,
-                      },
+                  const { sendTransactionalEmailServer } = await import("@/server/email-send");
+                  await sendTransactionalEmailServer({
+                    templateName: "paiement-confirme",
+                    recipientEmail: facture.client_email,
+                    idempotencyKey: `facture-payee-${factureId}`,
+                    templateData: {
+                      prenom: facture.client_prenom ?? facture.client_nom ?? undefined,
+                      numero: facture.numero,
+                      montant: (amount / 100).toFixed(2),
+                      date: new Date().toLocaleDateString("fr-FR"),
                     },
                   });
                 } catch (e) {

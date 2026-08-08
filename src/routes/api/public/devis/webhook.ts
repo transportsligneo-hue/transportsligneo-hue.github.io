@@ -136,23 +136,24 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                 }
               }
 
-              // 5. Enqueue confirmation email
+              // 5. Enqueue confirmation email (template registry → file d'attente rendue)
               try {
-                await supabaseAdmin.rpc("enqueue_email", {
-                  queue_name: "transactional_emails",
-                  payload: {
-                    to: devis?.email,
-                    subject: `Paiement confirmé — ${devis?.numero ?? ""}`,
-                    template: "devis-paye",
-                    data: {
+                if (devis?.email) {
+                  const { sendTransactionalEmailServer } = await import("@/server/email-send");
+                  await sendTransactionalEmailServer({
+                    templateName: "devis-paye",
+                    recipientEmail: devis.email,
+                    idempotencyKey: `devis-paye-${devisId}`,
+                    templateData: {
                       prenom: devis?.prenom,
                       numero: devis?.numero,
                       depart: devis?.depart,
                       arrivee: devis?.arrivee,
-                      montant: Number(devis?.prix_estime ?? 0).toFixed(2),
+                      prix: Number(devis?.prix_estime ?? amount / 100).toFixed(2),
                     },
-                  },
-                });
+
+                  });
+                }
               } catch (e) {
                 console.error("[devis/webhook] email error", e);
               }
