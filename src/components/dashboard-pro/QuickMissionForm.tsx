@@ -16,6 +16,7 @@ import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
 type TripOption = "aller-simple" | "aller-retour" | "express";
 type DisplayMode = "ttc" | "ht" | "exempt";
