@@ -172,6 +172,7 @@ function AdminParametres() {
 
           <DevisAcceptationToggleCard />
           <DriverScreenProtectionCard />
+          <AvisGoogleCard />
         </TabsContent>
 
 
@@ -607,6 +608,112 @@ function RelancesCard() {
   );
 }
 
+
+function AvisGoogleCard() {
+  const [url, setUrl] = useState("");
+  const [autoEnabled, setAutoEnabled] = useState(false);
+  const [delayHours, setDelayHours] = useState(2);
+  const [sendToContact, setSendToContact] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "google_review")
+        .maybeSingle();
+      const v = (data as { value?: { url?: string; auto_enabled?: boolean; delay_hours?: number; send_to_contact?: boolean } } | null)?.value;
+      if (v) {
+        setUrl(v.url ?? "");
+        setAutoEnabled(!!v.auto_enabled);
+        setDelayHours(typeof v.delay_hours === "number" ? v.delay_hours : 2);
+        setSendToContact(v.send_to_contact !== false);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase.from("app_settings").upsert(
+      {
+        key: "google_review",
+        value: {
+          url: url.trim(),
+          auto_enabled: autoEnabled,
+          delay_hours: Math.max(0, Number(delayHours) || 0),
+          send_to_contact: sendToContact,
+        } as unknown as never,
+      },
+      { onConflict: "key" },
+    );
+    setSaving(false);
+    if (error) toast.error("Échec sauvegarde", { description: error.message });
+    else toast.success("Paramètres avis Google enregistrés");
+  };
+
+  return (
+    <Card>
+      <h2 className="font-semibold text-pro-text flex items-center gap-2">
+        <ExternalLink size={16} className="text-pro-accent" />
+        Avis Google
+      </h2>
+      <p className="text-xs text-pro-muted mt-1">
+        Lien de votre fiche Google Business utilisé dans toutes les demandes d'avis envoyées après une mission
+        (client et contact livraison).
+      </p>
+
+      <div className="mt-4 space-y-3">
+        <FormField label="Lien avis Google">
+          <TextInput
+            value={url}
+            disabled={loading}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://g.page/r/.../review"
+          />
+        </FormField>
+
+        <label className="flex items-center gap-2 text-xs text-pro-text">
+          <input
+            type="checkbox"
+            checked={autoEnabled}
+            disabled={loading}
+            onChange={(e) => setAutoEnabled(e.target.checked)}
+          />
+          Envoi automatique après le passage de la mission en « Terminée »
+        </label>
+
+        <FormField label="Délai avant envoi automatique (heures)">
+          <TextInput
+            type="number"
+            min={0}
+            value={String(delayHours)}
+            disabled={loading}
+            onChange={(e) => setDelayHours(Number(e.target.value))}
+          />
+        </FormField>
+
+        <label className="flex items-center gap-2 text-xs text-pro-text">
+          <input
+            type="checkbox"
+            checked={sendToContact}
+            disabled={loading}
+            onChange={(e) => setSendToContact(e.target.checked)}
+          />
+          Inclure le contact livraison (uniquement s'il a un email valide)
+        </label>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <Button icon={<Save size={14} />} onClick={save} disabled={saving || loading}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 function DevisAcceptationToggleCard() {
   const [enabled, setEnabled] = useState(true);

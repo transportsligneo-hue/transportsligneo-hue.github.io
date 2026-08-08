@@ -56,6 +56,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -90,6 +91,7 @@ interface TrajetFull {
   prix_convoyeur?: number | null;
   tarif_convoyeur?: number | null;
   arrivee_contact_nom: string | null;
+  arrivee_contact_email: string | null;
   arrivee_contact_prenom: string | null;
   arrivee_contact_societe: string | null;
   arrivee_contact_telephone: string | null;
@@ -1124,6 +1126,16 @@ function AdminMissionDetail() {
             </div>
             <MissionDocsOfficielsPanel attributionId={attribution.id} isAdmin />
           </Card>
+
+          {/* Avis Google */}
+          <MissionAvisGooglePanel
+            attributionId={attribution.id}
+            trajetId={trajet.id}
+            clientEmail={trajet.client_email}
+            clientNom={trajet.client_nom}
+            contactNom={[trajet.arrivee_contact_prenom, trajet.arrivee_contact_nom].filter(Boolean).join(" ") || null}
+            contactEmail={trajet.arrivee_contact_email}
+          />
 
           {/* Documents */}
           <Card>
