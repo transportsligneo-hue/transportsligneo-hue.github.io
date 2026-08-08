@@ -123,6 +123,7 @@ import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminContenuRouteImport } from './routes/_authenticated/admin.contenu'
 import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
@@ -804,6 +805,12 @@ const AuthenticatedAdminConvoyeursRoute =
     path: '/convoyeurs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminContenuRoute =
+  AuthenticatedAdminContenuRouteImport.update({
+    id: '/contenu',
+    path: '/contenu',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCommunicationRoute =
   AuthenticatedAdminCommunicationRouteImport.update({
     id: '/communication',
@@ -1138,6 +1145,7 @@ export interface FileRoutesByFullPath {
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1295,6 +1303,7 @@ export interface FileRoutesByTo {
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1457,6 +1466,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
+  '/_authenticated/admin/contenu': typeof AuthenticatedAdminContenuRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
@@ -1622,6 +1632,7 @@ export interface FileRouteTypes {
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
+    | '/admin/contenu'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1779,6 +1790,7 @@ export interface FileRouteTypes {
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
+    | '/admin/contenu'
     | '/admin/convoyeurs'
     | '/admin/demandes'
     | '/admin/devis'
@@ -1940,6 +1952,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/candidatures'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/communication'
+    | '/_authenticated/admin/contenu'
     | '/_authenticated/admin/convoyeurs'
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
@@ -2921,6 +2934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/contenu': {
+      id: '/_authenticated/admin/contenu'
+      path: '/contenu'
+      fullPath: '/admin/contenu'
+      preLoaderRoute: typeof AuthenticatedAdminContenuRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/communication': {
       id: '/_authenticated/admin/communication'
       path: '/communication'
@@ -3328,6 +3348,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
   AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
+  AuthenticatedAdminContenuRoute: typeof AuthenticatedAdminContenuRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRouteWithChildren
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
@@ -3362,6 +3383,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
   AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,
+  AuthenticatedAdminContenuRoute: AuthenticatedAdminContenuRoute,
   AuthenticatedAdminConvoyeursRoute:
     AuthenticatedAdminConvoyeursRouteWithChildren,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
