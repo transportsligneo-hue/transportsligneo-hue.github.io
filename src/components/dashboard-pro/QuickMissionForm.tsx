@@ -125,6 +125,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
   // Options
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
   const [autreNote, setAutreNote] = useState("");
+  const [pvDigitalise, setPvDigitalise] = useState<PvChoice>("aucun");
 
   // Planning
   const [date, setDate] = useState("");
