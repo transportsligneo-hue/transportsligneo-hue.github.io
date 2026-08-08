@@ -5165,3 +5165,13 @@ html.theme-light .mbottomnav-surface {
 html.theme-light .mbottomnav-surface .text-white\/45,
 html.theme-light .mbottomnav-surface [class*="text-white"] { color: #5b6485 !important; }
 html.theme-light .mbottomnav-surface [class*="text-[#60a5fa]"] { color: #2f5fff !important; }
+
+/* Simulateur (verre fumé) : textes clairs conservés en thème clair */
+html.theme-light .glass-onyx,
+html.theme-light .glass-onyx h1,
+html.theme-light .glass-onyx h2,
+html.theme-light .glass-onyx h3,
+html.theme-light .r4-page .v4-quote-card,
+html.theme-light .r4-page .v4-quote-card h1,
+html.theme-light .r4-page .v4-quote-card h2,
+html.theme-light .r4-page .v4-quote-card h3 { color: #ffffff; }
