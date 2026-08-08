@@ -10,6 +10,7 @@ import { inferMissionLevel } from "@/lib/mission-level";
 import { toast } from "sonner";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { MissionPublisherChip } from "./MissionPublisherChip";
 
 
 interface Props {
@@ -76,7 +77,7 @@ export function MissionDetailSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[70] flex items-stretch justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <style>{`
@@ -156,7 +157,7 @@ export function MissionDetailSheet({
         {/* Scrollable content */}
         <div
           className="min-h-0 flex-1 overflow-y-auto"
-          style={{ paddingBottom: "calc(40px + env(safe-area-inset-bottom))" }}
+          style={{ paddingBottom: "calc(120px + env(safe-area-inset-bottom))" }}
         >
 
           {/* Topbar */}
@@ -222,6 +223,13 @@ export function MissionDetailSheet({
             </div>
             <div className="mt-1.5 text-[12.5px]" style={{ color: "#9aa6c9" }}>
               Mission #{t.id.slice(0, 8).toUpperCase()}
+            </div>
+            <div className="mt-3.5">
+              <MissionPublisherChip
+                nom={t.publisher_nom}
+                logoUrl={t.publisher_logo_url}
+                verifie={t.publisher_verifie}
+              />
             </div>
           </div>
 
@@ -553,6 +561,9 @@ export function MissionDetailSheet({
               {[
                 "Permis B en cours de validité",
                 "Pièce d'identité originale",
+                "Gilet jaune obligatoire pour la récupération sur parc auto",
+                "Tenue correcte exigée (survêtement proscrit)",
+                "Housse de protection pour trottinette (éviter de salir le coffre du véhicule)",
                 "Téléphone chargé (état des lieux photo + signature)",
                 "Application Ligneo à jour pour scanner clés & documents",
               ].map((line) => (
@@ -587,7 +598,7 @@ export function MissionDetailSheet({
             backdropFilter: "blur(18px)",
             borderTop: "1px solid rgba(122,163,255,.3)",
             boxShadow: "0 -10px 30px rgba(4,8,22,.5)",
-            paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(18px + env(safe-area-inset-bottom))",
           }}
         >
 
