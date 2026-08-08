@@ -124,6 +124,69 @@ function ConvoyeurProfil() {
         </div>
       </div>
 
+      {/* Progression de niveau */}
+      {(() => {
+        const p = computeNiveauProgress(progression.niveau, progression.missions, progression.note);
+        const pct = Math.round(p.ratio * 100);
+        return (
+          <div className="bg-white rounded-xl border border-pro-border p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="font-semibold text-sm text-pro-text flex items-center gap-2">
+                  <Trophy size={16} className="text-amber-500" /> Mon niveau convoyeur
+                </h2>
+                <p className="text-pro-text-soft text-xs mt-1">
+                  Votre niveau détermine les missions auxquelles vous pouvez candidater.
+                </p>
+              </div>
+              <span className="text-xs px-3 py-1 rounded-full border font-semibold bg-amber-50 text-amber-700 border-amber-200">
+                {niveauLabel(p.current)}
+              </span>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-pro-border bg-pro-bg-soft px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-pro-muted">Missions terminées</div>
+                <div className="text-lg font-semibold text-pro-text">{p.missionsDone}</div>
+              </div>
+              <div className="rounded-lg border border-pro-border bg-pro-bg-soft px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-pro-muted">Note moyenne</div>
+                <div className="text-lg font-semibold text-pro-text">
+                  {p.noteMoyenne != null ? `${p.noteMoyenne.toFixed(2)} / 5` : "—"}
+                </div>
+              </div>
+            </div>
+
+            {p.next ? (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs text-pro-text-soft">
+                  <span>
+                    Progression vers <strong className="text-pro-text">{niveauLabel(p.next)}</strong>
+                  </span>
+                  <span className="font-semibold text-pro-text">
+                    {p.missionsDone}/{p.missionsTarget} missions
+                  </span>
+                </div>
+                <div className="mt-2 h-2.5 w-full rounded-full bg-pro-bg-soft border border-pro-border overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="text-pro-muted text-[11px] mt-2">
+                  Objectif : {p.missionsTarget} missions terminées et une note moyenne ≥ {p.noteTarget}.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-xs text-emerald-700 font-medium">
+                Niveau maximum atteint — vous avez accès à toutes les missions.
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
+
       {/* Profile form */}
       <form onSubmit={saveProfile} className="bg-white rounded-xl border border-pro-border p-5 sm:p-6 space-y-5 shadow-sm">
         <h2 className="font-semibold text-sm text-pro-text flex items-center gap-2">
