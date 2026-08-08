@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { EDL_CAR_SCHEMA_H, EDL_CAR_SCHEMA_PNG, EDL_CAR_SCHEMA_W } from "@/lib/edl-car-schema";
 import {
   DOC_CREAM,
   DOC_GOLD,
