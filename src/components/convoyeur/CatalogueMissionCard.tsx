@@ -102,9 +102,8 @@ export function CatalogueMissionCard({
     distanceKm: t.distance_km,
     urgence: t.urgence,
   });
-  const isElectric =
-    (t.type_carburant ?? "").toLowerCase().includes("électr") ||
-    (t.type_carburant ?? "").toLowerCase().includes("electr");
+  const isElectric = isElectricEnergie(t.type_carburant)
+    || guessElectricFromModel(t.marque, t.modele);
 
   return (
     <div
