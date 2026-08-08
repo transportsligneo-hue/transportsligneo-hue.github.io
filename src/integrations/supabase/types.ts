@@ -1433,6 +1433,10 @@ export type Database = {
       }
       convoyeur_contrats: {
         Row: {
+          charte_document_id: string | null
+          charte_incluse: boolean
+          charte_signed_at: string | null
+          charte_signed_pdf_path: string | null
           convoyeur_id: string | null
           created_at: string
           created_by: string | null
@@ -1464,6 +1468,10 @@ export type Database = {
           yousign_signer_id: string | null
         }
         Insert: {
+          charte_document_id?: string | null
+          charte_incluse?: boolean
+          charte_signed_at?: string | null
+          charte_signed_pdf_path?: string | null
           convoyeur_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1495,6 +1503,10 @@ export type Database = {
           yousign_signer_id?: string | null
         }
         Update: {
+          charte_document_id?: string | null
+          charte_incluse?: boolean
+          charte_signed_at?: string | null
+          charte_signed_pdf_path?: string | null
           convoyeur_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -5594,6 +5606,10 @@ export type Database = {
           _statut: string
           _trajet_id: string
         }
+        Returns: boolean
+      }
+      convoyeur_documents_signes: {
+        Args: { _user_id: string }
         Returns: boolean
       }
       create_admin_notification: {

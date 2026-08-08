@@ -804,6 +804,184 @@ export async function generateContratConvoyeurPdf(
   return doc.output("blob");
 }
 
+/* ------------------------------------------------------------------ */
+/* 07 — CHARTE DE PRÉSENTATION ET DE DISCRÉTION                        */
+/* ------------------------------------------------------------------ */
+
+export interface CharteArticle {
+  titre: string;
+  paragraphes: string[];
+  puces?: string[];
+}
+
+export function buildCharteArticles(c?: CompanyInfo | null): CharteArticle[] {
+  const societe = c?.raison_sociale || "Transports Ligneo";
+  return [
+    {
+      titre: "Préambule",
+      paragraphes: [
+        `La présente charte définit les règles de présentation, de comportement et de discrétion que tout convoyeur du réseau ${societe} s'engage à respecter dans l'exercice de son activité. Elle complète le contrat de partenariat convoyeur et en constitue une annexe à part entière.`,
+        "Le respect de cette charte conditionne le maintien de l'accès aux missions proposées par la Société. Chaque véhicule convoyé appartient à un client qui place sa confiance dans le réseau Ligneo : cette charte a pour objet de garantir que cette confiance est honorée à chaque mission.",
+      ],
+    },
+    {
+      titre: "Article 1 — Présentation et tenue",
+      paragraphes: [
+        `Le Convoyeur s'engage à se présenter à chaque mission dans une tenue propre, sobre et professionnelle, cohérente avec l'image de la Société. Le port d'éléments d'identification ${societe}, lorsqu'ils sont fournis par la Société, est obligatoire durant l'exécution des missions.`,
+      ],
+      puces: [
+        "Tenue propre, sans signe distinctif d'une autre marque ou société concurrente ;",
+        "Hygiène et présentation soignées ;",
+        "Comportement courtois et respectueux envers le client, ses représentants, et toute personne rencontrée dans le cadre de la mission ;",
+        "Ponctualité aux horaires convenus, avec information immédiate du client et de la Société en cas de retard prévisible.",
+      ],
+    },
+    {
+      titre: "Article 2 — Attitude et comportement professionnel",
+      paragraphes: ["Le Convoyeur représente la Société à chaque mission. À ce titre, il s'engage à :"],
+      puces: [
+        "Adopter une conduite calme, prudente et respectueuse du Code de la route en toutes circonstances, y compris hors mission ;",
+        "Ne jamais utiliser le véhicule confié à des fins personnelles, ni effectuer de détour non justifié par la mission ;",
+        "Ne fumer, ni consommer d'alcool ou toute autre substance, à bord du véhicule confié ;",
+        "Ne transporter aucun passager ni objet personnel non autorisé durant la mission ;",
+        "Signaler immédiatement à la Société toute situation exceptionnelle rencontrée durant la mission.",
+      ],
+    },
+    {
+      titre: "Article 3 — Discrétion et confidentialité",
+      paragraphes: [
+        "Le Convoyeur a accès, dans le cadre de ses missions, à des informations sensibles concernant les clients de la Société : identité, coordonnées, adresses de domicile ou d'entreprise, habitudes, et parfois informations visibles à l'intérieur du véhicule. Le Convoyeur s'engage à une discrétion absolue concernant ces informations.",
+      ],
+      puces: [
+        "Ne jamais divulguer à un tiers l'identité, l'adresse ou toute information relative à un client, sauf nécessité liée à l'exécution de la mission et auprès des seules personnes habilitées de la Société ;",
+        "Ne prendre aucune photo ou vidéo du véhicule, de son contenu, de la plaque d'immatriculation ou des lieux d'intervention à d'autres fins que celles strictement nécessaires à l'état des lieux contradictoire ;",
+        "Ne jamais publier sur les réseaux sociaux ou tout support public une photo, vidéo, ou mention identifiant un client, un véhicule confié, une adresse de mission, sans autorisation écrite préalable de la Société et du client concerné ;",
+        "Ne consulter, utiliser ou conserver aucune information ou objet trouvé à bord du véhicule en dehors du strict cadre de la mission ;",
+        "Conserver la confidentialité des conditions tarifaires, méthodes internes et outils de la Société vis-à-vis de tout tiers, y compris d'autres convoyeurs extérieurs au réseau.",
+      ],
+    },
+    {
+      titre: "Article 4 — Respect des biens confiés",
+      paragraphes: [
+        "Le Convoyeur s'engage à traiter chaque véhicule confié avec le même soin que s'il s'agissait de son propre bien : conduite adaptée, respect de tous les réglages et objets présents dans le véhicule, restitution dans l'état constaté au départ hors usure normale liée au trajet.",
+        "Cette obligation de discrétion perdure au-delà de la fin de la mission concernée et de la relation contractuelle avec la Société.",
+      ],
+    },
+    {
+      titre: "Article 5 — Manquement à la charte",
+      paragraphes: [
+        "Tout manquement avéré à la présente charte pourra entraîner, selon sa gravité, un avertissement, une suspension temporaire de l'accès aux missions, ou une résiliation du contrat de partenariat, conformément aux dispositions prévues à ce titre dans le contrat de partenariat convoyeur.",
+        "Un manquement grave à l'obligation de discrétion (divulgation d'informations client, publication non autorisée) est considéré comme une faute grave pouvant justifier une suspension immédiate, sans préavis.",
+      ],
+    },
+  ];
+}
+
+let lastChartePageCount = 1;
+export function getLastChartePageCount() {
+  return lastChartePageCount;
+}
+
+/** Charte de présentation et de discrétion — annexe au contrat de partenariat. */
+export async function generateCharteDiscretionPdf(
+  d: ContratConvoyeurData,
+  company?: CompanyInfo | null,
+): Promise<Blob> {
+  const { doc, pageW, pageH, company: c } = await newDoc(
+    "Charte de présentation et de discrétion",
+    undefined,
+    "Annexe au contrat de partenariat convoyeur",
+    company,
+  );
+  const w = pageW - 28;
+  let y = 56;
+
+  const ensure = (need: number) => {
+    if (y + need > pageH - 26) {
+      drawDocLegalFooter(doc, pageW, pageH, c);
+      doc.addPage();
+      drawDocHeader(doc, {
+        pageW,
+        title: "Charte de présentation et de discrétion",
+        subtitle: "Annexe au contrat de partenariat convoyeur",
+        company: c,
+        height: 26,
+      });
+      y = 36;
+    }
+  };
+
+  buildCharteArticles(c).forEach((a) => {
+    ensure(16);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...DOC_NAVY);
+    doc.text(a.titre.toUpperCase(), 14, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...DOC_TEXT);
+    a.paragraphes.forEach((p) => {
+      const lines = doc.splitTextToSize(p, w);
+      ensure(lines.length * 4 + 3);
+      doc.text(lines, 14, y);
+      y += lines.length * 4 + 2;
+    });
+    (a.puces ?? []).forEach((b) => {
+      const lines = doc.splitTextToSize(b, w - 6);
+      ensure(lines.length * 4 + 2);
+      doc.setTextColor(...DOC_GOLD);
+      doc.text("•", 16, y);
+      doc.setTextColor(...DOC_TEXT);
+      doc.text(lines, 20, y);
+      y += lines.length * 4 + 1;
+    });
+    y += 3;
+  });
+
+  ensure(52);
+  y += 2;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_TEXT);
+  const engagement = doc.splitTextToSize(
+    `Je soussigné(e), ${d.nom_complet}, reconnais avoir pris connaissance de la présente charte et m'engage à en respecter l'intégralité des dispositions dans le cadre de mon activité de convoyeur partenaire ${c?.raison_sociale || "Transports Ligneo"}.`,
+    w,
+  );
+  doc.text(engagement, 14, y);
+  y += engagement.length * 4 + 5;
+
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(
+    `Fait à ${c?.adresse_ville || "Tours"}, le ${dateFmt(d.signed_at || new Date().toISOString())}, en deux exemplaires originaux.`,
+    14,
+    y,
+  );
+  y += 5;
+
+  doc.setFillColor(...DOC_CREAM);
+  doc.setDrawColor(...DOC_LINE);
+  doc.rect(14, y, w, 32, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text(`Pour ${c?.raison_sociale || "Transports Ligneo"}`, 18, y + 6);
+  doc.text("Le Convoyeur", pageW / 2 + 4, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...DOC_TEXT);
+  doc.setFontSize(7.5);
+  doc.text(`${c?.signataire_nom || "—"} — ${c?.signataire_fonction || "—"}`, 18, y + 12);
+  doc.text(d.nom_complet, pageW / 2 + 4, y + 12);
+  doc.setTextColor(...DOC_MUTED);
+  doc.setFontSize(7);
+  doc.text("Signature précédée de la mention « Lu et approuvé »", 18, y + 24);
+  doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
+
+  drawDocLegalFooter(doc, pageW, pageH, c);
+  lastChartePageCount = doc.getNumberOfPages();
+  return doc.output("blob");
+}
+
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

@@ -83,7 +83,8 @@ export async function uploadDocument(signatureRequestId: string, pdf: Uint8Array
 
 export interface AddSignerOptions {
   signatureRequestId: string;
-  documentId: string;
+  /** Document(s) à signer : le contrat, et la charte de présentation et discrétion. */
+  documents: Array<{ documentId: string; page: number }>;
   firstName: string;
   lastName: string;
   email: string;
@@ -91,8 +92,6 @@ export interface AddSignerOptions {
   phone?: string | null;
   /** Authentification par code SMS. */
   otpSms: boolean;
-  /** Page (1-indexée) où placer le champ de signature. */
-  page: number;
 }
 
 export async function addSigner(opts: AddSignerOptions) {
@@ -106,17 +105,15 @@ export async function addSigner(opts: AddSignerOptions) {
     },
     signature_level: "electronic_signature",
     signature_authentication_mode: opts.otpSms && opts.phone ? "otp_sms" : "no_otp",
-    fields: [
-      {
-        document_id: opts.documentId,
-        type: "signature",
-        page: opts.page,
-        x: 80,
-        y: 620,
-        width: 180,
-        height: 60,
-      },
-    ],
+    fields: opts.documents.map((d) => ({
+      document_id: d.documentId,
+      type: "signature",
+      page: Math.max(1, d.page || 1),
+      x: 80,
+      y: 620,
+      width: 180,
+      height: 60,
+    })),
   };
   return ysJson<{ id: string }>(`/signature_requests/${opts.signatureRequestId}/signers`, {
     method: "POST",

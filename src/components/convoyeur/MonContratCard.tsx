@@ -11,6 +11,9 @@ interface Row {
   sent_at: string | null;
   signed_at: string | null;
   signed_pdf_path: string | null;
+  charte_incluse: boolean | null;
+  charte_signed_at: string | null;
+  charte_signed_pdf_path: string | null;
 }
 
 export default function MonContratCard() {
@@ -39,10 +42,10 @@ export default function MonContratCard() {
 
   const signe = row.statut === "signe" && row.signed_pdf_path;
 
-  const telecharger = async () => {
+  const telecharger = async (document: "contrat" | "charte" = "contrat") => {
     setBusy(true);
     try {
-      const { url } = await signedUrl({ data: { contratId: row.id } });
+      const { url } = await signedUrl({ data: { contratId: row.id, document } });
       window.open(url, "_blank", "noopener");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Téléchargement impossible.");
@@ -64,23 +67,39 @@ export default function MonContratCard() {
               <ShieldCheck size={12} className="inline mr-1 -mt-0.5" />
               Signé le {row.signed_at ? new Date(row.signed_at).toLocaleDateString("fr-FR") : "—"}
             </p>
+          ) : null}
+          {signe && row.charte_incluse ? (
+            <p className="text-xs text-pro-text-soft mt-0.5">
+              Charte de présentation et discrétion —{" "}
+              {row.charte_signed_at ? "signée" : "en attente"}
+            </p>
           ) : row.statut === "envoye" ? (
             <p className="text-xs text-amber-700 mt-0.5">
               <Clock size={12} className="inline mr-1 -mt-0.5" />
-              En attente de votre signature — consultez l'email envoyé par Yousign.
+              Contrat + charte en attente de votre signature — consultez l'email envoyé par Yousign.
             </p>
           ) : (
             <p className="text-xs text-pro-text-soft mt-0.5">Aucun contrat signé pour le moment.</p>
           )}
         </div>
         {signe && (
-          <button onClick={() => void telecharger()} disabled={busy}
+          <button onClick={() => void telecharger("contrat")} disabled={busy}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-medium disabled:opacity-60 shrink-0">
             {busy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
             Télécharger
           </button>
         )}
       </div>
+      {signe && row.charte_signed_pdf_path && (
+        <div className="mt-3 flex justify-end">
+          <button onClick={() => void telecharger("charte")} disabled={busy}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-pro-border text-sm font-medium text-pro-text disabled:opacity-60">
+            <Download size={14} />
+            Télécharger la charte signée
+          </button>
+        </div>
+      )}
     </div>
+
   );
 }
