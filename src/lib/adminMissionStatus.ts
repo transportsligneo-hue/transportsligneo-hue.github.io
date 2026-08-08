@@ -159,6 +159,19 @@ export async function updateAdminMissionStatus({
   // Notification client (best-effort) — démarrage / livraison
   void notifyMissionLifecycle(trajetId, statut);
 
+  // Demande d'avis Google (best-effort, anti-doublon côté serveur)
+  if (statut === "validee" || statut === "termine") {
+    void (async () => {
+      try {
+        const { notifyDeliveryDone } = await import("@/lib/google-review.functions");
+        await notifyDeliveryDone({ data: { attributionId } });
+      } catch (e) {
+        console.warn("[avis-google] déclenchement admin échoué", e);
+      }
+    })();
+  }
+
+
   return payload;
 }
 
