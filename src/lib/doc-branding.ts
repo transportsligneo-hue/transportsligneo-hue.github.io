@@ -229,30 +229,54 @@ export function drawDocHeader(
       /* logo optionnel */
     }
   }
-  doc.setTextColor(...DOC_WHITE);
+
+  const leftX = logoData ? 47 : 14;
+  const rightX = pageW - 14;
+  const gap = 6;
+  const totalAvail = rightX - leftX - gap;
+
+  const raison = (company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase();
+  const tagline = "CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE";
+  const titleTxt = title.toUpperCase();
+
+  // 1) Titre à droite : réduit jusqu'à tenir dans ~55% de la largeur dispo
+  const titleMax = totalAvail * 0.55;
+  let titleSize = 18;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text((company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), 47, h / 2 - 2);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...DOC_GOLD_SOFT);
-  doc.text("CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE", 47, h / 2 + 4);
+  while (titleSize > 9 && fitTextWidth(doc, titleTxt, titleSize) > titleMax) titleSize -= 0.5;
+  const titleW = Math.min(fitTextWidth(doc, titleTxt, titleSize), titleMax);
+
+  // 2) Bloc gauche : largeur restante réelle
+  const leftAvail = Math.max(24, totalAvail - titleW);
+  let nameSize = 15;
+  while (nameSize > 8 && fitTextWidth(doc, raison, nameSize) > leftAvail) nameSize -= 0.5;
+  let tagSize = 7.5;
+  while (tagSize > 5 && fitTextWidth(doc, tagline, tagSize) > leftAvail) tagSize -= 0.25;
 
   doc.setTextColor(...DOC_WHITE);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text(title.toUpperCase(), pageW - 14, h / 2 - 2, { align: "right" });
+  doc.setFontSize(nameSize);
+  doc.text(clampText(doc, raison, leftAvail), leftX, h / 2 - 2);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(tagSize);
+  doc.setTextColor(...DOC_GOLD_SOFT);
+  doc.text(clampText(doc, tagline, leftAvail), leftX, h / 2 + 4);
+
+  doc.setTextColor(...DOC_WHITE);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(titleSize);
+  doc.text(clampText(doc, titleTxt, titleMax), rightX, h / 2 - 2, { align: "right" });
   if (numero) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(...DOC_GOLD);
-    doc.text(numero, pageW - 14, h / 2 + 5, { align: "right" });
+    doc.text(clampText(doc, numero, titleMax), rightX, h / 2 + 5, { align: "right" });
   }
   if (subtitle) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...DOC_GOLD_SOFT);
-    doc.text(subtitle, pageW - 14, h / 2 + 11, { align: "right" });
+    doc.text(clampText(doc, subtitle, Math.max(titleMax, totalAvail * 0.6)), rightX, h / 2 + 11, { align: "right" });
   }
 
   doc.setDrawColor(...DOC_GOLD);
