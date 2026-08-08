@@ -283,6 +283,12 @@ function ConvoyeurCatalogue() {
     toast.success(
       price === suggested ? "Candidature envoyée !" : "Contre-offre envoyée !",
     );
+    // Alerte email admin (best effort)
+    void import("@/lib/offres.functions")
+      .then(({ notifyAdminNouvelleOffre }) =>
+        notifyAdminNouvelleOffre({ data: { trajetId: trajet.id, prixPropose: price, message: message || null } }),
+      )
+      .catch(() => undefined);
     setOpenId(null);
     fetchData();
   };
