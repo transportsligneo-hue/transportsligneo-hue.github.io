@@ -27,7 +27,9 @@ import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueB
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
-import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
+import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -725,6 +727,8 @@ function AdminAttributions() {
           </div>
         </div>
       )}
+
+      <LegSuffixLegend className="mb-3" />
 
       {attributions.length === 0 ? (
         <EmptyState icon={Send} title="Aucune attribution" description="Attribuez un trajet à un convoyeur pour commencer." />
