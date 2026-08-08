@@ -14,7 +14,7 @@ type ArticleRow = {
   published_at: string | null;
 };
 
-export const Route = createFileRoute("/actualites")({
+export const Route = createFileRoute("/actualites/")({
   component: ActualitesPage,
   head: () => ({
     meta: [

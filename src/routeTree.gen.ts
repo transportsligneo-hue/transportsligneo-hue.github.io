@@ -37,6 +37,7 @@ import { Route as AttenteValidationRouteImport } from './routes/attente-validati
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
@@ -307,6 +308,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
+  id: '/actualites/',
+  path: '/actualites/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
@@ -1116,6 +1122,7 @@ export interface FileRoutesByFullPath {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1271,6 +1278,7 @@ export interface FileRoutesByTo {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1431,6 +1439,7 @@ export interface FileRoutesById {
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1594,6 +1603,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites/'
     | '/admin/acceptations'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -1749,6 +1759,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites'
     | '/admin/acceptations'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -1908,6 +1919,7 @@ export interface FileRouteTypes {
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
+    | '/actualites/'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
@@ -2061,6 +2073,7 @@ export interface RootRouteChildren {
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
+  ActualitesIndexRoute: typeof ActualitesIndexRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
@@ -2291,6 +2304,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/': {
+      id: '/actualites/'
+      path: '/actualites'
+      fullPath: '/actualites/'
+      preLoaderRoute: typeof ActualitesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verify-certificat/$token': {
@@ -3679,6 +3699,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
+  ActualitesIndexRoute: ActualitesIndexRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
