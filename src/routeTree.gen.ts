@@ -139,6 +139,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
+import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
@@ -893,6 +894,11 @@ const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
   path: '/api/public/facture/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFactureStatutRoute = ApiPublicFactureStatutRouteImport.update({
+  id: '/api/public/facture/statut',
+  path: '/api/public/facture/statut',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDevisWebhookRoute = ApiPublicDevisWebhookRouteImport.update({
   id: '/api/public/devis/webhook',
   path: '/api/public/devis/webhook',
@@ -1172,6 +1178,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1319,6 +1326,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1477,6 +1485,7 @@ export interface FileRoutesById {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1635,6 +1644,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -1782,6 +1792,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -1939,6 +1950,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -2009,6 +2021,7 @@ export interface RootRouteChildren {
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
+  ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
@@ -2940,6 +2953,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicFactureWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/facture/statut': {
+      id: '/api/public/facture/statut'
+      path: '/api/public/facture/statut'
+      fullPath: '/api/public/facture/statut'
+      preLoaderRoute: typeof ApiPublicFactureStatutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/devis/webhook': {
       id: '/api/public/devis/webhook'
       path: '/api/public/devis/webhook'
@@ -3588,6 +3608,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
+  ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
