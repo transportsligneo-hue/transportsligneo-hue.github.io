@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { EDL_CAR_SCHEMA_H, EDL_CAR_SCHEMA_PNG, EDL_CAR_SCHEMA_W } from "@/lib/edl-car-schema";
 import {
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
   DOC_CREAM,
   DOC_GOLD,
   DOC_LINE,
@@ -22,6 +23,7 @@ import {
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const c = company ?? (await fetchCompanyInfo());

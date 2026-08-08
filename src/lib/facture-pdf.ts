@@ -4,6 +4,7 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
   fetchCompanyInfo,
   companyLegalLine1,
   companyLegalLine2,
@@ -119,6 +120,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     : fInput;
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const innerW = pageW - M * 2;

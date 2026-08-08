@@ -14,6 +14,7 @@ import {
   SearchInput,
 } from "@/components/admin/AdminUI";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export const Route = createFileRoute("/_authenticated/admin/acceptations")({
   component: AdminAcceptationsPage,
@@ -100,6 +101,7 @@ function AdminAcceptationsPage() {
 
   const exportPdf = () => {
     const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+    applyLigneoFonts(doc);
     const pageW = doc.internal.pageSize.getWidth();
     doc.setFillColor(11, 16, 38);
     doc.rect(0, 0, pageW, 18, "F");
