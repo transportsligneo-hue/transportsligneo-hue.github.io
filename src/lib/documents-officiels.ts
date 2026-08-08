@@ -541,14 +541,15 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
   doc.line(14, y + 4.5, pageW - 14, y + 4.5);
-  y += 6;
+  y += 5.5;
 
   /* 4 — Observations */
-  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 1;
+  y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 5.2, pageW - 14, y + 3 + i * 5.2);
-  y += 12;
+  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.8, pageW - 14, y + 3 + i * 4.8);
+  y += 10;
+
 
   /* Signatures */
   const sigH = 21;
