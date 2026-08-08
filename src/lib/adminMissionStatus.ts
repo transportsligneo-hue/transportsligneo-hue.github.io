@@ -6,7 +6,7 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
   try {
     const { data: t } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, client_nom, client_email")
+      .select("id, depart, arrivee, client_nom, client_email, mission_id")
       .eq("id", trajetId)
       .maybeSingle();
     if (!t?.client_email) return;
@@ -19,7 +19,25 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
       .limit(1)
       .maybeSingle();
     const numero = a?.numero_mission ?? "";
-    const base = { prenom, numero, depart: t.depart, arrivee: t.arrivee };
+    let trackingCode = "";
+    let missionNumero = numero;
+    if (t.mission_id) {
+      const { data: m } = await supabase
+        .from("missions")
+        .select("numero, tracking_code")
+        .eq("id", t.mission_id)
+        .maybeSingle();
+      trackingCode = (m as { tracking_code?: string } | null)?.tracking_code ?? "";
+      missionNumero = m?.numero ?? numero;
+    }
+    const base = {
+      prenom,
+      numero: missionNumero || numero,
+      trackingCode,
+      depart: t.depart,
+      arrivee: t.arrivee,
+    };
+
     // Find user_id for client push
     const { data: prof } = await supabase
       .from("profiles")
