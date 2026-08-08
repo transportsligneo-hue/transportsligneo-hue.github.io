@@ -7,6 +7,8 @@ import {
 import { toast } from "sonner";
 import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
+
 
 export interface EdlPapierContext {
   numero: string;
@@ -51,7 +53,12 @@ interface DocItem {
   accent: "green" | "amber" | "pink" | "cyan";
   onUpload?: () => void;
   onOpen?: () => Promise<void> | void;
+  /** Type stocké en base quand le document est uploadé/scanné. */
+  uploadType?: string;
+  /** Nb de pages max pour le scanner natif. */
+  scanPages?: number;
 }
+
 
 const ACCENT: Record<DocItem["accent"], { bg: string; border: string; color: string }> = {
   green: { bg: "rgba(52,232,176,0.10)", border: "rgba(52,232,176,0.35)", color: "#34E8B0" },
@@ -154,14 +161,31 @@ export function MissionV3DocsPane({
   const contrat = findDoc(["contrat"]);
   const attest = findDoc(["assurance", "attestation_assurance"]);
 
+  const pvLivr = findDoc(["pv_livraison", "pv_arrivee"]);
+  const carteGrise = findDoc(["carte_grise"]);
+
   const items: DocItem[] = [
     {
       key: "pv_enlev",
       label: "Procès-verbal d'enlèvement",
-      status: inspectionDepartDone ? "valide" : "attente",
+      status: pvEnlev ? "valide" : inspectionDepartDone ? "valide" : "attente",
       icon: ClipboardCheck,
-      accent: inspectionDepartDone ? "green" : "amber",
+      accent: pvEnlev || inspectionDepartDone ? "green" : "amber",
       onOpen: pvEnlev ? () => openStored(pvEnlev.url_fichier) : undefined,
+      onUpload: () => triggerFile("pv_enlev"),
+      uploadType: "pv_enlevement",
+      scanPages: 4,
+    },
+    {
+      key: "pv_livraison",
+      label: "Procès-verbal de livraison",
+      status: pvLivr ? "valide" : inspectionArriveeDone ? "valide" : "attente",
+      icon: ClipboardCheck,
+      accent: pvLivr || inspectionArriveeDone ? "green" : "amber",
+      onOpen: pvLivr ? () => openStored(pvLivr.url_fichier) : undefined,
+      onUpload: () => triggerFile("pv_livraison"),
+      uploadType: "pv_livraison",
+      scanPages: 4,
     },
     {
       key: "contrat",
@@ -171,13 +195,19 @@ export function MissionV3DocsPane({
       accent: contrat ? "green" : "amber",
       onOpen: contrat ? () => openStored(contrat.url_fichier) : undefined,
       onUpload: () => triggerFile("contrat"),
+      uploadType: "contrat",
+      scanPages: 6,
     },
     {
       key: "cg",
       label: "Carte grise (CG)",
-      status: carteGriseAvailable ? "valide" : "attente",
+      status: carteGrise || carteGriseAvailable ? "valide" : "attente",
       icon: CreditCard,
-      accent: carteGriseAvailable ? "green" : "amber",
+      accent: carteGrise || carteGriseAvailable ? "green" : "amber",
+      onOpen: carteGrise ? () => openStored(carteGrise.url_fichier) : undefined,
+      onUpload: () => triggerFile("cg"),
+      uploadType: "carte_grise",
+      scanPages: 2,
     },
     {
       key: "assurance",
@@ -187,6 +217,8 @@ export function MissionV3DocsPane({
       accent: attest ? "green" : "amber",
       onOpen: attest ? () => openStored(attest.url_fichier) : undefined,
       onUpload: () => triggerFile("assurance"),
+      uploadType: "assurance",
+      scanPages: 3,
     },
     {
       key: "photos",
@@ -207,6 +239,7 @@ export function MissionV3DocsPane({
   const validated = items.filter(i => i.status === "valide").length;
   const total = items.length;
   const pct = Math.round((validated / total) * 100);
+
 
   return (
     <div className="v3-docs-root">
@@ -281,11 +314,30 @@ export function MissionV3DocsPane({
                   {STATUS_LABEL[item.status]}
                 </span>
               </div>
-              {item.onUpload && !item.onOpen ? (
+              {item.uploadType && (
+                <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5">
+                  <DocScanButton
+                    label="Scanner"
+                    maxPages={item.scanPages ?? 4}
+                    mergeToPdf
+                    filenameBase={`${item.uploadType}-${attributionId.slice(0, 8)}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#0A1230] bg-gradient-to-r from-[#2FD8FF] to-[#2F6BFF] disabled:opacity-60"
+                    onFiles={async (files) => {
+                      for (const f of files) await uploadFor(item.key, item.uploadType!, f);
+                    }}
+                  />
+                  <button type="button" aria-label={`Importer ${item.label}`}
+                    onClick={() => item.onUpload?.()}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[rgba(120,180,255,0.2)] text-[#8FB2E8]">
+                    <Upload size={14} />
+                  </button>
+                </div>
+              )}
+              {!item.uploadType && (item.onUpload && !item.onOpen ? (
                 <Upload size={16} className="v3-doc-chev" />
               ) : (
                 <ChevronRight size={18} className="v3-doc-chev" />
-              )}
+              ))}
               {item.onUpload && (
                 <input
                   ref={(el) => { fileRefs.current[item.key] = el; }}
@@ -295,13 +347,11 @@ export function MissionV3DocsPane({
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) {
-                      const docType = item.key === "contrat" ? "contrat" : item.key === "assurance" ? "assurance" : "autre";
-                      void uploadFor(item.key, docType, f);
-                    }
+                    if (f) void uploadFor(item.key, item.uploadType ?? "autre", f);
                     e.target.value = "";
                   }}
                 />
+
               )}
             </div>
           );
