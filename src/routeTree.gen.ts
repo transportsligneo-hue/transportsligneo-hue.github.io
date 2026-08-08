@@ -38,6 +38,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
+import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -57,11 +58,13 @@ import { Route as AuthenticatedDashboardProIndexRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/_authenticated/dashboard-client.index'
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as PaiementFactureFactureIdRouteImport } from './routes/paiement.facture.$factureId'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
+import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
@@ -138,6 +141,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
+import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
@@ -308,6 +312,11 @@ const ScanTokenRoute = ScanTokenRouteImport.update({
   path: '/scan/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaiementConfirmationRoute = PaiementConfirmationRouteImport.update({
+  id: '/paiement/confirmation',
+  path: '/paiement/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InvitationConvoyeurTokenRoute =
   InvitationConvoyeurTokenRouteImport.update({
     id: '/invitation-convoyeur/$token',
@@ -412,6 +421,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const PaiementFactureFactureIdRoute =
+  PaiementFactureFactureIdRouteImport.update({
+    id: '/paiement/facture/$factureId',
+    path: '/paiement/facture/$factureId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -439,6 +454,11 @@ const ApiPublicAlertesDocumentsVehiculesRoute =
     path: '/api/public/alertes-documents-vehicules',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiFacturePaymentIntentRoute = ApiFacturePaymentIntentRouteImport.update({
+  id: '/api/facture/payment-intent',
+  path: '/api/facture/payment-intent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFactureCheckoutRoute = ApiFactureCheckoutRouteImport.update({
   id: '/api/facture/checkout',
   path: '/api/facture/checkout',
@@ -887,6 +907,11 @@ const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
   path: '/api/public/facture/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFactureStatutRoute = ApiPublicFactureStatutRouteImport.update({
+  id: '/api/public/facture/statut',
+  path: '/api/public/facture/statut',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDevisWebhookRoute = ApiPublicDevisWebhookRouteImport.update({
   id: '/api/public/devis/webhook',
   path: '/api/public/devis/webhook',
@@ -1074,6 +1099,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1139,11 +1165,13 @@ export interface FileRoutesByFullPath {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
@@ -1165,6 +1193,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1223,6 +1252,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1285,11 +1315,13 @@ export interface FileRoutesByTo {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
   '/dashboard-client': typeof AuthenticatedDashboardClientIndexRoute
@@ -1311,6 +1343,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1377,6 +1410,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1442,11 +1476,13 @@ export interface FileRoutesById {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
   '/_authenticated/dashboard-client/': typeof AuthenticatedDashboardClientIndexRoute
@@ -1468,6 +1504,7 @@ export interface FileRoutesById {
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
+  '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
@@ -1534,6 +1571,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1599,11 +1637,13 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
+    | '/paiement/facture/$factureId'
     | '/admin/'
     | '/convoyeur/'
     | '/dashboard-client/'
@@ -1625,6 +1665,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -1683,6 +1724,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1745,11 +1787,13 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
+    | '/paiement/facture/$factureId'
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
@@ -1771,6 +1815,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -1836,6 +1881,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
@@ -1901,11 +1947,13 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
+    | '/paiement/facture/$factureId'
     | '/_authenticated/admin/'
     | '/_authenticated/convoyeur/'
     | '/_authenticated/dashboard-client/'
@@ -1927,6 +1975,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
     | '/api/public/devis/webhook'
+    | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
@@ -1983,19 +2032,23 @@ export interface RootRouteChildren {
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
+  PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
+  ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  PaiementFactureFactureIdRoute: typeof PaiementFactureFactureIdRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
+  ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
@@ -2220,6 +2273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScanTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paiement/confirmation': {
+      id: '/paiement/confirmation'
+      path: '/paiement/confirmation'
+      fullPath: '/paiement/confirmation'
+      preLoaderRoute: typeof PaiementConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/invitation-convoyeur/$token': {
       id: '/invitation-convoyeur/$token'
       path: '/invitation-convoyeur/$token'
@@ -2353,6 +2413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/paiement/facture/$factureId': {
+      id: '/paiement/facture/$factureId'
+      path: '/paiement/facture/$factureId'
+      fullPath: '/paiement/facture/$factureId'
+      preLoaderRoute: typeof PaiementFactureFactureIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -2386,6 +2453,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/alertes-documents-vehicules'
       fullPath: '/api/public/alertes-documents-vehicules'
       preLoaderRoute: typeof ApiPublicAlertesDocumentsVehiculesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/facture/payment-intent': {
+      id: '/api/facture/payment-intent'
+      path: '/api/facture/payment-intent'
+      fullPath: '/api/facture/payment-intent'
+      preLoaderRoute: typeof ApiFacturePaymentIntentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/facture/checkout': {
@@ -2918,6 +2992,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/facture/webhook'
       fullPath: '/api/public/facture/webhook'
       preLoaderRoute: typeof ApiPublicFactureWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/facture/statut': {
+      id: '/api/public/facture/statut'
+      path: '/api/public/facture/statut'
+      fullPath: '/api/public/facture/statut'
+      preLoaderRoute: typeof ApiPublicFactureStatutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/devis/webhook': {
@@ -3553,20 +3634,24 @@ const rootRouteChildren: RootRouteChildren = {
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
+  PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
+  ApiFacturePaymentIntentRoute: ApiFacturePaymentIntentRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  PaiementFactureFactureIdRoute: PaiementFactureFactureIdRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
+  ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
@@ -3591,13 +3676,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

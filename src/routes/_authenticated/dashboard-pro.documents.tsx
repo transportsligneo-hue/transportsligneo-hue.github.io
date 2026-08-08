@@ -479,7 +479,7 @@ function ProDocuments() {
                             <div className="inline-flex items-center gap-1.5 justify-end">
                               {(f.statut === "emise" || f.statut === "en_retard") && !deferred && (
                                 <button
-                                  onClick={() => setPayingFactureId(f.id)}
+                                  onClick={() => { window.location.href = `/paiement/facture/${f.id}`; }}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
                                 >
                                   <CreditCard size={13} /> Payer

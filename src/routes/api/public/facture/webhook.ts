@@ -24,16 +24,19 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
         }
 
         try {
-          if (event.type === "checkout.session.completed") {
+          if (event.type === "checkout.session.completed" || event.type === "payment_intent.succeeded") {
             const s = event.data.object;
             // Filter to facture sessions only — ignore other types routed to this URL.
             if (s?.metadata?.type !== "facture_pro") {
               return Response.json({ received: true, ignored: "not_facture" });
             }
+            const isIntent = event.type === "payment_intent.succeeded";
             const factureId = s?.metadata?.facture_id;
-            const sessionId = s?.id;
-            const paymentIntentId = typeof s?.payment_intent === "string" ? s.payment_intent : s?.payment_intent?.id;
-            const amount = Number(s?.amount_total ?? 0);
+            const sessionId = isIntent ? null : s?.id;
+            const paymentIntentId = isIntent
+              ? s?.id
+              : (typeof s?.payment_intent === "string" ? s.payment_intent : s?.payment_intent?.id);
+            const amount = Number((isIntent ? s?.amount_received ?? s?.amount : s?.amount_total) ?? 0);
 
             if (factureId) {
               const { data: facture } = await supabaseAdmin
@@ -42,6 +45,11 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
                 .eq("id", factureId)
                 .maybeSingle();
 
+              // Idempotence : ne rien refaire si déjà encaissée.
+              if (facture?.paid_at || facture?.statut === "payee") {
+                return Response.json({ received: true, ignored: "already_paid" });
+              }
+
               await supabaseAdmin
                 .from("factures")
                 .update({
@@ -49,7 +57,7 @@ export const Route = createFileRoute("/api/public/facture/webhook")({
                   mode_paiement: "carte",
                   date_paiement: new Date().toISOString().slice(0, 10),
                   paid_at: new Date().toISOString(),
-                  stripe_session_id: sessionId,
+                  ...(sessionId ? { stripe_session_id: sessionId } : {}),
                   stripe_payment_intent_id: paymentIntentId ?? null,
                   amount_paid_cents: amount,
                   updated_at: new Date().toISOString(),
