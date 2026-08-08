@@ -203,7 +203,22 @@ export function finalizeDoc(doc: jsPDF, company?: CompanyInfo | null) {
   doc.setPage(total);
 }
 
+/** Largeur (mm) d'un texte pour une taille de police donnée. */
+function fitTextWidth(doc: jsPDF, text: string, size: number): number {
+  doc.setFontSize(size);
+  return doc.getTextWidth(text);
+}
+
+/** Tronque un texte (avec …) pour tenir dans une largeur maximale. */
+function clampText(doc: jsPDF, text: string, maxW: number): string {
+  if (doc.getTextWidth(text) <= maxW) return text;
+  let t = text;
+  while (t.length > 1 && doc.getTextWidth(`${t}…`) > maxW) t = t.slice(0, -1);
+  return `${t}…`;
+}
+
 /** Bandeau navy + liseré or, identique sur tous les documents officiels. */
+
 
 export function drawDocHeader(
   doc: jsPDF,
