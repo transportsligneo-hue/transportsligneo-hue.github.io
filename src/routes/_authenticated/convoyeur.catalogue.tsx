@@ -97,12 +97,14 @@ function ConvoyeurCatalogue() {
   const [hasTraining, setHasTraining] = useState(false);
   const [trainingLoaded, setTrainingLoaded] = useState(false);
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
+  const [driverNiveau, setDriverNiveau] = useState<string>("debutant");
   const [trajets, setTrajets] = useState<CatalogTrajet[]>([]);
   const [myOffers, setMyOffers] = useState<Record<string, MyOffer>>({});
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<CatalogueFilterState>(DEFAULT_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [coords, setCoords] = useState<Record<string, { lat: number; lng: number }>>({});
 
   const geo = useGeolocation();
 
@@ -110,13 +112,16 @@ function ConvoyeurCatalogue() {
     if (!user) return;
     supabase
       .from("convoyeurs")
-      .select("id, has_completed_training")
+      .select("id, has_completed_training, niveau")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        const row = data as { id?: string; has_completed_training?: boolean } | null;
+        const row = data as
+          | { id?: string; has_completed_training?: boolean; niveau?: string }
+          | null;
         setConvoyeurId(row?.id ?? null);
         setHasTraining(Boolean(row?.has_completed_training));
+        setDriverNiveau(row?.niveau ?? "debutant");
         setTrainingLoaded(true);
       });
   }, [user]);
@@ -126,7 +131,7 @@ function ConvoyeurCatalogue() {
     const { data } = await supabase
       .from("trajets_publies_safe" as never)
       .select(
-        "id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,statut_publication,created_at,published_at" as never,
+        "id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,statut_publication,created_at,published_at,niveau_requis,vehicule_energie" as never,
       )
       .in("attribution_mode" as never, ["catalogue", "mixte"] as never)
       .order("published_at" as never, { ascending: false })
@@ -152,8 +157,27 @@ function ConvoyeurCatalogue() {
     fetchData();
   }, [fetchData]);
 
+  // Géocodage des points de prise en charge (uniquement quand "Autour de moi" est actif)
   useEffect(() => {
-    const ch = supabase
+    if (!geo.position) return;
+    let cancelled = false;
+    (async () => {
+      for (const t of trajets.slice(0, 60)) {
+        if (cancelled) return;
+        if (coords[t.id] || (typeof t.depart_lat === "number" && typeof t.depart_lng === "number"))
+          continue;
+        const p = await geocodeAddress(t.depart);
+        if (cancelled) return;
+        if (p) setCoords((c) => ({ ...c, [t.id]: { lat: p.lat, lng: p.lng } }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geo.position, trajets]);
+
+
       .channel("catalogue-live-v2")
       .on(
         "postgres_changes",
