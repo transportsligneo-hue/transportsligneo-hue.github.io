@@ -528,9 +528,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     doc.line(x, yy + 1.8, x + colEq, yy + 1.8);
     return yy + 4.4;
   };
-  let ye1 = y + 2;
+  let ye1 = y + 3.5;
   EDL_EQUIPEMENTS_L.forEach((l) => { ye1 = rowEq(14, ye1, l); });
-  let ye2 = y + 2;
+  let ye2 = y + 3.5;
   EDL_EQUIPEMENTS_R.forEach((l) => { ye2 = rowEq(xR, ye2, l); });
   y = Math.max(ye1, ye2) + 1;
 
