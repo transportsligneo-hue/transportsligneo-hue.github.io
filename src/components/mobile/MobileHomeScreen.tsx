@@ -344,7 +344,12 @@ export default function MobileHomeScreen() {
 
       </div>
 
-
+      {/* Contenu public dynamique : avis, actualités, FAQ */}
+      <div className="relative z-[1] r4-page">
+        <AvisSection />
+        <DerniersArticles />
+        <FaqDynamique />
+      </div>
 
       {/* Footer minimal */}
       <footer className="relative z-[1] px-5 pt-10 pb-8 mt-6">
