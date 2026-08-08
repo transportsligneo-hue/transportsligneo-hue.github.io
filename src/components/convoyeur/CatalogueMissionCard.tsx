@@ -1,24 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  MapPin,
-  Calendar,
-  Clock,
-  Car,
-  Euro,
-  Zap,
-  ArrowLeftRight,
-  ArrowRight,
-  Timer,
-  Navigation,
-  Send,
-  FileCheck2,
-  Lock,
-} from "lucide-react";
-import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
-import { missionRequiredNiveau, missionLevelStyle } from "@/lib/mission-level";
+import { missionRequiredNiveau } from "@/lib/mission-level";
 import { niveauLabel, canAccessNiveau } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
-
 
 export interface CatalogTrajet {
   id: string;
@@ -64,15 +47,27 @@ interface Props {
   onQuickApply: () => void;
 }
 
-
-function formatDuration(min?: number | null) {
-  if (!min || min <= 0) return null;
-  const h = Math.floor(min / 60);
-  const m = Math.round(min % 60);
-  if (h === 0) return `${m} min`;
-  if (m === 0) return `${h} h`;
-  return `${h} h ${m.toString().padStart(2, "0")}`;
-}
+/* ---------- Icônes (identiques à la maquette) ---------- */
+const S = (p: { children: React.ReactNode; fill?: string; sw?: number }) => (
+  <svg viewBox="0 0 24 24" fill={p.fill ?? "none"} stroke={p.fill ? "none" : "currentColor"} strokeWidth={p.sw ?? 2.4}>
+    {p.children}
+  </svg>
+);
+const IcoLink = () => (
+  <S>
+    <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
+  </S>
+);
+const IcoArrow = () => (<S><path d="M5 12h14M13 5l7 7-7 7" /></S>);
+const IcoDoc = () => (<S><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" /><path d="M14 2v6h6" /></S>);
+const IcoBolt = () => (<S fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></S>);
+const IcoThermal = () => (<S sw={2}><path d="M14 3v10.5a4 4 0 1 1-4 0V3z" /></S>);
+const IcoCal = () => (<S sw={2}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></S>);
+const IcoClock = () => (<S sw={2}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></S>);
+const IcoCheck = () => (<S sw={2}><path d="M9 11l3 3 8-8" /></S>);
+const IcoPin = () => (<S sw={2}><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></S>);
+const IcoCar = () => (<S sw={2}><path d="M5 17h14M6 17v2M18 17v2" /><path d="M4 13l1.5-5A2 2 0 0 1 7.4 6.6h9.2A2 2 0 0 1 18.5 8L20 13v4H4z" /></S>);
+const IcoLock = () => (<S sw={2}><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 1 1 8 0v3" /></S>);
 
 function useCountdown(iso: string | null) {
   const [now, setNow] = useState(() => Date.now());
@@ -91,6 +86,13 @@ function useCountdown(iso: string | null) {
   return `${m} min restantes`;
 }
 
+const OFFER_LABEL: Record<string, string> = {
+  en_attente: "Candidature envoyée",
+  contre_offre_admin: "Contre-offre reçue",
+  accepte: "Acceptée",
+  acceptee: "Acceptée",
+};
+
 export function CatalogueMissionCard({
   trajet: t,
   distanceFromMe,
@@ -108,7 +110,6 @@ export function CatalogueMissionCard({
     ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000
     : false;
   const countdown = useCountdown(t.proposal_expires_at);
-  // Niveau REQUIS PAR LA MISSION (≠ niveau du convoyeur)
   const requis = missionRequiredNiveau({
     niveau_requis: t.niveau_requis,
     distance_km: t.distance_km,
@@ -116,243 +117,136 @@ export function CatalogueMissionCard({
   });
   const level = niveauLabel(requis);
   const locked = !canAccessNiveau(driverNiveau, requis);
-  const isElectric = isElectricEnergie(t.type_carburant)
-    || isElectricEnergie(t.vehicule_energie)
-    || guessElectricFromModel(t.marque, t.modele);
+  const isElectric =
+    isElectricEnergie(t.type_carburant) ||
+    isElectricEnergie(t.vehicule_energie) ||
+    guessElectricFromModel(t.marque, t.modele);
+
+  const retourLeg = (t.groupedLegs ?? []).find((l) => l.leg_type === "retour");
+  const dateLabel = t.date_trajet
+    ? new Date(t.date_trajet).toLocaleDateString("fr-FR", { day: "2-digit", month: "long" })
+    : null;
 
   return (
-    <div
-      onClick={onOpen}
-      className={`group relative overflow-hidden rounded-2xl border p-4 backdrop-blur-xl transition-all duration-300 ${
-        locked
-          ? "cursor-not-allowed border-white/10 bg-white/[0.02] opacity-60 saturate-50"
-          : "cursor-pointer border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] hover:-translate-y-0.5 hover:border-amber-300/40 hover:shadow-[0_20px_50px_-24px_rgba(212,175,55,0.45)]"
-      }`}
-
-    >
-      {/* Halo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-70"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(212,175,55,0.35) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Top badges */}
-      <div className="relative flex flex-wrap items-center gap-1.5">
-        {urgent && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-red-400/60 bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-200">
-            <Zap size={10} /> Urgent
-          </span>
-        )}
-        <span
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-            isAR
-              ? "border-indigo-400/60 bg-indigo-500/15 text-indigo-200"
-              : "border-white/20 bg-white/5 text-white/80"
-          }`}
-        >
-          {isAR ? <ArrowLeftRight size={10} /> : <ArrowRight size={10} />}
+    <article className={`cat2-card${locked ? " is-locked" : ""}`} onClick={onOpen}>
+      {/* Badges */}
+      <div className="cat2-badges">
+        <span className={`cat2-badge ${isAR ? "linked" : "simple"}`}>
+          {isAR ? <IcoLink /> : <IcoArrow />}
           {isAR ? "Livraison + Restitution" : "Livraison simple"}
         </span>
         {isAR && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-100">
-            <FileCheck2 size={10} /> 2 états des lieux
-          </span>
+          <span className="cat2-badge doc"><IcoDoc />2 états des lieux</span>
         )}
-        <span
-          title="Niveau minimum requis pour cette mission"
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${missionLevelStyle(
-            requis,
-          )}`}
-        >
-          {locked && <Lock size={9} />} Niveau {level}
+        <span className="cat2-badge level">
+          {locked && <IcoLock />}
+          {level}
         </span>
-        {isElectric && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-300/70 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200 shadow-[0_0_14px_-4px_rgba(34,211,238,0.8)]">
-            <Zap size={10} strokeWidth={2.8} /> Électrique
+        {urgent && <span className="cat2-badge urgent"><IcoBolt />Urgente</span>}
+        {fresh && <span className="cat2-badge new">Nouveau</span>}
+        {isElectric ? (
+          <span className="cat2-ev">
+            <span className="bolt"><IcoBolt /></span>
+            Électrique
           </span>
-        )}
-
-        {fresh && (
-          <span className="ml-auto inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-100">
-            Nouveau
-          </span>
+        ) : (
+          <span className="cat2-thermal"><IcoThermal />Thermique</span>
         )}
       </div>
 
-      {/* Route */}
-      {(() => {
-        const retourLeg = (t.groupedLegs ?? []).find((l) => l.leg_type === "retour");
-        const steps = [
-          { k: "Prise en charge du véhicule", v: t.depart, c: "bg-emerald-400 ring-emerald-400/20" },
-          { k: "Livraison du véhicule", v: t.arrivee, c: "bg-sky-400 ring-sky-400/20" },
-          ...(isAR
-            ? [
-                {
-                  k: "Restitution du véhicule",
-                  v: retourLeg?.arrivee ?? t.depart,
-                  c: "bg-amber-300 ring-amber-300/20",
-                },
-              ]
-            : []),
-        ];
-        return (
-          <div className="relative mt-3 flex items-stretch gap-3">
-            <div className="flex flex-col items-center pt-1">
-              {steps.map((s, i) => (
-                <div key={s.k} className="flex flex-1 flex-col items-center">
-                  {i > 0 && (
-                    <span className="my-1 w-px flex-1 bg-gradient-to-b from-emerald-400/50 to-amber-300/50" />
-                  )}
-                  <span className={`h-3 w-3 rounded-full ring-4 ${s.c}`} />
-                </div>
-              ))}
-            </div>
-            <div className="min-w-0 flex-1 space-y-2">
-              {steps.map((s) => (
-                <div key={s.k}>
-                  <div className="text-[10px] uppercase tracking-wider text-white/50">
-                    {s.k}
-                  </div>
-                  <div className="truncate text-sm font-semibold text-white">{s.v}</div>
-                </div>
-              ))}
-            </div>
+      {/* Itinéraire */}
+      <div className="cat2-route">
+        <div className="cat2-stop pickup">
+          <div className="cat2-eyebrow">Prise en charge du véhicule</div>
+          <div className="cat2-addr">{t.depart}</div>
+        </div>
+        <div className="cat2-stop delivery">
+          <div className="cat2-eyebrow">Livraison du véhicule</div>
+          <div className="cat2-addr">{t.arrivee}</div>
+          {isAR && (
+            <span className="cat2-tag">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+              </svg>
+              Étape liée à la restitution
+            </span>
+          )}
+        </div>
+        {isAR && (
+          <div className="cat2-stop restitution">
+            <div className="cat2-eyebrow">Restitution du véhicule</div>
+            <div className="cat2-addr">{retourLeg?.arrivee ?? t.depart}</div>
           </div>
-        );
-      })()}
+        )}
+      </div>
 
-
-      {/* Meta row */}
-      <div className="relative mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-white/70">
-        {t.date_trajet && (
-          <span className="inline-flex items-center gap-1">
-            <Calendar size={11} className="text-amber-300/80" />
-            {new Date(t.date_trajet).toLocaleDateString("fr-FR", {
-              day: "2-digit",
-              month: "short",
-            })}
-          </span>
+      {/* Méta */}
+      <div className="cat2-meta">
+        {dateLabel && (
+          <div className="cat2-meta-item"><IcoCal /><b>{dateLabel}</b></div>
         )}
         {t.heure_trajet && (
-          <span className="inline-flex items-center gap-1">
-            <Clock size={11} className="text-amber-300/80" />
-            {t.heure_trajet}
-          </span>
+          <div className="cat2-meta-item"><IcoClock /><b>{t.heure_trajet.slice(0, 5)}</b></div>
         )}
+        {isAR && <div className="cat2-meta-item"><IcoCheck />Mission groupée</div>}
         {typeof t.distance_km === "number" && (
-          <span className="inline-flex items-center gap-1">
-            <MapPin size={11} className="text-amber-300/80" />
-            {Math.round(t.distance_km)} km
-          </span>
+          <div className="cat2-meta-item"><IcoCar />{Math.round(t.distance_km)} km</div>
         )}
-        {formatDuration(t.duree_estimee_min) && (
-          <span className="inline-flex items-center gap-1">
-            <Timer size={11} className="text-amber-300/80" />
-            {formatDuration(t.duree_estimee_min)}
-          </span>
+        {distanceFromMe != null && (
+          <div className="cat2-meta-item"><IcoPin />à {Math.round(distanceFromMe)} km de vous</div>
         )}
-        {(t.marque || t.modele) && (
-          <span className="inline-flex items-center gap-1 truncate">
-            <Car size={11} className="text-amber-300/80" />
-            {[t.marque, t.modele].filter(Boolean).join(" ")}
-          </span>
-        )}
-        {typeof t.kilometrage_estime === "number" && (
-          <span className="text-white/50">
-            · {t.kilometrage_estime.toLocaleString("fr-FR")} km au compteur
-          </span>
+        {countdown && (
+          <div className="cat2-meta-item"><IcoClock />{countdown}</div>
         )}
       </div>
 
-      {/* Distance from me + countdown */}
-      {(distanceFromMe != null || countdown) && (
-        <div className="relative mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-          {distanceFromMe != null && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-sky-300/40 bg-sky-500/10 px-2 py-0.5 font-semibold text-sky-100">
-              <Navigation size={10} />à {Math.round(distanceFromMe)} km de vous
-            </span>
-          )}
-          {countdown && (
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold ${
-                countdown === "Expirée"
-                  ? "border-red-400/40 bg-red-500/15 text-red-200"
-                  : "border-amber-300/40 bg-amber-500/10 text-amber-100"
-              }`}
-            >
-              <Timer size={10} /> {countdown}
-            </span>
-          )}
+      {/* Prix + statut */}
+      <div className="cat2-price-row">
+        <div className="cat2-price">
+          <div className="k">Rémunération</div>
+          <div className="v">
+            {price.toFixed(0)}
+            <span className="cur">€</span>
+          </div>
         </div>
-      )}
-
-      {/* Footer */}
-      <div className="relative mt-4 flex items-end justify-between border-t border-white/10 pt-3">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-white/50">
-            Rémunération
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span
-              className="text-2xl font-black leading-none text-white"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              {price.toFixed(0)}
-            </span>
-            <Euro size={16} className="text-amber-300" />
-          </div>
-          {isAR && (
-            <div className="mt-1 text-[10px] font-semibold text-amber-100/75">
-              Mission complète · livraison + restitution
-            </div>
-          )}
-        </div>
-
-        {locked ? (
-          <div className="flex max-w-[60%] flex-col items-end gap-1 text-right">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/70">
-              <Lock size={12} /> Verrouillée
-            </span>
-            <span className="text-[10px] leading-tight text-white/50">
-              Réservé aux convoyeurs {level}
-              {requis === "confirme" ? "+" : ""}
-            </span>
-          </div>
-        ) : myOfferStatus ? (
-          <div className="text-right">
-            <MissionStatusBadge
-              status={
-                myOfferStatus === "contre_offre_admin" ? "propose" : myOfferStatus
-              }
-              short
-            />
-            {typeof myOfferPrice === "number" && (
-              <div className="mt-1 text-[10px] text-white/60">
-                {myOfferPrice.toFixed(0)} €
-              </div>
-            )}
-          </div>
+        {myOfferStatus ? (
+          <span className="cat2-status">
+            <span className="dt" />
+            {OFFER_LABEL[myOfferStatus] ?? "En attente"}
+            {typeof myOfferPrice === "number" ? ` · ${myOfferPrice.toFixed(0)} €` : ""}
+          </span>
         ) : (
-          <div className="flex flex-col items-end gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (canApply) onQuickApply();
-              }}
-              disabled={!canApply}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/50 bg-gradient-to-b from-amber-300/20 to-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-[0_10px_25px_-12px_rgba(212,175,55,0.6)] transition-all hover:from-amber-300/30 hover:to-amber-500/20 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send size={12} /> Postuler
-            </button>
-            <span className="text-[10px] text-white/50">ou voir détails →</span>
-          </div>
+          <span className="cat2-status ok"><span className="dt" />Disponible</span>
         )}
-
       </div>
-    </div>
+
+      {/* CTA */}
+      {locked ? (
+        <button type="button" className="cat2-accept locked" disabled>
+          <IcoLock />
+          Réservé aux convoyeurs {level}
+          {requis === "confirme" ? "+" : ""}
+        </button>
+      ) : myOfferStatus ? (
+        <button
+          type="button"
+          className="cat2-accept"
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        >
+          <IcoDoc />
+          Voir ma candidature
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="cat2-accept"
+          disabled={!canApply}
+          onClick={(e) => { e.stopPropagation(); if (canApply) onQuickApply(); }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>
+          Accepter la mission
+        </button>
+      )}
+    </article>
   );
 }
