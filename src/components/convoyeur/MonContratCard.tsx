@@ -99,7 +99,7 @@ export default function MonContratCard() {
           </button>
         </div>
       )}
-      </div>
     </div>
+
   );
 }
