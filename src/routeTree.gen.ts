@@ -38,6 +38,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
+import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -309,6 +310,11 @@ const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
 const ScanTokenRoute = ScanTokenRouteImport.update({
   id: '/scan/$token',
   path: '/scan/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaiementConfirmationRoute = PaiementConfirmationRouteImport.update({
+  id: '/paiement/confirmation',
+  path: '/paiement/confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvitationConvoyeurTokenRoute =
@@ -1093,6 +1099,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1245,6 +1252,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1402,6 +1410,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1562,6 +1571,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1714,6 +1724,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/admin/acceptations'
@@ -1870,6 +1881,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
+    | '/paiement/confirmation'
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/_authenticated/admin/acceptations'
@@ -2020,6 +2032,7 @@ export interface RootRouteChildren {
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
+  PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
@@ -2258,6 +2271,13 @@ declare module '@tanstack/react-router' {
       path: '/scan/$token'
       fullPath: '/scan/$token'
       preLoaderRoute: typeof ScanTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paiement/confirmation': {
+      id: '/paiement/confirmation'
+      path: '/paiement/confirmation'
+      fullPath: '/paiement/confirmation'
+      preLoaderRoute: typeof PaiementConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invitation-convoyeur/$token': {
@@ -3614,6 +3634,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
+  PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
