@@ -3723,6 +3723,7 @@ export type Database = {
           remarques: string | null
           statut: string
           telephone: string | null
+          tracking_code: string | null
           type_trajet: string
           updated_at: string
           user_id: string
@@ -3764,6 +3765,7 @@ export type Database = {
           remarques?: string | null
           statut?: string
           telephone?: string | null
+          tracking_code?: string | null
           type_trajet?: string
           updated_at?: string
           user_id: string
@@ -3805,6 +3807,7 @@ export type Database = {
           remarques?: string | null
           statut?: string
           telephone?: string | null
+          tracking_code?: string | null
           type_trajet?: string
           updated_at?: string
           user_id?: string
@@ -4421,6 +4424,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      public_tracking_attempts: {
+        Row: {
+          blocked_until: string | null
+          created_at: string
+          failed_count: number
+          fingerprint: string
+          id: string
+          updated_at: string
+          window_started_at: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          created_at?: string
+          failed_count?: number
+          fingerprint: string
+          id?: string
+          updated_at?: string
+          window_started_at?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          created_at?: string
+          failed_count?: number
+          fingerprint?: string
+          id?: string
+          updated_at?: string
+          window_started_at?: string
+        }
+        Relationships: []
       }
       push_subscriptions: {
         Row: {
@@ -5746,6 +5779,7 @@ export type Database = {
         }
         Returns: string
       }
+      gen_tracking_code: { Args: never; Returns: string }
       generate_group_reference: { Args: never; Returns: string }
       get_active_vat_rates: {
         Args: never
