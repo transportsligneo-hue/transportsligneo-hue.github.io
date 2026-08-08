@@ -16,6 +16,7 @@ import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
 type TripOption = "aller-simple" | "aller-retour" | "express";
 type DisplayMode = "ttc" | "ht" | "exempt";
@@ -124,6 +125,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
   // Options
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
   const [autreNote, setAutreNote] = useState("");
+  const [pvDigitalise, setPvDigitalise] = useState<PvChoice>("aucun");
 
   // Planning
   const [date, setDate] = useState("");
@@ -422,6 +424,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         marque: marque || "",
         modele: modele || "",
         carburant: energie || "",
+        // PV de livraison digitalisé demandé par le client
+        pv_digitalise: pvDigitalise,
         // Lien vers le devis auto-généré
         ...(devisId ? { devis_id: devisId, devis_genere_at: new Date().toISOString() } : {}),
         // Restitution (Aller-retour)
@@ -922,10 +926,43 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           })}
         </div>
 
+        {/* PV de livraison digitalisé */}
+        <div className="mb-4">
+          <label className={lbl}>PV de livraison digitalisé</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {([{ key: "aucun" as const, label: "Aucun" }, ...PV_PLATEFORMES.map((p) => ({ key: p.key, label: p.label }))]).map(({ key, label }) => {
+              const def = pvDef(key);
+              const checked = pvDigitalise === key;
+              return (
+                <label
+                  key={key}
+                  className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                    checked ? "border-pro-accent bg-pro-accent/5" : "border-pro-border hover:border-pro-accent/40 bg-white"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="pv_digitalise"
+                    checked={checked}
+                    onChange={() => setPvDigitalise(key)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  {def ? <PvLogo def={def} size={24} /> : null}
+                  <span className="text-sm font-medium text-pro-text">{label}</span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="text-xs text-pro-text-soft mt-1.5">
+            Model s'ouvre directement dans l'application mobile du convoyeur, Welcome Auto sur le site internet.
+          </p>
+        </div>
+
         <div className="mb-4">
           <label className={lbl}>Autre demande / commentaire</label>
           <input className={inp} value={autreNote} onChange={(e) => setAutreNote(e.target.value)} placeholder="Optionnel" />
         </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>

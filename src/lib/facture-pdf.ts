@@ -127,6 +127,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const innerW = pageW - M * 2;
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  // Logo du client (comme sur le devis) — affiché dans le bloc « Facturé à ».
+  const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
   const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
   const tvaExempt = f.tva_exempt ?? resolved.pricingDisplayMode === "exempt";
@@ -212,19 +214,25 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (f.client_tva) clientLines.push({ t: `TVA ${f.client_tva}`, muted: true });
   if (f.client_email) clientLines.push({ t: f.client_email, muted: true });
 
-  const boxH = 14 + clientLines.length * 5.0;
+  const logoBoxW = clientLogoData ? 22 : 0;
+  const boxH = Math.max(14 + clientLines.length * 5.0, clientLogoData ? 30 : 0);
   doc.setFillColor(...SOFT_BG);
   doc.rect(M, blockTop, leftW, boxH, "F");
+  if (clientLogoData) {
+    try { doc.addImage(clientLogoData, "PNG", M + leftW - logoBoxW - 4, blockTop + 4, 18, 18); } catch { /* logo optionnel */ }
+  }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text("FACTURÉ À", M + 6, blockTop + 8);
   let cy = blockTop + 16;
+  const textMaxW = leftW - 12 - logoBoxW;
   for (const l of clientLines) {
     doc.setFont("helvetica", l.bold ? "bold" : "normal");
     doc.setFontSize(l.bold ? 11 : 9);
     doc.setTextColor(...(l.muted ? MUTED : TEXT));
-    doc.text(l.t, M + 6, cy);
+    const line = (doc.splitTextToSize(l.t, textMaxW) as string[])[0] || l.t;
+    doc.text(line, M + 6, cy);
     cy += l.bold ? 6.4 : 5.2;
   }
 

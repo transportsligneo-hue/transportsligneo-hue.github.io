@@ -10,9 +10,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ExternalLink, Copy, ClipboardCheck, Loader2, Save } from "lucide-react";
-
-type Plateforme = "model_arval";
+import { ExternalLink, Copy, ClipboardCheck, Loader2, Save, Smartphone } from "lucide-react";
+import {
+  PV_PLATEFORMES,
+  PvLogo,
+  openPvPlateforme,
+  type PvPlateforme as Plateforme,
+} from "./pv-plateformes";
 
 interface PvRow {
   id?: string;
@@ -24,10 +28,6 @@ interface PvRow {
   instruction: string | null;
 }
 
-const PLATEFORMES: { key: Plateforme; label: string; hint: string }[] = [
-  { key: "model_arval", label: "Model / Arval", hint: "PV digitalisé Model utilisé par Arval." },
-];
-
 const emptyRow = (p: Plateforme): PvRow => ({
   plateforme: p,
   actif: false,
@@ -37,6 +37,12 @@ const emptyRow = (p: Plateforme): PvRow => ({
   instruction: "",
 });
 
+const emptyRows = (): Record<Plateforme, PvRow> =>
+  PV_PLATEFORMES.reduce(
+    (acc, p) => ({ ...acc, [p.key]: emptyRow(p.key) }),
+    {} as Record<Plateforme, PvRow>,
+  );
+
 export function MissionPVDigitauxBlock({
   attributionId,
   mode = "admin",
@@ -44,9 +50,7 @@ export function MissionPVDigitauxBlock({
   attributionId: string;
   mode?: "admin" | "driver";
 }) {
-  const [rows, setRows] = useState<Record<Plateforme, PvRow>>({
-    model_arval: emptyRow("model_arval"),
-  });
+  const [rows, setRows] = useState<Record<Plateforme, PvRow>>(emptyRows);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<Plateforme | null>(null);
 
@@ -58,9 +62,7 @@ export function MissionPVDigitauxBlock({
         .select("*")
         .eq("attribution_id", attributionId);
       if (!alive) return;
-      const next: Record<Plateforme, PvRow> = {
-        model_arval: emptyRow("model_arval"),
-      };
+      const next = emptyRows();
       ((data as PvRow[]) || []).forEach((r) => {
         if (r.plateforme in next) next[r.plateforme] = r;
       });
@@ -118,7 +120,7 @@ export function MissionPVDigitauxBlock({
 
   // ===== DRIVER : ne montre que les plateformes actives =====
   if (mode === "driver") {
-    const active = PLATEFORMES.filter((p) => rows[p.key].actif);
+    const active = PV_PLATEFORMES.filter((p) => rows[p.key].actif);
     if (active.length === 0) return null;
     return (
       <section className="space-y-3">
@@ -129,27 +131,27 @@ export function MissionPVDigitauxBlock({
           </p>
         </div>
         <div className="space-y-3">
-          {active.map(({ key, label }) => {
-            const r = rows[key];
+          {active.map((def) => {
+            const r = rows[def.key];
+            const isApp = !!def.appScheme;
             return (
-              <article key={key} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="font-semibold text-slate-900">{label}</p>
+              <article key={def.key} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <PvLogo def={def} size={32} />
+                  <p className="font-semibold text-slate-900">{def.label}</p>
                 </div>
                 {r.instruction && (
                   <p className="text-xs text-slate-600 mb-3 leading-relaxed">{r.instruction}</p>
                 )}
                 <div className="grid gap-2">
-                  {r.url && (
-                    <a
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-[0.98]"
-                    >
-                      <ExternalLink size={16} /> Ouvrir {label}
-                    </a>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => openPvPlateforme(def, r.url)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-[0.98]"
+                  >
+                    {isApp ? <Smartphone size={16} /> : <ExternalLink size={16} />}
+                    {isApp ? `Ouvrir l'application ${def.label}` : `Ouvrir ${def.label}`}
+                  </button>
                   {r.code && (
                     <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                       <span className="flex-1 text-sm font-mono font-semibold text-slate-900 truncate">{r.code}</span>
@@ -194,14 +196,18 @@ export function MissionPVDigitauxBlock({
         Plateformes externes partenaires. À ne pas confondre avec l'état des lieux interne.
       </p>
       <div className="grid gap-3 md:grid-cols-2">
-        {PLATEFORMES.map(({ key, label, hint }) => {
+        {PV_PLATEFORMES.map((def) => {
+          const key = def.key;
           const r = rows[key];
           return (
             <article key={key} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
               <header className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-slate-900">{label}</p>
-                  <p className="text-[11px] text-slate-500">{hint}</p>
+                <div className="flex items-center gap-3">
+                  <PvLogo def={def} size={32} />
+                  <div>
+                    <p className="font-semibold text-slate-900">{def.label}</p>
+                    <p className="text-[11px] text-slate-500">{def.hint}</p>
+                  </div>
                 </div>
                 <label className="inline-flex items-center gap-2 cursor-pointer">
                   <input
@@ -216,10 +222,10 @@ export function MissionPVDigitauxBlock({
 
               <div className="space-y-2">
                 <label className="block text-xs font-medium text-slate-600">
-                  Lien de la plateforme
+                  {def.appScheme ? "Lien / deep link (optionnel)" : "Lien de la plateforme"}
                   <input
                     type="url"
-                    placeholder="https://…"
+                    placeholder={def.url || "https://…"}
                     value={r.url || ""}
                     onChange={(e) => update(key, { url: e.target.value })}
                     className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
