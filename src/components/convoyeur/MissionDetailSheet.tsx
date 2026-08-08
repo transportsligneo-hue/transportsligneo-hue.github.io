@@ -475,11 +475,14 @@ export function MissionDetailSheet({
                 </span>
                 <div>
                   <div
-                    className="text-[16px] font-bold"
+                    className="text-[16px] font-bold flex items-center gap-2 flex-wrap"
                     style={{ fontFamily: "'Space Grotesk',sans-serif" }}
                   >
                     {[t.marque, t.modele].filter(Boolean).join(" ") ||
                       "Véhicule à confirmer"}
+                    <ElectricBadge
+                      force={isElectricEnergie(t.type_carburant) || guessElectricFromModel(t.marque, t.modele)}
+                    />
                   </div>
                   <div className="mt-0.5 text-[12px]" style={{ color: "#9aa6c9" }}>
                     {t.type_carburant ?? "Détails communiqués à l'acceptation"}
