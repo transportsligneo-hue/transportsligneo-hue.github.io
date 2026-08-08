@@ -218,6 +218,7 @@ export function drawDocHeader(
   },
 ) {
   const { pageW, logoData, title, subtitle, numero, company } = opts;
+  docContexts.set(doc as unknown as object, { pageW, logoData, title, numero, company });
   const h = opts.height ?? 46;
   doc.setFillColor(...DOC_NAVY);
   doc.rect(0, 0, pageW, h, "F");
