@@ -149,6 +149,15 @@ export default function HomeDesktopV5() {
         </div>
       </section>
 
+      {/* ============ AVIS CLIENTS ============ */}
+      <AvisSection />
+
+      {/* ============ ACTUALITÉS ============ */}
+      <DerniersArticles />
+
+      {/* ============ FAQ ============ */}
+      <FaqDynamique />
+
       {/* ============ CTA FINALE ============ */}
       <div className="v4-cta-box">
         <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
@@ -156,7 +165,10 @@ export default function HomeDesktopV5() {
         </div>
         <h2>Estimez votre convoyage dès maintenant</h2>
         <p>Devis instantané, sans engagement. Réponse en moins de 30 secondes.</p>
-        <Link to="/tarifs" className="v4-btn-primary">Estimer mon trajet</Link>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link to="/tarifs" className="v4-btn-primary">Estimer mon trajet</Link>
+          <Link to="/suivi" className="v4-btn-outline">Suivre ma mission</Link>
+        </div>
       </div>
     </div>
   );
