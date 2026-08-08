@@ -46,6 +46,8 @@ export interface CatalogTrajet {
   published_at: string | null;
   depart_lat?: number | null;
   depart_lng?: number | null;
+  niveau_requis?: string | null;
+  vehicule_energie?: string | null;
   groupedLegs?: CatalogTrajet[];
   isGroupedAr?: boolean;
 }
@@ -56,9 +58,12 @@ interface Props {
   myOfferStatus?: string | null;
   myOfferPrice?: number | null;
   canApply: boolean;
+  /** Niveau du convoyeur connecté (pour verrouiller les missions trop élevées). */
+  driverNiveau?: string | null;
   onOpen: () => void;
   onQuickApply: () => void;
 }
+
 
 function formatDuration(min?: number | null) {
   if (!min || min <= 0) return null;
