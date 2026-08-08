@@ -15,7 +15,7 @@ export const notifyAdminNouvelleOffre = createServerFn({ method: 'POST' })
     const [{ data: trajet }, { data: profile }] = await Promise.all([
       supabaseAdmin
         .from('trajets')
-        .select('numero_mission, ville_depart, ville_arrivee, prix_convoyeur')
+        .select('numero_mission, depart, arrivee, prix_convoyeur')
         .eq('id', data.trajetId)
         .maybeSingle(),
       supabaseAdmin
