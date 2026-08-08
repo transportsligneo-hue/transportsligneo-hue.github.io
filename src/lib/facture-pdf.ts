@@ -186,7 +186,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   );
 
   // ===== Facturé à / Références =====
-  const blockTop = 74;
+  const blockTop = 70;
   const leftW = innerW * 0.52 - 4;
   const clientLines: { t: string; bold?: boolean; muted?: boolean }[] = [];
   const societe = f.client_societe?.trim();
@@ -251,7 +251,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ===== Tableau prestation =====
-  let y = Math.max(blockTop + boxH, ry) + 9;
+  let y = Math.max(blockTop + boxH, ry) + 7;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...NAVY);
@@ -325,7 +325,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
-  y += 17;
+  y += 11;
 
   // ===== Statut / modalités / signature =====
   const fh = 22;
@@ -352,9 +352,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const textW = innerW * 0.6;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   const wrapped = modalites.map((m) => doc.splitTextToSize(`• ${m}`, textW) as string[]);
-  const blockH = 12 + wrapped.reduce((s, l) => s + l.length * 3.8 + 1, 0);
+  const blockH = 11 + wrapped.reduce((s, l) => s + l.length * 3.5 + 0.8, 0);
   ensure(Math.max(blockH, 32));
 
   const blockY = y;
@@ -373,13 +373,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8);
   doc.setTextColor(...NAVY);
   doc.text("MODALITÉS DE RÈGLEMENT", M, blockY + 8);
-  let my = blockY + 13.5;
+  let my = blockY + 12.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(...TEXT);
   for (const lines of wrapped) {
     doc.text(lines, M, my);
-    my += lines.length * 3.8 + 1;
+    my += lines.length * 3.5 + 0.8;
   }
 
   // Signature (colonne droite)
