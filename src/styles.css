@@ -4936,14 +4936,12 @@ html.theme-light .r4-glass,
 html.theme-light .r4-map-card {
   box-shadow: 0 1px 2px rgba(15,21,38,0.04), 0 14px 34px rgba(15,21,38,0.06);
 }
-html.theme-light .r4-page .v5-hero-tint {
-  background: linear-gradient(180deg, rgba(245,247,252,0.55), rgba(245,247,252,0.88)) !important;
-}
-html.theme-light .r4-page .v5-hero-fade {
-  background: linear-gradient(180deg, transparent 40%, rgba(245,247,252,0.96) 100%) !important;
-}
-html.theme-light .r4-page .v5-hero-h1,
-html.theme-light .r4-page .v5-check-list > div { text-shadow: none; }
+/* Le hero photo garde son voile sombre et son texte clair (lisibilité). */
+html.theme-light .r4-page .v5-hero,
+html.theme-light .r4-page .v5-hero h1,
+html.theme-light .r4-page .v5-hero h2,
+html.theme-light .r4-page .v5-hero p,
+html.theme-light .r4-page .v5-hero .v5-check-list > div { color: #ffffff; }
 html.theme-light .r4-page .v5-trust { background: #ffffff !important; }
 html.theme-light .r4-page .v5-logo-item { background: #ffffff !important; }
 html.theme-light .r4-page .v5-marquee-mask::before,
@@ -4954,15 +4952,8 @@ html.theme-light .r4-page h2,
 html.theme-light .r4-page h3,
 html.theme-light .r4-page h4,
 html.theme-light .r4-page h5 { color: #0f1526; }
-html.theme-light .r4-page .v4-quote-card,
-html.theme-light .glass-onyx {
-  background: #ffffff !important;
-  border-color: rgba(15,21,38,0.10) !important;
-  box-shadow: 0 2px 4px rgba(15,21,38,0.05), 0 24px 56px rgba(15,21,38,0.10) !important;
-  color: #0f1526;
-}
-html.theme-light .glass-onyx::before,
-html.theme-light .glass-onyx::after { opacity: 0.25; }
+/* Le simulateur reste en verre fumé (règle de marque), y compris en clair. */
+html.theme-light .r4-page .v4-quote-card { color: inherit; }
 html.theme-light .card-premium-light { background: #ffffff; border-color: rgba(15,21,38,0.10); }
 
 /* --- Barre de navigation desktop --- */
