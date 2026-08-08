@@ -4,6 +4,13 @@ import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, Be
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+import VroomyOrderFlow from "@/components/assistant/VroomyOrderFlow";
+import {
+  detectOrderIntent,
+  extractOrderInfo,
+  loadDraft,
+  type VroomyOrderDraft,
+} from "@/lib/vroomy-order";
 
 
 /**
@@ -180,6 +187,9 @@ export default function AssistantIaWidget() {
   const [lead, setLead] = useState({ nom: "", telephone: "" });
   const [proactiveOff, setProactiveOff] = useState(false);
   const [prefNotice, setPrefNotice] = useState<string | null>(null);
+  const [orderFlow, setOrderFlow] = useState(false);
+  const [orderInitial, setOrderInitial] = useState<Partial<VroomyOrderDraft> | undefined>(undefined);
+  const [hasDraft, setHasDraft] = useState(false);
   const convId = useRef<string | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -307,6 +317,20 @@ export default function AssistantIaWidget() {
   }, [open]);
 
 
+  /* Brouillon de commande guidée en attente de reprise */
+  useEffect(() => {
+    if (!open) return;
+    const d = loadDraft();
+    setHasDraft(!!d && !!(d.depart || d.arrivee));
+  }, [open]);
+
+  /* Démarre (ou reprend) le parcours guidé */
+  const startOrderFlow = useCallback((initial?: Partial<VroomyOrderDraft>, intro?: string) => {
+    setOrderInitial(initial);
+    setOrderFlow(true);
+    if (intro) setMessages((m) => [...m, { role: "assistant", content: intro }]);
+  }, []);
+
   useEffect(() => {
     const onOpen = () => setOpen(true);
     window.addEventListener("ligneo:assistant-open", onOpen);
@@ -321,6 +345,26 @@ export default function AssistantIaWidget() {
       if (!value || typing) return;
       setInput("");
       setMessages((m) => [...m, { role: "user", content: value }]);
+
+      // Intention de commande : on bascule sur le parcours guidé pas à pas,
+      // en réutilisant les informations déjà données dans le message.
+      if (!orderFlow && profil !== "convoyeur" && detectOrderIntent(value)) {
+        const info = extractOrderInfo(value);
+        const known = [
+          info.depart && `départ ${info.depart}`,
+          info.arrivee && `arrivée ${info.arrivee}`,
+          info.vehicule && `véhicule ${info.vehicule}`,
+        ].filter(Boolean).join(", ");
+        const step = !info.depart ? "depart" : !info.arrivee ? "arrivee" : !info.vehicule ? "vehicule" : "date";
+        startOrderFlow(
+          { ...info, step } as Partial<VroomyOrderDraft>,
+          known
+            ? `Parfait, je note ${known}. Je vous guide pas à pas pour le reste, une question à la fois.`
+            : "Avec plaisir, on prend la route ensemble : je vous guide pas à pas, une question à la fois.",
+        );
+        return;
+      }
+
       setTyping(true);
       try {
         const { data: sessData } = await supabase.auth.getSession();
@@ -374,7 +418,7 @@ export default function AssistantIaWidget() {
         inputRef.current?.focus();
       }
     },
-    [typing, profil, prenom],
+    [typing, profil, prenom, orderFlow, startOrderFlow],
   );
 
   const sendLead = useCallback(async () => {
@@ -566,7 +610,53 @@ export default function AssistantIaWidget() {
             </section>
           )}
 
-          {profil && messages.length <= 3 && (
+          {orderFlow && (
+            <VroomyOrderFlow
+              initial={orderInitial}
+              onExit={() => {
+                setOrderFlow(false);
+                setMessages((m) => [
+                  ...m,
+                  {
+                    role: "assistant",
+                    content:
+                      "Pas de souci, je garde vos réponses de côté : vous pourrez reprendre la commande quand vous voulez, ou passer par le formulaire classique.",
+                  },
+                ]);
+              }}
+              onFinished={(numero, prix) => {
+                setOrderFlow(false);
+                setHasDraft(false);
+                setMessages((m) => [
+                  ...m,
+                  {
+                    role: "assistant",
+                    content: `Commande enregistrée, plein phare ! Votre devis ${numero} (${Math.round(prix)} € TTC) vient d'être créé et vous est envoyé par email. Il est en attente d'acceptation : vous pourrez l'accepter et le régler depuis votre espace client.`,
+                    cards: [{ type: "login", data: { url: "/dashboard-client/devis" } }],
+                  },
+                ]);
+              }}
+            />
+          )}
+
+          {profil === "client" && !orderFlow && (
+            <div className="vrm-chips" role="group" aria-label="Commander avec Vroomy">
+              <button
+                type="button"
+                className="vrm-chip"
+                onClick={() => startOrderFlow(undefined, hasDraft
+                  ? "On reprend votre commande là où nous l'avions laissée."
+                  : "Très bien, je vous guide pas à pas jusqu'à la confirmation.")}
+              >
+                <span className="vrm-ic" aria-hidden="true">
+                  <ClipboardList size={14} strokeWidth={2.2} />
+                </span>
+                {hasDraft ? "Reprendre ma commande" : "Se faire guider pas à pas"}
+              </button>
+            </div>
+          )}
+
+          {profil && !orderFlow && messages.length <= 3 && (
             <div className="vrm-chips" role="group" aria-label="Questions suggérées">
               {QUICK_REPLIES[profil].map((q) => (
                 <button
