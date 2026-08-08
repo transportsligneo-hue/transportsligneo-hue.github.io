@@ -177,7 +177,8 @@ function ConvoyeurCatalogue() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geo.position, trajets]);
 
-
+  useEffect(() => {
+    const ch = supabase
       .channel("catalogue-live-v2")
       .on(
         "postgres_changes",
@@ -198,17 +199,20 @@ function ConvoyeurCatalogue() {
   const catalogueTrajets = useMemo(() => toGroupedCatalogueTrajets(trajets), [trajets]);
 
   const enriched = useMemo(() => {
-    if (!geo.position) return catalogueTrajets.map((t) => ({ t, dist: null as number | null }));
+    if (!geo.position)
+      return catalogueTrajets.map((t) => ({ t, dist: null as number | null }));
     return catalogueTrajets.map((t) => {
-      if (typeof t.depart_lat === "number" && typeof t.depart_lng === "number") {
-        return {
-          t,
-          dist: haversineKm(geo.position!, { lat: t.depart_lat, lng: t.depart_lng }),
-        };
-      }
-      return { t, dist: null as number | null };
+      const point =
+        typeof t.depart_lat === "number" && typeof t.depart_lng === "number"
+          ? { lat: t.depart_lat, lng: t.depart_lng }
+          : coords[t.id];
+      return {
+        t,
+        dist: point ? haversineKm(geo.position!, point) : (null as number | null),
+      };
     });
-  }, [catalogueTrajets, geo.position]);
+  }, [catalogueTrajets, geo.position, coords]);
+
 
   const filtered = useMemo(() => {
     const s = filters.search.trim().toLowerCase();
