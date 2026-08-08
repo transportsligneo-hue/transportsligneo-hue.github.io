@@ -147,6 +147,22 @@ export function MissionCockpit({
     return () => { cancelled = true; };
   }, [attributionId]);
 
+  // Checklist de sécurité déjà validée pour cette mission ?
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("mission_departure_checklists" as never)
+        .select("attribution_id")
+        .eq("attribution_id" as never, attributionId as never)
+        .maybeSingle();
+      if (!cancelled && data) setChecklistDone(true);
+    })();
+    return () => { cancelled = true; };
+  }, [attributionId]);
+
+
+
   useEffect(() => {
     setOptimisticEtape(currentEtape);
   }, [currentEtape]);
