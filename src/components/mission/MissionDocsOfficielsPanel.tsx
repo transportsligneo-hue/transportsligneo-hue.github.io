@@ -14,7 +14,6 @@ type Variant = "light" | "dark";
 
 interface Props {
   attributionId: string;
-  isAdmin?: boolean;
   userId?: string | null;
   variant?: Variant;
 }
@@ -65,7 +64,7 @@ interface StoredDoc {
 
 const PV_TYPE = "passage_a_vide";
 
-export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, userId, variant = "light" }: Props) {
+export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light" }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurLite | null>(null);
