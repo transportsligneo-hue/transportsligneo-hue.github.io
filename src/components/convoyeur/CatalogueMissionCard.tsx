@@ -12,10 +12,13 @@ import {
   Navigation,
   Send,
   FileCheck2,
+  Lock,
 } from "lucide-react";
 import { MissionStatusBadge } from "@/components/admin/MissionStatusBadge";
-import { inferMissionLevel, missionLevelStyle } from "@/lib/mission-level";
+import { missionRequiredNiveau, missionLevelStyle } from "@/lib/mission-level";
+import { niveauLabel } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
+
 
 export interface CatalogTrajet {
   id: string;
