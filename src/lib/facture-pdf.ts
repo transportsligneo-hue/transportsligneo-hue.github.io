@@ -4,13 +4,13 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import signatureGo from "@/assets/signature-go.png";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
-import { applyLigneoFonts } from "@/lib/pdf-fonts";
   fetchCompanyInfo,
   companyLegalLine1,
   companyLegalLine2,
   resolveClientBillingIdentity,
   type CompanyInfo,
 } from "@/lib/doc-branding";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 
 
