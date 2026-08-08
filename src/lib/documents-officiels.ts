@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { EDL_CAR_SCHEMA_H, EDL_CAR_SCHEMA_PNG, EDL_CAR_SCHEMA_W } from "@/lib/edl-car-schema";
 import {
   DOC_CREAM,
   DOC_GOLD,
@@ -467,17 +468,27 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
 
   /* 2 — État extérieur */
   y = drawSectionTitle(doc, pageW, y, "2. État extérieur du véhicule") - 1;
-  const schemaTop = y + 4;
-  drawCarTopView(doc, 42, schemaTop, 30, 34);
+  const schemaTop = y + 3;
+  // Schéma véhicule officiel (5 vues) — identique au gabarit papier de référence
+  const schemaW = 104;
+  const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
+  doc.addImage(EDL_CAR_SCHEMA_PNG, "PNG", 18, schemaTop + 1, schemaW, schemaH, undefined, "FAST");
 
-  // Légende
-  const lx = 105;
-  let ly = schemaTop + 1;
+
+  // Légende (encadré à droite, comme le gabarit)
+  const legendX = 140;
+  const legendW = pageW - 14 - legendX;
+  const legendH = schemaH + 4;
+  doc.setDrawColor(...DOC_NAVY);
+  doc.setLineWidth(0.4);
+  doc.rect(legendX, schemaTop, legendW, legendH, "S");
+  const lx = legendX + 5;
+  let ly = schemaTop + 6;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
-  doc.text("LÉGENDE", lx, ly);
-  ly += 4.4;
+  doc.text("LÉGENDE", legendX + legendW / 2, ly, { align: "center" });
+  ly += 5.4;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
@@ -490,10 +501,11 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     "( • )  Impact (gravillon)",
   ].forEach((t) => {
     doc.text(t, lx, ly);
-    ly += 4.2;
+    ly += 4.6;
   });
 
-  y = schemaTop + 42;
+  y = schemaTop + legendH + 3;
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
@@ -547,8 +559,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.8, pageW - 14, y + 3 + i * 4.8);
-  y += 10;
+  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.4, pageW - 14, y + 3 + i * 4.4);
+  y += 8;
+
 
 
   /* Signatures */
