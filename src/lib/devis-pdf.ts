@@ -9,6 +9,7 @@ import {
   resolveClientBillingIdentity,
   type CompanyInfo,
 } from "@/lib/doc-branding";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 
 export interface DevisData {
@@ -260,6 +261,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       }
     : dInput;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);

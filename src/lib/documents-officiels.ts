@@ -19,9 +19,11 @@ import {
   loadImageAsDataUrl,
   type CompanyInfo,
 } from "@/lib/doc-branding";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const c = company ?? (await fetchCompanyInfo());

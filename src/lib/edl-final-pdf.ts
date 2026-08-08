@@ -13,6 +13,7 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export interface EdlFinalPdfPhoto {
   vue_type: string;
@@ -531,6 +532,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
 
     // 4) Canvas → jsPDF (A4 210x297)
     const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    applyLigneoFonts(doc);
     const pageW = 210;
     const pageH = 297;
     const pages = Array.from(root.querySelectorAll<HTMLElement>(".page"));

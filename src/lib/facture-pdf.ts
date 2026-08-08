@@ -10,6 +10,7 @@ import {
   resolveClientBillingIdentity,
   type CompanyInfo,
 } from "@/lib/doc-branding";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 
 
@@ -119,6 +120,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     : fInput;
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const innerW = pageW - M * 2;

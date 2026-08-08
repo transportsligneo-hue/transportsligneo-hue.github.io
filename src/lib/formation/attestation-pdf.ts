@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export type AttestationData = {
   fullName: string;
@@ -14,6 +15,7 @@ export function attestationReference(userId: string, at: Date) {
 export function generateAttestationPdf(data: AttestationData) {
   const ref = attestationReference(data.userId, data.completedAt);
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   doc.setFillColor(11, 19, 56);
   doc.rect(0, 0, 297, 210, "F");
   doc.setDrawColor(184, 134, 42);

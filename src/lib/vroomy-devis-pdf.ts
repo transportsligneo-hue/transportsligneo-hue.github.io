@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export interface VroomyDevisData {
   depart?: unknown;
@@ -25,6 +26,7 @@ function eur(v: unknown) {
 /** Génère et télécharge une estimation Vroomy au format PDF. */
 export function downloadVroomyDevisPdf(data: VroomyDevisData) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   const W = 210;
 
   doc.setFillColor(...NAVY);

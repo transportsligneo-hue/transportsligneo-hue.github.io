@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export interface MissionPdfData {
   numero: string;
@@ -106,6 +107,7 @@ function checkGold(doc: jsPDF, x: number, y: number) {
 
 export async function generateMissionPdf(m: MissionPdfData): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const logoData = await loadImageAsDataUrl(logoLigneo);
