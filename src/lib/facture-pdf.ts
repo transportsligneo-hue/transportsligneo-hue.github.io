@@ -127,6 +127,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const innerW = pageW - M * 2;
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  // Logo du client (comme sur le devis) — affiché dans le bloc « Facturé à ».
+  const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
   const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
   const tvaExempt = f.tva_exempt ?? resolved.pricingDisplayMode === "exempt";
