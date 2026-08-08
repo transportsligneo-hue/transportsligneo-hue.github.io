@@ -61,7 +61,14 @@ const IcoLink = () => (
 const IcoArrow = () => (<S><path d="M5 12h14M13 5l7 7-7 7" /></S>);
 const IcoDoc = () => (<S><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" /><path d="M14 2v6h6" /></S>);
 const IcoBolt = () => (<S fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></S>);
-const IcoThermal = () => (<S sw={2}><path d="M14 3v10.5a4 4 0 1 1-4 0V3z" /></S>);
+const IcoThermal = () => (
+  <S sw={2}>
+    <path d="M6 22h8a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2z" />
+    <path d="M18 5l3 3v9" />
+    <path d="M18 11V5h-3" />
+    <circle cx="10" cy="17" r="1.5" fill="currentColor" />
+  </S>
+);
 const IcoCal = () => (<S sw={2}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></S>);
 const IcoClock = () => (<S sw={2}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></S>);
 const IcoCheck = () => (<S sw={2}><path d="M9 11l3 3 8-8" /></S>);
