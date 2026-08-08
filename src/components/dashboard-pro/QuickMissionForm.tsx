@@ -422,6 +422,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         marque: marque || "",
         modele: modele || "",
         carburant: energie || "",
+        // PV de livraison digitalisé demandé par le client
+        pv_digitalise: pvDigitalise,
         // Lien vers le devis auto-généré
         ...(devisId ? { devis_id: devisId, devis_genere_at: new Date().toISOString() } : {}),
         // Restitution (Aller-retour)
