@@ -258,16 +258,16 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.text("DÉTAIL DE LA PRESTATION", M, y);
   y += 5;
 
-  const colQty = pageW - M - 118;
-  const colUnit = pageW - M - 62;
+  const colQty = pageW - M - 96;
+  const colUnit = pageW - M - 54;
   const colTotal = pageW - M;
   doc.setFillColor(...NAVY);
   doc.rect(M, y, innerW, 9, "F");
   doc.setTextColor(...WHITE);
   doc.setFontSize(8);
   doc.text("Description", M + 5, y + 5.9);
-  doc.text("Quantité", colQty + 20, y + 5.9, { align: "center" });
-  doc.text("Prix unit. HT", colUnit + 22, y + 5.9, { align: "right" });
+  doc.text("Qté", colQty + 12, y + 5.9, { align: "center" });
+  doc.text("Prix unit. HT", colUnit + 20, y + 5.9, { align: "right" });
   doc.text("Total HT", colTotal - 5, y + 5.9, { align: "right" });
   y += 9;
 
@@ -278,7 +278,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   ].join(" — ");
   const rows: { desc: string; qty: string; unit: string; total: string; free?: boolean }[] = [
     { desc: mainDesc, qty: "1", unit: eur(ht), total: eur(ht) },
-    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0), free: true },
+    { desc: "État des lieux contradictoire départ / arrivée (constat photo)", qty: "1", unit: "Inclus", total: eur(0), free: true },
     { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0), free: true },
   ];
 
@@ -287,14 +287,14 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   for (const r of rows) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    const lines = doc.splitTextToSize(r.desc, colQty - M - 10) as string[];
-    const rowH = Math.max(10, lines.length * 4.4 + 5.5);
+    const lines = doc.splitTextToSize(r.desc, colQty - M - 8) as string[];
+    const rowH = Math.max(9, lines.length * 4.2 + 5);
     doc.setTextColor(...TEXT);
     doc.text(lines, M + 5, y + 6);
     const midY = y + rowH / 2 + 1.4;
-    doc.text(r.qty, colQty + 20, midY, { align: "center" });
+    doc.text(r.qty, colQty + 12, midY, { align: "center" });
     doc.setTextColor(...(r.free ? MUTED : TEXT));
-    doc.text(r.unit, colUnit + 22, midY, { align: "right" });
+    doc.text(r.unit, colUnit + 20, midY, { align: "right" });
     doc.setTextColor(...TEXT);
     doc.text(r.total, colTotal - 5, midY, { align: "right" });
     doc.rect(M, y, innerW, rowH, "S");
@@ -302,8 +302,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ===== Totaux =====
-  y += 8;
-  const totLabelX = colUnit + 22;
+  y += 7;
+  const totLabelX = colUnit + 20;
   const totValX = colTotal - 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -311,11 +311,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.text("Total HT", totLabelX, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.text(eur(ht), totValX, y, { align: "right" });
-  y += 7;
+  y += 6;
   doc.setFont("helvetica", "normal");
   doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux} %)`, totLabelX, y, { align: "right" });
   doc.text(tvaExempt ? "Exonérée" : eur(tva), totValX, y, { align: "right" });
-  y += 5;
+  y += 4;
   doc.setFillColor(...NAVY);
   doc.rect(colUnit - 30, y, colTotal - (colUnit - 30), 12, "F");
   doc.setFont("helvetica", "bold");
@@ -325,7 +325,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
-  y += 18;
+  y += 17;
 
   // ===== Statut / modalités / signature =====
   const fh = 22;
