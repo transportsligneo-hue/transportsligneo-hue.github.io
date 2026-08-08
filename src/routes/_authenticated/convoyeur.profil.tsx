@@ -18,6 +18,11 @@ function ConvoyeurProfil() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
   const [statut, setStatut] = useState<string>("en_attente");
+  const [progression, setProgression] = useState({
+    niveau: "debutant" as string,
+    missions: 0,
+    note: null as number | null,
+  });
 
   const [form, setForm] = useState({
     prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "",
