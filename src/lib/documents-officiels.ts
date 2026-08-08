@@ -10,7 +10,6 @@ import {
   DOC_WHITE,
   dateFmt,
   drawDocHeader,
-  drawDocLegalFooter,
   docEnsureSpace,
   finalizeDoc,
   drawKeyValueRow,
