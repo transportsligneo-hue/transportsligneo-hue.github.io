@@ -26,8 +26,8 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
     const next = draft.trim();
     if (!next) { toast.error("Numéro requis"); return; }
     if (next === value) { setEditing(false); return; }
-    if (!/^[A-Za-z0-9._\-\/]+$/.test(next)) {
-      toast.error("Caractères autorisés : lettres, chiffres, . _ - /");
+    if (!/^[A-Za-z0-9 #._\-\/]+$/.test(next)) {
+      toast.error("Caractères autorisés : lettres, chiffres, espace, # . _ - /");
       return;
     }
     setSaving(true);
