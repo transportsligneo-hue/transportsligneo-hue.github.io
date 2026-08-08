@@ -51,7 +51,12 @@ interface DocItem {
   accent: "green" | "amber" | "pink" | "cyan";
   onUpload?: () => void;
   onOpen?: () => Promise<void> | void;
+  /** Type stocké en base quand le document est uploadé/scanné. */
+  uploadType?: string;
+  /** Nb de pages max pour le scanner natif. */
+  scanPages?: number;
 }
+
 
 const ACCENT: Record<DocItem["accent"], { bg: string; border: string; color: string }> = {
   green: { bg: "rgba(52,232,176,0.10)", border: "rgba(52,232,176,0.35)", color: "#34E8B0" },
