@@ -159,14 +159,31 @@ export function MissionV3DocsPane({
   const contrat = findDoc(["contrat"]);
   const attest = findDoc(["assurance", "attestation_assurance"]);
 
+  const pvLivr = findDoc(["pv_livraison", "pv_arrivee"]);
+  const carteGrise = findDoc(["carte_grise"]);
+
   const items: DocItem[] = [
     {
       key: "pv_enlev",
       label: "Procès-verbal d'enlèvement",
-      status: inspectionDepartDone ? "valide" : "attente",
+      status: pvEnlev ? "valide" : inspectionDepartDone ? "valide" : "attente",
       icon: ClipboardCheck,
-      accent: inspectionDepartDone ? "green" : "amber",
+      accent: pvEnlev || inspectionDepartDone ? "green" : "amber",
       onOpen: pvEnlev ? () => openStored(pvEnlev.url_fichier) : undefined,
+      onUpload: () => triggerFile("pv_enlev"),
+      uploadType: "pv_enlevement",
+      scanPages: 4,
+    },
+    {
+      key: "pv_livraison",
+      label: "Procès-verbal de livraison",
+      status: pvLivr ? "valide" : inspectionArriveeDone ? "valide" : "attente",
+      icon: ClipboardCheck,
+      accent: pvLivr || inspectionArriveeDone ? "green" : "amber",
+      onOpen: pvLivr ? () => openStored(pvLivr.url_fichier) : undefined,
+      onUpload: () => triggerFile("pv_livraison"),
+      uploadType: "pv_livraison",
+      scanPages: 4,
     },
     {
       key: "contrat",
@@ -176,13 +193,19 @@ export function MissionV3DocsPane({
       accent: contrat ? "green" : "amber",
       onOpen: contrat ? () => openStored(contrat.url_fichier) : undefined,
       onUpload: () => triggerFile("contrat"),
+      uploadType: "contrat",
+      scanPages: 6,
     },
     {
       key: "cg",
       label: "Carte grise (CG)",
-      status: carteGriseAvailable ? "valide" : "attente",
+      status: carteGrise || carteGriseAvailable ? "valide" : "attente",
       icon: CreditCard,
-      accent: carteGriseAvailable ? "green" : "amber",
+      accent: carteGrise || carteGriseAvailable ? "green" : "amber",
+      onOpen: carteGrise ? () => openStored(carteGrise.url_fichier) : undefined,
+      onUpload: () => triggerFile("cg"),
+      uploadType: "carte_grise",
+      scanPages: 2,
     },
     {
       key: "assurance",
@@ -192,6 +215,8 @@ export function MissionV3DocsPane({
       accent: attest ? "green" : "amber",
       onOpen: attest ? () => openStored(attest.url_fichier) : undefined,
       onUpload: () => triggerFile("assurance"),
+      uploadType: "assurance",
+      scanPages: 3,
     },
     {
       key: "photos",
@@ -212,6 +237,7 @@ export function MissionV3DocsPane({
   const validated = items.filter(i => i.status === "valide").length;
   const total = items.length;
   const pct = Math.round((validated / total) * 100);
+
 
   return (
     <div className="v3-docs-root">
