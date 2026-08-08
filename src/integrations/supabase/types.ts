@@ -5688,6 +5688,10 @@ export type Database = {
         Args: { _mission_id: string }
         Returns: undefined
       }
+      admin_update_trajet_prix: {
+        Args: { _prix: number; _prix_convoyeur?: number; _trajet_id: string }
+        Returns: Json
+      }
       api_emit_event: {
         Args: { _event: string; _mission_id: string; _payload: Json }
         Returns: undefined

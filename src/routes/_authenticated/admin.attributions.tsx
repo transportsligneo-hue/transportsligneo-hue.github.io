@@ -27,7 +27,9 @@ import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueB
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
-import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
+import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -319,6 +321,28 @@ function AdminAttributions() {
     return map;
   }, [attributions]);
 
+  type GroupedItem =
+    | { kind: "group"; gid: string; seq: string; items: Attribution[] }
+    | { kind: "single"; a: Attribution };
+
+  const groupedAttributions = useMemo<GroupedItem[]>(() => {
+    const out: GroupedItem[] = [];
+    const seen = new Set<string>();
+    attributions.forEach((a) => {
+      const gid = a.trajet?.mission_group_id ?? null;
+      if (!gid) { out.push({ kind: "single", a }); return; }
+      if (seen.has(gid)) return;
+      seen.add(gid);
+      const items = attributions
+        .filter((x) => x.trajet?.mission_group_id === gid)
+        .sort((x, y) => ((x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1)) - (y.trajet?.leg_index ?? (y.trajet?.leg_type === "retour" ? 2 : 1))));
+      if (items.length < 2) { out.push({ kind: "single", a }); return; }
+      const seq = shortMissionSeq(arBaseByGroup.get(gid) ?? a.numero_mission ?? "");
+      out.push({ kind: "group", gid, seq, items });
+    });
+    return out;
+  }, [attributions, arBaseByGroup]);
+
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
@@ -518,6 +542,108 @@ function AdminAttributions() {
     setPhotosView({ id: attributionId, type, photos: enriched });
   };
 
+  const renderAttributionCard = (a: Attribution) => (
+            <Card key={a.id}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } }); }}
+                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-pro-accent/40"
+                title="Ouvrir le menu complet de la mission"
+              >
+              <div className="flex items-start justify-between flex-wrap gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-pro-text font-semibold">
+                      {attributionRef(a, arBaseByGroup)}
+                    </p>
+                    {!a.trajet?.mission_group_id && hasLegSuffix(a.numero_mission) && (
+                      <span className="text-[11px] text-indigo-700" title="Ces deux volets ont été dissociés">
+                        Faisait partie de la mission {shortMissionSeq(a.numero_mission ?? "")}
+                      </span>
+                    )}
+                    <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
+                      {statutLabels[a.statut] ?? a.statut}
+                    </Badge>
+                    {a.trajet?.is_test_data && <TestBadge />}
+                    {a.trajet?.type_transport && (
+                      <span className="text-[10px] uppercase tracking-wider text-pro-muted">
+                        {a.trajet.type_transport}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-pro-text-soft text-sm mt-1">
+                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
+                  </p>
+                  <p className="text-pro-muted text-xs mt-1">
+                    Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
+                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
+                    {a.trajet?.date_trajet && (
+                      <> · {new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR")}</>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                  {renderAttributionActions(a)}
+                  <IconButton
+                    onClick={() => setSelectedAttr(a)}
+                    title="Aperçu rapide (panneau latéral)"
+                    tone="primary"
+                  >
+                    <Eye size={15} />
+                  </IconButton>
+                  <IconButton onClick={() => viewGps(a.id)} title="Suivi GPS" tone="primary">
+                    <MapPin size={15} />
+                  </IconButton>
+                  <IconButton onClick={() => viewPhotos(a.id, "depart")} title="Photos départ" tone="primary">
+                    <Eye size={15} />
+                  </IconButton>
+                  <IconButton onClick={() => viewPhotos(a.id, "arrivee")} title="Photos arrivée" tone="success">
+                    <Image size={15} />
+                  </IconButton>
+                  <IconButton onClick={() => setReportId(a.id)} title="Rapport mission" tone="primary">
+                    <FileText size={15} />
+                  </IconButton>
+                  {(a.statut === "termine" || a.statut === "validee") && (
+                    <IconButton
+                      onClick={() => handleEmitFacture(a)}
+                      title="Émettre la facture"
+                      tone="success"
+                      disabled={invoicingId === a.id}
+                    >
+                      {invoicingId === a.id ? <Loader2 size={15} className="animate-spin" /> : <Receipt size={15} />}
+                    </IconButton>
+                  )}
+                  {a.trajet?.is_test_data && (
+                    <DeleteTestMissionButton
+                      trajetId={a.trajet_id}
+                      compact
+                      onDeleted={() => { fetchAttributions(); fetchOptions(); }}
+                    />
+                  )}
+                </div>
+              </div>
+              </div>
+
+              <div className="mt-3 pt-3 border-t border-pro-border" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
+                  className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-accent transition-colors"
+                >
+                  <FileText size={12} />
+                  Documents
+                  <span className="text-[10px] ml-1">{expandedDocs === a.id ? "▲" : "▼"}</span>
+                </button>
+                {expandedDocs === a.id && (
+                  <div className="mt-2">
+                    <MissionDocuments attributionId={a.id} userId="" isAdmin />
+                  </div>
+                )}
+              </div>
+            </Card>
+  );
+
   return (
     <div>
       <PageHeader
@@ -602,106 +728,30 @@ function AdminAttributions() {
         </div>
       )}
 
+      <LegSuffixLegend className="mb-3" />
+
       {attributions.length === 0 ? (
         <EmptyState icon={Send} title="Aucune attribution" description="Attribuez un trajet à un convoyeur pour commencer." />
       ) : (
         <div className="space-y-3">
-          {attributions.map((a) => (
-            <Card key={a.id}>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
-                onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } }); }}
-                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-pro-accent/40"
-                title="Ouvrir le menu complet de la mission"
-              >
-              <div className="flex items-start justify-between flex-wrap gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-pro-text font-semibold">
-                      {attributionRef(a, arBaseByGroup)}
-                    </p>
-                    <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
-                      {statutLabels[a.statut] ?? a.statut}
-                    </Badge>
-                    {a.trajet?.is_test_data && <TestBadge />}
-                    {a.trajet?.type_transport && (
-                      <span className="text-[10px] uppercase tracking-wider text-pro-muted">
-                        {a.trajet.type_transport}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-pro-text-soft text-sm mt-1">
-                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
-                  </p>
-                  <p className="text-pro-muted text-xs mt-1">
-                    Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
-                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
-                    {a.trajet?.date_trajet && (
-                      <> · {new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR")}</>
-                    )}
-                  </p>
+          {groupedAttributions.map((item) =>
+            item.kind === "group" ? (
+              <div key={item.gid} className="rounded-2xl border-2 border-indigo-200 bg-indigo-50/50 p-3">
+                <div className="mb-2.5 flex flex-wrap items-center gap-2 px-1">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+                    <ArrowLeftRight size={12} /> Mission groupée
+                  </span>
+                  <span className="text-sm font-bold text-pro-text">Mission {item.seq}</span>
+                  <span className="text-[11px] text-pro-text-soft">
+                    Livraison ({item.seq}L) + Restitution ({item.seq}R) — liées tant qu'elles ne sont pas dissociées
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                  {renderAttributionActions(a)}
-                  <IconButton
-                    onClick={() => setSelectedAttr(a)}
-                    title="Aperçu rapide (panneau latéral)"
-                    tone="primary"
-                  >
-                    <Eye size={15} />
-                  </IconButton>
-                  <IconButton onClick={() => viewGps(a.id)} title="Suivi GPS" tone="primary">
-                    <MapPin size={15} />
-                  </IconButton>
-                  <IconButton onClick={() => viewPhotos(a.id, "depart")} title="Photos départ" tone="primary">
-                    <Eye size={15} />
-                  </IconButton>
-                  <IconButton onClick={() => viewPhotos(a.id, "arrivee")} title="Photos arrivée" tone="success">
-                    <Image size={15} />
-                  </IconButton>
-                  <IconButton onClick={() => setReportId(a.id)} title="Rapport mission" tone="primary">
-                    <FileText size={15} />
-                  </IconButton>
-                  {(a.statut === "termine" || a.statut === "validee") && (
-                    <IconButton
-                      onClick={() => handleEmitFacture(a)}
-                      title="Émettre la facture"
-                      tone="success"
-                      disabled={invoicingId === a.id}
-                    >
-                      {invoicingId === a.id ? <Loader2 size={15} className="animate-spin" /> : <Receipt size={15} />}
-                    </IconButton>
-                  )}
-                  {a.trajet?.is_test_data && (
-                    <DeleteTestMissionButton
-                      trajetId={a.trajet_id}
-                      compact
-                      onDeleted={() => { fetchAttributions(); fetchOptions(); }}
-                    />
-                  )}
-                </div>
+                <div className="space-y-2">{item.items.map(renderAttributionCard)}</div>
               </div>
-              </div>
-
-              <div className="mt-3 pt-3 border-t border-pro-border" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
-                  className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-accent transition-colors"
-                >
-                  <FileText size={12} />
-                  Documents
-                  <span className="text-[10px] ml-1">{expandedDocs === a.id ? "▲" : "▼"}</span>
-                </button>
-                {expandedDocs === a.id && (
-                  <div className="mt-2">
-                    <MissionDocuments attributionId={a.id} userId="" isAdmin />
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))}
+            ) : (
+              renderAttributionCard(item.a)
+            ),
+          )}
         </div>
       )}
 

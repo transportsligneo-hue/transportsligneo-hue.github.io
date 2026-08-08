@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ClipboardList } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -11,7 +11,8 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
-import { displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 
@@ -215,15 +216,34 @@ function AdminMissionsUnified() {
     });
   }, [rows, filter, search]);
 
-  // Alternance de surbrillance : un aller-retour (2 volets) partage la même bande
-  const banded = useMemo(() => {
+  // Regroupement visuel des missions groupées (Livraison L + Restitution R)
+  type ListRow =
+    | { type: "groupHeader"; gid: string; seq: string; count: number }
+    | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
+
+  const listRows = useMemo<ListRow[]>(() => {
+    const out: ListRow[] = [];
+    const seen = new Set<string>();
     let band = false;
-    let lastKey: string | null = null;
-    return visible.map((m) => {
-      const key = m.groupId ?? `${m.kind}-${m.id}`;
-      if (key !== lastKey) { band = !band; lastKey = key; }
-      return { m, band };
+    visible.forEach((m) => {
+      const gid = m.groupId ?? null;
+      const members = gid ? visible.filter((x) => x.groupId === gid) : [];
+      if (gid && members.length > 1) {
+        if (seen.has(gid)) return;
+        seen.add(gid);
+        band = !band;
+        const sorted = members
+          .slice()
+          .sort((a, b) => ((a.legIndex ?? (a.legType === "retour" ? 2 : 1)) - (b.legIndex ?? (b.legType === "retour" ? 2 : 1))));
+        const seq = shortMissionSeq(sorted[0].ref);
+        out.push({ type: "groupHeader", gid, seq, count: sorted.length });
+        sorted.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === sorted.length - 1 }));
+        return;
+      }
+      band = !band;
+      out.push({ type: "row", m, band, inGroup: false, last: true });
     });
+    return out;
   }, [visible]);
 
   // Garde le panneau synchronisé avec les données rafraîchies
@@ -281,6 +301,8 @@ function AdminMissionsUnified() {
         </div>
       </div>
 
+      <LegSuffixLegend className="mb-3" />
+
       {/* Tableau unique */}
       <div className="a6-card overflow-hidden">
         {visible.length === 0 ? (
@@ -302,44 +324,65 @@ function AdminMissionsUnified() {
                 </tr>
               </thead>
               <tbody>
-                {banded.map(({ m, band }) => (
-                  <tr
-                    key={`${m.kind}-${m.id}`}
-                    className={`row ${band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"}`}
-                    onClick={() => setSelected(m)}
-                  >
-                    <td>
-                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{m.ref}</p>
+                {listRows.map((r) =>
+                  r.type === "groupHeader" ? (
+                    <tr key={`g-${r.gid}`} className="bg-[#eef2ff]">
+                      <td colSpan={6} className="!py-2">
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
+                            <ArrowLeftRight size={11} /> Mission groupée
+                          </span>
+                          <b className="text-[12px] text-[var(--a6-text)]">Mission {r.seq}</b>
+                          <span className="text-[11px] text-[var(--a6-muted)]">
+                            {r.seq}L Livraison + {r.seq}R Restitution — non dissociées
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr
+                      key={`${r.m.kind}-${r.m.id}`}
+                      className={`row ${r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_3px_0_0_0_#4f46e5]" : ""}`}
+                      onClick={() => setSelected(r.m)}
+                    >
+                    <td className={r.inGroup ? "pl-5" : ""}>
+                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{r.m.ref}</p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        {m.isRoundTrip ? (
-                          <span className="a6-badge attribuee">
-                            {m.legType === "retour" || m.legIndex === 2 ? "Restitution" : "Livraison"}
+                        {r.m.isRoundTrip ? (
+                          <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
+                            {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
                           </span>
                         ) : (
                           <span className="a6-badge">Livraison simple</span>
                         )}
-                        {m.isTest && <span className="a6-badge annulee">Test</span>}
+                        {r.m.isTest && <span className="a6-badge annulee">Test</span>}
                       </div>
+                      {!r.inGroup && hasLegSuffix(r.m.ref) && (
+                        <p className="mt-1 text-[10.5px] text-[#4f46e5]">
+                          Faisait partie de la mission {shortMissionSeq(r.m.ref)}
+                        </p>
+                      )}
                     </td>
                     <td>
                       <p className="font-semibold text-[var(--a6-text)] inline-flex items-center gap-1.5">
-                        {m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {m.arrivee}
+                        {r.m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {r.m.arrivee}
                       </p>
-                      {(m.marque || m.modele) && (
-                        <p className="text-[11px] text-[var(--a6-dim)]">{[m.marque, m.modele].filter(Boolean).join(" ")}</p>
+                      {(r.m.marque || r.m.modele) && (
+                        <p className="text-[11px] text-[var(--a6-dim)]">{[r.m.marque, r.m.modele].filter(Boolean).join(" ")}</p>
                       )}
                     </td>
-                    <td className="hidden md:table-cell text-[var(--a6-muted)]">{m.clientNom || "—"}</td>
+                    <td className="hidden md:table-cell text-[var(--a6-muted)]">{r.m.clientNom || "—"}</td>
                     <td className="hidden lg:table-cell text-[var(--a6-dim)] text-[11.5px]">
-                      {m.date ? new Date(m.date).toLocaleDateString("fr-FR") : "—"}
-                      {m.heure ? ` · ${m.heure}` : ""}
+                      {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "—"}
+                      {r.m.heure ? ` · ${r.m.heure}` : ""}
                     </td>
-                    <td className="hidden lg:table-cell a6-num font-semibold">{m.prix != null ? `${m.prix} €` : "—"}</td>
+                    <td className="hidden lg:table-cell a6-num font-semibold">{r.m.prix != null ? `${r.m.prix} €` : "—"}</td>
                     <td>
-                      <span className={`a6-badge ${UNIFIED_STATUS[m.status].cls}`}>{UNIFIED_STATUS[m.status].label}</span>
+                      <span className={`a6-badge ${UNIFIED_STATUS[r.m.status].cls}`}>{UNIFIED_STATUS[r.m.status].label}</span>
                     </td>
                   </tr>
-                ))}
+                  ),
+                )}
               </tbody>
             </table>
           </div>

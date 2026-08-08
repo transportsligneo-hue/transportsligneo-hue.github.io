@@ -101,22 +101,20 @@ export function AdminMissionARBanner({
     }
     setSaving(true);
     try {
-      // Trajet : source opérationnelle
-      const { error: tErr } = await supabase
-        .from("trajets")
-        .update({ prix: parsed, prix_client: parsed } as never)
-        .eq("id", trajetId);
-      if (tErr) throw tErr;
-      // Mission côté client : figée
-      if (missionId) {
-        const { error: mErr } = await supabase.rpc(
-          "admin_set_mission_prix" as never,
-          { _mission_id: missionId, _prix: parsed } as never,
-        );
-        if (mErr) throw mErr;
-        setLocked(true);
+      const { data, error } = await supabase.rpc(
+        "admin_update_trajet_prix" as never,
+        { _trajet_id: trajetId, _prix: parsed } as never,
+      );
+      if (error) throw error;
+      const res = (data ?? {}) as { devis_updated?: boolean; facture_updated?: boolean; facture_blocked?: boolean };
+      setLocked(true);
+      const sync: string[] = ["Espace client", "Admin — Attributions & Missions"];
+      if (res.devis_updated) sync.unshift("Devis client");
+      if (res.facture_updated) sync.unshift("Facture");
+      toast.success("Prix mis à jour et synchronisé", { description: sync.join(" · ") });
+      if (res.facture_blocked) {
+        toast.warning("Facture déjà émise", { description: "Montant de la facture inchangé : avoir ou facture rectificative requis." });
       }
-      toast.success("Prix mis à jour", { description: "Prix figé sur cette mission uniquement." });
       onPriceSaved?.(parsed);
       setEditing(false);
     } catch (e) {
@@ -192,7 +190,7 @@ export function AdminMissionARBanner({
         <MissionLegBadge leg={legType as "aller" | "retour"} />
         <div className="text-sm text-pro-text">
           <span className="font-semibold">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
-          <span className="text-pro-text-soft"> · fait partie d'un groupe livraison + restitution</span>
+          <span className="text-pro-text-soft"> · mission groupée — L = Livraison, R = Restitution</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           {loading ? (
@@ -206,7 +204,7 @@ export function AdminMissionARBanner({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline-offset-2 hover:underline"
             >
               <ArrowLeftRight size={12} />
-              Voir la mission {twin.leg_type === "retour" ? "Retour" : "Aller"}
+              Voir le volet {twin.leg_type === "retour" ? "Restitution (R)" : "Livraison (L)"}
               {twin.numero ? <span className="font-mono text-[11px] text-pro-text-soft">{twin.numero}</span> : null}
             </Link>
           ) : twin ? (

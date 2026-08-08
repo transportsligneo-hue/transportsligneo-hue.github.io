@@ -89,37 +89,32 @@ export function MissionPriceCard({
   const save = async () => {
     const pc = parse(prixClient);
     const pv = parse(prixConvoyeur);
-    if (Number.isNaN(pc) || Number.isNaN(pv)) {
-      toast.error("Prix invalide");
+    if (Number.isNaN(pc) || Number.isNaN(pv) || pc == null) {
+      toast.error("Prix client invalide");
       return;
     }
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("trajets")
-        .update({
-          prix: pc,
-          prix_client: pc,
-          prix_convoyeur: pv,
-          tarif_convoyeur: pv,
-        } as never)
-        .eq("id", trajetId);
+      const { data, error } = await supabase.rpc(
+        "admin_update_trajet_prix" as never,
+        { _trajet_id: trajetId, _prix: pc, _prix_convoyeur: pv } as never,
+      );
       if (error) throw error;
-
-      if (missionId && pc != null) {
-        const { error: mErr } = await supabase.rpc(
-          "admin_set_mission_prix" as never,
-          { _mission_id: missionId, _prix: pc } as never,
-        );
-        if (mErr) throw mErr;
-        setLocked(true);
+      const res = (data ?? {}) as {
+        devis_updated?: boolean;
+        facture_updated?: boolean;
+        facture_blocked?: boolean;
+      };
+      setLocked(true);
+      const sync: string[] = ["Espace client", "Admin — Attributions & Missions"];
+      if (res.devis_updated) sync.unshift("Devis client");
+      if (res.facture_updated) sync.unshift("Facture");
+      toast.success("Prix mis à jour et synchronisé", { description: sync.join(" · ") });
+      if (res.facture_blocked) {
+        toast.warning("Facture déjà émise", {
+          description: "Le montant de la facture n'a pas été modifié : émettez un avoir ou une facture rectificative.",
+        });
       }
-
-      toast.success("Prix mis à jour", {
-        description: missionId
-          ? "Prix figé sur cette mission client uniquement."
-          : "Prix enregistré sur la mission.",
-      });
       onSaved?.({ prix: pc, prixConvoyeur: pv });
     } catch (e) {
       toast.error("Impossible d'enregistrer le prix", {
