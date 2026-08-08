@@ -1,4 +1,5 @@
-globalThis.window = globalThis.window || {};
+globalThis.atob = globalThis.atob; globalThis.btoa = globalThis.btoa;
+globalThis.window = globalThis;
 const { generatePassageAVidePdf, generateFicheMissionPdf, generateEdlPapierPdf } = await import('./src/lib/documents-officiels.ts');
 const company = { raison_sociale:"Transports Ligneo", forme_juridique:"SASU", capital_social:"1 000 €", rcs:"Tours 987 654 321", siret:"98765432100019", tva_intra:"FR12987654321", adresse_ligne1:"12 rue de la Paix", adresse_cp:"37000", adresse_ville:"Tours", adresse_pays:"France", email_contact:"contact@transportsligneo.fr", telephone:"07 82 45 61 81", site_web:"transportsligneo.fr", signataire_nom:"M. Ligneo", signataire_fonction:"Président", assurance_mention:null };
 const fs = await import('fs');
