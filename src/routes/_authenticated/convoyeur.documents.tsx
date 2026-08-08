@@ -307,6 +307,14 @@ function ConvoyeurDocuments() {
                       }}
                     />
                   </label>
+                  <DocScanButton
+                    label="Scanner"
+                    maxPages={6}
+                    mergeToPdf
+                    filenameBase={spec.key}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium bg-white border border-pro-border text-pro-text hover:bg-pro-bg-soft"
+                    onFiles={(files) => { if (files[0]) handleUpload(spec, files[0]); }}
+                  />
                 </div>
               </div>
             </div>
