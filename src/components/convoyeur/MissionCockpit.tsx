@@ -326,6 +326,11 @@ export function MissionCockpit({
           onStartInspection("arrivee");
           break;
         case "demarrer":
+          // Checklist sécurité bloquante : gilet jaune, tenue, permis.
+          if (!checklistDone) {
+            setOpenChecklist(true);
+            break;
+          }
           await persistEtape("en_route");
           if ((await onMacroStatusChange("en_cours")) === false) {
             toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
