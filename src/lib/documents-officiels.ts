@@ -447,19 +447,26 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
-  doc.text("Carburant / Énergie :", xR, yr);
-  let ex = xR + doc.getTextWidth("Carburant / Énergie :") + 3;
+  doc.text("Énergie :", xR, yr);
+  const exStart = xR + doc.getTextWidth("Énergie :") + 3;
+  const exLimit = xR + colW;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(6.8);
   doc.setTextColor(...DOC_TEXT);
   const energie = (d.carburant || "").toLowerCase();
-  EDL_ENERGIES.forEach((e) => {
+  const widths = EDL_ENERGIES.map((e) => 3.8 + doc.getTextWidth(e));
+  const totalW = widths.reduce((a, b) => a + b, 0);
+  const gap = Math.max(2, (exLimit - exStart - totalW) / (EDL_ENERGIES.length - 1));
+  let ex = exStart;
+  EDL_ENERGIES.forEach((e, i) => {
     const checked = energie.length > 0 && e.toLowerCase().startsWith(energie.slice(0, 4));
-    drawCheckbox(doc, ex, yr - 3, 3.2, checked);
-    doc.text(e, ex + 4.2, yr);
-    ex += 4.2 + doc.getTextWidth(e) + 4;
+    drawCheckbox(doc, ex, yr - 2.8, 3, checked);
+    doc.text(e, ex + 3.8, yr);
+    ex += widths[i] + gap;
   });
   yr += 5.4;
+
+
 
   y = Math.max(yl, yr) + 1;
   doc.setFont("helvetica", "normal");
