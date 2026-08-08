@@ -559,8 +559,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   y = drawSectionTitle(doc, pageW, y, "4. Observations complémentaires") - 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.25);
-  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.8, pageW - 14, y + 3 + i * 4.8);
-  y += 10;
+  for (let i = 0; i < 2; i++) doc.line(14, y + 3 + i * 4.4, pageW - 14, y + 3 + i * 4.4);
+  y += 8;
+
 
 
   /* Signatures */
