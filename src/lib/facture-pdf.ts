@@ -139,54 +139,54 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ===== Bandeau navy =====
   doc.setFillColor(...NAVY);
-  doc.rect(M, 14, innerW, 32, "F");
+  doc.rect(M, 12, innerW, 26, "F");
   if (logoData) {
-    try { doc.addImage(logoData, "PNG", M + 5, 18, 24, 24); } catch {}
+    try { doc.addImage(logoData, "PNG", M + 5, 15, 20, 20); } catch {}
   }
   doc.setTextColor(...WHITE);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), M + 35, 28);
+  doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), M + 31, 24);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...GOLD_SOFT);
-  doc.text("CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE", M + 35, 34);
+  doc.text("CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE", M + 31, 30);
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.8);
-  doc.line(M, 47, pageW - M, 47);
+  doc.line(M, 39, pageW - M, 39);
 
   // ===== Titre + dates =====
   doc.setFont("helvetica", "bold");
   doc.setFontSize(26);
   doc.setTextColor(...NAVY);
-  doc.text(isB2B ? "FACTURE B2B" : "FACTURE", M, 62);
+  doc.text(isB2B ? "FACTURE B2B" : "FACTURE", M, 54);
   doc.setFontSize(10);
   doc.setTextColor(...GOLD);
-  doc.text(`N° ${f.numero}`, M, 69);
+  doc.text(`N° ${f.numero}`, M, 61);
 
   const rX = pageW - M;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
-  doc.text("Date de facturation", rX, 55, { align: "right" });
+  doc.text("Date de facturation", rX, 47, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...NAVY);
-  doc.text(fmtDate(f.date_facture || new Date().toISOString()), rX, 61, { align: "right" });
+  doc.text(fmtDate(f.date_facture || new Date().toISOString()), rX, 53, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
-  doc.text(isPaid && !isB2B ? "Date de paiement" : "Date d'échéance", rX, 68, { align: "right" });
+  doc.text(isPaid && !isB2B ? "Date de paiement" : "Date d'échéance", rX, 60, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...GOLD);
   doc.text(
     isPaid && !isB2B ? fmtDate(f.date_paiement) : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
-    rX, 74, { align: "right" },
+    rX, 66, { align: "right" },
   );
 
   // ===== Facturé à / Références =====
-  const blockTop = 84;
+  const blockTop = 74;
   const leftW = innerW * 0.52 - 4;
   const clientLines: { t: string; bold?: boolean; muted?: boolean }[] = [];
   const societe = f.client_societe?.trim();
@@ -208,7 +208,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (f.client_tva) clientLines.push({ t: `TVA ${f.client_tva}`, muted: true });
   if (f.client_email) clientLines.push({ t: f.client_email, muted: true });
 
-  const boxH = 16 + clientLines.length * 5.2;
+  const boxH = 14 + clientLines.length * 5.0;
   doc.setFillColor(...SOFT_BG);
   doc.rect(M, blockTop, leftW, boxH, "F");
   doc.setFont("helvetica", "bold");
@@ -251,7 +251,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ===== Tableau prestation =====
-  let y = Math.max(blockTop + boxH, ry) + 12;
+  let y = Math.max(blockTop + boxH, ry) + 9;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...NAVY);
@@ -288,7 +288,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     const lines = doc.splitTextToSize(r.desc, colQty - M - 10) as string[];
-    const rowH = Math.max(11, lines.length * 4.6 + 6.5);
+    const rowH = Math.max(10, lines.length * 4.4 + 5.5);
     doc.setTextColor(...TEXT);
     doc.text(lines, M + 5, y + 6);
     const midY = y + rowH / 2 + 1.4;
@@ -302,7 +302,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ===== Totaux =====
-  y += 10;
+  y += 8;
   const totLabelX = colUnit + 22;
   const totValX = colTotal - 5;
   doc.setFont("helvetica", "normal");
@@ -325,7 +325,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
-  y += 22;
+  y += 20;
 
   // ===== Modalités de règlement =====
   const fh = 22;
