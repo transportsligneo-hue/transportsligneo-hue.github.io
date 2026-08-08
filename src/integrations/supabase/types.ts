@@ -1613,7 +1613,10 @@ export type Database = {
           has_completed_training: boolean
           id: string
           message: string | null
+          missions_terminees: number
+          niveau: string
           nom: string
+          note_moyenne: number | null
           organization_id: string | null
           permis: string | null
           permis_numero: string | null
@@ -1638,7 +1641,10 @@ export type Database = {
           has_completed_training?: boolean
           id?: string
           message?: string | null
+          missions_terminees?: number
+          niveau?: string
           nom: string
+          note_moyenne?: number | null
           organization_id?: string | null
           permis?: string | null
           permis_numero?: string | null
@@ -1663,7 +1669,10 @@ export type Database = {
           has_completed_training?: boolean
           id?: string
           message?: string | null
+          missions_terminees?: number
+          niveau?: string
           nom?: string
+          note_moyenne?: number | null
           organization_id?: string | null
           permis?: string | null
           permis_numero?: string | null
@@ -4738,6 +4747,7 @@ export type Database = {
           mission_group_id: string | null
           mission_id: string | null
           modele: string | null
+          niveau_requis: string
           numero_mission: string | null
           options_meta: Json
           parent_trajet_id: string | null
@@ -4811,6 +4821,7 @@ export type Database = {
           mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
+          niveau_requis?: string
           numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -4884,6 +4895,7 @@ export type Database = {
           mission_group_id?: string | null
           mission_id?: string | null
           modele?: string | null
+          niveau_requis?: string
           numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -5536,6 +5548,7 @@ export type Database = {
           marque: string | null
           mission_group_id: string | null
           modele: string | null
+          niveau_requis: string | null
           pricing_mode: string | null
           prix_convoyeur: number | null
           prix_convoyeur_fixe: number | null
@@ -5545,6 +5558,7 @@ export type Database = {
           proposal_expires_at: string | null
           published_at: string | null
           statut_publication: string | null
+          vehicule_energie: string | null
         }
         Relationships: []
       }
@@ -5567,6 +5581,7 @@ export type Database = {
           marque: string
           mission_group_id: string
           modele: string
+          niveau_requis: string
           pricing_mode: string
           prix_convoyeur: number
           prix_convoyeur_fixe: number
@@ -5576,6 +5591,7 @@ export type Database = {
           proposal_expires_at: string
           published_at: string
           statut_publication: string
+          vehicule_energie: string
         }[]
       }
       accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
@@ -5686,6 +5702,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      convoyeur_level_rank: { Args: { _n: string }; Returns: number }
       create_admin_notification: {
         Args: {
           _entity_id?: string
@@ -5942,6 +5959,10 @@ export type Database = {
       }
       recalculate_company_score: {
         Args: { _company_id: string }
+        Returns: undefined
+      }
+      recompute_convoyeur_niveau: {
+        Args: { _convoyeur_id: string }
         Returns: undefined
       }
       refresh_convoyeur_training_status: {
