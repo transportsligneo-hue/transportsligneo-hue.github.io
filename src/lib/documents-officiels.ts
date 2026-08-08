@@ -556,10 +556,11 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_TEXT);
-  doc.text(`Nom : ${d.convoyeur_nom || "..............................."}`, 18, sigY + 11);
-  doc.text(`Nom : ${d.client || "..............................."}`, pageW / 2 + 6, sigY + 11);
-  doc.text("Signature :", 18, sigY + 18);
-  doc.text("Signature :", pageW / 2 + 6, sigY + 18);
+  doc.text(`Nom : ${d.convoyeur_nom || "..............................."}`, 18, sigY + 10);
+  doc.text(`Nom : ${d.client || "..............................."}`, pageW / 2 + 6, sigY + 10);
+  doc.text("Signature :", 18, sigY + 16);
+  doc.text("Signature :", pageW / 2 + 6, sigY + 16);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...DOC_GOLD);
