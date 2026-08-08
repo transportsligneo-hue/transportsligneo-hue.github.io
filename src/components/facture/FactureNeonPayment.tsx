@@ -122,7 +122,7 @@ function PayForm({ summary, returnUrl }: { summary: FactureSummary; returnUrl: s
   );
 }
 
-export function FactureNeonPayment({ factureId, returnUrlBase }: { factureId: string; returnUrlBase: string }) {
+export function FactureNeonPayment({ factureId, returnUrlBase, onSummary }: { factureId: string; returnUrlBase: string; onSummary?: (s: FactureSummary) => void }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [summary, setSummary] = useState<FactureSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -144,6 +144,7 @@ export function FactureNeonPayment({ factureId, returnUrlBase }: { factureId: st
         }
         setClientSecret(data.clientSecret);
         setSummary(data.summary);
+        onSummary?.(data.summary);
       } catch {
         if (alive) setError("Connexion au service de paiement impossible");
       }
@@ -168,21 +169,4 @@ export function FactureNeonPayment({ factureId, returnUrlBase }: { factureId: st
       <PayForm summary={summary} returnUrl={returnUrl} />
     </Elements>
   );
-}
-
-export function useFactureSummary(factureId: string) {
-  const [summary, setSummary] = useState<FactureSummary | null>(null);
-  useEffect(() => {
-    let alive = true;
-    fetch("/api/facture/payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ factureId, environment: getStripeEnvironment() }),
-    })
-      .then((r) => r.json())
-      .then((d) => { if (alive && d?.summary) setSummary(d.summary); })
-      .catch(() => {});
-    return () => { alive = false; };
-  }, [factureId]);
-  return summary;
 }
