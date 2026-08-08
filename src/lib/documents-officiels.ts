@@ -493,7 +493,7 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
     ly += 4.2;
   });
 
-  y = schemaTop + 38;
+  y = schemaTop + 42;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
