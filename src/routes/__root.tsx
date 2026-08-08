@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import MobileAppGate, { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 import NativeAppInit from "@/components/mobile/NativeAppInit";
@@ -156,24 +157,26 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <PricingProvider>
-          <AiSettingsProvider>
-            <CursorSpotlight />
-            <MobileAppGate />
-            <NativeAppInit />
+      <ThemeProvider>
+        <AuthProvider>
+          <PricingProvider>
+            <AiSettingsProvider>
+              <CursorSpotlight />
+              <MobileAppGate />
+              <NativeAppInit />
 
-            <PublicChrome />
-            <Outlet />
-            <PublicMobileBottomNav />
-            <PwaProvider />
-            <PwaSplash />
-            <BiometricEnrollPrompt />
-            <BiometricLock />
-            <Toaster />
-          </AiSettingsProvider>
-        </PricingProvider>
-      </AuthProvider>
+              <PublicChrome />
+              <Outlet />
+              <PublicMobileBottomNav />
+              <PwaProvider />
+              <PwaSplash />
+              <BiometricEnrollPrompt />
+              <BiometricLock />
+              <Toaster />
+            </AiSettingsProvider>
+          </PricingProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

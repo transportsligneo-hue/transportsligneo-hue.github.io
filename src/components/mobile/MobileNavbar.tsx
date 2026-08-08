@@ -3,6 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { User, Phone } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type NavAccent = "b2b" | "driver" | undefined;
 const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
@@ -104,6 +105,8 @@ export default function MobileNavbar() {
               </span>
               <span className="mnav-phone-label">Appeler</span>
             </a>
+            <ThemeToggle />
+
 
           </div>
         </div>

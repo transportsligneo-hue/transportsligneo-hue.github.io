@@ -69,7 +69,7 @@ export default function MobileHomeScreen() {
 
   return (
     <div
-      className="md:hidden relative min-h-screen overflow-x-hidden text-white pb-bottom-nav pt-[96px]"
+      className="mhome-root md:hidden relative min-h-screen overflow-x-hidden text-white pb-bottom-nav pt-[96px]"
       style={{
         background:
           "radial-gradient(520px 440px at 90% 0%, rgba(63,123,255,0.32), transparent 60%)," +
@@ -100,7 +100,7 @@ export default function MobileHomeScreen() {
       />
 
       {/* === HERO photo (fondu progressif vers le fond) === */}
-      <section className="relative z-[1] h-[430px] overflow-hidden">
+      <section className="mhome-hero relative z-[1] h-[430px] overflow-hidden">
         <img
           src={heroBg}
           alt="Convoyeur Transports Ligneo"

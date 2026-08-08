@@ -2,6 +2,8 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { LogOut, Menu, X, type LucideIcon, MoreHorizontal } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
+import ThemeToggle from "@/components/ThemeToggle";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
@@ -26,6 +28,7 @@ interface Props {
 export function ConvoyeurSidebar({ items, children }: Props) {
   const location = useLocation();
   const { logout, user } = useAuth();
+  const { theme } = useTheme();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -33,13 +36,14 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   useEffect(() => {
     const prevHtml = document.documentElement.style.background;
     const prevBody = document.body.style.background;
-    document.documentElement.style.background = "#041B52";
-    document.body.style.background = "#041B52";
+    const shellBg = theme === "light" ? "#f5f7fc" : "#041B52";
+    document.documentElement.style.background = shellBg;
+    document.body.style.background = shellBg;
     return () => {
       document.documentElement.style.background = prevHtml;
       document.body.style.background = prevBody;
     };
-  }, []);
+  }, [theme]);
 
   const isActive = (item: ConvoyeurSidebarItem) =>
     item.exact
@@ -61,7 +65,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   return (
     <div className="driver-shell flex">
       {/* === Sidebar Desktop premium === */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r border-[rgba(103,193,255,0.18)] bg-[rgba(4,27,82,0.72)] backdrop-blur-2xl">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 driver-nav-surface w-64 flex-col border-r border-[rgba(103,193,255,0.18)] bg-[rgba(4,27,82,0.72)] backdrop-blur-2xl">
         <div className="px-5 py-5 border-b border-[rgba(103,193,255,0.16)]">
           <DriverBrand />
           {user?.email && (
@@ -88,7 +92,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           })}
         </nav>
 
-        <div className="p-3 border-t border-[rgba(103,193,255,0.16)]">
+        <div className="p-3 border-t border-[rgba(103,193,255,0.16)] space-y-1">
+          <ThemeToggle variant="full" className="w-full justify-start" />
           <button
             onClick={() => logout()}
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-[#D6E4FF] hover:bg-red-500/10 hover:text-red-300 transition-colors"
@@ -100,7 +105,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile Header premium glass === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 border-b border-[rgba(103,193,255,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 driver-nav-surface border-b border-[rgba(103,193,255,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
         <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[rgba(4,27,82,0.95)]" />
         <div className="h-16 px-4 flex items-center justify-between gap-3">
           <DriverBrand />
@@ -121,7 +126,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {mobileMenuOpen && (
         <>
           <div className="md:hidden fixed inset-0 z-50 bg-[#041B52]/70 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)} />
-          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] w-80 bg-[rgba(4,27,82,0.95)] backdrop-blur-2xl border-r border-[rgba(103,193,255,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
+          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] driver-nav-surface w-80 bg-[rgba(4,27,82,0.95)] backdrop-blur-2xl border-r border-[rgba(103,193,255,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
             <div className="px-5 py-4 border-b border-[rgba(103,193,255,0.20)] flex items-center justify-between">
               <DriverBrand />
               <button
@@ -152,7 +157,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
                 );
               })}
             </nav>
-            <div className="p-3 border-t border-[rgba(103,193,255,0.20)]">
+            <div className="p-3 border-t border-[rgba(103,193,255,0.20)] space-y-1">
+              <ThemeToggle variant="full" className="w-full justify-start" />
               <button
                 onClick={() => logout()}
                 className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[#D6E4FF] hover:bg-red-500/10 hover:text-red-300"
@@ -176,7 +182,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom px-3 pb-2 pt-2 pointer-events-none"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}
       >
-        <div className="pointer-events-auto rounded-3xl border border-[rgba(103,193,255,0.28)] bg-[rgba(4,27,82,0.75)] backdrop-blur-2xl shadow-[0_18px_50px_-12px_rgba(4,27,82,0.85),0_0_0_1px_rgba(103,193,255,0.08)_inset]">
+        <div className="driver-nav-surface pointer-events-auto rounded-3xl border border-[rgba(103,193,255,0.28)] bg-[rgba(4,27,82,0.75)] backdrop-blur-2xl shadow-[0_18px_50px_-12px_rgba(4,27,82,0.85),0_0_0_1px_rgba(103,193,255,0.08)_inset]">
           <div
             className="grid h-16 items-stretch"
             style={{ gridTemplateColumns: `repeat(${visibleTabs.length + (hasOverflow ? 1 : 0)}, 1fr)` }}

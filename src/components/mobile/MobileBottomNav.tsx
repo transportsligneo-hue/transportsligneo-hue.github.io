@@ -56,7 +56,7 @@ export default function MobileBottomNav() {
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-2 safe-bottom pointer-events-none"
     >
       <div
-        className="pointer-events-auto relative rounded-[28px] border border-white/[0.08] backdrop-blur-2xl"
+        className="mbottomnav-surface pointer-events-auto relative rounded-[28px] border border-white/[0.08] backdrop-blur-2xl"
         style={{
           background:
             "linear-gradient(180deg, rgba(10,22,56,0.85) 0%, rgba(5,11,29,0.9) 100%)",

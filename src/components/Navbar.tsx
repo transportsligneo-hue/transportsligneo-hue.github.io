@@ -4,6 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type NavAccent = "purple" | "green" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
@@ -117,6 +118,7 @@ export default function Navbar() {
                 </span>
               </span>
             </a>
+            <ThemeToggle />
             <button onClick={goToEspace} className="r4-btn-connect" type="button">
               <User size={13} />
               {isAuthenticated ? "Mon espace" : "Connexion"}
@@ -159,6 +161,9 @@ export default function Navbar() {
                     </span>
                   </span>
                 </a>
+              </li>
+              <li>
+                <ThemeToggle variant="full" />
               </li>
               <li>
                 <button onClick={goToEspace} className="r4-btn-connect" type="button">
