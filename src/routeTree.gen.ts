@@ -62,6 +62,7 @@ import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.tra
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
+import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
 import { Route as ApiB2bCheckoutRouteImport } from './routes/api/b2b/checkout'
@@ -439,6 +440,11 @@ const ApiPublicAlertesDocumentsVehiculesRoute =
     path: '/api/public/alertes-documents-vehicules',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiFacturePaymentIntentRoute = ApiFacturePaymentIntentRouteImport.update({
+  id: '/api/facture/payment-intent',
+  path: '/api/facture/payment-intent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFactureCheckoutRoute = ApiFactureCheckoutRouteImport.update({
   id: '/api/facture/checkout',
   path: '/api/facture/checkout',
@@ -1139,6 +1145,7 @@ export interface FileRoutesByFullPath {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1285,6 +1292,7 @@ export interface FileRoutesByTo {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1442,6 +1450,7 @@ export interface FileRoutesById {
   '/api/b2b/checkout': typeof ApiB2bCheckoutRoute
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
+  '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1599,6 +1608,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
@@ -1745,6 +1755,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
@@ -1901,6 +1912,7 @@ export interface FileRouteTypes {
     | '/api/b2b/checkout'
     | '/api/devis/checkout'
     | '/api/facture/checkout'
+    | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/yousign-webhook'
@@ -1988,6 +2000,7 @@ export interface RootRouteChildren {
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
+  ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
@@ -2386,6 +2399,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/alertes-documents-vehicules'
       fullPath: '/api/public/alertes-documents-vehicules'
       preLoaderRoute: typeof ApiPublicAlertesDocumentsVehiculesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/facture/payment-intent': {
+      id: '/api/facture/payment-intent'
+      path: '/api/facture/payment-intent'
+      fullPath: '/api/facture/payment-intent'
+      preLoaderRoute: typeof ApiFacturePaymentIntentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/facture/checkout': {
@@ -3558,6 +3578,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
+  ApiFacturePaymentIntentRoute: ApiFacturePaymentIntentRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
@@ -3591,13 +3612,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
