@@ -91,7 +91,7 @@ function ArticlePage() {
             />
           )}
           <div className="space-y-4 text-[15px] leading-relaxed text-[#c7d0e8]">
-            {article.contenu.split(/\n{2,}/).map((p, i) => (
+            {article.contenu.split(/\n{2,}/).map((p: string, i: number) => (
               <p key={i}>{p}</p>
             ))}
           </div>
