@@ -113,7 +113,98 @@ export async function loadImageAsDataUrl(src: string): Promise<string | null> {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Pagination robuste : jamais de texte sous le pied de page légal      */
+/* ------------------------------------------------------------------ */
+
+/** Hauteur réservée en bas de page pour le pied de page légal. */
+export const DOC_FOOTER_RESERVED = 26;
+/** Ordonnée de départ du contenu sur une page de continuation. */
+export const DOC_CONT_TOP = 30;
+
+type DocCtx = {
+  pageW: number;
+  logoData?: string | null;
+  title: string;
+  numero?: string;
+  company?: CompanyInfo | null;
+};
+
+const docContexts = new WeakMap<object, DocCtx>();
+
+/** Ordonnée maximale utilisable par le contenu sur la page courante. */
+export function docContentLimit(doc: jsPDF): number {
+  return doc.internal.pageSize.getHeight() - DOC_FOOTER_RESERVED;
+}
+
+/** En-tête compact des pages de continuation. */
+function drawContinuationHeader(doc: jsPDF, ctx: DocCtx) {
+  const h = 20;
+  doc.setFillColor(...DOC_NAVY);
+  doc.rect(0, 0, ctx.pageW, h, "F");
+  if (ctx.logoData) {
+    try {
+      doc.addImage(ctx.logoData, "PNG", 12, 3, 14, 14);
+    } catch {
+      /* logo optionnel */
+    }
+  }
+  doc.setTextColor(...DOC_WHITE);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.text(ctx.title.toUpperCase(), 30, h / 2 + 1);
+  if (ctx.numero) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...DOC_GOLD);
+    doc.text(ctx.numero, ctx.pageW - 14, h / 2 + 1, { align: "right" });
+  }
+  doc.setDrawColor(...DOC_GOLD);
+  doc.setLineWidth(0.6);
+  doc.line(0, h, ctx.pageW, h);
+}
+
+/**
+ * Garantit qu'il reste `needed` mm avant le pied de page.
+ * Ajoute une page (avec en-tête de continuation) si nécessaire et
+ * renvoie l'ordonnée à utiliser.
+ */
+export function docEnsureSpace(doc: jsPDF, y: number, needed: number): number {
+  if (y + needed <= docContentLimit(doc)) return y;
+  const ctx = docContexts.get(doc as unknown as object);
+  doc.addPage();
+  if (ctx) {
+    drawContinuationHeader(doc, ctx);
+    return DOC_CONT_TOP;
+  }
+  return 20;
+}
+
+/**
+ * À appeler juste avant `doc.output()` : dessine le pied de page légal
+ * et la pagination sur TOUTES les pages du document.
+ */
+export function finalizeDoc(doc: jsPDF, company?: CompanyInfo | null) {
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const ctx = docContexts.get(doc as unknown as object);
+  const c = company ?? ctx?.company ?? null;
+  const total = doc.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    drawDocLegalFooter(doc, pageW, pageH, c);
+    if (total > 1) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...DOC_MUTED);
+      doc.text(`Page ${p}/${total}`, pageW - 14, pageH - 22, { align: "right" });
+    }
+  }
+  doc.setPage(total);
+}
+
 /** Bandeau navy + liseré or, identique sur tous les documents officiels. */
+
 export function drawDocHeader(
   doc: jsPDF,
   opts: {
