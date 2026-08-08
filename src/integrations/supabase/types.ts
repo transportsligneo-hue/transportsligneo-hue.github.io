@@ -3159,6 +3159,47 @@ export type Database = {
           },
         ]
       }
+      mission_departure_checklists: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          created_by: string | null
+          gilet_jaune: boolean
+          id: string
+          permis_en_possession: boolean
+          tenue_conforme: boolean
+          validated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          created_by?: string | null
+          gilet_jaune?: boolean
+          id?: string
+          permis_en_possession?: boolean
+          tenue_conforme?: boolean
+          validated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          created_by?: string | null
+          gilet_jaune?: boolean
+          id?: string
+          permis_en_possession?: boolean
+          tenue_conforme?: boolean
+          validated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_departure_checklists_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: true
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_documents: {
         Row: {
           ajoute_par: string
