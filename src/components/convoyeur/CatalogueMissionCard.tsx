@@ -97,6 +97,7 @@ export function CatalogueMissionCard({
   myOfferStatus,
   myOfferPrice,
   canApply,
+  driverNiveau,
   onOpen,
   onQuickApply,
 }: Props) {
@@ -107,17 +108,27 @@ export function CatalogueMissionCard({
     ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000
     : false;
   const countdown = useCountdown(t.proposal_expires_at);
-  const level = inferMissionLevel({
-    distanceKm: t.distance_km,
+  // Niveau REQUIS PAR LA MISSION (≠ niveau du convoyeur)
+  const requis = missionRequiredNiveau({
+    niveau_requis: t.niveau_requis,
+    distance_km: t.distance_km,
     urgence: t.urgence,
   });
+  const level = niveauLabel(requis);
+  const locked = !canAccessNiveau(driverNiveau, requis);
   const isElectric = isElectricEnergie(t.type_carburant)
+    || isElectricEnergie(t.vehicule_energie)
     || guessElectricFromModel(t.marque, t.modele);
 
   return (
     <div
       onClick={onOpen}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/40 hover:shadow-[0_20px_50px_-24px_rgba(212,175,55,0.45)]"
+      className={`group relative overflow-hidden rounded-2xl border p-4 backdrop-blur-xl transition-all duration-300 ${
+        locked
+          ? "cursor-not-allowed border-white/10 bg-white/[0.02] opacity-60 saturate-50"
+          : "cursor-pointer border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] hover:-translate-y-0.5 hover:border-amber-300/40 hover:shadow-[0_20px_50px_-24px_rgba(212,175,55,0.45)]"
+      }`}
+
     >
       {/* Halo */}
       <div
