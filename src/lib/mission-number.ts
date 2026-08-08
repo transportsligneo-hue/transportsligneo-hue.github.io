@@ -3,7 +3,7 @@
  * (MIS-TLG-2026-075) est affiché avec un dièse devant la séquence → MIS-TLG-2026-#075.
  */
 export function displayNumero(numero: string): string {
-  return numero.replace(/-#?(\d+)([AR])?$/i, (_m, digits: string, suffix?: string) =>
+  return numero.replace(/-#?(\d+)([ARL])?$/i, (_m, digits: string, suffix?: string) =>
     `-#${digits}${suffix ? suffix.toUpperCase() : ""}`,
   );
 }
@@ -41,12 +41,23 @@ export function formatTrajetRef(opts: {
   const base = formatMissionNumber(opts.groupId ?? opts.id, opts.createdAt);
   if (!opts.isRoundTrip) return base;
   const isRetour = opts.legType === "retour" || opts.legIndex === 2;
-  return `${base}${isRetour ? "R" : "A"}`;
+  return `${base}${isRetour ? "R" : "L"}`;
 }
 
 /** Retire un éventuel suffixe A/R d'un numéro de mission (MIS-TLG-2026-082R → …-082) */
 export function stripLegSuffix(numero: string): string {
-  return numero.replace(/([-#]?\d+)[AR]$/i, "$1");
+  return numero.replace(/([-#]?\d+)[ARL]$/i, "$1");
+}
+
+/** true si le numéro porte un suffixe de volet (L = Livraison, R = Restitution) */
+export function hasLegSuffix(numero: string | null | undefined): boolean {
+  return !!numero && /[-#]?\d+[ARL]$/i.test(numero);
+}
+
+/** "#085" — séquence racine affichable d'un numéro de mission */
+export function shortMissionSeq(numero: string): string {
+  const m = stripLegSuffix(displayNumero(numero)).match(/#?(\d+)$/);
+  return m ? `#${m[1]}` : stripLegSuffix(displayNumero(numero));
 }
 
 /**
@@ -66,7 +77,7 @@ export function displayTrajetRef(opts: {
     const base = displayNumero(stripLegSuffix(opts.baseNumero));
     if (!opts.isRoundTrip) return base;
     const isRetour = opts.legType === "retour" || opts.legIndex === 2;
-    return `${base}${isRetour ? "R" : "A"}`;
+    return `${base}${isRetour ? "R" : "L"}`;
   }
 
   return formatTrajetRef(opts);
