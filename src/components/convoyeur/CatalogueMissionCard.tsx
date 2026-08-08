@@ -312,7 +312,17 @@ export function CatalogueMissionCard({
           )}
         </div>
 
-        {myOfferStatus ? (
+        {locked ? (
+          <div className="flex max-w-[60%] flex-col items-end gap-1 text-right">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/70">
+              <Lock size={12} /> Verrouillée
+            </span>
+            <span className="text-[10px] leading-tight text-white/50">
+              Réservé aux convoyeurs {level}
+              {requis === "confirme" ? "+" : ""}
+            </span>
+          </div>
+        ) : myOfferStatus ? (
           <div className="text-right">
             <MissionStatusBadge
               status={
@@ -341,6 +351,7 @@ export function CatalogueMissionCard({
             <span className="text-[10px] text-white/50">ou voir détails →</span>
           </div>
         )}
+
       </div>
     </div>
   );
