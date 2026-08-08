@@ -325,7 +325,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
-  y += 11;
+  y += 18;
 
   // ===== Statut / modalités / signature =====
   const fh = 22;
