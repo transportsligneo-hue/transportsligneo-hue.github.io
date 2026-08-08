@@ -365,12 +365,19 @@ export default function MobileHomeScreen() {
             <p className="text-white/55 text-[11px] mt-0.5 truncate">07 82 45 61 81 · contact@transportsligneo.fr</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-4 mt-5 text-[10.5px] text-white/45 tracking-wider uppercase">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[10.5px] uppercase tracking-wider text-white/45">
+          <Link to="/suivi" className="hover:text-[#93c5fd] transition-colors">Suivi mission</Link>
+          <span className="text-white/20">·</span>
+          <Link to="/actualites" className="hover:text-[#93c5fd] transition-colors">Actualités</Link>
+          <span className="text-white/20">·</span>
           <Link to="/cgv" className="hover:text-[#93c5fd] transition-colors">CGV</Link>
           <span className="text-white/20">·</span>
           <Link to="/mentions-legales" className="hover:text-[#93c5fd] transition-colors">Mentions</Link>
           <span className="text-white/20">·</span>
           <Link to="/confidentialite" className="hover:text-[#93c5fd] transition-colors">Privacy</Link>
+        </div>
+        <div className="mt-5 flex justify-center">
+          <StoreBadges />
         </div>
         <p className="text-center text-white/30 text-[10px] mt-3 tracking-wider">
           © {new Date().getFullYear()} Transports LIGNEO
