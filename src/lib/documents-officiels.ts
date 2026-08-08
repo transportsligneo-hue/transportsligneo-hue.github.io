@@ -29,12 +29,19 @@ async function newDoc(title: string, numero?: string, subtitle?: string, company
   return { doc, pageW, pageH, company: c };
 }
 
-function signatureBlocks(doc: jsPDF, pageW: number, y: number, left: string, right: string): number {
-  y = docEnsureSpace(doc, y, 34);
+function signatureBlocks(
+  doc: jsPDF,
+  pageW: number,
+  y: number,
+  left: string,
+  right: string,
+  height = 24,
+): number {
+  y = docEnsureSpace(doc, y, height + 6);
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
-  doc.rect(14, y, (pageW - 32) / 2, 26, "S");
-  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, 26, "S");
+  doc.rect(14, y, (pageW - 32) / 2, height, "S");
+  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, height, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
@@ -69,6 +76,7 @@ export interface FicheMissionData {
   notes?: string | null;
 }
 
+/** Fiche de mission — mise en page compacte deux colonnes, garantie sur UNE page. */
 export async function generateFicheMissionPdf(d: FicheMissionData, company?: CompanyInfo | null): Promise<Blob> {
   const { doc, pageW, pageH, company: c } = await newDoc(
     "Fiche de mission",
@@ -77,70 +85,81 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
     company,
   );
   const w = pageW - 28;
-  let y = 56;
+  const colW = (w - 6) / 2;
+  const xR = 14 + colW + 6;
+  const kv = (x: number, y: number, label: string, value: string) =>
+    drawKeyValueRow(doc, x, y, colW, label, value, { labelW: colW * 0.42 });
+  let y = 52;
 
+  /* Véhicule */
   y = drawSectionTitle(doc, pageW, y, "Véhicule à convoyer");
-  y = drawKeyValueRow(doc, 14, y, w, "Marque et modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" — "));
-  y = drawKeyValueRow(doc, 14, y, w, "Immatriculation", d.immatriculation || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "N° de série (VIN)", d.vin || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Kilométrage au départ", "______________ km");
+  let yl = y;
+  let yr = y;
+  yl = kv(14, yl, "Marque / modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" ") || "—");
+  yl = kv(14, yl, "Immatriculation", d.immatriculation || "—");
+  yl = kv(14, yl, "N° de série (VIN)", d.vin || "—");
+  yr = kv(xR, yr, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
+  yr = kv(xR, yr, "Km au départ", "____________ km");
+  yr = kv(xR, yr, "Assistance 24/7", c?.telephone || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Enlèvement");
-  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.enlevement_adresse || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.enlevement_contact || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.enlevement_creneau || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.enlevement_instructions || "—");
+  /* Enlèvement / Livraison côte à côte */
+  const ySec = y;
+  drawSectionTitle(doc, pageW, ySec, "Enlèvement", { x: 14, w: colW });
+  y = drawSectionTitle(doc, pageW, ySec, "Livraison", { x: xR, w: colW });
+  yl = y;
+  yr = y;
+  yl = kv(14, yl, "Adresse", d.enlevement_adresse || "—");
+  yl = kv(14, yl, "Contact", d.enlevement_contact || "—");
+  yl = kv(14, yl, "Créneau", d.enlevement_creneau || "—");
+  yl = kv(14, yl, "Instructions", d.enlevement_instructions || "—");
+  yr = kv(xR, yr, "Adresse", d.livraison_adresse || "—");
+  yr = kv(xR, yr, "Contact", d.livraison_contact || "—");
+  yr = kv(xR, yr, "Créneau", d.livraison_creneau || "—");
+  yr = kv(xR, yr, "Instructions", d.livraison_instructions || "—");
+  y = Math.max(yl, yr) + 3;
 
-  y += 4;
-  y = drawSectionTitle(doc, pageW, y, "Livraison");
-  y = drawKeyValueRow(doc, 14, y, w, "Adresse", d.livraison_adresse || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Contact sur place", d.livraison_contact || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Créneau prévu", d.livraison_creneau || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Instructions", d.livraison_instructions || "—");
-
-  y += 4;
+  /* Convoyeur */
   y = drawSectionTitle(doc, pageW, y, "Convoyeur assigné");
-  y = drawKeyValueRow(doc, 14, y, w, "Nom et prénom", d.convoyeur_nom || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Téléphone", d.convoyeur_tel || "—");
-  y = drawKeyValueRow(doc, 14, y, w, "Assistance 24/7", c?.telephone || "—");
+  yl = kv(14, y, "Nom et prénom", d.convoyeur_nom || "—");
+  yr = kv(xR, y, "Téléphone", d.convoyeur_tel || "—");
+  y = Math.max(yl, yr) + 4;
 
-  y = docEnsureSpace(doc, y + 5, 14);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("DOCUMENTS À EMPORTER PAR LE CONVOYEUR", 14, y);
-  y += 5;
+  y += 4.5;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...DOC_TEXT);
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.text(
     "[  ] Permis de conduire     [  ] Pièce d'identité     [  ] Ordre de mission (ce document)     [  ] Constat amiable     [  ] Attestation RC Pro",
     14,
     y,
   );
+  y += 6;
 
-  y = docEnsureSpace(doc, y + 8, 26);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("NOTES DE MISSION", 14, y);
-  y += 3;
+  y += 2.5;
   doc.setDrawColor(...DOC_LINE);
-  doc.rect(14, y, w, 18, "S");
+  doc.rect(14, y, w, 16, "S");
   if (d.notes) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...DOC_TEXT);
-    doc.text(doc.splitTextToSize(d.notes, w - 8).slice(0, 4), 18, y + 5);
+    doc.text(doc.splitTextToSize(d.notes, w - 8).slice(0, 3), 18, y + 5);
   }
-  y += 23;
+  y += 20;
 
-  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)");
+  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22);
   finalizeDoc(doc, c);
   return doc.output("blob");
 }
+
 
 /* ------------------------------------------------------------------ */
 /* 03 — ATTESTATION DE PASSAGE À VIDE                                  */
