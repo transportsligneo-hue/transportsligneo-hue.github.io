@@ -14,7 +14,6 @@ type Variant = "light" | "dark";
 
 interface Props {
   attributionId: string;
-  isAdmin?: boolean;
   userId?: string | null;
   variant?: Variant;
 }
@@ -65,7 +64,7 @@ interface StoredDoc {
 
 const PV_TYPE = "passage_a_vide";
 
-export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, userId, variant = "light" }: Props) {
+export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light" }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurLite | null>(null);
@@ -117,8 +116,10 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
     // Société du client (organisation / profil) — sinon nom du particulier
     let soc = (t?.arrivee_contact_societe || "").trim() || null;
     if (!soc && t?.client_email) {
-      const ident = await resolveClientBillingIdentity({ email: t.client_email });
-      soc = ident?.societe || null;
+      try {
+        const ident = await resolveClientBillingIdentity({ email: t.client_email });
+        soc = ident?.societe || null;
+      } catch { /* accès restreint côté convoyeur : on garde le fallback */ }
     }
     setClientSociete(soc);
     setLoading(false);
@@ -298,14 +299,14 @@ export function MissionDocsOfficielsPanel({ attributionId, isAdmin = false, user
         </button>
       ))}
 
-      {isAdmin && !showPvForm && (
+      {!showPvForm && (
         <button type="button" className={btn} onClick={() => setShowPvForm(true)}>
           <FilePlus2 size={18} />
           <span className="flex-1">Générer un passage à vide</span>
         </button>
       )}
 
-      {isAdmin && showPvForm && (
+      {showPvForm && (
         <div className={dark
           ? "rounded-2xl border border-[rgba(120,180,255,0.16)] bg-[rgba(20,32,72,0.45)] p-4 flex flex-col gap-2.5"
           : "rounded-xl border border-border bg-card p-4 flex flex-col gap-2.5"}>
