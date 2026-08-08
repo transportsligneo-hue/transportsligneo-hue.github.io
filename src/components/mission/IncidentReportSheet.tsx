@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 const ASSISTANCE_TEL = "+33782456181";
 const MAX_PHOTOS = 5;
