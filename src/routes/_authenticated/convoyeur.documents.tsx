@@ -13,6 +13,7 @@ import {
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
 import MonContratCard from "@/components/convoyeur/MonContratCard";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 /** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
 function safeFileName(name: string) {
