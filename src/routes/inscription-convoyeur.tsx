@@ -347,7 +347,21 @@ function InscriptionConvoyeur() {
     );
   }
 
-  const FileUpload = ({ label, file, onChange, hint, errorKey }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string; errorKey?: string }) => (
+  /** Applique un fichier issu du scanner natif avec les mêmes validations. */
+  const applyScannedFile = (key: string, setter: (f: File | null) => void, current: File | null) =>
+    (file: File) => {
+      const invalid = validateUploadFile(file);
+      if (invalid) { setFileErrors((f) => ({ ...f, [key]: invalid })); return; }
+      if (!current && selectedFiles() >= MAX_UPLOAD_FILES) {
+        setFileErrors((f) => ({ ...f, [key]: `Maximum ${MAX_UPLOAD_FILES} documents.` }));
+        return;
+      }
+      setter(file);
+      setFileErrors((f) => { const n = { ...f }; delete n[key]; return n; });
+      setError("");
+    };
+
+  const FileUpload = ({ label, file, onChange, hint, errorKey, scanKey, setFile }: { label: string; file: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; hint?: string; errorKey?: string; scanKey?: string; setFile?: (f: File | null) => void }) => (
     <div>
       <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
         <Upload size={12} className="inline mr-1" /> {label}
@@ -356,6 +370,18 @@ function InscriptionConvoyeur() {
         type="file" accept="image/*,application/pdf" onChange={onChange}
         className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
       />
+      {scanKey && setFile && (
+        <div className="mt-2">
+          <DocScanButton
+            label="Scanner ce document"
+            maxPages={4}
+            mergeToPdf
+            filenameBase={scanKey}
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 border border-blue-300/30 text-white"
+            onFiles={(files) => { if (files[0]) applyScannedFile(scanKey, setFile, file)(files[0]); }}
+          />
+        </div>
+      )}
       {errorKey && fileErrors[errorKey]
         ? <p className="text-red-300 text-[11px] mt-1">{fileErrors[errorKey]}</p>
         : file
@@ -363,6 +389,7 @@ function InscriptionConvoyeur() {
           : hint && <p className="text-white/40 text-[10px] mt-1">{hint}</p>}
     </div>
   );
+
 
   return (
     <div className="auth-shell flex items-center justify-center px-4 py-12">
