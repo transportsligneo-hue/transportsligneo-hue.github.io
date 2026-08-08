@@ -10,6 +10,7 @@ import {
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { getFleetInvitation, acceptFleetInvitation } from "@/lib/fleet-drivers.functions";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -525,8 +526,8 @@ function InscriptionConvoyeur() {
                 <p className="text-[10px] text-white/50 mt-1">Permis B requis depuis 3 ans minimum.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FileUpload label="Permis (recto) *" file={permisFile} errorKey="permis" onChange={makeFileHandler("permis", setPermisFile, permisFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
-                <FileUpload label="Permis (verso) *" file={permisVersoFile} errorKey="permis_verso" onChange={makeFileHandler("permis_verso", setPermisVersoFile, permisVersoFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+                <FileUpload label="Permis (recto) *" file={permisFile} errorKey="permis" scanKey="permis" setFile={setPermisFile} onChange={makeFileHandler("permis", setPermisFile, permisFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
+                <FileUpload label="Permis (verso) *" file={permisVersoFile} errorKey="permis_verso" scanKey="permis_verso" setFile={setPermisVersoFile} onChange={makeFileHandler("permis_verso", setPermisVersoFile, permisVersoFile)} hint="JPG, PNG ou PDF · 5 Mo max." />
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
@@ -553,13 +554,13 @@ function InscriptionConvoyeur() {
           {step === 3 && (
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.15em] text-blue-200">Documents officiels</p>
-              <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} errorKey="identite" onChange={makeFileHandler("identite", setCniFile, cniFile)} />
+              <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} errorKey="identite" scanKey="identite" setFile={setCniFile} onChange={makeFileHandler("identite", setCniFile, cniFile)} />
               {form.type_convoyeur === "independant" && (
-                <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} errorKey="kbis" onChange={makeFileHandler("kbis", setKbisFile, kbisFile)} />
+                <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} errorKey="kbis" scanKey="kbis" setFile={setKbisFile} onChange={makeFileHandler("kbis", setKbisFile, kbisFile)} />
               )}
-              <FileUpload label="RIB *" file={ribFile} errorKey="rib" onChange={makeFileHandler("rib", setRibFile, ribFile)} />
+              <FileUpload label="RIB *" file={ribFile} errorKey="rib" scanKey="rib" setFile={setRibFile} onChange={makeFileHandler("rib", setRibFile, ribFile)} />
               <div>
-                <FileUpload label="Attestation RC Pro *" file={rcProFile} errorKey="assurance" onChange={makeFileHandler("assurance", setRcProFile, rcProFile)} />
+                <FileUpload label="Attestation RC Pro *" file={rcProFile} errorKey="assurance" scanKey="assurance" setFile={setRcProFile} onChange={makeFileHandler("assurance", setRcProFile, rcProFile)} />
                 <p className="text-[11px] text-white/55 mt-1.5">
                   Pas encore d'assurance RC Pro ?{" "}
                   <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous accompagne.
