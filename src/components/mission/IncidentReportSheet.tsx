@@ -364,6 +364,19 @@ export function IncidentReportSheet({
                   <span>Depuis la galerie</span>
                 </button>
               </div>
+              <div className="mt-2.5">
+                <DocScanButton
+                  label="Scanner un document justificatif"
+                  maxPages={4}
+                  filenameBase="incident"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-white/10 text-white border border-white/15"
+                  onFiles={(files) => {
+                    const dt = new DataTransfer();
+                    files.forEach((f) => dt.items.add(f));
+                    void addFiles(dt.files);
+                  }}
+                />
+              </div>
               <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
                      onChange={(e) => { void addFiles(e.target.files); e.target.value = ""; }} />
               <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden"
