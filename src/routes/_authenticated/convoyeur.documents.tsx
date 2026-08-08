@@ -13,6 +13,7 @@ import {
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
 import MonContratCard from "@/components/convoyeur/MonContratCard";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 /** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
 function safeFileName(name: string) {
@@ -306,6 +307,14 @@ function ConvoyeurDocuments() {
                       }}
                     />
                   </label>
+                  <DocScanButton
+                    label="Scanner"
+                    maxPages={6}
+                    mergeToPdf
+                    filenameBase={spec.key}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium bg-white border border-pro-border text-pro-text hover:bg-pro-bg-soft"
+                    onFiles={(files) => { if (files[0]) handleUpload(spec, files[0]); }}
+                  />
                 </div>
               </div>
             </div>
