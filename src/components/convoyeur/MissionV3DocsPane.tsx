@@ -11,6 +11,7 @@ import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOffic
 export interface EdlPapierContext {
   numero: string;
   client?: string | null;
+  societe?: string | null;
   marque_modele?: string | null;
   immatriculation?: string | null;
   vin?: string | null;
