@@ -371,9 +371,10 @@ export function drawKeyValueRow(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.4);
   doc.setTextColor(...DOC_TEXT);
-  const lines = doc.splitTextToSize(value || "—", w - labelW - 4);
-  doc.text(lines.slice(0, 1), x + labelW, y + h / 2 + 1);
-  return y + h + gap;
+  const maxW = w - labelW - 4;
+  const raw = value || "—";
+  doc.text(doc.getTextWidth(raw) <= maxW ? raw : clampText(doc, raw, maxW), x + labelW, y + h / 2 + 1);
+
 }
 
 
