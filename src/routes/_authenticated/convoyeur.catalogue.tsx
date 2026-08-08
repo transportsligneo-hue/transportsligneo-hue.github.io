@@ -127,7 +127,7 @@ function ConvoyeurCatalogue() {
     const { data } = await supabase
       .from("trajets_publies_safe" as never)
       .select(
-        "id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,statut_publication,created_at,published_at,niveau_requis,vehicule_energie" as never,
+        "id,depart,arrivee,date_trajet,heure_trajet,marque,modele,prix_convoyeur_fixe,prix_convoyeur,prix_suggere,attribution_mode,allow_counter_offer,proposal_expires_at,leg_type,mission_group_id,statut_publication,created_at,published_at,niveau_requis,vehicule_energie,publisher_nom,publisher_logo_url,publisher_verifie" as never,
       )
       .in("attribution_mode" as never, ["catalogue", "mixte"] as never)
       .order("published_at" as never, { ascending: false })

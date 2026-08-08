@@ -5560,6 +5560,9 @@ export type Database = {
           prix_suggere: number | null
           proposal_expires_at: string | null
           published_at: string | null
+          publisher_logo_url: string | null
+          publisher_nom: string | null
+          publisher_verifie: boolean | null
           statut_publication: string | null
           vehicule_energie: string | null
         }
@@ -5593,6 +5596,9 @@ export type Database = {
           prix_suggere: number
           proposal_expires_at: string
           published_at: string
+          publisher_logo_url: string
+          publisher_nom: string
+          publisher_verifie: boolean
           statut_publication: string
           vehicule_energie: string
         }[]
