@@ -121,6 +121,7 @@ function AdminLayout() {
     { to: "/admin/informations-legales", label: "Informations légales", icon: Building2, group: "Finance" },
 
     // Système
+    { to: "/admin/contenu", label: "Contenu du site", icon: FileText, group: "Système" },
     { to: "/admin/historique", label: "Historique", icon: History, group: "Système" },
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
     { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
