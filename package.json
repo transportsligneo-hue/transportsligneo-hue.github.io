@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "assets:native": "bash scripts/generate-native-assets.sh"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
