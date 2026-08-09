@@ -43,11 +43,20 @@ import {
   type EdlStepDef,
 } from "./edl-premium-sequence";
 
+interface VehiculeInfo {
+  marque?: string | null;
+  modele?: string | null;
+  immatriculation?: string | null;
+  vin?: string | null;
+}
+
 interface Props {
   attributionId: string;
   type: "depart" | "arrivee";
   userId: string;
   driverName: string;
+  /** Infos véhicule affichées en en-tête et dans le récap final */
+  vehicule?: VehiculeInfo;
   /** Pour signatures client : nom à afficher par défaut */
   defaultClientName?: string;
   onComplete: () => void;
@@ -178,7 +187,7 @@ function newCaptureId() {
 }
 
 export function EdlPremiumFlow({
-  attributionId, type, userId, driverName, defaultClientName,
+  attributionId, type, userId, driverName, defaultClientName, vehicule,
   onComplete, onClose,
 }: Props) {
   // Carburant véhicule (depuis attribution → trajet → demande). Sert à filtrer
@@ -1418,6 +1427,25 @@ export function EdlPremiumFlow({
         </div>
       </header>
 
+      {/* === IDENTITÉ VÉHICULE (plaque + VIN) === */}
+      <div className="px-4 pt-2 flex items-center gap-2 flex-wrap shrink-0">
+        <span
+          className="edl-chip"
+          style={{ opacity: vehicule?.immatriculation ? 1 : 0.5 }}
+          title="Plaque d'immatriculation"
+        >
+          {vehicule?.immatriculation || "Plaque non renseignée"}
+        </span>
+        <span
+          className="edl-chip"
+          style={{ opacity: vehicule?.vin ? 1 : 0.5, maxWidth: "60%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          title="Numéro VIN"
+        >
+          VIN&nbsp;: {vehicule?.vin || "non renseigné"}
+        </span>
+      </div>
+
+
       {/* === BARRE PROGRESSION ÉLECTRIQUE === */}
       <div className="px-4 py-2 shrink-0">
         <div className="relative h-1.5 rounded-full bg-white/8 overflow-hidden">
@@ -1531,6 +1559,7 @@ export function EdlPremiumFlow({
             <ValidationArea
               step={currentStep}
               state={currentState}
+              vehicule={vehicule}
               onTrigger={handleValidationStep}
             />
           )}
@@ -1997,9 +2026,10 @@ function SignatureArea({
 }
 
 function ValidationArea({
-  step, state, onTrigger,
-}: { step: EdlStepDef; state?: StepState; onTrigger: () => void }) {
+  step, state, vehicule, onTrigger,
+}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void }) {
   const done = state?.status === "success";
+  const vehTitle = [vehicule?.marque, vehicule?.modele].filter(Boolean).join(" ");
 
   if (step.id === "admin_validated") {
     return (
@@ -2020,12 +2050,30 @@ function ValidationArea({
       <div className="edl-glass p-5 flex items-start gap-3">
         <FileText size={20} className="text-[var(--edl-gold)] shrink-0 mt-0.5"/>
         <div>
-          <h3 className="text-base font-bold text-white">Récap & envoi</h3>
+          <h3 className="text-base font-bold text-white">Récap &amp; envoi</h3>
           <p className="mt-1 text-sm text-[var(--edl-text-soft)]">
             Tout est complet : selfie, photos extérieur/intérieur, documents, signatures. Envoyez à l'admin pour validation finale.
           </p>
         </div>
       </div>
+
+      <div className="edl-glass p-4 space-y-2">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold">Véhicule inspecté</p>
+        {vehTitle && <p className="text-sm font-semibold text-white">{vehTitle}</p>}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--edl-text-soft)]">Plaque</span>
+          <span className="text-sm font-bold text-white tabular-nums" style={{ opacity: vehicule?.immatriculation ? 1 : 0.45 }}>
+            {vehicule?.immatriculation || "Non renseignée"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--edl-text-soft)]">VIN</span>
+          <span className="text-sm font-semibold text-white truncate" style={{ opacity: vehicule?.vin ? 1 : 0.45 }}>
+            {vehicule?.vin || "Non renseigné"}
+          </span>
+        </div>
+      </div>
+
       {done ? (
         <div className="edl-glass p-4 text-center">
           <span className="edl-chip edl-chip-success">
