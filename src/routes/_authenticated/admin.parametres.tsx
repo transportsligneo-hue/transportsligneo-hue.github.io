@@ -614,6 +614,9 @@ function AvisGoogleCard() {
   const [autoEnabled, setAutoEnabled] = useState(false);
   const [delayHours, setDelayHours] = useState(2);
   const [sendToContact, setSendToContact] = useState(true);
+  const [channel, setChannel] = useState<"email" | "sms" | "email+sms">("email");
+  const [smsFrom, setSmsFrom] = useState("Ligneo");
+  const [smsCount, setSmsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -624,13 +627,18 @@ function AvisGoogleCard() {
         .select("value")
         .eq("key", "google_review")
         .maybeSingle();
-      const v = (data as { value?: { url?: string; auto_enabled?: boolean; delay_hours?: number; send_to_contact?: boolean } } | null)?.value;
+      const v = (data as { value?: { url?: string; auto_enabled?: boolean; delay_hours?: number; send_to_contact?: boolean; channel?: "email" | "sms" | "email+sms"; sms_from?: string } } | null)?.value;
       if (v) {
         setUrl(v.url ?? "");
         setAutoEnabled(!!v.auto_enabled);
         setDelayHours(typeof v.delay_hours === "number" ? v.delay_hours : 2);
         setSendToContact(v.send_to_contact !== false);
+        setChannel(v.channel ?? "email");
+        setSmsFrom(v.sms_from ?? "Ligneo");
       }
+      const month = new Date().toISOString().slice(0, 7);
+      const { data: counter } = await supabase.from("app_settings").select("value").eq("key", `sms_sent_${month}`).maybeSingle();
+      setSmsCount(typeof counter?.value === "number" ? counter.value : 0);
       setLoading(false);
     })();
   }, []);
@@ -645,6 +653,8 @@ function AvisGoogleCard() {
           auto_enabled: autoEnabled,
           delay_hours: Math.max(0, Number(delayHours) || 0),
           send_to_contact: sendToContact,
+          channel,
+          sms_from: smsFrom.trim() || "Ligneo",
         } as unknown as never,
       },
       { onConflict: "key" },
@@ -695,6 +705,30 @@ function AvisGoogleCard() {
           />
         </FormField>
 
+        <FormField label="Canal de la demande d'avis">
+          <select
+            value={channel}
+            disabled={loading}
+            onChange={(e) => setChannel(e.target.value as "email" | "sms" | "email+sms")}
+            className="w-full rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+          >
+            <option value="email">Email seul</option>
+            <option value="sms">SMS seul</option>
+            <option value="email+sms">Email + SMS</option>
+          </select>
+        </FormField>
+
+        {(channel === "sms" || channel === "email+sms") && (
+          <FormField label="Expéditeur SMS (nom ou numéro E.164)">
+            <TextInput
+              value={smsFrom}
+              disabled={loading}
+              onChange={(e) => setSmsFrom(e.target.value)}
+              placeholder="Ligneo"
+            />
+          </FormField>
+        )}
+
         <label className="flex items-center gap-2 text-xs text-pro-text">
           <input
             type="checkbox"
@@ -702,8 +736,14 @@ function AvisGoogleCard() {
             disabled={loading}
             onChange={(e) => setSendToContact(e.target.checked)}
           />
-          Inclure le contact livraison (uniquement s'il a un email valide)
+          Inclure le contact livraison (email et/ou téléphone valides requis)
         </label>
+
+        <div className="rounded-lg border border-pro-border bg-pro-surface px-3 py-2">
+          <p className="text-[11px] text-pro-muted">
+            SMS envoyés ce mois-ci : <strong className="text-pro-text">{smsCount}</strong>
+          </p>
+        </div>
       </div>
 
       <div className="mt-4 flex justify-end">
@@ -714,6 +754,7 @@ function AvisGoogleCard() {
     </Card>
   );
 }
+
 
 function DevisAcceptationToggleCard() {
   const [enabled, setEnabled] = useState(true);
