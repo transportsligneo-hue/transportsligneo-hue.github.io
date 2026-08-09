@@ -689,7 +689,9 @@ function AdminMissionDetail() {
     );
   }
 
-  const missionNumber = trajet.mission_group_id
+  const missionNumber = attribution.numero_mission
+    ? attribution.numero_mission
+    : trajet.mission_group_id
     ? displayTrajetRef({
         id: trajet.id,
         createdAt: attribution.created_at,

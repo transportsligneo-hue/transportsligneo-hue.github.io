@@ -18,7 +18,7 @@ export function LegSuffixLegend({ className }: { className?: string }) {
       </span>
       <span className="inline-flex items-center gap-1.5">
         <span className="h-1.5 w-1.5 rounded-full bg-pro-accent" />
-        <b className="text-pro-text">Mission groupée</b> = L et R liées (même numéro racine)
+        <b className="text-pro-text">Duo Livraison–Restitution</b> = les deux volets L et R sont liés
       </span>
     </div>
   );
