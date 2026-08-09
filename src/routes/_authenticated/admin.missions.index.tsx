@@ -334,10 +334,10 @@ function AdminMissionsUnified() {
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
                              <ArrowLeftRight size={11} /> Duo Livraison–Restitution
                           </span>
-                          <b className="text-[12px] text-[var(--a6-text)]">Mission {r.seq}</b>
                           <span className="text-[11px] text-[var(--a6-muted)]">
-                            {r.seq}L Livraison + {r.seq}R Restitution — non dissociées
+                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — non dissociées
                           </span>
+
                         </span>
                       </td>
                     </tr>
