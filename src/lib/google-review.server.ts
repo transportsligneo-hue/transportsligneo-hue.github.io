@@ -127,14 +127,19 @@ async function sendReviewSms(params: {
   convoyeurLabel: string | null
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
-  if (!isValidPhone(recipient.phone)) {
+  if (!isValidPhone(params.recipient.phone)) {
     return { success: false, reason: 'Téléphone invalide.' }
   }
   const shortUrl = await ensureShortReviewUrl(params.settings.url)
   const body = buildSmsBody(params.convoyeurLabel, shortUrl)
-  const res = await sendSms({ to: recipient.phone!, body, from: params.settings.sms_from || 'Ligneo' })
+  const res = await sendSms({
+    to: params.recipient.phone!,
+    body,
+    from: params.settings.sms_from || 'Ligneo',
+  })
   return res.ok ? { success: true } : { success: false, reason: res.error }
 }
+
 
 async function recordReviewRequest(params: {
   attribution: any
