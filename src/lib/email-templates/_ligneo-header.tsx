@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { LIGNEO_BRAND_BANNER_URL } from '@/lib/brand-assets'
 import {
   Body,
   Button,
@@ -234,10 +235,13 @@ export function LigneoEmailShell({
 export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
     <Section style={headerSection}>
-      <Text style={brandCell}>
-        TRANSPORTS <span style={{ color: BLUE }}>LIGNEO</span>
-      </Text>
-      {tagline ? <Text style={eyebrowStyle}>{tagline}</Text> : null}
+      <img
+        src={LIGNEO_BRAND_BANNER_URL}
+        width="600"
+        alt="Transports Ligneo"
+        style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }}
+      />
+      {tagline ? <Text style={{ ...eyebrowStyle, padding: '10px 32px 0' }}>{tagline}</Text> : null}
     </Section>
   )
 }
@@ -370,10 +374,10 @@ const card = {
 }
 
 const headerSection = {
-  backgroundColor: '#ffffff',
-  backgroundImage: 'linear-gradient(#ffffff, #ffffff)',
+  backgroundColor: '#0b1026',
+  backgroundImage: 'linear-gradient(#0b1026, #0b1026)',
   borderBottom: `1px solid ${CARD_BORDER}`,
-  padding: '24px 32px',
+  padding: 0,
 }
 
 const brandCell = {
