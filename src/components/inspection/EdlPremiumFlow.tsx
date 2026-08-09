@@ -1540,6 +1540,7 @@ export function EdlPremiumFlow({
             <ValidationArea
               step={currentStep}
               state={currentState}
+              vehicule={vehicule}
               onTrigger={handleValidationStep}
             />
           )}
