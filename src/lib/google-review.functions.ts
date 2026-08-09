@@ -12,7 +12,14 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 /** Envoi manuel d'une demande d'avis Google (admin uniquement). */
 export const sendGoogleReviewRequest = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { attributionId: string; recipientType: 'client' | 'contact_livraison'; emailOverride?: string | null }) => input)
+  .inputValidator(
+    (input: {
+      attributionId: string
+      recipientType: 'client' | 'contact_livraison'
+      emailOverride?: string | null
+      channel?: 'email' | 'sms' | 'email+sms'
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context as never)
     const { sendGoogleReviewRequestServer } = await import('@/lib/google-review.server')
@@ -20,11 +27,13 @@ export const sendGoogleReviewRequest = createServerFn({ method: 'POST' })
       attributionId: data.attributionId,
       recipientType: data.recipientType,
       emailOverride: data.emailOverride ?? null,
+      channel: data.channel,
       auto: false,
       actorUserId: context.userId,
       actorLabel: 'Admin',
     })
   })
+
 
 /**
  * Déclenché par l'app convoyeur au moment de la clôture (livraison effectuée).
