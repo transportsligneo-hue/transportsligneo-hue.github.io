@@ -101,14 +101,19 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
     last.current = null;
   };
 
+  /** Effacement EXPLICITE uniquement (bouton « Effacer »). */
   const clear = () => {
     const c = canvasRef.current;
     const ctx = c?.getContext("2d");
     if (!c || !ctx) return;
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, c.width, c.height);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     setHasInk(false);
   };
+
 
   const validate = () => {
     const c = canvasRef.current;
