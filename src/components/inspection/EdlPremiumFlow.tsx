@@ -31,6 +31,8 @@ import { writeWithOutbox } from "@/lib/offline-outbox";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
+import { EdlStartChecklistGate } from "@/components/inspection/EdlStartChecklistGate";
+
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
@@ -259,6 +261,9 @@ export function EdlPremiumFlow({
   const [inspectionId, setInspectionId] = useState<string | null>(
     initialState?.inspectionId ?? null
   );
+  // Checklist sécurité obligatoire à chaque ouverture d'EDL (départ ET arrivée).
+  const [startChecklistDone, setStartChecklistDone] = useState(false);
+
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [openScanner, setOpenScanner] = useState(false);
@@ -717,7 +722,14 @@ export function EdlPremiumFlow({
   };
 
   /** Ignorer une étape scan : marquée comme validée sans document. Non destructif. */
+  /** Kit de sécurité absent du véhicule : l'étape photo peut être passée. */
+  const markKitAbsent = () => {
+    setState(currentStep.id, { status: "success", error: undefined });
+    toast.info("Kit de sécurité signalé absent · étape passée");
+  };
+
   const skipCurrentScan = () => {
+
     const stepId = currentStep.id;
     setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
     toast.info("Scan ignoré · appuyez sur \"Photo suivante\" pour continuer");
@@ -1362,7 +1374,20 @@ export function EdlPremiumFlow({
     );
   }
 
+  // Checklist obligatoire avant toute prise de photo (départ ET arrivée).
+  if (!startChecklistDone) {
+    return createPortal(
+      <EdlStartChecklistGate
+        phase={type}
+        onConfirm={() => setStartChecklistDone(true)}
+        onClose={onClose}
+      />,
+      document.body,
+    );
+  }
+
   const overlay = (
+
     <div className="edl-shell fixed inset-x-0 top-0 z-[100] flex flex-col" style={{ height: "100dvh", maxHeight: "100dvh" }}>
 
       {/* === HEADER GLASS === */}
@@ -1465,6 +1490,8 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onSimpleCapture={triggerSimpleCapture}
               onSkipScan={skipCurrentScan}
+              onMarkAbsent={currentStep.id === "kit_securite" ? markKitAbsent : undefined}
+
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
               onRetryUpload={retryUpload}
@@ -1648,12 +1675,14 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 }
 
 function PhotoOrScanArea({
-  step, state, onCapture, onSimpleCapture, onSkipScan, onRetake, onDelete, onRetryUpload,
+  step, state, onCapture, onSimpleCapture, onSkipScan, onMarkAbsent, onRetake, onDelete, onRetryUpload,
 }: {
   step: EdlStepDef; state?: StepState; onCapture: () => void;
   onSimpleCapture?: () => void; onSkipScan?: () => void;
+  onMarkAbsent?: () => void;
   onRetake: () => void; onDelete: () => void; onRetryUpload?: () => void;
 }) {
+
   const taken = Boolean(state?.previewUrl);
 
   return (
@@ -1752,7 +1781,30 @@ function PhotoOrScanArea({
               )}
             </div>
           )}
+
+          {/* Kit de sécurité absent du véhicule → étape passable */}
+          {onMarkAbsent && (
+            <button
+              type="button"
+              onClick={onMarkAbsent}
+              className="w-full flex items-center gap-3 text-left rounded-2xl p-3 edl-glass"
+            >
+              <span
+                className="w-6 h-6 rounded-md shrink-0 flex items-center justify-center"
+                style={{ border: "1.5px solid rgba(120,180,255,0.45)" }}
+              />
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-white">
+                  Kit de sécurité absent du véhicule
+                </span>
+                <span className="block text-[11px] text-[var(--edl-text-soft)]">
+                  Cochez pour passer cette photo · l'absence sera signalée.
+                </span>
+              </span>
+            </button>
+          )}
         </div>
+
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button

@@ -29,15 +29,33 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
     const ratio = window.devicePixelRatio || 1;
     const w = parent.clientWidth;
     const h = parent.clientHeight;
-    c.width = w * ratio;
-    c.height = h * ratio;
+    const nextW = Math.round(w * ratio);
+    const nextH = Math.round(h * ratio);
+    // Le redimensionnement du canvas efface son contenu : on ne le fait QUE si
+    // les dimensions changent réellement (scroll / ouverture clavier mobile
+    // déclenchent des events resize sans changement utile), et on restaure
+    // toujours le tracé existant.
+    if (c.width === nextW && c.height === nextH) return;
+
+    let snapshot: HTMLCanvasElement | null = null;
+    if (c.width > 0 && c.height > 0) {
+      snapshot = document.createElement("canvas");
+      snapshot.width = c.width;
+      snapshot.height = c.height;
+      snapshot.getContext("2d")?.drawImage(c, 0, 0);
+    }
+
+    c.width = nextW;
+    c.height = nextH;
     c.style.width = `${w}px`;
     c.style.height = `${h}px`;
     const ctx = c.getContext("2d");
     if (!ctx) return;
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, nextW, nextH);
+    if (snapshot) ctx.drawImage(snapshot, 0, 0, nextW, nextH);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#0f172a";
@@ -47,8 +65,13 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
   useEffect(() => {
     resize();
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
+    return () => {
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("orientationchange", resize);
+    };
   }, [resize]);
+
 
   const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -78,14 +101,19 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
     last.current = null;
   };
 
+  /** Effacement EXPLICITE uniquement (bouton « Effacer »). */
   const clear = () => {
     const c = canvasRef.current;
     const ctx = c?.getContext("2d");
     if (!c || !ctx) return;
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, c.width, c.height);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     setHasInk(false);
   };
+
 
   const validate = () => {
     const c = canvasRef.current;
