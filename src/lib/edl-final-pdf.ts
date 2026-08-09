@@ -12,7 +12,7 @@
  */
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 
 export interface EdlFinalPdfPhoto {

@@ -665,3 +665,5 @@ export function AmountRow({ label = 'Montant TTC', amount }: { label?: string; a
     </Section>
   )
 }
+
+void brandCell
