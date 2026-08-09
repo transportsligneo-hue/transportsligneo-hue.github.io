@@ -1,42 +1,16 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Home, Truck, Sparkles, User, LogIn } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Home, Truck, Sparkles, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 /**
  * Dock de navigation publique (mobile).
- * 4 onglets : Accueil · Missions (badge) · Estimer (CTA central surélevé) · Connexion.
- * Bandeau "Se connecter" au-dessus, uniquement pour les visiteurs non connectés.
+ * 4 onglets : Accueil · Services · Estimer (CTA central surélevé) · Connexion.
  */
 export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, role } = useAuth();
-  const [pending, setPending] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!isAuthenticated) {
-      setPending(0);
-      return;
-    }
-    (async () => {
-      try {
-        const { count } = await supabase
-          .from("devis")
-          .select("id", { count: "exact", head: true })
-          .in("statut", ["genere", "envoye", "en_attente"]);
-        if (!cancelled) setPending(count ?? 0);
-      } catch {
-        if (!cancelled) setPending(0);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated]);
 
   const inDashboard =
     location.pathname.startsWith("/dashboard-client") ||
@@ -54,20 +28,15 @@ export default function MobileBottomNav() {
     return navigate({ to: "/dashboard-client" });
   };
 
-  const goMissions = () => {
-    if (!isAuthenticated) return navigate({ to: "/login" });
-    if (role === "convoyeur") return navigate({ to: "/convoyeur/missions" });
-    return navigate({ to: "/dashboard-client/missions" });
-  };
-
   const goEstimer = () => {
     if (scrollToDevis()) return;
     navigate({ to: "/", hash: "devis" });
   };
 
   const isHome = location.pathname === "/";
-  const isMissions = location.pathname.includes("/missions");
+  const isServices = location.pathname.startsWith("/services");
   const isEspace = isAuthenticated || location.pathname.startsWith("/login");
+
 
   return (
     <nav aria-label="Navigation principale" className="md:hidden ldock-zone">
