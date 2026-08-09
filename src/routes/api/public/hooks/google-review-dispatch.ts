@@ -3,6 +3,7 @@
  * Appelé par pg_cron (POST, header apikey).
  */
 import { createFileRoute } from '@tanstack/react-router'
+import type { ReviewChannel, ReviewRecipientType } from '@/lib/google-review.server'
 
 export const Route = createFileRoute('/api/public/hooks/google-review-dispatch')({
   server: {
@@ -35,29 +36,35 @@ export const Route = createFileRoute('/api/public/hooks/google-review-dispatch')
           .gte('updated_at', new Date(Date.now() - 7 * 86_400_000).toISOString())
           .limit(50)
 
+        const channels: ReviewChannel[] =
+          settings.channel === 'email+sms' ? ['email', 'sms'] : [settings.channel || 'email']
+        const targets: ReviewRecipientType[] = ['client']
+        if (settings.send_to_contact) targets.push('contact_livraison')
+
         let sent = 0
         for (const a of attributions ?? []) {
           const { data: existing } = await supabaseAdmin
             .from('mission_review_requests')
-            .select('recipient_type')
+            .select('recipient_type, channel')
             .eq('attribution_id', a.id)
-          const done = new Set((existing ?? []).map((r) => r.recipient_type))
+          const done = new Set(
+            (existing ?? []).map((r) => `${r.recipient_type}:${r.channel}`),
+          )
 
-          if (!done.has('client')) {
-            const res = await sendGoogleReviewRequestServer({
-              attributionId: a.id,
-              recipientType: 'client',
-              auto: true,
-            })
-            if (res.ok) sent++
-          }
-          if (settings.send_to_contact && !done.has('contact_livraison')) {
-            const res = await sendGoogleReviewRequestServer({
-              attributionId: a.id,
-              recipientType: 'contact_livraison',
-              auto: true,
-            })
-            if (res.ok) sent++
+          for (const recipientType of targets) {
+            for (const channel of channels) {
+              if (done.has(`${recipientType}:${channel}`)) continue
+              const res = await sendGoogleReviewRequestServer({
+                attributionId: a.id,
+                recipientType,
+                channel,
+                auto: true,
+              })
+              if (res.ok) {
+                sent++
+                done.add(`${recipientType}:${channel}`)
+              }
+            }
           }
         }
 
