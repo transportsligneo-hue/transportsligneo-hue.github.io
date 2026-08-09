@@ -2007,9 +2007,10 @@ function SignatureArea({
 }
 
 function ValidationArea({
-  step, state, onTrigger,
-}: { step: EdlStepDef; state?: StepState; onTrigger: () => void }) {
+  step, state, vehicule, onTrigger,
+}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void }) {
   const done = state?.status === "success";
+  const vehTitle = [vehicule?.marque, vehicule?.modele].filter(Boolean).join(" ");
 
   if (step.id === "admin_validated") {
     return (
@@ -2030,12 +2031,30 @@ function ValidationArea({
       <div className="edl-glass p-5 flex items-start gap-3">
         <FileText size={20} className="text-[var(--edl-gold)] shrink-0 mt-0.5"/>
         <div>
-          <h3 className="text-base font-bold text-white">Récap & envoi</h3>
+          <h3 className="text-base font-bold text-white">Récap &amp; envoi</h3>
           <p className="mt-1 text-sm text-[var(--edl-text-soft)]">
             Tout est complet : selfie, photos extérieur/intérieur, documents, signatures. Envoyez à l'admin pour validation finale.
           </p>
         </div>
       </div>
+
+      <div className="edl-glass p-4 space-y-2">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold">Véhicule inspecté</p>
+        {vehTitle && <p className="text-sm font-semibold text-white">{vehTitle}</p>}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--edl-text-soft)]">Plaque</span>
+          <span className="text-sm font-bold text-white tabular-nums" style={{ opacity: vehicule?.immatriculation ? 1 : 0.45 }}>
+            {vehicule?.immatriculation || "Non renseignée"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--edl-text-soft)]">VIN</span>
+          <span className="text-sm font-semibold text-white truncate" style={{ opacity: vehicule?.vin ? 1 : 0.45 }}>
+            {vehicule?.vin || "Non renseigné"}
+          </span>
+        </div>
+      </div>
+
       {done ? (
         <div className="edl-glass p-4 text-center">
           <span className="edl-chip edl-chip-success">
