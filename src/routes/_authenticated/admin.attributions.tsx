@@ -741,11 +741,12 @@ function AdminAttributions() {
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white">
                     <ArrowLeftRight size={12} /> Duo Livraison–Restitution
                   </span>
-                  <span className="text-sm font-bold text-pro-text">Mission {item.seq}</span>
                   <span className="text-[11px] text-pro-text-soft">
-                    Livraison ({item.seq}L) + Restitution ({item.seq}R) — liées tant qu'elles ne sont pas dissociées
+                    Livraison {item.items[0]?.numero_mission ?? "—"} + Restitution{" "}
+                    {item.items[1]?.numero_mission ?? "—"} — liées tant qu'elles ne sont pas dissociées
                   </span>
                 </div>
+
                 <div className="space-y-2">{item.items.map(renderAttributionCard)}</div>
               </div>
             ) : (

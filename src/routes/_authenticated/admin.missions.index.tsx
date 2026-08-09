@@ -220,7 +220,7 @@ function AdminMissionsUnified() {
 
   // Regroupement visuel des missions groupées (Livraison L + Restitution R)
   type ListRow =
-    | { type: "groupHeader"; gid: string; seq: string; count: number }
+    | { type: "groupHeader"; gid: string; refs: string[] }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -237,8 +237,7 @@ function AdminMissionsUnified() {
         const sorted = members
           .slice()
           .sort((a, b) => ((a.legIndex ?? (a.legType === "retour" ? 2 : 1)) - (b.legIndex ?? (b.legType === "retour" ? 2 : 1))));
-        const seq = shortMissionSeq(sorted[0].ref);
-        out.push({ type: "groupHeader", gid, seq, count: sorted.length });
+        out.push({ type: "groupHeader", gid, refs: sorted.map((x) => x.ref) });
         sorted.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === sorted.length - 1 }));
         return;
       }
@@ -247,6 +246,7 @@ function AdminMissionsUnified() {
     });
     return out;
   }, [visible]);
+
 
   // Garde le panneau synchronisé avec les données rafraîchies
   useEffect(() => {
@@ -334,10 +334,10 @@ function AdminMissionsUnified() {
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
                              <ArrowLeftRight size={11} /> Duo Livraison–Restitution
                           </span>
-                          <b className="text-[12px] text-[var(--a6-text)]">Mission {r.seq}</b>
                           <span className="text-[11px] text-[var(--a6-muted)]">
-                            {r.seq}L Livraison + {r.seq}R Restitution — non dissociées
+                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — non dissociées
                           </span>
+
                         </span>
                       </td>
                     </tr>
