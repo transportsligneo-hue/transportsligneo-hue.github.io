@@ -203,7 +203,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -475,8 +475,8 @@ function ConvoyeurMissions() {
         vehicule={{
           marque: inspectionMission?.trajet?.marque ?? null,
           modele: inspectionMission?.trajet?.modele ?? null,
-          immatriculation: inspectionMission?.trajet?.immatriculation ?? null,
-          vin: (inspectionMission?.trajet as { vin?: string | null } | null | undefined)?.vin ?? null,
+          immatriculation: inspectionMission?.trajet?.immatriculation || (inspectionMission?.trajet as { vehicule_immatriculation?: string | null } | null | undefined)?.vehicule_immatriculation || null,
+          vin: (inspectionMission?.trajet as { vin?: string | null; vehicule_vin?: string | null } | null | undefined)?.vin || (inspectionMission?.trajet as { vehicule_vin?: string | null } | null | undefined)?.vehicule_vin || null,
         }}
         defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
         onComplete={handleInspectionComplete}
@@ -583,8 +583,8 @@ function ConvoyeurMissions() {
           vehicule={{
             marque: t?.marque ?? null,
             modele: t?.modele ?? null,
-            immatriculation: t?.immatriculation ?? null,
-            vin: t?.vin ?? null,
+            immatriculation: t?.immatriculation || (t as { vehicule_immatriculation?: string | null } | null | undefined)?.vehicule_immatriculation || null,
+            vin: t?.vin || (t as { vehicule_vin?: string | null } | null | undefined)?.vehicule_vin || null,
             energie: (t as { vehicule_energie?: string | null } | null)?.vehicule_energie ?? null,
             type: (t as { vehicule_type?: string | null } | null)?.vehicule_type ?? null,
             couleur: (t as { vehicule_couleur?: string | null } | null)?.vehicule_couleur ?? null,
@@ -651,7 +651,7 @@ function ConvoyeurMissions() {
         userId={user.id}
         inspectionDepartDone={!!openMission.inspectionDepart}
         inspectionArriveeDone={!!openMission.inspectionArrivee}
-        carteGriseAvailable={!!(t?.carte_grise_recto_url || t?.carte_grise_verso_url || t?.vin)}
+        carteGriseAvailable={!!(t?.carte_grise_recto_url || t?.carte_grise_verso_url || t?.vin || (t as { vehicule_vin?: string | null } | null | undefined)?.vehicule_vin)}
         edlContext={{
           numero: openMission.numero_mission
             ? displayNumero(openMission.numero_mission)
@@ -665,8 +665,8 @@ function ConvoyeurMissions() {
             [t?.marque, t?.modele].filter(Boolean).join(" ") ||
             (t as { vehicule_type?: string | null } | null)?.vehicule_type ||
             null,
-          immatriculation: t?.immatriculation ?? null,
-          vin: t?.vin ?? null,
+          immatriculation: t?.immatriculation || (t as { vehicule_immatriculation?: string | null } | null | undefined)?.vehicule_immatriculation || null,
+          vin: t?.vin || (t as { vehicule_vin?: string | null } | null | undefined)?.vehicule_vin || null,
           kilometrage_depart: (t as { vehicule_km?: number | null } | null)?.vehicule_km != null
             ? String((t as { vehicule_km?: number | null }).vehicule_km)
             : null,
