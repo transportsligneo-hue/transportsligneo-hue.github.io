@@ -336,14 +336,18 @@ function AdminMissionsUnified() {
               <tbody>
                 {listRows.map((r) =>
                   r.type === "groupHeader" ? (
-                    <tr key={`g-${r.gid}`} className="bg-[#eef2ff]">
-                      <td colSpan={6} className="!py-2">
+                    <tr key={`g-${r.gid}`} className="bg-[#e5e9ff]">
+                      <td
+                        colSpan={6}
+                        className="!py-2.5 border-t-[3px] border-t-[#4f46e5] shadow-[inset_4px_0_0_0_#4f46e5]"
+                        style={{ paddingLeft: 14 }}
+                      >
                         <span className="inline-flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
                              <ArrowLeftRight size={11} /> Duo Livraison–Restitution
                           </span>
-                          <span className="text-[11px] text-[var(--a6-muted)]">
-                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — non dissociées
+                          <span className="text-[11px] font-medium text-[#3730a3]">
+                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — les 2 lignes ci-dessous forment un seul dossier
                           </span>
 
                         </span>
@@ -352,9 +356,10 @@ function AdminMissionsUnified() {
                   ) : (
                     <tr
                       key={`${r.m.kind}-${r.m.id}`}
-                      className={`row ${r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_3px_0_0_0_#4f46e5]" : ""}`}
+                      className={`row ${r.inGroup ? "bg-[#f6f7ff]" : r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_4px_0_0_0_#4f46e5]" : ""} ${r.inGroup && r.last ? "border-b-[3px] border-b-[#4f46e5]" : ""}`}
                       onClick={() => setSelected(r.m)}
                     >
+
                     <td className={r.inGroup ? "pl-5" : ""}>
                       <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{r.m.ref}</p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
