@@ -1490,6 +1490,8 @@ export function EdlPremiumFlow({
               onCapture={triggerCapture}
               onSimpleCapture={triggerSimpleCapture}
               onSkipScan={skipCurrentScan}
+              onMarkAbsent={currentStep.id === "kit_securite" ? markKitAbsent : undefined}
+
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
               onRetryUpload={retryUpload}
