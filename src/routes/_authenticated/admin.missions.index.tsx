@@ -11,7 +11,7 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
-import { displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";

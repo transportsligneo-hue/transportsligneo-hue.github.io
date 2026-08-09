@@ -27,7 +27,7 @@ import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueB
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
-import { missionNumberOf, displayTrajetRef, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
