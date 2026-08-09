@@ -227,25 +227,33 @@ function AdminMissionsUnified() {
     const out: ListRow[] = [];
     const seen = new Set<string>();
     let band = false;
+    const isRetour = (x: (typeof visible)[number]) => x.legType === "retour" || x.legIndex === 2;
+    const isAller = (x: (typeof visible)[number]) => x.legType === "aller" || x.legIndex === 1;
+
     visible.forEach((m) => {
       const gid = m.groupId ?? null;
-      const members = gid ? visible.filter((x) => x.groupId === gid) : [];
-      if (gid && members.length > 1) {
-        if (seen.has(gid)) return;
-        seen.add(gid);
-        band = !band;
-        const sorted = members
-          .slice()
-          .sort((a, b) => ((a.legIndex ?? (a.legType === "retour" ? 2 : 1)) - (b.legIndex ?? (b.legType === "retour" ? 2 : 1))));
-        out.push({ type: "groupHeader", gid, refs: sorted.map((x) => x.ref) });
-        sorted.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === sorted.length - 1 }));
-        return;
+      const all = gid ? visible.filter((x) => x.groupId === gid) : [];
+      // Un duo = exactement 1 volet Livraison + 1 volet Restitution.
+      // Les éventuels trajets "simple" résiduels du même groupe restent affichés à part.
+      const duo = [all.find(isAller), all.find(isRetour)].filter(Boolean) as typeof all;
+      const inDuo = new Set(duo.map((x) => x.id));
+
+      if (gid && duo.length === 2) {
+        if (!seen.has(gid)) {
+          seen.add(gid);
+          band = !band;
+          out.push({ type: "groupHeader", gid, refs: duo.map((x) => x.ref) });
+          duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
+        }
+        if (inDuo.has(m.id)) return;
       }
+
       band = !band;
       out.push({ type: "row", m, band, inGroup: false, last: true });
     });
     return out;
   }, [visible]);
+
 
 
   // Garde le panneau synchronisé avec les données rafraîchies
