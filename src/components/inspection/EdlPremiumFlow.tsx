@@ -43,11 +43,20 @@ import {
   type EdlStepDef,
 } from "./edl-premium-sequence";
 
+interface VehiculeInfo {
+  marque?: string | null;
+  modele?: string | null;
+  immatriculation?: string | null;
+  vin?: string | null;
+}
+
 interface Props {
   attributionId: string;
   type: "depart" | "arrivee";
   userId: string;
   driverName: string;
+  /** Infos véhicule affichées en en-tête et dans le récap final */
+  vehicule?: VehiculeInfo;
   /** Pour signatures client : nom à afficher par défaut */
   defaultClientName?: string;
   onComplete: () => void;
