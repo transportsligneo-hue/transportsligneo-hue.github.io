@@ -187,7 +187,7 @@ function newCaptureId() {
 }
 
 export function EdlPremiumFlow({
-  attributionId, type, userId, driverName, defaultClientName,
+  attributionId, type, userId, driverName, defaultClientName, vehicule,
   onComplete, onClose,
 }: Props) {
   // Carburant véhicule (depuis attribution → trajet → demande). Sert à filtrer
