@@ -1427,6 +1427,25 @@ export function EdlPremiumFlow({
         </div>
       </header>
 
+      {/* === IDENTITÉ VÉHICULE (plaque + VIN) === */}
+      <div className="px-4 pt-2 flex items-center gap-2 flex-wrap shrink-0">
+        <span
+          className="edl-chip"
+          style={{ opacity: vehicule?.immatriculation ? 1 : 0.5 }}
+          title="Plaque d'immatriculation"
+        >
+          {vehicule?.immatriculation || "Plaque non renseignée"}
+        </span>
+        <span
+          className="edl-chip"
+          style={{ opacity: vehicule?.vin ? 1 : 0.5, maxWidth: "60%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          title="Numéro VIN"
+        >
+          VIN&nbsp;: {vehicule?.vin || "non renseigné"}
+        </span>
+      </div>
+
+
       {/* === BARRE PROGRESSION ÉLECTRIQUE === */}
       <div className="px-4 py-2 shrink-0">
         <div className="relative h-1.5 rounded-full bg-white/8 overflow-hidden">
