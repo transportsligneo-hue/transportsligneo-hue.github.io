@@ -3520,8 +3520,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
-          recipient_email: string
+          recipient_email: string | null
           recipient_name: string | null
+          recipient_phone: string | null
           recipient_type: string
           review_left_at: string | null
           sent_at: string
@@ -3536,8 +3537,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          recipient_email: string
+          recipient_email?: string | null
           recipient_name?: string | null
+          recipient_phone?: string | null
           recipient_type: string
           review_left_at?: string | null
           sent_at?: string
@@ -3552,8 +3554,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          recipient_email?: string
+          recipient_email?: string | null
           recipient_name?: string | null
+          recipient_phone?: string | null
           recipient_type?: string
           review_left_at?: string | null
           sent_at?: string
@@ -4627,6 +4630,33 @@ export type Database = {
           short_code?: string
           status?: string
           token?: string
+        }
+        Relationships: []
+      }
+      short_links: {
+        Row: {
+          code: string
+          created_at: string
+          hits: number
+          id: string
+          purpose: string | null
+          target_url: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          hits?: number
+          id?: string
+          purpose?: string | null
+          target_url: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          hits?: number
+          id?: string
+          purpose?: string | null
+          target_url?: string
         }
         Relationships: []
       }
