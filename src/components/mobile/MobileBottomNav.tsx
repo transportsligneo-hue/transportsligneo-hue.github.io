@@ -1,20 +1,48 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Home, Truck, User, Sparkles } from "lucide-react";
+import { Home, Truck, Sparkles, User, LogIn } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 /**
- * Bottom navigation publique (mobile uniquement).
- * 4 onglets : Accueil · Tarifs · Estimer (CTA centré, scrolle vers #devis) · Mon espace.
+ * Dock de navigation publique (mobile).
+ * 4 onglets : Accueil · Missions (badge) · Estimer (CTA central surélevé) · Connexion.
+ * Bandeau "Se connecter" au-dessus, uniquement pour les visiteurs non connectés.
  */
 export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, role } = useAuth();
+  const [pending, setPending] = useState(0);
 
-  // Ne pas afficher la nav publique sur les espaces authentifiés
+  useEffect(() => {
+    let cancelled = false;
+    if (!isAuthenticated) {
+      setPending(0);
+      return;
+    }
+    (async () => {
+      try {
+        const { count } = await supabase
+          .from("devis")
+          .select("id", { count: "exact", head: true })
+          .in("statut", ["genere", "envoye", "en_attente"]);
+        if (!cancelled) setPending(count ?? 0);
+      } catch {
+        if (!cancelled) setPending(0);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
   const inDashboard =
     location.pathname.startsWith("/dashboard-client") ||
+    location.pathname.startsWith("/dashboard-pro") ||
+    location.pathname.startsWith("/flotte") ||
+    location.pathname.startsWith("/entreprise") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/convoyeur");
   if (inDashboard) return null;
@@ -26,6 +54,12 @@ export default function MobileBottomNav() {
     return navigate({ to: "/dashboard-client" });
   };
 
+  const goMissions = () => {
+    if (!isAuthenticated) return navigate({ to: "/login" });
+    if (role === "convoyeur") return navigate({ to: "/convoyeur/missions" });
+    return navigate({ to: "/dashboard-client/missions" });
+  };
+
   const goEstimer = () => {
     if (scrollToDevis()) return;
     navigate({ to: "/", hash: "devis" });
@@ -33,85 +67,54 @@ export default function MobileBottomNav() {
 
   const isHome = location.pathname === "/";
   const isMissions = location.pathname.includes("/missions");
-  const isEspace =
-    isAuthenticated ||
-    location.pathname.startsWith("/dashboard-client") ||
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/convoyeur") ||
-    location.pathname.startsWith("/login");
-
-  const goMissions = () => {
-    if (!isAuthenticated) return navigate({ to: "/login" });
-    if (role === "convoyeur") return navigate({ to: "/convoyeur/missions" });
-    return navigate({ to: "/dashboard-client/missions" });
-  };
-
-  const tabBase = "flex flex-col items-center justify-center gap-1 h-full tap-scale";
-  const colorOn = "text-[#60a5fa]";
-  const colorOff = "text-white/50";
+  const isEspace = isAuthenticated || location.pathname.startsWith("/login");
 
   return (
-    <nav
-      aria-label="Navigation principale"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-2 safe-bottom pointer-events-none"
-    >
-      <div
-        className="mbottomnav-surface pointer-events-auto relative rounded-[28px] border border-white/[0.08] backdrop-blur-2xl"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(10,22,56,0.85) 0%, rgba(5,11,29,0.9) 100%)",
-          boxShadow:
-            "0 20px 50px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset",
-        }}
-      >
-        <div className="grid grid-cols-4 h-16 items-stretch">
-          <Link to="/" className={tabBase}>
-            <Home size={20} className={isHome ? colorOn : colorOff} strokeWidth={2} />
-            <span className={`text-[10px] tracking-[0.08em] font-heading font-bold ${isHome ? colorOn : colorOff}`}>
-              Accueil
-            </span>
-          </Link>
+    <nav aria-label="Navigation principale" className="md:hidden ldock-zone">
+      {!isAuthenticated && (
+        <Link to="/login" className="ldock-login" aria-label="Se connecter">
+          <span className="ldock-login-ic">
+            <LogIn size={20} strokeWidth={2.2} />
+          </span>
+          <span className="flex-1 min-w-0 relative">
+            <span className="ldock-login-title block">Se connecter</span>
+            <span className="ldock-login-sub block">Accéder à mon compte</span>
+          </span>
+        </Link>
+      )}
 
-          <button onClick={goMissions} className={tabBase} aria-label="Mes missions">
-            <Truck size={20} className={isMissions ? colorOn : colorOff} strokeWidth={2} />
-            <span className={`text-[10px] tracking-[0.08em] font-heading font-bold ${isMissions ? colorOn : colorOff}`}>
-              Missions
-            </span>
-          </button>
+      <div className="ldock">
+        <Link to="/" className={`ldock-item${isHome ? " is-active" : ""}`}>
+          <span className="ldock-ic">
+            <Home strokeWidth={2} />
+          </span>
+          <span>Accueil</span>
+          <i className="ldock-dot" />
+        </Link>
 
+        <button onClick={goMissions} className={`ldock-item${isMissions ? " is-active" : ""}`} aria-label="Missions">
+          {pending > 0 && <i className="ldock-badge not-italic">{pending > 9 ? "9+" : pending}</i>}
+          <span className="ldock-ic">
+            <Truck strokeWidth={2} />
+          </span>
+          <span>Missions</span>
+          <i className="ldock-dot" />
+        </button>
 
-          {/* CTA Estimer · centré, surélevé, halo bleu */}
-          <button
-            onClick={goEstimer}
-            className="relative flex flex-col items-center justify-center gap-1 h-full tap-scale"
-            aria-label="Estimer mon trajet"
-          >
-            <span
-              aria-hidden
-              className="absolute -top-8 w-16 h-16 rounded-full blur-2xl bg-[#3b82f6]/60 pointer-events-none"
-            />
-            <span
-              className="absolute -top-6 w-14 h-14 rounded-full text-white flex items-center justify-center border border-white/20"
-              style={{
-                background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                boxShadow:
-                  "0 12px 30px -6px rgba(59,130,246,0.75), inset 0 1px 0 rgba(255,255,255,0.3)",
-              }}
-            >
-              <Sparkles size={22} strokeWidth={2} />
-            </span>
-            <span className="mt-8 text-[10px] tracking-[0.08em] font-heading font-bold text-[#60a5fa]">
-              Estimer
-            </span>
-          </button>
+        <button onClick={goEstimer} className="ldock-item is-raised" aria-label="Estimer mon trajet">
+          <span className="ldock-fab">
+            <Sparkles strokeWidth={2.1} />
+          </span>
+          <span>Estimer</span>
+        </button>
 
-          <button onClick={goEspace} className={tabBase} aria-label="Mon espace">
-            <User size={20} className={isEspace ? colorOn : colorOff} strokeWidth={2} />
-            <span className={`text-[10px] tracking-[0.08em] font-heading font-bold ${isEspace ? colorOn : colorOff}`}>
-              {isAuthenticated ? "Espace" : "Connexion"}
-            </span>
-          </button>
-        </div>
+        <button onClick={goEspace} className={`ldock-item${isEspace ? " is-active" : ""}`} aria-label="Mon espace">
+          <span className="ldock-ic">
+            <User strokeWidth={2} />
+          </span>
+          <span>{isAuthenticated ? "Espace" : "Connexion"}</span>
+          <i className="ldock-dot" />
+        </button>
       </div>
     </nav>
   );
