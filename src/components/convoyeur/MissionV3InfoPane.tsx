@@ -225,25 +225,28 @@ export function MissionV3InfoPane({
           {vehicule.annee && <span className="v3-chip"><Calendar size={12} /> {vehicule.annee}</span>}
         </div>
 
-        {vehicule.immatriculation && (
-          <div className="v3-field">
-            <div style={{ minWidth: 0 }}>
-              <div className="v3-field-lbl">Plaque d'immatriculation</div>
-              <div className="v3-field-val">{vehicule.immatriculation}</div>
+        <div className="v3-field">
+          <div style={{ minWidth: 0 }}>
+            <div className="v3-field-lbl">Plaque d'immatriculation</div>
+            <div className="v3-field-val" style={{ opacity: vehicule.immatriculation ? 1 : 0.45 }}>
+              {vehicule.immatriculation || "Non renseignée"}
             </div>
-            <CopyBtn value={vehicule.immatriculation} />
           </div>
-        )}
+          {vehicule.immatriculation && <CopyBtn value={vehicule.immatriculation} />}
+        </div>
 
-        {vehicule.vin && (
-          <div className="v3-field">
-            <div style={{ minWidth: 0, overflow: "hidden" }}>
-              <div className="v3-field-lbl">Numéro VIN</div>
-              <div className="v3-field-val" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{vehicule.vin}</div>
+        <div className="v3-field">
+          <div style={{ minWidth: 0, overflow: "hidden" }}>
+            <div className="v3-field-lbl">Numéro VIN</div>
+            <div
+              className="v3-field-val"
+              style={{ overflow: "hidden", textOverflow: "ellipsis", opacity: vehicule.vin ? 1 : 0.45 }}
+            >
+              {vehicule.vin || "Non renseigné"}
             </div>
-            <CopyBtn value={vehicule.vin} />
           </div>
-        )}
+          {vehicule.vin && <CopyBtn value={vehicule.vin} />}
+        </div>
 
         {(vehicule.couleur || vehicule.km) && (
           <div className="v3-veh-foot">
