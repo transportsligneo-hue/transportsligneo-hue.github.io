@@ -2,17 +2,19 @@ import { createFileRoute } from '@tanstack/react-router'
 import { resolveShortLink } from '@/lib/short-links.server'
 
 export const Route = createFileRoute('/a/$code')({
-  component: () => null,
-  loader: async ({ params }) => {
-    const target = await resolveShortLink(params.code)
-    if (!target) throw new Error('Lien introuvable ou expiré.')
-    return { target }
+  server: {
+    handlers: {
+      GET: async ({ params }) => {
+        const target = await resolveShortLink(params.code)
+        if (!target) {
+          return new Response('Lien introuvable ou expiré.', { status: 404 })
+        }
+        return new Response(null, {
+          status: 302,
+          headers: { Location: target },
+        })
+      },
+    },
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: 'Transports Ligneo' },
-      { name: 'description', content: 'Redirection en cours...' },
-      { httpEquiv: 'refresh', content: `0;url=${loaderData.target}` },
-    ],
-  }),
+  component: () => null,
 })
