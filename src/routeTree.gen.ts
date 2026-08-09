@@ -48,6 +48,7 @@ import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
+import { Route as ACodeRouteImport } from './routes/a.$code'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
@@ -366,6 +367,11 @@ const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
 const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
   id: '/actualites/$slug',
   path: '/actualites/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ACodeRoute = ACodeRouteImport.update({
+  id: '/a/$code',
+  path: '/a/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -1126,6 +1132,7 @@ export interface FileRoutesByFullPath {
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
@@ -1284,6 +1291,7 @@ export interface FileRoutesByTo {
   '/tarifs': typeof TarifsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
@@ -1447,6 +1455,7 @@ export interface FileRoutesById {
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
@@ -1613,6 +1622,7 @@ export interface FileRouteTypes {
     | '/entreprise'
     | '/flotte'
     | '/notifications'
+    | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
@@ -1771,6 +1781,7 @@ export interface FileRouteTypes {
     | '/tarifs'
     | '/unsubscribe'
     | '/notifications'
+    | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
@@ -1933,6 +1944,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
     | '/_authenticated/notifications'
+    | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
@@ -2092,6 +2104,7 @@ export interface RootRouteChildren {
   SuiviRoute: typeof SuiviRoute
   TarifsRoute: typeof TarifsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -2407,6 +2420,13 @@ declare module '@tanstack/react-router' {
       path: '/actualites/$slug'
       fullPath: '/actualites/$slug'
       preLoaderRoute: typeof ActualitesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a/$code': {
+      id: '/a/$code'
+      path: '/a/$code'
+      fullPath: '/a/$code'
+      preLoaderRoute: typeof ACodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/notifications': {
@@ -3735,6 +3755,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuiviRoute: SuiviRoute,
   TarifsRoute: TarifsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,

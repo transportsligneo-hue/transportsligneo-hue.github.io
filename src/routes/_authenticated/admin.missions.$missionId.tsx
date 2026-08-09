@@ -1135,10 +1135,13 @@ function AdminMissionDetail() {
             attributionId={attribution.id}
             trajetId={trajet.id}
             clientEmail={trajet.client_email}
+            clientTelephone={trajet.client_telephone}
             clientNom={trajet.client_nom}
             contactNom={[trajet.arrivee_contact_prenom, trajet.arrivee_contact_nom].filter(Boolean).join(" ") || null}
             contactEmail={trajet.arrivee_contact_email}
+            contactTelephone={trajet.arrivee_contact_telephone}
           />
+
 
           {/* Documents */}
           <Card>
