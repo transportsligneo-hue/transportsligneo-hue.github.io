@@ -71,18 +71,6 @@ export default function MobileBottomNav() {
 
   return (
     <nav aria-label="Navigation principale" className="md:hidden ldock-zone">
-      {!isAuthenticated && (
-        <Link to="/login" className="ldock-login" aria-label="Se connecter">
-          <span className="ldock-login-ic">
-            <LogIn size={20} strokeWidth={2.2} />
-          </span>
-          <span className="flex-1 min-w-0 relative">
-            <span className="ldock-login-title block">Se connecter</span>
-            <span className="ldock-login-sub block">Accéder à mon compte</span>
-          </span>
-        </Link>
-      )}
-
       <div className="ldock">
         <Link to="/" className={`ldock-item${isHome ? " is-active" : ""}`}>
           <span className="ldock-ic">
@@ -92,14 +80,13 @@ export default function MobileBottomNav() {
           <i className="ldock-dot" />
         </Link>
 
-        <button onClick={goMissions} className={`ldock-item${isMissions ? " is-active" : ""}`} aria-label="Missions">
-          {pending > 0 && <i className="ldock-badge not-italic">{pending > 9 ? "9+" : pending}</i>}
+        <Link to="/services" className={`ldock-item${isServices ? " is-active" : ""}`} aria-label="Services">
           <span className="ldock-ic">
             <Truck strokeWidth={2} />
           </span>
-          <span>Missions</span>
+          <span>Services</span>
           <i className="ldock-dot" />
-        </button>
+        </Link>
 
         <button onClick={goEstimer} className="ldock-item is-raised" aria-label="Estimer mon trajet">
           <span className="ldock-fab">
