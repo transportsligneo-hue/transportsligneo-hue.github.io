@@ -472,6 +472,12 @@ function ConvoyeurMissions() {
         type={inspection.type}
         userId={user.id}
         driverName={driverDisplayName}
+        vehicule={{
+          marque: inspectionMission?.trajet?.marque ?? null,
+          modele: inspectionMission?.trajet?.modele ?? null,
+          immatriculation: inspectionMission?.trajet?.immatriculation ?? null,
+          vin: (inspectionMission?.trajet as { vin?: string | null } | null | undefined)?.vin ?? null,
+        }}
         defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
         onComplete={handleInspectionComplete}
         onClose={closeInspection}
