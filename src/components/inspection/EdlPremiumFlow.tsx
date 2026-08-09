@@ -1781,7 +1781,30 @@ function PhotoOrScanArea({
               )}
             </div>
           )}
+
+          {/* Kit de sécurité absent du véhicule → étape passable */}
+          {onMarkAbsent && (
+            <button
+              type="button"
+              onClick={onMarkAbsent}
+              className="w-full flex items-center gap-3 text-left rounded-2xl p-3 edl-glass"
+            >
+              <span
+                className="w-6 h-6 rounded-md shrink-0 flex items-center justify-center"
+                style={{ border: "1.5px solid rgba(120,180,255,0.45)" }}
+              />
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-white">
+                  Kit de sécurité absent du véhicule
+                </span>
+                <span className="block text-[11px] text-[var(--edl-text-soft)]">
+                  Cochez pour passer cette photo · l'absence sera signalée.
+                </span>
+              </span>
+            </button>
+          )}
         </div>
+
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button
