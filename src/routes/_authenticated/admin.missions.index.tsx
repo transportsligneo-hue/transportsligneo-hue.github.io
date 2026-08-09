@@ -220,7 +220,7 @@ function AdminMissionsUnified() {
 
   // Regroupement visuel des missions groupées (Livraison L + Restitution R)
   type ListRow =
-    | { type: "groupHeader"; gid: string; seq: string; count: number }
+    | { type: "groupHeader"; gid: string; refs: string[] }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -237,8 +237,7 @@ function AdminMissionsUnified() {
         const sorted = members
           .slice()
           .sort((a, b) => ((a.legIndex ?? (a.legType === "retour" ? 2 : 1)) - (b.legIndex ?? (b.legType === "retour" ? 2 : 1))));
-        const seq = shortMissionSeq(sorted[0].ref);
-        out.push({ type: "groupHeader", gid, seq, count: sorted.length });
+        out.push({ type: "groupHeader", gid, refs: sorted.map((x) => x.ref) });
         sorted.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === sorted.length - 1 }));
         return;
       }
@@ -247,6 +246,7 @@ function AdminMissionsUnified() {
     });
     return out;
   }, [visible]);
+
 
   // Garde le panneau synchronisé avec les données rafraîchies
   useEffect(() => {
