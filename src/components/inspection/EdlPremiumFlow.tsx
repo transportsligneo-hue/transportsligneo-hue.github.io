@@ -1362,7 +1362,20 @@ export function EdlPremiumFlow({
     );
   }
 
+  // Checklist obligatoire avant toute prise de photo (départ ET arrivée).
+  if (!startChecklistDone) {
+    return createPortal(
+      <EdlStartChecklistGate
+        phase={type}
+        onConfirm={() => setStartChecklistDone(true)}
+        onClose={onClose}
+      />,
+      document.body,
+    );
+  }
+
   const overlay = (
+
     <div className="edl-shell fixed inset-x-0 top-0 z-[100] flex flex-col" style={{ height: "100dvh", maxHeight: "100dvh" }}>
 
       {/* === HEADER GLASS === */}
