@@ -560,7 +560,7 @@ function AdminAttributions() {
                     </p>
                     {!a.trajet?.mission_group_id && hasLegSuffix(a.numero_mission) && (
                       <span className="text-[11px] text-indigo-700" title="Ces deux volets ont été dissociés">
-                        Faisait partie de la mission {shortMissionSeq(a.numero_mission ?? "")}
+                        Ancien duo Livraison–Restitution
                       </span>
                     )}
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
@@ -739,7 +739,7 @@ function AdminAttributions() {
               <div key={item.gid} className="rounded-2xl border-2 border-indigo-200 bg-indigo-50/50 p-3">
                 <div className="mb-2.5 flex flex-wrap items-center gap-2 px-1">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white">
-                    <ArrowLeftRight size={12} /> Mission groupée
+                    <ArrowLeftRight size={12} /> Duo Livraison–Restitution
                   </span>
                   <span className="text-sm font-bold text-pro-text">Mission {item.seq}</span>
                   <span className="text-[11px] text-pro-text-soft">
@@ -1009,6 +1009,9 @@ function attributionRef(
   a: Attribution,
   baseByGroup: Map<string, string>,
 ): string {
+  // Un numéro attribué par l'admin reste la source de vérité : ne jamais le
+  // reconstruire, le resuffixer ou le renuméroter uniquement pour l'affichage.
+  if (a.numero_mission) return a.numero_mission;
   const gid = a.trajet?.mission_group_id ?? null;
   if (!gid) return missionNumberOf(a);
   return displayTrajetRef({

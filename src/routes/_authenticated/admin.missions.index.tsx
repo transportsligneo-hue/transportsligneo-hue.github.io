@@ -101,15 +101,17 @@ function AdminMissionsUnified() {
 
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
-      const baseNumero = (t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null) ?? t.numero_mission ?? numeroByTrajet.get(t.id) ?? null;
-      const ref = displayTrajetRef({
+      const storedNumero = t.numero_mission ?? numeroByTrajet.get(t.id) ?? null;
+      // Le numéro saisi/attribué dans l'admin est immuable à l'affichage.
+      // On ne génère une référence que lorsqu'aucun numéro n'existe encore.
+      const ref = storedNumero ?? displayTrajetRef({
         id: t.id,
         createdAt: t.created_at,
         groupId: t.mission_group_id,
         isRoundTrip: isAR,
         legType: t.leg_type,
         legIndex: t.leg_index,
-        baseNumero,
+        baseNumero: t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null,
       });
       return {
       kind: "trajet",
@@ -330,7 +332,7 @@ function AdminMissionsUnified() {
                       <td colSpan={6} className="!py-2">
                         <span className="inline-flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
-                            <ArrowLeftRight size={11} /> Mission groupée
+                             <ArrowLeftRight size={11} /> Duo Livraison–Restitution
                           </span>
                           <b className="text-[12px] text-[var(--a6-text)]">Mission {r.seq}</b>
                           <span className="text-[11px] text-[var(--a6-muted)]">
@@ -359,7 +361,7 @@ function AdminMissionsUnified() {
                       </div>
                       {!r.inGroup && hasLegSuffix(r.m.ref) && (
                         <p className="mt-1 text-[10.5px] text-[#4f46e5]">
-                          Faisait partie de la mission {shortMissionSeq(r.m.ref)}
+                           Ancien duo Livraison–Restitution
                         </p>
                       )}
                     </td>
