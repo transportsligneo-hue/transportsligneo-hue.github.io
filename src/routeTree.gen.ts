@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TestSmsRouteImport } from './routes/test-sms'
 import { Route as TarifsRouteImport } from './routes/tarifs'
 import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -177,6 +178,11 @@ import { Route as ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport } from 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestSmsRoute = TestSmsRouteImport.update({
+  id: '/test-sms',
+  path: '/test-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TarifsRoute = TarifsRouteImport.update({
@@ -1124,6 +1130,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
+  '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -1289,6 +1296,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
+  '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
@@ -1447,6 +1455,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
   '/tarifs': typeof TarifsRoute
+  '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -1614,6 +1623,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/suivi'
     | '/tarifs'
+    | '/test-sms'
     | '/unsubscribe'
     | '/admin'
     | '/convoyeur'
@@ -1779,6 +1789,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/suivi'
     | '/tarifs'
+    | '/test-sms'
     | '/unsubscribe'
     | '/notifications'
     | '/a/$code'
@@ -1936,6 +1947,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/suivi'
     | '/tarifs'
+    | '/test-sms'
     | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
@@ -2103,6 +2115,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuiviRoute: typeof SuiviRoute
   TarifsRoute: typeof TarifsRoute
+  TestSmsRoute: typeof TestSmsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
@@ -2154,6 +2167,13 @@ declare module '@tanstack/react-router' {
       path: '/unsubscribe'
       fullPath: '/unsubscribe'
       preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-sms': {
+      id: '/test-sms'
+      path: '/test-sms'
+      fullPath: '/test-sms'
+      preLoaderRoute: typeof TestSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tarifs': {
@@ -3754,6 +3774,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuiviRoute: SuiviRoute,
   TarifsRoute: TarifsRoute,
+  TestSmsRoute: TestSmsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
@@ -3805,13 +3826,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
