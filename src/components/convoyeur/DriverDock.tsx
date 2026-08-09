@@ -81,7 +81,7 @@ export default function DriverDock({
           depart: t?.depart ?? "Départ",
           arrivee: t?.arrivee ?? "Arrivée",
           progress:
-            (attr.etape_courante && PROGRESS_BY_ETAPE[attr.etape_courante]) ??
+            PROGRESS_BY_ETAPE[attr.etape_courante ?? ""] ??
             (attr.statut === "en_cours" ? 60 : 15),
         });
       } catch {
