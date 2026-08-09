@@ -742,8 +742,8 @@ function AdminAttributions() {
                     <ArrowLeftRight size={12} /> Duo Livraison–Restitution
                   </span>
                   <span className="text-[11px] text-pro-text-soft">
-                    Livraison {item.items[0]?.numero_mission ?? "—"} + Restitution{" "}
-                    {item.items[1]?.numero_mission ?? "—"} — liées tant qu'elles ne sont pas dissociées
+                    Livraison {item.items[0]?.numero_mission ? displayNumero(item.items[0].numero_mission) : "—"} + Restitution{" "}
+                    {item.items[1]?.numero_mission ? displayNumero(item.items[1].numero_mission) : "—"} — liées tant qu'elles ne sont pas dissociées
                   </span>
                 </div>
 
@@ -1011,8 +1011,9 @@ function attributionRef(
   baseByGroup: Map<string, string>,
 ): string {
   // Un numéro attribué par l'admin reste la source de vérité : ne jamais le
-  // reconstruire, le resuffixer ou le renuméroter uniquement pour l'affichage.
-  if (a.numero_mission) return a.numero_mission;
+  // reconstruire, le resuffixer ou le renuméroter. On normalise juste le format
+  // d'affichage (dièse devant la séquence).
+  if (a.numero_mission) return displayNumero(a.numero_mission);
   const gid = a.trajet?.mission_group_id ?? null;
   if (!gid) return missionNumberOf(a);
   return displayTrajetRef({

@@ -103,16 +103,18 @@ function AdminMissionsUnified() {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
       const storedNumero = t.numero_mission ?? numeroByTrajet.get(t.id) ?? null;
       // Le numéro saisi/attribué dans l'admin est immuable à l'affichage.
-      // On ne génère une référence que lorsqu'aucun numéro n'existe encore.
-      const ref = storedNumero ?? displayTrajetRef({
-        id: t.id,
-        createdAt: t.created_at,
-        groupId: t.mission_group_id,
-        isRoundTrip: isAR,
-        legType: t.leg_type,
-        legIndex: t.leg_index,
-        baseNumero: t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null,
-      });
+      // On normalise juste le format (dièse devant la séquence) sans reconstruire.
+      const ref = storedNumero
+        ? displayNumero(storedNumero)
+        : displayTrajetRef({
+            id: t.id,
+            createdAt: t.created_at,
+            groupId: t.mission_group_id,
+            isRoundTrip: isAR,
+            legType: t.leg_type,
+            legIndex: t.leg_index,
+            baseNumero: t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null,
+          });
       return {
       kind: "trajet",
       id: t.id,
