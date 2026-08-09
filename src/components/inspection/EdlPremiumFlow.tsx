@@ -722,7 +722,14 @@ export function EdlPremiumFlow({
   };
 
   /** Ignorer une étape scan : marquée comme validée sans document. Non destructif. */
+  /** Kit de sécurité absent du véhicule : l'étape photo peut être passée. */
+  const markKitAbsent = () => {
+    setState(currentStep.id, { status: "success", error: undefined });
+    toast.info("Kit de sécurité signalé absent · étape passée");
+  };
+
   const skipCurrentScan = () => {
+
     const stepId = currentStep.id;
     setState(stepId, { status: "success", ocr: { status: "failed", error: "Ignoré par l'utilisateur" } });
     toast.info("Scan ignoré · appuyez sur \"Photo suivante\" pour continuer");
