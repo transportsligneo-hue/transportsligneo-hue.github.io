@@ -110,32 +110,6 @@ export default function DriverDock({
   return (
     <>
       <nav aria-label="Navigation convoyeur" className="md:hidden ldock-zone">
-        {active && (
-          <button
-            className="ldock-mission"
-            onClick={() => navigate({ to: "/convoyeur/missions", search: { open: active.id } as never })}
-          >
-            <span className="ldock-mission-ic">
-              <i className="ldock-mission-ring" />
-              <ArrowRight size={19} strokeWidth={2.2} />
-            </span>
-            <span className="flex-1 min-w-0">
-              <span className="ldock-mission-label">
-                <i className="ldock-live" />
-                Mission en cours
-              </span>
-              <span className="ldock-mission-route block">
-                {city(active.depart)} → {city(active.arrivee)}
-              </span>
-              <span className="ldock-mission-progress block">
-                <i style={{ width: `${active.progress}%` }} />
-              </span>
-            </span>
-            <span className="ldock-mission-chevron">
-              <ChevronRight size={14} strokeWidth={2.4} />
-            </span>
-          </button>
-        )}
 
         <div className="ldock">
           <Link to="/convoyeur" className={`ldock-item${activeDash ? " is-active" : ""}`}>
