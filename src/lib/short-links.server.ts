@@ -45,6 +45,11 @@ export async function resolveShortLink(code: string): Promise<string | null> {
     .eq('code', code)
     .maybeSingle()
   if (error || !data) return null
-  await supabaseAdmin.rpc('increment_short_link_hits', { _code: code }).catch(() => null)
+  await supabaseAdmin
+    .from('short_links')
+    .update({ hits: (data as { hits?: number }).hits ?? 0 + 1 })
+    .eq('code', code)
+    .then(() => null, () => null)
   return data.target_url
 }
+
