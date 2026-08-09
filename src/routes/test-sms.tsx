@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { sendTestSms } from '@/lib/sms-test.functions'
+import { sendTestSms, type TestSmsResponse } from '@/lib/sms-test.functions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -20,20 +20,28 @@ export const Route = createFileRoute('/test-sms')({
   component: TestSmsPage,
 })
 
+function prettify(raw?: string) {
+  if (!raw) return ''
+  try {
+    return JSON.stringify(JSON.parse(raw), null, 2)
+  } catch {
+    return raw
+  }
+}
+
 function TestSmsPage() {
   const send = useServerFn(sendTestSms)
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<string | null>(null)
+  const [result, setResult] = useState<TestSmsResponse | null>(null)
 
   const onSend = async () => {
     setLoading(true)
     setResult(null)
     try {
-      const res = await send({ data: { phone } })
-      setResult(res.ok ? `SMS envoyé (SID ${res.sid})` : `Échec : ${res.error}`)
+      setResult(await send({ data: { phone } }))
     } catch (e) {
-      setResult(`Erreur : ${e instanceof Error ? e.message : String(e)}`)
+      setResult({ ok: false, error: e instanceof Error ? e.message : String(e) })
     } finally {
       setLoading(false)
     }
@@ -54,7 +62,29 @@ function TestSmsPage() {
       <Button onClick={onSend} disabled={loading || phone.trim().length < 6}>
         {loading ? 'Envoi…' : 'Envoyer le SMS de test'}
       </Button>
-      {result && <p className="text-sm">{result}</p>}
+
+      {loading && <p className="text-sm text-muted-foreground">Envoi en cours…</p>}
+
+      {result && (
+        <div
+          className={`rounded-lg border p-4 text-sm ${
+            result.ok ? 'border-primary/40 bg-primary/5' : 'border-destructive/40 bg-destructive/5'
+          }`}
+        >
+          <p className="font-medium">
+            {result.ok ? 'SMS envoyé' : 'Échec de l’envoi'}
+            {typeof result.status === 'number' ? ` — HTTP ${result.status}` : ''}
+          </p>
+          {result.to && <p className="mt-1 text-muted-foreground">Destinataire : {result.to}</p>}
+          {result.sid && <p className="text-muted-foreground">SID : {result.sid}</p>}
+          {result.error && <p className="mt-1 text-destructive">Erreur : {result.error}</p>}
+          {result.raw && (
+            <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted p-3 text-xs">
+              {prettify(result.raw)}
+            </pre>
+          )}
+        </div>
+      )}
     </main>
   )
 }
