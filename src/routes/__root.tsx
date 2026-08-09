@@ -1,5 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import MobileBottomNav from "@/components/mobile/MobileBottomNav";
 import MobileAppGate, { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
@@ -130,11 +130,24 @@ function useIsCheckoutRoute() {
   return pathname.startsWith("/paiement");
 }
 
+/** Espaces connectés (admin, convoyeur, dashboards) : chrome public masqué. */
+function useIsDashboardRoute() {
+  const { pathname } = useRouterState({ select: (s) => s.location });
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/convoyeur") ||
+    pathname.startsWith("/dashboard-client") ||
+    pathname.startsWith("/dashboard-pro") ||
+    pathname.startsWith("/flotte") ||
+    pathname.startsWith("/entreprise")
+  );
+}
+
 function PublicMobileBottomNav() {
-  const { user } = useAuth();
   const isApp = useIsMobileAppShell();
   const isCheckout = useIsCheckoutRoute();
-  if (user || isApp || isCheckout) return null;
+  const isDashboard = useIsDashboardRoute();
+  if (isApp || isCheckout || isDashboard) return null;
   return <MobileBottomNav />;
 }
 
@@ -142,7 +155,9 @@ function PublicMobileBottomNav() {
 function PublicChrome() {
   const isApp = useIsMobileAppShell();
   const isCheckout = useIsCheckoutRoute();
+  const isDashboard = useIsDashboardRoute();
   if (isApp || isCheckout) return null;
+  if (isDashboard) return <CookieBanner />;
   return (
     <>
       <MobileNavbar />

@@ -5523,3 +5523,126 @@ html.theme-light .driver-selfie-status { color: #47506e; }
 .cat2-accept:disabled { opacity: .5; }
 .cat2-accept.locked { background: rgba(255,255,255,0.06); box-shadow: none; color: var(--cat2-muted); }
 .cat2-accept.locked::after { display: none; }
+
+/* =========================================================
+   LDOCK — docks de navigation bas d'écran (public + driver)
+   Identité bleu néon électrique sur navy #061238
+   ========================================================= */
+.ldock-zone {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  padding: 0 14px 14px; pointer-events: none;
+  padding-bottom: max(env(safe-area-inset-bottom), 14px);
+}
+.ldock-zone > * { pointer-events: auto; }
+
+.ldock {
+  position: relative; display: flex; align-items: center; justify-content: space-around;
+  background: rgba(10,20,58,0.85); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(140,170,255,0.28); border-radius: 24px; padding: 10px 6px 12px;
+  box-shadow: 0 20px 50px rgba(0,0,6,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.ldock::before {
+  content: ''; position: absolute; top: 0; left: 16%; right: 16%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(91,131,255,0.55), transparent);
+}
+
+.ldock-item {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 6px; border-radius: 16px; color: #6577ad; font-size: 10.4px; font-weight: 700;
+  transition: color .2s ease; flex: 1; min-width: 0; background: none; border: none;
+}
+.ldock-item span { line-height: 1.1; white-space: nowrap; }
+.ldock-item svg { width: 21px; height: 21px; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+.ldock-item:active svg { transform: scale(.9); }
+.ldock-ic { position: relative; display: flex; align-items: center; justify-content: center; }
+.ldock-item.is-active { color: #dfe6ff; }
+.ldock-item.is-active .ldock-ic::before {
+  content: ''; position: absolute; inset: -9px; border-radius: 14px; z-index: -1;
+  background: linear-gradient(150deg, rgba(91,131,255,0.30), rgba(47,95,255,0.10));
+  animation: ldockGlow 2.6s ease-in-out infinite;
+}
+@keyframes ldockGlow {
+  0%,100% { box-shadow: 0 0 0 1px rgba(91,131,255,0.40), 0 6px 16px rgba(47,95,255,0.35), 0 0 20px rgba(47,95,255,0.25); }
+  50% { box-shadow: 0 0 0 1px rgba(91,131,255,0.60), 0 6px 20px rgba(47,95,255,0.50), 0 0 28px rgba(47,95,255,0.38); }
+}
+.ldock-item.is-active svg { filter: drop-shadow(0 0 6px rgba(91,131,255,0.7)); transform: translateY(-1px) scale(1.06); }
+.ldock-dot {
+  position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: #5b83ff; opacity: 0;
+  box-shadow: 0 0 6px #5b83ff; transition: opacity .2s;
+}
+.ldock-item.is-active .ldock-dot { opacity: 1; }
+
+.ldock-badge {
+  position: absolute; top: -2px; right: 14%; min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; background: #ff5470; color: #fff; font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #040b28;
+}
+
+/* CTA central surélevé */
+.ldock-item.is-raised { margin-top: -28px; }
+.ldock-fab {
+  width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, #5b83ff, #1c3fc4); position: relative; overflow: hidden;
+  box-shadow: 0 12px 26px rgba(47,95,255,0.55), 0 0 0 6px #040b28;
+}
+.ldock-fab svg { width: 25px; height: 25px; color: #fff; }
+.ldock-fab::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: skewX(-20deg); animation: ldockShine 3.2s ease-in-out infinite;
+}
+@keyframes ldockShine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
+.ldock-item.is-raised span { margin-top: 8px; color: #dfe6ff; }
+
+/* Bandeau "Se connecter" */
+.ldock-login {
+  position: relative; display: flex; align-items: center; gap: 14px; padding: 13px 16px; margin-bottom: 10px;
+  width: 100%; text-align: left; overflow: hidden; border-radius: 20px;
+  background: linear-gradient(120deg, rgba(47,95,255,0.16), rgba(91,131,255,0.08));
+  border: 1px solid rgba(140,170,255,0.28); box-shadow: 0 16px 36px rgba(47,95,255,0.22);
+}
+.ldock-login::before {
+  content: ''; position: absolute; top: -40px; right: 60px; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(91,131,255,0.25), transparent 70%); pointer-events: none;
+}
+.ldock-login-ic {
+  width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; color: #fff;
+  background: linear-gradient(150deg, #5b83ff, #1c3fc4);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(47,95,255,0.45);
+}
+.ldock-login-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; color: #f2f5ff; }
+.ldock-login-sub { font-size: 11.5px; color: #6577ad; margin-top: 1px; }
+
+/* Bandeau mission active */
+.ldock-mission {
+  position: relative; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  margin: 0 0 10px; padding: 12px 14px; border-radius: 20px; overflow: hidden;
+  background: linear-gradient(120deg, rgba(47,95,255,0.16), rgba(143,108,255,0.10));
+  border: 1px solid rgba(91,131,255,0.35); box-shadow: 0 14px 30px rgba(47,95,255,0.25);
+}
+.ldock-mission-ic {
+  position: relative; width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; color: #fff;
+  background: linear-gradient(150deg, #5b83ff, #1c3fc4);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(47,95,255,0.4);
+}
+.ldock-mission-ring {
+  position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #5b83ff; opacity: .6;
+  animation: ldockRing 2s ease-out infinite;
+}
+@keyframes ldockRing { 0% { transform: scale(.9); opacity: .7; } 100% { transform: scale(1.35); opacity: 0; } }
+.ldock-mission-label {
+  font-size: 9.8px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #5b83ff;
+  display: flex; align-items: center; gap: 6px;
+}
+.ldock-live { width: 5px; height: 5px; border-radius: 50%; background: #22d3a8; box-shadow: 0 0 6px #22d3a8; animation: ldockBlink 1.6s ease-in-out infinite; }
+@keyframes ldockBlink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.ldock-mission-route { font-size: 13px; font-weight: 700; margin-top: 3px; color: #f2f5ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ldock-mission-progress { height: 3px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 7px; overflow: hidden; }
+.ldock-mission-progress > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #5b83ff, #9be8ff); box-shadow: 0 0 8px rgba(91,131,255,0.6); }
+.ldock-mission-chevron { flex-shrink: 0; width: 30px; height: 30px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; color: #9aa8d9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ldock-item.is-active .ldock-ic::before,
+  .ldock-fab::after, .ldock-mission-ring, .ldock-live { animation: none; }
+}

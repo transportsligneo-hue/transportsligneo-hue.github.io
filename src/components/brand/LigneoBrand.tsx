@@ -79,9 +79,9 @@ export function LigneoBrand({ role, compact = false, variant = "light" }: Props)
           >
             {cfg.label}
           </span>
-          {!compact && (
-            <span className={`text-[10px] ${tagColor}`}>· {cfg.dashboardLabel}</span>
-          )}
+          <span className={`text-[10px] ${tagColor}`}>
+            · {compact ? "Dashboard" : cfg.dashboardLabel}
+          </span>
         </div>
       </div>
     </div>
