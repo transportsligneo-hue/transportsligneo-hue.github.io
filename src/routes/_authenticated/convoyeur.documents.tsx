@@ -110,7 +110,7 @@ function ConvoyeurDocuments() {
       const path = `${user.id}/${spec.key}_${Date.now()}_${safeFileName(file.name)}`;
       const { error: upErr } = await supabase.storage
         .from("convoyeur-documents")
-        .upload(path, file, { upsert: true, contentType: file.type || "application/octet-stream" });
+        .upload(path, file, { upsert: false, contentType: file.type || "application/octet-stream" });
       if (upErr) throw upErr;
 
       // Replace previous of same type
@@ -147,7 +147,7 @@ function ConvoyeurDocuments() {
       const path = `${user.id}/avatar_${Date.now()}_${safeFileName(file.name)}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+        .upload(path, file, { upsert: false, contentType: file.type || "image/jpeg" });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       const { error: updErr } = await supabase
