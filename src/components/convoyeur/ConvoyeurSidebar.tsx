@@ -32,7 +32,6 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   const { theme } = useTheme();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.background;
@@ -50,11 +49,6 @@ export function ConvoyeurSidebar({ items, children }: Props) {
     item.exact
       ? location.pathname === item.to
       : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
-
-  const MAX_TABS = 4;
-  const hasOverflow = items.length > MAX_TABS;
-  const visibleTabs = hasOverflow ? items.slice(0, 3) : items.slice(0, MAX_TABS);
-  const overflowTabs = hasOverflow ? items.slice(3) : [];
 
   const navItemClass = (active: boolean) =>
     `relative flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-all ${
