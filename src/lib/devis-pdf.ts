@@ -506,7 +506,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   // Sceau doré central (façon template)
   if (!d.clientSignatureDataUrl) {
-    drawGoldSeal(doc, pageW / 2, sigBaseY + 14, 14);
+    drawGoldSeal(doc, pageW - 82, sigBaseY + 16, 12);
   }
 
 
