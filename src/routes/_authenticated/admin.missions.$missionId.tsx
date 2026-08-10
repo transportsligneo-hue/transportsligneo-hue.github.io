@@ -927,18 +927,22 @@ function AdminMissionDetail() {
                 <div className="flex-1 min-w-[220px]">
                   <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300 mb-1.5">
                     <Receipt size={12} /> N° de PO / commande client
+                    {savingPo && <Loader2 size={11} className="animate-spin" />}
                   </label>
                   <input
                     id="po-number"
                     value={poNumber}
                     onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                    onBlur={(e) => void savePo(e.target.value)}
                     maxLength={60}
                     placeholder="Ex. PO-2026-0042"
                     className="w-full rounded-md border border-amber-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50"
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
+                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
                   </p>
+
                 </div>
                 <Button
                   icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
