@@ -428,7 +428,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Total HT", labelR, y, { align: "right" });
+  doc.text(micro ? "Total" : "Total HT", labelR, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...NAVY);
   doc.text(eur(ht), colTotalR, y, { align: "right" });
@@ -436,8 +436,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT);
-  doc.text("TVA (20 %)", labelR, y, { align: "right" });
-  doc.text(eur(tva), colTotalR, y, { align: "right" });
+  if (micro) {
+    doc.text("TVA", labelR, y, { align: "right" });
+    doc.text("Non applicable", colTotalR, y, { align: "right" });
+  } else {
+    doc.text(`TVA (${String(vatRate).replace(".", ",")} %)`, labelR, y, { align: "right" });
+    doc.text(eur(tva), colTotalR, y, { align: "right" });
+  }
 
   y += 4;
   doc.setFillColor(...NAVY);
@@ -445,7 +450,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(...WHITE);
-  doc.text("TOTAL TTC", labelR, y + 7.8, { align: "right" });
+  doc.text(micro ? "TOTAL NET À PAYER" : "TOTAL TTC", labelR, y + 7.8, { align: "right" });
   doc.setFontSize(10.5);
   doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
   y += 14;
@@ -454,10 +459,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
     "Aucun acompte demandé à la réservation.",
+    ...(micro ? [exemptionNote] : []),
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
 
     "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
+
 
   // Conditions sur 2 colonnes (compact) pour tenir sur une page
   doc.setFont("helvetica", "normal");
