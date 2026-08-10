@@ -5657,18 +5657,32 @@ export type Database = {
       accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
-      admin_cancel_mission: {
-        Args: {
-          _attribution_id: string
-          _cancel_trajet?: boolean
-          _categorie: string
-          _facturable?: boolean
-          _indemnite?: number
-          _motif?: string
-          _passage_vide?: boolean
-        }
-        Returns: undefined
-      }
+      admin_cancel_mission:
+        | {
+            Args: {
+              _attribution_id: string
+              _cancel_trajet?: boolean
+              _categorie: string
+              _facturable?: boolean
+              _indemnite?: number
+              _motif?: string
+              _passage_vide?: boolean
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _apply_group?: boolean
+              _attribution_id: string
+              _cancel_trajet?: boolean
+              _categorie: string
+              _facturable?: boolean
+              _indemnite?: number
+              _motif?: string
+              _passage_vide?: boolean
+            }
+            Returns: number
+          }
       admin_cancel_mission_leg: {
         Args: { _mission_id: string }
         Returns: undefined
@@ -5743,6 +5757,10 @@ export type Database = {
         Returns: undefined
       }
       admin_reset_operational_data: { Args: never; Returns: Json }
+      admin_set_mission_po: {
+        Args: { _apply_group?: boolean; _attribution_id: string; _po: string }
+        Returns: number
+      }
       admin_set_mission_prix: {
         Args: { _mission_id: string; _prix: number }
         Returns: undefined

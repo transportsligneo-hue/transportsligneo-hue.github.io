@@ -102,6 +102,7 @@ interface TrajetFull {
   arrivee_contact_instructions: string | null;
   mission_group_id: string | null;
   leg_type: string | null;
+  commande_ref?: string | null;
 }
 
 interface ConvoyeurFull {
@@ -212,6 +213,8 @@ function AdminMissionDetail() {
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
   const [poNumber, setPoNumber] = useState("");
+  const [cloturePrefill, setCloturePrefill] = useState<{ categorie: string; motif: string } | null>(null);
+  const [clotureKey, setClotureKey] = useState(0);
   const [generatingFacture, setGeneratingFacture] = useState(false);
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
@@ -235,6 +238,43 @@ function AdminMissionDetail() {
     setContactTel2(trajet.arrivee_contact_telephone2 ?? "");
     setContactInstr(trajet.arrivee_contact_instructions ?? "");
   }, [trajet]);
+
+  // N° de PO — partagé par les deux volets d'un aller-retour
+  const [savingPo, setSavingPo] = useState(false);
+  useEffect(() => {
+    if (!trajet) return;
+    setPoNumber(trajet.commande_ref ?? "");
+  }, [trajet?.id, trajet?.commande_ref]);
+
+  const savePo = useCallback(
+    async (value: string, silent = false) => {
+      if (!attribution) return;
+      const po = value.trim().slice(0, 60);
+      if ((trajet?.commande_ref ?? "") === po) return;
+      setSavingPo(true);
+      try {
+        const { error } = await supabase.rpc("admin_set_mission_po" as never, {
+          _attribution_id: attribution.id,
+          _po: po || null,
+          _apply_group: true,
+        } as never);
+        if (error) throw error;
+        setTrajet((t) => (t ? { ...t, commande_ref: po || null } : t));
+        if (!silent) {
+          toast.success("N° de PO enregistré", {
+            description: trajet?.mission_group_id ? "Appliqué aux deux volets (Livraison + Restitution)." : undefined,
+          });
+        }
+      } catch (e) {
+        toast.error("Enregistrement du PO impossible", { description: (e as Error).message });
+      } finally {
+        setSavingPo(false);
+      }
+    },
+    [attribution, trajet?.commande_ref, trajet?.mission_group_id],
+  );
+
+
 
   // Numéro de base partagé pour un aller-retour (les 2 volets affichent 075A / 075R)
   const [groupBaseNumero, setGroupBaseNumero] = useState<string | null>(null);
@@ -590,6 +630,7 @@ function AdminMissionDetail() {
       });
       if (!ok) return;
     }
+    await savePo(po, true);
     setGeneratingFacture(true);
     try {
       // Livraison + restitution = UNE seule facture au tarif de base global
@@ -888,18 +929,22 @@ function AdminMissionDetail() {
                 <div className="flex-1 min-w-[220px]">
                   <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300 mb-1.5">
                     <Receipt size={12} /> N° de PO / commande client
+                    {savingPo && <Loader2 size={11} className="animate-spin" />}
                   </label>
                   <input
                     id="po-number"
                     value={poNumber}
                     onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                    onBlur={(e) => void savePo(e.target.value)}
                     maxLength={60}
                     placeholder="Ex. PO-2026-0042"
                     className="w-full rounded-md border border-amber-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50"
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
+                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
                   </p>
+
                 </div>
                 <Button
                   icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
@@ -1159,24 +1204,36 @@ function AdminMissionDetail() {
           {/* Incidents signalés par le convoyeur */}
           <MissionIncidentsPanel
             attributionId={attribution.id}
+            isGroup={Boolean(trajet.mission_group_id)}
             onPassageAVide={(motif) => {
               setPvMotif(motif);
               setPvOpenKey((k) => k + 1);
               document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+            onCloture={(categorie, motif) => {
+              setCloturePrefill({ categorie, motif });
+              setClotureKey((k) => k + 1);
+              document.getElementById("cloture-admin")?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
           />
 
           {/* Clôture administrative : annulation motivée */}
-          <MissionClotureAdminPanel
-            attributionId={attribution.id}
-            statut={attribution.statut}
-            onChanged={() => { void fetchAll(); }}
-            onPassageAVide={(motif) => {
-              setPvMotif(motif);
-              setPvOpenKey((k) => k + 1);
-              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-          />
+          <div id="cloture-admin">
+            <MissionClotureAdminPanel
+              attributionId={attribution.id}
+              statut={attribution.statut}
+              isGroup={Boolean(trajet.mission_group_id)}
+              prefill={cloturePrefill}
+              prefillKey={clotureKey}
+              onChanged={() => { void fetchAll(); }}
+              onPassageAVide={(motif) => {
+                setPvMotif(motif);
+                setPvOpenKey((k) => k + 1);
+                document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            />
+          </div>
+
 
 
 

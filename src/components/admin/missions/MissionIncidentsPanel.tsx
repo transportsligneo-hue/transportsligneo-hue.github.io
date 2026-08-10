@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  AlertTriangle, Loader2, MapPin, CheckCircle2, Clock, FilePlus2, ShieldAlert,
+  AlertTriangle, Loader2, MapPin, CheckCircle2, Clock, FilePlus2, ShieldAlert, Ban,
 } from "lucide-react";
 import { Card, Badge, Button } from "@/components/admin/AdminUI";
 
@@ -30,9 +30,23 @@ interface IncidentRow {
 
 interface Props {
   attributionId: string;
+  /** La mission fait partie d'un Duo Livraison–Restitution. */
+  isGroup?: boolean;
   /** Ouvre le formulaire "passage à vide" pré-rempli avec ce motif. */
   onPassageAVide?: (motif: string) => void;
+  /** Ouvre la clôture administrative pré-remplie (catégorie + motif). */
+  onCloture?: (categorie: string, motif: string) => void;
 }
+
+/** Type d'incident → catégorie de clôture administrative. */
+const CLOTURE_BY_TYPE: Record<string, string> = {
+  vehicule_non_dispo: "vehicule_indisponible",
+  vehicule_non_roulant: "vehicule_non_roulant",
+  client_injoignable: "interlocuteur_absent",
+  accident: "incident_route",
+  vol_securite: "incident_route",
+};
+
 
 const GRAVITE_TONE: Record<string, "danger" | "warning" | "info" | "neutral"> = {
   critique: "danger",
@@ -66,7 +80,7 @@ function photosOf(raw: unknown): string[] {
   return [];
 }
 
-export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) {
+export function MissionIncidentsPanel({ attributionId, isGroup, onPassageAVide, onCloture }: Props) {
   const [rows, setRows] = useState<IncidentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -137,6 +151,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
             const photos = photosOf(row.photos);
             const resolved = row.statut === "resolu";
             const suggestPv = PV_TYPES.has(row.type_incident ?? "");
+            const clotureKey = CLOTURE_BY_TYPE[row.type_incident ?? ""] ?? null;
             return (
               <div
                 key={row.id}
@@ -200,6 +215,23 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
                     Générer un passage à vide (véhicule indisponible)
                   </button>
                 )}
+
+                {clotureKey && !resolved && (
+                  <button
+                    type="button"
+                    onClick={() => onCloture?.(
+                      clotureKey,
+                      `${typeLabelOf(row.type_incident)} — ${row.titre}`,
+                    )}
+                    className="mt-2 w-full flex items-center gap-2 rounded-lg border border-red-400/50 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-700"
+                  >
+                    <Ban size={14} />
+                    {isGroup
+                      ? "Annuler la mission (Livraison + Restitution)"
+                      : "Annuler la mission suite à cet incident"}
+                  </button>
+                )}
+
 
                 {!resolved && (
                   <div className="mt-2 space-y-2">

@@ -119,6 +119,11 @@ export const CLOTURE_LABEL: Record<string, string> = Object.fromEntries(
 type Props = {
   attributionId: string;
   statut: string;
+  /** Duo Livraison–Restitution : l'annulation s'applique aux deux volets. */
+  isGroup?: boolean;
+  /** Pré-remplissage déclenché depuis un incident. */
+  prefill?: { categorie: string; motif: string } | null;
+  prefillKey?: number;
   onChanged?: () => void;
   /** Ouvre le formulaire « Passage à vide » pré-rempli */
   onPassageAVide?: (motif: string) => void;
@@ -134,7 +139,7 @@ type AnnulationRow = {
   annulation_passage_vide: boolean | null;
 };
 
-export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onPassageAVide }: Props) {
+export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefill, prefillKey, onChanged, onPassageAVide }: Props) {
   const [row, setRow] = useState<AnnulationRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -144,6 +149,7 @@ export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onP
   const [indemnite, setIndemnite] = useState("");
   const [passageVide, setPassageVide] = useState(false);
   const [cancelTrajet, setCancelTrajet] = useState(true);
+  const [applyGroup, setApplyGroup] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(
@@ -169,6 +175,17 @@ export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attributionId, statut]);
 
+  useEffect(() => {
+    if (!prefillKey || !prefill) return;
+    setOpen(true);
+    setCategorie(prefill.categorie);
+    const cat = CLOTURE_CATEGORIES.find((c) => c.key === prefill.categorie);
+    setFacturable(Boolean(cat?.facturable));
+    setPassageVide(Boolean(cat?.passageVide));
+    setMotif(prefill.motif);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillKey]);
+
   const pickCategorie = (key: string) => {
     setCategorie(key);
     const cat = CLOTURE_CATEGORIES.find((c) => c.key === key);
@@ -187,7 +204,9 @@ export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onP
     }
     const cat = CLOTURE_CATEGORIES.find((c) => c.key === categorie);
     const ok = await confirmToast(`Annuler la mission — ${cat?.label} ?`, {
-      description: "La mission passe en statut Annulé et le trajet est mis à jour. Action tracée dans l'historique.",
+      description: isGroup && applyGroup
+        ? "Les deux volets (Livraison + Restitution) passent en statut Annulé. Action tracée dans l'historique."
+        : "La mission passe en statut Annulé et le trajet est mis à jour. Action tracée dans l'historique.",
       confirmLabel: "Confirmer l'annulation",
       variant: "danger",
     });
@@ -203,6 +222,7 @@ export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onP
         _indemnite: indemnite ? Number(indemnite) : null,
         _passage_vide: passageVide,
         _cancel_trajet: cancelTrajet,
+        _apply_group: isGroup ? applyGroup : false,
       } as never);
       if (error) throw error;
       toast.success("Mission annulée", { description: cat?.label });
@@ -375,6 +395,13 @@ export function MissionClotureAdminPanel({ attributionId, statut, onChanged, onP
               <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
               Annuler aussi le trajet (sinon republiable)
             </label>
+            {isGroup && (
+              <label className="flex items-center gap-2 text-sm font-semibold text-pro-text sm:col-span-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2">
+                <input type="checkbox" checked={applyGroup} onChange={(e) => setApplyGroup(e.target.checked)} />
+                Appliquer aux deux volets (Livraison + Restitution)
+              </label>
+            )}
+
             <label className="flex items-center gap-2 text-sm text-pro-text">
               <span className="shrink-0">Indemnité convoyeur</span>
               <input
