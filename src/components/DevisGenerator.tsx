@@ -1295,9 +1295,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     </div>
                     {pricing && (
                       <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Prix HT</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA 20%</p><p className="font-heading text-base text-cream/85">{tva} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Total TTC</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</p><p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
+
                       </div>
                     )}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-cream/65">
