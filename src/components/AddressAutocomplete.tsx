@@ -174,8 +174,8 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
               onClick={() => handleSelect(s)}
               className="px-4 py-3 cursor-pointer hover:bg-primary/10 transition-colors border-b border-primary/10 last:border-0"
             >
-              <p className="text-cream text-sm">{s.label}</p>
-              {s.context && <p className="text-cream/40 text-xs mt-0.5">{s.context}</p>}
+              <p className="text-[#4d8dff] text-sm font-semibold">{s.label}</p>
+              {s.context && <p className="text-[#4d8dff]/65 text-xs mt-0.5">{s.context}</p>}
             </li>
           ))}
         </ul>

@@ -125,10 +125,10 @@ export default function PlacesInput({
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => select(s)}
-              className="w-full text-left px-4 py-2.5 text-sm text-cream/85 hover:bg-[#5fb6ff]/10 hover:text-[#5fb6ff] border-b border-white/5 last:border-0 transition-colors"
+              className="w-full text-left px-4 py-3 text-sm font-semibold text-[#4d8dff] hover:bg-[#4d8dff]/12 hover:text-[#7db1ff] border-b border-[#4d8dff]/15 last:border-0 transition-colors"
             >
               <p className="truncate">{s.label}</p>
-              {s.secondary && <p className="text-[10px] text-cream/40 truncate">{s.secondary}</p>}
+              {s.secondary && <p className="text-[11px] font-normal text-[#4d8dff]/65 truncate">{s.secondary}</p>}
             </button>
           ))}
         </div>
