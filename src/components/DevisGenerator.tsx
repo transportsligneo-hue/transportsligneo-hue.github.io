@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
   CheckCircle, User, Download, Shield, Route as RouteIcon,
@@ -110,7 +111,18 @@ export interface DevisGeneratorProps {
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
+  // --- régime de facturation (micro = franchise en base de TVA) ---
+  const [microRegime, setMicroRegime] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    fetchActiveRegime()
+      .then((r) => { if (!cancelled) setMicroRegime(r.regime !== "societe"); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // --- core trajet ---
+
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
   const [vehicleType, setVehicleType] = useState("");
@@ -376,11 +388,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType);
-  // priceTTC = source de vérité affichée. priceHT rétro-calculé depuis le TTC.
+  // priceTTC = source de vérité affichée. En micro-entreprise (franchise en base de TVA),
+  // le prix affiché est le net à payer : aucune ventilation HT / TVA.
   const localTtc = pricing?.finalPrice ?? 0;
   const priceTTC = serverTtc ?? localTtc;
-  const priceHT = Math.round((priceTTC / 1.2) * 100) / 100;
+  const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
+
 
 
   // inputBare retiré : la barre principale utilise des styles inline premium
@@ -826,17 +840,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Prix HT</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p>
                 <p className="font-heading text-3xl gold-gradient-text leading-none">{priceHT} €</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">TVA 20%</p>
-                <p className="font-heading text-base text-cream/85">{tva} €</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">TVA</p>
+                <p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Total TTC</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p>
                 <p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p>
               </div>
+
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Distance</p>
@@ -1280,9 +1295,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     </div>
                     {pricing && (
                       <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Prix HT</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA 20%</p><p className="font-heading text-base text-cream/85">{tva} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Total TTC</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</p><p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p></div>
+                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
+
                       </div>
                     )}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-cream/65">

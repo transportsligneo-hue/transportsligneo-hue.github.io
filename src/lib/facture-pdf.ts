@@ -138,9 +138,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
   const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
-  const ht = Number(f.prix_ht);
+  // En franchise en base (micro), le montant net à payer est le prix affiché au client.
+  const ht = tvaExempt ? Number(f.prix_ttc ?? f.prix_ht) : Number(f.prix_ht);
   const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
   const ttc = tvaExempt ? ht : Number(f.prix_ttc);
+
 
   // ===== Bandeau navy =====
   doc.setFillColor(...NAVY);
@@ -320,20 +322,22 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Total HT", totLabelX, y, { align: "right" });
+  doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.text(eur(ht), totValX, y, { align: "right" });
   y += 6;
   doc.setFont("helvetica", "normal");
   doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux} %)`, totLabelX, y, { align: "right" });
-  doc.text(tvaExempt ? "Exonérée" : eur(tva), totValX, y, { align: "right" });
+  doc.text(tvaExempt ? "Non applicable" : eur(tva), totValX, y, { align: "right" });
+
   y += 4;
   doc.setFillColor(...NAVY);
   doc.rect(colUnit - 30, y, colTotal - (colUnit - 30), 12, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...WHITE);
-  doc.text("TOTAL TTC", totLabelX, y + 7.8, { align: "right" });
+  doc.text(tvaExempt ? "TOTAL NET À PAYER" : "TOTAL TTC", totLabelX, y + 7.8, { align: "right" });
+
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });

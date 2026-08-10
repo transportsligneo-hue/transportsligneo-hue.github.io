@@ -10,6 +10,8 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
+
 
 export interface DevisData {
   numero: string;
@@ -190,6 +192,11 @@ function labelValue(doc: jsPDF, x: number, y: number, label: string, value: stri
 export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
 
+  // Régime de facturation : micro-entreprise (franchise en base) = prix saisi = net à payer.
+  const { regime, vatRate, exemptionNote } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+
+
   // Devis au nom de l'organisation (rétroactif) : la société prime sur le contact.
   const billing = await resolveClientBillingIdentity({
     userId: (dInput as unknown as { client_user_id?: string | null; user_id?: string | null }).client_user_id
@@ -349,13 +356,17 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFontSize(7.8);
   doc.text("Description", colDescX, y + 5.9);
   doc.text("Quantité", colQtyC, y + 5.9, { align: "center" });
-  doc.text("Prix unit. HT", colUnitR, y + 5.9, { align: "right" });
-  doc.text("Total HT", colTotalR, y + 5.9, { align: "right" });
+  doc.text(micro ? "Prix unitaire" : "Prix unit. HT", colUnitR, y + 5.9, { align: "right" });
+  doc.text(micro ? "Total" : "Total HT", colTotalR, y + 5.9, { align: "right" });
+
   y += 9;
 
   const ttc = d.prix_estime;
-  const ht = +(ttc / 1.2).toFixed(2);
+  const ht = micro ? ttc : +(ttc / (1 + vatRate / 100)).toFixed(2);
   const tva = +(ttc - ht).toFixed(2);
+
+
+
   const distance = d.distance_km ?? 0;
 
   // Options cochées : soit fournies directement, soit relues depuis le récap enregistré
@@ -417,7 +428,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Total HT", labelR, y, { align: "right" });
+  doc.text(micro ? "Total" : "Total HT", labelR, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...NAVY);
   doc.text(eur(ht), colTotalR, y, { align: "right" });
@@ -425,8 +436,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT);
-  doc.text("TVA (20 %)", labelR, y, { align: "right" });
-  doc.text(eur(tva), colTotalR, y, { align: "right" });
+  if (micro) {
+    doc.text("TVA", labelR, y, { align: "right" });
+    doc.text("Non applicable", colTotalR, y, { align: "right" });
+  } else {
+    doc.text(`TVA (${String(vatRate).replace(".", ",")} %)`, labelR, y, { align: "right" });
+    doc.text(eur(tva), colTotalR, y, { align: "right" });
+  }
 
   y += 4;
   doc.setFillColor(...NAVY);
@@ -434,7 +450,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(...WHITE);
-  doc.text("TOTAL TTC", labelR, y + 7.8, { align: "right" });
+  doc.text(micro ? "TOTAL NET À PAYER" : "TOTAL TTC", labelR, y + 7.8, { align: "right" });
   doc.setFontSize(10.5);
   doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
   y += 14;
@@ -443,10 +459,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
     "Aucun acompte demandé à la réservation.",
+    ...(micro ? [exemptionNote] : []),
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
 
     "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
+
 
   // Conditions sur 2 colonnes (compact) pour tenir sur une page
   doc.setFont("helvetica", "normal");

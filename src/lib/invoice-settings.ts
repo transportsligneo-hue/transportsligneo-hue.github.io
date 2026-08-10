@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
 export interface InvoiceMentionResolved {
   mention: string | null;
@@ -10,15 +11,20 @@ export interface InvoiceMentionResolved {
 /**
  * Résout la mention légale et le mode fiscal à imprimer sur une facture.
  * Priorité de la mention : profil client (si actif + non vide) > app_settings global > rien.
+ * En régime micro-entreprise (franchise en base), la TVA est toujours exonérée.
  */
 export async function resolveInvoiceMention(opts: {
   userId?: string | null;
 }): Promise<InvoiceMentionResolved> {
+  const { regime, exemptionNote } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+
   const out: InvoiceMentionResolved = {
     mention: null,
     active: false,
-    pricingDisplayMode: "ttc",
-    tvaExemptionNote: null,
+    pricingDisplayMode: micro ? "exempt" : "ttc",
+
+    tvaExemptionNote: micro ? exemptionNote : null,
   };
 
   // Charge le défaut global (lecture autorisée à tout authenticated)
@@ -50,10 +56,12 @@ export async function resolveInvoiceMention(opts: {
       facture_mention_active?: boolean | null;
     } | null;
     if (p) {
-      if (p.pricing_display_mode === "ht" || p.pricing_display_mode === "ttc" || p.pricing_display_mode === "exempt") {
+      // En micro-entreprise, le régime global prime : jamais de TVA facturée.
+      if (!micro && (p.pricing_display_mode === "ht" || p.pricing_display_mode === "ttc" || p.pricing_display_mode === "exempt")) {
         out.pricingDisplayMode = p.pricing_display_mode;
       }
-      out.tvaExemptionNote = p.tva_exemption_note?.trim() || null;
+      out.tvaExemptionNote = p.tva_exemption_note?.trim() || out.tvaExemptionNote;
+
       // Override mention si le client en a une active et non vide
       if (p.facture_mention_active && p.facture_mention_legale && p.facture_mention_legale.trim().length > 0) {
         out.mention = p.facture_mention_legale.trim();
