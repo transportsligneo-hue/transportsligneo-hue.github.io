@@ -56,10 +56,12 @@ export async function resolveInvoiceMention(opts: {
       facture_mention_active?: boolean | null;
     } | null;
     if (p) {
-      if (p.pricing_display_mode === "ht" || p.pricing_display_mode === "ttc" || p.pricing_display_mode === "exempt") {
+      // En micro-entreprise, le régime global prime : jamais de TVA facturée.
+      if (!micro && (p.pricing_display_mode === "ht" || p.pricing_display_mode === "ttc" || p.pricing_display_mode === "exempt")) {
         out.pricingDisplayMode = p.pricing_display_mode;
       }
-      out.tvaExemptionNote = p.tva_exemption_note?.trim() || null;
+      out.tvaExemptionNote = p.tva_exemption_note?.trim() || out.tvaExemptionNote;
+
       // Override mention si le client en a une active et non vide
       if (p.facture_mention_active && p.facture_mention_legale && p.facture_mention_legale.trim().length > 0) {
         out.mention = p.facture_mention_legale.trim();
