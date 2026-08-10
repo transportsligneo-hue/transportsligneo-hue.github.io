@@ -463,25 +463,31 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   ];
 
 
-  // Conditions sur 2 colonnes (compact) pour tenir sur une page
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
-  const colW = (innerW - 8) / 2;
-  const wrappedCols = conditions.map((c) => doc.splitTextToSize(`• ${c}`, colW) as string[]);
-  const leftCols = wrappedCols.slice(0, Math.ceil(wrappedCols.length / 2));
-  const rightCols = wrappedCols.slice(Math.ceil(wrappedCols.length / 2));
-  const colLines = Math.max(
-    leftCols.reduce((a, w) => a + w.length + 0.4, 0),
-    rightCols.reduce((a, w) => a + w.length + 0.4, 0),
-  );
-  const condH = colLines * 4.1;
-  const needed = 5.5 + condH + 28;
-  if (y + needed > pageH - 26) {
-    drawFooter(doc, pageW, pageH, co);
-    doc.addPage();
-    applyLigneoFonts(doc);
-    drawHeader(doc, pageW, logoData);
-    y = 50;
+  // Conditions sur 2 colonnes (compact) — le devis doit tenir sur UNE page
+  const bottomLimit = pageH - 40; // au-dessus du bandeau de pied de page
+  let condFs = 7.6;
+  let lead = 4.1;
+  let sigH = 26;
+  const buildCols = () => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(condFs);
+    const colW = (innerW - 8) / 2;
+    const wrapped = conditions.map((c) => doc.splitTextToSize(`• ${c}`, colW) as string[]);
+    const half = Math.ceil(wrapped.length / 2);
+    return { colW, leftCols: wrapped.slice(0, half), rightCols: wrapped.slice(half) };
+  };
+  let { colW, leftCols, rightCols } = buildCols();
+  const blockHeight = () => {
+    const l = leftCols.reduce((a, w) => a + w.length * lead + 1.4, 0);
+    const r = rightCols.reduce((a, w) => a + w.length * lead + 1.4, 0);
+    return 5.5 + Math.max(l, r) + sigH;
+  };
+  // Compression progressive si nécessaire pour rester sur une seule page
+  while (y + blockHeight() > bottomLimit && condFs > 6) {
+    condFs -= 0.3;
+    lead -= 0.15;
+    sigH -= 1;
+    ({ colW, leftCols, rightCols } = buildCols());
   }
 
   doc.setFont("helvetica", "bold");
@@ -490,18 +496,17 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("CONDITIONS", M, y);
   y += 5.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(condFs);
   doc.setTextColor(...TEXT);
   const condTop = y;
   let ly = condTop;
-  leftCols.forEach((w) => { doc.text(w, M, ly); ly += w.length * 4.1 + 1.4; });
+  leftCols.forEach((w) => { doc.text(w, M, ly); ly += w.length * lead + 1.4; });
   let ry2 = condTop;
-  rightCols.forEach((w) => { doc.text(w, M + colW + 8, ry2); ry2 += w.length * 4.1 + 1.4; });
+  rightCols.forEach((w) => { doc.text(w, M + colW + 8, ry2); ry2 += w.length * lead + 1.4; });
   y = Math.max(ly, ry2);
 
   // ===== Signatures =====
-  y += 5;
-
+  y += 4;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -510,21 +515,22 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("Pour Transports Ligneo", right, y, { align: "right" });
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 2, 36, 13); } catch { /* optionnel */ }
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 2, 34, 12); } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", right - 36, y + 2, 32, 13); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", right - 34, y + 2, 30, 12); } catch { /* optionnel */ }
   }
 
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.8);
   doc.setTextColor(...MUTED);
-  doc.text("Signature et cachet client", M + 5, y + 18);
-  doc.text("Olivier G. — Fondateur", right, y + 18, { align: "right" });
+  doc.text("Signature et cachet client", M + 5, y + 16.5);
+  doc.text("Olivier G. — Fondateur", right, y + 16.5, { align: "right" });
   if (d.acceptedAtLabel) {
     doc.setFontSize(7);
-    doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 5, y + 25.5);
+    doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 5, y + 22);
   }
+
 
   drawFooter(doc, pageW, pageH, co);
 
