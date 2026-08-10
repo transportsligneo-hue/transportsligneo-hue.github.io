@@ -152,7 +152,7 @@ function renderCoverHeader(logoData: string, m: EdlFinalPdfData): string {
         <img class="brand-logo" src="${logoData}" alt="Transports Ligneo">
         <div>
           <div class="brand-name">TRANSPORTS LIGNEO</div>
-          <div class="brand-tag">Convoyage automobile premium</div>
+          <div class="brand-tag">Convoyage automobile</div>
         </div>
       </div>
       <div class="ref-block">

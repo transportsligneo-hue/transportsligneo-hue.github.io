@@ -251,7 +251,7 @@ export function drawDocHeader(
   const totalAvail = rightX - leftX - gap;
 
   const raison = (company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase();
-  const tagline = "CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE";
+  const tagline = "CONVOYAGE AUTOMOBILE — FRANCE & EUROPE";
   const titleTxt = title.toUpperCase();
 
   // Colonnes strictes : le bloc identité et le bloc titre ne se croisent jamais.

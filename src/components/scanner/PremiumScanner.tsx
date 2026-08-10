@@ -232,7 +232,7 @@ export function PremiumScanner({
           <X size={22} />
         </button>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-white/50">Scanner premium</p>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-white/50">Scanner de documents</p>
           <p className="text-sm font-semibold">{title}</p>
         </div>
         <div className="flex items-center gap-1">

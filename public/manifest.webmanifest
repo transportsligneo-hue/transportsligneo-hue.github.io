@@ -1,7 +1,7 @@
 {
   "name": "Transports Ligneo",
   "short_name": "Ligneo",
-  "description": "Convoyage automobile premium — particuliers, professionnels, flottes.",
+  "description": "Convoyage automobile — particuliers, professionnels, flottes.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "id": "/",
