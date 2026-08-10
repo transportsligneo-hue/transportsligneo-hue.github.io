@@ -111,6 +111,15 @@ function AdminLayout() {
 
     // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
+    {
+      to: "/admin/alertes",
+      label: "Alertes opérationnelles",
+      icon: AlertTriangle,
+      group: "Opérations",
+      badge: alertCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white">{alertCount > 99 ? "99+" : alertCount}</span>
+        : undefined,
+    },
     { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
     { to: "/admin/attributions", label: "Attributions", icon: ClipboardList, group: "Opérations" },
     { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },

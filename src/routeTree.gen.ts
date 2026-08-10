@@ -134,6 +134,7 @@ import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as AuthenticatedAdminAssistantIaRouteImport } from './routes/_authenticated/admin.assistant-ia'
+import { Route as AuthenticatedAdminAlertesRouteImport } from './routes/_authenticated/admin.alertes'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
 import { Route as AuthenticatedDashboardProNouvelleMissionIndexRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.index'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
@@ -871,6 +872,12 @@ const AuthenticatedAdminAssistantIaRoute =
     path: '/assistant-ia',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAlertesRoute =
+  AuthenticatedAdminAlertesRouteImport.update({
+    id: '/alertes',
+    path: '/alertes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAcceptationsRoute =
   AuthenticatedAdminAcceptationsRouteImport.update({
     id: '/acceptations',
@@ -1159,6 +1166,7 @@ export interface FileRoutesByFullPath {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -1320,6 +1328,7 @@ export interface FileRoutesByTo {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -1486,6 +1495,7 @@ export interface FileRoutesById {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/_authenticated/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
@@ -1655,6 +1665,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/admin/acceptations'
+    | '/admin/alertes'
     | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
@@ -1816,6 +1827,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites'
     | '/admin/acceptations'
+    | '/admin/alertes'
     | '/admin/assistant-ia'
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
@@ -1981,6 +1993,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/_authenticated/admin/acceptations'
+    | '/_authenticated/admin/alertes'
     | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
@@ -3050,6 +3063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAssistantIaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/alertes': {
+      id: '/_authenticated/admin/alertes'
+      path: '/alertes'
+      fullPath: '/admin/alertes'
+      preLoaderRoute: typeof AuthenticatedAdminAlertesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/acceptations': {
       id: '/_authenticated/admin/acceptations'
       path: '/acceptations'
@@ -3401,6 +3421,7 @@ const AuthenticatedAdminOrganisationsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAcceptationsRoute: typeof AuthenticatedAdminAcceptationsRoute
+  AuthenticatedAdminAlertesRoute: typeof AuthenticatedAdminAlertesRoute
   AuthenticatedAdminAssistantIaRoute: typeof AuthenticatedAdminAssistantIaRoute
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
@@ -3436,6 +3457,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAcceptationsRoute: AuthenticatedAdminAcceptationsRoute,
+  AuthenticatedAdminAlertesRoute: AuthenticatedAdminAlertesRoute,
   AuthenticatedAdminAssistantIaRoute: AuthenticatedAdminAssistantIaRoute,
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
@@ -3847,13 +3869,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
