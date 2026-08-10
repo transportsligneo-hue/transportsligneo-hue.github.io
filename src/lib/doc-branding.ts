@@ -77,7 +77,16 @@ export function companyAddressLine(c?: CompanyInfo | null): string {
     .join(", ");
 }
 
-/** Ligne 1 du pied de page légal : forme, capital, RCS, SIRET, TVA. */
+/** Convertit un SIRET (14 chiffres) en SIREN (9 chiffres, sans le NIC). */
+export function toSiren(siret?: string | null): string | null {
+  if (!siret) return null;
+  const digits = String(siret).replace(/\D/g, "");
+  if (digits.length < 9) return null;
+  const siren = digits.slice(0, 9);
+  return `${siren.slice(0, 3)} ${siren.slice(3, 6)} ${siren.slice(6, 9)}`;
+}
+
+/** Ligne 1 du pied de page légal : forme, capital, RCS, SIREN, TVA. */
 export function companyLegalLine1(c?: CompanyInfo | null): string {
   if (!c) return "";
   const parts: string[] = [];
@@ -85,8 +94,10 @@ export function companyLegalLine1(c?: CompanyInfo | null): string {
     parts.push([c.forme_juridique, c.capital_social ? `au capital de ${c.capital_social}` : null].filter(Boolean).join(" "));
   }
   if (c.rcs) parts.push(`RCS ${c.rcs}`);
-  if (c.siret) parts.push(`SIRET ${c.siret}`);
+  const siren = toSiren(c.siret);
+  if (siren) parts.push(`SIREN ${siren}`);
   if (c.tva_intra) parts.push(`TVA ${c.tva_intra}`);
+
   return parts.join(" — ");
 }
 
