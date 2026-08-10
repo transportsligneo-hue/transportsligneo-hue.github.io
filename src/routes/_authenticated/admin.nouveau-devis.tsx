@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { lookupPlate } from "@/lib/plate.functions";
 import { supabase } from "@/integrations/supabase/client";
+import PlacesInput from "@/components/PlacesInput";
 
 import { toast } from "sonner";
 import {
@@ -71,6 +72,33 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+      />
+    </div>
+  );
+}
+
+function AddressField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+        {label}
+      </label>
+      <PlacesInput
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+        dropdownClassName="absolute z-50 left-0 right-0 top-full mt-1 rounded-lg border border-pro-border bg-white shadow-xl max-h-64 overflow-y-auto [&_button]:text-pro-text [&_button]:hover:bg-pro-accent/10 [&_button]:border-pro-border/60"
       />
     </div>
   );
@@ -488,8 +516,8 @@ function AdminNouveauDevisPage() {
             <h3 className="text-[15px] font-bold text-pro-text">Trajet</h3>
           </div>
           <div className="space-y-4">
-            <Field label="Adresse de départ" value={depart} onChange={setDepart} placeholder="Ex : 6 rue du pont libert, 37520 La Riche" />
-            <Field label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            <AddressField label="Adresse de départ" value={depart} onChange={setDepart} placeholder="Ex : 6 rue du pont libert, 37520 La Riche" />
+            <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
             <div>
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Type de trajet
