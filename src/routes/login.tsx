@@ -138,6 +138,21 @@ function LoginPage() {
   const awaitingRouting = justLoggedInRef.current && isAuthenticated && !isLoading;
   const loading = submitting || awaitingRouting;
 
+  // Garde-fou : si la redirection n'aboutit pas (réseau lent, profil illisible),
+  // on débloque le bouton au lieu de rester bloqué sur « Connexion… ».
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => {
+      if (justLoggedInRef.current) {
+        justLoggedInRef.current = false;
+        setSubmitting(false);
+        setError("Connexion établie mais l'espace met du temps à s'ouvrir. Réessayez ou rechargez la page.");
+      }
+    }, 15000);
+    return () => clearTimeout(t);
+  }, [loading]);
+
+
   return (
     <div className="auth-shell flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md auth-fade-in">
