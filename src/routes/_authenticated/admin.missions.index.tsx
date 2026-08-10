@@ -15,6 +15,8 @@ import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMis
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
+import { useMissionAlerts } from "@/hooks/useMissionAlerts";
+import { SEVERITY_META } from "@/lib/mission-alerts";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
