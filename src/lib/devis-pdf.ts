@@ -71,6 +71,26 @@ export interface DevisData {
   } | null;
 }
 
+/**
+ * Relit les options cochées (plein carburant, recharge élec, mise en main, lavage…)
+ * et le PV digitalisé depuis le récapitulatif enregistré dans `message`.
+ */
+export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null } {
+  const out: { options: string[]; pv: string | null } = { options: [], pv: null };
+  if (!message) return out;
+  for (const raw of message.split("\n")) {
+    const line = raw.trim();
+    const optMatch = line.match(/^Options?\s*:\s*(.+)$/i);
+    if (optMatch) {
+      out.options = optMatch[1].split(",").map((s) => s.trim()).filter(Boolean);
+      continue;
+    }
+    const pvMatch = line.match(/^PV de livraison digitalis[ée]\s*:\s*(.+)$/i);
+    if (pvMatch) out.pv = pvMatch[1].trim();
+  }
+  return out;
+}
+
 const NAVY: [number, number, number] = [12, 22, 56];
 const GOLD: [number, number, number] = [176, 137, 44];
 const GOLD_SOFT: [number, number, number] = [214, 183, 106];
