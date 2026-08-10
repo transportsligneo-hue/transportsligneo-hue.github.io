@@ -211,6 +211,7 @@ function AdminMissionDetail() {
   const [adminNote, setAdminNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
+  const [poNumber, setPoNumber] = useState("");
   const [generatingFacture, setGeneratingFacture] = useState(false);
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
