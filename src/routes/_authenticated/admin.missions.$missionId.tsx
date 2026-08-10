@@ -635,6 +635,9 @@ function AdminMissionDetail() {
           prix_ttc: ttc,
           statut: "emise",
           mode_paiement: "Carte bancaire",
+          reference_client: po || null,
+          reference_label: po ? "N° de PO" : null,
+
         })
         .select("id")
         .single();
