@@ -423,7 +423,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   ];
 
   const needed = 8 + conditions.length * 6.2 + 34;
-  if (y + needed > pageH - 36) {
+  if (y + needed > pageH - 28) {
     drawFooter(doc, pageW, pageH, co);
     doc.addPage();
     applyLigneoFonts(doc);
