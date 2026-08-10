@@ -367,8 +367,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text(`${distance} km`, pageW - 95, y + 4);
-  doc.text(`${unit.toFixed(2)} EUR / km`, pageW - 60, y + 4);
+  doc.text(distance > 0 ? `${distance} km` : "—", pageW - 95, y + 4);
+  doc.text(distance > 0 ? `${unit.toFixed(2)} EUR / km` : "Forfait", pageW - 60, y + 4);
+
   doc.setFont("helvetica", "bold");
   doc.text(eur(ht), pageW - 18, y + 4, { align: "right" });
 
