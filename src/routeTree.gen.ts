@@ -118,6 +118,7 @@ import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
+import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
@@ -777,6 +778,12 @@ const AuthenticatedAdminInformationsLegalesRoute =
     path: '/informations-legales',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminIncidentsRoute =
+  AuthenticatedAdminIncidentsRouteImport.update({
+    id: '/incidents',
+    path: '/incidents',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHistoriqueRoute =
   AuthenticatedAdminHistoriqueRouteImport.update({
     id: '/historique',
@@ -1183,6 +1190,7 @@ export interface FileRoutesByFullPath {
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1345,6 +1353,7 @@ export interface FileRoutesByTo {
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1512,6 +1521,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
+  '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1682,6 +1692,7 @@ export interface FileRouteTypes {
     | '/admin/factures'
     | '/admin/formation'
     | '/admin/historique'
+    | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/inscriptions'
     | '/admin/messages'
@@ -1844,6 +1855,7 @@ export interface FileRouteTypes {
     | '/admin/factures'
     | '/admin/formation'
     | '/admin/historique'
+    | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/inscriptions'
     | '/admin/messages'
@@ -2010,6 +2022,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/formation'
     | '/_authenticated/admin/historique'
+    | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/informations-legales'
     | '/_authenticated/admin/inscriptions'
     | '/_authenticated/admin/messages'
@@ -2951,6 +2964,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInformationsLegalesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/incidents': {
+      id: '/_authenticated/admin/incidents'
+      path: '/incidents'
+      fullPath: '/admin/incidents'
+      preLoaderRoute: typeof AuthenticatedAdminIncidentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/historique': {
       id: '/_authenticated/admin/historique'
       path: '/historique'
@@ -3438,6 +3458,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
+  AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
@@ -3475,6 +3496,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
+  AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
   AuthenticatedAdminInformationsLegalesRoute:
     AuthenticatedAdminInformationsLegalesRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,

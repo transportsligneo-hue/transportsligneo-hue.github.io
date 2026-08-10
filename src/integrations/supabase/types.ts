@@ -3056,6 +3056,50 @@ export type Database = {
           },
         ]
       }
+      incident_events: {
+        Row: {
+          assigned_to: string | null
+          author_id: string | null
+          commentaire: string | null
+          created_at: string
+          event_type: string
+          from_statut: string | null
+          id: string
+          incident_id: string
+          to_statut: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          author_id?: string | null
+          commentaire?: string | null
+          created_at?: string
+          event_type: string
+          from_statut?: string | null
+          id?: string
+          incident_id: string
+          to_statut?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          author_id?: string | null
+          commentaire?: string | null
+          created_at?: string
+          event_type?: string
+          from_statut?: string | null
+          id?: string
+          incident_id?: string
+          to_statut?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "mission_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inspection_document_ocr: {
         Row: {
           attribution_id: string
@@ -3382,6 +3426,7 @@ export type Database = {
       }
       mission_incidents: {
         Row: {
+          assigned_to: string | null
           attribution_id: string
           convoyeur_user_id: string
           created_at: string
@@ -3391,6 +3436,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           photos: Json | null
+          prise_en_charge_at: string | null
           reponse_admin: string | null
           resolu_at: string | null
           statut: string
@@ -3399,6 +3445,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           attribution_id: string
           convoyeur_user_id: string
           created_at?: string
@@ -3408,6 +3455,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           photos?: Json | null
+          prise_en_charge_at?: string | null
           reponse_admin?: string | null
           resolu_at?: string | null
           statut?: string
@@ -3416,6 +3464,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           attribution_id?: string
           convoyeur_user_id?: string
           created_at?: string
@@ -3425,6 +3474,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           photos?: Json | null
+          prise_en_charge_at?: string | null
           reponse_admin?: string | null
           resolu_at?: string | null
           statut?: string
@@ -5837,6 +5887,16 @@ export type Database = {
       }
       admin_unlink_mission_from_group: {
         Args: { _mission_id: string }
+        Returns: undefined
+      }
+      admin_update_incident: {
+        Args: {
+          _assigned_to?: string
+          _clear_assignation?: boolean
+          _commentaire?: string
+          _incident_id: string
+          _statut?: string
+        }
         Returns: undefined
       }
       admin_update_trajet_prix: {
