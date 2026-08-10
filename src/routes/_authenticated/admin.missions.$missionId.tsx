@@ -884,15 +884,34 @@ function AdminMissionDetail() {
                 <Receipt size={13} /> Facture émise
               </Link>
             ) : (
-              <Button
-                icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
-                onClick={generateFacture}
-                disabled={generatingFacture || !trajet?.prix}
-              >
-                Générer facture
-              </Button>
+              <div className="w-full rounded-lg border border-amber-400/40 bg-amber-400/[0.07] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
+                <div className="flex-1 min-w-[220px]">
+                  <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300 mb-1.5">
+                    <Receipt size={12} /> N° de PO / commande client
+                  </label>
+                  <input
+                    id="po-number"
+                    value={poNumber}
+                    onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                    maxLength={60}
+                    placeholder="Ex. PO-2026-0042"
+                    className="w-full rounded-md border border-amber-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50"
+                  />
+                  <p className="mt-1 text-[11px] text-white/50">
+                    {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
+                  </p>
+                </div>
+                <Button
+                  icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                  onClick={generateFacture}
+                  disabled={generatingFacture || !trajet?.prix}
+                >
+                  Générer facture
+                </Button>
+              </div>
             )}
           </div>
+
         </div>
       </Card>
 
