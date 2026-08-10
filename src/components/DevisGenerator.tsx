@@ -110,7 +110,18 @@ export interface DevisGeneratorProps {
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
+  // --- régime de facturation (micro = franchise en base de TVA) ---
+  const [microRegime, setMicroRegime] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    fetchActiveRegime()
+      .then((r) => { if (!cancelled) setMicroRegime(r.regime !== "societe"); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // --- core trajet ---
+
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
   const [vehicleType, setVehicleType] = useState("");
