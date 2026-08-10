@@ -43,8 +43,12 @@ export function OrgLogoUploader({ organizationId, organizationName, value, onCha
         .from(BUCKET)
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
       if (upErr) throw upErr;
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      const publicUrl = data.publicUrl;
+      // Bucket privé : on stocke une URL signée longue durée (10 ans).
+      const { data, error: signErr } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUrl(path, 60 * 60 * 24 * 3650);
+      if (signErr) throw signErr;
+      const publicUrl = data.signedUrl;
       const { error: updErr } = await supabase
         .from("organizations")
         .update({ logo_url: publicUrl } as never)
