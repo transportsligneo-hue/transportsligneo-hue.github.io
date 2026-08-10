@@ -366,9 +366,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.4);
+  const labelR = sepUnit - 4;
   lignes.forEach((l) => {
-    const wrapped = doc.splitTextToSize(l.desc, 84) as string[];
-    const h = Math.max(11, wrapped.length * 4.4 + 6);
+    const wrapped = doc.splitTextToSize(l.desc, sepQty - M - 8) as string[];
+    const h = Math.max(10.5, wrapped.length * 4.4 + 5.5);
     doc.setDrawColor(...LINE);
     doc.setLineWidth(0.25);
     doc.rect(M, y, innerW, h, "S");
@@ -377,7 +378,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.line(sepTotal, y, sepTotal, y + h);
 
     doc.setTextColor(...TEXT);
-    doc.text(wrapped, colDescX, y + 6);
+    doc.text(wrapped, colDescX, y + 5.6);
     doc.text(l.qty, colQtyC, y + h / 2 + 1.2, { align: "center" });
     if (l.unit === "Inclus") doc.setTextColor(...MUTED);
     doc.text(l.unit, colUnitR, y + h / 2 + 1.2, { align: "right" });
@@ -387,43 +388,42 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   });
 
   // ===== Totaux =====
-  y += 10;
+  y += 9;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Total HT", sepTotal - 4, y, { align: "right" });
+  doc.text("Total HT", labelR, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...NAVY);
   doc.text(eur(ht), colTotalR, y, { align: "right" });
 
-  y += 8;
+  y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT);
-  doc.text("TVA (20 %)", sepTotal - 4, y, { align: "right" });
+  doc.text("TVA (20 %)", labelR, y, { align: "right" });
   doc.text(eur(tva), colTotalR, y, { align: "right" });
 
-  y += 5;
+  y += 4;
   doc.setFillColor(...NAVY);
-  doc.rect(M + 110, y, innerW - 110, 12, "F");
+  doc.rect(sepQty, y, right - sepQty, 12, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(...WHITE);
-  doc.text("TOTAL TTC", sepTotal - 4, y + 7.8, { align: "right" });
+  doc.text("TOTAL TTC", labelR, y + 7.8, { align: "right" });
   doc.setFontSize(10.5);
   doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
-  y += 22;
+  y += 20;
 
   // ===== Conditions =====
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
     `Règlement par ${(d.mode_paiement || "carte bancaire").toLowerCase()}, aucun acompte demandé à la réservation.`,
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
-    "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées.",
-    "Devis soumis aux Conditions Générales de Vente (www.transportsligneo.fr/cgv).",
+    "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
 
-  const needed = 16 + conditions.length * 6 + 34;
-  if (y + needed > pageH - 40) {
+  const needed = 12 + conditions.length * 6.2 + 36;
+  if (y + needed > pageH - 38) {
     drawFooter(doc, pageW, pageH, co);
     doc.addPage();
     applyLigneoFonts(doc);
@@ -446,7 +446,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   });
 
   // ===== Signatures =====
-  y += 12;
+  y += 10;
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
