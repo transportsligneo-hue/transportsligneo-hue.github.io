@@ -59,6 +59,7 @@ import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/A
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
+import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
