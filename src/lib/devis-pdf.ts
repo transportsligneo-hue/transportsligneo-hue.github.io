@@ -289,13 +289,22 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const vehicule = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
     || d.type_vehicule || "—";
   let ry = blockY + 13;
-  labelValue(doc, rx, ry, "Trajet : ", doc.splitTextToSize(`${d.depart} → ${d.arrivee}`, 80)[0]);
-  ry += 5.2;
+  // Trajet sur 2 lignes max (adresses longues)
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.6);
+  doc.setTextColor(...TEXT);
+  doc.text("Trajet :", rx, ry);
+  const trajetLines = (doc.splitTextToSize(`${d.depart} -> ${d.arrivee}`, 72) as string[]).slice(0, 2);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...NAVY);
+  doc.text(trajetLines, rx + 13, ry);
+  ry += 5.2 * trajetLines.length;
   labelValue(doc, rx, ry, "Véhicule : ", vehicule);
   ry += 5.2;
   labelValue(doc, rx, ry, "Enlèvement souhaité : ", d.date_souhaitee ? fmtDate(d.date_souhaitee) : "—");
   ry += 5.2;
   labelValue(doc, rx, ry, "Contact commercial : ", "Olivier G.");
+
 
   // ===== Tableau prestation =====
   let y = blockY + blockH + 12;
