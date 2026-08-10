@@ -322,20 +322,24 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
-  doc.text("Total HT", totLabelX, y, { align: "right" });
+  doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.text(eur(ht), totValX, y, { align: "right" });
   y += 6;
   doc.setFont("helvetica", "normal");
-  doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux} %)`, totLabelX, y, { align: "right" });
-  doc.text(tvaExempt ? "Exonérée" : eur(tva), totValX, y, { align: "right" });
+  doc.text("TVA", totLabelX, y, { align: "right" });
+  doc.text(tvaExempt ? "Non applicable" : eur(tva), totValX, y, { align: "right" });
+  if (!tvaExempt) {
+    doc.text(`(${tvaTaux} %)`, totLabelX + 14, y, { align: "right" });
+  }
   y += 4;
   doc.setFillColor(...NAVY);
   doc.rect(colUnit - 30, y, colTotal - (colUnit - 30), 12, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...WHITE);
-  doc.text("TOTAL TTC", totLabelX, y + 7.8, { align: "right" });
+  doc.text(tvaExempt ? "TOTAL NET À PAYER" : "TOTAL TTC", totLabelX, y + 7.8, { align: "right" });
+
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
