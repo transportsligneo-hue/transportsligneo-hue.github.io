@@ -24,7 +24,7 @@ export async function resolveInvoiceMention(opts: {
     active: false,
     pricingDisplayMode: micro ? "exempt" : "ttc",
 
-    tvaExemptionNote: null,
+    tvaExemptionNote: micro ? exemptionNote : null,
   };
 
   // Charge le défaut global (lecture autorisée à tout authenticated)
