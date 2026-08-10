@@ -58,6 +58,7 @@ import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
+import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -191,6 +192,8 @@ function vueLabelFor(vueType: string): string {
 
 function AdminMissionDetail() {
   const { missionId } = Route.useParams();
+  const [pvMotif, setPvMotif] = useState<string | null>(null);
+  const [pvOpenKey, setPvOpenKey] = useState(0);
   const navigate = useNavigate();
 
   const [attribution, setAttribution] = useState<AttributionFull | null>(null);
@@ -1119,15 +1122,25 @@ function AdminMissionDetail() {
             <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
+          {/* Incidents signalés par le convoyeur */}
+          <MissionIncidentsPanel
+            attributionId={attribution.id}
+            onPassageAVide={(motif) => {
+              setPvMotif(motif);
+              setPvOpenKey((k) => k + 1);
+              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          />
+
           {/* Documents officiels */}
-          <Card>
+          <Card id="docs-officiels">
             <div className="flex items-center gap-2 mb-3">
               <FileText size={15} className="text-pro-accent" />
               <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
                 Documents officiels
               </h3>
             </div>
-            <MissionDocsOfficielsPanel attributionId={attribution.id} />
+            <MissionDocsOfficielsPanel attributionId={attribution.id} pvPrefillMotif={pvMotif} pvOpenKey={pvOpenKey} />
           </Card>
 
           {/* Avis Google */}
