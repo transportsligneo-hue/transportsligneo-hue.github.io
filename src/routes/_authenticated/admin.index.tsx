@@ -321,6 +321,9 @@ function AdminDashboard() {
         />
       </section>
 
+      {/* === Missions à risque === */}
+      <MissionsAtRiskWidget />
+
       {/* === Carte trajets en cours === */}
       {stats.trajetsActifs > 0 ? (
         <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
