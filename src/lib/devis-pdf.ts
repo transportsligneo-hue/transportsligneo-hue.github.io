@@ -454,11 +454,19 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text(eur(d.prix_estime), tx + 50 + 23, ty + 7.5, { align: "right" });
 
   // ===== CONDITIONS + SIGNATURE =====
-  // Limite haute de la zone : on doit s'arrêter au-dessus du bandeau émetteur (pageH - 42)
-  // pour empêcher tout chevauchement entre les conditions et le bloc société.
+  // Le bloc conditions/signature démarre TOUJOURS sous le contenu le plus bas
+  // (liste des détails ou tableau des totaux). Si la place manque, on bascule
+  // proprement sur une seconde page au lieu de superposer les textes.
   y = Math.max(dy, ty + 12) + 8;
   const maxY = pageH - 50;
-  if (y > maxY - 26) y = maxY - 26;
+  const NEEDED = 34;
+  if (y > maxY - NEEDED) {
+    drawSocietyBlock(doc, pageW, pageH - 42, co);
+    drawFooter(doc, pageW, pageH);
+    doc.addPage();
+    y = 28;
+  }
+
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
