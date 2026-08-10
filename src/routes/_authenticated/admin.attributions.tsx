@@ -234,8 +234,12 @@ function AdminAttributions() {
       trajet.client_nom = clientNom || trajet.client_nom;
 
       const prixTTC = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
-      const prixHT = prixTTC > 0 ? prixTTC / 1.2 : 0;
+      // Régime micro-entreprise (franchise en base) : le prix affiché est le net à payer.
+      const { regime: regimeFact, vatRate: tauxFact } = await fetchActiveRegime();
+      const microFact = regimeFact !== "societe";
+      const prixHT = microFact ? prixTTC : (prixTTC > 0 ? prixTTC / (1 + tauxFact / 100) : 0);
       const prixTVA = +(prixTTC - prixHT).toFixed(2);
+
       const isB2B = false; // par défaut particulier (B2B = via factures B2B flow)
 
       // 3. Insertion — trigger remplit numero automatiquement
