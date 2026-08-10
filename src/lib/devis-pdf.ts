@@ -340,7 +340,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [
     {
-      desc: `Convoyage routier ${d.depart} → ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
+      desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
       qty: "1",
       unit: eur(ht),
       total: eur(ht),
