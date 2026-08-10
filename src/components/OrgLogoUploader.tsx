@@ -72,8 +72,8 @@ export function OrgLogoUploader({ organizationId, organizationName, value, onCha
       const marker = `/${BUCKET}/`;
       const idx = value.indexOf(marker);
       if (idx >= 0) {
-        const path = value.substring(idx + marker.length);
-        await supabase.storage.from(BUCKET).remove([path]);
+        const path = value.substring(idx + marker.length).split("?")[0]!;
+        await supabase.storage.from(BUCKET).remove([decodeURIComponent(path)]);
       }
       await supabase
         .from("organizations")
