@@ -222,8 +222,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       const nextUserId = newSession?.user?.id ?? null;
       if (nextUserId === currentUserIdRef.current) return;
-      void hydrateForUser(newSession?.user ?? null);
+      // IMPORTANT : ne jamais appeler Supabase dans le callback (verrou auth → blocage).
+      const nextUser = newSession?.user ?? null;
+      setTimeout(() => { void hydrateForUser(nextUser); }, 0);
     });
+
 
     // 2) Charger la session existante — sauf si "Rester connecté" avait été décoché
     //    et que l'onglet a été fermé depuis (aucune sessionStorage sentinel).
