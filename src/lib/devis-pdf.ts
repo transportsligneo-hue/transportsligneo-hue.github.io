@@ -338,6 +338,11 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const tva = +(ttc - ht).toFixed(2);
   const distance = d.distance_km ?? 0;
 
+  // Options cochées : soit fournies directement, soit relues depuis le récap enregistré
+  const parsedFromMessage = parseDevisOptions(d.message);
+  const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
+  const pvDigital = d.pv_digital ?? parsedFromMessage.pv;
+
   const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [
     {
       desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
@@ -351,10 +356,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
-  if (d.pv_digital) {
-    lignes.push({ desc: `PV de livraison digitalisé : ${d.pv_digital}`, qty: "1", unit: "Inclus", total: eur(0) });
+  if (pvDigital) {
+    lignes.push({ desc: `PV de livraison digitalisé : ${pvDigital}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
-  (d.options ?? []).forEach((o) => lignes.push({ desc: o, qty: "1", unit: "Inclus", total: eur(0) }));
+  optionsList.forEach((o) => lignes.push({ desc: `Option : ${o}`, qty: "1", unit: "Inclus", total: eur(0) }));
   if (d.destinataire_nom) {
     lignes.push({
       desc: `Destinataire : ${[d.destinataire_nom, d.destinataire_tel].filter(Boolean).join(" — ")}`,
