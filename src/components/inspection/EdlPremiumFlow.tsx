@@ -275,6 +275,7 @@ export function EdlPremiumFlow({
 
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [finalError, setFinalError] = useState<string | null>(null);
   const [openScanner, setOpenScanner] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const [online, setOnline] = useState<boolean>(
@@ -1164,16 +1165,27 @@ export function EdlPremiumFlow({
   };
 
   const finalizeInspection = useCallback(async () => {
-    if (!inspectionId) {
-      throw new Error("Inspection introuvable.");
+    // L'inspection peut ne pas encore exister (parcours sans photo, étapes
+    // bypassées par l'admin…) : on la crée à la volée plutôt que d'échouer.
+    let insId = inspectionId;
+    if (!insId) {
+      try {
+        insId = await ensureInspection();
+      } catch (err) {
+        console.warn("[EDL Premium] ensureInspection à la finalisation a échoué", err);
+        insId = null;
+      }
     }
 
-    const { error: inspectionError } = await supabase
-      .from("inspections")
-      .update({ statut: "complete" })
-      .eq("id", inspectionId);
-
-    if (inspectionError) throw inspectionError;
+    if (insId) {
+      const { error: inspectionError } = await supabase
+        .from("inspections")
+        .update({ statut: "complete" })
+        .eq("id", insId);
+      // Non bloquant : la mission doit pouvoir se terminer même si la ligne
+      // d'inspection n'est pas modifiable (RLS, hors-ligne…).
+      if (inspectionError) console.warn("[EDL Premium] update inspection statut", inspectionError);
+    }
 
     if (type === "arrivee") {
       // On marque seulement l'EDL arrivée comme faite. Le selfie final et
@@ -1198,7 +1210,7 @@ export function EdlPremiumFlow({
         ),
       ]);
     }
-  }, [attributionId, inspectionId, type, userId]);
+  }, [attributionId, ensureInspection, inspectionId, type, userId]);
 
   // ─────────────────────────── NAVIGATION ───────────────────────────
   /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
@@ -1230,13 +1242,16 @@ export function EdlPremiumFlow({
 
 
   const goNext = () => {
+    if (completing) return;
     if (!canAdvance()) {
       toast.error("Validez cette étape avant de continuer");
+      setFinalError("Validez cette étape avant de continuer.");
       return;
     }
     if (safeIndex < TOTAL - 1) {
       setStepIndex(safeIndex + 1);
     } else {
+      setFinalError(null);
       setCompleting(true);
       void finalizeInspection()
         .then(() => {
@@ -1244,9 +1259,9 @@ export function EdlPremiumFlow({
           onComplete();
         })
         .catch((error) => {
-          toast.error("Impossible de finaliser l'inspection", {
-            description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
-          });
+          const message = error instanceof Error ? error.message : "Réessayez dans quelques secondes.";
+          toast.error("Impossible de finaliser l'inspection", { description: message });
+          setFinalError(message);
         })
         .finally(() => {
           setCompleting(false);
@@ -1617,6 +1632,13 @@ export function EdlPremiumFlow({
             </span>
           </div>
         </div>
+        {finalError && (
+          <div className="px-4 pb-1">
+            <p className="text-[11px] text-red-300 bg-red-500/10 ring-1 ring-red-400/30 rounded-lg px-3 py-2">
+              {finalError}
+            </p>
+          </div>
+        )}
         <div className="px-4 pt-2 pb-3 flex items-center gap-3">
           <button
             onClick={goPrev}
@@ -1629,15 +1651,17 @@ export function EdlPremiumFlow({
 
           <button
             onClick={goNext}
-            disabled={!canAdvance()}
+            disabled={!canAdvance() || completing}
             className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50 text-sm font-semibold"
           >
-            {safeIndex === TOTAL - 1
-              ? "Terminer la mission"
-              : currentStep.kind === "photo" || currentStep.kind === "scan"
-                ? "Photo suivante"
-                : "Étape suivante"}
-            <ArrowRight size={18} />
+            {completing
+              ? "Finalisation…"
+              : safeIndex === TOTAL - 1
+                ? "Terminer la mission"
+                : currentStep.kind === "photo" || currentStep.kind === "scan"
+                  ? "Photo suivante"
+                  : "Étape suivante"}
+            {completing ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
           </button>
         </div>
       </footer>
