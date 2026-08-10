@@ -327,11 +327,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.text(eur(ht), totValX, y, { align: "right" });
   y += 6;
   doc.setFont("helvetica", "normal");
-  doc.text("TVA", totLabelX, y, { align: "right" });
+  doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux} %)`, totLabelX, y, { align: "right" });
   doc.text(tvaExempt ? "Non applicable" : eur(tva), totValX, y, { align: "right" });
-  if (!tvaExempt) {
-    doc.text(`(${tvaTaux} %)`, totLabelX + 14, y, { align: "right" });
-  }
+
   y += 4;
   doc.setFillColor(...NAVY);
   doc.rect(colUnit - 30, y, colTotal - (colUnit - 30), 12, "F");
