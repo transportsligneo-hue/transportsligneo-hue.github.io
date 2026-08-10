@@ -628,6 +628,7 @@ function AdminMissionDetail() {
       });
       if (!ok) return;
     }
+    await savePo(po, true);
     setGeneratingFacture(true);
     try {
       // Livraison + restitution = UNE seule facture au tarif de base global
