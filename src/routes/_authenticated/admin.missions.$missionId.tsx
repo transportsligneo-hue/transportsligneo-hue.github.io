@@ -102,6 +102,7 @@ interface TrajetFull {
   arrivee_contact_instructions: string | null;
   mission_group_id: string | null;
   leg_type: string | null;
+  commande_ref?: string | null;
 }
 
 interface ConvoyeurFull {
