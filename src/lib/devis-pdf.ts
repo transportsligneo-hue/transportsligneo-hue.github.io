@@ -307,7 +307,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Tableau prestation =====
-  let y = blockY + blockH + 12;
+  let y = blockY + blockH + 10;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.4);
   doc.setTextColor(...NAVY);
@@ -315,12 +315,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   y += 4;
   const colDescX = M + 4;
-  const colQtyC = M + 121;
-  const colUnitR = M + 157;
+  const sepQty = M + 100;
+  const sepUnit = M + 128;
+  const sepTotal = M + 156;
+  const colQtyC = (sepQty + sepUnit) / 2;
+  const colUnitR = sepTotal - 4;
   const colTotalR = right - 4;
-  const sepQty = M + 108;
-  const sepUnit = M + 135;
-  const sepTotal = M + 172;
+
 
   doc.setFillColor(...NAVY);
   doc.rect(M, y, innerW, 9, "F");
