@@ -376,11 +376,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType);
-  // priceTTC = source de vérité affichée. priceHT rétro-calculé depuis le TTC.
+  // priceTTC = source de vérité affichée. En micro-entreprise (franchise en base de TVA),
+  // le prix affiché est le net à payer : aucune ventilation HT / TVA.
   const localTtc = pricing?.finalPrice ?? 0;
   const priceTTC = serverTtc ?? localTtc;
-  const priceHT = Math.round((priceTTC / 1.2) * 100) / 100;
+  const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
+
 
 
   // inputBare retiré : la barre principale utilise des styles inline premium
