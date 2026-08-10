@@ -353,9 +353,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("Total HT", colTotalR, y + 5.9, { align: "right" });
   y += 9;
 
-  const ttc = d.prix_estime;
-  const ht = +(ttc / 1.2).toFixed(2);
+  // Régime de facturation (micro-entreprise = franchise en base : prix saisi = net à payer)
+  const { regime, vatRate, exemptionNote } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+  const ttc = micro ? d.prix_estime : +(d.prix_estime * (1 + vatRate / 100)).toFixed(2);
+  const ht = micro ? d.prix_estime : d.prix_estime;
   const tva = +(ttc - ht).toFixed(2);
+
   const distance = d.distance_km ?? 0;
 
   // Options cochées : soit fournies directement, soit relues depuis le récap enregistré
