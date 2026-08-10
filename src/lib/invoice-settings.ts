@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchActiveRegime, TVA_FRANCHISE_NOTE } from "@/lib/pricing/fetch";
 
 export interface InvoiceMentionResolved {
   mention: string | null;
@@ -10,14 +11,19 @@ export interface InvoiceMentionResolved {
 /**
  * Résout la mention légale et le mode fiscal à imprimer sur une facture.
  * Priorité de la mention : profil client (si actif + non vide) > app_settings global > rien.
+ * En régime micro-entreprise (franchise en base), la TVA est toujours exonérée.
  */
 export async function resolveInvoiceMention(opts: {
   userId?: string | null;
 }): Promise<InvoiceMentionResolved> {
+  const { regime, exemptionNote } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+
   const out: InvoiceMentionResolved = {
     mention: null,
     active: false,
-    pricingDisplayMode: "ttc",
+    pricingDisplayMode: micro ? "exempt" : "ttc",
+
     tvaExemptionNote: null,
   };
 
