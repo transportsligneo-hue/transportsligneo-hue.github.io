@@ -1632,6 +1632,13 @@ export function EdlPremiumFlow({
             </span>
           </div>
         </div>
+        {finalError && (
+          <div className="px-4 pb-1">
+            <p className="text-[11px] text-red-300 bg-red-500/10 ring-1 ring-red-400/30 rounded-lg px-3 py-2">
+              {finalError}
+            </p>
+          </div>
+        )}
         <div className="px-4 pt-2 pb-3 flex items-center gap-3">
           <button
             onClick={goPrev}
@@ -1644,15 +1651,17 @@ export function EdlPremiumFlow({
 
           <button
             onClick={goNext}
-            disabled={!canAdvance()}
+            disabled={!canAdvance() || completing}
             className="edl-cta flex-1 h-12 px-4 flex items-center justify-center gap-2 disabled:opacity-50 text-sm font-semibold"
           >
-            {safeIndex === TOTAL - 1
-              ? "Terminer la mission"
-              : currentStep.kind === "photo" || currentStep.kind === "scan"
-                ? "Photo suivante"
-                : "Étape suivante"}
-            <ArrowRight size={18} />
+            {completing
+              ? "Finalisation…"
+              : safeIndex === TOTAL - 1
+                ? "Terminer la mission"
+                : currentStep.kind === "photo" || currentStep.kind === "scan"
+                  ? "Photo suivante"
+                  : "Étape suivante"}
+            {completing ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
           </button>
         </div>
       </footer>
