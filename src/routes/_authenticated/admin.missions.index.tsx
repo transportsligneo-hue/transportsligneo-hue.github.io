@@ -363,7 +363,15 @@ function AdminMissionsUnified() {
                     >
 
                     <td className={r.inGroup ? "pl-5" : ""}>
-                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{r.m.ref}</p>
+                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
+                        {alertsByTrajet.get(r.m.id) && (
+                          <span
+                            title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
+                            className={`h-2 w-2 rounded-full ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].dot} ${alertsByTrajet.get(r.m.id) === "critique" ? "animate-pulse" : ""}`}
+                          />
+                        )}
+                        {r.m.ref}
+                      </p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
                         {r.m.isRoundTrip ? (
                           <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
