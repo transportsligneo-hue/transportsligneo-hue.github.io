@@ -1132,6 +1132,20 @@ function AdminMissionDetail() {
             }}
           />
 
+          {/* Clôture administrative : annulation motivée */}
+          <MissionClotureAdminPanel
+            attributionId={attribution.id}
+            statut={attribution.statut}
+            onChanged={() => { void fetchAll(); }}
+            onPassageAVide={(motif) => {
+              setPvMotif(motif);
+              setPvOpenKey((k) => k + 1);
+              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          />
+
+
+
           {/* Documents officiels */}
           <div id="docs-officiels">
           <Card>
