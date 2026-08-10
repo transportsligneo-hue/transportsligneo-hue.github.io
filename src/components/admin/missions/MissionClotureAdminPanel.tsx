@@ -395,6 +395,13 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
               <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
               Annuler aussi le trajet (sinon republiable)
             </label>
+            {isGroup && (
+              <label className="flex items-center gap-2 text-sm font-semibold text-pro-text sm:col-span-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2">
+                <input type="checkbox" checked={applyGroup} onChange={(e) => setApplyGroup(e.target.checked)} />
+                Appliquer aux deux volets (Livraison + Restitution)
+              </label>
+            )}
+
             <label className="flex items-center gap-2 text-sm text-pro-text">
               <span className="shrink-0">Indemnité convoyeur</span>
               <input
