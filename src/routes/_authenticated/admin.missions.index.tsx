@@ -50,6 +50,7 @@ function AdminMissionsUnified() {
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
+  const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
