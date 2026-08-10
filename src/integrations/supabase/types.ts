@@ -3192,6 +3192,71 @@ export type Database = {
           },
         ]
       }
+      mission_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          attribution_id: string
+          base_severity: string
+          created_at: string
+          details: Json
+          escalated_at: string | null
+          id: string
+          message: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          titre: string
+          triggered_at: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          attribution_id: string
+          base_severity?: string
+          created_at?: string
+          details?: Json
+          escalated_at?: string | null
+          id?: string
+          message?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          titre: string
+          triggered_at?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          attribution_id?: string
+          base_severity?: string
+          created_at?: string
+          details?: Json
+          escalated_at?: string | null
+          id?: string
+          message?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          titre?: string
+          triggered_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_alerts_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_departure_checklists: {
         Row: {
           attribution_id: string
@@ -5656,6 +5721,10 @@ export type Database = {
       }
       accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
+      acknowledge_mission_alert: {
+        Args: { _alert_id: string }
+        Returns: undefined
+      }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
       admin_cancel_mission:
         | {
@@ -5757,6 +5826,7 @@ export type Database = {
         Returns: undefined
       }
       admin_reset_operational_data: { Args: never; Returns: Json }
+      admin_run_alert_detection: { Args: never; Returns: Json }
       admin_set_mission_po: {
         Args: { _apply_group?: boolean; _attribution_id: string; _po: string }
         Returns: number
@@ -5858,6 +5928,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      detect_mission_alerts: { Args: never; Returns: Json }
       driver_apply_to_mission: {
         Args: {
           _message?: string
@@ -6021,6 +6092,10 @@ export type Database = {
         }
         Returns: string
       }
+      mission_pickup_ts: {
+        Args: { _date: string; _heure: string }
+        Returns: string
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -6091,6 +6166,7 @@ export type Database = {
           rule_id_retour: string
         }[]
       }
+      resolve_mission_alert: { Args: { _alert_id: string }; Returns: undefined }
       resolve_scan_handoff_token: {
         Args: { _token: string }
         Returns: {

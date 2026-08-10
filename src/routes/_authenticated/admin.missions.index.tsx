@@ -15,6 +15,8 @@ import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMis
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
+import { useMissionAlerts } from "@/hooks/useMissionAlerts";
+import { SEVERITY_META } from "@/lib/mission-alerts";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
@@ -48,6 +50,7 @@ function AdminMissionsUnified() {
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
+  const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -363,7 +366,15 @@ function AdminMissionsUnified() {
                     >
 
                     <td className={r.inGroup ? "pl-5" : ""}>
-                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold">{r.m.ref}</p>
+                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
+                        {alertsByTrajet.get(r.m.id) && (
+                          <span
+                            title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
+                            className={`h-2 w-2 rounded-full ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].dot} ${alertsByTrajet.get(r.m.id) === "critique" ? "animate-pulse" : ""}`}
+                          />
+                        )}
+                        {r.m.ref}
+                      </p>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
                         {r.m.isRoundTrip ? (
                           <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">

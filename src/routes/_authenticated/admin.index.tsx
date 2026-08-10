@@ -31,6 +31,7 @@ import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { PageHeader } from "@/components/admin/AdminUI";
+import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
 
 
 
@@ -320,6 +321,9 @@ function AdminDashboard() {
           sub="7 derniers jours"
         />
       </section>
+
+      {/* === Missions à risque === */}
+      <MissionsAtRiskWidget />
 
       {/* === Carte trajets en cours === */}
       {stats.trajetsActifs > 0 ? (
