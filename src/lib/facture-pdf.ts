@@ -138,9 +138,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
   const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
-  const ht = Number(f.prix_ht);
+  // En franchise en base (micro), le montant net à payer est le prix affiché au client.
+  const ht = tvaExempt ? Number(f.prix_ttc ?? f.prix_ht) : Number(f.prix_ht);
   const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
   const ttc = tvaExempt ? ht : Number(f.prix_ttc);
+
 
   // ===== Bandeau navy =====
   doc.setFillColor(...NAVY);
