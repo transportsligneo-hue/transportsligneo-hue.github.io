@@ -10,6 +10,8 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
+
 
 export interface DevisData {
   numero: string;
