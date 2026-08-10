@@ -1202,24 +1202,36 @@ function AdminMissionDetail() {
           {/* Incidents signalés par le convoyeur */}
           <MissionIncidentsPanel
             attributionId={attribution.id}
+            isGroup={Boolean(trajet.mission_group_id)}
             onPassageAVide={(motif) => {
               setPvMotif(motif);
               setPvOpenKey((k) => k + 1);
               document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+            onCloture={(categorie, motif) => {
+              setCloturePrefill({ categorie, motif });
+              setClotureKey((k) => k + 1);
+              document.getElementById("cloture-admin")?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
           />
 
           {/* Clôture administrative : annulation motivée */}
-          <MissionClotureAdminPanel
-            attributionId={attribution.id}
-            statut={attribution.statut}
-            onChanged={() => { void fetchAll(); }}
-            onPassageAVide={(motif) => {
-              setPvMotif(motif);
-              setPvOpenKey((k) => k + 1);
-              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-          />
+          <div id="cloture-admin">
+            <MissionClotureAdminPanel
+              attributionId={attribution.id}
+              statut={attribution.statut}
+              isGroup={Boolean(trajet.mission_group_id)}
+              prefill={cloturePrefill}
+              prefillKey={clotureKey}
+              onChanged={() => { void fetchAll(); }}
+              onPassageAVide={(motif) => {
+                setPvMotif(motif);
+                setPvOpenKey((k) => k + 1);
+                document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            />
+          </div>
+
 
 
 
