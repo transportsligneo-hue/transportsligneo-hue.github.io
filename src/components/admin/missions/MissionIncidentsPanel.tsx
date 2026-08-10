@@ -215,6 +215,23 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
                   </button>
                 )}
 
+                {clotureKey && !resolved && (
+                  <button
+                    type="button"
+                    onClick={() => onCloture?.(
+                      clotureKey,
+                      `${typeLabelOf(row.type_incident)} — ${row.titre}`,
+                    )}
+                    className="mt-2 w-full flex items-center gap-2 rounded-lg border border-red-400/50 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-700"
+                  >
+                    <Ban size={14} />
+                    {isGroup
+                      ? "Annuler la mission (Livraison + Restitution)"
+                      : "Annuler la mission suite à cet incident"}
+                  </button>
+                )}
+
+
                 {!resolved && (
                   <div className="mt-2 space-y-2">
                     <textarea
