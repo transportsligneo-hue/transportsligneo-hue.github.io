@@ -580,6 +580,15 @@ function AdminMissionDetail() {
 
   const generateFacture = async () => {
     if (!attribution || !trajet || generatingFacture) return;
+    const po = poNumber.trim().slice(0, 60);
+    if (!po) {
+      const ok = await confirmToast("Générer la facture sans numéro de PO ?", {
+        description: "Aucun numéro de commande / PO n'a été saisi. Il n'apparaîtra pas sur la facture.",
+        confirmLabel: "Générer quand même",
+        cancelLabel: "Saisir un PO",
+      });
+      if (!ok) return;
+    }
     setGeneratingFacture(true);
     try {
       // Livraison + restitution = UNE seule facture au tarif de base global
@@ -589,6 +598,7 @@ function AdminMissionDetail() {
         toast.info("Facture déjà émise pour cette mission", { description: basis.existing.numero });
         return;
       }
+
 
       const ttc = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
       const tvaTaux = 20;
