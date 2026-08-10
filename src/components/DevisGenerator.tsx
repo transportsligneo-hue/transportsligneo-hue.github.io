@@ -840,17 +840,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Prix HT</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p>
                 <p className="font-heading text-3xl gold-gradient-text leading-none">{priceHT} €</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">TVA 20%</p>
-                <p className="font-heading text-base text-cream/85">{tva} €</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">TVA</p>
+                <p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Total TTC</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p>
                 <p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p>
               </div>
+
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Distance</p>
