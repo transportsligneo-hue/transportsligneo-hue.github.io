@@ -16,6 +16,10 @@ interface Props {
   attributionId: string;
   userId?: string | null;
   variant?: Variant;
+  /** Motif pré-rempli du passage à vide (ex. déclenché depuis un incident). */
+  pvPrefillMotif?: string | null;
+  /** Incrémenter cette clé ouvre le formulaire passage à vide. */
+  pvOpenKey?: number;
 }
 
 interface TrajetLite {
@@ -64,7 +68,7 @@ interface StoredDoc {
 
 const PV_TYPE = "passage_a_vide";
 
-export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light" }: Props) {
+export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0 }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurLite | null>(null);
@@ -126,6 +130,13 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   }, [attributionId]);
 
   useEffect(() => { void reload(); }, [reload]);
+
+  // Ouverture pilotée depuis l'extérieur (panneau Incidents)
+  useEffect(() => {
+    if (!pvOpenKey) return;
+    setShowPvForm(true);
+    if (pvPrefillMotif) setPvForm((f) => ({ ...f, motif: pvPrefillMotif }));
+  }, [pvOpenKey, pvPrefillMotif]);
 
   const convoyeurNom = convoyeur ? [convoyeur.prenom, convoyeur.nom].filter(Boolean).join(" ") : null;
   const contactArriveeNom =
