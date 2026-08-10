@@ -417,8 +417,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Conditions =====
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
-    `Règlement par ${(d.mode_paiement || "carte bancaire").toLowerCase()}, aucun acompte demandé à la réservation.`,
+    "Aucun acompte demandé à la réservation.",
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
+
     "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
 
