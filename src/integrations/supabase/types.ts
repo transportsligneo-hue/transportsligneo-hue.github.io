@@ -652,6 +652,13 @@ export type Database = {
       }
       attributions: {
         Row: {
+          annulation_at: string | null
+          annulation_categorie: string | null
+          annulation_facturable: boolean
+          annulation_indemnite: number | null
+          annulation_motif: string | null
+          annulation_par: string | null
+          annulation_passage_vide: boolean
           convoyeur_id: string
           created_at: string
           etape_courante: string | null
@@ -669,6 +676,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          annulation_at?: string | null
+          annulation_categorie?: string | null
+          annulation_facturable?: boolean
+          annulation_indemnite?: number | null
+          annulation_motif?: string | null
+          annulation_par?: string | null
+          annulation_passage_vide?: boolean
           convoyeur_id: string
           created_at?: string
           etape_courante?: string | null
@@ -686,6 +700,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          annulation_at?: string | null
+          annulation_categorie?: string | null
+          annulation_facturable?: boolean
+          annulation_indemnite?: number | null
+          annulation_motif?: string | null
+          annulation_par?: string | null
+          annulation_passage_vide?: boolean
           convoyeur_id?: string
           created_at?: string
           etape_courante?: string | null
@@ -5636,6 +5657,18 @@ export type Database = {
       accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
+      admin_cancel_mission: {
+        Args: {
+          _attribution_id: string
+          _cancel_trajet?: boolean
+          _categorie: string
+          _facturable?: boolean
+          _indemnite?: number
+          _motif?: string
+          _passage_vide?: boolean
+        }
+        Returns: undefined
+      }
       admin_cancel_mission_leg: {
         Args: { _mission_id: string }
         Returns: undefined

@@ -59,6 +59,7 @@ import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/A
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
+import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -1131,6 +1132,20 @@ function AdminMissionDetail() {
               document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
           />
+
+          {/* Clôture administrative : annulation motivée */}
+          <MissionClotureAdminPanel
+            attributionId={attribution.id}
+            statut={attribution.statut}
+            onChanged={() => { void fetchAll(); }}
+            onPassageAVide={(motif) => {
+              setPvMotif(motif);
+              setPvOpenKey((k) => k + 1);
+              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          />
+
+
 
           {/* Documents officiels */}
           <div id="docs-officiels">
