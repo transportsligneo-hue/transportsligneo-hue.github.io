@@ -30,9 +30,23 @@ interface IncidentRow {
 
 interface Props {
   attributionId: string;
+  /** La mission fait partie d'un Duo Livraison–Restitution. */
+  isGroup?: boolean;
   /** Ouvre le formulaire "passage à vide" pré-rempli avec ce motif. */
   onPassageAVide?: (motif: string) => void;
+  /** Ouvre la clôture administrative pré-remplie (catégorie + motif). */
+  onCloture?: (categorie: string, motif: string) => void;
 }
+
+/** Type d'incident → catégorie de clôture administrative. */
+const CLOTURE_BY_TYPE: Record<string, string> = {
+  vehicule_non_dispo: "vehicule_indisponible",
+  vehicule_non_roulant: "vehicule_non_roulant",
+  client_injoignable: "interlocuteur_absent",
+  accident: "incident_route",
+  vol_securite: "incident_route",
+};
+
 
 const GRAVITE_TONE: Record<string, "danger" | "warning" | "info" | "neutral"> = {
   critique: "danger",
