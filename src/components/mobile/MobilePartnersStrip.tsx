@@ -10,7 +10,7 @@ const PARTNERS = [
 const reassurance = [
   { icon: Shield, label: "Assurance" },
   { icon: Clock, label: "7j/7" },
-  { icon: Award, label: "Premium" },
+  { icon: Award, label: "Haut de gamme" },
 ];
 
 /**

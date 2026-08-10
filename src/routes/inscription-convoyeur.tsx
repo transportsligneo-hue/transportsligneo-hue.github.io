@@ -20,7 +20,7 @@ export const Route = createFileRoute("/inscription-convoyeur")({
   head: () => ({
     meta: [
       { title: "Devenir convoyeur · Transports Ligneo" },
-      { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription premium en 4 étapes, validation par notre équipe sous 24 à 48 h." },
+      { name: "description", content: "Rejoignez le réseau de convoyeurs Transports Ligneo. Inscription en 4 étapes, validation par notre équipe sous 24 à 48 h." },
     ],
   }),
 });

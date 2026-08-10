@@ -55,7 +55,7 @@ export default function PwaSplash() {
         />
         <div className="pwa-splash__wordmark">
           <span className="pwa-splash__brand">TRANSPORTS&nbsp;LIGNEO</span>
-          <span className="pwa-splash__tagline">Convoyage automobile premium</span>
+          <span className="pwa-splash__tagline">Convoyage automobile</span>
         </div>
       </div>
       <div className="pwa-splash__progress" />

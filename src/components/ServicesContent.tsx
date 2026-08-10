@@ -25,7 +25,7 @@ const services = [
     Icon: Star,
     title: "Véhicules de collection",
     desc: "Manipulation avec le soin qu'exigent les véhicules d'exception : chauffeurs formés, équipements adaptés.",
-    tags: ["Soin premium", "Sur devis"],
+    tags: ["Soin d'exception", "Sur devis"],
   },
   {
     Icon: Camera,

@@ -155,7 +155,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...GOLD_SOFT);
-  doc.text("CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE", M + 31, 30);
+  doc.text("CONVOYAGE AUTOMOBILE — FRANCE & EUROPE", M + 31, 30);
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.8);
   doc.line(M, 39, pageW - M, 39);

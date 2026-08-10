@@ -126,7 +126,7 @@ function drawHeader(doc: jsPDF, pageW: number, logoData: string | null) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.8);
   doc.setTextColor(...GOLD_SOFT);
-  doc.text("CONVOYAGE AUTOMOBILE PREMIUM — FRANCE & EUROPE", M + 29, 29.5);
+  doc.text("CONVOYAGE AUTOMOBILE — FRANCE & EUROPE", M + 29, 29.5);
   doc.setFillColor(...GOLD);
   doc.rect(M, 37.2, w, 0.9, "F");
 }
