@@ -329,7 +329,7 @@ function AdminNouveauDevisPage() {
           prestation: "Convoyage automobile",
           prix_estime: prix,
           statut: "brouillon",
-          origine: "admin",
+          origine: "manuel",
           user_id: client.user_id,
         } as never)
         .select("id, numero, prix_estime")
@@ -342,7 +342,14 @@ function AdminNouveauDevisPage() {
       setCreated({ id: row.id, numero: row.numero, prix: Number(row.prix_estime) });
       toast.success(`Devis ${row.numero} généré`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erreur lors de la génération");
+      const msg =
+        e instanceof Error
+          ? e.message
+          : typeof e === "object" && e && "message" in e
+            ? String((e as { message: unknown }).message)
+            : "Erreur lors de la génération";
+      toast.error(msg);
+    }
     } finally {
       setGenerating(false);
     }
