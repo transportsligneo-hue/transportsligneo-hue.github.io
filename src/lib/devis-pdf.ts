@@ -281,11 +281,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFontSize(8.4);
   doc.setTextColor(...TEXT);
   let cy = blockY + 18.5;
-  const contactName = `${d.prenom ?? ""} ${d.nom ?? ""}`.trim();
-  if (d.societe?.trim() && contactName) {
-    doc.text(`À l'attention de ${contactName}`, M + 5, cy);
-    cy += 4.4;
-  }
+  // Jamais de nom de contact quand une société est identifiée.
+
   if (d.adresse) {
     doc.splitTextToSize(d.adresse, 76).slice(0, 2).forEach((l: string) => {
       doc.text(l, M + 5, cy);
