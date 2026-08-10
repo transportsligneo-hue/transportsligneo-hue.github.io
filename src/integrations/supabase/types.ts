@@ -6166,6 +6166,7 @@ export type Database = {
           rule_id_retour: string
         }[]
       }
+      resolve_mission_alert: { Args: { _alert_id: string }; Returns: undefined }
       resolve_scan_handoff_token: {
         Args: { _token: string }
         Returns: {
