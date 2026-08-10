@@ -192,6 +192,11 @@ function labelValue(doc: jsPDF, x: number, y: number, label: string, value: stri
 export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
 
+  // Régime de facturation : micro-entreprise (franchise en base) = prix saisi = net à payer.
+  const { regime, vatRate, exemptionNote } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+
+
   // Devis au nom de l'organisation (rétroactif) : la société prime sur le contact.
   const billing = await resolveClientBillingIdentity({
     userId: (dInput as unknown as { client_user_id?: string | null; user_id?: string | null }).client_user_id
