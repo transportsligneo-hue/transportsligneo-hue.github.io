@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  AlertTriangle, Loader2, MapPin, CheckCircle2, Clock, FilePlus2, ShieldAlert,
+  AlertTriangle, Loader2, MapPin, CheckCircle2, Clock, FilePlus2, ShieldAlert, Ban,
 } from "lucide-react";
 import { Card, Badge, Button } from "@/components/admin/AdminUI";
 
@@ -80,7 +80,7 @@ function photosOf(raw: unknown): string[] {
   return [];
 }
 
-export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) {
+export function MissionIncidentsPanel({ attributionId, isGroup, onPassageAVide, onCloture }: Props) {
   const [rows, setRows] = useState<IncidentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -151,6 +151,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
             const photos = photosOf(row.photos);
             const resolved = row.statut === "resolu";
             const suggestPv = PV_TYPES.has(row.type_incident ?? "");
+            const clotureKey = CLOTURE_BY_TYPE[row.type_incident ?? ""] ?? null;
             return (
               <div
                 key={row.id}
