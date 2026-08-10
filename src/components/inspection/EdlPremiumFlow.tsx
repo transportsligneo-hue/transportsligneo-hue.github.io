@@ -1209,7 +1209,7 @@ export function EdlPremiumFlow({
         ),
       ]);
     }
-  }, [attributionId, inspectionId, type, userId]);
+  }, [attributionId, ensureInspection, inspectionId, type, userId]);
 
   // ─────────────────────────── NAVIGATION ───────────────────────────
   /** Bypass admin : étape considérée passable si admin a posé un override skip/disable */
