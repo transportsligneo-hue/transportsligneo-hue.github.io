@@ -169,7 +169,7 @@ function drawFooter(doc: jsPDF, pageW: number, pageH: number, company?: CompanyI
   doc.setTextColor(215, 220, 235);
   const l1 = companyLegalLine1(company);
   const l2 = companyLegalLine2(company);
-  doc.text(l1 || "SASU — RCS Tours — SIRET — TVA", cx, y + 11.5, { align: "center", maxWidth: w - 12 });
+  doc.text(l1 || "Transports Ligneo — SIREN 753 320 001", cx, y + 11.5, { align: "center", maxWidth: w - 12 });
   doc.text(
     l2 || "37000 Tours, France — contact@transportsligneo.fr — 07 82 45 61 81 — www.transportsligneo.fr",
     cx,
@@ -281,11 +281,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFontSize(8.4);
   doc.setTextColor(...TEXT);
   let cy = blockY + 18.5;
-  const contactName = `${d.prenom ?? ""} ${d.nom ?? ""}`.trim();
-  if (d.societe?.trim() && contactName) {
-    doc.text(`À l'attention de ${contactName}`, M + 5, cy);
-    cy += 4.4;
-  }
+  // Jamais de nom de contact quand une société est identifiée.
+
   if (d.adresse) {
     doc.splitTextToSize(d.adresse, 76).slice(0, 2).forEach((l: string) => {
       doc.text(l, M + 5, cy);

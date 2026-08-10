@@ -271,7 +271,7 @@ function ConfidentialitePage() {
           Politique de confidentialité
         </h1>
         <p className="mb-3 max-w-2xl text-[15.5px] leading-relaxed text-[#9aa6c9]">
-          Transports Ligneo Driver — éditée par Transports Ligneo, [FORME JURIDIQUE À COMPLÉTER], immatriculée sous le SIREN 753 320 001, dont le siège est situé à Tours (37), France.
+          Transports Ligneo Driver — éditée par Transports Ligneo, entrepreneur individuel, immatriculée sous le SIREN 753 320 001, dont le siège est situé à Tours (37), France.
         </p>
         <p className="mb-12 text-sm text-[#9aa6c9]">
           Dernière mise à jour : 10 août 2026
