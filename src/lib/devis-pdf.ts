@@ -422,8 +422,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
 
-  const needed = 8 + conditions.length * 6.2 + 34;
-  if (y + needed > pageH - 28) {
+  // Conditions sur 2 colonnes (compact) pour tenir sur une page
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.6);
+  const colW = (innerW - 8) / 2;
+  const wrappedCols = conditions.map((c) => doc.splitTextToSize(`• ${c}`, colW) as string[]);
+  const leftCols = wrappedCols.slice(0, Math.ceil(wrappedCols.length / 2));
+  const rightCols = wrappedCols.slice(Math.ceil(wrappedCols.length / 2));
+  const colLines = Math.max(
+    leftCols.reduce((a, w) => a + w.length + 0.4, 0),
+    rightCols.reduce((a, w) => a + w.length + 0.4, 0),
+  );
+  const condH = colLines * 4.1;
+  const needed = 6.5 + condH + 30;
+  if (y + needed > pageH - 26) {
     drawFooter(doc, pageW, pageH, co);
     doc.addPage();
     applyLigneoFonts(doc);
@@ -432,21 +444,23 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   }
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.4);
+  doc.setFontSize(8.2);
   doc.setTextColor(...NAVY);
   doc.text("CONDITIONS", M, y);
-  y += 6.5;
+  y += 5.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
+  doc.setFontSize(7.6);
   doc.setTextColor(...TEXT);
-  conditions.forEach((c) => {
-    const wrapped = doc.splitTextToSize(`• ${c}`, innerW - 6) as string[];
-    doc.text(wrapped, M, y);
-    y += wrapped.length * 4.6 + 1.6;
-  });
+  const condTop = y;
+  let ly = condTop;
+  leftCols.forEach((w) => { doc.text(w, M, ly); ly += w.length * 4.1 + 1.4; });
+  let ry2 = condTop;
+  rightCols.forEach((w) => { doc.text(w, M + colW + 8, ry2); ry2 += w.length * 4.1 + 1.4; });
+  y = Math.max(ly, ry2);
 
   // ===== Signatures =====
-  y += 10;
+  y += 8;
+
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
