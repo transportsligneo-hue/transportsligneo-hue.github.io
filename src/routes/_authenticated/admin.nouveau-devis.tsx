@@ -76,6 +76,33 @@ function Field({
   );
 }
 
+function AddressField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+        {label}
+      </label>
+      <PlacesInput
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+        dropdownClassName="absolute z-50 left-0 right-0 top-full mt-1 rounded-lg border border-pro-border bg-white shadow-xl max-h-64 overflow-y-auto"
+      />
+    </div>
+  );
+}
+
 const OPTIONS_LIST = [
   { id: "recharge_elec", label: "Recharge électrique (véhicule électrique)" },
   { id: "carburant_thermique", label: "Plein de carburant (véhicule thermique)" },
