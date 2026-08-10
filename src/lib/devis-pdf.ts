@@ -356,12 +356,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   y += 9;
 
-  // Régime de facturation (micro-entreprise = franchise en base : prix saisi = net à payer)
-  const { regime, vatRate, exemptionNote } = await fetchActiveRegime();
-  const micro = regime !== "societe";
   const ttc = d.prix_estime;
   const ht = micro ? ttc : +(ttc / (1 + vatRate / 100)).toFixed(2);
   const tva = +(ttc - ht).toFixed(2);
+
 
 
   const distance = d.distance_km ?? 0;
