@@ -1133,7 +1133,8 @@ function AdminMissionDetail() {
           />
 
           {/* Documents officiels */}
-          <Card id="docs-officiels">
+          <div id="docs-officiels">
+          <Card>
             <div className="flex items-center gap-2 mb-3">
               <FileText size={15} className="text-pro-accent" />
               <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
@@ -1142,6 +1143,7 @@ function AdminMissionDetail() {
             </div>
             <MissionDocsOfficielsPanel attributionId={attribution.id} pvPrefillMotif={pvMotif} pvOpenKey={pvOpenKey} />
           </Card>
+          </div>
 
           {/* Avis Google */}
           <MissionAvisGooglePanel
