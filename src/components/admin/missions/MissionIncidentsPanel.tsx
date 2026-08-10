@@ -140,7 +140,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
             return (
               <div
                 key={row.id}
-                className={`rounded-xl border p-3 ${resolved ? "border-pro-border bg-pro-surface" : "border-red-500/40 bg-red-500/5"}`}
+                className={`rounded-xl border p-3 ${resolved ? "border-pro-border bg-pro-bg-soft" : "border-red-500/40 bg-red-500/5"}`}
               >
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <Badge tone={GRAVITE_TONE[row.gravite] ?? "neutral"}>{row.gravite}</Badge>
@@ -194,7 +194,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
                     onClick={() => onPassageAVide?.(
                       `${typeLabelOf(row.type_incident)} — ${row.titre}`,
                     )}
-                    className="mt-2 w-full flex items-center gap-2 rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-200"
+                    className="mt-2 w-full flex items-center gap-2 rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-800"
                   >
                     <FilePlus2 size={14} />
                     Générer un passage à vide (véhicule indisponible)
@@ -208,7 +208,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
                       onChange={(e) => setDrafts((p) => ({ ...p, [row.id]: e.target.value }))}
                       placeholder="Réponse / décision admin (optionnel)"
                       rows={2}
-                      className="w-full rounded-lg border border-pro-border bg-pro-bg px-3 py-2 text-xs text-pro-text outline-none"
+                      className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-xs text-pro-text outline-none"
                     />
                     <div className="flex gap-2">
                       {row.statut !== "en_cours" && (
@@ -225,7 +225,7 @@ export function MissionIncidentsPanel({ attributionId, onPassageAVide }: Props) 
                 )}
 
                 {row.gravite === "critique" && !resolved && (
-                  <p className="mt-2 inline-flex items-center gap-1 text-[11px] text-red-400">
+                  <p className="mt-2 inline-flex items-center gap-1 text-[11px] text-red-600">
                     <ShieldAlert size={12} /> Incident critique — contacter le convoyeur immédiatement.
                   </p>
                 )}
