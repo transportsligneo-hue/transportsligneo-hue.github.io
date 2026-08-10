@@ -1164,16 +1164,27 @@ export function EdlPremiumFlow({
   };
 
   const finalizeInspection = useCallback(async () => {
-    if (!inspectionId) {
-      throw new Error("Inspection introuvable.");
+    // L'inspection peut ne pas encore exister (parcours sans photo, étapes
+    // bypassées par l'admin…) : on la crée à la volée plutôt que d'échouer.
+    let insId = inspectionId;
+    if (!insId) {
+      try {
+        insId = await ensureInspection();
+      } catch (err) {
+        console.warn("[EDL Premium] ensureInspection à la finalisation a échoué", err);
+        insId = null;
+      }
     }
 
-    const { error: inspectionError } = await supabase
-      .from("inspections")
-      .update({ statut: "complete" })
-      .eq("id", inspectionId);
-
-    if (inspectionError) throw inspectionError;
+    if (insId) {
+      const { error: inspectionError } = await supabase
+        .from("inspections")
+        .update({ statut: "complete" })
+        .eq("id", insId);
+      // Non bloquant : la mission doit pouvoir se terminer même si la ligne
+      // d'inspection n'est pas modifiable (RLS, hors-ligne…).
+      if (inspectionError) console.warn("[EDL Premium] update inspection statut", inspectionError);
+    }
 
     if (type === "arrivee") {
       // On marque seulement l'EDL arrivée comme faite. Le selfie final et
