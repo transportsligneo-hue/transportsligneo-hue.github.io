@@ -237,6 +237,43 @@ function AdminMissionDetail() {
     setContactInstr(trajet.arrivee_contact_instructions ?? "");
   }, [trajet]);
 
+  // N° de PO — partagé par les deux volets d'un aller-retour
+  const [savingPo, setSavingPo] = useState(false);
+  useEffect(() => {
+    if (!trajet) return;
+    setPoNumber(trajet.commande_ref ?? "");
+  }, [trajet?.id, trajet?.commande_ref]);
+
+  const savePo = useCallback(
+    async (value: string, silent = false) => {
+      if (!attribution) return;
+      const po = value.trim().slice(0, 60);
+      if ((trajet?.commande_ref ?? "") === po) return;
+      setSavingPo(true);
+      try {
+        const { error } = await supabase.rpc("admin_set_mission_po" as never, {
+          _attribution_id: attribution.id,
+          _po: po || null,
+          _apply_group: true,
+        } as never);
+        if (error) throw error;
+        setTrajet((t) => (t ? { ...t, commande_ref: po || null } : t));
+        if (!silent) {
+          toast.success("N° de PO enregistré", {
+            description: trajet?.mission_group_id ? "Appliqué aux deux volets (Livraison + Restitution)." : undefined,
+          });
+        }
+      } catch (e) {
+        toast.error("Enregistrement du PO impossible", { description: (e as Error).message });
+      } finally {
+        setSavingPo(false);
+      }
+    },
+    [attribution, trajet?.commande_ref, trajet?.mission_group_id],
+  );
+
+
+
   // Numéro de base partagé pour un aller-retour (les 2 volets affichent 075A / 075R)
   const [groupBaseNumero, setGroupBaseNumero] = useState<string | null>(null);
   const groupId = trajet?.mission_group_id ?? null;
