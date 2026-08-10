@@ -349,7 +349,6 @@ function AdminNouveauDevisPage() {
             ? String((e as { message: unknown }).message)
             : "Erreur lors de la génération";
       toast.error(msg);
-    }
     } finally {
       setGenerating(false);
     }
