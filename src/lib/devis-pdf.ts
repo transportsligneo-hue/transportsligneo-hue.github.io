@@ -307,7 +307,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Tableau prestation =====
-  let y = blockY + blockH + 10;
+  let y = blockY + blockH + 6;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.4);
   doc.setTextColor(...NAVY);
@@ -388,7 +388,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   });
 
   // ===== Totaux =====
-  y += 7;
+  y += 6;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
@@ -412,7 +412,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("TOTAL TTC", labelR, y + 7.8, { align: "right" });
   doc.setFontSize(10.5);
   doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
-  y += 16;
+  y += 14;
 
   // ===== Conditions =====
   const conditions = [
@@ -434,7 +434,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     rightCols.reduce((a, w) => a + w.length + 0.4, 0),
   );
   const condH = colLines * 4.1;
-  const needed = 6.5 + condH + 30;
+  const needed = 5.5 + condH + 28;
   if (y + needed > pageH - 26) {
     drawFooter(doc, pageW, pageH, co);
     doc.addPage();
@@ -459,7 +459,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y = Math.max(ly, ry2);
 
   // ===== Signatures =====
-  y += 8;
+  y += 7;
 
 
   doc.setFont("helvetica", "normal");
@@ -478,8 +478,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.8);
   doc.setTextColor(...MUTED);
-  doc.text("Signature et cachet client", M + 5, y + 21);
-  doc.text("Olivier G. — Fondateur", right, y + 21, { align: "right" });
+  doc.text("Signature et cachet client", M + 5, y + 20);
+  doc.text("Olivier G. — Fondateur", right, y + 20, { align: "right" });
   if (d.acceptedAtLabel) {
     doc.setFontSize(7);
     doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 5, y + 25.5);
