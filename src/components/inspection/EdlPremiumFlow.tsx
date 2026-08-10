@@ -275,6 +275,7 @@ export function EdlPremiumFlow({
 
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [finalError, setFinalError] = useState<string | null>(null);
   const [openScanner, setOpenScanner] = useState(false);
   const [signatureClientName, setSignatureClientName] = useState(defaultClientName ?? "");
   const [online, setOnline] = useState<boolean>(
