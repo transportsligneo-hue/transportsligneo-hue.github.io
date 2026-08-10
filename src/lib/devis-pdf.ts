@@ -388,7 +388,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   });
 
   // ===== Totaux =====
-  y += 9;
+  y += 7;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
@@ -412,7 +412,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("TOTAL TTC", labelR, y + 7.8, { align: "right" });
   doc.setFontSize(10.5);
   doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
-  y += 20;
+  y += 16;
 
   // ===== Conditions =====
   const conditions = [
@@ -422,8 +422,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     "Un état des lieux contradictoire est réalisé au départ et à l'arrivée, avec photos horodatées, et le devis est soumis aux CGV (www.transportsligneo.fr/cgv).",
   ];
 
-  const needed = 12 + conditions.length * 6.2 + 36;
-  if (y + needed > pageH - 38) {
+  const needed = 8 + conditions.length * 6.2 + 34;
+  if (y + needed > pageH - 36) {
     drawFooter(doc, pageW, pageH, co);
     doc.addPage();
     applyLigneoFonts(doc);
