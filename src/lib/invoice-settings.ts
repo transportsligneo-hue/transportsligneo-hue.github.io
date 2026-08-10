@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { fetchActiveRegime, TVA_FRANCHISE_NOTE } from "@/lib/pricing/fetch";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
 export interface InvoiceMentionResolved {
   mention: string | null;
