@@ -644,9 +644,12 @@ function AdminMissionDetail() {
 
 
       const ttc = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
-      const tvaTaux = 20;
-      const ht = +(ttc / (1 + tvaTaux / 100)).toFixed(2);
+      // Régime micro-entreprise (franchise en base) : le prix affiché est le net à payer.
+      const { regime: regimeFact, vatRate: tauxFact } = await fetchActiveRegime();
+      const tvaTaux = regimeFact === "societe" ? tauxFact : 0;
+      const ht = tvaTaux === 0 ? ttc : +(ttc / (1 + tvaTaux / 100)).toFixed(2);
       const tva = +(ttc - ht).toFixed(2);
+
       const today = new Date();
       const yy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, "0");
