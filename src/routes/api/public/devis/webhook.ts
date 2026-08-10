@@ -83,7 +83,7 @@ export const Route = createFileRoute("/api/public/devis/webhook")({
                 const prixTtc = Number(devis.prix_estime ?? 0);
                 const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
                 const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
-                const factureNumero = /^DEV-TLG-\d{4}-\d{3}$/.test(devis.numero ?? "")
+                const factureNumero = /^DEV-TLG-\d{4}-#?\d{3}$/.test(devis.numero ?? "")
                   ? (devis.numero as string).replace("DEV-TLG", "FAC-TLG")
                   : undefined;
                 const vehiculeLabel = [devis.marque, devis.modele].filter(Boolean).join(" ");
