@@ -1241,13 +1241,16 @@ export function EdlPremiumFlow({
 
 
   const goNext = () => {
+    if (completing) return;
     if (!canAdvance()) {
       toast.error("Validez cette étape avant de continuer");
+      setFinalError("Validez cette étape avant de continuer.");
       return;
     }
     if (safeIndex < TOTAL - 1) {
       setStepIndex(safeIndex + 1);
     } else {
+      setFinalError(null);
       setCompleting(true);
       void finalizeInspection()
         .then(() => {
@@ -1255,9 +1258,9 @@ export function EdlPremiumFlow({
           onComplete();
         })
         .catch((error) => {
-          toast.error("Impossible de finaliser l'inspection", {
-            description: error instanceof Error ? error.message : "Réessayez dans quelques secondes.",
-          });
+          const message = error instanceof Error ? error.message : "Réessayez dans quelques secondes.";
+          toast.error("Impossible de finaliser l'inspection", { description: message });
+          setFinalError(message);
         })
         .finally(() => {
           setCompleting(false);
