@@ -351,8 +351,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFontSize(7.8);
   doc.text("Description", colDescX, y + 5.9);
   doc.text("Quantité", colQtyC, y + 5.9, { align: "center" });
-  doc.text("Prix unit. HT", colUnitR, y + 5.9, { align: "right" });
-  doc.text("Total HT", colTotalR, y + 5.9, { align: "right" });
+  doc.text(micro ? "Prix unitaire" : "Prix unit. HT", colUnitR, y + 5.9, { align: "right" });
+  doc.text(micro ? "Total" : "Total HT", colTotalR, y + 5.9, { align: "right" });
+
   y += 9;
 
   // Régime de facturation (micro-entreprise = franchise en base : prix saisi = net à payer)
