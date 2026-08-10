@@ -459,7 +459,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y = Math.max(ly, ry2);
 
   // ===== Signatures =====
-  y += 7;
+  y += 5;
 
 
   doc.setFont("helvetica", "normal");
@@ -469,17 +469,17 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("Pour Transports Ligneo", right, y, { align: "right" });
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 3, 38, 15); } catch { /* optionnel */ }
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 2, 36, 13); } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", right - 38, y + 3, 34, 15); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", right - 36, y + 2, 32, 13); } catch { /* optionnel */ }
   }
 
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.8);
   doc.setTextColor(...MUTED);
-  doc.text("Signature et cachet client", M + 5, y + 20);
-  doc.text("Olivier G. — Fondateur", right, y + 20, { align: "right" });
+  doc.text("Signature et cachet client", M + 5, y + 18);
+  doc.text("Olivier G. — Fondateur", right, y + 18, { align: "right" });
   if (d.acceptedAtLabel) {
     doc.setFontSize(7);
     doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 5, y + 25.5);
