@@ -51,6 +51,24 @@ function AdminLayout() {
   const { isAuthenticated, role, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "super_admin") return;
+    const fetchAlerts = async () => {
+      const { count } = await supabase
+        .from("mission_alerts" as never)
+        .select("id", { count: "exact", head: true })
+        .in("status" as never, ["open", "acknowledged"] as never);
+      setAlertCount(count ?? 0);
+    };
+    fetchAlerts();
+    const channel = supabase
+      .channel("admin-alert-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "mission_alerts" }, fetchAlerts)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [role]);
 
   useEffect(() => {
     if (isLoading) return;
