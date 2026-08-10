@@ -42,6 +42,7 @@ import { template as vehiculeDocumentExpiration } from './vehicule-document-expi
 import { template as invite } from './invite'
 import { template as invitationConvoyeur } from './invitation-convoyeur'
 import { template as avisGoogle } from './avis-google'
+import { template as suppressionCompteAdmin } from './suppression-compte-admin'
 
 
 
@@ -80,4 +81,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'vehicule-document-expiration': vehiculeDocumentExpiration,
   'invite': invite,
   'avis-google': avisGoogle,
+  'suppression-compte-admin': suppressionCompteAdmin,
 }
