@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TestSmsRouteImport } from './routes/test-sms'
 import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
 import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -188,6 +189,11 @@ const TestSmsRoute = TestSmsRouteImport.update({
 const TarifsRoute = TarifsRouteImport.update({
   id: '/tarifs',
   path: '/tarifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuppressionCompteRoute = SuppressionCompteRouteImport.update({
+  id: '/suppression-compte',
+  path: '/suppression-compte',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuiviRoute = SuiviRouteImport.update({
@@ -1129,6 +1135,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -1295,6 +1302,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -1454,6 +1462,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suivi': typeof SuiviRoute
+  '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -1622,6 +1631,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/suivi'
+    | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
     | '/unsubscribe'
@@ -1788,6 +1798,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/suivi'
+    | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
     | '/unsubscribe'
@@ -1946,6 +1957,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/suivi'
+    | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
     | '/unsubscribe'
@@ -2114,6 +2126,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuiviRoute: typeof SuiviRoute
+  SuppressionCompteRoute: typeof SuppressionCompteRoute
   TarifsRoute: typeof TarifsRoute
   TestSmsRoute: typeof TestSmsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
@@ -2181,6 +2194,13 @@ declare module '@tanstack/react-router' {
       path: '/tarifs'
       fullPath: '/tarifs'
       preLoaderRoute: typeof TarifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suppression-compte': {
+      id: '/suppression-compte'
+      path: '/suppression-compte'
+      fullPath: '/suppression-compte'
+      preLoaderRoute: typeof SuppressionCompteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/suivi': {
@@ -3773,6 +3793,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuiviRoute: SuiviRoute,
+  SuppressionCompteRoute: SuppressionCompteRoute,
   TarifsRoute: TarifsRoute,
   TestSmsRoute: TestSmsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
@@ -3826,13 +3847,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
