@@ -272,7 +272,7 @@ function AdminAttributions() {
           prix_ht: +prixHT.toFixed(2),
           prix_tva: prixTVA,
           prix_ttc: prixTTC,
-          tva_taux: 20,
+          tva_taux: microFact ? 0 : tauxFact,
           statut: "emise",
         })
         .select("*")
