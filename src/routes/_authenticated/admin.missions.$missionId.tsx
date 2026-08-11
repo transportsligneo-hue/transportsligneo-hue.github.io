@@ -744,10 +744,12 @@ function AdminMissionDetail() {
       const tva = +(ttc - ht).toFixed(2);
 
       const today = new Date();
-      const yy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const dd = String(today.getDate()).padStart(2, "0");
-      const numero = `F-${yy}${mm}${dd}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      // La facture reprend automatiquement le numéro de la mission (MIS-… → FAC-…)
+      const baseNum = stripLegSuffix(attribution.numero_mission ?? "").trim();
+      const numero = /^MIS-TLG-\d{4}-#?\d{3,}$/.test(baseNum)
+        ? baseNum.replace(/^MIS-/, "FAC-")
+        : `F-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
 
       const nameParts = (trajet.client_nom ?? "").trim().split(/\s+/);
       const prenom = nameParts.length > 1 ? nameParts[0] : "";
