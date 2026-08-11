@@ -57,6 +57,8 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
+import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
