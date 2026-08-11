@@ -69,8 +69,8 @@ const VUE_LABELS: Record<string, string> = {
 const labelOf = (v: string) => VUE_LABELS[v] ?? v.replace(/_/g, " ");
 
 const EQUIP_LABELS: Record<string, string> = {
-  roue_secours: "Roue de secours",
-  roue_de_secours: "Roue de secours",
+  roue_secours: "Roue de secours / kit anti-crevaison",
+  roue_de_secours: "Roue de secours / kit anti-crevaison",
   tapis_sol: "Tapis de sol",
   tapis_de_sol: "Tapis de sol",
   extincteur: "Extincteur",
@@ -83,11 +83,8 @@ const EQUIP_LABELS: Record<string, string> = {
   gilet: "Gilet réfléchissant",
   cric: "Cric",
 };
-const EQUIP_SUB: Record<string, string> = {
-  roue_secours: "Kit anti-crevaison",
-  roue_de_secours: "Kit anti-crevaison",
-};
 const DEFAULT_EQUIP_KEYS = ["roue_secours", "tapis_sol", "extincteur", "cable_charge", "doubles_cles", "kit_securite"];
+
 
 const SIG_LABELS: Record<string, { role: string; step: string }> = {
   driver_start: { role: "Convoyeur", step: "Départ" },
