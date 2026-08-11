@@ -470,6 +470,11 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
             uploadedAt: new Date().toLocaleString("fr-FR"),
           },
         }).catch((e) => console.warn("Notification admin validation non bloquante:", e));
+
+        // Récap complet admin (in-app + push + email détaillé)
+        import("@/lib/mission-completion-notify")
+          .then(({ notifyAdminMissionTerminee }) => notifyAdminMissionTerminee(attributionId))
+          .catch(() => { /* best-effort */ });
       }
       toast.success("État des lieux validé ✓");
       onComplete();
