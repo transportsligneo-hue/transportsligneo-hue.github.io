@@ -194,14 +194,36 @@ function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhoto
     ["DISTANCE PARCOURUE", distance != null ? `${distance} km` : "—"],
   ];
 
-  const eq = m.equipements ?? {};
-  const keys = Array.from(new Set<string>([...DEFAULT_EQUIP_KEYS, ...Object.keys(eq)]));
-  const equipItems = keys.map((k) => {
-    const label = EQUIP_LABELS[k] ?? k.replace(/_/g, " ");
-    const sub = EQUIP_SUB[k] ?? (isTruthy((eq as Record<string, unknown>)[k]) ? "Présent" : "Absent");
-    const ok = isTruthy((eq as Record<string, unknown>)[k]);
-    return { label, sub, ok };
-  });
+  const eq = (m.equipements ?? {}) as Record<string, unknown>;
+  // Normalise les alias (roue, roue_secours, kit_anti_crevaison… -> roue_secours)
+  const normalizeKey = (k: string): string | null => {
+    const n = k.toLowerCase().replace(/[\s-]/g, "_");
+    if (/^roue(_|$)/.test(n) || n.includes("crevaison") || n === "roue_de_secours") return "roue_secours";
+    if (n.includes("tapis")) return "tapis_sol";
+    if (n.includes("extincteur")) return "extincteur";
+    if (n.includes("cable")) return "cable_charge";
+    if (n.includes("cle")) return "doubles_cles";
+    if (n.includes("kit_securite") || n.includes("securite")) return "kit_securite";
+    if (n.includes("triangle")) return "triangle";
+    if (n.includes("gilet")) return "gilet";
+    if (n === "cric") return "cric";
+    return null; // clé inconnue : on n'affiche pas de ligne parasite
+  };
+
+  const presence = new Map<string, boolean>();
+  for (const key of DEFAULT_EQUIP_KEYS) presence.set(key, false);
+  for (const [k, v] of Object.entries(eq)) {
+    const nk = normalizeKey(k);
+    if (!nk) continue;
+    presence.set(nk, (presence.get(nk) ?? false) || isTruthy(v));
+  }
+
+  const equipItems = Array.from(presence.entries()).map(([k, ok]) => ({
+    label: EQUIP_LABELS[k] ?? k.replace(/_/g, " "),
+    sub: ok ? "Présent" : "Absent",
+    ok,
+  }));
+
 
   return `
     <div class="cover-title">État des lieux</div>
