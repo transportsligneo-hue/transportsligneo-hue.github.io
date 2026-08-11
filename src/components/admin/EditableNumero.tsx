@@ -31,8 +31,16 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
       return;
     }
     setSaving(true);
-    const { error } = await (supabase as any).from(table).update({ [column]: next }).eq("id", id);
+    const { data, error } = await (supabase as any)
+      .from(table)
+      .update({ [column]: next })
+      .eq("id", id)
+      .select("id");
     setSaving(false);
+    if (!error && (!data || data.length === 0)) {
+      toast.error("Modification refusée", { description: "Aucune ligne mise à jour (droits insuffisants)." });
+      return;
+    }
     if (error) {
       const msg = error.message?.includes("duplicate") || error.code === "23505"
         ? "Ce numéro est déjà utilisé"
