@@ -922,7 +922,10 @@ function AdminMissionDetail() {
                   id={attribution.id}
                   column="numero_mission"
                   value={missionNumber}
-                  onSaved={(next: string) => setAttribution((a) => (a ? { ...a, numero_mission: next } : a))}
+                  onSaved={(next: string) => {
+                    setAttribution((a) => (a ? { ...a, numero_mission: next } : a));
+                    setTrajet((t) => (t ? { ...t, numero_mission: next } : t));
+                  }}
                 />
                 <Badge tone={attributionStatutTone[attribution.statut] ?? "neutral"}>
                   {statutLabels[attribution.statut] ?? attribution.statut}

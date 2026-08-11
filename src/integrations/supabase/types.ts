@@ -5910,6 +5910,10 @@ export type Database = {
         Args: { _offre_id: string; _reason?: string }
         Returns: undefined
       }
+      admin_rename_mission_numero: {
+        Args: { _attribution_id: string; _numero: string }
+        Returns: string
+      }
       admin_reset_mission: {
         Args: { _attribution_id: string }
         Returns: undefined
