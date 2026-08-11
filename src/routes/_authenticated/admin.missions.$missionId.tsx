@@ -993,12 +993,42 @@ function AdminMissionDetail() {
               {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager PDF au client"}
             </button>
             {linkedFactureId ? (
-              <Link
-                to="/admin/factures"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-              >
-                <Receipt size={13} /> Facture émise
-              </Link>
+              <div className="w-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
+                <div className="flex-1 min-w-[220px]">
+                  <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300 mb-1.5">
+                    <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
+                    {savingPo && <Loader2 size={11} className="animate-spin" />}
+                  </label>
+                  <input
+                    id="po-number-emise"
+                    value={poNumber}
+                    onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                    onBlur={(e) => void savePo(e.target.value)}
+                    maxLength={60}
+                    placeholder="Ex. PO-2026-0042"
+                    className="w-full rounded-md border border-emerald-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-300/50"
+                  />
+                  <p className="mt-1 text-[11px] text-white/50">
+                    Le PO est reporté sur la facture existante, puis le PDF est régénéré.
+                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                    onClick={regenerateFacturePdf}
+                    disabled={regeneratingFacturePdf}
+                  >
+                    Régénérer le PDF
+                  </Button>
+                  <Link
+                    to="/admin/factures"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    Voir les factures
+                  </Link>
+                </div>
+              </div>
             ) : (
               <div className="w-full rounded-lg border border-amber-400/40 bg-amber-400/[0.07] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
                 <div className="flex-1 min-w-[220px]">
