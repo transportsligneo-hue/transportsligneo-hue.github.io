@@ -213,6 +213,8 @@ function AdminMissionDetail() {
   const [adminNote, setAdminNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
+  const [linkedFactureNumero, setLinkedFactureNumero] = useState<string | null>(null);
+  const [regeneratingFacturePdf, setRegeneratingFacturePdf] = useState(false);
   const [poNumber, setPoNumber] = useState("");
   const [cloturePrefill, setCloturePrefill] = useState<{ categorie: string; motif: string } | null>(null);
   const [clotureKey, setClotureKey] = useState(0);
