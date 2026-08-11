@@ -190,6 +190,14 @@ function AdminFacturesPage() {
       };
       const blob = await generateFacturePdf(data);
       downloadFacturePdf(blob, row.numero);
+      await logPoEvent({
+        action: "pdf_regenerate",
+        factureId: row.id,
+        factureNumero: row.numero,
+        oldPo: row.reference_client ?? null,
+        newPo: refClient,
+      });
+      setPoHistoryKey(k => k + 1);
       toast.success("Facture téléchargée");
     } catch (e) {
       toast.error("Erreur PDF", { description: (e as Error).message });
