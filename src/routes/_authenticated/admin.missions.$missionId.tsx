@@ -881,8 +881,9 @@ function AdminMissionDetail() {
 
       {/* === Header mission === */}
       <Card>
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div className="min-w-0 flex-1 flex items-start gap-3">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-start justify-between gap-4">
+          <div className="min-w-0 w-full lg:flex-1 flex items-start gap-3">
+
             <ClientLogo
               src={clientLogoUrl}
               name={clientSociete || trajet.client_nom || undefined}
