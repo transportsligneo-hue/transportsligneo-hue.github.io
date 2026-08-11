@@ -1083,7 +1083,13 @@ function AdminMissionDetail() {
                 </Button>
               </div>
             )}
+            <PoHistoryPanel
+              attributionId={attribution.id}
+              refreshKey={poHistoryKey}
+              className="w-full text-left"
+            />
           </div>
+
 
         </div>
       </Card>
