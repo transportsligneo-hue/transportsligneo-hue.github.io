@@ -370,13 +370,20 @@ function ConvoyeurMissions() {
       toast.info("Hors ligne — la mise à jour partira dès le retour du réseau.");
     }
     if (statut === "en_cours") { setActiveMissionId(id); setShowMap(true); }
-    if (statut === "termine") {
+    if (statut === "termine" || statut === "en_attente_validation") {
       setActiveMissionId(null); setShowMap(false);
       try {
         const { notifyClientMissionCompleted } = await import("@/lib/push/notify.functions");
         await notifyClientMissionCompleted({ data: { attributionId: id } });
       } catch (e) {
         console.warn("[convoyeur.missions] notifyClientMissionCompleted failed", e);
+      }
+      // Notification admin complète (in-app + push + email récapitulatif)
+      try {
+        const { notifyAdminMissionTerminee } = await import("@/lib/mission-completion-notify");
+        await notifyAdminMissionTerminee(id);
+      } catch (e) {
+        console.warn("[convoyeur.missions] notifyAdminMissionTerminee failed", e);
       }
     }
     await fetchMissions();
