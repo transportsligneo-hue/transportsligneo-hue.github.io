@@ -249,11 +249,14 @@ function AdminMissionDetail() {
     setPoNumber(trajet.commande_ref ?? "");
   }, [trajet?.id, trajet?.commande_ref]);
 
+  const [poHistoryKey, setPoHistoryKey] = useState(0);
+
   const savePo = useCallback(
     async (value: string, silent = false) => {
       if (!attribution) return;
       const po = value.trim().slice(0, 60);
-      if ((trajet?.commande_ref ?? "") === po) return;
+      const previous = trajet?.commande_ref ?? null;
+      if ((previous ?? "") === po) return;
       setSavingPo(true);
       try {
         const { error } = await supabase.rpc("admin_set_mission_po" as never, {
@@ -263,6 +266,13 @@ function AdminMissionDetail() {
         } as never);
         if (error) throw error;
         setTrajet((t) => (t ? { ...t, commande_ref: po || null } : t));
+        await logPoEvent({
+          action: "po_change",
+          attributionId: attribution.id,
+          oldPo: previous,
+          newPo: po || null,
+        });
+        setPoHistoryKey((k) => k + 1);
         if (!silent) {
           toast.success("N° de PO enregistré", {
             description: trajet?.mission_group_id ? "Appliqué aux deux volets (Livraison + Restitution)." : undefined,
@@ -276,6 +286,7 @@ function AdminMissionDetail() {
     },
     [attribution, trajet?.commande_ref, trajet?.mission_group_id],
   );
+
 
 
 
