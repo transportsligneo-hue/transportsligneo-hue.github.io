@@ -440,10 +440,11 @@ function AdminMissionDetail() {
     // Check existing facture
     const { data: existingFact } = await supabase
       .from("factures")
-      .select("id")
+      .select("id, numero")
       .eq("attribution_id", missionId)
       .maybeSingle();
     setLinkedFactureId(existingFact?.id ?? null);
+    setLinkedFactureNumero((existingFact as { numero?: string } | null)?.numero ?? null);
 
     setLoading(false);
   }, [missionId]);
