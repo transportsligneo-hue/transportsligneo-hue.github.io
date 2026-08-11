@@ -942,7 +942,7 @@ function AdminMissionDetail() {
 
 
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="w-full lg:w-[360px] shrink-0 flex flex-col items-stretch lg:items-end gap-2">
             <Select
               value={attribution.statut}
               onChange={(e) => updateStatut(e.target.value)}
