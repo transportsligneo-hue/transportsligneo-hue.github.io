@@ -21,6 +21,7 @@ import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
+import { AvisGoogleHistoryCard } from "@/components/admin/AvisGoogleHistoryCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -173,6 +174,7 @@ function AdminParametres() {
           <DevisAcceptationToggleCard />
           <DriverScreenProtectionCard />
           <AvisGoogleCard />
+          <AvisGoogleHistoryCard />
         </TabsContent>
 
 
