@@ -623,6 +623,74 @@ function AdminMissionDetail() {
     }
   };
 
+  /** Régénère le PDF d'une facture déjà émise, en y reportant le N° de PO actuel (rétroactif). */
+  const regenerateFacturePdf = async () => {
+    if (!linkedFactureId || regeneratingFacturePdf) return;
+    setRegeneratingFacturePdf(true);
+    try {
+      const po = poNumber.trim().slice(0, 60);
+      await savePo(po, true);
+
+      const { data: fact, error } = await supabase
+        .from("factures")
+        .select("*")
+        .eq("id", linkedFactureId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!fact) throw new Error("Facture introuvable");
+
+      const row = fact as unknown as Record<string, unknown>;
+      const currentRef = (row["reference_client"] as string | null) ?? null;
+      if ((po || null) !== currentRef) {
+        const { error: upErr } = await supabase
+          .from("factures")
+          .update({
+            reference_client: po || null,
+            reference_label: po ? ((row["reference_label"] as string | null) || "N° de PO") : null,
+          })
+          .eq("id", linkedFactureId);
+        if (upErr) throw upErr;
+        row["reference_client"] = po || null;
+        row["reference_label"] = po ? ((row["reference_label"] as string | null) || "N° de PO") : null;
+      }
+
+      const { generateFacturePdf, downloadFacturePdf } = await import("@/lib/facture-pdf");
+      const blob = await generateFacturePdf({
+        numero: row["numero"] as string,
+        type_facture: (row["type_facture"] as "particulier" | "b2b") ?? "particulier",
+        date_facture: (row["date_facture"] as string) ?? (row["created_at"] as string),
+        date_mission: (row["date_mission"] as string | null) ?? null,
+        date_echeance: (row["date_echeance"] as string | null) ?? null,
+        mode_paiement: (row["mode_paiement"] as string | null) ?? null,
+        conditions_paiement: (row["conditions_paiement"] as string | null) ?? null,
+        client_nom: (row["client_nom"] as string | null) ?? null,
+        client_prenom: (row["client_prenom"] as string | null) ?? null,
+        client_societe: (row["client_societe"] as string | null) ?? null,
+        client_email: (row["client_email"] as string | null) ?? null,
+        client_adresse: (row["client_adresse"] as string | null) ?? null,
+        client_siret: (row["client_siret"] as string | null) ?? null,
+        client_tva: (row["client_tva"] as string | null) ?? null,
+        designation: (row["designation"] as string | null) ?? null,
+        depart: (row["depart"] as string | null) ?? null,
+        arrivee: (row["arrivee"] as string | null) ?? null,
+        distance_km: (row["distance_km"] as number | null) ?? null,
+        prix_ht: Number(row["prix_ht"] ?? 0),
+        tva_taux: Number(row["tva_taux"] ?? 0),
+        prix_tva: Number(row["prix_tva"] ?? 0),
+        prix_ttc: Number(row["prix_ttc"] ?? 0),
+        reference_client: (row["reference_client"] as string | null) ?? null,
+        reference_label: (row["reference_label"] as string | null) ?? null,
+      });
+      downloadFacturePdf(blob, row["numero"] as string);
+      toast.success("Facture régénérée", { description: po ? `PO ${po} reporté sur le PDF.` : undefined });
+    } catch (e) {
+      toast.error("Régénération impossible", { description: (e as Error).message });
+    } finally {
+      setRegeneratingFacturePdf(false);
+    }
+  };
+
+
   const generateFacture = async () => {
     if (!attribution || !trajet || generatingFacture) return;
     const po = poNumber.trim().slice(0, 60);
