@@ -31,6 +31,23 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
       return;
     }
     setSaving(true);
+    // Mission : passer par la RPC admin pour propager le numéro
+    // sur l'attribution ET le trajet lié (fiches, EDL, PDF, suivi).
+    if (table === "attributions" && column === "numero_mission") {
+      const { error: rpcError } = await (supabase as any).rpc("admin_rename_mission_numero", {
+        _attribution_id: id,
+        _numero: next,
+      });
+      setSaving(false);
+      if (rpcError) {
+        toast.error("Impossible de renommer", { description: rpcError.message });
+        return;
+      }
+      toast.success("Numéro mis à jour partout");
+      onSaved(next);
+      setEditing(false);
+      return;
+    }
     const { data, error } = await (supabase as any)
       .from(table)
       .update({ [column]: next })
@@ -41,6 +58,7 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
       toast.error("Modification refusée", { description: "Aucune ligne mise à jour (droits insuffisants)." });
       return;
     }
+
     if (error) {
       const msg = error.message?.includes("duplicate") || error.code === "23505"
         ? "Ce numéro est déjà utilisé"
