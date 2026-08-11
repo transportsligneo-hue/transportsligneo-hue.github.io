@@ -288,10 +288,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       doc.text(l, M + 5, cy);
       cy += 4.4;
     });
-  } else if (d.email) {
-    doc.text(d.email, M + 5, cy);
-    cy += 4.4;
   }
+
   doc.setFontSize(7.6);
   doc.setTextColor(...MUTED);
   const legal = [d.siret ? `SIRET ${d.siret}` : null, d.tva_intra ? `TVA ${d.tva_intra}` : null]

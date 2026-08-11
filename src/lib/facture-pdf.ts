@@ -214,7 +214,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
   if (f.client_siret) clientLines.push({ t: `SIRET ${f.client_siret}`, muted: true });
   if (f.client_tva) clientLines.push({ t: `TVA ${f.client_tva}`, muted: true });
-  if (f.client_email) clientLines.push({ t: f.client_email, muted: true });
+  
 
   const logoBoxW = clientLogoData ? 22 : 0;
   const boxH = Math.max(14 + clientLines.length * 5.0, clientLogoData ? 30 : 0);
