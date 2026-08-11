@@ -881,8 +881,9 @@ function AdminMissionDetail() {
 
       {/* === Header mission === */}
       <Card>
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div className="min-w-0 flex-1 flex items-start gap-3">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-start justify-between gap-4">
+          <div className="min-w-0 w-full lg:flex-1 flex items-start gap-3">
+
             <ClientLogo
               src={clientLogoUrl}
               name={clientSociete || trajet.client_nom || undefined}
@@ -913,7 +914,7 @@ function AdminMissionDetail() {
                 </div>
               )}
 
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+            <div className="mt-3 grid grid-cols-1 xl:grid-cols-3 gap-2 xl:gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
                 <Car size={14} className="text-pro-muted" />
                 <span className="truncate">
@@ -941,7 +942,7 @@ function AdminMissionDetail() {
 
 
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="w-full lg:w-[360px] shrink-0 flex flex-col items-stretch lg:items-end gap-2">
             <Select
               value={attribution.statut}
               onChange={(e) => updateStatut(e.target.value)}
