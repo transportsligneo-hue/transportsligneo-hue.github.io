@@ -112,7 +112,11 @@ function AdminFacturesPage() {
     if (selected?.id === id) setSelected({ ...selected, mode_paiement, conditions_paiement });
   };
 
+  const [poHistoryKey, setPoHistoryKey] = useState(0);
+
   const saveReference = async (id: string, ref: string | null, label: string | null) => {
+    const before = factures.find(f => f.id === id);
+    const previous = before?.reference_client ?? null;
     const { error } = await supabase
       .from("factures")
       .update({ reference_client: ref, reference_label: label })
@@ -123,8 +127,19 @@ function AdminFacturesPage() {
     }
     setFactures(prev => prev.map(f => f.id === id ? { ...f, reference_client: ref, reference_label: label } : f));
     if (selected?.id === id) setSelected(s => s ? { ...s, reference_client: ref, reference_label: label } : s);
+    if ((previous ?? "") !== (ref ?? "")) {
+      await logPoEvent({
+        action: "po_change",
+        factureId: id,
+        factureNumero: before?.numero ?? null,
+        oldPo: previous,
+        newPo: ref,
+      });
+      setPoHistoryKey(k => k + 1);
+    }
     return true;
   };
+
 
   const handleDownload = async (row: FactureRow) => {
     let refClient = row.reference_client ?? null;
