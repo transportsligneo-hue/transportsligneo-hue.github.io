@@ -370,7 +370,14 @@ function AdminFacturesPage() {
 
           <DrawerSection title="Numéro de commande (PO) — Bon de commande" icon={<Receipt size={12} />}>
             <ReferenceDrawerEditor row={selected} onSave={saveReference} />
+            <PoHistoryPanel
+              factureId={selected.id}
+              refreshKey={poHistoryKey}
+              className="mt-3"
+              title="Historique PO & régénérations"
+            />
           </DrawerSection>
+
 
           <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
             <DrawerGrid>
