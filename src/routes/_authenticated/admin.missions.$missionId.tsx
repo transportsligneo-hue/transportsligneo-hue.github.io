@@ -213,6 +213,8 @@ function AdminMissionDetail() {
   const [adminNote, setAdminNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
+  const [linkedFactureNumero, setLinkedFactureNumero] = useState<string | null>(null);
+  const [regeneratingFacturePdf, setRegeneratingFacturePdf] = useState(false);
   const [poNumber, setPoNumber] = useState("");
   const [cloturePrefill, setCloturePrefill] = useState<{ categorie: string; motif: string } | null>(null);
   const [clotureKey, setClotureKey] = useState(0);
@@ -440,10 +442,11 @@ function AdminMissionDetail() {
     // Check existing facture
     const { data: existingFact } = await supabase
       .from("factures")
-      .select("id")
+      .select("id, numero")
       .eq("attribution_id", missionId)
       .maybeSingle();
     setLinkedFactureId(existingFact?.id ?? null);
+    setLinkedFactureNumero((existingFact as { numero?: string } | null)?.numero ?? null);
 
     setLoading(false);
   }, [missionId]);
@@ -619,6 +622,74 @@ function AdminMissionDetail() {
       setGeneratingEdlPdf(false);
     }
   };
+
+  /** Régénère le PDF d'une facture déjà émise, en y reportant le N° de PO actuel (rétroactif). */
+  const regenerateFacturePdf = async () => {
+    if (!linkedFactureId || regeneratingFacturePdf) return;
+    setRegeneratingFacturePdf(true);
+    try {
+      const po = poNumber.trim().slice(0, 60);
+      await savePo(po, true);
+
+      const { data: fact, error } = await supabase
+        .from("factures")
+        .select("*")
+        .eq("id", linkedFactureId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!fact) throw new Error("Facture introuvable");
+
+      const row = fact as unknown as Record<string, unknown>;
+      const currentRef = (row["reference_client"] as string | null) ?? null;
+      if ((po || null) !== currentRef) {
+        const { error: upErr } = await supabase
+          .from("factures")
+          .update({
+            reference_client: po || null,
+            reference_label: po ? ((row["reference_label"] as string | null) || "N° de PO") : null,
+          })
+          .eq("id", linkedFactureId);
+        if (upErr) throw upErr;
+        row["reference_client"] = po || null;
+        row["reference_label"] = po ? ((row["reference_label"] as string | null) || "N° de PO") : null;
+      }
+
+      const { generateFacturePdf, downloadFacturePdf } = await import("@/lib/facture-pdf");
+      const blob = await generateFacturePdf({
+        numero: row["numero"] as string,
+        type_facture: (row["type_facture"] as "particulier" | "b2b") ?? "particulier",
+        date_facture: (row["date_facture"] as string) ?? (row["created_at"] as string),
+        date_mission: (row["date_mission"] as string | null) ?? null,
+        date_echeance: (row["date_echeance"] as string | null) ?? null,
+        mode_paiement: (row["mode_paiement"] as string | null) ?? null,
+        conditions_paiement: (row["conditions_paiement"] as string | null) ?? null,
+        client_nom: (row["client_nom"] as string | null) ?? null,
+        client_prenom: (row["client_prenom"] as string | null) ?? null,
+        client_societe: (row["client_societe"] as string | null) ?? null,
+        client_email: (row["client_email"] as string | null) ?? null,
+        client_adresse: (row["client_adresse"] as string | null) ?? null,
+        client_siret: (row["client_siret"] as string | null) ?? null,
+        client_tva: (row["client_tva"] as string | null) ?? null,
+        designation: (row["designation"] as string | null) ?? null,
+        depart: (row["depart"] as string | null) ?? null,
+        arrivee: (row["arrivee"] as string | null) ?? null,
+        distance_km: (row["distance_km"] as number | null) ?? null,
+        prix_ht: Number(row["prix_ht"] ?? 0),
+        tva_taux: Number(row["tva_taux"] ?? 0),
+        prix_tva: Number(row["prix_tva"] ?? 0),
+        prix_ttc: Number(row["prix_ttc"] ?? 0),
+        reference_client: (row["reference_client"] as string | null) ?? null,
+        reference_label: (row["reference_label"] as string | null) ?? null,
+      });
+      downloadFacturePdf(blob, row["numero"] as string);
+      toast.success("Facture régénérée", { description: po ? `PO ${po} reporté sur le PDF.` : undefined });
+    } catch (e) {
+      toast.error("Régénération impossible", { description: (e as Error).message });
+    } finally {
+      setRegeneratingFacturePdf(false);
+    }
+  };
+
 
   const generateFacture = async () => {
     if (!attribution || !trajet || generatingFacture) return;
@@ -922,12 +993,42 @@ function AdminMissionDetail() {
               {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager PDF au client"}
             </button>
             {linkedFactureId ? (
-              <Link
-                to="/admin/factures"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-              >
-                <Receipt size={13} /> Facture émise
-              </Link>
+              <div className="w-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
+                <div className="flex-1 min-w-[220px]">
+                  <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300 mb-1.5">
+                    <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
+                    {savingPo && <Loader2 size={11} className="animate-spin" />}
+                  </label>
+                  <input
+                    id="po-number-emise"
+                    value={poNumber}
+                    onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                    onBlur={(e) => void savePo(e.target.value)}
+                    maxLength={60}
+                    placeholder="Ex. PO-2026-0042"
+                    className="w-full rounded-md border border-emerald-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-300/50"
+                  />
+                  <p className="mt-1 text-[11px] text-white/50">
+                    Le PO est reporté sur la facture existante, puis le PDF est régénéré.
+                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                    onClick={regenerateFacturePdf}
+                    disabled={regeneratingFacturePdf}
+                  >
+                    Régénérer le PDF
+                  </Button>
+                  <Link
+                    to="/admin/factures"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    Voir les factures
+                  </Link>
+                </div>
+              </div>
             ) : (
               <div className="w-full rounded-lg border border-amber-400/40 bg-amber-400/[0.07] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
                 <div className="flex-1 min-w-[220px]">
