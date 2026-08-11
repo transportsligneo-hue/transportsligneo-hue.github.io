@@ -695,6 +695,15 @@ function AdminMissionDetail() {
         reference_label: (row["reference_label"] as string | null) ?? null,
       });
       downloadFacturePdf(blob, row["numero"] as string);
+      await logPoEvent({
+        action: "pdf_regenerate",
+        attributionId: attribution?.id ?? null,
+        factureId: linkedFactureId,
+        factureNumero: (row["numero"] as string | null) ?? linkedFactureNumero,
+        oldPo: currentRef,
+        newPo: po || null,
+      });
+      setPoHistoryKey((k) => k + 1);
       toast.success("Facture régénérée", { description: po ? `PO ${po} reporté sur le PDF.` : undefined });
     } catch (e) {
       toast.error("Régénération impossible", { description: (e as Error).message });
