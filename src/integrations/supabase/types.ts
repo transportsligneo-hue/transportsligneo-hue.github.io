@@ -4448,6 +4448,45 @@ export type Database = {
           },
         ]
       }
+      po_pdf_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string | null
+          attribution_id: string | null
+          created_at: string
+          facture_id: string | null
+          facture_numero: string | null
+          id: string
+          new_po: string | null
+          old_po: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name?: string | null
+          attribution_id?: string | null
+          created_at?: string
+          facture_id?: string | null
+          facture_numero?: string | null
+          id?: string
+          new_po?: string | null
+          old_po?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          attribution_id?: string | null
+          created_at?: string
+          facture_id?: string | null
+          facture_numero?: string | null
+          id?: string
+          new_po?: string | null
+          old_po?: string | null
+        }
+        Relationships: []
+      }
       pricing_settings: {
         Row: {
           created_at: string

@@ -18,6 +18,8 @@ import {
 } from "@/components/admin/AdminUI";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
+import { logPoEvent } from "@/lib/po-history";
 
 export const Route = createFileRoute("/_authenticated/admin/factures")({
   component: AdminFacturesPage,
@@ -110,7 +112,11 @@ function AdminFacturesPage() {
     if (selected?.id === id) setSelected({ ...selected, mode_paiement, conditions_paiement });
   };
 
+  const [poHistoryKey, setPoHistoryKey] = useState(0);
+
   const saveReference = async (id: string, ref: string | null, label: string | null) => {
+    const before = factures.find(f => f.id === id);
+    const previous = before?.reference_client ?? null;
     const { error } = await supabase
       .from("factures")
       .update({ reference_client: ref, reference_label: label })
@@ -121,8 +127,19 @@ function AdminFacturesPage() {
     }
     setFactures(prev => prev.map(f => f.id === id ? { ...f, reference_client: ref, reference_label: label } : f));
     if (selected?.id === id) setSelected(s => s ? { ...s, reference_client: ref, reference_label: label } : s);
+    if ((previous ?? "") !== (ref ?? "")) {
+      await logPoEvent({
+        action: "po_change",
+        factureId: id,
+        factureNumero: before?.numero ?? null,
+        oldPo: previous,
+        newPo: ref,
+      });
+      setPoHistoryKey(k => k + 1);
+    }
     return true;
   };
+
 
   const handleDownload = async (row: FactureRow) => {
     let refClient = row.reference_client ?? null;
@@ -173,6 +190,14 @@ function AdminFacturesPage() {
       };
       const blob = await generateFacturePdf(data);
       downloadFacturePdf(blob, row.numero);
+      await logPoEvent({
+        action: "pdf_regenerate",
+        factureId: row.id,
+        factureNumero: row.numero,
+        oldPo: row.reference_client ?? null,
+        newPo: refClient,
+      });
+      setPoHistoryKey(k => k + 1);
       toast.success("Facture téléchargée");
     } catch (e) {
       toast.error("Erreur PDF", { description: (e as Error).message });
@@ -345,7 +370,14 @@ function AdminFacturesPage() {
 
           <DrawerSection title="Numéro de commande (PO) — Bon de commande" icon={<Receipt size={12} />}>
             <ReferenceDrawerEditor row={selected} onSave={saveReference} />
+            <PoHistoryPanel
+              factureId={selected.id}
+              refreshKey={poHistoryKey}
+              className="mt-3"
+              title="Historique PO & régénérations"
+            />
           </DrawerSection>
+
 
           <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
             <DrawerGrid>

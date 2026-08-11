@@ -57,6 +57,8 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
+import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
@@ -249,11 +251,14 @@ function AdminMissionDetail() {
     setPoNumber(trajet.commande_ref ?? "");
   }, [trajet?.id, trajet?.commande_ref]);
 
+  const [poHistoryKey, setPoHistoryKey] = useState(0);
+
   const savePo = useCallback(
     async (value: string, silent = false) => {
       if (!attribution) return;
       const po = value.trim().slice(0, 60);
-      if ((trajet?.commande_ref ?? "") === po) return;
+      const previous = trajet?.commande_ref ?? null;
+      if ((previous ?? "") === po) return;
       setSavingPo(true);
       try {
         const { error } = await supabase.rpc("admin_set_mission_po" as never, {
@@ -263,6 +268,13 @@ function AdminMissionDetail() {
         } as never);
         if (error) throw error;
         setTrajet((t) => (t ? { ...t, commande_ref: po || null } : t));
+        await logPoEvent({
+          action: "po_change",
+          attributionId: attribution.id,
+          oldPo: previous,
+          newPo: po || null,
+        });
+        setPoHistoryKey((k) => k + 1);
         if (!silent) {
           toast.success("N° de PO enregistré", {
             description: trajet?.mission_group_id ? "Appliqué aux deux volets (Livraison + Restitution)." : undefined,
@@ -276,6 +288,7 @@ function AdminMissionDetail() {
     },
     [attribution, trajet?.commande_ref, trajet?.mission_group_id],
   );
+
 
 
 
@@ -682,6 +695,15 @@ function AdminMissionDetail() {
         reference_label: (row["reference_label"] as string | null) ?? null,
       });
       downloadFacturePdf(blob, row["numero"] as string);
+      await logPoEvent({
+        action: "pdf_regenerate",
+        attributionId: attribution?.id ?? null,
+        factureId: linkedFactureId,
+        factureNumero: (row["numero"] as string | null) ?? linkedFactureNumero,
+        oldPo: currentRef,
+        newPo: po || null,
+      });
+      setPoHistoryKey((k) => k + 1);
       toast.success("Facture régénérée", { description: po ? `PO ${po} reporté sur le PDF.` : undefined });
     } catch (e) {
       toast.error("Régénération impossible", { description: (e as Error).message });
@@ -1061,7 +1083,13 @@ function AdminMissionDetail() {
                 </Button>
               </div>
             )}
+            <PoHistoryPanel
+              attributionId={attribution.id}
+              refreshKey={poHistoryKey}
+              className="w-full text-left"
+            />
           </div>
+
 
         </div>
       </Card>
