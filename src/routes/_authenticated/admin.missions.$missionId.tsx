@@ -1084,8 +1084,12 @@ function AdminMissionDetail() {
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
-                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                    {trajet.mission_group_id
+                      ? " Un seul PO et UNE seule facture pour le duo Livraison + Restitution (montant global)."
+                      : ""}
+                    {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
                   </p>
+
 
                 </div>
                 <Button
