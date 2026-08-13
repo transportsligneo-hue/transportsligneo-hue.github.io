@@ -731,9 +731,14 @@ function AdminMissionDetail() {
       const basis = await resolveGroupInvoiceBasis(trajet.id);
       if (basis.existing) {
         setLinkedFactureId(basis.existing.id);
-        toast.info("Facture déjà émise pour cette mission", { description: basis.existing.numero });
+        setLinkedFactureNumero(basis.existing.numero);
+        toast.info(
+          basis.isGroup ? "Facture unique déjà émise pour ce duo Livraison–Restitution" : "Facture déjà émise pour cette mission",
+          { description: basis.existing.numero },
+        );
         return;
       }
+
 
 
       const ttc = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
