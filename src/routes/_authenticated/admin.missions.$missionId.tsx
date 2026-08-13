@@ -759,7 +759,9 @@ function AdminMissionDetail() {
         .from("factures")
         .insert({
           numero,
-          attribution_id: attribution.id,
+          // Toujours portée par le volet Livraison : une seule facture pour tout le duo
+          attribution_id: basis.primaryAttributionId ?? attribution.id,
+          mission_id: basis.primaryTrajetId,
           client_email: trajet.client_email ?? "",
           client_nom: nom || "Client",
           client_prenom: prenom || null,
@@ -779,11 +781,13 @@ function AdminMissionDetail() {
           reference_label: po ? "N° de PO" : null,
 
         })
-        .select("id")
+        .select("id, numero")
         .single();
       if (error) throw error;
       setLinkedFactureId(inserted.id);
-      toast.success("Facture créée", { description: `Numéro ${numero}` });
+      setLinkedFactureNumero(inserted.numero as string);
+      toast.success("Facture créée", { description: `Numéro ${numero}${basis.isGroup ? " — facture unique Livraison + Restitution" : ""}` });
+
     } catch (e) {
 
       toast.error("Création impossible", { description: (e as Error).message });
