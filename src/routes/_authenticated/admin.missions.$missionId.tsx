@@ -452,14 +452,12 @@ function AdminMissionDetail() {
       })));
     }
 
-    // Check existing facture
-    const { data: existingFact } = await supabase
-      .from("factures")
-      .select("id, numero")
-      .eq("attribution_id", missionId)
-      .maybeSingle();
-    setLinkedFactureId(existingFact?.id ?? null);
-    setLinkedFactureNumero((existingFact as { numero?: string } | null)?.numero ?? null);
+    // Facture existante — recherchée au niveau du DUO (une seule facture pour Livraison + Restitution)
+    const factBasis = await resolveGroupInvoiceBasis(attr.trajet_id);
+    setIsSecondaryLeg(factBasis.isGroup && factBasis.primaryAttributionId !== attr.id);
+    setLinkedFactureId(factBasis.existing?.id ?? null);
+    setLinkedFactureNumero(factBasis.existing?.numero ?? null);
+
 
     setLoading(false);
   }, [missionId]);
