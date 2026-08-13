@@ -7,6 +7,10 @@ export interface GroupInvoiceBasis {
   trajetIds: string[];
   /** ids des attributions couvertes par la facture */
   attributionIds: string[];
+  /** trajet porteur de la facture (volet Livraison / leg 1) */
+  primaryTrajetId: string;
+  /** attribution porteuse de la facture (volet Livraison / leg 1) — null si non attribué */
+  primaryAttributionId: string | null;
   /** montant TTC global (jamais coupé par segment) */
   totalTtc: number;
   depart: string | null;
@@ -17,6 +21,7 @@ export interface GroupInvoiceBasis {
   /** facture déjà émise pour un des segments du groupe */
   existing: { id: string; numero: string } | null;
 }
+
 
 interface LegRow {
   id: string;
