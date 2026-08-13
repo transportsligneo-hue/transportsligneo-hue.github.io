@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.devis_is_aller_retour(text);

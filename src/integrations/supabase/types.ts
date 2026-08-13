@@ -6032,7 +6032,6 @@ export type Database = {
         Returns: boolean
       }
       detect_mission_alerts: { Args: never; Returns: Json }
-      devis_is_aller_retour: { Args: { _option: string }; Returns: boolean }
       driver_apply_to_mission: {
         Args: {
           _message?: string
