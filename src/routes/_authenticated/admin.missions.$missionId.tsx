@@ -1047,7 +1047,8 @@ function AdminMissionDetail() {
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     Le PO est reporté sur la facture existante, puis le PDF est régénéré.
-                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                    {trajet.mission_group_id ? " Facture unique pour le duo Livraison + Restitution (montant global)." : ""}
+
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
