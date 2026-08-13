@@ -18,13 +18,15 @@ export const TVA_FRANCHISE_NOTE = "TVA non applicable, article 293 B du CGI.";
 export async function fetchActiveRegime(): Promise<ActiveRegime> {
   const fallback: ActiveRegime = { regime: "micro", vatRate: 0, exemptionNote: TVA_FRANCHISE_NOTE };
   try {
-    const { data } = await supabase
-      .from("pricing_settings")
-      .select("regime, default_vat_rate")
-      .maybeSingle();
-    if (!data) return fallback;
-    const regime = (data as { regime?: string }).regime === "societe" ? "societe" : "micro";
-    const vatRate = Number((data as { default_vat_rate?: number }).default_vat_rate ?? 20);
+    const { data } = await supabase.rpc("get_public_pricing_display" as never);
+    const row = (Array.isArray(data) ? data[0] : data) as
+      | { regime?: string; default_vat_rate?: number }
+      | null
+      | undefined;
+    if (!row) return fallback;
+    const regime = row.regime === "societe" ? "societe" : "micro";
+    const vatRate = Number(row.default_vat_rate ?? 20);
+
     return {
       regime,
       vatRate: regime === "societe" ? vatRate : 0,
