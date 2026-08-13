@@ -7,6 +7,10 @@ export interface GroupInvoiceBasis {
   trajetIds: string[];
   /** ids des attributions couvertes par la facture */
   attributionIds: string[];
+  /** trajet porteur de la facture (volet Livraison / leg 1) */
+  primaryTrajetId: string;
+  /** attribution porteuse de la facture (volet Livraison / leg 1) — null si non attribué */
+  primaryAttributionId: string | null;
   /** montant TTC global (jamais coupé par segment) */
   totalTtc: number;
   depart: string | null;
@@ -17,6 +21,7 @@ export interface GroupInvoiceBasis {
   /** facture déjà émise pour un des segments du groupe */
   existing: { id: string; numero: string } | null;
 }
+
 
 interface LegRow {
   id: string;
@@ -99,9 +104,16 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
   let existing: { id: string; numero: string } | null = null;
   const { data: attrs } = await supabase
     .from("attributions")
-    .select("id")
+    .select("id, trajet_id")
     .in("trajet_id", trajetIds.length ? trajetIds : [trajetId]);
-  const attributionIds = (attrs ?? []).map((a) => a.id as string);
+  const attrRows = (attrs ?? []) as { id: string; trajet_id: string }[];
+  // Ordonné comme les segments (leg 1 d'abord) pour que la facture porte toujours le volet Livraison
+  const orderedAttrs = (trajetIds.length ? trajetIds : [trajetId])
+    .map((tid) => attrRows.find((a) => a.trajet_id === tid))
+    .filter(Boolean) as { id: string; trajet_id: string }[];
+  const attributionIds = orderedAttrs.map((a) => a.id);
+  const primaryTrajetId = trajetIds[0] ?? trajetId;
+  const primaryAttributionId = orderedAttrs[0]?.id ?? null;
 
   if (attributionIds.length) {
     const { data: fac } = await supabase
@@ -126,7 +138,10 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     isGroup,
     trajetIds,
     attributionIds,
+    primaryTrajetId,
+    primaryAttributionId,
     totalTtc,
+
     depart: legs[0]?.depart ?? current?.depart ?? null,
     arrivee: isGroup
       ? (uniquePoints.slice(1).join(" → ") || legs[legs.length - 1]?.arrivee || null)

@@ -216,6 +216,8 @@ function AdminMissionDetail() {
   const [savingNote, setSavingNote] = useState(false);
   const [linkedFactureId, setLinkedFactureId] = useState<string | null>(null);
   const [linkedFactureNumero, setLinkedFactureNumero] = useState<string | null>(null);
+  const [isSecondaryLeg, setIsSecondaryLeg] = useState(false);
+
   const [regeneratingFacturePdf, setRegeneratingFacturePdf] = useState(false);
   const [poNumber, setPoNumber] = useState("");
   const [cloturePrefill, setCloturePrefill] = useState<{ categorie: string; motif: string } | null>(null);
@@ -452,14 +454,12 @@ function AdminMissionDetail() {
       })));
     }
 
-    // Check existing facture
-    const { data: existingFact } = await supabase
-      .from("factures")
-      .select("id, numero")
-      .eq("attribution_id", missionId)
-      .maybeSingle();
-    setLinkedFactureId(existingFact?.id ?? null);
-    setLinkedFactureNumero((existingFact as { numero?: string } | null)?.numero ?? null);
+    // Facture existante — recherchée au niveau du DUO (une seule facture pour Livraison + Restitution)
+    const factBasis = await resolveGroupInvoiceBasis(attr.trajet_id);
+    setIsSecondaryLeg(factBasis.isGroup && factBasis.primaryAttributionId !== attr.id);
+    setLinkedFactureId(factBasis.existing?.id ?? null);
+    setLinkedFactureNumero(factBasis.existing?.numero ?? null);
+
 
     setLoading(false);
   }, [missionId]);
@@ -731,9 +731,14 @@ function AdminMissionDetail() {
       const basis = await resolveGroupInvoiceBasis(trajet.id);
       if (basis.existing) {
         setLinkedFactureId(basis.existing.id);
-        toast.info("Facture déjà émise pour cette mission", { description: basis.existing.numero });
+        setLinkedFactureNumero(basis.existing.numero);
+        toast.info(
+          basis.isGroup ? "Facture unique déjà émise pour ce duo Livraison–Restitution" : "Facture déjà émise pour cette mission",
+          { description: basis.existing.numero },
+        );
         return;
       }
+
 
 
       const ttc = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
@@ -759,7 +764,9 @@ function AdminMissionDetail() {
         .from("factures")
         .insert({
           numero,
-          attribution_id: attribution.id,
+          // Toujours portée par le volet Livraison : une seule facture pour tout le duo
+          attribution_id: basis.primaryAttributionId ?? attribution.id,
+          mission_id: basis.primaryTrajetId,
           client_email: trajet.client_email ?? "",
           client_nom: nom || "Client",
           client_prenom: prenom || null,
@@ -779,11 +786,13 @@ function AdminMissionDetail() {
           reference_label: po ? "N° de PO" : null,
 
         })
-        .select("id")
+        .select("id, numero")
         .single();
       if (error) throw error;
       setLinkedFactureId(inserted.id);
-      toast.success("Facture créée", { description: `Numéro ${numero}` });
+      setLinkedFactureNumero(inserted.numero as string);
+      toast.success("Facture créée", { description: `Numéro ${numero}${basis.isGroup ? " — facture unique Livraison + Restitution" : ""}` });
+
     } catch (e) {
 
       toast.error("Création impossible", { description: (e as Error).message });
@@ -1038,7 +1047,8 @@ function AdminMissionDetail() {
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     Le PO est reporté sur la facture existante, puis le PDF est régénéré.
-                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                    {trajet.mission_group_id ? " Facture unique pour le duo Livraison + Restitution (montant global)." : ""}
+
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1075,8 +1085,12 @@ function AdminMissionDetail() {
                   />
                   <p className="mt-1 text-[11px] text-white/50">
                     {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
-                    {trajet.mission_group_id ? " Appliqué aux deux volets (Livraison + Restitution)." : ""}
+                    {trajet.mission_group_id
+                      ? " Un seul PO et UNE seule facture pour le duo Livraison + Restitution (montant global)."
+                      : ""}
+                    {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
                   </p>
+
 
                 </div>
                 <Button

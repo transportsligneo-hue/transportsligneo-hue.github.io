@@ -254,8 +254,10 @@ function AdminAttributions() {
         .insert({
           numero: "AUTO", // remplacé par le trigger
           type_facture: isB2B ? "b2b" : "particulier",
-          attribution_id: a.id,
-          mission_id: trajet.id,
+          // Facture unique portée par le volet Livraison (duo aller-retour)
+          attribution_id: basis.primaryAttributionId ?? a.id,
+          mission_id: basis.primaryTrajetId ?? trajet.id,
+
           client_email: trajet.client_email,
           client_nom: nomFamille,
           client_prenom: rest.length ? prenom : null,
