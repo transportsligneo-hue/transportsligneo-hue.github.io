@@ -571,7 +571,15 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
+          {isAllerRetour && (
+            <p className="mb-4 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+              Trajet Livraison + restitution : deux véhicules distincts (deux états des lieux).
+            </p>
+          )}
           <div className="space-y-4">
+            {isAllerRetour && (
+              <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">Véhicule aller (livraison)</p>
+            )}
             <div>
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Immatriculation
@@ -585,7 +593,7 @@ function AdminNouveauDevisPage() {
                 />
                 <button
                   type="button"
-                  onClick={handleSivLookup}
+                  onClick={() => handleSivLookup(1)}
                   disabled={sivLoading}
                   className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
                 >
@@ -607,7 +615,49 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
+
+            {isAllerRetour && (
+              <div className="space-y-4 border-t border-pro-border pt-4">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">Véhicule retour (restitution)</p>
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Immatriculation retour
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      value={immatRetour}
+                      onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
+                      placeholder="GQ-053-MH"
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSivLookup(2)}
+                      disabled={siv2Loading}
+                      className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                    >
+                      {siv2Loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                      Rechercher
+                    </button>
+                  </div>
+                  {siv2Msg && (
+                    <p
+                      className={`mt-2 text-[12px] font-medium ${
+                        siv2Msg.type === "ok" ? "text-emerald-600" : "text-red-600"
+                      }`}
+                    >
+                      {siv2Msg.text}
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
+                  <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
+                </div>
+              </div>
+            )}
           </div>
+
 
         </Card>
 
