@@ -378,6 +378,29 @@ function AdminNouveauDevisPage() {
     if (pdfBlob && created) downloadDevisPdf(pdfBlob, created.numero);
   };
 
+  const handleUpdatePrice = async () => {
+    if (!created) return;
+    const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) return toast.error("Montant TTC invalide");
+    setGenerating(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .eq("id", created.id);
+      if (error) throw error;
+      const blob = await generateDevisPdf({ ...buildPdfData(created.numero), prix_estime: n });
+      setPdfBlob(blob);
+      setCreated({ ...created, prix: n });
+      toast.success("Prix mis à jour · PDF régénéré");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur lors de la mise à jour");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+
   const handleSaveToAccount = async () => {
     if (!created) return;
     setSaving(true);
