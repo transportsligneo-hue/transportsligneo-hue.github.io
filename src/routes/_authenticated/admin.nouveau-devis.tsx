@@ -347,6 +347,7 @@ function AdminNouveauDevisPage() {
           message: recapMessage || null,
           prestation: "Convoyage automobile",
           prix_estime: prix,
+          prix_manuel: true,
           statut: "brouillon",
           origine: "manuel",
           user_id: client.user_id,
