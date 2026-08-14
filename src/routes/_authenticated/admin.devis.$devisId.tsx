@@ -306,7 +306,33 @@ function AdminDevisDetailPage() {
             <p className="text-3xl font-semibold text-pro-text">{devis.prix_estime} €</p>
             <p className="text-[10px] text-pro-muted uppercase tracking-wider">TTC</p>
             {devis.tarif_label && <p className="text-xs text-pro-text-soft mt-2">{devis.tarif_label}</p>}
+
+            {devis.locked_at ? (
+              <p className="mt-3 text-[11px] text-pro-muted">Devis signé/verrouillé : le montant n'est plus modifiable.</p>
+            ) : (
+              <div className="mt-4 pt-3 border-t border-pro-border">
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2">Corriger le prix</p>
+                <div className="flex gap-2">
+                  <input
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Montant TTC"
+                    className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                  <Button
+                    onClick={handleUpdatePrice}
+                    disabled={savingPrice}
+                    icon={savingPrice ? <Loader2 size={12} className="animate-spin" /> : <PenLine size={12} />}
+                  >
+                    Régénérer
+                  </Button>
+                </div>
+                <p className="mt-2 text-[11px] text-pro-muted">Le PDF est régénéré avec le nouveau montant.</p>
+              </div>
+            )}
           </Card>
+
 
           {acceptation && (
             <Card>
