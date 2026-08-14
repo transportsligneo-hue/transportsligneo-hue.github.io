@@ -562,6 +562,10 @@ function AdminDevisPage() {
         onDownload={handleDownload}
         onConvert={handleConvert}
         onArchive={(d) => { handleArchive(d); setSelected(null); }}
+        onPriceSaved={(updated) => {
+          setDevis((rows) => rows.map((row) => row.id === updated.id ? updated : row));
+          setSelected(updated);
+        }}
       />
     </div>
   );
@@ -574,6 +578,7 @@ function DevisDrawer({
   onDownload,
   onConvert,
   onArchive,
+  onPriceSaved,
 }: {
   devis: DevisRow | null;
   acceptation: AcceptationInfo | null;
@@ -581,15 +586,19 @@ function DevisDrawer({
   onDownload: (d: DevisRow) => void;
   onConvert: (d: DevisRow) => void;
   onArchive: (d: DevisRow) => void;
+  onPriceSaved: (d: DevisRow) => void;
 }) {
   const [history, setHistory] = useState<HistoryRow[] | null>(null);
   const [proofUrls, setProofUrls] = useState<{ signature: string | null; pdf: string | null }>({ signature: null, pdf: null });
+  const [priceInput, setPriceInput] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
 
   useEffect(() => {
     if (!devis) return;
     let cancelled = false;
     setHistory(null);
     setProofUrls({ signature: null, pdf: null });
+    setPriceInput(String(devis.prix_estime ?? ""));
     (async () => {
       const { data } = await supabase
         .from("devis_status_history")
@@ -615,6 +624,31 @@ function DevisDrawer({
   }, [devis, acceptation]);
 
   if (!devis) return null;
+  const savePriceAndRegenerate = async () => {
+    const amount = Number(priceInput.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("Saisis un montant valide");
+      return;
+    }
+    setSavingPrice(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ prix_estime: amount, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      const updated = { ...devis, prix_estime: amount };
+      onPriceSaved(updated);
+      await onDownload(updated);
+      toast.success("Prix modifié et PDF régénéré", { description: `${amount.toFixed(2)} € TTC` });
+    } catch (error) {
+      toast.error("Impossible de modifier le prix", {
+        description: error instanceof Error ? error.message : "Erreur inconnue",
+      });
+    } finally {
+      setSavingPrice(false);
+    }
+  };
   const effective = isExpired(devis) ? "expire" : devis.statut;
   return (
     <AdminDetailDrawer
@@ -730,10 +764,40 @@ function DevisDrawer({
       </DrawerSection>
 
       <DrawerSection title="Tarification">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between gap-3">
           <span className="text-xs uppercase tracking-wider text-white/50">Prix estimé TTC</span>
           <span className="text-3xl font-semibold text-white">{Number(devis.prix_estime).toFixed(2)} €</span>
         </div>
+        {devis.locked_at ? (
+          <p className="mt-3 text-xs text-white/50">Ce devis est signé : son montant est verrouillé.</p>
+        ) : (
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <label htmlFor={`devis-price-${devis.id}`} className="mb-2 block text-[10px] font-medium uppercase tracking-wider text-white/60">
+              Modifier le prix TTC
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 flex-1">
+                <input
+                  id={`devis-price-${devis.id}`}
+                  value={priceInput}
+                  onChange={(event) => setPriceInput(event.target.value)}
+                  inputMode="decimal"
+                  aria-label="Nouveau prix TTC"
+                  className="h-10 w-full rounded-md border border-white/20 bg-white px-3 pr-9 text-sm font-semibold text-slate-950 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">€</span>
+              </div>
+              <Button
+                size="sm"
+                onClick={savePriceAndRegenerate}
+                disabled={savingPrice}
+                icon={savingPrice ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+              >
+                {savingPrice ? "Régénération…" : "Modifier et régénérer"}
+              </Button>
+            </div>
+          </div>
+        )}
       </DrawerSection>
 
       <DrawerSection title="Historique" icon={<History size={12} />}>
