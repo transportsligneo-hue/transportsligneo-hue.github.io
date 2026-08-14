@@ -1978,6 +1978,7 @@ export type Database = {
           prix_aller: number | null
           prix_base: number | null
           prix_estime: number
+          prix_manuel: boolean
           prix_retour: number | null
           recuperation_retour_identique: boolean
           refus_motif: string | null
@@ -2055,6 +2056,7 @@ export type Database = {
           prix_aller?: number | null
           prix_base?: number | null
           prix_estime: number
+          prix_manuel?: boolean
           prix_retour?: number | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
@@ -2132,6 +2134,7 @@ export type Database = {
           prix_aller?: number | null
           prix_base?: number | null
           prix_estime?: number
+          prix_manuel?: boolean
           prix_retour?: number | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
