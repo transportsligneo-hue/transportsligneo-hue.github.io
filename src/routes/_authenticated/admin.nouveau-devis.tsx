@@ -785,6 +785,31 @@ function AdminNouveauDevisPage() {
             </div>
 
             <Card>
+              <h3 className="mb-3 text-[15px] font-bold text-pro-text">Corriger le prix</h3>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <input
+                  value={montant}
+                  onChange={(e) => setMontant(e.target.value)}
+                  inputMode="decimal"
+                  placeholder="Montant TTC"
+                  className="w-40 rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                />
+                <Button
+                  onClick={handleUpdatePrice}
+                  disabled={generating}
+                  icon={generating ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+                >
+                  Mettre à jour et régénérer
+                </Button>
+              </div>
+              <p className="mt-2 text-[11.5px] text-pro-muted">
+                Le montant saisi ici est prioritaire : aucune grille tarifaire client ne le modifie.
+              </p>
+            </Card>
+
+
+
+            <Card>
               <h3 className="mb-4 text-[15px] font-bold text-pro-text">Que souhaitez-vous faire ?</h3>
               <div className="grid gap-2.5 sm:grid-cols-3">
                 <button
