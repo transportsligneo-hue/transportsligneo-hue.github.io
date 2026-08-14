@@ -135,6 +135,9 @@ function AdminNouveauDevisPage() {
   const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
   const [immat, setImmat] = useState("");
   const [modele, setModele] = useState("");
+  const [immatRetour, setImmatRetour] = useState("");
+  const [vehiculeRetour, setVehiculeRetour] = useState("");
+  const [modeleRetour, setModeleRetour] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
   const [destNom, setDestNom] = useState("");
@@ -184,32 +187,42 @@ function AdminNouveauDevisPage() {
   const [sivLoading, setSivLoading] = useState(false);
   const [sivMsg, setSivMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
-  const handleSivLookup = async () => {
-    const plate = immat.trim().toUpperCase();
-    setSivMsg(null);
+  const [siv2Loading, setSiv2Loading] = useState(false);
+  const [siv2Msg, setSiv2Msg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const handleSivLookup = async (leg: 1 | 2 = 1) => {
+    const setLoading = leg === 1 ? setSivLoading : setSiv2Loading;
+    const setMsg = leg === 1 ? setSivMsg : setSiv2Msg;
+    const plate = (leg === 1 ? immat : immatRetour).trim().toUpperCase();
+    setMsg(null);
     if (plate.length < 4) {
-      setSivMsg({ type: "err", text: "Saisis une plaque valide" });
+      setMsg({ type: "err", text: "Saisis une plaque valide" });
       return;
     }
-    setSivLoading(true);
+    setLoading(true);
     try {
       const r = await lookupPlateFn({ data: { plate } });
       if (!r.ok || !r.data) {
-        setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
+        setMsg({ type: "err", text: r.error || "Recherche impossible" });
       } else {
         const d = r.data;
-        if (d.marque) setVehicule(d.marque);
-        if (d.modele) setModele(d.modele);
+        if (leg === 1) {
+          if (d.marque) setVehicule(d.marque);
+          if (d.modele) setModele(d.modele);
+        } else {
+          if (d.marque) setVehiculeRetour(d.marque);
+          if (d.modele) setModeleRetour(d.modele);
+        }
         const carb = (d.carburant ?? "").toLowerCase();
         const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
-        setSivMsg({
+        setMsg({
           type: "ok",
           text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
             d.carburant ? ` · ${d.carburant}` : ""
           }`,
         });
         // Aligne l'option énergie (recharge élec / plein carburant) sur le carburant détecté
-        if (carb) {
+        if (carb && leg === 1) {
           const elecLabel = OPTIONS_LIST[0].label;
           const thermLabel = OPTIONS_LIST[1].label;
           setOptions((prev) => {
@@ -221,11 +234,12 @@ function AdminNouveauDevisPage() {
 
       }
     } catch {
-      setSivMsg({ type: "err", text: "Erreur réseau" });
+      setMsg({ type: "err", text: "Erreur réseau" });
     } finally {
-      setSivLoading(false);
+      setLoading(false);
     }
   };
+
 
 
   const selectClient = async (c: ClientRow) => {
@@ -264,10 +278,15 @@ function AdminNouveauDevisPage() {
   }, [montant]);
 
   const pvLabel = pvDigital === "Aucun" ? null : pvDigital;
+  const isAllerRetour = typeTrajet === "Livraison + restitution";
 
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
-    immat ? `Immatriculation : ${immat}` : null,
+    immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    isAllerRetour && (vehiculeRetour || modeleRetour)
+      ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
+      : null,
+    isAllerRetour && immatRetour ? `Immatriculation retour : ${immatRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
@@ -557,7 +576,15 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
+          {isAllerRetour && (
+            <p className="mb-4 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+              Trajet Livraison + restitution : deux véhicules distincts (deux états des lieux).
+            </p>
+          )}
           <div className="space-y-4">
+            {isAllerRetour && (
+              <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">Véhicule aller (livraison)</p>
+            )}
             <div>
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Immatriculation
@@ -571,7 +598,7 @@ function AdminNouveauDevisPage() {
                 />
                 <button
                   type="button"
-                  onClick={handleSivLookup}
+                  onClick={() => handleSivLookup(1)}
                   disabled={sivLoading}
                   className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
                 >
@@ -593,7 +620,49 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
+
+            {isAllerRetour && (
+              <div className="space-y-4 border-t border-pro-border pt-4">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">Véhicule retour (restitution)</p>
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Immatriculation retour
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      value={immatRetour}
+                      onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
+                      placeholder="GQ-053-MH"
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSivLookup(2)}
+                      disabled={siv2Loading}
+                      className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                    >
+                      {siv2Loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                      Rechercher
+                    </button>
+                  </div>
+                  {siv2Msg && (
+                    <p
+                      className={`mt-2 text-[12px] font-medium ${
+                        siv2Msg.type === "ok" ? "text-emerald-600" : "text-red-600"
+                      }`}
+                    >
+                      {siv2Msg.text}
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
+                  <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
+                </div>
+              </div>
+            )}
           </div>
+
 
         </Card>
 
