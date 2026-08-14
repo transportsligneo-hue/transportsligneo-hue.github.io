@@ -40,6 +40,9 @@ function AdminDevisDetailPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [converting, setConverting] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
+
 
   const buildDevisData = (row: any): DevisData => ({
     numero: row.numero,
@@ -87,6 +90,8 @@ function AdminDevisDetailPage() {
     }
     const enriched = { ...data, _profile: profile };
     setDevis(enriched);
+    setPriceInput(enriched.prix_estime != null ? String(enriched.prix_estime) : "");
+
 
     // Load acceptance signature / signed PDF if available
     if (enriched.locked_at) {
@@ -171,6 +176,38 @@ function AdminDevisDetailPage() {
     setDevis({ ...devis, statut });
     toast.success("Statut mis à jour");
   };
+
+  const handleUpdatePrice = async () => {
+    if (!devis) return;
+    const n = parseFloat(priceInput.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) {
+      toast.error("Montant TTC invalide");
+      return;
+    }
+    setSavingPrice(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      const next = { ...devis, prix_estime: n };
+      setDevis(next);
+      try {
+        const blob = await generateDevisPdf(buildDevisData(next));
+        if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+        setPdfUrl(URL.createObjectURL(blob));
+      } catch (e) {
+        console.error("PDF regen error", e);
+      }
+      toast.success("Prix mis à jour", { description: `${n.toFixed(2)} € TTC · PDF régénéré` });
+    } catch (e) {
+      toast.error("Impossible de modifier le prix", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingPrice(false);
+    }
+  };
+
 
   const handleConvert = async () => {
     if (!devis || devis.mission_id) return;
@@ -306,7 +343,33 @@ function AdminDevisDetailPage() {
             <p className="text-3xl font-semibold text-pro-text">{devis.prix_estime} €</p>
             <p className="text-[10px] text-pro-muted uppercase tracking-wider">TTC</p>
             {devis.tarif_label && <p className="text-xs text-pro-text-soft mt-2">{devis.tarif_label}</p>}
+
+            {devis.locked_at ? (
+              <p className="mt-3 text-[11px] text-pro-muted">Devis signé/verrouillé : le montant n'est plus modifiable.</p>
+            ) : (
+              <div className="mt-4 pt-3 border-t border-pro-border">
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2">Corriger le prix</p>
+                <div className="flex gap-2">
+                  <input
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Montant TTC"
+                    className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                  <Button
+                    onClick={handleUpdatePrice}
+                    disabled={savingPrice}
+                    icon={savingPrice ? <Loader2 size={12} className="animate-spin" /> : <PenLine size={12} />}
+                  >
+                    Régénérer
+                  </Button>
+                </div>
+                <p className="mt-2 text-[11px] text-pro-muted">Le PDF est régénéré avec le nouveau montant.</p>
+              </div>
+            )}
           </Card>
+
 
           {acceptation && (
             <Card>
