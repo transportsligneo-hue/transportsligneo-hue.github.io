@@ -184,32 +184,42 @@ function AdminNouveauDevisPage() {
   const [sivLoading, setSivLoading] = useState(false);
   const [sivMsg, setSivMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
-  const handleSivLookup = async () => {
-    const plate = immat.trim().toUpperCase();
-    setSivMsg(null);
+  const [siv2Loading, setSiv2Loading] = useState(false);
+  const [siv2Msg, setSiv2Msg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const handleSivLookup = async (leg: 1 | 2 = 1) => {
+    const setLoading = leg === 1 ? setSivLoading : setSiv2Loading;
+    const setMsg = leg === 1 ? setSivMsg : setSiv2Msg;
+    const plate = (leg === 1 ? immat : immatRetour).trim().toUpperCase();
+    setMsg(null);
     if (plate.length < 4) {
-      setSivMsg({ type: "err", text: "Saisis une plaque valide" });
+      setMsg({ type: "err", text: "Saisis une plaque valide" });
       return;
     }
-    setSivLoading(true);
+    setLoading(true);
     try {
       const r = await lookupPlateFn({ data: { plate } });
       if (!r.ok || !r.data) {
-        setSivMsg({ type: "err", text: r.error || "Recherche impossible" });
+        setMsg({ type: "err", text: r.error || "Recherche impossible" });
       } else {
         const d = r.data;
-        if (d.marque) setVehicule(d.marque);
-        if (d.modele) setModele(d.modele);
+        if (leg === 1) {
+          if (d.marque) setVehicule(d.marque);
+          if (d.modele) setModele(d.modele);
+        } else {
+          if (d.marque) setVehiculeRetour(d.marque);
+          if (d.modele) setModeleRetour(d.modele);
+        }
         const carb = (d.carburant ?? "").toLowerCase();
         const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
-        setSivMsg({
+        setMsg({
           type: "ok",
           text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
             d.carburant ? ` · ${d.carburant}` : ""
           }`,
         });
         // Aligne l'option énergie (recharge élec / plein carburant) sur le carburant détecté
-        if (carb) {
+        if (carb && leg === 1) {
           const elecLabel = OPTIONS_LIST[0].label;
           const thermLabel = OPTIONS_LIST[1].label;
           setOptions((prev) => {
@@ -221,11 +231,12 @@ function AdminNouveauDevisPage() {
 
       }
     } catch {
-      setSivMsg({ type: "err", text: "Erreur réseau" });
+      setMsg({ type: "err", text: "Erreur réseau" });
     } finally {
-      setSivLoading(false);
+      setLoading(false);
     }
   };
+
 
 
   const selectClient = async (c: ClientRow) => {
