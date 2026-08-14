@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -11,7 +13,18 @@ import {
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
-import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
+import {
+  ColumnsMenu,
+  ConvoyeurCell,
+  FactureQuickLink,
+  MISSION_COLUMNS,
+  PaymentBadge,
+  paymentState,
+  type ConvoyeurOption,
+  type FactureLite,
+  type MissionMeta,
+} from "@/components/admin/missions/MissionsTableExtras";
+import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
@@ -25,6 +38,8 @@ export const Route = createFileRoute("/_authenticated/admin/missions/")({
 interface TrajetRow {
   id: string; depart: string; arrivee: string; date_trajet: string | null; heure_trajet: string | null;
   marque: string | null; modele: string | null; immatriculation: string | null;
+  vehicule_immatriculation: string | null; vin: string | null; vehicule_vin: string | null;
+  vehicule_energie: string | null; mission_id: string | null;
   client_nom: string | null; client_email: string | null; client_telephone: string | null;
   prix: number | null; prix_convoyeur: number | null; tarif_convoyeur: number | null;
   prix_suggere: number | null; statut: string; statut_publication: string | null;
@@ -43,32 +58,93 @@ interface DemandeRow {
 }
 
 const PRIORITY: Record<string, number> = { en_cours: 60, attribue: 50, accepte: 40, en_attente: 30, termine: 20, annule: 10 };
+const ACTIVE_ATTR = ["propose", "accepte", "en_cours", "en_attente_validation"];
+const TABLE_KEY = "admin_missions";
+
+const QUICK_STATUS: { value: string; label: string }[] = [
+  { value: "attribue", label: "Attribuée" },
+  { value: "en_cours", label: "En cours" },
+  { value: "termine", label: "Terminée" },
+  { value: "annule", label: "Annulée" },
+];
+
+function isElectric(energie: string | null | undefined) {
+  const e = (energie ?? "").toLowerCase();
+  return e.includes("elec") || e.includes("élec") || e === "ev";
+}
 
 function AdminMissionsUnified() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<UnifiedMission[]>([]);
+  const [meta, setMeta] = useState<Map<string, MissionMeta>>(new Map());
+  const [convoyeurs, setConvoyeurs] = useState<ConvoyeurOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
+  const [convFilter, setConvFilter] = useState("all");
+  const [payFilter, setPayFilter] = useState("all");
+  const [energyFilter, setEnergyFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+  const [hidden, setHidden] = useState<Set<string>>(new Set(["client"]));
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
 
+  const show = useCallback((key: string) => !hidden.has(key), [hidden]);
+  const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length, [hidden]);
+
+  /* ---------------- Préférences de colonnes (par admin) ---------------- */
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("admin_table_prefs")
+      .select("hidden_columns")
+      .eq("user_id", user.id)
+      .eq("table_key", TABLE_KEY)
+      .maybeSingle()
+      .then(({ data }) => {
+        const cols = (data?.hidden_columns ?? null) as string[] | null;
+        if (Array.isArray(cols)) setHidden(new Set(cols));
+      });
+  }, [user]);
+
+  const toggleColumn = async (key: string) => {
+    const next = new Set(hidden);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setHidden(next);
+    if (!user) return;
+    await supabase
+      .from("admin_table_prefs")
+      .upsert(
+        { user_id: user.id, table_key: TABLE_KEY, hidden_columns: Array.from(next) },
+        { onConflict: "user_id,table_key" },
+      );
+  };
+
+  /* ---------------- Chargement ---------------- */
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: trajetsData }, { data: demandesData }, { data: attributionsData }] = await Promise.all([
+    const [{ data: trajetsData }, { data: demandesData }, { data: attributionsData }, { data: convData }] = await Promise.all([
       supabase.from("trajets").select("*").order("created_at", { ascending: false }),
       supabase
         .from("demandes_convoyage")
         .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
-      supabase.from("attributions").select("trajet_id, numero_mission, created_at"),
+      supabase.from("attributions").select("trajet_id, convoyeur_id, statut, numero_mission, created_at"),
+      supabase.from("convoyeurs").select("id, prenom, nom, statut").eq("statut", "valide").order("nom"),
     ]);
+
+    setConvoyeurs(
+      ((convData ?? []) as { id: string; prenom: string | null; nom: string | null }[]).map((c) => ({
+        id: c.id,
+        nom: `${c.prenom ?? ""} ${c.nom ?? ""}`.trim() || "Convoyeur",
+      })),
+    );
 
     const trajets = ((trajetsData ?? []) as unknown as TrajetRow[]).filter(
       (t) => !(t.depart ?? "").trim().toLowerCase().includes("partenariat"),
     );
 
-    // Déduplication identique au pipeline existant (aller / retour conservés séparément)
     const deduped = new Map<string, TrajetRow>();
     trajets.forEach((t) => {
       const key = t.demande_id
@@ -83,15 +159,72 @@ function AdminMissionsUnified() {
 
     const convertedDemandeIds = new Set(trajets.map((t) => t.demande_id).filter(Boolean) as string[]);
 
-    // Vrais numéros de mission (attributions) : un aller-retour partage le numéro de base
-    const attrRows = (attributionsData ?? []) as unknown as { trajet_id: string | null; numero_mission: string | null; created_at: string }[];
+    const attrRows = (attributionsData ?? []) as unknown as {
+      trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
+    }[];
     const numeroByTrajet = new Map<string, string>();
+    const activeAttrByTrajet = new Map<string, { convoyeur_id: string | null; statut: string | null }>();
     attrRows.forEach((a) => {
-      if (!a.trajet_id || !a.numero_mission) return;
-      const cur = numeroByTrajet.get(a.trajet_id);
-      if (!cur) numeroByTrajet.set(a.trajet_id, a.numero_mission);
+      if (!a.trajet_id) return;
+      if (a.numero_mission && !numeroByTrajet.has(a.trajet_id)) numeroByTrajet.set(a.trajet_id, a.numero_mission);
+      if (ACTIVE_ATTR.includes(a.statut ?? "") && !activeAttrByTrajet.has(a.trajet_id)) {
+        activeAttrByTrajet.set(a.trajet_id, { convoyeur_id: a.convoyeur_id, statut: a.statut });
+      }
     });
-    // Numéro de base par groupe A/R : on prend celui de l'aller, sinon le plus petit
+
+    // Convoyeurs référencés (même non validés) pour l'affichage du nom
+    const convIds = Array.from(new Set(Array.from(activeAttrByTrajet.values()).map((a) => a.convoyeur_id).filter(Boolean))) as string[];
+    const convNames = new Map<string, string>();
+    ((convData ?? []) as { id: string; prenom: string | null; nom: string | null }[]).forEach((c) =>
+      convNames.set(c.id, `${c.prenom ?? ""} ${c.nom ?? ""}`.trim()),
+    );
+    const missingConv = convIds.filter((id) => !convNames.has(id));
+    if (missingConv.length) {
+      const { data } = await supabase.from("convoyeurs").select("id, prenom, nom").in("id", missingConv);
+      ((data ?? []) as { id: string; prenom: string | null; nom: string | null }[]).forEach((c) =>
+        convNames.set(c.id, `${c.prenom ?? ""} ${c.nom ?? ""}`.trim()),
+      );
+    }
+
+    // Factures liées (via mission_id du trajet)
+    const missionIds = Array.from(new Set(trajets.map((t) => t.mission_id).filter(Boolean))) as string[];
+    const factureByMission = new Map<string, FactureLite>();
+    if (missionIds.length) {
+      const { data } = await supabase
+        .from("factures")
+        .select("id, numero, statut, total_ttc, prix_ttc, date_echeance, pdf_url, mission_id")
+        .in("mission_id", missionIds);
+      ((data ?? []) as unknown as {
+        id: string; numero: string; statut: string | null; total_ttc: number | null; prix_ttc: number | null;
+        date_echeance: string | null; pdf_url: string | null; mission_id: string | null;
+      }[]).forEach((f) => {
+        if (!f.mission_id || factureByMission.has(f.mission_id)) return;
+        factureByMission.set(f.mission_id, {
+          id: f.id,
+          numero: f.numero,
+          statut: f.statut,
+          total: f.total_ttc ?? f.prix_ttc,
+          echeance: f.date_echeance,
+          pdfUrl: f.pdf_url,
+        });
+      });
+    }
+
+    const metaMap = new Map<string, MissionMeta>();
+    trajets.forEach((t) => {
+      const attr = activeAttrByTrajet.get(t.id);
+      metaMap.set(t.id, {
+        convoyeurId: attr?.convoyeur_id ?? null,
+        convoyeurNom: attr?.convoyeur_id ? convNames.get(attr.convoyeur_id) ?? "Convoyeur" : null,
+        attributionStatut: attr?.statut ?? null,
+        facture: t.mission_id ? factureByMission.get(t.mission_id) ?? null : null,
+        vin: t.vin ?? t.vehicule_vin ?? null,
+        energie: t.vehicule_energie ?? null,
+        missionId: t.mission_id ?? null,
+      });
+    });
+    setMeta(metaMap);
+
     const baseByGroup = new Map<string, string>();
     trajets.forEach((t) => {
       if (!t.mission_group_id) return;
@@ -105,8 +238,6 @@ function AdminMissionsUnified() {
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
       const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
       const storedNumero = t.numero_mission ?? numeroByTrajet.get(t.id) ?? null;
-      // Le numéro saisi/attribué dans l'admin est immuable à l'affichage.
-      // On normalise juste le format (dièse devant la séquence) sans reconstruire.
       const ref = storedNumero
         ? displayNumero(storedNumero)
         : displayTrajetRef({
@@ -119,39 +250,38 @@ function AdminMissionsUnified() {
             baseNumero: t.mission_group_id ? baseByGroup.get(t.mission_group_id) : null,
           });
       return {
-      kind: "trajet",
-      id: t.id,
-      ref,
-      status: trajetToUnified(t.statut),
-      depart: t.depart,
-      arrivee: t.arrivee,
-      date: t.date_trajet,
-      heure: t.heure_trajet,
-      marque: t.marque,
-      modele: t.modele,
-      immatriculation: t.immatriculation,
-      clientNom: t.client_nom,
-      clientEmail: t.client_email,
-      clientTel: t.client_telephone,
-      prix: t.prix,
-      prixConvoyeur: t.prix_convoyeur ?? t.tarif_convoyeur,
-      prixSuggere: t.prix_suggere,
-      statutPublication: t.statut_publication,
-      isRoundTrip: isAR,
-      legType: t.leg_type,
-      groupId: t.mission_group_id,
-      legIndex: t.leg_index,
-      isTest: !!t.is_test_data,
-      createdAt: t.created_at,
-      pricingMode: t.pricing_mode,
-      prixClientTtc: t.prix_client_ttc,
-      prixConvoyeurFixe: t.prix_convoyeur_fixe,
-      prixConvoyeurMin: t.prix_convoyeur_min,
-      prixConvoyeurMax: t.prix_convoyeur_max,
-      margeIndicativePct: t.marge_indicative_pct,
+        kind: "trajet",
+        id: t.id,
+        ref,
+        status: trajetToUnified(t.statut),
+        depart: t.depart,
+        arrivee: t.arrivee,
+        date: t.date_trajet,
+        heure: t.heure_trajet,
+        marque: t.marque,
+        modele: t.modele,
+        immatriculation: t.immatriculation ?? t.vehicule_immatriculation,
+        clientNom: t.client_nom,
+        clientEmail: t.client_email,
+        clientTel: t.client_telephone,
+        prix: t.prix,
+        prixConvoyeur: t.prix_convoyeur ?? t.tarif_convoyeur,
+        prixSuggere: t.prix_suggere,
+        statutPublication: t.statut_publication,
+        isRoundTrip: isAR,
+        legType: t.leg_type,
+        groupId: t.mission_group_id,
+        legIndex: t.leg_index,
+        isTest: !!t.is_test_data,
+        createdAt: t.created_at,
+        pricingMode: t.pricing_mode,
+        prixClientTtc: t.prix_client_ttc,
+        prixConvoyeurFixe: t.prix_convoyeur_fixe,
+        prixConvoyeurMin: t.prix_convoyeur_min,
+        prixConvoyeurMax: t.prix_convoyeur_max,
+        margeIndicativePct: t.marge_indicative_pct,
       };
     });
-
 
     const demandeMissions: UnifiedMission[] = ((demandesData ?? []) as unknown as DemandeRow[])
       .filter((d) => !convertedDemandeIds.has(d.id))
@@ -185,10 +315,7 @@ function AdminMissionsUnified() {
         const ta = new Date(a.createdAt).getTime();
         const tb = new Date(b.createdAt).getTime();
         if (tb !== ta) return tb - ta;
-        // Même groupe (aller-retour) : aller d'abord, puis retour
-        if (a.groupId && a.groupId === b.groupId) {
-          return (a.legIndex ?? 1) - (b.legIndex ?? 1);
-        }
+        if (a.groupId && a.groupId === b.groupId) return (a.legIndex ?? 1) - (b.legIndex ?? 1);
         return 0;
       }),
     );
@@ -201,11 +328,31 @@ function AdminMissionsUnified() {
     const channel = supabase
       .channel("admin-missions-unified")
       .on("postgres_changes", { event: "*", schema: "public", table: "trajets" }, () => fetchAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "attributions" }, () => fetchAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, () => fetchAll())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [fetchAll]);
 
+  /* ---------------- Actions rapides ---------------- */
+  const assignConvoyeur = async (trajetId: string, convoyeurId: string) => {
+    const { error } = await supabase.rpc("admin_assign_convoyeur", {
+      _trajet_id: trajetId,
+      _convoyeur_id: convoyeurId,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Convoyeur attribué");
+    fetchAll();
+  };
+
+  const quickStatus = async (trajetId: string, statut: string) => {
+    const { error } = await supabase.from("trajets").update({ statut }).eq("id", trajetId);
+    if (error) return toast.error(error.message);
+    toast.success("Statut mis à jour");
+    fetchAll();
+  };
+
+  /* ---------------- Filtres / tri ---------------- */
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: rows.length };
     UNIFIED_ORDER.forEach((s) => { c[s] = rows.filter((r) => r.status === s).length; });
@@ -214,18 +361,33 @@ function AdminMissionsUnified() {
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    const list = rows.filter((r) => {
       if (filter !== "all" && r.status !== filter) return false;
+      const m = meta.get(r.id);
+      if (convFilter !== "all") {
+        if (convFilter === "none" ? !!m?.convoyeurId : m?.convoyeurId !== convFilter) return false;
+      }
+      if (payFilter !== "all" && paymentState(m?.facture ?? null) !== payFilter) return false;
+      if (energyFilter !== "all") {
+        const elec = isElectric(m?.energie);
+        if (energyFilter === "electrique" ? !elec : elec) return false;
+      }
       if (!q) return true;
-      return [r.ref, r.depart, r.arrivee, r.clientNom, r.immatriculation, r.marque, r.modele]
+      return [r.ref, r.depart, r.arrivee, r.clientNom, r.immatriculation, r.marque, r.modele, m?.vin, m?.convoyeurNom]
         .filter(Boolean)
         .some((v) => (v as string).toLowerCase().includes(q));
     });
-  }, [rows, filter, search]);
 
-  // Regroupement visuel des missions groupées (Livraison L + Restitution R)
+    const sorted = [...list];
+    if (sortBy === "prix") sorted.sort((a, b) => (b.prix ?? 0) - (a.prix ?? 0));
+    else if (sortBy === "date") sorted.sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime());
+    else if (sortBy === "client") sorted.sort((a, b) => (a.clientNom ?? "").localeCompare(b.clientNom ?? ""));
+    return sorted;
+  }, [rows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy]);
+
+  /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
-    | { type: "groupHeader"; gid: string; refs: string[] }
+    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -238,8 +400,6 @@ function AdminMissionsUnified() {
     visible.forEach((m) => {
       const gid = m.groupId ?? null;
       const all = gid ? visible.filter((x) => x.groupId === gid) : [];
-      // Un duo = exactement 1 volet Livraison + 1 volet Restitution.
-      // Les éventuels trajets "simple" résiduels du même groupe restent affichés à part.
       const duo = [all.find(isAller), all.find(isRetour)].filter(Boolean) as typeof all;
       const inDuo = new Set(duo.map((x) => x.id));
 
@@ -247,7 +407,17 @@ function AdminMissionsUnified() {
         if (!seen.has(gid)) {
           seen.add(gid);
           band = !band;
-          out.push({ type: "groupHeader", gid, refs: duo.map((x) => x.ref) });
+          const convs = Array.from(new Set(duo.map((x) => meta.get(x.id)?.convoyeurNom).filter(Boolean))) as string[];
+          const total = duo.reduce((s, x) => s + (x.prix ?? 0), 0);
+          const statuts = duo.map((x) => UNIFIED_STATUS[x.status].label);
+          out.push({
+            type: "groupHeader",
+            gid,
+            refs: duo.map((x) => x.ref),
+            convs,
+            total,
+            statut: Array.from(new Set(statuts)).join(" · "),
+          });
           duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
         }
         if (inDuo.has(m.id)) return;
@@ -257,11 +427,8 @@ function AdminMissionsUnified() {
       out.push({ type: "row", m, band, inGroup: false, last: true });
     });
     return out;
-  }, [visible]);
+  }, [visible, meta]);
 
-
-
-  // Garde le panneau synchronisé avec les données rafraîchies
   useEffect(() => {
     if (!selected) return;
     const fresh = rows.find((r) => r.id === selected.id && r.kind === selected.kind);
@@ -279,6 +446,7 @@ function AdminMissionsUnified() {
         subtitle={`Demandes, trajets et attributions réunis dans un seul flux — ${rows.length} mission${rows.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <ColumnsMenu hidden={hidden} onToggle={toggleColumn} />
             <Link
               to="/admin/attributions"
               search={{} as never}
@@ -294,9 +462,8 @@ function AdminMissionsUnified() {
         }
       />
 
-
-      {/* Filtres */}
-      <div className="flex items-center gap-2 flex-wrap mb-4">
+      {/* Filtres statut */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
         <button className={`a6-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
           Toutes · {counts.all}
         </button>
@@ -310,10 +477,49 @@ function AdminMissionsUnified() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher une mission, un client, une plaque…"
+            placeholder="Rechercher mission, client, plaque, VIN, convoyeur…"
             className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--a6-border)] bg-white text-[12.5px] outline-none focus:border-[var(--a6-blue)]"
           />
         </div>
+      </div>
+
+      {/* Filtres croisés */}
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        {[
+          {
+            value: convFilter, set: setConvFilter, label: "Convoyeur",
+            options: [{ v: "all", l: "Tous les convoyeurs" }, { v: "none", l: "Non attribuées" }, ...convoyeurs.map((c) => ({ v: c.id, l: c.nom }))],
+          },
+          {
+            value: payFilter, set: setPayFilter, label: "Facture",
+            options: [
+              { v: "all", l: "Tout paiement" }, { v: "payee", l: "Payée" },
+              { v: "attente", l: "En attente" }, { v: "retard", l: "En retard" }, { v: "aucune", l: "Sans facture" },
+            ],
+          },
+          {
+            value: energyFilter, set: setEnergyFilter, label: "Énergie",
+            options: [{ v: "all", l: "Toutes énergies" }, { v: "electrique", l: "Électrique" }, { v: "thermique", l: "Thermique" }],
+          },
+          {
+            value: sortBy, set: setSortBy, label: "Tri",
+            options: [
+              { v: "recent", l: "Plus récentes" }, { v: "date", l: "Date de mission" },
+              { v: "prix", l: "Prix décroissant" }, { v: "client", l: "Client (A→Z)" },
+            ],
+          },
+        ].map((f) => (
+          <select
+            key={f.label}
+            value={f.value}
+            onChange={(e) => f.set(e.target.value)}
+            className="h-9 rounded-lg border border-[var(--a6-border)] bg-white px-2.5 text-[12.5px] text-[var(--a6-text)] outline-none focus:border-[var(--a6-blue)]"
+          >
+            {f.options.map((o) => (
+              <option key={o.v} value={o.v}>{o.l}</option>
+            ))}
+          </select>
+        ))}
       </div>
 
       <LegSuffixLegend className="mb-3" />
@@ -331,10 +537,14 @@ function AdminMissionsUnified() {
               <thead>
                 <tr>
                   <th>Référence</th>
-                  <th>Trajet</th>
-                  <th className="hidden md:table-cell">Client</th>
-                  <th className="hidden lg:table-cell">Date</th>
-                  <th className="hidden lg:table-cell">Prix</th>
+                  {show("trajet") && <th>Trajet</th>}
+                  {show("plaque") && <th>Plaque / VIN</th>}
+                  {show("vehicule") && <th>Véhicule</th>}
+                  {show("client") && <th>Client</th>}
+                  {show("convoyeur") && <th>Convoyeur</th>}
+                  {show("date") && <th>Date</th>}
+                  {show("prix") && <th>Prix</th>}
+                  {show("paiement") && <th>Facture</th>}
                   <th>Statut</th>
                 </tr>
               </thead>
@@ -343,18 +553,26 @@ function AdminMissionsUnified() {
                   r.type === "groupHeader" ? (
                     <tr key={`g-${r.gid}`} className="bg-[#e5e9ff]">
                       <td
-                        colSpan={6}
+                        colSpan={colCount}
                         className="!py-2.5 border-t-[3px] border-t-[#4f46e5] shadow-[inset_4px_0_0_0_#4f46e5]"
                         style={{ paddingLeft: 14 }}
                       >
                         <span className="inline-flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
-                             <ArrowLeftRight size={11} /> Duo Livraison–Restitution
+                            <ArrowLeftRight size={11} /> Duo Livraison–Restitution
                           </span>
                           <span className="text-[11px] font-medium text-[#3730a3]">
-                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — les 2 lignes ci-dessous forment un seul dossier
+                            Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — un seul dossier
                           </span>
-
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#3730a3]">
+                            Convoyeur{r.convs.length > 1 ? "s" : ""} : {r.convs.length ? r.convs.join(", ") : "non attribué"}
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#3730a3]">
+                            Total cumulé : {r.total.toFixed(2)} €
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#3730a3]">
+                            Statut : {r.statut}
+                          </span>
                         </span>
                       </td>
                     </tr>
@@ -364,51 +582,120 @@ function AdminMissionsUnified() {
                       className={`row ${r.inGroup ? "bg-[#f6f7ff]" : r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_4px_0_0_0_#4f46e5]" : ""} ${r.inGroup && r.last ? "border-b-[3px] border-b-[#4f46e5]" : ""}`}
                       onClick={() => setSelected(r.m)}
                     >
-
-                    <td className={r.inGroup ? "pl-5" : ""}>
-                      <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
-                        {alertsByTrajet.get(r.m.id) && (
-                          <span
-                            title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
-                            className={`h-2 w-2 rounded-full ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].dot} ${alertsByTrajet.get(r.m.id) === "critique" ? "animate-pulse" : ""}`}
-                          />
-                        )}
-                        {r.m.ref}
-                      </p>
-                      <div className="flex gap-1.5 mt-1 flex-wrap">
-                        {r.m.isRoundTrip ? (
-                          <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
-                            {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
-                          </span>
-                        ) : (
-                          <span className="a6-badge">Livraison simple</span>
-                        )}
-                        {r.m.isTest && <span className="a6-badge annulee">Test</span>}
-                      </div>
-                      {!r.inGroup && hasLegSuffix(r.m.ref) && (
-                        <p className="mt-1 text-[10.5px] text-[#4f46e5]">
-                           Ancien duo Livraison–Restitution
+                      <td className={r.inGroup ? "pl-5" : ""}>
+                        <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
+                          {alertsByTrajet.get(r.m.id) && (
+                            <span
+                              title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
+                              className={`h-2 w-2 rounded-full ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].dot} ${alertsByTrajet.get(r.m.id) === "critique" ? "animate-pulse" : ""}`}
+                            />
+                          )}
+                          {r.m.ref}
                         </p>
+                        <div className="flex gap-1.5 mt-1 flex-wrap">
+                          {r.m.isRoundTrip ? (
+                            <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
+                              {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
+                            </span>
+                          ) : (
+                            <span className="a6-badge">Livraison simple</span>
+                          )}
+                          {r.m.isTest && <span className="a6-badge annulee">Test</span>}
+                        </div>
+                        {!r.inGroup && hasLegSuffix(r.m.ref) && (
+                          <p className="mt-1 text-[10.5px] text-[#4f46e5]">Ancien duo Livraison–Restitution</p>
+                        )}
+                      </td>
+
+                      {show("trajet") && (
+                        <td>
+                          <p className="font-semibold text-[var(--a6-text)] inline-flex items-center gap-1.5">
+                            {r.m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {r.m.arrivee}
+                          </p>
+                        </td>
                       )}
-                    </td>
-                    <td>
-                      <p className="font-semibold text-[var(--a6-text)] inline-flex items-center gap-1.5">
-                        {r.m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {r.m.arrivee}
-                      </p>
-                      {(r.m.marque || r.m.modele) && (
-                        <p className="text-[11px] text-[var(--a6-dim)]">{[r.m.marque, r.m.modele].filter(Boolean).join(" ")}</p>
+
+                      {show("plaque") && (
+                        <td>
+                          {r.m.immatriculation ? (
+                            <span className="inline-flex items-center rounded-md border border-[#dbe3ff] bg-[#f4f7ff] px-1.5 py-0.5 a6-mono text-[11px] font-bold tracking-wider text-[#1e3a8a]">
+                              {r.m.immatriculation}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-[var(--a6-dim)]">—</span>
+                          )}
+                          {meta.get(r.m.id)?.vin && (
+                            <p className="mt-0.5 a6-mono text-[10px] text-[var(--a6-dim)]">VIN {meta.get(r.m.id)?.vin}</p>
+                          )}
+                        </td>
                       )}
-                    </td>
-                    <td className="hidden md:table-cell text-[var(--a6-muted)]">{r.m.clientNom || "—"}</td>
-                    <td className="hidden lg:table-cell text-[var(--a6-dim)] text-[11.5px]">
-                      {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "—"}
-                      {r.m.heure ? ` · ${r.m.heure}` : ""}
-                    </td>
-                    <td className="hidden lg:table-cell a6-num font-semibold">{r.m.prix != null ? `${r.m.prix} €` : "—"}</td>
-                    <td>
-                      <span className={`a6-badge ${UNIFIED_STATUS[r.m.status].cls}`}>{UNIFIED_STATUS[r.m.status].label}</span>
-                    </td>
-                  </tr>
+
+                      {show("vehicule") && (
+                        <td className="text-[11.5px] text-[var(--a6-muted)]">
+                          <span className="inline-flex items-center gap-1">
+                            {isElectric(meta.get(r.m.id)?.energie) ? (
+                              <Zap size={11} className="text-emerald-600" />
+                            ) : (
+                              <Fuel size={11} className="text-[var(--a6-dim)]" />
+                            )}
+                            {[r.m.marque, r.m.modele].filter(Boolean).join(" ") || "—"}
+                          </span>
+                        </td>
+                      )}
+
+                      {show("client") && <td className="text-[var(--a6-muted)]">{r.m.clientNom || "—"}</td>}
+
+                      {show("convoyeur") && (
+                        <td>
+                          {r.m.kind === "trajet" ? (
+                            <ConvoyeurCell
+                              meta={meta.get(r.m.id)}
+                              convoyeurs={convoyeurs}
+                              onAssign={(cid) => assignConvoyeur(r.m.id, cid)}
+                            />
+                          ) : (
+                            <span className="text-[11px] text-[var(--a6-dim)]">Demande</span>
+                          )}
+                        </td>
+                      )}
+
+                      {show("date") && (
+                        <td className="text-[var(--a6-dim)] text-[11.5px]">
+                          {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "—"}
+                          {r.m.heure ? ` · ${r.m.heure}` : ""}
+                        </td>
+                      )}
+
+                      {show("prix") && (
+                        <td className="a6-num font-semibold">{r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}</td>
+                      )}
+
+                      {show("paiement") && (
+                        <td>
+                          <div className="flex items-center gap-1.5">
+                            <PaymentBadge facture={meta.get(r.m.id)?.facture ?? null} />
+                            <FactureQuickLink facture={meta.get(r.m.id)?.facture ?? null} />
+                          </div>
+                        </td>
+                      )}
+
+                      <td>
+                        <span className={`a6-badge ${UNIFIED_STATUS[r.m.status].cls}`}>{UNIFIED_STATUS[r.m.status].label}</span>
+                        {r.m.kind === "trajet" && (
+                          <select
+                            value=""
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => e.target.value && quickStatus(r.m.id, e.target.value)}
+                            className="mt-1 block w-[104px] rounded-md border border-[#eaeaee] bg-white px-1 py-0.5 text-[10.5px] text-[var(--a6-muted)] outline-none focus:border-[var(--a6-blue)]"
+                          >
+                            <option value="">Changer…</option>
+                            {QUICK_STATUS.map((s) => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+                    </tr>
                   ),
                 )}
               </tbody>
