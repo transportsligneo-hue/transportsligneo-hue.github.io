@@ -40,6 +40,9 @@ function AdminDevisDetailPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [converting, setConverting] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
+
 
   const buildDevisData = (row: any): DevisData => ({
     numero: row.numero,
