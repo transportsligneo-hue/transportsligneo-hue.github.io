@@ -278,10 +278,15 @@ function AdminNouveauDevisPage() {
   }, [montant]);
 
   const pvLabel = pvDigital === "Aucun" ? null : pvDigital;
+  const isAllerRetour = typeTrajet === "Livraison + restitution";
 
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
-    immat ? `Immatriculation : ${immat}` : null,
+    immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    isAllerRetour && (vehiculeRetour || modeleRetour)
+      ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
+      : null,
+    isAllerRetour && immatRetour ? `Immatriculation retour : ${immatRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
