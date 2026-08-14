@@ -142,6 +142,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_table_prefs: {
+        Row: {
+          created_at: string
+          hidden_columns: Json
+          id: string
+          table_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden_columns?: Json
+          id?: string
+          table_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hidden_columns?: Json
+          id?: string
+          table_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           ai_enabled: boolean
@@ -1957,6 +1984,7 @@ export type Database = {
           heure_retour: string | null
           heure_souhaitee: string | null
           id: string
+          immatriculation: string | null
           immatriculation_retour: string | null
           locked_at: string | null
           marque: string | null
@@ -2035,6 +2063,7 @@ export type Database = {
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
+          immatriculation?: string | null
           immatriculation_retour?: string | null
           locked_at?: string | null
           marque?: string | null
@@ -2113,6 +2142,7 @@ export type Database = {
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
+          immatriculation?: string | null
           immatriculation_retour?: string | null
           locked_at?: string | null
           marque?: string | null
@@ -5816,6 +5846,10 @@ export type Database = {
       acknowledge_mission_alert: {
         Args: { _alert_id: string }
         Returns: undefined
+      }
+      admin_assign_convoyeur: {
+        Args: { _convoyeur_id: string; _trajet_id: string }
+        Returns: string
       }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
       admin_cancel_mission:
