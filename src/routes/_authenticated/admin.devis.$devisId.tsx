@@ -177,6 +177,38 @@ function AdminDevisDetailPage() {
     toast.success("Statut mis à jour");
   };
 
+  const handleUpdatePrice = async () => {
+    if (!devis) return;
+    const n = parseFloat(priceInput.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) {
+      toast.error("Montant TTC invalide");
+      return;
+    }
+    setSavingPrice(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      const next = { ...devis, prix_estime: n };
+      setDevis(next);
+      try {
+        const blob = await generateDevisPdf(buildDevisData(next));
+        if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+        setPdfUrl(URL.createObjectURL(blob));
+      } catch (e) {
+        console.error("PDF regen error", e);
+      }
+      toast.success("Prix mis à jour", { description: `${n.toFixed(2)} € TTC · PDF régénéré` });
+    } catch (e) {
+      toast.error("Impossible de modifier le prix", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingPrice(false);
+    }
+  };
+
+
   const handleConvert = async () => {
     if (!devis || devis.mission_id) return;
     if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
