@@ -702,6 +702,19 @@ function AdminNouveauDevisPage() {
                   <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
                   <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
                 </div>
+                <Field label="VIN retour" value={vinRetour} onChange={(v) => setVinRetour(v.toUpperCase())} placeholder="VF1XXXXXXXXXXXXXX" />
+                <AddressField
+                  label="Adresse de départ (retour)"
+                  value={departRetour}
+                  onChange={setDepartRetour}
+                  placeholder={arrivee || "Par défaut : adresse d'arrivée de l'aller"}
+                />
+                <AddressField
+                  label="Adresse d'arrivée (retour)"
+                  value={arriveeRetour}
+                  onChange={setArriveeRetour}
+                  placeholder={depart || "Par défaut : adresse de départ de l'aller"}
+                />
               </div>
             )}
           </div>
