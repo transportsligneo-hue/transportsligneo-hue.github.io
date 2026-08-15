@@ -61,8 +61,7 @@ function ClientProfil() {
     // 1. Met à jour le profil (nom/prenom/téléphone/société…)
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({
-        user_id: user.id,
+      .update({
         prenom: form.prenom,
         nom: form.nom,
         email: form.email,
@@ -70,7 +69,8 @@ function ClientProfil() {
         societe: form.societe || null,
         siret: form.siret || null,
         tva_intra: form.tva_intra || null,
-      } as never, { onConflict: "user_id" });
+      } as never)
+      .eq("user_id", user.id);
 
     // 2. Si l'email a changé → déclenche le flow de vérification Supabase Auth
     let emailMsg = "";
