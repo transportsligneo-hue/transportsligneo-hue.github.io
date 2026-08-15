@@ -213,9 +213,11 @@ function AdminNouveauDevisPage() {
         if (leg === 1) {
           if (d.marque) setVehicule(d.marque);
           if (d.modele) setModele(d.modele);
+          if (d.vin) setVin(d.vin.toUpperCase());
         } else {
           if (d.marque) setVehiculeRetour(d.marque);
           if (d.modele) setModeleRetour(d.modele);
+          if (d.vin) setVinRetour(d.vin.toUpperCase());
         }
         const carb = (d.carburant ?? "").toLowerCase();
         const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
