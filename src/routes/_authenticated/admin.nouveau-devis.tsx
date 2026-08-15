@@ -135,9 +135,13 @@ function AdminNouveauDevisPage() {
   const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
   const [immat, setImmat] = useState("");
   const [modele, setModele] = useState("");
+  const [vin, setVin] = useState("");
   const [immatRetour, setImmatRetour] = useState("");
   const [vehiculeRetour, setVehiculeRetour] = useState("");
   const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
   const [destNom, setDestNom] = useState("");
@@ -209,9 +213,11 @@ function AdminNouveauDevisPage() {
         if (leg === 1) {
           if (d.marque) setVehicule(d.marque);
           if (d.modele) setModele(d.modele);
+          if (d.vin) setVin(d.vin.toUpperCase());
         } else {
           if (d.marque) setVehiculeRetour(d.marque);
           if (d.modele) setModeleRetour(d.modele);
+          if (d.vin) setVinRetour(d.vin.toUpperCase());
         }
         const carb = (d.carburant ?? "").toLowerCase();
         const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
@@ -283,10 +289,14 @@ function AdminNouveauDevisPage() {
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
     immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
     isAllerRetour && (vehiculeRetour || modeleRetour)
       ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
       : null,
     isAllerRetour && immatRetour ? `Immatriculation retour : ${immatRetour}` : null,
+    isAllerRetour && vinRetour ? `VIN retour : ${vinRetour}` : null,
+    isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
+    isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
@@ -340,6 +350,14 @@ function AdminNouveauDevisPage() {
           arrivee: arrivee.trim(),
           marque: vehicule || null,
           modele: modele || null,
+          immatriculation: immat.trim().toUpperCase() || null,
+          vin: vin.trim().toUpperCase() || null,
+          marque_retour: isAllerRetour ? vehiculeRetour || null : null,
+          modele_retour: isAllerRetour ? modeleRetour || null : null,
+          immatriculation_retour: isAllerRetour ? immatRetour.trim().toUpperCase() || null : null,
+          vin_retour: isAllerRetour ? vinRetour.trim().toUpperCase() || null : null,
+          depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
+          arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: typeTrajet,
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
@@ -644,6 +662,7 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
+            <Field label="VIN (numéro de série)" value={vin} onChange={(v) => setVin(v.toUpperCase())} placeholder="VF3XXXXXXXXXXXXXX" />
 
             {isAllerRetour && (
               <div className="space-y-4 border-t border-pro-border pt-4">
@@ -683,6 +702,19 @@ function AdminNouveauDevisPage() {
                   <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
                   <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
                 </div>
+                <Field label="VIN retour" value={vinRetour} onChange={(v) => setVinRetour(v.toUpperCase())} placeholder="VF1XXXXXXXXXXXXXX" />
+                <AddressField
+                  label="Adresse de départ (retour)"
+                  value={departRetour}
+                  onChange={setDepartRetour}
+                  placeholder={arrivee || "Par défaut : adresse d'arrivée de l'aller"}
+                />
+                <AddressField
+                  label="Adresse d'arrivée (retour)"
+                  value={arriveeRetour}
+                  onChange={setArriveeRetour}
+                  placeholder={depart || "Par défaut : adresse de départ de l'aller"}
+                />
               </div>
             )}
           </div>
