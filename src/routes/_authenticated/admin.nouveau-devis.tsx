@@ -662,6 +662,7 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
+            <Field label="VIN (numéro de série)" value={vin} onChange={(v) => setVin(v.toUpperCase())} placeholder="VF3XXXXXXXXXXXXXX" />
 
             {isAllerRetour && (
               <div className="space-y-4 border-t border-pro-border pt-4">
