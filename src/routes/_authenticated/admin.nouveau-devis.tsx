@@ -289,10 +289,14 @@ function AdminNouveauDevisPage() {
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
     immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
     isAllerRetour && (vehiculeRetour || modeleRetour)
       ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
       : null,
     isAllerRetour && immatRetour ? `Immatriculation retour : ${immatRetour}` : null,
+    isAllerRetour && vinRetour ? `VIN retour : ${vinRetour}` : null,
+    isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
+    isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
