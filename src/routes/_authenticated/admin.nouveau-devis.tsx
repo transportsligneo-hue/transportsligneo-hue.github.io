@@ -135,9 +135,13 @@ function AdminNouveauDevisPage() {
   const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
   const [immat, setImmat] = useState("");
   const [modele, setModele] = useState("");
+  const [vin, setVin] = useState("");
   const [immatRetour, setImmatRetour] = useState("");
   const [vehiculeRetour, setVehiculeRetour] = useState("");
   const [modeleRetour, setModeleRetour] = useState("");
+  const [vinRetour, setVinRetour] = useState("");
+  const [departRetour, setDepartRetour] = useState("");
+  const [arriveeRetour, setArriveeRetour] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
   const [destNom, setDestNom] = useState("");
