@@ -47,6 +47,7 @@ import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
+import { useMissionPv, pvOf, MissionPvBadges } from "@/components/admin/MissionPvBadges";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
@@ -222,6 +223,7 @@ function AdminMissionDetail() {
   const navigate = useNavigate();
 
   const [attribution, setAttribution] = useState<AttributionFull | null>(null);
+  const pvMap = useMissionPv([attribution?.id]);
   const [trajet, setTrajet] = useState<TrajetFull | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurFull | null>(null);
   const [inspections, setInspections] = useState<InspectionRow[]>([]);
@@ -916,6 +918,7 @@ function AdminMissionDetail() {
         baseNumero: groupBaseNumero ?? attribution.numero_mission,
       })
     : missionNumberOf(attribution);
+  const missionPv = pvOf(pvMap, attribution.id);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
     day: "2-digit",
@@ -992,9 +995,10 @@ function AdminMissionDetail() {
                 <RoleBadge role={isB2B ? "partner" : "client"} />
                 <RoleBadge role="driver" />
               </div>
-              {(clientSociete || trajet.client_nom) && (
-                <div className="mt-1 text-xs text-pro-muted truncate">
-                  {clientSociete || trajet.client_nom}
+              {(clientSociete || trajet.client_nom || missionPv.length > 0) && (
+                <div className="mt-1 flex items-center gap-2 text-xs text-pro-muted">
+                  <span className="truncate">{clientSociete || trajet.client_nom}</span>
+                  <MissionPvBadges plateformes={missionPv} size={18} />
                 </div>
               )}
 
