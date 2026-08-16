@@ -1355,6 +1355,9 @@ function AdminMissionDetail() {
             <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
+          {/* Édition admin de la fiche mission */}
+          <MissionEditInfosPanel trajetId={trajet.id} onChanged={() => { void fetchAll(); }} />
+
           {/* Incidents signalés par le convoyeur */}
           <MissionIncidentsPanel
             attributionId={attribution.id}
