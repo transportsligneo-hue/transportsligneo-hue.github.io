@@ -673,34 +673,21 @@ function AdminMissionsUnified() {
                       {show("date") && (
                         <td className="min-w-[170px] text-[var(--a6-dim)] text-[11.5px]">
                           {r.m.kind === "trajet" ? (
-                            <div className="grid gap-1.5" onClick={(event) => event.stopPropagation()}>
-                              <label className="relative block">
-                                <CalendarDays size={12} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[var(--a6-accent)]" />
-                                <input
-                                  type="date"
-                                  value={r.m.date?.slice(0, 10) ?? ""}
-                                  aria-label={`Date de mission ${r.m.ref}`}
-                                  onChange={(event) => void updatePlanning(r.m.id, "date_trajet", event.target.value)}
-                                  className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] pl-7 pr-1 text-[11px] font-semibold text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
-                                />
-                              </label>
-                              <input
-                                type="time"
-                                value={r.m.heure?.slice(0, 5) ?? ""}
-                                aria-label={`Heure de mission ${r.m.ref}`}
-                                onChange={(event) => void updatePlanning(r.m.id, "heure_trajet", event.target.value)}
-                                className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] px-2 text-[11px] font-medium text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
-                              />
-                              {!r.m.date && <span className="font-semibold text-amber-700">Date à renseigner</span>}
-                            </div>
+                            <MissionDateCell
+                              refLabel={r.m.ref}
+                              date={r.m.date ?? null}
+                              heure={r.m.heure ?? null}
+                              onChange={(field, value) => void updatePlanning(r.m.id, field, value)}
+                            />
                           ) : (
                             <>
-                              {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "Date à renseigner"}
+                              {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "À planifier"}
                               {r.m.heure ? ` · ${r.m.heure}` : ""}
                             </>
                           )}
                         </td>
                       )}
+
 
                       {show("prix") && (
                         <td className="a6-num font-semibold">{r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}</td>
