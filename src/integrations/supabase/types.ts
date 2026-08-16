@@ -6340,6 +6340,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      sync_trajet_dates_from_devis: {
+        Args: { _devis_id: string }
+        Returns: undefined
+      }
       verify_certificate: {
         Args: { _token: string }
         Returns: {

@@ -146,6 +146,10 @@ function AdminNouveauDevisPage() {
   const [vinRetour, setVinRetour] = useState("");
   const [departRetour, setDepartRetour] = useState("");
   const [arriveeRetour, setArriveeRetour] = useState("");
+  const [dateSouhaitee, setDateSouhaitee] = useState("");
+  const [heureSouhaitee, setHeureSouhaitee] = useState("");
+  const [dateRetourInput, setDateRetourInput] = useState("");
+  const [heureRetourInput, setHeureRetourInput] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
@@ -324,6 +328,8 @@ function AdminNouveauDevisPage() {
     modele: modele || null,
     immatriculation: immat || null,
     option_trajet: typeTrajet,
+    date_souhaitee: dateSouhaitee || null,
+
     options,
     pv_digital: pvLabel,
     destinataire_nom: destNom || null,
@@ -363,6 +369,11 @@ function AdminNouveauDevisPage() {
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: typeTrajet,
+          date_souhaitee: dateSouhaitee || null,
+          heure_souhaitee: heureSouhaitee || null,
+          date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
+          heure_retour: isAllerRetour ? (heureRetourInput || null) : null,
+
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
           contact_arrivee_note: destNote || null,
@@ -612,8 +623,68 @@ function AdminNouveauDevisPage() {
               </div>
             </div>
             <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+
+            <div className="border-t border-pro-border pt-4">
+              <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                Planning {isAllerRetour ? "· livraison" : ""}
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Date d'enlèvement
+                  </label>
+                  <input
+                    type="date"
+                    value={dateSouhaitee}
+                    onChange={(e) => setDateSouhaitee(e.target.value)}
+                    className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Heure
+                  </label>
+                  <input
+                    type="time"
+                    value={heureSouhaitee}
+                    onChange={(e) => setHeureSouhaitee(e.target.value)}
+                    className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                </div>
+              </div>
+              {isAllerRetour && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Date restitution
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRetourInput}
+                      onChange={(e) => setDateRetourInput(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Heure restitution
+                    </label>
+                    <input
+                      type="time"
+                      value={heureRetourInput}
+                      onChange={(e) => setHeureRetourInput(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                </div>
+              )}
+              <p className="mt-2 text-[11.5px] text-pro-muted">
+                Ces dates sont reportées automatiquement sur les missions créées à la conversion du devis.
+              </p>
+            </div>
           </div>
         </Card>
+
 
         {/* 3. Véhicule */}
         <Card>
