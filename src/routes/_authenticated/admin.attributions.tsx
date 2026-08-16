@@ -30,6 +30,7 @@ import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf, displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { ArrowLeftRight } from "lucide-react";
+import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
@@ -53,6 +54,7 @@ interface Attribution {
   trajet?: {
     depart: string; arrivee: string; date_trajet: string | null; heure_trajet?: string | null;
     statut: string; statut_publication?: string | null; client_nom?: string | null;
+    client_email?: string | null;
     client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
@@ -153,6 +155,7 @@ function vueLabelFor(vueType: string): string {
 function AdminAttributions() {
   const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
+  const clientBrands = useClientBrands(attributions.map((a) => a.trajet?.client_email));
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
@@ -361,7 +364,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, prix), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, prix), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -617,17 +620,24 @@ function AdminAttributions() {
                       <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {a.trajet.vin.slice(-8)}</span>
                     )}
                   </div>
-                  <p className="text-pro-muted text-xs mt-1.5">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
+
                     <span className="font-semibold text-pro-text-soft">
                       {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
                       {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
                     </span>
-                    {" · "}Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
-                    {a.trajet?.client_telephone && <> · <span className="text-pro-text-soft">{a.trajet.client_telephone}</span></>}
-                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
-                    {a.trajet?.prix != null && <> · <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></>}
-                  </p>
+                    <span>·</span>
+                    <ClientBrand
+                      brand={clientBrandOf(clientBrands, a.trajet?.client_email)}
+                      fallbackName={a.trajet?.client_nom}
+                      size={22}
+                    />
+                    {a.trajet?.client_telephone && <span className="text-pro-text-soft">· {a.trajet.client_telephone}</span>}
+                    <span>· Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span></span>
+                    {a.trajet?.prix != null && <span>· <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></span>}
+                  </div>
                 </div>
+
                 <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
                   <IconButton

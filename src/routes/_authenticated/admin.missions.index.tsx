@@ -30,6 +30,7 @@ import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
+import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
@@ -147,10 +148,11 @@ function AdminMissionsUnified() {
   const [payFilter, setPayFilter] = useState("all");
   const [energyFilter, setEnergyFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
-  const [hidden, setHidden] = useState<Set<string>>(new Set(["client"]));
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
+  const clientBrands = useClientBrands(rows.map((r) => r.clientEmail));
 
   const show = useCallback((key: string) => !hidden.has(key), [hidden]);
   const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length, [hidden]);
@@ -460,7 +462,7 @@ function AdminMissionsUnified() {
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
-    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string }
+    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -490,6 +492,8 @@ function AdminMissionsUnified() {
             convs,
             total,
             statut: Array.from(new Set(statuts)).join(" · "),
+            clientEmail: duo.find((x) => x.clientEmail)?.clientEmail ?? null,
+            clientNom: duo.find((x) => x.clientNom)?.clientNom ?? null,
           });
           duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
         }
@@ -637,6 +641,13 @@ function AdminMissionsUnified() {
                           <span className="text-[11px] font-medium text-[#3730a3]">
                             Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — un seul dossier
                           </span>
+                          <span className="rounded-full bg-white/80 px-2 py-0.5">
+                            <ClientBrand
+                              brand={clientBrandOf(clientBrands, r.clientEmail)}
+                              fallbackName={r.clientNom}
+                              size={20}
+                            />
+                          </span>
                           <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#3730a3]">
                             Convoyeur{r.convs.length > 1 ? "s" : ""} : {r.convs.length ? r.convs.join(", ") : "non attribué"}
                           </span>
@@ -716,7 +727,15 @@ function AdminMissionsUnified() {
                         </td>
                       )}
 
-                      {show("client") && <td className="text-[var(--a6-muted)]">{r.m.clientNom || "—"}</td>}
+                      {show("client") && (
+                        <td className="text-[var(--a6-muted)]">
+                          <ClientBrand
+                            brand={clientBrandOf(clientBrands, r.m.clientEmail)}
+                            fallbackName={r.m.clientNom}
+                            size={22}
+                          />
+                        </td>
+                      )}
 
                       {show("convoyeur") && (
                         <td>
