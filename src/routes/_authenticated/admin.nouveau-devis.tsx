@@ -637,10 +637,11 @@ function AdminNouveauDevisPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Date d'enlèvement
+                    Date d'enlèvement *
                   </label>
                   <input
                     type="date"
+                    required
                     value={dateSouhaitee}
                     onChange={(e) => setDateSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -648,10 +649,11 @@ function AdminNouveauDevisPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Heure
+                    Heure *
                   </label>
                   <input
                     type="time"
+                    required
                     value={heureSouhaitee}
                     onChange={(e) => setHeureSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -662,10 +664,11 @@ function AdminNouveauDevisPage() {
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Date restitution
+                      Date restitution *
                     </label>
                     <input
                       type="date"
+                      required
                       value={dateRetourInput}
                       onChange={(e) => setDateRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -673,10 +676,11 @@ function AdminNouveauDevisPage() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Heure restitution
+                      Heure restitution *
                     </label>
                     <input
                       type="time"
+                      required
                       value={heureRetourInput}
                       onChange={(e) => setHeureRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
