@@ -1106,6 +1106,162 @@ export type Database = {
           },
         ]
       }
+      campaign_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+          link_url: string | null
+          recipient_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          link_url?: string | null
+          recipient_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          link_url?: string | null
+          recipient_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_events_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          client_id: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          error_message: string | null
+          id: string
+          organization_id: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          client_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email: string
+          error_message?: string | null
+          id?: string
+          organization_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          client_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          error_message?: string | null
+          id?: string
+          organization_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cta_text: string | null
+          cta_url: string | null
+          id: string
+          message: string
+          name: string
+          preheader: string | null
+          scheduled_at: string | null
+          sender_name: string
+          sent_at: string | null
+          status: string
+          subject: string
+          title: string
+          updated_at: string
+          visual_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          message?: string
+          name: string
+          preheader?: string | null
+          scheduled_at?: string | null
+          sender_name?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+          visual_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          message?: string
+          name?: string
+          preheader?: string | null
+          scheduled_at?: string | null
+          sender_name?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+          visual_url?: string | null
+        }
+        Relationships: []
+      }
       chat_tool_calls: {
         Row: {
           arguments: Json
@@ -1213,6 +1369,36 @@ export type Database = {
         }
         Relationships: []
       }
+      client_km_accounts: {
+        Row: {
+          client_id: string | null
+          email: string
+          id: string
+          missions_count: number
+          tier_name: string | null
+          total_km: number
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          email: string
+          id?: string
+          missions_count?: number
+          tier_name?: string | null
+          total_km?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          email?: string
+          id?: string
+          missions_count?: number
+          tier_name?: string | null
+          total_km?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_pricing_rules: {
         Row: {
           active: boolean
@@ -1287,6 +1473,38 @@ export type Database = {
           zone_label?: string | null
         }
         Relationships: []
+      }
+      client_unsubscribes: {
+        Row: {
+          campaign_id: string | null
+          client_id: string | null
+          email: string
+          id: string
+          unsubscribed_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          client_id?: string | null
+          email: string
+          id?: string
+          unsubscribed_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          client_id?: string | null
+          email?: string
+          id?: string
+          unsubscribed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_unsubscribes_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       companies: {
         Row: {
@@ -3271,6 +3489,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      km_tiers: {
+        Row: {
+          benefit: string | null
+          color: string
+          created_at: string
+          id: string
+          min_km: number
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          benefit?: string | null
+          color?: string
+          created_at?: string
+          id?: string
+          min_km?: number
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          benefit?: string | null
+          color?: string
+          created_at?: string
+          id?: string
+          min_km?: number
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       mission_alerts: {
         Row: {
@@ -6539,6 +6790,7 @@ export type Database = {
         Args: { _convoyeur_id: string }
         Returns: undefined
       }
+      refresh_client_km_accounts: { Args: never; Returns: undefined }
       refresh_convoyeur_training_status: {
         Args: { _convoyeur_id: string }
         Returns: undefined
