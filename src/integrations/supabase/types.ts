@@ -4231,6 +4231,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled_admin: boolean
+          enabled_client: boolean
+          enabled_convoyeur: boolean
+          enabled_push: boolean
+          groupe: string
+          key: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled_admin?: boolean
+          enabled_client?: boolean
+          enabled_convoyeur?: boolean
+          enabled_push?: boolean
+          groupe?: string
+          key: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled_admin?: boolean
+          enabled_client?: boolean
+          enabled_convoyeur?: boolean
+          enabled_push?: boolean
+          groupe?: string
+          key?: string
+          label?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -5978,6 +6017,10 @@ export type Database = {
           _statut?: string
         }
         Returns: undefined
+      }
+      admin_update_mission_infos: {
+        Args: { _patch: Json; _trajet_id: string }
+        Returns: Json
       }
       admin_update_trajet_prix: {
         Args: { _prix: number; _prix_convoyeur?: number; _trajet_id: string }
