@@ -890,10 +890,21 @@ function AdminNouveauDevisPage() {
 
         {/* Génération */}
         <Card className="text-center">
-          <Button onClick={handleGenerate} disabled={generating} icon={generating ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} className="mx-auto">
+          <Button
+            onClick={handleGenerate}
+            disabled={generating || planningIncomplet}
+            icon={generating ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            className="mx-auto"
+          >
             {generating ? "Génération…" : "Générer le PDF du devis"}
           </Button>
+          {planningIncomplet && (
+            <p className="mt-3 text-[12px] font-medium text-red-600">
+              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""} pour générer le devis.
+            </p>
+          )}
         </Card>
+
 
         {created && (
           <>
