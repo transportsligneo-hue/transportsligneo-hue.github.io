@@ -61,6 +61,7 @@ import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
 import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
+import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
