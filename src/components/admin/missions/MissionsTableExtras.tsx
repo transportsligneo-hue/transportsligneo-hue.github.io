@@ -161,46 +161,75 @@ export function ColumnsMenu({
   onToggle: (key: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const place = () => {
+    const r = btnRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const width = 224;
+    const left = Math.max(8, Math.min(r.right - width, window.innerWidth - width - 8));
+    setPos({ top: r.bottom + 6, left });
+  };
 
   useEffect(() => {
     if (!open) return;
+    place();
     const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (ref.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
     };
+    const onScroll = () => place();
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [open]);
 
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={btnRef}
         onClick={() => setOpen((v) => !v)}
         className="flex h-9 items-center gap-1.5 rounded-lg border border-[#eaeaee] bg-white px-3 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
       >
         <Columns3 size={15} /> Colonnes <ChevronDown size={13} />
       </button>
-      {open && (
-        <div className="absolute right-0 z-30 mt-1.5 w-56 rounded-xl border border-[#eaeaee] bg-white p-1.5 shadow-lg">
-          {MISSION_COLUMNS.map((c) => {
-            const visible = !hidden.has(c.key);
-            const locked = "locked" in c && c.locked;
-            return (
-              <button
-                key={c.key}
-                disabled={locked}
-                onClick={() => onToggle(c.key)}
-                className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12.5px] ${
-                  locked ? "cursor-not-allowed text-[var(--a6-dim)]" : "text-[var(--a6-text)] hover:bg-[#f4f7ff]"
-                }`}
-              >
-                {c.label}
-                {visible && <Check size={13} className="text-[#2f5fff]" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {open && pos
+        ? createPortal(
+            <div
+              ref={menuRef}
+              style={{ top: pos.top, left: pos.left, width: 224, maxHeight: "60vh" }}
+              className="fixed z-[9999] overflow-y-auto rounded-xl border border-[#eaeaee] bg-white p-1.5 shadow-xl"
+            >
+              {MISSION_COLUMNS.map((c) => {
+                const visible = !hidden.has(c.key);
+                const locked = "locked" in c && c.locked;
+                return (
+                  <button
+                    key={c.key}
+                    disabled={locked}
+                    onClick={() => onToggle(c.key)}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12.5px] ${
+                      locked ? "cursor-not-allowed text-[var(--a6-dim)]" : "text-[var(--a6-text)] hover:bg-[#f4f7ff]"
+                    }`}
+                  >
+                    {c.label}
+                    {visible && <Check size={13} className="text-[#2f5fff]" />}
+                  </button>
+                );
+              })}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
