@@ -5646,3 +5646,67 @@ html.theme-light .driver-selfie-status { color: #47506e; }
   .ldock-item.is-active .ldock-ic::before,
   .ldock-fab::after, .ldock-mission-ring, .ldock-live { animation: none; }
 }
+
+/* ============================================================
+   Espace Flotte — cartes "dossier de transport"
+   Esthétique volontairement distincte de l'admin :
+   fond blanc, filet violet à gauche, chips arrondies.
+   ============================================================ */
+.fleet-dossier {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e6e8f0;
+  border-radius: 16px;
+  padding: 14px 16px 12px 18px;
+  overflow: hidden;
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.fleet-dossier::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, #7c5cff, #2f5fff);
+}
+.fleet-dossier:hover { box-shadow: 0 10px 26px -18px rgba(83,52,214,.55); border-color: #d9d3ff; }
+.fleet-dossier-head { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.fleet-dossier-num {
+  font-family: 'Space Grotesk','Inter',sans-serif; font-weight: 700; font-size: 13.5px;
+  letter-spacing: .02em; color: #1b2340;
+}
+.fleet-dossier-total { margin-left: auto; text-align: right; font-weight: 700; font-size: 15px; color: #1b2340; }
+.fleet-dossier-total-note { display: block; font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: #8b93b0; }
+.fleet-chip-duo {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
+  background: #f0ecff; color: #5334d6; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.fleet-chip-elec {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
+  background: #e6f7f0; color: #0a7c56; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.fleet-plate {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 5px;
+  background: #101a3d; color: #fff; font-family: 'Space Grotesk','Inter',sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: .09em;
+  box-shadow: inset 3px 0 0 #2f5fff;
+}
+.fleet-plate-mini {
+  display: inline-flex; padding: 1px 6px; border-radius: 4px; background: #eef1f8;
+  color: #445; font-size: 10px; font-weight: 700; letter-spacing: .07em;
+}
+.fleet-dossier-vehicle {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: 6px; font-size: 12px; color: #5c6480;
+}
+.fleet-vin { font-size: 10px; letter-spacing: .05em; color: #98a0ba; font-family: ui-monospace, monospace; }
+.fleet-leg-list { margin-top: 10px; display: grid; gap: 8px; }
+.fleet-leg {
+  display: grid; gap: 5px; padding: 10px 12px; border-radius: 12px;
+  background: #f7f8fc; border: 1px solid transparent; transition: background .18s ease, border-color .18s ease;
+}
+.fleet-leg:hover { background: #f2efff; border-color: #ded6ff; }
+.fleet-leg-route { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #1b2340; min-width: 0; }
+.fleet-leg-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #6b7392; }
+.fleet-leg-cta {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 3px;
+  color: #5334d6; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+}
