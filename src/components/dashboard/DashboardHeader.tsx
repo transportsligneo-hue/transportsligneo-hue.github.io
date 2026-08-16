@@ -362,87 +362,9 @@ export function DashboardHeader({
           <div className="flex-1" />
         )}
 
-        {/* === Notifications === */}
-        <div ref={notifRef} className="relative">
-          <button
-            onClick={() => setNotifOpen((v) => !v)}
-            className={`relative w-9 h-9 rounded-md flex items-center justify-center transition-colors ${iconBtn}`}
-            aria-label="Notifications"
-          >
-            <Bell size={17} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </button>
+        {/* === Notifications (cloche unifiée, navigation interne) === */}
+        <NotificationBell className={isDark ? "text-cream" : "text-pro-text-soft"} />
 
-          {notifOpen && (
-            <div className={`absolute right-0 mt-2 w-80 rounded-lg overflow-hidden ${dropdownBg}`}>
-              <div className={`px-4 py-3 border-b ${isDark ? "border-primary/15" : "border-pro-border"}`}>
-                <p className={`text-sm font-semibold ${isDark ? "text-cream" : "text-pro-text"}`}>
-                  Notifications
-                </p>
-              </div>
-              {finalNotifs.length === 0 ? (
-                <div className={`px-4 py-8 text-center text-sm ${isDark ? "text-cream/50" : "text-pro-muted"}`}>
-                  Aucune notification
-                </div>
-              ) : (
-                <ul className="max-h-96 overflow-y-auto">
-                  {finalNotifs.map((n) => {
-                    const content = (
-                      <div className={`px-4 py-3 border-b last:border-0 transition-colors ${
-                        isDark
-                          ? "border-primary/10 hover:bg-primary/10"
-                          : "border-pro-border hover:bg-pro-bg-soft"
-                      }`}>
-                        <p className={`text-sm font-medium ${isDark ? "text-cream" : "text-pro-text"}`}>
-                          {n.title}
-                        </p>
-                        {n.description && (
-                          <p className={`text-xs mt-0.5 ${isDark ? "text-cream/60" : "text-pro-text-soft"}`}>
-                            {n.description}
-                          </p>
-                        )}
-                        <p className={`text-[10px] mt-1 ${isDark ? "text-cream/40" : "text-pro-muted"}`}>
-                          {new Date(n.date).toLocaleString("fr-FR", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    );
-                    return (
-                      <li key={n.id}>
-                        {n.to ? (
-                          <a href={n.to} onClick={() => setNotifOpen(false)} className="block">
-                            {content}
-                          </a>
-                        ) : (
-                          content
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <a
-                href="/notifications"
-                onClick={() => setNotifOpen(false)}
-                className={`block px-4 py-2.5 text-center text-xs font-semibold border-t ${
-                  isDark
-                    ? "border-primary/15 text-primary hover:bg-primary/10"
-                    : "border-pro-border text-pro-accent hover:bg-pro-bg-soft"
-                }`}
-              >
-                Voir toutes les notifications →
-              </a>
-            </div>
-          )}
-        </div>
 
 
         {/* === Profil === */}
