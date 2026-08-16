@@ -318,6 +318,20 @@ function ProMissionsIndex() {
           dossiers.map(({ key, legs, isDuo, total, head }) => {
             const elec = (head.carburant ?? "").toLowerCase().includes("elec")
               || (head.carburant ?? "").toLowerCase().includes("élec");
+            const fmtDate = (d: string) =>
+              new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+            const dates = legs
+              .map((l) => l.date_prise_en_charge)
+              .filter(Boolean)
+              .sort();
+            const dateLabel = dates.length === 0
+              ? "Date à définir"
+              : dates[0] === dates[dates.length - 1]
+                ? fmtDate(dates[0]!)
+                : `${fmtDate(dates[0]!)} → ${fmtDate(dates[dates.length - 1]!)}`;
+            const plates = Array.from(
+              new Set(legs.map((l) => l.immatriculation).filter(Boolean) as string[]),
+            );
             return (
               <article key={key} className="fleet-dossier">
                 <header className="fleet-dossier-head">
@@ -328,9 +342,9 @@ function ProMissionsIndex() {
                         <Repeat size={10} /> Aller-retour
                       </span>
                     )}
-                    {head.immatriculation && (
-                      <span className="fleet-plate">{head.immatriculation}</span>
-                    )}
+                    {plates.map((p) => (
+                      <span key={p} className="plate-tag">{p}</span>
+                    ))}
                     {elec && <span className="fleet-chip-elec"><Zap size={10} /> Électrique</span>}
                   </div>
                   <div className="fleet-dossier-total">
@@ -340,10 +354,14 @@ function ProMissionsIndex() {
                 </header>
 
                 <div className="fleet-dossier-vehicle">
+                  <Calendar size={12} className="text-[#5334d6]" />
+                  <span className="font-semibold text-[#1b2340]">{dateLabel}</span>
+                  <span className="text-pro-muted">·</span>
                   <Car size={12} />
                   <span>{[head.marque, head.modele].filter(Boolean).join(" ") || "Véhicule à préciser"}</span>
                   {head.vin && <span className="fleet-vin">VIN {head.vin}</span>}
                 </div>
+
 
                 <ul className="fleet-leg-list">
                   {legs.map((m) => (
