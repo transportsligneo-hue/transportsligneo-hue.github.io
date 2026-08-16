@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car } from "lucide-react";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
+import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
@@ -184,7 +185,7 @@ function ProMissionsIndex() {
   const dossiers = useMemo(() => {
     const map = new Map<string, MissionRow[]>();
     for (const m of filtered) {
-      const key = m.mission_group_id ?? m.group_reference ?? m.numero.replace(/-(A|R|L)$/i, "");
+      const key = m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero);
       const arr = map.get(key);
       if (arr) arr.push(m);
       else map.set(key, [m]);
@@ -274,7 +275,7 @@ function ProMissionsIndex() {
                   <FileText size={14} className="text-pro-accent shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs text-pro-text-soft">{p.numero}</span>
+                      <span className="font-mono text-xs text-pro-text-soft">{displayNumero(p.numero)}</span>
                       <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-amber-100 text-amber-700">
                         {p.source === "devis" ? "Devis en attente" : "Demande reçue"}
                       </span>
@@ -336,7 +337,7 @@ function ProMissionsIndex() {
               <article key={key} className="fleet-dossier">
                 <header className="fleet-dossier-head">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="fleet-dossier-num">{head.group_reference ?? head.numero}</span>
+                    <span className="fleet-dossier-num">{displayNumero(stripLegSuffix(head.numero))}</span>
                     {isDuo && (
                       <span className="fleet-chip-duo">
                         <Repeat size={10} /> Aller-retour
@@ -374,7 +375,7 @@ function ProMissionsIndex() {
                         onFocus={() => prefetchMissionTracking(m.numero, m.id)}
                       >
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-[11px] text-pro-text-soft">{m.numero}</span>
+                          <span className="font-mono text-[11px] text-pro-text-soft">{legRef(m.numero, m.leg_type, m.leg_index, isDuo)}</span>
                           <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${statutPill[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
                             {statutLabel[m.statut] ?? m.statut}

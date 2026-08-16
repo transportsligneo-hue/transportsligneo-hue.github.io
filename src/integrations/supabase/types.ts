@@ -5959,6 +5959,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      canonical_group_numero: { Args: { p_group_id: string }; Returns: string }
       convoyeur_documents_signes: {
         Args: { _user_id: string }
         Returns: boolean
@@ -6229,10 +6230,12 @@ export type Database = {
         Args: { _prefix: string; _year?: number }
         Returns: string
       }
+      normalize_all_mission_numeros: { Args: never; Returns: number }
       normalize_mission_group_prices: {
         Args: { _group: string }
         Returns: undefined
       }
+      normalize_mission_numero: { Args: { p_numero: string }; Returns: string }
       push_scan_handoff_extraction: {
         Args: { _extraction: Json; _token: string }
         Returns: string

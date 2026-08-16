@@ -1,12 +1,14 @@
 /**
  * Affichage normalisé d'un numéro de mission : le numéro d'origine stocké en base
  * (MIS-TLG-2026-075) est affiché avec un dièse devant la séquence → MIS-TLG-2026-#075.
+ * Un éventuel suffixe de volet est affiché séparé par un tiret → MIS-TLG-2026-#075-L.
  */
 export function displayNumero(numero: string): string {
-  return numero.replace(/-#?(\d+)([ARL])?$/i, (_m, digits: string, suffix?: string) =>
-    `-#${digits}${suffix ? suffix.toUpperCase() : ""}`,
+  return numero.replace(/-#?(\d+)-?([ARL])?$/i, (_m, digits: string, suffix?: string) =>
+    `-#${digits}${suffix ? `-${suffix.toUpperCase()}` : ""}`,
   );
 }
+
 
 /** Numéro mission MIS-TLG-YYYY-#XXX dérivé déterministe depuis created_at + id */
 export function formatMissionNumber(id: string, createdAt: string): string {
@@ -25,8 +27,15 @@ export function missionNumberOf(row: {
 }
 
 
+/** "L" (livraison) ou "R" (restitution) selon le volet, null si mission simple */
+export function legSuffix(legType?: string | null, legIndex?: number | null): "L" | "R" | null {
+  if (legType === "retour" || legIndex === 2) return "R";
+  if (legType === "aller" || legIndex === 1) return "L";
+  return null;
+}
+
 /**
- * Référence d'un trajet, suffixée A (livraison) / R (restitution)
+ * Référence d'un trajet, suffixée -L (livraison) / -R (restitution)
  * pour les missions livraison + restitution. Les deux volets partagent
  * le même numéro de base (dérivé du mission_group_id).
  */
@@ -40,18 +49,17 @@ export function formatTrajetRef(opts: {
 }): string {
   const base = formatMissionNumber(opts.groupId ?? opts.id, opts.createdAt);
   if (!opts.isRoundTrip) return base;
-  const isRetour = opts.legType === "retour" || opts.legIndex === 2;
-  return `${base}${isRetour ? "R" : "L"}`;
+  return `${base}-${legSuffix(opts.legType, opts.legIndex) ?? "L"}`;
 }
 
-/** Retire un éventuel suffixe A/R d'un numéro de mission (MIS-TLG-2026-082R → …-082) */
+/** Retire un éventuel suffixe A/R d'un numéro de mission (MIS-TLG-2026-082-R → …-082) */
 export function stripLegSuffix(numero: string): string {
-  return numero.replace(/([-#]?\d+)[ARL]$/i, "$1");
+  return numero.replace(/([-#]?\d+)-?[ARL]$/i, "$1");
 }
 
 /** true si le numéro porte un suffixe de volet (L = Livraison, R = Restitution) */
 export function hasLegSuffix(numero: string | null | undefined): boolean {
-  return !!numero && /[-#]?\d+[ARL]$/i.test(numero);
+  return !!numero && /[-#]?\d+-?[ARL]$/i.test(numero);
 }
 
 /** "#085" — séquence racine affichable d'un numéro de mission */
@@ -61,8 +69,24 @@ export function shortMissionSeq(numero: string): string {
 }
 
 /**
+ * Référence affichée d'un volet : MIS-TLG-2026-#104-L / -R.
+ * Le numéro de base est celui du dossier, identique pour les deux volets.
+ */
+export function legRef(
+  numero: string | null | undefined,
+  legType?: string | null,
+  legIndex?: number | null,
+  isDuo = true,
+): string {
+  if (!numero) return "—";
+  const base = displayNumero(stripLegSuffix(numero));
+  const suffix = isDuo ? legSuffix(legType, legIndex) : null;
+  return suffix ? `${base}-${suffix}` : base;
+}
+
+/**
  * Référence affichée : privilégie le vrai numéro de mission (attribution)
- * et applique le suffixe A / R pour les livraisons + restitutions.
+ * et applique le suffixe -L / -R pour les livraisons + restitutions.
  */
 export function displayTrajetRef(opts: {
   id: string;
@@ -76,9 +100,9 @@ export function displayTrajetRef(opts: {
   if (opts.baseNumero) {
     const base = displayNumero(stripLegSuffix(opts.baseNumero));
     if (!opts.isRoundTrip) return base;
-    const isRetour = opts.legType === "retour" || opts.legIndex === 2;
-    return `${base}${isRetour ? "R" : "L"}`;
+    return `${base}-${legSuffix(opts.legType, opts.legIndex) ?? "L"}`;
   }
 
   return formatTrajetRef(opts);
 }
+

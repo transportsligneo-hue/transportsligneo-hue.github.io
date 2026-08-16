@@ -9,6 +9,7 @@ import {
   Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp,
 } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+import { legRef } from "@/lib/mission-number";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -24,6 +25,8 @@ interface MissionRow {
   statut: string;
   prix_total: number;
   created_at: string;
+  leg_type?: string | null;
+  leg_index?: number | null;
 }
 interface VehicleRow {
   id: string; marque: string | null; modele: string | null;
@@ -77,7 +80,7 @@ function ProDashboard() {
       const email = user.email ?? "";
       const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
       const [{ data: directRows }, { data: profile }, { data: memberships }, { data: devisData }, { data: facturesData }] = await Promise.all([
-        supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at").or(orFilter).order("created_at", { ascending: false }),
+        supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index").or(orFilter).order("created_at", { ascending: false }),
         supabase.from("profiles").select("organization_id").eq("user_id", user.id).maybeSingle(),
         supabase.from("organization_members").select("organization_id").eq("user_id", user.id).eq("status", "active"),
         supabase.from("devis").select("id, numero, depart, arrivee, prix_estime, statut, created_at, paid_at, accepted_at, locked_at, mission_id").order("created_at", { ascending: false }).limit(6),
@@ -87,7 +90,7 @@ function ProDashboard() {
       let orgRows: MissionRow[] = []; let vehicleRows: VehicleRow[] = [];
       if (orgIds.length > 0) {
         const [{ data: mData }, { data: vData }] = await Promise.all([
-          supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at").or(orgIds.map(id => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(",")).order("created_at", { ascending: false }),
+          supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index").or(orgIds.map(id => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(",")).order("created_at", { ascending: false }),
           supabase.from("vehicles").select("id, marque, modele, immatriculation, statut").in("organization_id", orgIds),
         ]);
         orgRows = (mData ?? []) as MissionRow[];
@@ -333,7 +336,7 @@ function ProDashboard() {
               style={{ gridTemplateColumns: "1.7fr 1.4fr 110px 90px 34px" }}
             >
               <div className="min-w-0">
-                <div className="v3-mono-id">{m.numero}</div>
+                <div className="v3-mono-id">{legRef(m.numero, m.leg_type, m.leg_index, m.leg_type === "aller" || m.leg_type === "retour")}</div>
                 <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
               </div>
               <div className="hidden md:block v3-pulse">
