@@ -61,15 +61,14 @@ export const generateEdlReport = createServerFn({ method: "POST" })
     if (settings && !settings.ai_enabled) return { ok: false, error: "IA désactivée" };
     if (settings?.caps?.auto_report === false) return { ok: false, error: "Rapport auto désactivé" };
 
-    // Récupère les données EDL depuis Supabase pour donner du contexte au modèle
+    // Récupère les données EDL via le client RLS de l'appelant :
+    // seul un utilisateur autorisé sur l'attribution (client, convoyeur, admin) peut lire l'inspection.
     let context_text = "";
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: insp } = await (supabaseAdmin.from("inspections" as any) as any)
-        .select("*").eq("id", data.inspection_id).maybeSingle();
-      if (insp) context_text = `Contexte inspection : ${JSON.stringify(insp).slice(0, 3000)}`;
-    } catch { /* pas bloquant */ }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: insp, error: inspError } = await (context.supabase.from("inspections" as any) as any)
+      .select("*").eq("id", data.inspection_id).maybeSingle();
+    if (inspError || !insp) return { ok: false, error: "Inspection introuvable ou accès non autorisé" };
+    context_text = `Contexte inspection : ${JSON.stringify(insp).slice(0, 3000)}`;
 
     const model = pickModel("auto_report", settings?.model_overrides);
     const userText = [
