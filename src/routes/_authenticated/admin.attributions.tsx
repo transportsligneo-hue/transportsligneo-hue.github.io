@@ -50,7 +50,15 @@ interface Attribution {
   etape_courante?: string | null;
   numero_mission?: string | null;
   created_at: string;
-  trajet?: { depart: string; arrivee: string; date_trajet: string | null; statut: string; statut_publication?: string | null; client_nom?: string | null; type_transport?: string | null; is_test_data?: boolean | null; mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null };
+  trajet?: {
+    depart: string; arrivee: string; date_trajet: string | null; heure_trajet?: string | null;
+    statut: string; statut_publication?: string | null; client_nom?: string | null;
+    client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
+    mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
+    marque?: string | null; modele?: string | null; immatriculation?: string | null;
+    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null;
+    prix?: number | null;
+  };
   convoyeur?: { nom: string; prenom: string };
 }
 
