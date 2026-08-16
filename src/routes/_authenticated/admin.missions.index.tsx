@@ -197,7 +197,7 @@ function AdminMissionsUnified() {
         .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
-      supabase.from("attributions").select("trajet_id, convoyeur_id, statut, numero_mission, created_at"),
+      supabase.from("attributions").select("id, trajet_id, convoyeur_id, statut, numero_mission, created_at"),
       supabase.from("convoyeurs").select("id, prenom, nom, statut").eq("statut", "valide").order("nom"),
     ]);
 
@@ -230,12 +230,12 @@ function AdminMissionsUnified() {
       trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
     }[];
     const numeroByTrajet = new Map<string, string>();
-    const activeAttrByTrajet = new Map<string, { convoyeur_id: string | null; statut: string | null }>();
+    const activeAttrByTrajet = new Map<string, { id: string; convoyeur_id: string | null; statut: string | null }>();
     attrRows.forEach((a) => {
       if (!a.trajet_id) return;
       if (a.numero_mission && !numeroByTrajet.has(a.trajet_id)) numeroByTrajet.set(a.trajet_id, a.numero_mission);
       if (ACTIVE_ATTR.includes(a.statut ?? "") && !activeAttrByTrajet.has(a.trajet_id)) {
-        activeAttrByTrajet.set(a.trajet_id, { convoyeur_id: a.convoyeur_id, statut: a.statut });
+        activeAttrByTrajet.set(a.trajet_id, { id: a.id, convoyeur_id: a.convoyeur_id, statut: a.statut });
       }
     });
 
