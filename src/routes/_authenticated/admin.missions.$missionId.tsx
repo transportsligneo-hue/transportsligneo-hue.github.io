@@ -90,6 +90,8 @@ interface TrajetFull {
   arrivee: string;
   date_trajet: string | null;
   heure_trajet: string | null;
+  date_souhaitee: string | null;
+
   statut: string;
   marque: string | null;
   modele: string | null;
