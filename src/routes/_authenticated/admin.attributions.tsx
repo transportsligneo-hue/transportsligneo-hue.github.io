@@ -591,12 +591,41 @@ function AdminAttributions() {
                   <p className="text-pro-text-soft text-sm mt-1">
                     {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
-                  <p className="text-pro-muted text-xs mt-1">
-                    Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
-                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
-                    {a.trajet?.date_trajet && (
-                      <> · {new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR")}</>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    {(() => {
+                      const plate = a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation;
+                      return plate ? <span className="plate-tag text-[11px]">{plate}</span> : (
+                        <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                          Plaque à renseigner
+                        </span>
+                      );
+                    })()}
+                    {(a.trajet?.marque || a.trajet?.modele) && (
+                      <span className="text-xs font-semibold text-pro-text">
+                        {[a.trajet?.marque, a.trajet?.modele].filter(Boolean).join(" ")}
+                      </span>
                     )}
+                    {(() => {
+                      const e = (a.trajet?.vehicule_energie ?? "").toLowerCase();
+                      return e.includes("lec") || e === "ev" ? (
+                        <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                          Électrique
+                        </span>
+                      ) : null;
+                    })()}
+                    {a.trajet?.vin && (
+                      <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {a.trajet.vin.slice(-8)}</span>
+                    )}
+                  </div>
+                  <p className="text-pro-muted text-xs mt-1.5">
+                    <span className="font-semibold text-pro-text-soft">
+                      {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
+                      {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
+                    </span>
+                    {" · "}Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
+                    {a.trajet?.client_telephone && <> · <span className="text-pro-text-soft">{a.trajet.client_telephone}</span></>}
+                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
+                    {a.trajet?.prix != null && <> · <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></>}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
