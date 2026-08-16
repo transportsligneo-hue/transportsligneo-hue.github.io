@@ -629,7 +629,7 @@ function AdminMissionsUnified() {
                       {show("plaque") && (
                         <td>
                           {r.m.immatriculation ? (
-                            <span className="inline-flex items-center rounded-md border border-[#dbe3ff] bg-[#f4f7ff] px-1.5 py-0.5 a6-mono text-[11px] font-bold tracking-wider text-[#1e3a8a]">
+                            <span className="plate-tag plate-tag--sm">
                               {r.m.immatriculation}
                             </span>
                           ) : (

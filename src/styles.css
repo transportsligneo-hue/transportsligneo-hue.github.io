@@ -5710,3 +5710,45 @@ html.theme-light .driver-selfie-status { color: #47506e; }
   margin-left: auto; display: inline-flex; align-items: center; gap: 3px;
   color: #5334d6; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
 }
+
+/* ============================================================
+   Plaque d'immatriculation — composant visuel partagé
+   (Espace Flotte, Admin, Documents). Bande UE + reflet animé.
+   ============================================================ */
+.plate-tag {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px 3px 16px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff, #eef1f8);
+  border: 1px solid #c8cfe2;
+  color: #101a3d;
+  font-family: 'Space Grotesk','Inter',sans-serif;
+  font-size: 12px; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(16,26,61,.12), inset 0 1px 0 rgba(255,255,255,.9);
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.plate-tag::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
+  background: linear-gradient(180deg, #1b3fa8, #0d2472);
+  box-shadow: inset -1px 0 0 rgba(0,0,0,.15);
+}
+.plate-tag::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 38%;
+  left: -60%; transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent);
+  transition: left .55s ease;
+}
+.plate-tag:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgba(16,26,61,.45); }
+.plate-tag:hover::after { left: 120%; }
+.plate-tag--sm { padding: 2px 7px 2px 13px; font-size: 10.5px; letter-spacing: .1em; }
+.plate-tag--sm::before { width: 8px; }
+.plate-tag--dark {
+  background: linear-gradient(180deg, #182350, #101a3d);
+  border-color: #2b3a72; color: #f4f7ff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .plate-tag, .plate-tag::after { transition: none; }
+}

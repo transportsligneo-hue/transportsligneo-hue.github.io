@@ -357,10 +357,10 @@ function ProDocuments() {
                               </span>
                             )}
                             <span className="flex flex-wrap items-center gap-2 text-[11px] text-pro-text-soft">
-                              {d.immatriculation && <span className="fleet-plate-mini">{d.immatriculation}</span>}
+                              {d.immatriculation && <span className="plate-tag plate-tag--sm">{d.immatriculation}</span>}
                               {vehicule && <span>{vehicule}</span>}
                               {d.immatriculation_retour && d.immatriculation_retour !== d.immatriculation && (
-                                <span className="fleet-plate-mini">{d.immatriculation_retour}</span>
+                                <span className="plate-tag plate-tag--sm">{d.immatriculation_retour}</span>
                               )}
                               {vehiculeRetour && vehiculeRetour !== vehicule && <span>{vehiculeRetour}</span>}
                             </span>

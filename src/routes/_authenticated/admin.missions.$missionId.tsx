@@ -1019,14 +1019,15 @@ function AdminMissionDetail() {
             <div className="mt-3 grid grid-cols-1 xl:grid-cols-3 gap-2 xl:gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
                 <Car size={14} className="text-pro-muted" />
-                <span className="truncate">
+                <span className="truncate inline-flex items-center gap-2">
                   {trajet.marque || trajet.modele
                     ? `${trajet.marque ?? ""} ${trajet.modele ?? ""}`.trim()
                     : "Véhicule —"}
                   {trajet.immatriculation && (
-                    <span className="text-pro-muted ml-1">· {trajet.immatriculation}</span>
+                    <span className="plate-tag plate-tag--sm">{trajet.immatriculation}</span>
                   )}
                 </span>
+
               </div>
               <div className="flex items-center gap-2 text-pro-text-soft">
                 <User size={14} className="text-pro-muted" />
