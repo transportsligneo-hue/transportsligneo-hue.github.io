@@ -3,7 +3,7 @@ import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar } from "lucide-react";
+import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car } from "lucide-react";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
