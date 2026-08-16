@@ -61,6 +61,7 @@ function AdminNotifications() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
   const [showRead, setShowRead] = useState(false);
+  const [tab, setTab] = useState<"feed" | "settings">("feed");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
