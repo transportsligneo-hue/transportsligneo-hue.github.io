@@ -97,6 +97,20 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
 
 
 const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
+const FIELD_TYPES: Record<string, FieldDef["type"]> = Object.fromEntries(
+  SECTIONS.flatMap((s) => s.fields.map((f) => [f.key, f.type ?? "text"])),
+);
+
+/** Normalise une valeur brute DB vers la valeur attendue par l'input (date / heure). */
+function normalizeValue(key: string, raw: unknown): string {
+  if (raw === null || raw === undefined) return "";
+  const s = String(raw);
+  const t = FIELD_TYPES[key];
+  if (t === "date") return s.slice(0, 10);
+  if (t === "time") return s.slice(0, 5);
+  return s;
+}
+
 
 interface Props {
   trajetId: string;
