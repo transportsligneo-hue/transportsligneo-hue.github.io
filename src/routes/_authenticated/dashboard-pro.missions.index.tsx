@@ -172,11 +172,36 @@ function ProMissionsIndex() {
       list = list.filter(m =>
         m.numero.toLowerCase().includes(q) ||
         m.ville_depart.toLowerCase().includes(q) ||
-        m.ville_arrivee.toLowerCase().includes(q)
+        m.ville_arrivee.toLowerCase().includes(q) ||
+        (m.immatriculation ?? "").toLowerCase().includes(q) ||
+        (m.vin ?? "").toLowerCase().includes(q) ||
+        `${m.marque ?? ""} ${m.modele ?? ""}`.toLowerCase().includes(q)
       );
     }
     return list;
   }, [missions, filter, search]);
+
+  /** Regroupe les jambes Livraison + Restitution d'un même dossier. */
+  const dossiers = useMemo(() => {
+    const map = new Map<string, MissionRow[]>();
+    for (const m of filtered) {
+      const key = m.mission_group_id ?? m.group_reference ?? m.numero.replace(/-(A|R|L)$/i, "");
+      const arr = map.get(key);
+      if (arr) arr.push(m);
+      else map.set(key, [m]);
+    }
+    return Array.from(map.entries()).map(([key, legs]) => {
+      const ordered = [...legs].sort((a, b) => {
+        const rank = (l: MissionRow) => (l.leg_type === "retour" ? 1 : 0);
+        return rank(a) - rank(b) || (a.leg_index ?? 0) - (b.leg_index ?? 0);
+      });
+      const isDuo = ordered.length > 1 || ordered.some(l => l.leg_type === "aller" || l.leg_type === "retour");
+      const total = ordered.reduce((sum, l) => sum + Number(l.prix_total ?? 0), 0);
+      const head = ordered[0]!;
+      return { key, legs: ordered, isDuo, total, head };
+    });
+  }, [filtered]);
+
 
   const pendingFiltered = useMemo(() => {
     if (!search.trim()) return pending;
