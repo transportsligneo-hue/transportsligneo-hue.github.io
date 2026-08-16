@@ -119,7 +119,10 @@ const TRAJET_TYPES = [
   "Livraison + restitution",
 ] as const;
 
-const PV_OPTIONS = ["Aucun", "WelcomeAuto", "Model"] as const;
+const PV_OPTIONS: { key: PvChoice; label: string }[] = [
+  { key: "aucun", label: "Aucun" },
+  ...PV_PLATEFORMES.map((p) => ({ key: p.key as PvChoice, label: p.label })),
+];
 
 function AdminNouveauDevisPage() {
   const [search, setSearch] = useState("");
