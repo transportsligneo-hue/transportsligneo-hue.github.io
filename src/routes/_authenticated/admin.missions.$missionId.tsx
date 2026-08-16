@@ -28,6 +28,10 @@ import {
   Trash2,
   Download,
   Save,
+  Car,
+  Copy,
+  Fingerprint,
+  Pencil,
 } from "lucide-react";
 import {
   Card,
