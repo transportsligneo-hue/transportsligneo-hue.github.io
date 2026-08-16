@@ -239,6 +239,7 @@ function GroupedMissionForm() {
   const canSubmit =
     depart.trim().length >= 2 &&
     !!date &&
+    !!heure &&
     filledRows.length > 0 &&
     rows.every((r) => (r.immat.trim() ? destFor(r).trim().length >= 2 : true)) &&
     !submitting;
@@ -546,12 +547,12 @@ function GroupedMissionForm() {
       <Card num="4" title="Planning">
         <div className="grid gap-3.5 sm:grid-cols-2">
           <div>
-            <span className={labelCls}>Date souhaitée</span>
-            <input type="date" className={fieldCls} value={date} onChange={(e) => setDate(e.target.value)} />
+            <span className={labelCls}>Date souhaitée *</span>
+            <input type="date" required className={fieldCls} value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div>
-            <span className={labelCls}>Heure souhaitée</span>
-            <input type="time" className={fieldCls} value={heure} onChange={(e) => setHeure(e.target.value)} />
+            <span className={labelCls}>Heure souhaitée *</span>
+            <input type="time" required className={fieldCls} value={heure} onChange={(e) => setHeure(e.target.value)} />
           </div>
         </div>
         <div className="mt-3.5">

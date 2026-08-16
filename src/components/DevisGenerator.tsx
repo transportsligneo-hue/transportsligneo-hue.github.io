@@ -387,7 +387,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     return () => { cancelled = true; clearTimeout(t); };
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
-  const isComplete = !!(departure && arrival && vehicleType);
+  const isComplete = !!(departure && arrival && vehicleType && date && heure);
   // priceTTC = source de vérité affichée. En micro-entreprise (franchise en base de TVA),
   // le prix affiché est le net à payer : aucune ventilation HT / TVA.
   const localTtc = pricing?.finalPrice ?? 0;
@@ -659,7 +659,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Calendar size={11} className="text-[#60a5fa]" /> Date
+                  <Calendar size={11} className="text-[#60a5fa]" /> Date *
                 </label>
                 <input
                   type="date"
@@ -670,7 +670,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Clock size={11} className="text-[#60a5fa]" /> Heure
+                  <Clock size={11} className="text-[#60a5fa]" /> Heure *
                 </label>
                 <input
                   type="time"
@@ -808,14 +808,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                  <Calendar size={11} className="text-[#e7c76a]" /> Date
+                  <Calendar size={11} className="text-[#e7c76a]" /> Date *
                 </label>
                 <input type="date" value={date} onChange={e => setDate(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                  <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison
+                  <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison *
                 </label>
                 <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
@@ -943,12 +943,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <PlacesInput value={arrival} onChange={setArrival} className={inputCard} fallbackOptions={CITIES} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée</label>
-                      <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée *</label>
+                      <input type="date" required value={date} onChange={e => setDate(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure de livraison souhaitée</label>
-                      <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure de livraison souhaitée *</label>
+                      <input type="time" required value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>
 

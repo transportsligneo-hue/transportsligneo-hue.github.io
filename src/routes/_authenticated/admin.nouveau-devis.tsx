@@ -293,6 +293,11 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = typeTrajet === "Livraison + restitution";
+  const planningIncomplet =
+    !dateSouhaitee ||
+    !heureSouhaitee ||
+    (isAllerRetour && (!dateRetourInput || !heureRetourInput));
+
 
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
@@ -345,7 +350,13 @@ function AdminNouveauDevisPage() {
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim() || !arrivee.trim()) return toast.error("Départ et arrivée requis");
+    if (!dateSouhaitee || !heureSouhaitee)
+      return toast.error("Date et heure d'enlèvement obligatoires");
+    if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
+      return toast.error("Date et heure de restitution obligatoires");
     if (!Number.isFinite(prix) || prix <= 0) return toast.error("Montant TTC invalide");
+
+
 
     setGenerating(true);
     try {
@@ -631,10 +642,11 @@ function AdminNouveauDevisPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Date d'enlèvement
+                    Date d'enlèvement *
                   </label>
                   <input
                     type="date"
+                    required
                     value={dateSouhaitee}
                     onChange={(e) => setDateSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -642,10 +654,11 @@ function AdminNouveauDevisPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Heure
+                    Heure *
                   </label>
                   <input
                     type="time"
+                    required
                     value={heureSouhaitee}
                     onChange={(e) => setHeureSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -656,10 +669,11 @@ function AdminNouveauDevisPage() {
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Date restitution
+                      Date restitution *
                     </label>
                     <input
                       type="date"
+                      required
                       value={dateRetourInput}
                       onChange={(e) => setDateRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -667,10 +681,11 @@ function AdminNouveauDevisPage() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Heure restitution
+                      Heure restitution *
                     </label>
                     <input
                       type="time"
+                      required
                       value={heureRetourInput}
                       onChange={(e) => setHeureRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -880,10 +895,21 @@ function AdminNouveauDevisPage() {
 
         {/* Génération */}
         <Card className="text-center">
-          <Button onClick={handleGenerate} disabled={generating} icon={generating ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} className="mx-auto">
+          <Button
+            onClick={handleGenerate}
+            disabled={generating || planningIncomplet}
+            icon={generating ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            className="mx-auto"
+          >
             {generating ? "Génération…" : "Générer le PDF du devis"}
           </Button>
+          {planningIncomplet && (
+            <p className="mt-3 text-[12px] font-medium text-red-600">
+              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""} pour générer le devis.
+            </p>
+          )}
         </Card>
+
 
         {created && (
           <>

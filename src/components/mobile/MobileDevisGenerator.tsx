@@ -290,6 +290,14 @@ export default function MobileDevisGenerator() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pricing || distance == null) return;
+    if (!date || !heure) {
+      window.alert("Merci d'indiquer la date et l'heure souhaitées.");
+      return;
+    }
+    if (option === "aller-retour" && (!dateRetour || !heureRetour)) {
+      window.alert("Merci d'indiquer la date et l'heure de restitution.");
+      return;
+    }
     setSending(true);
     try {
       const { data: devisRow } = await supabase.from("devis").insert({
@@ -881,12 +889,12 @@ export default function MobileDevisGenerator() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelCls}><Calendar size={11} className="inline mr-1" />Date</label>
-                  <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCls} />
+                  <label className={labelCls}><Calendar size={11} className="inline mr-1" />Date *</label>
+                  <input type="date" required value={date} onChange={e => setDate(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className={labelCls}>Heure de livraison</label>
-                  <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className={inputCls} />
+                  <label className={labelCls}>Heure de livraison *</label>
+                  <input type="time" required value={heure} onChange={e => setHeure(e.target.value)} className={inputCls} />
                 </div>
               </div>
               <div>
@@ -946,12 +954,12 @@ export default function MobileDevisGenerator() {
                 {/* Date / Heure retour */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={labelCls}><Calendar size={11} className="inline mr-1" />Date retour</label>
-                    <input type="date" value={dateRetour} onChange={e => setDateRetour(e.target.value)} className={inputCls} />
+                    <label className={labelCls}><Calendar size={11} className="inline mr-1" />Date retour *</label>
+                    <input type="date" required value={dateRetour} onChange={e => setDateRetour(e.target.value)} className={inputCls} />
                   </div>
                   <div>
-                    <label className={labelCls}>Heure retour</label>
-                    <input type="time" value={heureRetour} onChange={e => setHeureRetour(e.target.value)} className={inputCls} />
+                    <label className={labelCls}>Heure retour *</label>
+                    <input type="time" required value={heureRetour} onChange={e => setHeureRetour(e.target.value)} className={inputCls} />
                   </div>
                 </div>
 

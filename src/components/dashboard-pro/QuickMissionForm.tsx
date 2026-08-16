@@ -331,10 +331,15 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     if (!user || !profile) return;
     setError(null);
 
-    if (!depart || !arrivee || !date) {
-      setError("Merci de renseigner départ, arrivée et date.");
+    if (!depart || !arrivee || !date || !heure) {
+      setError("Merci de renseigner départ, arrivée, date et heure.");
       return;
     }
+    if (tripType === "aller-retour" && (!dateRetour || !heureRetour)) {
+      setError("Merci de renseigner la date et l'heure de restitution.");
+      return;
+    }
+
 
     setSubmitting(true);
     try {
@@ -874,14 +879,15 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           {/* Date et heure retour */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date retour (optionnel)</label>
-              <input type="date" className={inp} value={dateRetour} onChange={(e) => setDateRetour(e.target.value)} min={date || new Date().toISOString().slice(0, 10)} />
+              <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date retour *</label>
+              <input type="date" className={inp} value={dateRetour} onChange={(e) => setDateRetour(e.target.value)} required min={date || new Date().toISOString().slice(0, 10)} />
             </div>
             <div>
-              <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure retour</label>
-              <input type="time" className={inp} value={heureRetour} onChange={(e) => setHeureRetour(e.target.value)} />
+              <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure retour *</label>
+              <input type="time" className={inp} value={heureRetour} onChange={(e) => setHeureRetour(e.target.value)} required />
             </div>
           </div>
+
         </section>
       )}
 
@@ -966,14 +972,15 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date souhaitée</label>
+            <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date souhaitée *</label>
             <input type="date" className={inp} value={date} onChange={(e) => setDate(e.target.value)} required min={new Date().toISOString().slice(0, 10)} />
           </div>
           <div>
-            <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure souhaitée</label>
-            <input type="time" className={inp} value={heure} onChange={(e) => setHeure(e.target.value)} />
+            <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure souhaitée *</label>
+            <input type="time" className={inp} value={heure} onChange={(e) => setHeure(e.target.value)} required />
           </div>
         </div>
+
         <div className="mt-3">
           <label className={lbl}>Informations complémentaires</label>
           <textarea className={`${inp} min-h-[70px] resize-y`} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Particularités, accès, conditions..." />
@@ -1022,7 +1029,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
         </p>
         <button
           type="submit"
-          disabled={submitting || !depart || !arrivee || !date}
+          disabled={submitting || !depart || !arrivee || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
