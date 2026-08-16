@@ -765,6 +765,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attributions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_client_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       avis_clients: {
@@ -3629,6 +3636,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mission_offres_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_client_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mission_pv_digitaux: {
@@ -5226,6 +5240,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_client_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       trajets_admin_data: {
@@ -5259,6 +5280,13 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: true
             referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets_client_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -5524,6 +5552,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vehicle_movements_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_client_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vehicle_movements_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -5675,6 +5710,246 @@ export type Database = {
           vin: string | null
         }
         Relationships: []
+      }
+      trajets_client_safe: {
+        Row: {
+          allow_counter_offer: boolean | null
+          archived_at: string | null
+          arrivee: string | null
+          arrivee_contact_email: string | null
+          arrivee_contact_instructions: string | null
+          arrivee_contact_nom: string | null
+          arrivee_contact_prenom: string | null
+          arrivee_contact_societe: string | null
+          arrivee_contact_telephone: string | null
+          arrivee_contact_telephone2: string | null
+          attribution_mode: string | null
+          bidding_enabled: boolean | null
+          carte_grise_recto_url: string | null
+          carte_grise_verso_url: string | null
+          client_email: string | null
+          client_nom: string | null
+          client_telephone: string | null
+          commande_ref: string | null
+          contact_arrivee_nom: string | null
+          contact_arrivee_note: string | null
+          contact_arrivee_tel: string | null
+          contact_depart_nom: string | null
+          contact_depart_note: string | null
+          contact_depart_tel: string | null
+          created_at: string | null
+          date_souhaitee: string | null
+          date_trajet: string | null
+          demande_id: string | null
+          depart: string | null
+          devis_id: string | null
+          group_reference: string | null
+          heure_trajet: string | null
+          id: string | null
+          immatriculation: string | null
+          is_round_trip: boolean | null
+          is_test_data: boolean | null
+          leg_index: number | null
+          leg_type: string | null
+          marque: string | null
+          mission_group_id: string | null
+          mission_id: string | null
+          modele: string | null
+          niveau_requis: string | null
+          numero_mission: string | null
+          options_meta: Json | null
+          parent_trajet_id: string | null
+          pricing_mode: string | null
+          prix: number | null
+          prix_client: number | null
+          prix_total: number | null
+          proposal_expires_at: string | null
+          published_at: string | null
+          pv_digitalise: string | null
+          statut: string | null
+          statut_publication: string | null
+          type_mission: string | null
+          updated_at: string | null
+          vehicule_couleur: string | null
+          vehicule_energie: string | null
+          vehicule_immatriculation: string | null
+          vehicule_km: number | null
+          vehicule_notes: string | null
+          vehicule_type: string | null
+          vehicule_vin: string | null
+          vin: string | null
+        }
+        Insert: {
+          allow_counter_offer?: boolean | null
+          archived_at?: string | null
+          arrivee?: string | null
+          arrivee_contact_email?: string | null
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_prenom?: string | null
+          arrivee_contact_societe?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
+          attribution_mode?: string | null
+          bidding_enabled?: boolean | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
+          client_email?: string | null
+          client_nom?: string | null
+          client_telephone?: string | null
+          commande_ref?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
+          created_at?: string | null
+          date_souhaitee?: string | null
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart?: string | null
+          devis_id?: string | null
+          group_reference?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          is_round_trip?: boolean | null
+          is_test_data?: boolean | null
+          leg_index?: number | null
+          leg_type?: string | null
+          marque?: string | null
+          mission_group_id?: string | null
+          mission_id?: string | null
+          modele?: string | null
+          niveau_requis?: string | null
+          numero_mission?: string | null
+          options_meta?: Json | null
+          parent_trajet_id?: string | null
+          pricing_mode?: string | null
+          prix?: number | null
+          prix_client?: number | null
+          prix_total?: number | null
+          proposal_expires_at?: string | null
+          published_at?: string | null
+          pv_digitalise?: string | null
+          statut?: string | null
+          statut_publication?: string | null
+          type_mission?: string | null
+          updated_at?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
+          vin?: string | null
+        }
+        Update: {
+          allow_counter_offer?: boolean | null
+          archived_at?: string | null
+          arrivee?: string | null
+          arrivee_contact_email?: string | null
+          arrivee_contact_instructions?: string | null
+          arrivee_contact_nom?: string | null
+          arrivee_contact_prenom?: string | null
+          arrivee_contact_societe?: string | null
+          arrivee_contact_telephone?: string | null
+          arrivee_contact_telephone2?: string | null
+          attribution_mode?: string | null
+          bidding_enabled?: boolean | null
+          carte_grise_recto_url?: string | null
+          carte_grise_verso_url?: string | null
+          client_email?: string | null
+          client_nom?: string | null
+          client_telephone?: string | null
+          commande_ref?: string | null
+          contact_arrivee_nom?: string | null
+          contact_arrivee_note?: string | null
+          contact_arrivee_tel?: string | null
+          contact_depart_nom?: string | null
+          contact_depart_note?: string | null
+          contact_depart_tel?: string | null
+          created_at?: string | null
+          date_souhaitee?: string | null
+          date_trajet?: string | null
+          demande_id?: string | null
+          depart?: string | null
+          devis_id?: string | null
+          group_reference?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          is_round_trip?: boolean | null
+          is_test_data?: boolean | null
+          leg_index?: number | null
+          leg_type?: string | null
+          marque?: string | null
+          mission_group_id?: string | null
+          mission_id?: string | null
+          modele?: string | null
+          niveau_requis?: string | null
+          numero_mission?: string | null
+          options_meta?: Json | null
+          parent_trajet_id?: string | null
+          pricing_mode?: string | null
+          prix?: number | null
+          prix_client?: number | null
+          prix_total?: number | null
+          proposal_expires_at?: string | null
+          published_at?: string | null
+          pv_digitalise?: string | null
+          statut?: string | null
+          statut_publication?: string | null
+          type_mission?: string | null
+          updated_at?: string | null
+          vehicule_couleur?: string | null
+          vehicule_energie?: string | null
+          vehicule_immatriculation?: string | null
+          vehicule_km?: number | null
+          vehicule_notes?: string | null
+          vehicule_type?: string | null
+          vehicule_vin?: string | null
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trajets_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_convoyage"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_client_safe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trajets_publies_safe: {
         Row: {
