@@ -74,6 +74,68 @@ function isElectric(energie: string | null | undefined) {
   return e.includes("elec") || e.includes("élec") || e === "ev";
 }
 
+function MissionDateCell({
+  refLabel,
+  date,
+  heure,
+  onChange,
+}: {
+  refLabel: string;
+  date: string | null;
+  heure: string | null;
+  onChange: (field: "date_trajet" | "heure_trajet", value: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+
+  if (!editing) {
+    return (
+      <div className="flex items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
+        <CalendarDays size={12} className="shrink-0 text-[var(--a6-accent)]" />
+        <span className={date ? "font-semibold text-[var(--a6-text)]" : "font-semibold text-amber-700"}>
+          {date ? new Date(date).toLocaleDateString("fr-FR") : "À planifier"}
+          {date && heure ? ` · ${heure.slice(0, 5)}` : ""}
+        </span>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded-md border border-[var(--a6-border)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--a6-accent)] transition hover:bg-[var(--a6-accent)]/10"
+        >
+          Modifier
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-1.5" onClick={(event) => event.stopPropagation()}>
+      <input
+        type="date"
+        autoFocus
+        value={date?.slice(0, 10) ?? ""}
+        aria-label={`Date de mission ${refLabel}`}
+        onChange={(event) => onChange("date_trajet", event.target.value)}
+        className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] px-2 text-[11px] font-semibold text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
+      />
+      <input
+        type="time"
+        value={heure?.slice(0, 5) ?? ""}
+        aria-label={`Heure de mission ${refLabel}`}
+        onChange={(event) => onChange("heure_trajet", event.target.value)}
+        className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] px-2 text-[11px] font-medium text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
+      />
+      <button
+        type="button"
+        onClick={() => setEditing(false)}
+        className="justify-self-start rounded-md px-1 text-[10px] font-semibold text-[var(--a6-dim)] hover:text-[var(--a6-text)]"
+      >
+        Terminé
+      </button>
+    </div>
+  );
+}
+
+
+
 function AdminMissionsUnified() {
   const { user } = useAuth();
   const [rows, setRows] = useState<UnifiedMission[]>([]);
@@ -673,34 +735,21 @@ function AdminMissionsUnified() {
                       {show("date") && (
                         <td className="min-w-[170px] text-[var(--a6-dim)] text-[11.5px]">
                           {r.m.kind === "trajet" ? (
-                            <div className="grid gap-1.5" onClick={(event) => event.stopPropagation()}>
-                              <label className="relative block">
-                                <CalendarDays size={12} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[var(--a6-accent)]" />
-                                <input
-                                  type="date"
-                                  value={r.m.date?.slice(0, 10) ?? ""}
-                                  aria-label={`Date de mission ${r.m.ref}`}
-                                  onChange={(event) => void updatePlanning(r.m.id, "date_trajet", event.target.value)}
-                                  className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] pl-7 pr-1 text-[11px] font-semibold text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
-                                />
-                              </label>
-                              <input
-                                type="time"
-                                value={r.m.heure?.slice(0, 5) ?? ""}
-                                aria-label={`Heure de mission ${r.m.ref}`}
-                                onChange={(event) => void updatePlanning(r.m.id, "heure_trajet", event.target.value)}
-                                className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] px-2 text-[11px] font-medium text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
-                              />
-                              {!r.m.date && <span className="font-semibold text-amber-700">Date à renseigner</span>}
-                            </div>
+                            <MissionDateCell
+                              refLabel={r.m.ref}
+                              date={r.m.date ?? null}
+                              heure={r.m.heure ?? null}
+                              onChange={(field, value) => void updatePlanning(r.m.id, field, value)}
+                            />
                           ) : (
                             <>
-                              {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "Date à renseigner"}
+                              {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "À planifier"}
                               {r.m.heure ? ` · ${r.m.heure}` : ""}
                             </>
                           )}
                         </td>
                       )}
+
 
                       {show("prix") && (
                         <td className="a6-num font-semibold">{r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}</td>
