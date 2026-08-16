@@ -612,8 +612,68 @@ function AdminNouveauDevisPage() {
               </div>
             </div>
             <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+
+            <div className="border-t border-pro-border pt-4">
+              <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                Planning {isAllerRetour ? "· livraison" : ""}
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Date d'enlèvement
+                  </label>
+                  <input
+                    type="date"
+                    value={dateSouhaitee}
+                    onChange={(e) => setDateSouhaitee(e.target.value)}
+                    className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                    Heure
+                  </label>
+                  <input
+                    type="time"
+                    value={heureSouhaitee}
+                    onChange={(e) => setHeureSouhaitee(e.target.value)}
+                    className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
+                </div>
+              </div>
+              {isAllerRetour && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Date restitution
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRetourInput}
+                      onChange={(e) => setDateRetourInput(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Heure restitution
+                    </label>
+                    <input
+                      type="time"
+                      value={heureRetourInput}
+                      onChange={(e) => setHeureRetourInput(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                </div>
+              )}
+              <p className="mt-2 text-[11.5px] text-pro-muted">
+                Ces dates sont reportées automatiquement sur les missions créées à la conversion du devis.
+              </p>
+            </div>
           </div>
         </Card>
+
 
         {/* 3. Véhicule */}
         <Card>
