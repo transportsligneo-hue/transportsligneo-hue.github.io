@@ -3,6 +3,8 @@
  * Source unique utilisée par : demande de mission (client), admin, app convoyeur.
  */
 import { useState } from "react";
+import modelLogo from "@/assets/pv-model.webp.asset.json";
+import welcomeAutoLogo from "@/assets/pv-welcomeauto.png.asset.json";
 
 export type PvPlateforme = "model_arval" | "welcomeauto";
 export type PvChoice = "aucun" | PvPlateforme;
