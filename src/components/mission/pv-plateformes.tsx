@@ -3,6 +3,8 @@
  * Source unique utilisée par : demande de mission (client), admin, app convoyeur.
  */
 import { useState } from "react";
+import modelLogo from "@/assets/pv-model.webp.asset.json";
+import welcomeAutoLogo from "@/assets/pv-welcomeauto.png.asset.json";
 
 export type PvPlateforme = "model_arval" | "welcomeauto";
 export type PvChoice = "aucun" | PvPlateforme;
@@ -24,9 +26,9 @@ export interface PvPlateformeDef {
 export const PV_PLATEFORMES: PvPlateformeDef[] = [
   {
     key: "model_arval",
-    label: "Model",
-    hint: "PV digitalisé Model (Arval) — s'ouvre dans l'application mobile.",
-    logo: "https://logo.clearbit.com/modelsolutions.fr",
+    label: "moDel",
+    hint: "PV digitalisé moDel (Arval) — s'ouvre dans l'application mobile.",
+    logo: modelLogo.url,
     url: null,
     appScheme: "model://",
     storeIos: "https://apps.apple.com/fr/search?term=model%20arval",
@@ -36,7 +38,7 @@ export const PV_PLATEFORMES: PvPlateformeDef[] = [
     key: "welcomeauto",
     label: "Welcome Auto",
     hint: "PV digitalisé Welcome Auto — s'ouvre sur le site internet.",
-    logo: "https://logo.clearbit.com/welcomeauto.fr",
+    logo: welcomeAutoLogo.url,
     url: "https://www.welcomeauto.fr",
   },
 ];

@@ -2008,6 +2008,7 @@ export type Database = {
           prix_estime: number
           prix_manuel: boolean
           prix_retour: number | null
+          pv_digitalise: string | null
           recuperation_retour_identique: boolean
           refus_motif: string | null
           refused_at: string | null
@@ -2087,6 +2088,7 @@ export type Database = {
           prix_estime: number
           prix_manuel?: boolean
           prix_retour?: number | null
+          pv_digitalise?: string | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
           refused_at?: string | null
@@ -2166,6 +2168,7 @@ export type Database = {
           prix_estime?: number
           prix_manuel?: boolean
           prix_retour?: number | null
+          pv_digitalise?: string | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
           refused_at?: string | null
@@ -5043,6 +5046,7 @@ export type Database = {
           prix_total: number | null
           proposal_expires_at: string | null
           published_at: string | null
+          pv_digitalise: string | null
           statut: string
           statut_publication: string
           tarif_convoyeur: number | null
@@ -5117,6 +5121,7 @@ export type Database = {
           prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
+          pv_digitalise?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
@@ -5191,6 +5196,7 @@ export type Database = {
           prix_total?: number | null
           proposal_expires_at?: string | null
           published_at?: string | null
+          pv_digitalise?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
