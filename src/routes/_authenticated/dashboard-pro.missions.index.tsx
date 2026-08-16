@@ -297,85 +297,94 @@ function ProMissionsIndex() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
-        <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2">
-          <Truck size={14} className="text-pro-accent" />
-          <h2 className="text-sm font-semibold text-pro-text">Missions</h2>
-          <span className="ml-auto text-xs text-pro-text-soft">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <Truck size={14} className="text-[#5334d6]" />
+          <h2 className="text-sm font-semibold text-pro-text">Dossiers de transport</h2>
+          <span className="ml-auto text-xs text-pro-text-soft">
+            {dossiers.length} dossier{dossiers.length > 1 ? "s" : ""} · {filtered.length} mission{filtered.length > 1 ? "s" : ""}
+          </span>
         </div>
+
         {loading ? (
-          <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-pro-accent" size={24} /></div>
-        ) : filtered.length === 0 ? (
-          <div className="p-12 text-center">
+          <div className="p-12 flex justify-center bg-white rounded-2xl border border-pro-border">
+            <Loader2 className="animate-spin text-[#5334d6]" size={24} />
+          </div>
+        ) : dossiers.length === 0 ? (
+          <div className="p-12 text-center bg-white rounded-2xl border border-pro-border">
             <Truck className="text-slate-300 mx-auto mb-3" size={36} />
             <p className="text-pro-text-soft text-sm">Aucune mission ne correspond.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-pro-bg-soft text-pro-muted text-xs uppercase tracking-wide">
-                <tr>
-                  <th className="text-left px-5 py-3 font-medium">N°</th>
-                  <th className="text-left px-5 py-3 font-medium">Trajet</th>
-                  <th className="text-left px-5 py-3 font-medium">Date</th>
-                  <th className="text-left px-5 py-3 font-medium">Statut</th>
-                  <th className="text-right px-5 py-3 font-medium">Montant</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((m) => (
-                  <tr
-                    key={m.id}
-                    className="border-t border-pro-border hover:bg-pro-bg-soft/60 transition-colors cursor-pointer"
-                    onMouseEnter={() => prefetchMissionTracking(m.numero, m.id)}
-                    onFocus={() => prefetchMissionTracking(m.numero, m.id)}
-                    onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
-                  >
-                    <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
-                        <span>{m.numero}</span>
-                        <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
-                        {m.group_reference && (
-                          <span
-                            className="ml-1 rounded-full bg-[#f0ecff] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#5334d6]"
-                            title={`Mission groupée ${m.group_reference}`}
-                          >
-                            Groupée
+          dossiers.map(({ key, legs, isDuo, total, head }) => {
+            const elec = (head.carburant ?? "").toLowerCase().includes("elec")
+              || (head.carburant ?? "").toLowerCase().includes("élec");
+            return (
+              <article key={key} className="fleet-dossier">
+                <header className="fleet-dossier-head">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="fleet-dossier-num">{head.group_reference ?? head.numero}</span>
+                    {isDuo && (
+                      <span className="fleet-chip-duo">
+                        <Repeat size={10} /> Aller-retour
+                      </span>
+                    )}
+                    {head.immatriculation && (
+                      <span className="fleet-plate">{head.immatriculation}</span>
+                    )}
+                    {elec && <span className="fleet-chip-elec"><Zap size={10} /> Électrique</span>}
+                  </div>
+                  <div className="fleet-dossier-total">
+                    {total.toFixed(2)} €
+                    {isDuo && legs.length > 1 && <span className="fleet-dossier-total-note">total dossier</span>}
+                  </div>
+                </header>
+
+                <div className="fleet-dossier-vehicle">
+                  <Car size={12} />
+                  <span>{[head.marque, head.modele].filter(Boolean).join(" ") || "Véhicule à préciser"}</span>
+                  {head.vin && <span className="fleet-vin">VIN {head.vin}</span>}
+                </div>
+
+                <ul className="fleet-leg-list">
+                  {legs.map((m) => (
+                    <li key={m.id}>
+                      <Link
+                        to="/dashboard-pro/missions/$missionId"
+                        params={{ missionId: m.id }}
+                        className="fleet-leg"
+                        onMouseEnter={() => prefetchMissionTracking(m.numero, m.id)}
+                        onFocus={() => prefetchMissionTracking(m.numero, m.id)}
+                      >
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-[11px] text-pro-text-soft">{m.numero}</span>
+                          <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${statutPill[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
+                            {statutLabel[m.statut] ?? m.statut}
                           </span>
-                        )}
+                        </div>
+                        <div className="fleet-leg-route">
+                          <MapPin size={12} className="text-[#5334d6] shrink-0" />
+                          <span className="truncate">{m.ville_depart}</span>
+                          <ArrowRight size={12} className="text-pro-muted shrink-0" />
+                          <span className="truncate">{m.ville_arrivee}</span>
+                        </div>
+                        <div className="fleet-leg-meta">
+                          <span><Calendar size={10} className="inline mr-1" />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
+                          {m.immatriculation && <span className="fleet-plate-mini">{m.immatriculation}</span>}
+                          <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
+                          <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>
+                        </div>
                       </Link>
-                    </td>
-                    <td className="px-5 py-3 text-pro-text">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1.5 w-full">
-                        <MapPin size={12} className="text-pro-muted" />
-                        <span className="flex-1 truncate">{m.ville_depart} → {m.ville_arrivee}</span>
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-pro-text-soft">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</Link>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block w-full">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statutPill[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
-                          {statutLabel[m.statut] ?? m.statut}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-right font-semibold text-pro-text">
-                      <div className="flex items-center justify-end gap-3">
-                        <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block">{Number(m.prix_total).toFixed(2)} €</Link>
-                        <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="inline-flex items-center gap-1 text-pro-accent text-[11px] uppercase tracking-wider hover:underline">
-                          Voir le suivi <ArrowRight size={12} />
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })
         )}
       </div>
+
     </div>
   );
 }
