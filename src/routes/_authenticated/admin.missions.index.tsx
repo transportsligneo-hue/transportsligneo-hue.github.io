@@ -227,7 +227,7 @@ function AdminMissionsUnified() {
     const convertedDemandeIds = new Set(trajets.map((t) => t.demande_id).filter(Boolean) as string[]);
 
     const attrRows = (attributionsData ?? []) as unknown as {
-      trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
+      id: string; trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
     }[];
     const numeroByTrajet = new Map<string, string>();
     const activeAttrByTrajet = new Map<string, { id: string; convoyeur_id: string | null; statut: string | null }>();
