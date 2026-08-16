@@ -11,6 +11,7 @@ import {
   CreditCard, Loader2, Filter, CheckCheck,
 } from "lucide-react";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { NotificationSettingsPanel } from "@/components/admin/NotificationSettingsPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/notifications")({
   component: AdminNotifications,
