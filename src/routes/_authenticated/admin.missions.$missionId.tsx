@@ -997,6 +997,24 @@ function AdminMissionDetail() {
                 </div>
               )}
 
+              {/* Date de mission — affichage direct et lisible */}
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <Calendar size={14} className="text-pro-accent" />
+                <span className="text-pro-text font-medium">
+                  {trajet.date_trajet
+                    ? new Date(trajet.date_trajet).toLocaleDateString("fr-FR", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Date de mission —"}
+                  {trajet.heure_trajet && (
+                    <span className="text-pro-muted font-normal"> · {trajet.heure_trajet}</span>
+                  )}
+                </span>
+              </div>
+
             <div className="mt-3 grid grid-cols-1 xl:grid-cols-3 gap-2 xl:gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
                 <Car size={14} className="text-pro-muted" />
@@ -1021,6 +1039,7 @@ function AdminMissionDetail() {
               </div>
             </div>
             </div>
+
           </div>
 
 
