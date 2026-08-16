@@ -28,6 +28,9 @@ import {
   Trash2,
   Download,
   Save,
+  Copy,
+  Fingerprint,
+  Pencil,
 } from "lucide-react";
 import {
   Card,
@@ -107,6 +110,19 @@ interface TrajetFull {
   mission_group_id: string | null;
   leg_type: string | null;
   commande_ref?: string | null;
+  vin?: string | null;
+  vehicule_vin?: string | null;
+  vehicule_immatriculation?: string | null;
+  vehicule_marque?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_energie?: string | null;
+  vehicule_couleur?: string | null;
+  vehicule_km?: number | null;
+  vehicule_type?: string | null;
+  vehicule_notes?: string | null;
+  contact_depart_nom?: string | null;
+  contact_depart_tel?: string | null;
+  contact_depart_note?: string | null;
 }
 
 interface ConvoyeurFull {
@@ -255,6 +271,7 @@ function AdminMissionDetail() {
   }, [trajet?.id, trajet?.commande_ref]);
 
   const [poHistoryKey, setPoHistoryKey] = useState(0);
+  const [editOpenKey, setEditOpenKey] = useState(0);
 
   const savePo = useCallback(
     async (value: string, silent = false) => {
@@ -827,6 +844,33 @@ function AdminMissionDetail() {
     return 0;
   }, [attribution, inspections.length]);
 
+  // Identification véhicule (affichage direct dans la fiche complète)
+  const plaquePrincipale = (trajet?.immatriculation || trajet?.vehicule_immatriculation || "").toUpperCase();
+  const vinPrincipal = (trajet?.vin || trajet?.vehicule_vin || "").toUpperCase();
+  const energieLabel = ((): string => {
+    const e = (trajet?.vehicule_energie || "").toLowerCase();
+    const map: Record<string, string> = {
+      essence: "Essence",
+      diesel: "Diesel",
+      hybride: "Hybride",
+      electrique: "Électrique",
+      gpl: "GPL",
+    };
+    return map[e] ?? (e ? e.charAt(0).toUpperCase() + e.slice(1) : "");
+  })();
+  const isDuo = Boolean(trajet?.mission_group_id);
+
+  const copyValue = async (value: string, message: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(message);
+    } catch {
+      toast.error("Copie impossible");
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -1241,6 +1285,114 @@ function AdminMissionDetail() {
             </div>
           </Card>
 
+          {/* Véhicule & identification */}
+          <Card>
+            <div className="flex items-center gap-2 mb-4">
+              <Car size={15} className="text-pro-accent" />
+              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+                Véhicule &amp; identification
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditOpenKey((k) => k + 1);
+                  document.getElementById("edit-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-pro-accent/40 text-pro-accent text-xs font-semibold hover:bg-pro-accent/10 transition-colors"
+              >
+                <Pencil size={12} /> Modifier
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 mb-4">
+              <button
+                type="button"
+                onClick={() => void copyValue(plaquePrincipale, "Plaque copiée")}
+                title="Copier la plaque"
+                className="group inline-flex items-center gap-2 rounded-lg border-2 border-pro-text/70 bg-white px-3 py-1.5 shadow-sm hover:border-pro-accent transition-colors"
+              >
+                <span className="text-[9px] font-bold tracking-[0.12em] text-pro-accent leading-none">F</span>
+                <span className="font-mono text-base sm:text-lg font-bold tracking-[0.14em] text-pro-text leading-none">
+                  {plaquePrincipale || "—"}
+                </span>
+                <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+              </button>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-pro-text truncate">
+                  {[trajet.marque ?? trajet.vehicule_marque, trajet.modele ?? trajet.vehicule_modele]
+                    .filter(Boolean)
+                    .join(" ") || "Véhicule non renseigné"}
+                </p>
+                <p className="text-[11px] text-pro-muted">
+                  {[energieLabel, trajet.vehicule_couleur, trajet.vehicule_km ? `${trajet.vehicule_km} km` : null]
+                    .filter(Boolean)
+                    .join(" · ") || "Énergie, couleur et kilométrage à compléter"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+              <div className="sm:col-span-2">
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">VIN / N° de série</p>
+                <div className="flex items-center gap-2">
+                  <Fingerprint size={13} className="text-pro-muted shrink-0" />
+                  <span className="font-mono text-sm text-pro-text break-all">{vinPrincipal || "—"}</span>
+                  {vinPrincipal && (
+                    <button
+                      type="button"
+                      onClick={() => void copyValue(vinPrincipal, "VIN copié")}
+                      title="Copier le VIN"
+                      className="text-pro-muted hover:text-pro-accent"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Énergie</p>
+                <p className="text-sm text-pro-text">{energieLabel || "—"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Couleur</p>
+                <p className="text-sm text-pro-text">{trajet.vehicule_couleur || "—"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Kilométrage</p>
+                <p className="text-sm text-pro-text">
+                  {trajet.vehicule_km != null ? `${trajet.vehicule_km} km` : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Type</p>
+                <p className="text-sm text-pro-text">{trajet.vehicule_type || "—"}</p>
+              </div>
+              {trajet.vehicule_notes && (
+                <div className="sm:col-span-2">
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Notes véhicule</p>
+                  <p className="text-sm text-pro-text whitespace-pre-wrap">{trajet.vehicule_notes}</p>
+                </div>
+              )}
+            </div>
+
+            {isDuo && (
+              <p className="mt-3 text-[11px] text-pro-text-soft border-t border-pro-border pt-3">
+                Duo Livraison + Restitution : chaque volet a son propre véhicule et sa propre plaque.
+                Ouvrez l'autre volet pour vérifier ses informations.
+              </p>
+            )}
+          </Card>
+
+          {/* Édition admin de la fiche mission — plaques, VIN, adresses, contacts */}
+          <div id="edit-fiche">
+            <MissionEditInfosPanel
+              trajetId={trajet.id}
+              openKey={editOpenKey}
+              onChanged={() => { void fetchAll(); }}
+            />
+          </div>
+
+
           {/* Selfie identité convoyeur */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
@@ -1355,8 +1507,6 @@ function AdminMissionDetail() {
             <AdminMissionAiPanel inspections={inspections} />
           </Card>
 
-          {/* Édition admin de la fiche mission */}
-          <MissionEditInfosPanel trajetId={trajet.id} onChanged={() => { void fetchAll(); }} />
 
           {/* Incidents signalés par le convoyeur */}
           <MissionIncidentsPanel

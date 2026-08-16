@@ -89,15 +89,21 @@ const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
 
 interface Props {
   trajetId: string;
+  /** Incrémenter pour ouvrir le panneau depuis l'extérieur (bouton « Modifier »). */
+  openKey?: number;
   onChanged?: () => void;
 }
 
-export function MissionEditInfosPanel({ trajetId, onChanged }: Props) {
+export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [initial, setInitial] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (openKey > 0) setOpen(true);
+  }, [openKey]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -154,23 +160,23 @@ export function MissionEditInfosPanel({ trajetId, onChanged }: Props) {
 
   return (
     <Card>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         <Pencil size={15} className="text-pro-accent" />
         <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
           Modifier la fiche mission
         </h3>
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="ml-auto text-xs font-semibold text-pro-accent hover:underline"
-        >
-          {open ? "Masquer" : "Ouvrir"}
-        </button>
+        <div className="ml-auto">
+          <Button variant={open ? "secondary" : "primary"} onClick={() => setOpen((o) => !o)}>
+            <Pencil size={13} /> {open ? "Masquer" : "Modifier les informations"}
+          </Button>
+        </div>
       </div>
 
       {!open ? (
         <p className="text-xs text-pro-text-soft">
-          Plaque, VIN, véhicule, adresses, date/heure et contacts. Chaque modification est tracée
-          et notifiée automatiquement.
+          Plaque, VIN, véhicule, adresses, date/heure et contacts — modifiables à tout moment, même
+          rétroactivement sur une mission terminée. Chaque changement est tracé et notifié
+          automatiquement (client, convoyeur, admin).
         </p>
       ) : loading ? (
         <div className="flex justify-center py-8">
