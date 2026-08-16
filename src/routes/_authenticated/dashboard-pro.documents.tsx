@@ -331,15 +331,6 @@ function ProDocuments() {
                 <tbody>
                   {devis.map((d) => {
                     const st = devisStatutPill[d.statut] ?? { label: d.statut, cls: "bg-slate-100 text-slate-700" };
-                    return (
-                      <tr key={d.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
-                        <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">{d.numero}</td>
-                        <td className="px-5 py-3 text-pro-text">{d.depart} → {d.arrivee}</td>
-                        <td className="px-5 py-3 text-pro-text-soft">
-                          {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                        </td>
-                  {devis.map((d) => {
-                    const st = devisStatutPill[d.statut] ?? { label: d.statut, cls: "bg-slate-100 text-slate-700" };
                     const isDuo = Boolean(d.depart_retour || d.immatriculation_retour || d.prix_retour);
                     const vehicule = [d.marque, d.modele].filter(Boolean).join(" ");
                     const vehiculeRetour = [d.marque_retour, d.modele_retour].filter(Boolean).join(" ");
