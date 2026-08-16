@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 
 type Variant = "light" | "dark";
@@ -55,54 +56,13 @@ export function DashboardHeader({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [autoNotifs, setAutoNotifs] = useState<Notification[]>([]);
   const [unreadAuto, setUnreadAuto] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const isDark = variant === "dark";
-
-  // === Notifs auto : user_notifications de l'utilisateur courant + realtime ===
-  useEffect(() => {
-    if (notifications) return;
-    if (!user?.id) return;
-    const load = async () => {
-      const { data } = await supabase
-        .from("user_notifications" as never)
-        .select("id, titre, message, link, lu, created_at")
-        .eq("user_id" as never, user.id as never)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      const rows = (data as unknown as Array<{ id: string; titre: string; message: string | null; link: string | null; lu: boolean; created_at: string }>) ?? [];
-      setAutoNotifs(
-        rows.map((r) => ({
-          id: r.id,
-          title: r.titre,
-          description: r.message ?? undefined,
-          date: r.created_at,
-          to: r.link && r.link.startsWith("/") ? r.link : "/notifications",
-        }))
-      );
-      setUnreadAuto(rows.filter((r) => !r.lu).length);
-    };
-    load();
-    const channel = supabase
-      .channel(`hdr-notif-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
-        load
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [notifications, user?.id]);
-
-  const finalNotifs = notifications ?? autoNotifs;
-  const unreadCount = notifications ? notifications.length : unreadAuto;
-
 
   // === Recherche globale (debounce léger) ===
   useEffect(() => {
@@ -212,7 +172,6 @@ export function DashboardHeader({
     const onClick = (e: MouseEvent) => {
       const t = e.target as Node;
       if (searchRef.current && !searchRef.current.contains(t)) setSearchOpen(false);
-      if (notifRef.current && !notifRef.current.contains(t)) setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(t)) setProfileOpen(false);
     };
     document.addEventListener("mousedown", onClick);
