@@ -345,7 +345,13 @@ function AdminNouveauDevisPage() {
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim() || !arrivee.trim()) return toast.error("Départ et arrivée requis");
+    if (!dateSouhaitee || !heureSouhaitee)
+      return toast.error("Date et heure d'enlèvement obligatoires");
+    if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
+      return toast.error("Date et heure de restitution obligatoires");
     if (!Number.isFinite(prix) || prix <= 0) return toast.error("Montant TTC invalide");
+
+
 
     setGenerating(true);
     try {
