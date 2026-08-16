@@ -28,7 +28,6 @@ import {
   Trash2,
   Download,
   Save,
-  Car,
   Copy,
   Fingerprint,
   Pencil,
