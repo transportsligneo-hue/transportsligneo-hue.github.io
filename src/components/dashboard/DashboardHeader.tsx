@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
+import { Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
@@ -18,22 +18,12 @@ interface SearchResult {
   to: string;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  description?: string;
-  date: string;
-  to?: string;
-}
-
 interface Props {
   variant?: Variant;
   /** Lien profil (ex: /dashboard-client/profil) */
   profileTo?: string;
   /** Active la recherche multi-entités (admin) */
   enableGlobalSearch?: boolean;
-  /** Sources de notifications custom (sinon, fallback automatique) */
-  notifications?: Notification[];
 }
 
 /**
@@ -47,7 +37,6 @@ export function DashboardHeader({
   variant = "light",
   profileTo,
   enableGlobalSearch = false,
-  notifications,
 }: Props) {
   const { user, logout, role } = useAuth();
   const [ownAvatar, setOwnAvatar] = useState<string | null>(null);
@@ -57,8 +46,6 @@ export function DashboardHeader({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [autoNotifs, setAutoNotifs] = useState<Notification[]>([]);
-  const [unreadAuto, setUnreadAuto] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
