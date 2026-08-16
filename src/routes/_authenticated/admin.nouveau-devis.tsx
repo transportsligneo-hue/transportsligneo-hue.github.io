@@ -19,6 +19,7 @@ import {
 import { PageHeader, Card, Button } from "@/components/admin/AdminUI";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
 export const Route = createFileRoute("/_authenticated/admin/nouveau-devis")({
   component: AdminNouveauDevisPage,
