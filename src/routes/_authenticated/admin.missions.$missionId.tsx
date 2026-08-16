@@ -843,6 +843,33 @@ function AdminMissionDetail() {
     return 0;
   }, [attribution, inspections.length]);
 
+  // Identification véhicule (affichage direct dans la fiche complète)
+  const plaquePrincipale = (trajet?.immatriculation || trajet?.vehicule_immatriculation || "").toUpperCase();
+  const vinPrincipal = (trajet?.vin || trajet?.vehicule_vin || "").toUpperCase();
+  const energieLabel = ((): string => {
+    const e = (trajet?.vehicule_energie || "").toLowerCase();
+    const map: Record<string, string> = {
+      essence: "Essence",
+      diesel: "Diesel",
+      hybride: "Hybride",
+      electrique: "Électrique",
+      gpl: "GPL",
+    };
+    return map[e] ?? (e ? e.charAt(0).toUpperCase() + e.slice(1) : "");
+  })();
+  const isDuo = Boolean(trajet?.mission_group_id);
+
+  const copyValue = async (value: string, message: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(message);
+    } catch {
+      toast.error("Copie impossible");
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
