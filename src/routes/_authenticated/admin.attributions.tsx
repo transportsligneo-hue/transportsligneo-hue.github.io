@@ -53,6 +53,7 @@ interface Attribution {
   trajet?: {
     depart: string; arrivee: string; date_trajet: string | null; heure_trajet?: string | null;
     statut: string; statut_publication?: string | null; client_nom?: string | null;
+    client_email?: string | null;
     client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
