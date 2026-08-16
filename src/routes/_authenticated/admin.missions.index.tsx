@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -37,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/missions/")({
 
 interface TrajetRow {
   id: string; depart: string; arrivee: string; date_trajet: string | null; heure_trajet: string | null;
+  date_souhaitee: string | null;
   marque: string | null; modele: string | null; immatriculation: string | null;
   vehicule_immatriculation: string | null; vin: string | null; vehicule_vin: string | null;
   vehicule_energie: string | null; mission_id: string | null;
@@ -256,7 +257,7 @@ function AdminMissionsUnified() {
         status: trajetToUnified(t.statut),
         depart: t.depart,
         arrivee: t.arrivee,
-        date: t.date_trajet,
+        date: t.date_trajet ?? t.date_souhaitee,
         heure: t.heure_trajet,
         marque: t.marque,
         modele: t.modele,
@@ -349,6 +350,16 @@ function AdminMissionsUnified() {
     const { error } = await supabase.from("trajets").update({ statut }).eq("id", trajetId);
     if (error) return toast.error(error.message);
     toast.success("Statut mis à jour");
+    fetchAll();
+  };
+
+  const updatePlanning = async (trajetId: string, key: "date_trajet" | "heure_trajet", value: string) => {
+    const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
+      _trajet_id: trajetId,
+      _patch: { [key]: value || null } as never,
+    } as never);
+    if (error) return toast.error("Planning non enregistré", { description: error.message });
+    toast.success(key === "date_trajet" ? "Date de mission enregistrée" : "Heure enregistrée");
     fetchAll();
   };
 
@@ -660,9 +671,34 @@ function AdminMissionsUnified() {
                       )}
 
                       {show("date") && (
-                        <td className="text-[var(--a6-dim)] text-[11.5px]">
-                          {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "—"}
-                          {r.m.heure ? ` · ${r.m.heure}` : ""}
+                        <td className="min-w-[170px] text-[var(--a6-dim)] text-[11.5px]">
+                          {r.m.kind === "trajet" ? (
+                            <div className="grid gap-1.5" onClick={(event) => event.stopPropagation()}>
+                              <label className="relative block">
+                                <CalendarDays size={12} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[var(--a6-accent)]" />
+                                <input
+                                  type="date"
+                                  value={r.m.date?.slice(0, 10) ?? ""}
+                                  aria-label={`Date de mission ${r.m.ref}`}
+                                  onChange={(event) => void updatePlanning(r.m.id, "date_trajet", event.target.value)}
+                                  className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] pl-7 pr-1 text-[11px] font-semibold text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
+                                />
+                              </label>
+                              <input
+                                type="time"
+                                value={r.m.heure?.slice(0, 5) ?? ""}
+                                aria-label={`Heure de mission ${r.m.ref}`}
+                                onChange={(event) => void updatePlanning(r.m.id, "heure_trajet", event.target.value)}
+                                className="h-8 w-full rounded-md border border-[var(--a6-border)] bg-[var(--a6-surface)] px-2 text-[11px] font-medium text-[var(--a6-text)] outline-none focus:border-[var(--a6-accent)]"
+                              />
+                              {!r.m.date && <span className="font-semibold text-amber-700">Date à renseigner</span>}
+                            </div>
+                          ) : (
+                            <>
+                              {r.m.date ? new Date(r.m.date).toLocaleDateString("fr-FR") : "Date à renseigner"}
+                              {r.m.heure ? ` · ${r.m.heure}` : ""}
+                            </>
+                          )}
                         </td>
                       )}
 
