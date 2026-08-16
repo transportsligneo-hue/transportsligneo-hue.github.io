@@ -11,6 +11,7 @@ import {
   Phone,
   Mail,
   Clock,
+  Calendar,
   Camera,
   FileText,
   PenTool,
