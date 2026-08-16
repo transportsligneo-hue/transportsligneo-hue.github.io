@@ -20,6 +20,14 @@ type FieldDef = {
 
 const SECTIONS: { title: string; fields: FieldDef[] }[] = [
   {
+    title: "Planning (date & heure)",
+    fields: [
+      { key: "date_trajet", label: "Date de mission", type: "date" },
+      { key: "heure_trajet", label: "Heure de prise en charge", type: "time" },
+      { key: "date_souhaitee", label: "Date souhaitée (client)", type: "date" },
+    ],
+  },
+  {
     title: "Véhicule",
     fields: [
       { key: "marque", label: "Marque" },
@@ -41,6 +49,7 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
           { value: "gpl", label: "GPL" },
         ],
       },
+      { key: "vehicule_type", label: "Type / gabarit" },
       { key: "vehicule_couleur", label: "Couleur" },
       { key: "vehicule_km", label: "Kilométrage", type: "number" },
       { key: "vehicule_notes", label: "Notes véhicule", type: "textarea", span: true },
@@ -51,8 +60,6 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
     fields: [
       { key: "depart", label: "Adresse de départ", span: true },
       { key: "arrivee", label: "Adresse d'arrivée", span: true },
-      { key: "date_trajet", label: "Date", type: "date" },
-      { key: "heure_trajet", label: "Heure", type: "time" },
     ],
   },
   {
@@ -73,6 +80,9 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
       { key: "arrivee_contact_telephone2", label: "Téléphone 2" },
       { key: "arrivee_contact_email", label: "Email" },
       { key: "arrivee_contact_instructions", label: "Instructions", type: "textarea", span: true },
+      { key: "contact_arrivee_nom", label: "Contact arrivée (fiche)" },
+      { key: "contact_arrivee_tel", label: "Téléphone (fiche)" },
+      { key: "contact_arrivee_note", label: "Note (fiche)", type: "textarea", span: true },
     ],
   },
   {
@@ -85,7 +95,22 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
   },
 ];
 
+
 const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
+const FIELD_TYPES: Record<string, FieldDef["type"]> = Object.fromEntries(
+  SECTIONS.flatMap((s) => s.fields.map((f) => [f.key, f.type ?? "text"])),
+);
+
+/** Normalise une valeur brute DB vers la valeur attendue par l'input (date / heure). */
+function normalizeValue(key: string, raw: unknown): string {
+  if (raw === null || raw === undefined) return "";
+  const s = String(raw);
+  const t = FIELD_TYPES[key];
+  if (t === "date") return s.slice(0, 10);
+  if (t === "time") return s.slice(0, 5);
+  return s;
+}
+
 
 interface Props {
   trajetId: string;
@@ -116,9 +141,9 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     const row = data as unknown as Record<string, unknown>;
     const next: Record<string, string> = {};
     for (const k of ALL_KEYS) {
-      const v = row[k];
-      next[k] = v === null || v === undefined ? "" : String(v);
+      next[k] = normalizeValue(k, row[k]);
     }
+
     setInitial(next);
     setForm(next);
   }, [trajetId]);
