@@ -20,6 +20,8 @@ interface MissionRow {
   date_prise_en_charge: string;
   statut: string;
   prix_total: number;
+  leg_type?: string | null;
+  leg_index?: number | null;
 }
 
 function FlotteMissions() {

@@ -25,6 +25,8 @@ interface MissionRow {
   statut: string;
   prix_total: number;
   created_at: string;
+  leg_type?: string | null;
+  leg_index?: number | null;
 }
 interface VehicleRow {
   id: string; marque: string | null; modele: string | null;
