@@ -490,6 +490,8 @@ function AdminMissionsUnified() {
             convs,
             total,
             statut: Array.from(new Set(statuts)).join(" · "),
+            clientEmail: duo.find((x) => x.clientEmail)?.clientEmail ?? null,
+            clientNom: duo.find((x) => x.clientNom)?.clientNom ?? null,
           });
           duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
         }
