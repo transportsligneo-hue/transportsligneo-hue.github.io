@@ -284,7 +284,7 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
         </div>
       ) : (
         <div>
-          <div className="mb-4 flex flex-wrap gap-1.5 rounded-xl bg-pro-surface-soft/60 p-1">
+          <div className="mb-4 flex flex-wrap gap-1.5 rounded-xl bg-pro-bg p-1">
             {SECTIONS.map((s) => {
               const Icon = s.icon;
               const isActive = s.id === active.id;
