@@ -6202,6 +6202,10 @@ export type Database = {
         }
         Returns: string
       }
+      map_trajet_statut_to_mission: {
+        Args: { _statut: string }
+        Returns: string
+      }
       mission_pickup_ts: {
         Args: { _date: string; _heure: string }
         Returns: string
