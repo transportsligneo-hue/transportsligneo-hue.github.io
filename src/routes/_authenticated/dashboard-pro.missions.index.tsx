@@ -80,7 +80,7 @@ function ProMissionsIndex() {
       const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
         supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id, group_reference")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
           .or(orFilter)
           .order("created_at", { ascending: false }),
         supabase
@@ -104,7 +104,7 @@ function ProMissionsIndex() {
       if (orgIds.length > 0) {
         const { data } = await supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, mission_group_id, group_reference")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
           .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
           .order("created_at", { ascending: false });
         orgRows = (data ?? []) as MissionRow[];
