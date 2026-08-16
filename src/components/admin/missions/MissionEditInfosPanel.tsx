@@ -3,11 +3,15 @@
  * contacts, client). Chaque modification passe par le RPC `admin_update_mission_infos`
  * qui trace l'historique et déclenche les notifications (client / convoyeur / admin)
  * selon les réglages de `notification_settings`.
+ *
+ * Ergonomie : navigation par onglets, champs compacts, barre d'action collante.
+ * Les champs miroirs (ex. `immatriculation` / `vehicule_immatriculation`) sont
+ * fusionnés en une seule saisie pour éviter les doublons à l'écran.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, Button, TextInput, Select } from "@/components/admin/AdminUI";
-import { Pencil, Loader2, Save, RotateCcw } from "lucide-react";
+import { Pencil, Loader2, Save, RotateCcw, CalendarClock, Car, MapPin, Users } from "lucide-react";
 import { toast } from "sonner";
 
 type FieldDef = {
@@ -16,11 +20,19 @@ type FieldDef = {
   type?: "text" | "date" | "time" | "number" | "textarea" | "select";
   options?: { value: string; label: string }[];
   span?: boolean;
+  /** Colonnes secondaires alimentées avec la même valeur (évite les doublons UI). */
+  mirrors?: string[];
+  placeholder?: string;
+  hint?: string;
 };
 
-const SECTIONS: { title: string; fields: FieldDef[] }[] = [
+type SectionDef = { id: string; title: string; icon: typeof Car; fields: FieldDef[] };
+
+const SECTIONS: SectionDef[] = [
   {
-    title: "Planning (date & heure)",
+    id: "planning",
+    title: "Planning",
+    icon: CalendarClock,
     fields: [
       { key: "date_trajet", label: "Date de mission", type: "date" },
       { key: "heure_trajet", label: "Heure de prise en charge", type: "time" },
@@ -28,14 +40,20 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
     ],
   },
   {
+    id: "vehicule",
     title: "Véhicule",
+    icon: Car,
     fields: [
-      { key: "marque", label: "Marque" },
-      { key: "modele", label: "Modèle" },
-      { key: "immatriculation", label: "Plaque (principale)" },
-      { key: "vehicule_immatriculation", label: "Plaque véhicule" },
-      { key: "vin", label: "VIN" },
-      { key: "vehicule_vin", label: "VIN (fiche véhicule)" },
+      { key: "marque", label: "Marque", placeholder: "RENAULT" },
+      { key: "modele", label: "Modèle", placeholder: "MEGANE" },
+      {
+        key: "immatriculation",
+        label: "Immatriculation",
+        mirrors: ["vehicule_immatriculation"],
+        placeholder: "AA-123-BB",
+        hint: "Synchronisée sur la fiche véhicule et les documents.",
+      },
+      { key: "vin", label: "VIN / N° de série", mirrors: ["vehicule_vin"], placeholder: "VF1..." },
       {
         key: "vehicule_energie",
         label: "Énergie",
@@ -56,61 +74,59 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
     ],
   },
   {
+    id: "itineraire",
     title: "Itinéraire",
+    icon: MapPin,
     fields: [
       { key: "depart", label: "Adresse de départ", span: true },
       { key: "arrivee", label: "Adresse d'arrivée", span: true },
     ],
   },
   {
-    title: "Contact départ",
-    fields: [
-      { key: "contact_depart_nom", label: "Nom" },
-      { key: "contact_depart_tel", label: "Téléphone" },
-      { key: "contact_depart_note", label: "Instructions", type: "textarea", span: true },
-    ],
-  },
-  {
-    title: "Contact arrivée",
-    fields: [
-      { key: "arrivee_contact_prenom", label: "Prénom" },
-      { key: "arrivee_contact_nom", label: "Nom" },
-      { key: "arrivee_contact_societe", label: "Société" },
-      { key: "arrivee_contact_telephone", label: "Téléphone" },
-      { key: "arrivee_contact_telephone2", label: "Téléphone 2" },
-      { key: "arrivee_contact_email", label: "Email" },
-      { key: "arrivee_contact_instructions", label: "Instructions", type: "textarea", span: true },
-      { key: "contact_arrivee_nom", label: "Contact arrivée (fiche)" },
-      { key: "contact_arrivee_tel", label: "Téléphone (fiche)" },
-      { key: "contact_arrivee_note", label: "Note (fiche)", type: "textarea", span: true },
-    ],
-  },
-  {
-    title: "Client",
+    id: "contacts",
+    title: "Contacts & client",
+    icon: Users,
     fields: [
       { key: "client_nom", label: "Nom client" },
-      { key: "client_telephone", label: "Téléphone" },
-      { key: "client_email", label: "Email" },
+      { key: "client_telephone", label: "Téléphone client" },
+      { key: "client_email", label: "Email client", span: true },
+      { key: "contact_depart_nom", label: "Contact départ · nom" },
+      { key: "contact_depart_tel", label: "Contact départ · téléphone" },
+      { key: "contact_depart_note", label: "Instructions départ", type: "textarea", span: true },
+      { key: "arrivee_contact_prenom", label: "Contact arrivée · prénom" },
+      { key: "arrivee_contact_nom", label: "Contact arrivée · nom", mirrors: ["contact_arrivee_nom"] },
+      { key: "arrivee_contact_societe", label: "Société" },
+      {
+        key: "arrivee_contact_telephone",
+        label: "Contact arrivée · téléphone",
+        mirrors: ["contact_arrivee_tel"],
+      },
+      { key: "arrivee_contact_telephone2", label: "Téléphone secondaire" },
+      { key: "arrivee_contact_email", label: "Email arrivée" },
+      {
+        key: "arrivee_contact_instructions",
+        label: "Instructions arrivée",
+        type: "textarea",
+        span: true,
+        mirrors: ["contact_arrivee_note"],
+      },
     ],
   },
 ];
 
-
-const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
-const FIELD_TYPES: Record<string, FieldDef["type"]> = Object.fromEntries(
-  SECTIONS.flatMap((s) => s.fields.map((f) => [f.key, f.type ?? "text"])),
-);
+const ALL_FIELDS = SECTIONS.flatMap((s) => s.fields);
+const ALL_KEYS = ALL_FIELDS.map((f) => f.key);
+const FIELD_BY_KEY: Record<string, FieldDef> = Object.fromEntries(ALL_FIELDS.map((f) => [f.key, f]));
 
 /** Normalise une valeur brute DB vers la valeur attendue par l'input (date / heure). */
 function normalizeValue(key: string, raw: unknown): string {
   if (raw === null || raw === undefined) return "";
   const s = String(raw);
-  const t = FIELD_TYPES[key];
+  const t = FIELD_BY_KEY[key]?.type ?? "text";
   if (t === "date") return s.slice(0, 10);
   if (t === "time") return s.slice(0, 5);
   return s;
 }
-
 
 interface Props {
   trajetId: string;
@@ -125,6 +141,7 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const [saving, setSaving] = useState(false);
   const [initial, setInitial] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({});
+  const [tab, setTab] = useState<string>(SECTIONS[0].id);
 
   useEffect(() => {
     if (openKey > 0) setOpen(true);
@@ -140,10 +157,15 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     }
     const row = data as unknown as Record<string, unknown>;
     const next: Record<string, string> = {};
-    for (const k of ALL_KEYS) {
-      next[k] = normalizeValue(k, row[k]);
+    for (const f of ALL_FIELDS) {
+      let raw = row[f.key];
+      if ((raw === null || raw === undefined || raw === "") && f.mirrors) {
+        for (const m of f.mirrors) {
+          if (row[m] !== null && row[m] !== undefined && row[m] !== "") { raw = row[m]; break; }
+        }
+      }
+      next[f.key] = normalizeValue(f.key, raw);
     }
-
     setInitial(next);
     setForm(next);
   }, [trajetId]);
@@ -157,12 +179,24 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     [form, initial],
   );
 
+  const dirtyBySection = useMemo(() => {
+    const m: Record<string, number> = {};
+    SECTIONS.forEach((s) => {
+      m[s.id] = s.fields.filter((f) => (form[f.key] ?? "") !== (initial[f.key] ?? "")).length;
+    });
+    return m;
+  }, [form, initial]);
+
   const save = async () => {
     if (dirtyKeys.length === 0) return;
     setSaving(true);
     try {
       const patch: Record<string, string | null> = {};
-      for (const k of dirtyKeys) patch[k] = form[k]?.trim() ? form[k].trim() : null;
+      for (const k of dirtyKeys) {
+        const value = form[k]?.trim() ? form[k].trim() : null;
+        patch[k] = value;
+        FIELD_BY_KEY[k]?.mirrors?.forEach((m) => { patch[m] = value; });
+      }
       const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
         _trajet_id: trajetId,
         _patch: patch as never,
@@ -183,16 +217,58 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     }
   };
 
+  const active = SECTIONS.find((s) => s.id === tab) ?? SECTIONS[0];
+
+  const renderField = (f: FieldDef) => {
+    const changed = (form[f.key] ?? "") !== (initial[f.key] ?? "");
+    const set = (v: string) => setForm((p) => ({ ...p, [f.key]: v }));
+    return (
+      <div key={f.key} className={f.span ? "sm:col-span-2" : undefined}>
+        <label className="mb-1 flex items-center gap-1 text-[11px] font-medium text-pro-text-soft">
+          {f.label}
+          {changed && <span className="h-1.5 w-1.5 rounded-full bg-pro-accent" aria-label="modifié" />}
+        </label>
+        {f.type === "textarea" ? (
+          <textarea
+            value={form[f.key] ?? ""}
+            onChange={(e) => set(e.target.value)}
+            rows={2}
+            className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text outline-none focus:border-pro-accent"
+          />
+        ) : f.type === "select" ? (
+          <Select value={form[f.key] ?? ""} onChange={(e) => set(e.target.value)}>
+            {f.options?.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </Select>
+        ) : (
+          <TextInput
+            type={f.type === "number" ? "number" : f.type ?? "text"}
+            value={form[f.key] ?? ""}
+            placeholder={f.placeholder}
+            onChange={(e) => set(e.target.value)}
+          />
+        )}
+        {f.hint && <p className="mt-1 text-[10px] text-pro-muted">{f.hint}</p>}
+      </div>
+    );
+  };
+
   return (
     <Card>
-      <div className="flex flex-wrap items-center gap-2 mb-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <Pencil size={15} className="text-pro-accent" />
-        <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-pro-text">
           Modifier la fiche mission
         </h3>
+        {dirtyKeys.length > 0 && (
+          <span className="rounded-full bg-pro-accent/10 px-2 py-0.5 text-[10px] font-bold text-pro-accent">
+            {dirtyKeys.length} modif.
+          </span>
+        )}
         <div className="ml-auto">
           <Button variant={open ? "secondary" : "primary"} onClick={() => setOpen((o) => !o)}>
-            <Pencil size={13} /> {open ? "Masquer" : "Modifier les informations"}
+            <Pencil size={13} /> {open ? "Masquer" : "Modifier"}
           </Button>
         </div>
       </div>
@@ -200,70 +276,54 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
       {!open ? (
         <p className="text-xs text-pro-text-soft">
           Plaque, VIN, véhicule, adresses, date/heure et contacts — modifiables à tout moment, même
-          rétroactivement sur une mission terminée. Chaque changement est tracé et notifié
-          automatiquement (client, convoyeur, admin).
+          rétroactivement. Chaque changement est tracé et notifié automatiquement.
         </p>
       ) : loading ? (
         <div className="flex justify-center py-8">
           <Loader2 size={20} className="animate-spin text-pro-accent" />
         </div>
       ) : (
-        <div className="space-y-5">
-          {SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-pro-muted mb-2">
-                {section.title}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {section.fields.map((f) => {
-                  const changed = (form[f.key] ?? "") !== (initial[f.key] ?? "");
-                  return (
-                    <div key={f.key} className={f.span ? "sm:col-span-2" : undefined}>
-                      <label className="block text-[11px] font-medium text-pro-text-soft mb-1">
-                        {f.label}
-                        {changed && <span className="ml-1 text-pro-accent">•</span>}
-                      </label>
-                      {f.type === "textarea" ? (
-                        <textarea
-                          value={form[f.key] ?? ""}
-                          onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                          rows={2}
-                          className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text outline-none focus:border-pro-accent"
-                        />
-                      ) : f.type === "select" ? (
-                        <Select
-                          value={form[f.key] ?? ""}
-                          onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                        >
-                          {f.options?.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </Select>
-                      ) : (
-                        <TextInput
-                          type={f.type === "number" ? "number" : f.type ?? "text"}
-                          value={form[f.key] ?? ""}
-                          onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        <div>
+          <div className="mb-4 flex flex-wrap gap-1.5 rounded-xl bg-pro-bg p-1">
+            {SECTIONS.map((s) => {
+              const Icon = s.icon;
+              const isActive = s.id === active.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setTab(s.id)}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    isActive
+                      ? "bg-pro-accent text-white shadow-sm"
+                      : "text-pro-text-soft hover:bg-white hover:text-pro-text"
+                  }`}
+                >
+                  <Icon size={13} />
+                  {s.title}
+                  {dirtyBySection[s.id] > 0 && (
+                    <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-white" : "bg-pro-accent"}`} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-          <div className="flex items-center gap-2 pt-1 border-t border-pro-border">
-            <p className="text-xs text-pro-text-soft mt-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {active.fields.map(renderField)}
+          </div>
+
+          <div className="sticky bottom-0 -mx-1 mt-5 flex flex-wrap items-center gap-2 border-t border-pro-border bg-white/95 px-1 py-3 backdrop-blur">
+            <p className="text-xs text-pro-text-soft">
               {dirtyKeys.length === 0 ? "Aucune modification" : `${dirtyKeys.length} champ(s) modifié(s)`}
             </p>
-            <div className="ml-auto flex items-center gap-2 mt-3">
+            <div className="ml-auto flex items-center gap-2">
               <Button variant="secondary" onClick={() => setForm(initial)} disabled={dirtyKeys.length === 0 || saving}>
                 <RotateCcw size={14} /> Annuler
               </Button>
               <Button onClick={save} disabled={dirtyKeys.length === 0 || saving}>
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                Enregistrer & notifier
+                Enregistrer
               </Button>
             </div>
           </div>
