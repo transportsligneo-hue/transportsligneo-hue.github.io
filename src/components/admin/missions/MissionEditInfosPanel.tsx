@@ -141,9 +141,9 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     const row = data as unknown as Record<string, unknown>;
     const next: Record<string, string> = {};
     for (const k of ALL_KEYS) {
-      const v = row[k];
-      next[k] = v === null || v === undefined ? "" : String(v);
+      next[k] = normalizeValue(k, row[k]);
     }
+
     setInitial(next);
     setForm(next);
   }, [trajetId]);
