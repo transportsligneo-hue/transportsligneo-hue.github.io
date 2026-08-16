@@ -31,6 +31,7 @@ import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
+import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
@@ -153,6 +154,7 @@ function AdminMissionsUnified() {
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
   const clientBrands = useClientBrands(rows.map((r) => r.clientEmail));
+  const pvMap = useMissionPv(Array.from(meta.values()).map((m) => m.attributionId));
 
   const show = useCallback((key: string) => !hidden.has(key), [hidden]);
   const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length, [hidden]);
@@ -195,7 +197,7 @@ function AdminMissionsUnified() {
         .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
-      supabase.from("attributions").select("trajet_id, convoyeur_id, statut, numero_mission, created_at"),
+      supabase.from("attributions").select("id, trajet_id, convoyeur_id, statut, numero_mission, created_at"),
       supabase.from("convoyeurs").select("id, prenom, nom, statut").eq("statut", "valide").order("nom"),
     ]);
 
@@ -225,15 +227,15 @@ function AdminMissionsUnified() {
     const convertedDemandeIds = new Set(trajets.map((t) => t.demande_id).filter(Boolean) as string[]);
 
     const attrRows = (attributionsData ?? []) as unknown as {
-      trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
+      id: string; trajet_id: string | null; convoyeur_id: string | null; numero_mission: string | null; statut: string | null; created_at: string;
     }[];
     const numeroByTrajet = new Map<string, string>();
-    const activeAttrByTrajet = new Map<string, { convoyeur_id: string | null; statut: string | null }>();
+    const activeAttrByTrajet = new Map<string, { id: string; convoyeur_id: string | null; statut: string | null }>();
     attrRows.forEach((a) => {
       if (!a.trajet_id) return;
       if (a.numero_mission && !numeroByTrajet.has(a.trajet_id)) numeroByTrajet.set(a.trajet_id, a.numero_mission);
       if (ACTIVE_ATTR.includes(a.statut ?? "") && !activeAttrByTrajet.has(a.trajet_id)) {
-        activeAttrByTrajet.set(a.trajet_id, { convoyeur_id: a.convoyeur_id, statut: a.statut });
+        activeAttrByTrajet.set(a.trajet_id, { id: a.id, convoyeur_id: a.convoyeur_id, statut: a.statut });
       }
     });
 
@@ -282,6 +284,7 @@ function AdminMissionsUnified() {
         convoyeurId: attr?.convoyeur_id ?? null,
         convoyeurNom: attr?.convoyeur_id ? convNames.get(attr.convoyeur_id) ?? "Convoyeur" : null,
         attributionStatut: attr?.statut ?? null,
+        attributionId: attr?.id ?? null,
         facture: t.mission_id ? factureByMission.get(t.mission_id) ?? null : null,
         vin: t.vin ?? t.vehicule_vin ?? null,
         energie: t.vehicule_energie ?? null,
@@ -462,7 +465,7 @@ function AdminMissionsUnified() {
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
-    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null }
+    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null; pv: string[] }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -494,6 +497,7 @@ function AdminMissionsUnified() {
             statut: Array.from(new Set(statuts)).join(" · "),
             clientEmail: duo.find((x) => x.clientEmail)?.clientEmail ?? null,
             clientNom: duo.find((x) => x.clientNom)?.clientNom ?? null,
+            pv: Array.from(new Set(duo.flatMap((x) => pvOf(pvMap, meta.get(x.id)?.attributionId)))),
           });
           duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
         }
@@ -646,6 +650,7 @@ function AdminMissionsUnified() {
                               brand={clientBrandOf(clientBrands, r.clientEmail)}
                               fallbackName={r.clientNom}
                               size={20}
+                              pv={r.pv}
                             />
                           </span>
                           <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#3730a3]">
@@ -733,6 +738,7 @@ function AdminMissionsUnified() {
                             brand={clientBrandOf(clientBrands, r.m.clientEmail)}
                             fallbackName={r.m.clientNom}
                             size={22}
+                            pv={pvOf(pvMap, meta.get(r.m.id)?.attributionId)}
                           />
                         </td>
                       )}

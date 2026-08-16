@@ -31,6 +31,7 @@ import { missionNumberOf, displayTrajetRef, displayNumero, stripLegSuffix, hasLe
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { ArrowLeftRight } from "lucide-react";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
+import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
@@ -156,6 +157,7 @@ function AdminAttributions() {
   const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const clientBrands = useClientBrands(attributions.map((a) => a.trajet?.client_email));
+  const pvMap = useMissionPv(attributions.map((a) => a.id));
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
@@ -631,6 +633,7 @@ function AdminAttributions() {
                       brand={clientBrandOf(clientBrands, a.trajet?.client_email)}
                       fallbackName={a.trajet?.client_nom}
                       size={22}
+                      pv={pvOf(pvMap, a.id)}
                     />
                     {a.trajet?.client_telephone && <span className="text-pro-text-soft">· {a.trajet.client_telephone}</span>}
                     <span>· Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span></span>

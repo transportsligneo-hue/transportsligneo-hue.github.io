@@ -28,6 +28,7 @@ export interface MissionMeta {
   vin: string | null;
   energie: string | null;
   missionId: string | null;
+  attributionId?: string | null;
 }
 
 export const MISSION_COLUMNS = [
