@@ -465,7 +465,7 @@ function AdminMissionsUnified() {
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
-    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null }
+    | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null; pv: string[] }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
