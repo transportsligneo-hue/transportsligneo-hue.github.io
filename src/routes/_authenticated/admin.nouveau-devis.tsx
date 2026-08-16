@@ -147,7 +147,7 @@ function AdminNouveauDevisPage() {
   const [departRetour, setDepartRetour] = useState("");
   const [arriveeRetour, setArriveeRetour] = useState("");
   const [options, setOptions] = useState<string[]>([]);
-  const [pvDigital, setPvDigital] = useState<string>(PV_OPTIONS[0]);
+  const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
   const [destTel, setDestTel] = useState("");
   const [destNote, setDestNote] = useState("");
@@ -287,7 +287,7 @@ function AdminNouveauDevisPage() {
     return Number.isFinite(n) ? n : NaN;
   }, [montant]);
 
-  const pvLabel = pvDigital === "Aucun" ? null : pvDigital;
+  const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = typeTrajet === "Livraison + restitution";
 
   const recapMessage = [
@@ -780,21 +780,29 @@ function AdminNouveauDevisPage() {
               PV de livraison digitalisé
             </label>
             <div className="flex flex-wrap gap-2">
-              {PV_OPTIONS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPvDigital(p)}
-                  className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                    pvDigital === p
-                      ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
-                      : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+              {PV_OPTIONS.map((p) => {
+                const def = pvDef(p.key);
+                const active = pvDigital === p.key;
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => setPvDigital(p.key)}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
+                      active
+                        ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                        : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                    }`}
+                  >
+                    {def ? <PvLogo def={def} size={20} /> : null}
+                    {p.label}
+                  </button>
+                );
+              })}
             </div>
+            <p className="mt-2 text-[11.5px] text-pro-muted">
+              Le PV choisi est reporté automatiquement dans la mission du convoyeur.
+            </p>
           </div>
         </Card>
 
