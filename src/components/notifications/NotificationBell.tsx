@@ -75,6 +75,14 @@ export function NotificationBell({ className = "" }: { className?: string }) {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, fetchLatest, channelId]);
 
+  // Ouverture du panneau → tout est considéré comme vu (le badge disparaît)
+  useEffect(() => {
+    if (!open || !user?.id) return;
+    const t = setTimeout(() => { markAllRead(); }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user?.id]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
