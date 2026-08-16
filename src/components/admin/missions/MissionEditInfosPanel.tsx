@@ -89,15 +89,21 @@ const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
 
 interface Props {
   trajetId: string;
+  /** Incrémenter pour ouvrir le panneau depuis l'extérieur (bouton « Modifier »). */
+  openKey?: number;
   onChanged?: () => void;
 }
 
-export function MissionEditInfosPanel({ trajetId, onChanged }: Props) {
+export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [initial, setInitial] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (openKey > 0) setOpen(true);
+  }, [openKey]);
 
   const load = useCallback(async () => {
     setLoading(true);

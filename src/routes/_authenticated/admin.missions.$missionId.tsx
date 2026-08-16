@@ -271,6 +271,7 @@ function AdminMissionDetail() {
   }, [trajet?.id, trajet?.commande_ref]);
 
   const [poHistoryKey, setPoHistoryKey] = useState(0);
+  const [editOpenKey, setEditOpenKey] = useState(0);
 
   const savePo = useCallback(
     async (value: string, silent = false) => {
