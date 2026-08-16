@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat } from "lucide-react";
+import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
+
 import { useServerFn } from "@tanstack/react-start";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
 import { markDevisAsProcessed } from "@/lib/devis-mark-processed.functions";
@@ -33,6 +35,15 @@ interface DevisRow {
   mission_id: string | null;
   converted_at: string | null;
   refused_at: string | null;
+  marque: string | null;
+  modele: string | null;
+  immatriculation: string | null;
+  depart_retour: string | null;
+  arrivee_retour: string | null;
+  immatriculation_retour: string | null;
+  marque_retour: string | null;
+  modele_retour: string | null;
+  prix_retour: number | null;
 }
 
 
@@ -123,7 +134,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
@@ -322,10 +333,39 @@ function ProDocuments() {
                 <tbody>
                   {devis.map((d) => {
                     const st = devisStatutPill[d.statut] ?? { label: d.statut, cls: "bg-slate-100 text-slate-700" };
+                    const isDuo = Boolean(d.depart_retour || d.immatriculation_retour || d.prix_retour);
+                    const vehicule = [d.marque, d.modele].filter(Boolean).join(" ");
+                    const vehiculeRetour = [d.marque_retour, d.modele_retour].filter(Boolean).join(" ");
                     return (
-                      <tr key={d.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
-                        <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">{d.numero}</td>
-                        <td className="px-5 py-3 text-pro-text">{d.depart} → {d.arrivee}</td>
+                      <tr key={d.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60 align-top">
+                        <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
+                          <div className="flex flex-col gap-1.5">
+                            <span>{d.numero}</span>
+                            {isDuo && <span className="fleet-chip-duo w-fit"><Repeat size={10} /> Aller-retour</span>}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3 text-pro-text">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <MissionLegBadge leg={isDuo ? "aller" : null} size="xs" />
+                              <span>{d.depart} → {d.arrivee}</span>
+                            </span>
+                            {isDuo && (d.depart_retour || d.arrivee_retour) && (
+                              <span className="flex items-center gap-1.5">
+                                <MissionLegBadge leg="retour" size="xs" />
+                                <span>{d.depart_retour ?? d.arrivee} → {d.arrivee_retour ?? d.depart}</span>
+                              </span>
+                            )}
+                            <span className="flex flex-wrap items-center gap-2 text-[11px] text-pro-text-soft">
+                              {d.immatriculation && <span className="fleet-plate-mini">{d.immatriculation}</span>}
+                              {vehicule && <span>{vehicule}</span>}
+                              {d.immatriculation_retour && d.immatriculation_retour !== d.immatriculation && (
+                                <span className="fleet-plate-mini">{d.immatriculation_retour}</span>
+                              )}
+                              {vehiculeRetour && vehiculeRetour !== vehicule && <span>{vehiculeRetour}</span>}
+                            </span>
+                          </div>
+                        </td>
                         <td className="px-5 py-3 text-pro-text-soft">
                           {new Date(d.created_at).toLocaleDateString("fr-FR")}
                         </td>
@@ -336,7 +376,9 @@ function ProDocuments() {
                         </td>
                         <td className="px-5 py-3 text-right font-semibold text-pro-text whitespace-nowrap">
                           {Number(d.prix_estime).toFixed(2)} €
+                          {isDuo && <span className="block text-[10px] font-semibold uppercase tracking-wider text-pro-muted">aller-retour</span>}
                         </td>
+
                         <td className="px-5 py-3 text-right">
                           {d.pdf_url ? (
                             <a
