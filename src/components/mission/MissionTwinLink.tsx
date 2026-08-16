@@ -34,7 +34,7 @@ export function MissionTwinLink({
     const q =
       source === "missions"
         ? supabase.from("missions").select("id, leg_type, numero").eq("mission_group_id", groupId).neq("id", currentId).limit(1).maybeSingle()
-        : supabase.from("trajets").select("id, leg_type").eq("mission_group_id", groupId).neq("id", currentId).limit(1).maybeSingle();
+        : supabase.from("trajets_client_safe").select("id, leg_type").eq("mission_group_id", groupId).neq("id", currentId).limit(1).maybeSingle();
     q.then(({ data }) => {
       if (cancelled) return;
       setTwin(data ? ({ id: (data as { id: string }).id, leg_type: (data as { leg_type?: string | null }).leg_type ?? null, numero: (data as { numero?: string | null }).numero ?? null }) : null);

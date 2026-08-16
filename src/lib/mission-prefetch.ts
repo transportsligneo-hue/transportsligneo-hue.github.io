@@ -65,7 +65,7 @@ export function prefetchMissionTracking(missionNumero: string | null | undefined
           .select("kind, signature_data, signed_at, created_at")
           .eq("attribution_id", attributionId),
         trajetId
-          ? supabase.from("trajets").select("carte_grise_recto_url, carte_grise_verso_url").eq("id", trajetId).maybeSingle()
+          ? supabase.from("trajets_client_safe").select("carte_grise_recto_url, carte_grise_verso_url").eq("id", trajetId).maybeSingle()
           : Promise.resolve(null),
       ]);
     } catch {
