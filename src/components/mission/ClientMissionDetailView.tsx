@@ -9,6 +9,7 @@ import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
+import { legRef } from "@/lib/mission-number";
 
 interface Mission {
   id: string;
@@ -323,7 +324,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="mission-text-muted text-[10px] uppercase tracking-wider">{mission.numero}</p>
+              <p className="mission-text-muted text-[10px] uppercase tracking-wider">{legRef(mission.numero, mission.leg_type, null, mission.leg_type === "aller" || mission.leg_type === "retour")}</p>
               <MissionLegBadge leg={mission.leg_type as "aller" | "retour" | "simple" | null} />
             </div>
             <h1 className="font-heading text-2xl mission-text mt-1 flex items-center gap-2">

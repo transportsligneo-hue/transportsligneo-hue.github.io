@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { legRef } from "@/lib/mission-number";
 
 export const Route = createFileRoute("/_authenticated/entreprise/missions")({
   component: EntrepriseMissions,
@@ -34,7 +35,7 @@ function EntrepriseMissions() {
       if (!mem) { setLoading(false); return; }
       const { data } = await supabase
         .from("missions")
-        .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total")
+        .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, leg_type, leg_index")
         .eq("organization_id", mem.organization_id)
         .order("created_at", { ascending: false });
       setRows((data ?? []) as MissionRow[]);
@@ -66,7 +67,7 @@ function EntrepriseMissions() {
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-pro-muted">Aucune mission</TableCell></TableRow>
             ) : rows.map((r) => (
               <TableRow key={r.id}>
-                <TableCell className="font-mono text-xs">{r.numero}</TableCell>
+                <TableCell className="font-mono text-xs">{legRef(r.numero, r.leg_type, r.leg_index, r.leg_type === "aller" || r.leg_type === "retour")}</TableCell>
                 <TableCell>{r.ville_depart} → {r.ville_arrivee}</TableCell>
                 <TableCell>{new Date(r.date_prise_en_charge).toLocaleDateString("fr-FR")}</TableCell>
                 <TableCell><Badge variant="outline">{r.statut}</Badge></TableCell>
