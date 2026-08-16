@@ -181,21 +181,30 @@ export const relancerContratYousign = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-/** Lien de téléchargement temporaire du contrat signé (admin ou convoyeur propriétaire). */
+/**
+ * Lien de téléchargement temporaire du contrat signé (admin ou convoyeur propriétaire).
+ * La lecture passe par le client admin puis un contrôle de propriété explicite :
+ * la table n'expose plus jeton, lien Yousign ni IP au client.
+ */
 export const getContratSigneUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { contratId: string; document?: "contrat" | "charte" }) => d)
   .handler(async ({ data, context }) => {
-    const { data: row } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
       .from("convoyeur_contrats")
       .select("id, signed_pdf_path, charte_signed_pdf_path, user_id, statut")
       .eq("id", data.contratId)
       .maybeSingle();
     if (!row) throw new Error("Contrat introuvable.");
+
+    if (row.user_id !== context.userId) {
+      await assertAdmin(context);
+    }
+
     const path = data.document === "charte" ? row.charte_signed_pdf_path : row.signed_pdf_path;
     if (!path) throw new Error("Le document signé n'est pas encore disponible.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: signed, error } = await supabaseAdmin.storage
       .from(BUCKET)
       .createSignedUrl(path, 300);
@@ -203,16 +212,15 @@ export const getContratSigneUrl = createServerFn({ method: "POST" })
     return { url: signed.signedUrl };
   });
 
-/** Contrat du convoyeur connecté (espace convoyeur → Mes documents). */
+/**
+ * Contrat du convoyeur connecté (espace convoyeur → Mes documents).
+ * Utilise la fonction sécurisée get_my_contrat_status qui ne renvoie
+ * que le statut et les chemins de documents signés.
+ */
 export const getMonContrat = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: row } = await context.supabase
-      .from("convoyeur_contrats")
-      .select("id, statut, signed_at, sent_at, signed_pdf_path, charte_incluse, charte_signed_at, charte_signed_pdf_path")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: rows } = await context.supabase.rpc("get_my_contrat_status");
+    const row = Array.isArray(rows) ? rows[0] : rows;
     return { contrat: row ?? null };
   });
