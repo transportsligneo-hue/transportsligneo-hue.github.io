@@ -6228,6 +6228,19 @@ export type Database = {
       }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
+      get_my_contrat_status: {
+        Args: never
+        Returns: {
+          charte_incluse: boolean
+          charte_signed_at: string
+          charte_signed_pdf_path: string
+          id: string
+          sent_at: string
+          signed_at: string
+          signed_pdf_path: string
+          statut: string
+        }[]
+      }
       get_public_pricing_display: {
         Args: never
         Returns: {
