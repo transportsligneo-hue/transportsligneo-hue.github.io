@@ -107,6 +107,19 @@ interface TrajetFull {
   mission_group_id: string | null;
   leg_type: string | null;
   commande_ref?: string | null;
+  vin?: string | null;
+  vehicule_vin?: string | null;
+  vehicule_immatriculation?: string | null;
+  vehicule_marque?: string | null;
+  vehicule_modele?: string | null;
+  vehicule_energie?: string | null;
+  vehicule_couleur?: string | null;
+  vehicule_km?: number | null;
+  vehicule_type?: string | null;
+  vehicule_notes?: string | null;
+  contact_depart_nom?: string | null;
+  contact_depart_tel?: string | null;
+  contact_depart_note?: string | null;
 }
 
 interface ConvoyeurFull {
