@@ -328,6 +328,8 @@ function AdminNouveauDevisPage() {
     modele: modele || null,
     immatriculation: immat || null,
     option_trajet: typeTrajet,
+    date_souhaitee: dateSouhaitee || null,
+
     options,
     pv_digital: pvLabel,
     destinataire_nom: destNom || null,
