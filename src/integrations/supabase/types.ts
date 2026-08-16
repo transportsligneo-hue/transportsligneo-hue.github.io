@@ -5948,6 +5948,7 @@ export type Database = {
         Returns: number
       }
       auto_archive_old_records: { Args: never; Returns: undefined }
+      backfill_missions_from_trajets: { Args: never; Returns: number }
       can_driver_update_attribution: {
         Args: {
           _attribution_id: string
