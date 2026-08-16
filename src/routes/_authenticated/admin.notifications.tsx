@@ -121,7 +121,22 @@ function AdminNotifications() {
         }
       />
 
+      <div className="flex items-center gap-1 bg-white border border-pro-border rounded-xl p-1.5 w-fit">
+        {([["feed", "Flux"], ["settings", "Réglages"]] as const).map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
+              tab === k ? "bg-pro-text text-white" : "text-pro-muted hover:bg-pro-bg-soft"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
 
+      {tab === "feed" ? (
+        <>
       <div className="flex items-center gap-2 flex-wrap bg-white border border-pro-border rounded-xl p-2">
         <Filter size={14} className="text-pro-muted ml-2" />
         {types.map(t => (
