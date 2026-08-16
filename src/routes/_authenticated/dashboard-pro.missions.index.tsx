@@ -21,9 +21,17 @@ interface MissionRow {
   prix_total: number;
   created_at: string;
   leg_type: string | null;
+  leg_index: number | null;
   mission_group_id: string | null;
   group_reference: string | null;
+  marque: string | null;
+  modele: string | null;
+  immatriculation: string | null;
+  vin: string | null;
+  carburant: string | null;
+  type_trajet: string | null;
 }
+
 
 
 interface PendingItem {
