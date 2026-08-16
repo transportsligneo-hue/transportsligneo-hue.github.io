@@ -366,6 +366,7 @@ function AdminNouveauDevisPage() {
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
           contact_arrivee_note: destNote || null,
+          pv_digitalise: pvDigital,
           message: recapMessage || null,
           prestation: "Convoyage automobile",
           prix_estime: prix,
