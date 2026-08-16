@@ -11,6 +11,7 @@ import {
   Phone,
   Mail,
   Clock,
+  Calendar,
   Camera,
   FileText,
   PenTool,
@@ -90,6 +91,8 @@ interface TrajetFull {
   arrivee: string;
   date_trajet: string | null;
   heure_trajet: string | null;
+  date_souhaitee: string | null;
+
   statut: string;
   marque: string | null;
   modele: string | null;
@@ -995,6 +998,24 @@ function AdminMissionDetail() {
                 </div>
               )}
 
+              {/* Date de mission — affichage direct et lisible */}
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <Calendar size={14} className="text-pro-accent" />
+                <span className="text-pro-text font-medium">
+                  {trajet.date_trajet
+                    ? new Date(trajet.date_trajet).toLocaleDateString("fr-FR", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Date de mission —"}
+                  {trajet.heure_trajet && (
+                    <span className="text-pro-muted font-normal"> · {trajet.heure_trajet}</span>
+                  )}
+                </span>
+              </div>
+
             <div className="mt-3 grid grid-cols-1 xl:grid-cols-3 gap-2 xl:gap-3 text-sm">
               <div className="flex items-center gap-2 text-pro-text-soft">
                 <Car size={14} className="text-pro-muted" />
@@ -1019,6 +1040,7 @@ function AdminMissionDetail() {
               </div>
             </div>
             </div>
+
           </div>
 
 
@@ -1332,6 +1354,21 @@ function AdminMissionDetail() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+              <div className="sm:col-span-2">
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Date de mission</p>
+                <div className="flex items-center gap-2">
+                  <Calendar size={13} className="text-pro-muted shrink-0" />
+                  <span className="text-sm text-pro-text">
+                    {trajet.date_trajet
+                      ? `${new Date(trajet.date_trajet).toLocaleDateString("fr-FR", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "long",
+                        })}${trajet.heure_trajet ? ` · ${trajet.heure_trajet}` : ""}`
+                      : "—"}
+                  </span>
+                </div>
+              </div>
               <div className="sm:col-span-2">
                 <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">VIN / N° de série</p>
                 <div className="flex items-center gap-2">
