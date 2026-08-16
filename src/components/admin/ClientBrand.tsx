@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { OrgLogo } from "@/components/OrgLogo";
+import { MissionPvBadges } from "@/components/admin/MissionPvBadges";
 
 export interface ClientBrandInfo {
   societe: string | null;
@@ -77,12 +78,15 @@ export function ClientBrand({
   size = 20,
   className = "",
   inline = false,
+  pv = [],
 }: {
   brand: ClientBrandInfo | null;
   fallbackName?: string | null;
   size?: number;
   className?: string;
   inline?: boolean;
+  /** Plateformes de PV digitalisés actives (moDel, Welcome Auto) */
+  pv?: string[];
 }) {
   const societe = cleanSociete(brand?.societe);
   const contact = brand?.contact || fallbackName || null;
@@ -101,6 +105,7 @@ export function ClientBrand({
           </span>
         )}
       </span>
+      <MissionPvBadges plateformes={pv} size={Math.max(14, size - 4)} />
       {inline ? null : null}
     </span>
   );
