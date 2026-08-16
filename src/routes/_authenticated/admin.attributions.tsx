@@ -619,16 +619,23 @@ function AdminAttributions() {
                     )}
                   </div>
                   <p className="text-pro-muted text-xs mt-1.5">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
                     <span className="font-semibold text-pro-text-soft">
                       {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
                       {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
                     </span>
-                    {" · "}Client : <span className="text-pro-text-soft">{a.trajet?.client_nom || "Non renseigné"}</span>
-                    {a.trajet?.client_telephone && <> · <span className="text-pro-text-soft">{a.trajet.client_telephone}</span></>}
-                    {" · "}Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
-                    {a.trajet?.prix != null && <> · <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></>}
-                  </p>
+                    <span>·</span>
+                    <ClientBrand
+                      brand={clientBrandOf(clientBrands, a.trajet?.client_email)}
+                      fallbackName={a.trajet?.client_nom}
+                      size={22}
+                    />
+                    {a.trajet?.client_telephone && <span className="text-pro-text-soft">· {a.trajet.client_telephone}</span>}
+                    <span>· Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span></span>
+                    {a.trajet?.prix != null && <span>· <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></span>}
+                  </div>
                 </div>
+
                 <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
                   <IconButton
