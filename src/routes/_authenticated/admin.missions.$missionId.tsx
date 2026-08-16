@@ -1355,6 +1355,21 @@ function AdminMissionDetail() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
               <div className="sm:col-span-2">
+                <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Date de mission</p>
+                <div className="flex items-center gap-2">
+                  <Calendar size={13} className="text-pro-muted shrink-0" />
+                  <span className="text-sm text-pro-text">
+                    {trajet.date_trajet
+                      ? `${new Date(trajet.date_trajet).toLocaleDateString("fr-FR", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "long",
+                        })}${trajet.heure_trajet ? ` · ${trajet.heure_trajet}` : ""}`
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+              <div className="sm:col-span-2">
                 <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">VIN / N° de série</p>
                 <div className="flex items-center gap-2">
                   <Fingerprint size={13} className="text-pro-muted shrink-0" />
