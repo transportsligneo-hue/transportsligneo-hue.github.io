@@ -146,6 +146,10 @@ function AdminNouveauDevisPage() {
   const [vinRetour, setVinRetour] = useState("");
   const [departRetour, setDepartRetour] = useState("");
   const [arriveeRetour, setArriveeRetour] = useState("");
+  const [dateSouhaitee, setDateSouhaitee] = useState("");
+  const [heureSouhaitee, setHeureSouhaitee] = useState("");
+  const [dateRetourInput, setDateRetourInput] = useState("");
+  const [heureRetourInput, setHeureRetourInput] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
