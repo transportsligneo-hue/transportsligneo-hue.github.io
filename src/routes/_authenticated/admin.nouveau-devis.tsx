@@ -369,6 +369,11 @@ function AdminNouveauDevisPage() {
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: typeTrajet,
+          date_souhaitee: dateSouhaitee || null,
+          heure_souhaitee: heureSouhaitee || null,
+          date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
+          heure_retour: isAllerRetour ? (heureRetourInput || null) : null,
+
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
           contact_arrivee_note: destNote || null,
