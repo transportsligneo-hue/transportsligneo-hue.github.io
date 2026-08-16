@@ -5948,6 +5948,7 @@ export type Database = {
         Returns: number
       }
       auto_archive_old_records: { Args: never; Returns: undefined }
+      backfill_missions_from_trajets: { Args: never; Returns: number }
       can_driver_update_attribution: {
         Args: {
           _attribution_id: string
@@ -6200,6 +6201,10 @@ export type Database = {
           _metadata?: Json
           _organization_id?: string
         }
+        Returns: string
+      }
+      map_trajet_statut_to_mission: {
+        Args: { _statut: string }
         Returns: string
       }
       mission_pickup_ts: {
