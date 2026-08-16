@@ -1,12 +1,14 @@
 /**
  * Affichage normalisé d'un numéro de mission : le numéro d'origine stocké en base
  * (MIS-TLG-2026-075) est affiché avec un dièse devant la séquence → MIS-TLG-2026-#075.
+ * Un éventuel suffixe de volet est affiché séparé par un tiret → MIS-TLG-2026-#075-L.
  */
 export function displayNumero(numero: string): string {
-  return numero.replace(/-#?(\d+)([ARL])?$/i, (_m, digits: string, suffix?: string) =>
-    `-#${digits}${suffix ? suffix.toUpperCase() : ""}`,
+  return numero.replace(/-#?(\d+)-?([ARL])?$/i, (_m, digits: string, suffix?: string) =>
+    `-#${digits}${suffix ? `-${suffix.toUpperCase()}` : ""}`,
   );
 }
+
 
 /** Numéro mission MIS-TLG-YYYY-#XXX dérivé déterministe depuis created_at + id */
 export function formatMissionNumber(id: string, createdAt: string): string {
