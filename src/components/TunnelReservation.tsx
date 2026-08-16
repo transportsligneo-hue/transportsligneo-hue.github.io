@@ -19,6 +19,7 @@ interface FormState {
   ville_depart: string;
   ville_arrivee: string;
   date_prise_en_charge: string;
+  heure_prise_en_charge: string;
   type_trajet: TripType;
   options: string[];
   marque: string;
@@ -37,6 +38,7 @@ const initialState: FormState = {
   ville_depart: "",
   ville_arrivee: "",
   date_prise_en_charge: "",
+  heure_prise_en_charge: "",
   type_trajet: "aller_simple",
   options: [],
   marque: "",
@@ -136,7 +138,7 @@ export default function TunnelReservation({ onClose }: Props) {
   };
 
   const canNext = (): boolean => {
-    if (step === 1) return !!(form.ville_depart && form.ville_arrivee && form.date_prise_en_charge);
+    if (step === 1) return !!(form.ville_depart && form.ville_arrivee && form.date_prise_en_charge && form.heure_prise_en_charge);
     if (step === 2) return true;
     if (step === 3) return !!(form.marque && form.modele && form.immatriculation && form.carburant);
     if (step === 4) return !!(form.nom && form.prenom && form.email && form.cgv);
@@ -161,6 +163,7 @@ export default function TunnelReservation({ onClose }: Props) {
           ville_depart: form.ville_depart,
           ville_arrivee: form.ville_arrivee,
           date_prise_en_charge: form.date_prise_en_charge,
+          heure_prise_en_charge: form.heure_prise_en_charge,
           type_trajet: form.type_trajet,
           options: optionsLabels,
           marque: form.marque,
@@ -407,13 +410,25 @@ function Step1({ form, update }: { form: FormState; update: (n: string, v: any) 
         />
         <div>
           <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
-            <Calendar className="w-3 h-3 inline mr-1" /> Date de prise en charge
+            <Calendar className="w-3 h-3 inline mr-1" /> Date de prise en charge *
           </label>
           <input
             type="date"
             min={today}
             value={form.date_prise_en_charge}
             onChange={(e) => update("date_prise_en_charge", e.target.value)}
+            required
+            className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">
+            <Calendar className="w-3 h-3 inline mr-1" /> Heure de prise en charge *
+          </label>
+          <input
+            type="time"
+            value={form.heure_prise_en_charge}
+            onChange={(e) => update("heure_prise_en_charge", e.target.value)}
             required
             className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
           />
@@ -547,7 +562,7 @@ function Step4({
       <div className="bg-navy-light/60 border border-primary/30 rounded p-5 mb-5">
         <p className="text-xs uppercase tracking-wider text-primary mb-3">Récapitulatif de la commande</p>
         <RecapLine label="Trajet" value={`${form.ville_depart} → ${form.ville_arrivee}`} />
-        <RecapLine label="Date" value={form.date_prise_en_charge ? new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR") : " · "} />
+        <RecapLine label="Date" value={form.date_prise_en_charge ? `${new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR")}${form.heure_prise_en_charge ? ` à ${form.heure_prise_en_charge}` : ""}` : " · "} />
         <RecapLine label="Type" value={tripTypeLabel(form.type_trajet)} />
         {form.options.length > 0 && (
           <RecapLine
@@ -595,7 +610,7 @@ function Step5({ numero, form, total, onClose }: { numero: string; form: FormSta
         <p className="text-xs uppercase tracking-wider text-primary mb-3">Mission</p>
         <RecapLine label="N°" value={numero} />
         <RecapLine label="Trajet" value={`${form.ville_depart} → ${form.ville_arrivee}`} />
-        <RecapLine label="Date" value={new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR")} />
+        <RecapLine label="Date" value={`${new Date(form.date_prise_en_charge).toLocaleDateString("fr-FR")}${form.heure_prise_en_charge ? ` à ${form.heure_prise_en_charge}` : ""}`} />
         <RecapLine label="Statut" value="En attente de validation" />
         <div className="border-t border-primary/20 mt-3 pt-3 flex items-baseline justify-between">
           <span className="text-cream/70 text-xs uppercase tracking-wider">Total TTC</span>
