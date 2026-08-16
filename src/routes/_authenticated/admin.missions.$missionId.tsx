@@ -223,6 +223,7 @@ function AdminMissionDetail() {
   const navigate = useNavigate();
 
   const [attribution, setAttribution] = useState<AttributionFull | null>(null);
+  const pvMap = useMissionPv([attribution?.id]);
   const [trajet, setTrajet] = useState<TrajetFull | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurFull | null>(null);
   const [inspections, setInspections] = useState<InspectionRow[]>([]);
@@ -917,6 +918,7 @@ function AdminMissionDetail() {
         baseNumero: groupBaseNumero ?? attribution.numero_mission,
       })
     : missionNumberOf(attribution);
+  const missionPv = pvOf(pvMap, attribution.id);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
     day: "2-digit",
