@@ -203,6 +203,10 @@ function AdminNotifications() {
           })}
         </ul>
       )}
+        </>
+      ) : (
+        <NotificationSettingsPanel />
+      )}
     </div>
   );
 }
