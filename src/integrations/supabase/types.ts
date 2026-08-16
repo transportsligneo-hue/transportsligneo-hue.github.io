@@ -6224,6 +6224,10 @@ export type Database = {
       }
       auto_archive_old_records: { Args: never; Returns: undefined }
       backfill_missions_from_trajets: { Args: never; Returns: number }
+      can_convoyeur_bid_on_trajet: {
+        Args: { _convoyeur_id: string; _trajet_id: string }
+        Returns: boolean
+      }
       can_driver_update_attribution: {
         Args: {
           _attribution_id: string
@@ -6468,6 +6472,7 @@ export type Database = {
         Returns: boolean
       }
       is_privileged_writer: { Args: never; Returns: boolean }
+      is_public_app_setting_key: { Args: { _key: string }; Returns: boolean }
       is_validated_convoyeur: { Args: { _user_id: string }; Returns: boolean }
       log_activity: {
         Args: {
