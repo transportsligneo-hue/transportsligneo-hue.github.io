@@ -293,6 +293,11 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = typeTrajet === "Livraison + restitution";
+  const planningIncomplet =
+    !dateSouhaitee ||
+    !heureSouhaitee ||
+    (isAllerRetour && (!dateRetourInput || !heureRetourInput));
+
 
   const recapMessage = [
     `Type de trajet : ${typeTrajet}`,
