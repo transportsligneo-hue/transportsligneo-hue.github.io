@@ -3893,6 +3893,7 @@ export type Database = {
           email: string
           fleet_organization_id: string | null
           group_reference: string | null
+          heure_prise_en_charge: string | null
           id: string
           immatriculation: string | null
           leg_index: number | null
@@ -3935,6 +3936,7 @@ export type Database = {
           email: string
           fleet_organization_id?: string | null
           group_reference?: string | null
+          heure_prise_en_charge?: string | null
           id?: string
           immatriculation?: string | null
           leg_index?: number | null
@@ -3977,6 +3979,7 @@ export type Database = {
           email?: string
           fleet_organization_id?: string | null
           group_reference?: string | null
+          heure_prise_en_charge?: string | null
           id?: string
           immatriculation?: string | null
           leg_index?: number | null
