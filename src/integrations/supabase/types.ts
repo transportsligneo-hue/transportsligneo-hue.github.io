@@ -765,13 +765,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attributions_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       avis_clients: {
@@ -3636,13 +3629,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "mission_offres_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       mission_pv_digitaux: {
@@ -5240,13 +5226,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "trajets_parent_trajet_id_fkey"
-            columns: ["parent_trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       trajets_admin_data: {
@@ -5280,13 +5259,6 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: true
             referencedRelation: "trajets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: true
-            referencedRelation: "trajets_assigned_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -5552,13 +5524,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "vehicle_movements_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_assigned_safe"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "vehicle_movements_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -5709,114 +5674,7 @@ export type Database = {
           vehicule_vin: string | null
           vin: string | null
         }
-        Insert: {
-          arrivee?: string | null
-          arrivee_contact_instructions?: string | null
-          arrivee_contact_nom?: string | null
-          arrivee_contact_telephone?: string | null
-          arrivee_contact_telephone2?: string | null
-          carte_grise_recto_url?: string | null
-          carte_grise_verso_url?: string | null
-          commission_convoyeur_pct?: number | null
-          contact_arrivee_nom?: string | null
-          contact_arrivee_note?: string | null
-          contact_arrivee_tel?: string | null
-          contact_depart_nom?: string | null
-          contact_depart_note?: string | null
-          contact_depart_tel?: string | null
-          created_at?: string | null
-          date_trajet?: string | null
-          demande_id?: string | null
-          depart?: string | null
-          devis_id?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          immatriculation?: string | null
-          marque?: string | null
-          modele?: string | null
-          options_meta?: Json | null
-          pricing_mode?: string | null
-          prix_convoyeur?: number | null
-          prix_convoyeur_fixe?: number | null
-          prix_convoyeur_max?: number | null
-          prix_convoyeur_min?: number | null
-          prix_suggere?: number | null
-          published_at?: string | null
-          statut?: string | null
-          statut_publication?: string | null
-          tarif_convoyeur?: number | null
-          updated_at?: string | null
-          vehicule_couleur?: string | null
-          vehicule_energie?: string | null
-          vehicule_immatriculation?: string | null
-          vehicule_km?: number | null
-          vehicule_notes?: string | null
-          vehicule_type?: string | null
-          vehicule_vin?: string | null
-          vin?: string | null
-        }
-        Update: {
-          arrivee?: string | null
-          arrivee_contact_instructions?: string | null
-          arrivee_contact_nom?: string | null
-          arrivee_contact_telephone?: string | null
-          arrivee_contact_telephone2?: string | null
-          carte_grise_recto_url?: string | null
-          carte_grise_verso_url?: string | null
-          commission_convoyeur_pct?: number | null
-          contact_arrivee_nom?: string | null
-          contact_arrivee_note?: string | null
-          contact_arrivee_tel?: string | null
-          contact_depart_nom?: string | null
-          contact_depart_note?: string | null
-          contact_depart_tel?: string | null
-          created_at?: string | null
-          date_trajet?: string | null
-          demande_id?: string | null
-          depart?: string | null
-          devis_id?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          immatriculation?: string | null
-          marque?: string | null
-          modele?: string | null
-          options_meta?: Json | null
-          pricing_mode?: string | null
-          prix_convoyeur?: number | null
-          prix_convoyeur_fixe?: number | null
-          prix_convoyeur_max?: number | null
-          prix_convoyeur_min?: number | null
-          prix_suggere?: number | null
-          published_at?: string | null
-          statut?: string | null
-          statut_publication?: string | null
-          tarif_convoyeur?: number | null
-          updated_at?: string | null
-          vehicule_couleur?: string | null
-          vehicule_energie?: string | null
-          vehicule_immatriculation?: string | null
-          vehicule_km?: number | null
-          vehicule_notes?: string | null
-          vehicule_type?: string | null
-          vehicule_vin?: string | null
-          vin?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trajets_demande_id_fkey"
-            columns: ["demande_id"]
-            isOneToOne: false
-            referencedRelation: "demandes_convoyage"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_devis_id_fkey"
-            columns: ["devis_id"]
-            isOneToOne: false
-            referencedRelation: "devis"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       trajets_publies_safe: {
         Row: {
@@ -5853,6 +5711,55 @@ export type Database = {
       }
     }
     Functions: {
+      _trajets_assigned_safe_rows: {
+        Args: never
+        Returns: {
+          arrivee: string
+          arrivee_contact_instructions: string
+          arrivee_contact_nom: string
+          arrivee_contact_telephone: string
+          arrivee_contact_telephone2: string
+          carte_grise_recto_url: string
+          carte_grise_verso_url: string
+          commission_convoyeur_pct: number
+          contact_arrivee_nom: string
+          contact_arrivee_note: string
+          contact_arrivee_tel: string
+          contact_depart_nom: string
+          contact_depart_note: string
+          contact_depart_tel: string
+          created_at: string
+          date_trajet: string
+          demande_id: string
+          depart: string
+          devis_id: string
+          heure_trajet: string
+          id: string
+          immatriculation: string
+          marque: string
+          modele: string
+          options_meta: Json
+          pricing_mode: string
+          prix_convoyeur: number
+          prix_convoyeur_fixe: number
+          prix_convoyeur_max: number
+          prix_convoyeur_min: number
+          prix_suggere: number
+          published_at: string
+          statut: string
+          statut_publication: string
+          tarif_convoyeur: number
+          updated_at: string
+          vehicule_couleur: string
+          vehicule_energie: string
+          vehicule_immatriculation: string
+          vehicule_km: number
+          vehicule_notes: string
+          vehicule_type: string
+          vehicule_vin: string
+          vin: string
+        }[]
+      }
       _trajets_publies_safe_rows: {
         Args: never
         Returns: {
