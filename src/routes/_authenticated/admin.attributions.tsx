@@ -618,8 +618,8 @@ function AdminAttributions() {
                       <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {a.trajet.vin.slice(-8)}</span>
                     )}
                   </div>
-                  <p className="text-pro-muted text-xs mt-1.5">
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
+
                     <span className="font-semibold text-pro-text-soft">
                       {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
                       {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
