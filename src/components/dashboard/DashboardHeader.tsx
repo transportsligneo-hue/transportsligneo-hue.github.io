@@ -67,7 +67,7 @@ export function DashboardHeader({
           .or(`nom.ilike.${q},prenom.ilike.${q},depart.ilike.${q},arrivee.ilike.${q},immatriculation.ilike.${q}`)
           .limit(4),
         supabase
-          .from("trajets")
+          .from("trajets_client_safe")
           .select("id, depart, arrivee, client_nom, vin, immatriculation")
           .or(`depart.ilike.${q},arrivee.ilike.${q},client_nom.ilike.${q},vin.ilike.${q},immatriculation.ilike.${q}`)
           .limit(4),

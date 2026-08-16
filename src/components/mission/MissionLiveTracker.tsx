@@ -76,7 +76,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       if (!attr) return;
       const [trajetRes, convRes] = await Promise.all([
         attr.trajet_id
-          ? supabase.from("trajets").select("depart, arrivee, marque, modele, immatriculation").eq("id", attr.trajet_id).maybeSingle()
+          ? supabase.from("trajets_client_safe").select("depart, arrivee, marque, modele, immatriculation").eq("id", attr.trajet_id).maybeSingle()
           : Promise.resolve({ data: null }),
         attr.convoyeur_id
           ? supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle()

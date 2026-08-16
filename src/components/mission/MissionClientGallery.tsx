@@ -160,7 +160,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
       (async () => {
         setLoadingCg(true);
         const { data: tr } = await supabase
-          .from("trajets")
+          .from("trajets_client_safe")
           .select("carte_grise_recto_url, carte_grise_verso_url")
           .eq("id", trajetId)
           .maybeSingle();

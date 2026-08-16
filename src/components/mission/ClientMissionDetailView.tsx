@@ -94,7 +94,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         let trajetCandidate: string | null = null;
         if (!attr && m.numero) {
           const { data: tByRef } = await supabase
-            .from("trajets")
+            .from("trajets_client_safe")
             .select("id")
             .eq("commande_ref", m.numero)
             .order("created_at", { ascending: false })
@@ -105,7 +105,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
         if (!attr && !trajetCandidate) {
           const { data: trajets } = await supabase
-            .from("trajets")
+            .from("trajets_client_safe")
             .select("id")
             .ilike("depart", `%${m.ville_depart}%`)
             .ilike("arrivee", `%${m.ville_arrivee}%`)
@@ -139,7 +139,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         const finalTrajetId = attr?.trajet_id ?? trajetCandidate ?? null;
         if (finalTrajetId && !cancelled) {
           const { data: tj } = await supabase
-            .from("trajets")
+            .from("trajets_client_safe")
             .select("arrivee, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_societe, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", finalTrajetId)
             .maybeSingle();
@@ -253,7 +253,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       }
 
       const [{ data: trajet }, { data: conv }, { data: insps }, { data: sigs }] = await Promise.all([
-        supabase.from("trajets").select("*").eq("id", attr.trajet_id).maybeSingle(),
+        supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
         supabase.from("convoyeurs").select("nom, prenom, telephone").eq("id", attr.convoyeur_id).maybeSingle(),
         supabase.from("inspections").select("id, type, equipements, kilometrage_depart, kilometrage_arrivee").eq("attribution_id" as never, attributionId as never),
         supabase.from("mission_signatures").select("kind, signature_data").eq("attribution_id", attributionId),
