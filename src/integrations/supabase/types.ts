@@ -6317,6 +6317,10 @@ export type Database = {
         Args: { _prefix: string; _year?: number }
         Returns: string
       }
+      normalize_mission_group_prices: {
+        Args: { _group: string }
+        Returns: undefined
+      }
       push_scan_handoff_extraction: {
         Args: { _extraction: Json; _token: string }
         Returns: string
