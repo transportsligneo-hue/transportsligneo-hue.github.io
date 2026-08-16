@@ -30,6 +30,7 @@ import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { missionNumberOf, displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix, shortMissionSeq } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { ArrowLeftRight } from "lucide-react";
+import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
@@ -154,6 +155,7 @@ function vueLabelFor(vueType: string): string {
 function AdminAttributions() {
   const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
+  const clientBrands = useClientBrands(attributions.map((a) => a.trajet?.client_email));
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
