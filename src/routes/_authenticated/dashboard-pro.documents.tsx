@@ -33,6 +33,15 @@ interface DevisRow {
   mission_id: string | null;
   converted_at: string | null;
   refused_at: string | null;
+  marque: string | null;
+  modele: string | null;
+  immatriculation: string | null;
+  depart_retour: string | null;
+  arrivee_retour: string | null;
+  immatriculation_retour: string | null;
+  marque_retour: string | null;
+  modele_retour: string | null;
+  prix_retour: number | null;
 }
 
 
@@ -123,7 +132,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
