@@ -59,14 +59,16 @@ async function unregisterAppSW() {
 }
 
 /** iOS (Safari/iPadOS) : pas de beforeinstallprompt, installation manuelle. */
-function isIosSafari(): boolean {
+function isIosDevice(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;
-  const isIos = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
-  if (!isIos) return false;
-  // Exclure les navigateurs iOS tiers qui ne savent pas installer (Chrome/Firefox iOS)
-  const isThirdParty = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
-  return !isThirdParty;
+  return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
+}
+
+/** Chrome / Firefox / Edge / Opera sur iOS : « Sur l'écran d'accueil » n'existe pas toujours. */
+function isThirdPartyIosBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
 }
 
 function isStandalone(): boolean {
@@ -81,6 +83,8 @@ export default function PwaProvider() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
   const [iosVisible, setIosVisible] = useState(false);
+  const [iosGuideOpen, setIosGuideOpen] = useState(false);
+  const [iosThirdParty, setIosThirdParty] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateFn, setUpdateFn] = useState<(() => Promise<void>) | null>(null);
 
