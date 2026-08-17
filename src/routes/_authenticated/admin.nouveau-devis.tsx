@@ -296,6 +296,10 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = typeTrajet === "Livraison + restitution";
+  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
+  const prestationLabel = isRechargeSeule
+    ? "Recharge véhicule sur place (sans livraison)"
+    : "Convoyage automobile";
   const planningIncomplet =
     !dateSouhaitee ||
     !heureSouhaitee ||
