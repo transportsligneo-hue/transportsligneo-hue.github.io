@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
   Card,
