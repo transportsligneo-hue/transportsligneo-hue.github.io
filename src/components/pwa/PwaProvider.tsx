@@ -153,7 +153,8 @@ export default function PwaProvider() {
   // iOS : invite manuelle « Partager → Sur l'écran d'accueil »
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isIosSafari() || isStandalone()) return;
+    if (!isIosDevice() || isStandalone()) return;
+    setIosThirdParty(isThirdPartyIosBrowser());
     const dismissed = localStorage.getItem("pwa-ios-install-dismissed-at");
     if (dismissed && Date.now() - Number(dismissed) < 1000 * 60 * 60 * 24 * 14) return;
     const t = window.setTimeout(() => setIosVisible(true), 2500);
