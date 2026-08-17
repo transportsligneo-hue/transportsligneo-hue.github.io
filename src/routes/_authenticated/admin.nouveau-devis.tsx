@@ -473,13 +473,27 @@ function AdminNouveauDevisPage() {
 
   const handleSendEmail = async () => {
     if (!created || !client) return;
-    if (!emailTo.trim()) return toast.error("Adresse email requise");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo.trim())) return toast.error("Adresse email invalide");
     setSending(true);
     try {
+      // 1. Dépose du PDF pour un téléchargement direct depuis l'email
+      let pdfUrl: string | undefined;
+      if (pdfBlob) {
+        const path = `${client.user_id}/devis-${created.numero}.pdf`;
+        const { error: upErr } = await supabase.storage
+          .from("devis-acceptes")
+          .upload(path, pdfBlob, { contentType: "application/pdf", upsert: true });
+        if (upErr) console.error("[devis] upload pdf", upErr.message);
+        const { data: signed } = await supabase.storage
+          .from("devis-acceptes")
+          .createSignedUrl(path, 60 * 60 * 24 * 30, { download: `devis-${created.numero}.pdf` });
+        pdfUrl = signed?.signedUrl;
+      }
+
       await sendTransactionalEmail({
         templateName: "devis-client",
         recipientEmail: emailTo.trim(),
-        idempotencyKey: `devis-admin-${created.id}`,
+        idempotencyKey: `devis-admin-${created.id}-${Date.now()}`,
         templateData: {
           prenom: client.prenom,
           nom: client.nom,
@@ -487,13 +501,17 @@ function AdminNouveauDevisPage() {
           depart,
           arrivee,
           prix: created.prix,
+          optionTrajet: typeTrajet,
+          ...(pdfUrl ? { pdfUrl } : {}),
         },
       });
       await supabase
         .from("devis")
         .update({ statut: "envoye", email_envoye: true, sent_at: new Date().toISOString() } as never)
         .eq("id", created.id);
-      toast.success("Devis envoyé par email");
+      toast.success(
+        pdfUrl ? `Devis envoyé à ${emailTo.trim()} avec le PDF` : `Devis envoyé à ${emailTo.trim()}`,
+      );
       setEmailOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Échec de l'envoi");
@@ -501,6 +519,7 @@ function AdminNouveauDevisPage() {
       setSending(false);
     }
   };
+
 
   return (
     <div>
@@ -1011,17 +1030,28 @@ function AdminNouveauDevisPage() {
               </div>
 
               {emailOpen && (
-                <div className="mt-3.5 flex flex-wrap gap-2.5">
-                  <input
-                    value={emailTo}
-                    onChange={(e) => setEmailTo(e.target.value)}
-                    className="min-w-[220px] flex-1 rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                  />
-                  <Button onClick={handleSendEmail} disabled={sending} icon={sending ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}>
-                    Envoyer
-                  </Button>
+                <div className="mt-3.5 rounded-xl border border-pro-border bg-pro-bg-soft p-3.5">
+                  <label className="mb-1.5 block text-[11.5px] font-semibold text-pro-text">
+                    Adresse email du destinataire
+                  </label>
+                  <div className="flex flex-wrap gap-2.5">
+                    <input
+                      value={emailTo}
+                      onChange={(e) => setEmailTo(e.target.value)}
+                      type="email"
+                      placeholder="client@exemple.fr"
+                      className="min-w-[220px] flex-1 rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                    <Button onClick={handleSendEmail} disabled={sending} icon={sending ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}>
+                      Envoyer
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-[11.5px] text-pro-muted">
+                    Le client reçoit le template Ligneo avec un bouton de téléchargement direct du devis PDF (lien valable 30 jours).
+                  </p>
                 </div>
               )}
+
             </Card>
           </>
         )}
