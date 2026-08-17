@@ -115,9 +115,12 @@ const OPTIONS_LIST = [
 ] as const;
 
 
+const RECHARGE_SEULE = "Recharge sur place (sans livraison)";
+
 const TRAJET_TYPES = [
   "Livraison simple",
   "Livraison + restitution",
+  RECHARGE_SEULE,
 ] as const;
 
 const PV_OPTIONS: { key: PvChoice; label: string }[] = [
