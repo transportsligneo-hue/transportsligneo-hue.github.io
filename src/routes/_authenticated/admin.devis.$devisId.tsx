@@ -493,7 +493,26 @@ function AdminDevisDetailPage() {
                 <Trash2 size={12} /> Supprimer
               </button>
             </div>
+            <div className="mt-4 pt-4 border-t border-pro-border">
+              <SendDocumentByEmail
+                kind="devis"
+                numero={devis.numero}
+                documentId={devis.id}
+                defaultEmail={devis.email}
+                buildPdf={() => generateDevisPdf(buildDevisData(devis))}
+                templateData={{
+                  prenom: devis.prenom,
+                  nom: devis.nom,
+                  depart: devis.depart,
+                  arrivee: devis.arrivee,
+                  distance: devis.distance_km,
+                  prix: devis.prix_estime != null ? Number(devis.prix_estime).toFixed(2) : undefined,
+                  optionTrajet: devis.option_trajet,
+                }}
+              />
+            </div>
           </Card>
+
         </div>
 
         {/* Right: PDF preview */}
