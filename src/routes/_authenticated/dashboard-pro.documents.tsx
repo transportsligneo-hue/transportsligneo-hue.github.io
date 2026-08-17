@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat, PenLine } from "lucide-react";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
 import { useServerFn } from "@tanstack/react-start";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { markDevisAsProcessed } from "@/lib/devis-mark-processed.functions";
 
 import { FactureEmbeddedCheckout } from "@/components/facture/FactureEmbeddedCheckout";
@@ -35,6 +36,7 @@ interface DevisRow {
   mission_id: string | null;
   converted_at: string | null;
   refused_at: string | null;
+  date_souhaitee: string | null;
   marque: string | null;
   modele: string | null;
   immatriculation: string | null;
@@ -75,7 +77,9 @@ interface FactureRow {
 }
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
-  envoye: { label: "Envoyé", cls: "bg-blue-50 text-blue-700" },
+  brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
+  genere: { label: "À signer", cls: "bg-blue-50 text-blue-700" },
+  envoye: { label: "À signer", cls: "bg-blue-50 text-blue-700" },
   en_attente: { label: "En attente", cls: "bg-blue-50 text-blue-700" },
   accepte: { label: "À régler", cls: "bg-amber-50 text-amber-700" },
   convertit: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
@@ -111,6 +115,8 @@ function ProDocuments() {
   const [closingDevis, setClosingDevis] = useState<DevisRow | null>(null);
   const [closingReason, setClosingReason] = useState<string>("");
   const [closingSubmitting, setClosingSubmitting] = useState<boolean>(false);
+  const [signingId, setSigningId] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const markProcessed = useServerFn(markDevisAsProcessed);
 
 
@@ -134,7 +140,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
@@ -149,7 +155,7 @@ function ProDocuments() {
     })();
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, reloadKey]);
 
   const years = useMemo(() => {
     const set = new Set<string>();
@@ -190,6 +196,19 @@ function ProDocuments() {
     d.statut !== "refuse" &&
     d.statut !== "expire" &&
     d.statut !== "accepte";
+
+  /** Devis signable : pas encore signé/payé/refusé/converti/clôturé */
+  const canBeSigned = (d: DevisRow) =>
+    !d.locked_at &&
+    !d.paid_at &&
+    !d.refused_at &&
+    !d.mission_id &&
+    !d.converted_at &&
+    !["refuse", "expire", "annule", "converti", "convertit"].includes(d.statut);
+
+  const signingDevis = devis.find((d) => d.id === signingId) ?? null;
+
+
 
   const handleConfirmClose = async () => {
     if (!closingDevis) return;
@@ -395,6 +414,19 @@ function ProDocuments() {
                         </td>
                         <td className="px-5 py-3 text-right">
                           <div className="inline-flex items-center gap-2 justify-end">
+                            {canBeSigned(d) && (
+                              <button
+                                onClick={() => setSigningId(d.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                              >
+                                <PenLine size={13} /> Signer le devis
+                              </button>
+                            )}
+                            {d.locked_at && (
+                              <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium">
+                                <PenLine size={12} /> Signé
+                              </span>
+                            )}
                             {d.statut === "accepte" && !d.paid_at ? (
                               <button
                                 onClick={() => setPayingId(d.id)}
@@ -414,11 +446,12 @@ function ProDocuments() {
                                 <CheckCircle2 size={13} /> Marquer comme traité
                               </button>
                             )}
-                            {!canBeClosed(d) && !d.paid_at && d.statut !== "accepte" && (
+                            {!canBeSigned(d) && !canBeClosed(d) && !d.paid_at && !d.locked_at && d.statut !== "accepte" && (
                               <span className="text-pro-muted text-xs">—</span>
                             )}
                           </div>
                         </td>
+
 
                       </tr>
                     );
@@ -663,7 +696,49 @@ function ProDocuments() {
           </div>
         </div>
       )}
+
+      {/* Signature électronique du devis */}
+      {signingDevis && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl my-6 rounded-xl border border-primary/20 bg-navy p-6 shadow-2xl">
+            <button
+              onClick={() => setSigningId(null)}
+              className="absolute top-4 right-4 text-cream/60 hover:text-cream transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-heading text-xl text-primary tracking-wider">
+                Acceptation du devis — {signingDevis.numero}
+              </h2>
+              <p className="text-cream/70 text-sm mt-1">
+                {signingDevis.depart} → {signingDevis.arrivee} · {Number(signingDevis.prix_estime).toFixed(2)} €
+              </p>
+            </div>
+            <DevisAcceptationStep
+              devisId={signingDevis.id}
+              numero={signingDevis.numero}
+              depart={signingDevis.depart}
+              arrivee={signingDevis.arrivee}
+              prixTtc={Number(signingDevis.prix_estime)}
+              vehicule={[signingDevis.marque, signingDevis.modele].filter(Boolean).join(" ") || null}
+              dateSouhaitee={signingDevis.date_souhaitee}
+              onAccepted={() => {
+                setSigningId(null);
+                setReloadKey((k) => k + 1);
+                toast.success("Devis signé — la mission peut être planifiée.");
+              }}
+              onCancel={() => {
+                setSigningId(null);
+                setReloadKey((k) => k + 1);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
+
   );
 
 }
