@@ -255,9 +255,12 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       const { data: attr } = await supabase
         .from("attributions").select("trajet_id").eq("id", attributionId).maybeSingle();
       if (!attr?.trajet_id) return;
-      const { data: t } = await supabase
+      const { data: raw } = await supabase
         .from("trajets_assigned_safe" as never).select("marque, modele, immatriculation, demande_id")
         .eq("id", attr.trajet_id).maybeSingle();
+      const t = raw as unknown as {
+        marque: string | null; modele: string | null; immatriculation: string | null; demande_id: string | null;
+      } | null;
       if (!t) return;
       setVehicleLabel([t.marque, t.modele, t.immatriculation].filter(Boolean).join(" · "));
       if (t.demande_id) {
@@ -265,6 +268,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           .from("demandes_convoyage").select("carburant").eq("id", t.demande_id).maybeSingle();
         setCarburant(d?.carburant ?? null);
       }
+
     })();
   }, [attributionId]);
 
