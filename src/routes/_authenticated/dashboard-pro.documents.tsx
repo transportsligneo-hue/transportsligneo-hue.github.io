@@ -153,7 +153,7 @@ function ProDocuments() {
     })();
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, reloadKey]);
 
   const years = useMemo(() => {
     const set = new Set<string>();
