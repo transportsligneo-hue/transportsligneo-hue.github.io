@@ -411,7 +411,7 @@ export function DevisAcceptationStep({
 
   if (phase === "refused") {
     return (
-      <div className="space-y-4 text-center py-6">
+      <div className="space-y-4 text-center py-6 bg-white rounded-xl p-5">
         <div className="mx-auto w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
           <XCircle className="text-red-500" size={30} />
         </div>
