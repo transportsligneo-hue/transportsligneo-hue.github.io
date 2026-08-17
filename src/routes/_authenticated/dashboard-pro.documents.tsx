@@ -36,6 +36,7 @@ interface DevisRow {
   mission_id: string | null;
   converted_at: string | null;
   refused_at: string | null;
+  date_souhaitee: string | null;
   marque: string | null;
   modele: string | null;
   immatriculation: string | null;
