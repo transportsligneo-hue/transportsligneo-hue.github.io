@@ -618,8 +618,15 @@ function AdminNouveauDevisPage() {
             <h3 className="text-[15px] font-bold text-pro-text">Trajet</h3>
           </div>
           <div className="space-y-4">
-            <AddressField label="Adresse de départ" value={depart} onChange={setDepart} placeholder="Ex : 6 rue du pont libert, 37520 La Riche" />
-            <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            <AddressField
+              label={isRechargeSeule ? "Adresse d'intervention" : "Adresse de départ"}
+              value={depart}
+              onChange={setDepart}
+              placeholder="Ex : 6 rue du pont libert, 37520 La Riche"
+            />
+            {!isRechargeSeule && (
+              <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            )}
             <div>
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Type de trajet
@@ -629,7 +636,13 @@ function AdminNouveauDevisPage() {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setTypeTrajet(t)}
+                    onClick={() => {
+                      setTypeTrajet(t);
+                      if (t === RECHARGE_SEULE) {
+                        const elecLabel = OPTIONS_LIST[0].label;
+                        setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
+                      }
+                    }}
                     className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                       typeTrajet === t
                         ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
@@ -640,7 +653,13 @@ function AdminNouveauDevisPage() {
                   </button>
                 ))}
               </div>
+              {isRechargeSeule && (
+                <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+                  Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
+                </p>
+              )}
             </div>
+
             <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
 
             <div className="border-t border-pro-border pt-4">
