@@ -70,7 +70,7 @@ function ConvoyeurDashboard() {
         .filter(Boolean) as string[];
       if (termineIds.length > 0) {
         const { data: trs } = await supabase
-          .from("trajets")
+          .from("trajets_assigned_safe" as never)
           .select("tarif_convoyeur, updated_at")
           .in("id", termineIds)
           .gte("updated_at", firstOfLast);
