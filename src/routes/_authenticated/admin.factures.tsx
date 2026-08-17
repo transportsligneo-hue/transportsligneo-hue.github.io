@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, FileText, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
   Card,
