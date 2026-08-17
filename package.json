@@ -12,6 +12,7 @@
     "assets:native": "bash scripts/generate-native-assets.sh"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
     "@capacitor/app": "^8.1.1",
     "@capacitor/camera": "^8.2.2",
     "@capacitor/core": "^8.5.0",
