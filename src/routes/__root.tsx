@@ -16,7 +16,7 @@ import { PricingProvider } from "@/lib/pricing";
 import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import appCss from "../styles.css?url";
 
