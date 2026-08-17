@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { createPortal } from "react-dom";
 import {
   MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
   Send, Loader2, CheckCircle, User, Phone, Mail, Download, ArrowLeft, Sparkles,
@@ -11,9 +10,9 @@ import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import {
-  getAutocompleteSuggestions, getGoogleDistanceKm, isGoogleAvailable, loadGoogle,
-  resetPlacesSession, type PlaceSuggestion,
+  getGoogleDistanceKm, isGoogleAvailable,
 } from "@/lib/google-places";
+import PlacesInput from "@/components/PlacesInput";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { lookupPlate } from "@/lib/plate.functions";
 import { getRecaptchaToken } from "@/lib/recaptcha";
@@ -159,13 +158,8 @@ export default function MobileDevisGenerator() {
   const [telephone, setTelephone] = useState("");
   const [email, setEmail] = useState("");
 
-  // Bottom-sheet de sélection ville
-  const [pickerType, setPickerType] = useState<"dep" | "arr" | null>(null);
-  const [pickerFilter, setPickerFilter] = useState("");
-
   const [googleDistance, setGoogleDistance] = useState<number | null>(null);
   const [distanceLoading, setDistanceLoading] = useState(false);
-  const [googleSuggestions, setGoogleSuggestions] = useState<PlaceSuggestion[]>([]);
 
   const localDistance = useMemo(() => {
     if (!departure || !arrival) return null;
@@ -195,33 +189,6 @@ export default function MobileDevisGenerator() {
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
-
-  const filteredCities = CITIES.filter(c =>
-    c.toLowerCase().includes(pickerFilter.toLowerCase())
-  );
-
-  // Précharge Google et alimente les suggestions du picker
-  useEffect(() => { if (isGoogleAvailable()) loadGoogle().catch(() => {}); }, []);
-  useEffect(() => {
-    if (!pickerType) { setGoogleSuggestions([]); return; }
-    if (!isGoogleAvailable() || pickerFilter.length < 2) { setGoogleSuggestions([]); return; }
-    const t = setTimeout(async () => {
-      const res = await getAutocompleteSuggestions(pickerFilter);
-      setGoogleSuggestions(res);
-    }, 220);
-    return () => clearTimeout(t);
-  }, [pickerFilter, pickerType]);
-
-  const openPicker = (type: "dep" | "arr") => {
-    setPickerType(type);
-    setPickerFilter("");
-  };
-
-  const selectCity = (city: string) => {
-    if (pickerType === "dep") setDeparture(city);
-    if (pickerType === "arr") setArrival(city);
-    setPickerType(null);
-  };
 
   async function handleSivLookup() {
     setSivMsg(null);
@@ -454,11 +421,7 @@ export default function MobileDevisGenerator() {
               </div>
 
               {/* Départ */}
-              <button
-                type="button"
-                onClick={() => openPicker("dep")}
-                className="mdev-addr w-full text-left"
-              >
+              <div className="mdev-addr w-full text-left">
                 <span className="mdev-addr-ic">
                   <MapPin size={13} className="text-[#8fb4ff]" strokeWidth={2} />
                 </span>
@@ -466,13 +429,14 @@ export default function MobileDevisGenerator() {
                   <div className="text-[9px] tracking-[0.1em] uppercase text-[#9aa6c9] font-bold mb-0.5">
                     Départ
                   </div>
-                  <div
-                    className={`text-[13px] truncate ${
-                      departure ? "text-white not-italic" : "text-[#c3cbe6] italic"
-                    }`}
-                  >
-                    {departure || "Choisir une adresse"}
-                  </div>
+                  <PlacesInput
+                    value={departure}
+                    onChange={setDeparture}
+                    placeholder="Saisir une adresse"
+                    className="mdev-address-input"
+                    dropdownClassName="mdev-address-menu"
+                    inputId="mobile-departure-address"
+                  />
                 </div>
                 {departure && arrival && (
                   <span
@@ -494,7 +458,7 @@ export default function MobileDevisGenerator() {
                     <ArrowUpDown size={12} className="text-[#8fb4ff]" strokeWidth={2.4} />
                   </span>
                 )}
-              </button>
+              </div>
 
               {/* Connector */}
               <div className="mdev-conn">
@@ -511,11 +475,7 @@ export default function MobileDevisGenerator() {
               </div>
 
               {/* Arrivée */}
-              <button
-                type="button"
-                onClick={() => openPicker("arr")}
-                className="mdev-addr w-full text-left"
-              >
+              <div className="mdev-addr w-full text-left">
                 <span className="mdev-addr-ic">
                   <Navigation size={13} className="text-[#8fb4ff]" strokeWidth={2} />
                 </span>
@@ -523,19 +483,20 @@ export default function MobileDevisGenerator() {
                   <div className="text-[9px] tracking-[0.1em] uppercase text-[#9aa6c9] font-bold mb-0.5">
                     Arrivée
                   </div>
-                  <div
-                    className={`text-[13px] truncate ${
-                      arrival ? "text-white not-italic" : "text-[#c3cbe6] italic"
-                    }`}
-                  >
-                    {arrival || "Choisir une adresse"}
-                  </div>
+                  <PlacesInput
+                    value={arrival}
+                    onChange={setArrival}
+                    placeholder="Saisir une adresse"
+                    className="mdev-address-input"
+                    dropdownClassName="mdev-address-menu"
+                    inputId="mobile-arrival-address"
+                  />
                 </div>
-              </button>
+              </div>
 
               {/* Toggle Aller simple / Aller-retour */}
               <div
-                className="relative flex mt-4 rounded-full p-1"
+                className="mdev-trip-toggle relative flex mt-4 rounded-full p-1"
                 style={{
                   background: "rgba(0,0,0,0.25)",
                   border: "1px solid rgba(122,163,255,0.18)",
@@ -646,9 +607,10 @@ export default function MobileDevisGenerator() {
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
           }
+          .mdev-card:focus-within { animation: none; transform: none; }
           .mdev-inner {
             position: relative; background: rgba(13,19,42,0.96); border-radius: 27px;
-            padding: 22px 20px; backdrop-filter: blur(18px); overflow: hidden;
+             padding: 22px 20px; backdrop-filter: blur(18px); overflow: visible;
           }
           .mdev-inner::before {
             content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
@@ -671,6 +633,28 @@ export default function MobileDevisGenerator() {
             box-shadow: 0 0 0 3px rgba(63,123,255,0.12);
             outline: none;
           }
+          .mdev-address-input {
+            width: 100%; min-width: 0; height: 22px; padding: 0; border: 0;
+            outline: 0; background: transparent; color: #fff; font-size: 16px;
+            font-weight: 600; text-overflow: ellipsis;
+          }
+          .mdev-address-input::placeholder { color: #c3cbe6; font-style: italic; opacity: .82; }
+          .mdev-address-menu {
+            position: absolute; z-index: 80; left: -44px; right: 0; top: calc(100% + 10px);
+            max-height: 220px; overflow-y: auto; border-radius: 14px;
+            background: #101735; border: 1px solid rgba(122,163,255,.35);
+            box-shadow: 0 18px 45px rgba(4,8,22,.65);
+          }
+          html.theme-light .mdev-card { background: #fff; box-shadow: 0 22px 45px rgba(15,21,38,.14); }
+          html.theme-light .mdev-inner { background: #fff; }
+          html.theme-light .mdev-addr { background: #f5f7fc; border-color: rgba(47,95,255,.2); }
+          html.theme-light .mdev-address-input { color: #0f1526 !important; }
+          html.theme-light .mdev-address-input::placeholder { color: #6b7590 !important; }
+          html.theme-light .mdev-address-menu { background: #fff; border-color: rgba(47,95,255,.25); box-shadow: 0 18px 45px rgba(15,21,38,.18); }
+          html.theme-light .mdev-address-menu button { color: #1c3fc4 !important; border-color: rgba(47,95,255,.12); }
+          html.theme-light .mdev-address-menu button:hover { background: rgba(47,95,255,.08); }
+          html.theme-light .mdev-trip-toggle button.text-white,
+          html.theme-light .mdev-cta { color: #fff !important; }
           .mdev-addr-ic {
             width: 32px; height: 32px; border-radius: 50%;
             background: linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.1));
@@ -1090,90 +1074,6 @@ export default function MobileDevisGenerator() {
         )}
       </div>
 
-      {/* Bottom sheet · Sélecteur de villes (portal pour échapper à tout
-          ancêtre avec filter / backdrop-filter / transform qui briserait
-          le position: fixed) */}
-      {pickerType && typeof document !== "undefined" && createPortal((
-        <div className="fixed inset-0 z-50 flex flex-col">
-          <button
-            type="button"
-            onClick={() => setPickerType(null)}
-            className="flex-1 bg-black/60 backdrop-blur-sm animate-fade-in"
-            aria-label="Fermer"
-          />
-          <div className="bg-navy-light border-t gold-border-strong rounded-t-3xl max-h-[80vh] flex flex-col animate-sheet-up safe-bottom">
-            <div className="px-5 pt-3 pb-2 shrink-0">
-              <div className="w-10 h-1 rounded-full bg-cream/20 mx-auto mb-3" />
-              <p className="font-heading text-primary text-base tracking-wide text-center">
-                {pickerType === "dep" ? "Ville de départ" : "Ville d'arrivée"}
-              </p>
-            </div>
-            <div className="px-5 pb-3 shrink-0">
-              <input
-                autoFocus
-                type="text"
-                value={pickerFilter}
-                onChange={e => setPickerFilter(e.target.value)}
-                placeholder="Rechercher..."
-                className="w-full bg-navy/60 border border-primary/20 rounded-xl px-4 py-3 text-cream text-base focus:border-primary/60 focus:outline-none"
-              />
-            </div>
-            <div className="overflow-y-auto px-3 pb-6 flex-1">
-              {googleSuggestions.length > 0 && (
-                <>
-                  <p className="px-4 pt-1 pb-2 text-[10px] uppercase tracking-[0.2em] text-primary/70 font-heading">
-                    Suggestions Google
-                  </p>
-                  {googleSuggestions.map((s) => (
-                    <button
-                      key={s.placeId || s.label}
-                      type="button"
-                      onClick={() => { resetPlacesSession(); selectCity(s.label); }}
-                      className="w-full text-left px-4 py-3 rounded-xl text-cream hover:bg-primary/10 active:bg-primary/15 transition-colors flex items-start gap-3"
-                    >
-                      <MapPin size={16} className="text-primary mt-0.5 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm truncate">{s.label}</p>
-                        {s.secondary && (
-                          <p className="text-[11px] text-cream/50 truncate">{s.secondary}</p>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                  <div className="h-px bg-primary/15 my-2 mx-4" />
-                </>
-              )}
-
-              {(googleSuggestions.length > 0 || filteredCities.length > 0) && (
-                <p className="px-4 pt-1 pb-2 text-[10px] uppercase tracking-[0.2em] text-cream/45 font-heading">
-                  Villes fréquentes
-                </p>
-              )}
-              {filteredCities.map(city => (
-                <button
-                  key={city}
-                  type="button"
-                  onClick={() => selectCity(city)}
-                  className="w-full text-left px-4 py-3.5 rounded-xl text-cream hover:bg-primary/10 active:bg-primary/15 transition-colors flex items-center justify-between"
-                >
-                  <span>{city}</span>
-                  {((pickerType === "dep" && city === departure) ||
-                    (pickerType === "arr" && city === arrival)) && (
-                    <CheckCircle size={16} className="text-primary" />
-                  )}
-                </button>
-              ))}
-              {filteredCities.length === 0 && googleSuggestions.length === 0 && (
-                <p className="text-center text-cream/50 text-sm py-8">
-                  {pickerFilter.length < 2
-                    ? "Tapez au moins 2 caractères pour rechercher une adresse"
-                    : "Aucun résultat"}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      ), document.body)}
     </section>
   );
 }

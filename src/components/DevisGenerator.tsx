@@ -613,7 +613,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setDeparture}
                   placeholder="Adresse de départ"
                   className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
-                  fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -626,7 +625,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée"
                   className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
-                  fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -757,7 +755,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setDeparture}
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                  fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -787,7 +784,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setArrival}
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                  fallbackOptions={CITIES}
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -936,11 +932,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ *</label>
-                      <PlacesInput value={departure} onChange={setDeparture} className={inputCard} fallbackOptions={CITIES} required />
+                       <PlacesInput value={departure} onChange={setDeparture} className={inputCard} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée *</label>
-                      <PlacesInput value={arrival} onChange={setArrival} className={inputCard} fallbackOptions={CITIES} required />
+                       <PlacesInput value={arrival} onChange={setArrival} className={inputCard} required />
                     </div>
                     <div>
                       <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée *</label>
@@ -974,7 +970,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                             value={departRetour || arrival}
                             onChange={setDepartRetour}
                             className={inputCard}
-                            fallbackOptions={CITIES}
                             placeholder="Adresse de prise en charge retour"
                           />
                         </div>
@@ -991,7 +986,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                               value={arriveeRetour}
                               onChange={setArriveeRetour}
                               className={inputCard}
-                              fallbackOptions={CITIES}
                               placeholder="Adresse de retour"
                             />
                           )}
