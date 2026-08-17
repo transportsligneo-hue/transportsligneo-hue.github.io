@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ligneo Driver</string>
+    <string name="title_activity_main">Ligneo Driver</string>
+    <string name="package_name">com.transportsligneo.driver</string>
+    <string name="custom_url_scheme">com.transportsligneo.driver</string>
+</resources>
