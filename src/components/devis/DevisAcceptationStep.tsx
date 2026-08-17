@@ -432,7 +432,7 @@ export function DevisAcceptationStep({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-white rounded-xl p-5">
       <div className="bg-gradient-to-r from-[#0a1638] to-[#132a6b] rounded-xl p-5">
         <h2 className="font-heading text-lg text-white tracking-wide">
           Acceptation du <span className="text-[#4f8cff]">devis</span> — {numero}
