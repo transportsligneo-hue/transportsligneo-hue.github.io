@@ -195,6 +195,19 @@ function ProDocuments() {
     d.statut !== "expire" &&
     d.statut !== "accepte";
 
+  /** Devis signable : pas encore signé/payé/refusé/converti/clôturé */
+  const canBeSigned = (d: DevisRow) =>
+    !d.locked_at &&
+    !d.paid_at &&
+    !d.refused_at &&
+    !d.mission_id &&
+    !d.converted_at &&
+    !["refuse", "expire", "annule", "converti", "convertit"].includes(d.statut);
+
+  const signingDevis = devis.find((d) => d.id === signingId) ?? null;
+
+
+
   const handleConfirmClose = async () => {
     if (!closingDevis) return;
     const reason = closingReason.trim();
