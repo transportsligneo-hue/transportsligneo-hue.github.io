@@ -115,7 +115,7 @@ const OPTIONS_LIST = [
 ] as const;
 
 
-const RECHARGE_SEULE = "Recharge sur place (sans livraison)";
+const RECHARGE_SEULE = "Recharge uniquement (sans livraison)";
 
 const TRAJET_TYPES = [
   "Livraison simple",
@@ -298,7 +298,7 @@ function AdminNouveauDevisPage() {
   const isAllerRetour = typeTrajet === "Livraison + restitution";
   const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
-    ? "Recharge véhicule sur place (sans livraison)"
+    ? "Recharge véhicule uniquement (sans livraison)"
     : "Convoyage automobile";
   const planningIncomplet =
     !dateSouhaitee ||

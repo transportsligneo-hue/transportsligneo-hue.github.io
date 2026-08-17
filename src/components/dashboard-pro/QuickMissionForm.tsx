@@ -249,7 +249,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     return () => { cancelled = true; };
   }, [depart, arrivee, tripType, profile, user]);
 
-  // Recharge sur place : pas de livraison, l'adresse d'arrivée = adresse d'intervention
+  // Recharge uniquement : pas de livraison, l'adresse d'arrivée = adresse d'intervention
   useEffect(() => {
     if (tripType === "recharge") setArrivee(depart);
   }, [tripType, depart]);
@@ -576,7 +576,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           {[
             { v: "aller-simple", label: "Aller simple", desc: "Livraison à destination" },
             { v: "aller-retour", label: "Aller-retour", desc: "Livraison + restitution" },
-            { v: "recharge", label: "Recharge sur place", desc: "Recharge du véhicule, sans livraison" },
+            { v: "recharge", label: "Recharge uniquement", desc: "Recharge du véhicule, sans livraison" },
           ].map((opt) => {
             const active = tripType === (opt.v as TripOption);
             return (
@@ -664,7 +664,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             <MapPinned size={14} className="text-pro-accent" /> Pas de livraison
           </h2>
           <p className="text-xs text-pro-text-soft">
-            Recharge sur place : le véhicule est rechargé puis restitué à la même adresse
+            Recharge uniquement : le véhicule est rechargé puis restitué à la même adresse
             ({depart || "adresse d'enlèvement"}). Aucune adresse de livraison n'est nécessaire.
           </p>
         </section>
