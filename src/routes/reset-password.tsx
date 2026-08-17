@@ -26,15 +26,60 @@ function ResetPassword() {
 
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.getSession().then(({ data: { session } }) => {
+
+    const consumeLink = async () => {
+      const url = new URL(window.location.href);
+      const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+      const q = url.searchParams;
+
+      const errDesc = q.get("error_description") ?? hash.get("error_description");
+      if (errDesc) {
+        if (!cancelled) { setError(decodeURIComponent(errDesc)); setHasSession(false); }
+        return;
+      }
+
+      try {
+        const code = q.get("code");
+        const tokenHash = q.get("token_hash") ?? q.get("token");
+        const accessToken = hash.get("access_token");
+        const refreshToken = hash.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          const { error: e } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (e) throw e;
+        } else if (code) {
+          const { error: e } = await supabase.auth.exchangeCodeForSession(code);
+          if (e) throw e;
+        } else if (tokenHash) {
+          const { error: e } = await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+          if (e) throw e;
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Lien invalide.");
+          setHasSession(false);
+        }
+        return;
+      }
+
+      // Nettoie l'URL (évite de rejouer un token déjà consommé)
+      if (url.hash || q.has("code") || q.has("token_hash") || q.has("token")) {
+        window.history.replaceState({}, "", url.pathname);
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
       if (!cancelled) setHasSession(!!session);
-    });
+    };
+
+    void consumeLink();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
-      if (event === "PASSWORD_RECOVERY" || session) setHasSession(true);
+      if (event === "PASSWORD_RECOVERY" || session) { setHasSession(true); setError(""); }
     });
     return () => { cancelled = true; subscription.unsubscribe(); };
   }, []);
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
