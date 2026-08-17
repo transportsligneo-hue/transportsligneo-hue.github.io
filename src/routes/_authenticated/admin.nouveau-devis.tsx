@@ -669,7 +669,7 @@ function AdminNouveauDevisPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Date d'enlèvement *
+                    {isRechargeSeule ? "Date d'intervention *" : "Date d'enlèvement *"}
                   </label>
                   <input
                     type="date"
@@ -846,14 +846,16 @@ function AdminNouveauDevisPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
               4
             </span>
-            <h3 className="text-[15px] font-bold text-pro-text">Client livré (destinataire)</h3>
+            <h3 className="text-[15px] font-bold text-pro-text">
+              {isRechargeSeule ? "Contact sur place" : "Client livré (destinataire)"}
+            </h3>
           </div>
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Nom du destinataire" value={destNom} onChange={setDestNom} placeholder="Nom / société" />
               <Field label="Téléphone" value={destTel} onChange={setDestTel} placeholder="06 12 34 56 78" />
             </div>
-            <Field label="Note de livraison" value={destNote} onChange={setDestNote} placeholder="Étage, code, horaires…" />
+            <Field label={isRechargeSeule ? "Note d'intervention" : "Note de livraison"} value={destNote} onChange={setDestNote} placeholder="Étage, code, horaires…" />
           </div>
         </Card>
 
