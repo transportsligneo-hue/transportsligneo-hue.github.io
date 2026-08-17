@@ -200,7 +200,8 @@ function RootComponent() {
           <PricingProvider>
             <AiSettingsProvider>
               <CursorSpotlight />
-              <MobileAppGate />
+              <RecoveryLinkRedirect />
+
               <NativeAppInit />
 
               <PublicChrome />
