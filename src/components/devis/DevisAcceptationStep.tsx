@@ -412,18 +412,18 @@ export function DevisAcceptationStep({
   if (phase === "refused") {
     return (
       <div className="space-y-4 text-center py-6">
-        <div className="mx-auto w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center">
-          <XCircle className="text-red-400" size={30} />
+        <div className="mx-auto w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
+          <XCircle className="text-red-500" size={30} />
         </div>
         <div>
-          <p className="font-heading text-lg text-cream">Devis refusé</p>
-          <p className="text-xs text-cream/70 mt-1">
+          <p className="font-heading text-lg text-[#0a1638]">Devis refusé</p>
+          <p className="text-xs text-[#667085] mt-1">
             Merci pour votre retour. Nous restons à votre disposition si vous souhaitez un nouveau devis.
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="px-4 py-2 rounded border border-cream/20 text-cream/80 text-xs uppercase tracking-wider hover:text-cream"
+          className="px-4 py-2 rounded-lg border border-[#e4e7ec] text-[#667085] text-xs uppercase tracking-wider hover:text-[#101828]"
         >
           Retour
         </button>
