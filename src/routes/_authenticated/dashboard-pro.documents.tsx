@@ -399,6 +399,19 @@ function ProDocuments() {
                         </td>
                         <td className="px-5 py-3 text-right">
                           <div className="inline-flex items-center gap-2 justify-end">
+                            {canBeSigned(d) && (
+                              <button
+                                onClick={() => setSigningId(d.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pro-accent text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                              >
+                                <PenLine size={13} /> Signer le devis
+                              </button>
+                            )}
+                            {d.locked_at && (
+                              <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium">
+                                <PenLine size={12} /> Signé
+                              </span>
+                            )}
                             {d.statut === "accepte" && !d.paid_at ? (
                               <button
                                 onClick={() => setPayingId(d.id)}
@@ -418,11 +431,12 @@ function ProDocuments() {
                                 <CheckCircle2 size={13} /> Marquer comme traité
                               </button>
                             )}
-                            {!canBeClosed(d) && !d.paid_at && d.statut !== "accepte" && (
+                            {!canBeSigned(d) && !canBeClosed(d) && !d.paid_at && !d.locked_at && d.statut !== "accepte" && (
                               <span className="text-pro-muted text-xs">—</span>
                             )}
                           </div>
                         </td>
+
 
                       </tr>
                     );
