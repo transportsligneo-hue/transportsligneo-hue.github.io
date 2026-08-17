@@ -552,17 +552,17 @@ export function DevisAcceptationStep({
       {phase === "sign" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
-              <PenLine size={13} className="text-primary" /> Signez pour valider
+            <p className="text-xs text-[#667085] uppercase tracking-wider flex items-center gap-2">
+              <PenLine size={13} className="text-[#2f5fff]" /> Signez pour valider
             </p>
             <button
               onClick={() => setPhase("consent")}
-              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+              className="text-[#667085] hover:text-[#101828] text-xs inline-flex items-center gap-1"
             >
               <ArrowLeft size={12} /> Retour
             </button>
           </div>
-          <p className="text-xs text-cream/70">
+          <p className="text-xs text-[#667085]">
             Signez ci-dessous puis validez. La signature, l'horodatage et votre adresse IP
             sont archivés comme preuve légale.
           </p>
