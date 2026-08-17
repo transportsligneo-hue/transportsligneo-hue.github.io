@@ -700,7 +700,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           </div>
         </div>
       </section>
-      )
+      )}
+
 
       {/* Véhicule */}
       <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
