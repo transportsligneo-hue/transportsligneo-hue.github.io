@@ -433,11 +433,22 @@ export function DevisAcceptationStep({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 p-4 rounded border border-primary/30 bg-primary/5">
-        <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
-        <div className="text-sm text-cream">
-          <p className="font-semibold text-cream">Signature électronique par code e-mail</p>
-          <p className="text-cream/85 mt-1 text-xs leading-relaxed">
+      <div className="bg-gradient-to-r from-[#0a1638] to-[#132a6b] rounded-xl p-5">
+        <h2 className="font-heading text-lg text-white tracking-wide">
+          Acceptation du <span className="text-[#4f8cff]">devis</span> — {numero}
+        </h2>
+        <p className="text-[#aab4d4] text-sm mt-1">
+          {depart} → {arrivee} · <span className="text-white font-semibold">{prixTtc.toFixed(2)} €</span>
+        </p>
+      </div>
+
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(47,95,255,0.08)] border border-[rgba(79,140,255,0.25)]">
+        <div className="w-[30px] h-[30px] rounded-full bg-[rgba(79,140,255,0.15)] flex items-center justify-center shrink-0 mt-0.5">
+          <ShieldCheck className="text-[#4f8cff]" size={18} />
+        </div>
+        <div className="text-sm">
+          <p className="font-semibold text-[#0a1638]">Signature électronique par code e-mail</p>
+          <p className="text-[#667085] mt-1 text-xs leading-relaxed">
             Vérifiez le récapitulatif, acceptez les CGV puis validez votre devis avec un
             code à 6 chiffres reçu par e-mail. Horodatage, adresse IP et vérification du
             code sont archivés comme preuve légale.
