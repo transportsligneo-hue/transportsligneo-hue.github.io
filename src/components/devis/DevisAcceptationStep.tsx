@@ -490,19 +490,19 @@ export function DevisAcceptationStep({
 
       {phase === "consent" && (
         <>
-          <label className="flex items-start gap-3 p-3 rounded border border-cream/15 bg-navy-dark/40 cursor-pointer">
+          <label className="flex items-start gap-3 p-3 rounded-xl bg-[#fafbfd] border border-[#e4e7ec] cursor-pointer">
             <input
               type="checkbox"
               checked={checked}
               onChange={(e) => setChecked(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-primary cursor-pointer shrink-0"
+              className="mt-0.5 w-4 h-4 accent-[#2f5fff] cursor-pointer shrink-0"
             />
-            <span className="text-xs text-cream leading-relaxed">
+            <span className="text-xs text-[#667085] leading-relaxed">
               Je reconnais avoir pris connaissance du devis et des{" "}
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); setShowCgv(true); }}
-                className="underline text-primary hover:text-gold-light"
+                className="underline text-[#2f5fff] hover:text-[#4f8cff] font-semibold"
               >
                 Conditions Générales de Vente
               </button>{" "}
@@ -513,20 +513,20 @@ export function DevisAcceptationStep({
           <div className="flex flex-col-reverse sm:flex-row gap-2 sm:flex-wrap sm:justify-end">
             <button
               onClick={() => setPhase("refuse")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-red-500/40 text-red-300 hover:bg-red-500/10 text-xs uppercase tracking-wider"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-red-500/40 text-red-500 hover:bg-red-500/10 text-xs uppercase tracking-wider"
             >
               <XCircle size={14} /> Refuser
             </button>
             <button
               onClick={onCancel}
-              className="px-4 py-2.5 text-xs uppercase tracking-wider text-cream/70 hover:text-cream rounded border border-cream/20"
+              className="px-4 py-2.5 text-xs uppercase tracking-wider text-[#667085] hover:text-[#101828] rounded-lg border border-[#e4e7ec]"
             >
               Annuler
             </button>
             <button
               onClick={() => checked && sendCode(false)}
               disabled={!checked || sending}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 font-heading text-xs tracking-[0.15em] uppercase rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isFlotte ? "bg-primary text-navy hover:bg-gold-light" : "border border-primary/40 text-primary hover:bg-primary/10"}`}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >
               <Mail size={14} />
               {sending ? "Envoi…" : "Signer par e-mail"}
@@ -535,13 +535,13 @@ export function DevisAcceptationStep({
               <button
                 onClick={() => checked && setPhase("sign")}
                 disabled={!checked}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 <PenLine size={14} /> Signer maintenant
               </button>
             )}
           </div>
-          <p className="text-[10px] text-cream/55 leading-relaxed text-right">
+          <p className="text-[10px] text-[#667085]/80 leading-relaxed text-right">
             {isFlotte
               ? "Signature Flotte · validation par code de signature unique reçu par e-mail (obligatoire)."
               : "Signature manuscrite instantanée · aucun code à attendre."}
