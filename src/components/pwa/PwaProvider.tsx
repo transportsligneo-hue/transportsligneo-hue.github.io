@@ -145,6 +145,17 @@ export default function PwaProvider() {
     };
   }, []);
 
+
+  // iOS : invite manuelle « Partager → Sur l'écran d'accueil »
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isIosSafari() || isStandalone()) return;
+    const dismissed = localStorage.getItem("pwa-ios-install-dismissed-at");
+    if (dismissed && Date.now() - Number(dismissed) < 1000 * 60 * 60 * 24 * 14) return;
+    const t = window.setTimeout(() => setIosVisible(true), 2500);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const triggerInstall = async () => {
     if (!installEvent) return;
     await installEvent.prompt();
@@ -157,6 +168,12 @@ export default function PwaProvider() {
     localStorage.setItem("pwa-install-dismissed-at", String(Date.now()));
     setInstallVisible(false);
   };
+
+  const dismissIos = () => {
+    localStorage.setItem("pwa-ios-install-dismissed-at", String(Date.now()));
+    setIosVisible(false);
+  };
+
 
   const applyUpdate = async () => {
     if (!updateFn) return;
