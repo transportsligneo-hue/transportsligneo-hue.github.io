@@ -1030,17 +1030,28 @@ function AdminNouveauDevisPage() {
               </div>
 
               {emailOpen && (
-                <div className="mt-3.5 flex flex-wrap gap-2.5">
-                  <input
-                    value={emailTo}
-                    onChange={(e) => setEmailTo(e.target.value)}
-                    className="min-w-[220px] flex-1 rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                  />
-                  <Button onClick={handleSendEmail} disabled={sending} icon={sending ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}>
-                    Envoyer
-                  </Button>
+                <div className="mt-3.5 rounded-xl border border-pro-border bg-pro-bg-soft p-3.5">
+                  <label className="mb-1.5 block text-[11.5px] font-semibold text-pro-text">
+                    Adresse email du destinataire
+                  </label>
+                  <div className="flex flex-wrap gap-2.5">
+                    <input
+                      value={emailTo}
+                      onChange={(e) => setEmailTo(e.target.value)}
+                      type="email"
+                      placeholder="client@exemple.fr"
+                      className="min-w-[220px] flex-1 rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                    <Button onClick={handleSendEmail} disabled={sending} icon={sending ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}>
+                      Envoyer
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-[11.5px] text-pro-muted">
+                    Le client reçoit le template Ligneo avec un bouton de téléchargement direct du devis PDF (lien valable 30 jours).
+                  </p>
                 </div>
               )}
+
             </Card>
           </>
         )}
