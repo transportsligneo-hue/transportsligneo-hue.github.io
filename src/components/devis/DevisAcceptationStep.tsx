@@ -574,18 +574,18 @@ export function DevisAcceptationStep({
       {phase === "otp" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
-              <KeyRound size={13} className="text-primary" /> Saisissez le code reçu
+            <p className="text-xs text-[#667085] uppercase tracking-wider flex items-center gap-2">
+              <KeyRound size={13} className="text-[#2f5fff]" /> Saisissez le code reçu
             </p>
             <button
               onClick={() => setPhase("consent")}
-              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+              className="text-[#667085] hover:text-[#101828] text-xs inline-flex items-center gap-1"
             >
               <ArrowLeft size={12} /> Retour
             </button>
           </div>
-          <p className="text-xs text-cream/70">
-            Un code à 6 chiffres vient d'être envoyé à <span className="text-cream font-medium">{maskedEmail}</span>.
+          <p className="text-xs text-[#667085]">
+            Un code à 6 chiffres vient d'être envoyé à <span className="text-[#0a1638] font-medium">{maskedEmail}</span>.
             Valable {Math.floor(secondsLeft / 60)} min {String(secondsLeft % 60).padStart(2, "0")}s.
           </p>
 
@@ -602,35 +602,35 @@ export function DevisAcceptationStep({
                 onChange={(e) => handleDigit(i, e.target.value)}
                 onKeyDown={(e) => handleKey(i, e)}
                 onFocus={(e) => e.target.select()}
-                className="w-11 h-14 sm:w-12 sm:h-16 text-center font-heading text-2xl bg-navy-dark/60 border border-primary/40 rounded text-cream focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-11 h-14 sm:w-12 sm:h-16 text-center font-heading text-2xl bg-white border border-[#e4e7ec] rounded-lg text-[#101828] focus:outline-none focus:border-[#2f5fff] focus:ring-2 focus:ring-[#2f5fff]/30"
               />
             ))}
           </div>
 
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-xs text-[#667085]">
             <button
               onClick={() => sendCode(true)}
               disabled={!canResend}
-              className="inline-flex items-center gap-1 text-primary hover:text-gold-light disabled:text-cream/40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1 text-[#2f5fff] hover:text-[#4f8cff] disabled:text-[#667085]/40 disabled:cursor-not-allowed"
             >
               <RotateCw size={12} />
               {canResend
                 ? "Renvoyer le code"
                 : `Renvoyer dans ${Math.max(0, Math.ceil((resendAt - now) / 1000))}s`}
             </button>
-            <span className="text-cream/50">Le code expire dans {secondsLeft}s</span>
+            <span className="text-[#667085]/70">Le code expire dans {secondsLeft}s</span>
           </div>
 
           <button
             onClick={submitCode}
             disabled={digits.join("").length !== 6}
-            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary text-navy font-heading text-xs tracking-[0.15em] uppercase rounded hover:bg-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <ShieldCheck size={14} /> Valider et signer le devis
           </button>
 
-          <p className="text-[10px] text-cream/55 leading-relaxed flex items-start gap-1.5">
-            <FileCheck2 size={12} className="text-primary shrink-0 mt-0.5" />
+          <p className="text-[10px] text-[#667085]/80 leading-relaxed flex items-start gap-1.5">
+            <FileCheck2 size={12} className="text-[#2f5fff] shrink-0 mt-0.5" />
             En validant, le devis {numero} sera définitivement accepté pour un montant de {prixTtc.toFixed(2)} € TTC.
             Adresse IP, date/heure et code OTP vérifié seront archivés comme preuve.
           </p>
