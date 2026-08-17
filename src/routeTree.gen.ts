@@ -135,6 +135,7 @@ import { Route as AuthenticatedAdminContenuRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
+import { Route as AuthenticatedAdminCampagnesRouteImport } from './routes/_authenticated/admin.campagnes'
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
@@ -880,6 +881,12 @@ const AuthenticatedAdminCandidaturesRoute =
     path: '/candidatures',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCampagnesRoute =
+  AuthenticatedAdminCampagnesRouteImport.update({
+    id: '/campagnes',
+    path: '/campagnes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminB2bLeadsRoute =
   AuthenticatedAdminB2bLeadsRouteImport.update({
     id: '/b2b-leads',
@@ -1204,6 +1211,7 @@ export interface FileRoutesByFullPath {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
@@ -1371,6 +1379,7 @@ export interface FileRoutesByTo {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
@@ -1543,6 +1552,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/_authenticated/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
@@ -1718,6 +1728,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
+    | '/admin/campagnes'
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
@@ -1885,6 +1896,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
+    | '/admin/campagnes'
     | '/admin/candidatures'
     | '/admin/clients'
     | '/admin/communication'
@@ -2056,6 +2068,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
     | '/_authenticated/admin/b2b-leads'
+    | '/_authenticated/admin/campagnes'
     | '/_authenticated/admin/candidatures'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/communication'
@@ -3136,6 +3149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCandidaturesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/campagnes': {
+      id: '/_authenticated/admin/campagnes'
+      path: '/campagnes'
+      fullPath: '/admin/campagnes'
+      preLoaderRoute: typeof AuthenticatedAdminCampagnesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/b2b-leads': {
       id: '/_authenticated/admin/b2b-leads'
       path: '/b2b-leads'
@@ -3527,6 +3547,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
+  AuthenticatedAdminCampagnesRoute: typeof AuthenticatedAdminCampagnesRoute
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
   AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
@@ -3564,6 +3585,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
+  AuthenticatedAdminCampagnesRoute: AuthenticatedAdminCampagnesRoute,
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
   AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,

@@ -112,6 +112,9 @@ function AdminLayout() {
     },
     { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
 
+    // Marketing
+    { to: "/admin/campagnes", label: "Campagnes", icon: Megaphone, group: "Marketing" },
+
     // Comptes
     { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Comptes" },
     { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
