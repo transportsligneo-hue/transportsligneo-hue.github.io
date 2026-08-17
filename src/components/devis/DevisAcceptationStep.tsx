@@ -392,16 +392,16 @@ export function DevisAcceptationStep({
   if (phase === "success") {
     return (
       <div className="space-y-4 text-center py-6">
-        <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center">
-          <CheckCircle2 className="text-emerald-400" size={30} />
+        <div className="mx-auto w-14 h-14 rounded-full bg-[rgba(47,95,255,0.12)] flex items-center justify-center">
+          <CheckCircle2 className="text-[#2f5fff]" size={30} />
         </div>
         <div>
-          <p className="font-heading text-lg text-cream">Devis {numero} signé</p>
-          <p className="text-xs text-cream/70 mt-1">Un PDF signé a été archivé dans votre espace.</p>
+          <p className="font-heading text-lg text-[#0a1638]">Devis {numero} signé</p>
+          <p className="text-xs text-[#667085] mt-1">Un PDF signé a été archivé dans votre espace.</p>
         </div>
         <button
           onClick={downloadSignedPdf}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded border border-primary/40 text-primary text-xs uppercase tracking-wider hover:bg-primary/10"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#2f5fff]/40 text-[#2f5fff] text-xs uppercase tracking-wider hover:bg-[#2f5fff]/10"
         >
           <FileCheck2 size={14} /> Télécharger le devis signé
         </button>
