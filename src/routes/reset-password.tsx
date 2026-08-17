@@ -128,6 +128,8 @@ function ResetPassword() {
             <p className="auth-subtle text-sm">
               Ce lien de réinitialisation n'est plus valide. Demandez un nouveau lien depuis la page de connexion.
             </p>
+            {error && <p className="auth-subtle text-xs opacity-70">{error}</p>}
+
             <Link to="/mot-de-passe-oublie" className="auth-btn-primary mt-2">
               Demander un nouveau lien
             </Link>
