@@ -4487,6 +4487,28 @@
   background: linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent); transform: skewX(-20deg); animation: dcShine 3.4s ease-in-out infinite;
 }
 @keyframes dcShine { 0% { left:-60%; } 45%,100% { left:130%; } }
+.dc-waitlist-form { text-align: left; }
+.dc-waitlist-label { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa6c9; margin-bottom: 10px; }
+.dc-waitlist-input-wrap { position: relative; margin-bottom: 16px; }
+.dc-waitlist-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #4f8cff; pointer-events: none; }
+.dc-waitlist-input {
+  width: 100%; padding: 15px 16px 15px 44px; border-radius: 14px; border: 1px solid rgba(122,163,255,0.3);
+  background: rgba(6,10,24,0.45); color: #fff; font-size: 15px; outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.dc-waitlist-input::placeholder { color: #7b88b3; }
+.dc-waitlist-input:focus { border-color: #4f8cff; box-shadow: 0 0 0 3px rgba(79,140,255,0.18); }
+.dc-waitlist-input:disabled { opacity: .6; cursor: not-allowed; }
+.dc-btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+.dc-waitlist-error {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 11px 13px; border-radius: 10px;
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); color: #ffb4b4; font-size: 13px;
+}
+.dc-waitlist-disclaimer { font-size: 11.5px; color: #7b88b3; text-align: center; margin-top: 14px; }
+.dc-waitlist-success { text-align: center; padding: 14px 0; }
+.dc-waitlist-success-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(74,208,160,0.15); border: 1px solid rgba(74,208,160,0.45); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; color: #4ad0a0; }
+.dc-waitlist-success-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.dc-waitlist-success-text { color: #dbe4ff; font-size: 14px; line-height: 1.55; }
 .dc-login-card {
   position: relative; overflow: hidden; margin-top: 28px; background: rgba(14,20,44,0.6);
   border: 1px solid rgba(74,208,160,0.35); border-radius: 18px; padding: 22px 28px;
@@ -4507,10 +4529,12 @@
 .dc-btn-login::after { content: ''; position: absolute; top: 0; left: -60%; width: 35%; height: 100%; background: linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent); transform: skewX(-20deg); animation: r4NavShine 3.6s ease-in-out infinite; }
 @media (max-width: 640px) {
   .dc-wrap { padding: 96px 0 48px; }
-  .dc-wrap h1 { font-size: 30px; }
+  .dc-wrap h1 { font-size: 28px; }
   .dc-card { padding: 24px 20px; border-radius: 20px; }
   .dc-login-card { flex-direction: column; align-items: flex-start; padding: 20px; }
+  .dc-waitlist-input { font-size: 16px; }
 }
+
 
 /* ===== Vroomy · mascotte, export PDF, accessibilité & préférences ===== */
 .vrm-mascotte { display: block; object-fit: contain; border-radius: 50%; }
