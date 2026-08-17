@@ -7,7 +7,7 @@ workflows:
         - Android_build
       vars:
         PACKAGE_NAME: "com.transportsligneo.driver"
-      node: 20
+      node: 22
     scripts:
       - name: Installer les dépendances
         script: npm install
