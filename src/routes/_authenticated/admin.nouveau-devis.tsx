@@ -473,13 +473,27 @@ function AdminNouveauDevisPage() {
 
   const handleSendEmail = async () => {
     if (!created || !client) return;
-    if (!emailTo.trim()) return toast.error("Adresse email requise");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo.trim())) return toast.error("Adresse email invalide");
     setSending(true);
     try {
+      // 1. Dépose du PDF pour un téléchargement direct depuis l'email
+      let pdfUrl: string | undefined;
+      if (pdfBlob) {
+        const path = `${client.user_id}/devis-${created.numero}.pdf`;
+        const { error: upErr } = await supabase.storage
+          .from("devis-acceptes")
+          .upload(path, pdfBlob, { contentType: "application/pdf", upsert: true });
+        if (upErr) console.error("[devis] upload pdf", upErr.message);
+        const { data: signed } = await supabase.storage
+          .from("devis-acceptes")
+          .createSignedUrl(path, 60 * 60 * 24 * 30, { download: `devis-${created.numero}.pdf` });
+        pdfUrl = signed?.signedUrl;
+      }
+
       await sendTransactionalEmail({
         templateName: "devis-client",
         recipientEmail: emailTo.trim(),
-        idempotencyKey: `devis-admin-${created.id}`,
+        idempotencyKey: `devis-admin-${created.id}-${Date.now()}`,
         templateData: {
           prenom: client.prenom,
           nom: client.nom,
@@ -487,13 +501,17 @@ function AdminNouveauDevisPage() {
           depart,
           arrivee,
           prix: created.prix,
+          optionTrajet: typeTrajet,
+          ...(pdfUrl ? { pdfUrl } : {}),
         },
       });
       await supabase
         .from("devis")
         .update({ statut: "envoye", email_envoye: true, sent_at: new Date().toISOString() } as never)
         .eq("id", created.id);
-      toast.success("Devis envoyé par email");
+      toast.success(
+        pdfUrl ? `Devis envoyé à ${emailTo.trim()} avec le PDF` : `Devis envoyé à ${emailTo.trim()}`,
+      );
       setEmailOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Échec de l'envoi");
@@ -501,6 +519,7 @@ function AdminNouveauDevisPage() {
       setSending(false);
     }
   };
+
 
   return (
     <div>
