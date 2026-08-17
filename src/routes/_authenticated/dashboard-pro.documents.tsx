@@ -113,6 +113,8 @@ function ProDocuments() {
   const [closingDevis, setClosingDevis] = useState<DevisRow | null>(null);
   const [closingReason, setClosingReason] = useState<string>("");
   const [closingSubmitting, setClosingSubmitting] = useState<boolean>(false);
+  const [signingId, setSigningId] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const markProcessed = useServerFn(markDevisAsProcessed);
 
 
