@@ -694,7 +694,49 @@ function ProDocuments() {
           </div>
         </div>
       )}
+
+      {/* Signature électronique du devis */}
+      {signingDevis && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl my-6 rounded-xl border border-primary/20 bg-navy p-6 shadow-2xl">
+            <button
+              onClick={() => setSigningId(null)}
+              className="absolute top-4 right-4 text-cream/60 hover:text-cream transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h2 className="font-heading text-xl text-primary tracking-wider">
+                Acceptation du devis — {signingDevis.numero}
+              </h2>
+              <p className="text-cream/70 text-sm mt-1">
+                {signingDevis.depart} → {signingDevis.arrivee} · {Number(signingDevis.prix_estime).toFixed(2)} €
+              </p>
+            </div>
+            <DevisAcceptationStep
+              devisId={signingDevis.id}
+              numero={signingDevis.numero}
+              depart={signingDevis.depart}
+              arrivee={signingDevis.arrivee}
+              prixTtc={Number(signingDevis.prix_estime)}
+              vehicule={[signingDevis.marque, signingDevis.modele].filter(Boolean).join(" ") || null}
+              dateSouhaitee={signingDevis.date_souhaitee}
+              onAccepted={() => {
+                setSigningId(null);
+                setReloadKey((k) => k + 1);
+                toast.success("Devis signé — la mission peut être planifiée.");
+              }}
+              onCancel={() => {
+                setSigningId(null);
+                setReloadKey((k) => k + 1);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
+
   );
 
 }
