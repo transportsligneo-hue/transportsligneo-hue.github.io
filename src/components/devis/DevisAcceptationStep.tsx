@@ -391,7 +391,7 @@ export function DevisAcceptationStep({
 
   if (phase === "success") {
     return (
-      <div className="space-y-4 text-center py-6">
+      <div className="space-y-4 text-center py-6 bg-white rounded-xl p-5">
         <div className="mx-auto w-14 h-14 rounded-full bg-[rgba(47,95,255,0.12)] flex items-center justify-center">
           <CheckCircle2 className="text-[#2f5fff]" size={30} />
         </div>
