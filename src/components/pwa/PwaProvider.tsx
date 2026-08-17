@@ -58,11 +58,32 @@ async function unregisterAppSW() {
   }
 }
 
+/** iOS (Safari/iPadOS) : pas de beforeinstallprompt, installation manuelle. */
+function isIosSafari(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  const isIos = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
+  if (!isIos) return false;
+  // Exclure les navigateurs iOS tiers qui ne savent pas installer (Chrome/Firefox iOS)
+  const isThirdParty = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  return !isThirdParty;
+}
+
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 export default function PwaProvider() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installVisible, setInstallVisible] = useState(false);
+  const [iosVisible, setIosVisible] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateFn, setUpdateFn] = useState<(() => Promise<void>) | null>(null);
+
 
   // SW registration (or cleanup in dev/preview/iframe)
   useEffect(() => {
