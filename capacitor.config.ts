@@ -13,7 +13,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const serverUrl = process.env.CAP_SERVER_URL || "https://transportsligneo.fr";
 
 const config: CapacitorConfig = {
-  appId: "fr.transportsligneo.driver",
+  appId: "com.transportsligneo.driver",
   appName: "Ligneo Driver",
   webDir: "dist",
   server: {
