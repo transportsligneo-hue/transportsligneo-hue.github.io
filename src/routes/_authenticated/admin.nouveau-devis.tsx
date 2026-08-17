@@ -115,9 +115,12 @@ const OPTIONS_LIST = [
 ] as const;
 
 
+const RECHARGE_SEULE = "Recharge sur place (sans livraison)";
+
 const TRAJET_TYPES = [
   "Livraison simple",
   "Livraison + restitution",
+  RECHARGE_SEULE,
 ] as const;
 
 const PV_OPTIONS: { key: PvChoice; label: string }[] = [
@@ -293,6 +296,10 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = typeTrajet === "Livraison + restitution";
+  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
+  const prestationLabel = isRechargeSeule
+    ? "Recharge véhicule sur place (sans livraison)"
+    : "Convoyage automobile";
   const planningIncomplet =
     !dateSouhaitee ||
     !heureSouhaitee ||
@@ -328,7 +335,7 @@ function AdminNouveauDevisPage() {
     societe: client?.societe ?? null,
     logo_url: client?.logo_url ?? null,
     depart,
-    arrivee,
+    arrivee: isRechargeSeule ? depart : arrivee,
     marque: vehicule || null,
     modele: modele || null,
     immatriculation: immat || null,
@@ -340,7 +347,7 @@ function AdminNouveauDevisPage() {
     destinataire_nom: destNom || null,
     destinataire_tel: destTel || null,
     destinataire_note: destNote || null,
-    prestation: "Convoyage automobile",
+    prestation: prestationLabel,
     prix_estime: prix,
     validite_jours: 15,
     created_at: new Date().toISOString(),
@@ -349,7 +356,8 @@ function AdminNouveauDevisPage() {
 
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
-    if (!depart.trim() || !arrivee.trim()) return toast.error("Départ et arrivée requis");
+    if (!depart.trim()) return toast.error("Adresse requise");
+    if (!isRechargeSeule && !arrivee.trim()) return toast.error("Départ et arrivée requis");
     if (!dateSouhaitee || !heureSouhaitee)
       return toast.error("Date et heure d'enlèvement obligatoires");
     if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
@@ -368,7 +376,7 @@ function AdminNouveauDevisPage() {
           email: client.email ?? "",
           telephone: client.telephone,
           depart: depart.trim(),
-          arrivee: arrivee.trim(),
+          arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
           marque: vehicule || null,
           modele: modele || null,
           immatriculation: immat.trim().toUpperCase() || null,
@@ -390,7 +398,7 @@ function AdminNouveauDevisPage() {
           contact_arrivee_note: destNote || null,
           pv_digitalise: pvDigital,
           message: recapMessage || null,
-          prestation: "Convoyage automobile",
+          prestation: prestationLabel,
           prix_estime: prix,
           prix_manuel: true,
           statut: "brouillon",
@@ -610,8 +618,15 @@ function AdminNouveauDevisPage() {
             <h3 className="text-[15px] font-bold text-pro-text">Trajet</h3>
           </div>
           <div className="space-y-4">
-            <AddressField label="Adresse de départ" value={depart} onChange={setDepart} placeholder="Ex : 6 rue du pont libert, 37520 La Riche" />
-            <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            <AddressField
+              label={isRechargeSeule ? "Adresse d'intervention" : "Adresse de départ"}
+              value={depart}
+              onChange={setDepart}
+              placeholder="Ex : 6 rue du pont libert, 37520 La Riche"
+            />
+            {!isRechargeSeule && (
+              <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+            )}
             <div>
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Type de trajet
@@ -621,7 +636,13 @@ function AdminNouveauDevisPage() {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setTypeTrajet(t)}
+                    onClick={() => {
+                      setTypeTrajet(t);
+                      if (t === RECHARGE_SEULE) {
+                        const elecLabel = OPTIONS_LIST[0].label;
+                        setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
+                      }
+                    }}
                     className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                       typeTrajet === t
                         ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
@@ -632,7 +653,13 @@ function AdminNouveauDevisPage() {
                   </button>
                 ))}
               </div>
+              {isRechargeSeule && (
+                <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+                  Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
+                </p>
+              )}
             </div>
+
             <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
 
             <div className="border-t border-pro-border pt-4">
@@ -642,7 +669,7 @@ function AdminNouveauDevisPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Date d'enlèvement *
+                    {isRechargeSeule ? "Date d'intervention *" : "Date d'enlèvement *"}
                   </label>
                   <input
                     type="date"
@@ -819,14 +846,16 @@ function AdminNouveauDevisPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
               4
             </span>
-            <h3 className="text-[15px] font-bold text-pro-text">Client livré (destinataire)</h3>
+            <h3 className="text-[15px] font-bold text-pro-text">
+              {isRechargeSeule ? "Contact sur place" : "Client livré (destinataire)"}
+            </h3>
           </div>
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Nom du destinataire" value={destNom} onChange={setDestNom} placeholder="Nom / société" />
               <Field label="Téléphone" value={destTel} onChange={setDestTel} placeholder="06 12 34 56 78" />
             </div>
-            <Field label="Note de livraison" value={destNote} onChange={setDestNote} placeholder="Étage, code, horaires…" />
+            <Field label={isRechargeSeule ? "Note d'intervention" : "Note de livraison"} value={destNote} onChange={setDestNote} placeholder="Étage, code, horaires…" />
           </div>
         </Card>
 

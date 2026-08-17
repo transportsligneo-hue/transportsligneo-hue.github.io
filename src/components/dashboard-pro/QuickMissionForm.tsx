@@ -18,7 +18,7 @@ import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
-type TripOption = "aller-simple" | "aller-retour" | "express";
+type TripOption = "aller-simple" | "aller-retour" | "express" | "recharge";
 type DisplayMode = "ttc" | "ht" | "exempt";
 
 interface ProfileInfo {
@@ -249,6 +249,11 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
     return () => { cancelled = true; };
   }, [depart, arrivee, tripType, profile, user]);
 
+  // Recharge sur place : pas de livraison, l'adresse d'arrivée = adresse d'intervention
+  useEffect(() => {
+    if (tripType === "recharge") setArrivee(depart);
+  }, [tripType, depart]);
+
   // Auto-set express option when tripType is express
   useEffect(() => {
     if (tripType === "express") {
@@ -372,7 +377,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             modele: modele || null,
             vin: vin || null,
             carburant: energie || null,
-            option_trajet: tripType === "aller-retour" ? "aller_retour" : tripType === "express" ? "express" : "aller_simple",
+            option_trajet: tripType === "aller-retour" ? "aller_retour" : tripType === "express" ? "express" : tripType === "recharge" ? "recharge_seule" : "aller_simple",
             prix_estime: prixTtc,
             statut: "envoye",
             origine: "demande_client",
@@ -571,6 +576,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           {[
             { v: "aller-simple", label: "Aller simple", desc: "Livraison à destination" },
             { v: "aller-retour", label: "Aller-retour", desc: "Livraison + restitution" },
+            { v: "recharge", label: "Recharge sur place", desc: "Recharge du véhicule, sans livraison" },
           ].map((opt) => {
             const active = tripType === (opt.v as TripOption);
             return (
@@ -652,6 +658,17 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       </section>
 
       {/* Arrivée */}
+      {tripType === "recharge" ? (
+        <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
+          <h2 className="text-sm font-semibold text-pro-text mb-2 flex items-center gap-1.5">
+            <MapPinned size={14} className="text-pro-accent" /> Pas de livraison
+          </h2>
+          <p className="text-xs text-pro-text-soft">
+            Recharge sur place : le véhicule est rechargé puis restitué à la même adresse
+            ({depart || "adresse d'enlèvement"}). Aucune adresse de livraison n'est nécessaire.
+          </p>
+        </section>
+      ) : (
       <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
         <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
           <MapPinned size={14} className="text-pro-accent" /> Lieu de livraison
@@ -683,6 +700,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           </div>
         </div>
       </section>
+      )}
+
 
       {/* Véhicule */}
       <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
