@@ -7,6 +7,7 @@ import {
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
