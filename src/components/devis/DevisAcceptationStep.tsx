@@ -679,21 +679,21 @@ export function DevisAcceptationStep({
       )}
 
       {showCgv && (
-        <div className="fixed inset-0 z-[60] bg-navy/95 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-navy-dark border border-primary/30 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-cream/10">
-              <h3 className="font-heading text-lg text-primary tracking-wider">Conditions Générales de Vente</h3>
-              <button onClick={() => setShowCgv(false)} className="text-cream/60 hover:text-cream">
+        <div className="fixed inset-0 z-[60] bg-[#0a1638]/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e4e7ec] rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[#e4e7ec]">
+              <h3 className="font-heading text-lg text-[#0a1638] tracking-wider">Conditions Générales de Vente</h3>
+              <button onClick={() => setShowCgv(false)} className="text-[#667085] hover:text-[#101828]">
                 <X size={20} />
               </button>
             </div>
-            <div className="overflow-y-auto p-5 text-sm text-cream/90 whitespace-pre-line leading-relaxed">
+            <div className="overflow-y-auto p-5 text-sm text-[#101828] whitespace-pre-line leading-relaxed">
               {CGV_TEXT}
             </div>
-            <div className="p-4 border-t border-cream/10 flex justify-end">
+            <div className="p-4 border-t border-[#e4e7ec] flex justify-end">
               <button
                 onClick={() => setShowCgv(false)}
-                className="px-4 py-2 bg-primary text-navy text-xs uppercase tracking-wider rounded hover:bg-gold-light"
+                className="px-4 py-2 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white text-xs uppercase tracking-wider rounded-lg font-semibold hover:from-[#284ee6] hover:to-[#4f8cff]"
               >
                 Fermer
               </button>
