@@ -284,6 +284,57 @@ export default function PwaProvider() {
           </div>
         </div>
       )}
+
+      {iosVisible && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "calc(16px + env(safe-area-inset-bottom))",
+            left: 12,
+            right: 12,
+            zIndex: 2147483646,
+            background: "#0b1026",
+            border: "1px solid #d4af37",
+            color: "#faf7ef",
+            padding: 16,
+            borderRadius: 12,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+            fontFamily: "Inter, system-ui, sans-serif",
+          }}
+        >
+          <div style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#e7c76a", marginBottom: 8 }}>
+            Installer l'application
+          </div>
+          <div style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 12 }}>
+            Sur iPhone et iPad, appuyez sur{" "}
+            <span aria-hidden style={{ display: "inline-flex", verticalAlign: "-3px", margin: "0 2px" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e7c76a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 16V4" />
+                <path d="m8 8 4-4 4 4" />
+                <path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
+              </svg>
+            </span>
+            <strong>Partager</strong>, puis <strong>« Sur l'écran d'accueil »</strong>.
+          </div>
+          <button
+            onClick={dismissIos}
+            style={{
+              background: "transparent",
+              color: "#c9cbd6",
+              border: "1px solid rgba(255,255,255,0.2)",
+              padding: "8px 14px",
+              borderRadius: 4,
+              cursor: "pointer",
+              fontSize: 11,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}
+          >
+            J'ai compris
+          </button>
+        </div>
+      )}
     </>
+
   );
 }
