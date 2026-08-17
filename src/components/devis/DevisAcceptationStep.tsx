@@ -640,17 +640,17 @@ export function DevisAcceptationStep({
       {phase === "refuse" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-cream/85 uppercase tracking-wider flex items-center gap-2">
-              <XCircle size={13} className="text-red-400" /> Refuser le devis
+            <p className="text-xs text-[#667085] uppercase tracking-wider flex items-center gap-2">
+              <XCircle size={13} className="text-red-500" /> Refuser le devis
             </p>
             <button
               onClick={() => setPhase("consent")}
-              className="text-cream/60 hover:text-cream text-xs inline-flex items-center gap-1"
+              className="text-[#667085] hover:text-[#101828] text-xs inline-flex items-center gap-1"
             >
               <ArrowLeft size={12} /> Retour
             </button>
           </div>
-          <label className="block text-xs text-cream/70">
+          <label className="block text-xs text-[#667085]">
             Motif (facultatif, 500 caractères max)
             <textarea
               value={refusMotif}
@@ -658,19 +658,19 @@ export function DevisAcceptationStep({
               onChange={(e) => setRefusMotif(e.target.value)}
               rows={3}
               placeholder="Ex : prix, délai, choix d'un autre prestataire…"
-              className="mt-1 w-full rounded border border-cream/20 bg-navy-dark/60 text-cream text-sm p-2 focus:outline-none focus:border-primary"
+              className="mt-1 w-full rounded-lg border border-[#e4e7ec] bg-white text-[#101828] text-sm p-2 focus:outline-none focus:border-[#2f5fff]"
             />
           </label>
           <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end">
             <button
               onClick={() => setPhase("consent")}
-              className="px-4 py-2 rounded border border-cream/20 text-cream/70 hover:text-cream text-xs uppercase tracking-wider"
+              className="px-4 py-2 rounded-lg border border-[#e4e7ec] text-[#667085] hover:text-[#101828] text-xs uppercase tracking-wider"
             >
               Annuler
             </button>
             <button
               onClick={submitRefus}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-red-500/90 text-white text-xs uppercase tracking-wider hover:bg-red-500"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/90 text-white text-xs uppercase tracking-wider hover:bg-red-500"
             >
               <XCircle size={14} /> Confirmer le refus
             </button>
