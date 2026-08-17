@@ -28,6 +28,7 @@ import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-c
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
 import { Route as DeveloppeursRouteImport } from './routes/developpeurs'
+import { Route as DesinscriptionRouteImport } from './routes/desinscription'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
@@ -68,6 +69,9 @@ import { Route as PaiementFactureFactureIdRouteImport } from './routes/paiement.
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
+import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
+import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/track-click'
+import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
@@ -271,6 +275,11 @@ const DevenirConvoyeurRoute = DevenirConvoyeurRouteImport.update({
 const DeveloppeursRoute = DeveloppeursRouteImport.update({
   id: '/developpeurs',
   path: '/developpeurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesinscriptionRoute = DesinscriptionRouteImport.update({
+  id: '/desinscription',
+  path: '/desinscription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -483,6 +492,22 @@ const ApiPublicYousignWebhookRoute = ApiPublicYousignWebhookRouteImport.update({
   path: '/api/public/yousign-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTrackOpenRoute = ApiPublicTrackOpenRouteImport.update({
+  id: '/api/public/track-open',
+  path: '/api/public/track-open',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTrackClickRoute = ApiPublicTrackClickRouteImport.update({
+  id: '/api/public/track-click',
+  path: '/api/public/track-click',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCampaignUnsubscribeRoute =
+  ApiPublicCampaignUnsubscribeRouteImport.update({
+    id: '/api/public/campaign-unsubscribe',
+    path: '/api/public/campaign-unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAssistantChatRoute = ApiPublicAssistantChatRouteImport.update({
   id: '/api/public/assistant-chat',
   path: '/api/public/assistant-chat',
@@ -1134,6 +1159,7 @@ export interface FileRoutesByFullPath {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1241,6 +1267,9 @@ export interface FileRoutesByFullPath {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
+  '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1303,6 +1332,7 @@ export interface FileRoutesByTo {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1401,6 +1431,9 @@ export interface FileRoutesByTo {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
+  '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1465,6 +1498,7 @@ export interface FileRoutesById {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1572,6 +1606,9 @@ export interface FileRoutesById {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
+  '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1636,6 +1673,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -1743,6 +1781,9 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/campaign-unsubscribe'
+    | '/api/public/track-click'
+    | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -1805,6 +1846,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -1903,6 +1945,9 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/campaign-unsubscribe'
+    | '/api/public/track-click'
+    | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -1966,6 +2011,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -2073,6 +2119,9 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/campaign-unsubscribe'
+    | '/api/public/track-click'
+    | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
     | '/lovable/email/suppression'
@@ -2137,6 +2186,7 @@ export interface RootRouteChildren {
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  DesinscriptionRoute: typeof DesinscriptionRoute
   DeveloppeursRoute: typeof DeveloppeursRoute
   DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
@@ -2171,6 +2221,9 @@ export interface RootRouteChildren {
   ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
+  ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
+  ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
+  ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PaiementFactureFactureIdRoute: typeof PaiementFactureFactureIdRoute
@@ -2332,6 +2385,13 @@ declare module '@tanstack/react-router' {
       path: '/developpeurs'
       fullPath: '/developpeurs'
       preLoaderRoute: typeof DeveloppeursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desinscription': {
+      id: '/desinscription'
+      path: '/desinscription'
+      fullPath: '/desinscription'
+      preLoaderRoute: typeof DesinscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -2612,6 +2672,27 @@ declare module '@tanstack/react-router' {
       path: '/api/public/yousign-webhook'
       fullPath: '/api/public/yousign-webhook'
       preLoaderRoute: typeof ApiPublicYousignWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/track-open': {
+      id: '/api/public/track-open'
+      path: '/api/public/track-open'
+      fullPath: '/api/public/track-open'
+      preLoaderRoute: typeof ApiPublicTrackOpenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/track-click': {
+      id: '/api/public/track-click'
+      path: '/api/public/track-click'
+      fullPath: '/api/public/track-click'
+      preLoaderRoute: typeof ApiPublicTrackClickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/campaign-unsubscribe': {
+      id: '/api/public/campaign-unsubscribe'
+      path: '/api/public/campaign-unsubscribe'
+      fullPath: '/api/public/campaign-unsubscribe'
+      preLoaderRoute: typeof ApiPublicCampaignUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/assistant-chat': {
@@ -3822,6 +3903,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommentCaMarcheRoute: CommentCaMarcheRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  DesinscriptionRoute: DesinscriptionRoute,
   DeveloppeursRoute: DeveloppeursRoute,
   DevenirConvoyeurRoute: DevenirConvoyeurRoute,
   InscriptionClientRoute: InscriptionClientRoute,
@@ -3857,6 +3939,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
+  ApiPublicCampaignUnsubscribeRoute: ApiPublicCampaignUnsubscribeRoute,
+  ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
+  ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PaiementFactureFactureIdRoute: PaiementFactureFactureIdRoute,
