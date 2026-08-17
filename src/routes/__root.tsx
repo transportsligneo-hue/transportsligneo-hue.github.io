@@ -167,8 +167,31 @@ function PublicChrome() {
   );
 }
 
+/**
+ * Certains liens de réinitialisation renvoient vers la racine du site
+ * (site_url) au lieu de /reset-password. On redirige alors en conservant
+ * le jeton, sinon l'utilisateur atterrit sur l'accueil sans rien pouvoir faire.
+ */
+function RecoveryLinkRedirect() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { pathname, search, hash } = window.location;
+    if (pathname.startsWith("/reset-password")) return;
+    const q = new URLSearchParams(search);
+    const h = new URLSearchParams(hash.replace(/^#/, ""));
+    const isRecovery =
+      q.get("type") === "recovery" ||
+      h.get("type") === "recovery" ||
+      (q.get("token_hash") && q.get("type") === "recovery");
+    if (isRecovery) window.location.replace(`/reset-password${search}${hash}`);
+  }, []);
+  return null;
+}
+
 function RootComponent() {
   const [queryClient] = useState(() => new QueryClient());
+
+
 
   return (
     <QueryClientProvider client={queryClient}>
