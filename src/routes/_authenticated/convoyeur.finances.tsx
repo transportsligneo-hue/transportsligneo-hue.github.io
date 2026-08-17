@@ -63,7 +63,7 @@ function FinancesPage() {
       since.setDate(1);
 
       const { data: trs } = await supabase
-        .from("trajets")
+        .from("trajets_assigned_safe" as never)
         .select("id, depart, arrivee, date_trajet, tarif_convoyeur, updated_at, numero_mission")
         .in("id", trajetIds)
         .gte("updated_at", since.toISOString());

@@ -256,7 +256,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
         .from("attributions").select("trajet_id").eq("id", attributionId).maybeSingle();
       if (!attr?.trajet_id) return;
       const { data: t } = await supabase
-        .from("trajets").select("marque, modele, immatriculation, demande_id")
+        .from("trajets_assigned_safe" as never).select("marque, modele, immatriculation, demande_id")
         .eq("id", attr.trajet_id).maybeSingle();
       if (!t) return;
       setVehicleLabel([t.marque, t.modele, t.immatriculation].filter(Boolean).join(" · "));
