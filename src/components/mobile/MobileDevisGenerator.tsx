@@ -496,7 +496,7 @@ export default function MobileDevisGenerator() {
 
               {/* Toggle Aller simple / Aller-retour */}
               <div
-                className="relative flex mt-4 rounded-full p-1"
+                className="mdev-trip-toggle relative flex mt-4 rounded-full p-1"
                 style={{
                   background: "rgba(0,0,0,0.25)",
                   border: "1px solid rgba(122,163,255,0.18)",
@@ -607,6 +607,7 @@ export default function MobileDevisGenerator() {
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
           }
+          .mdev-card:focus-within { animation: none; transform: none; }
           .mdev-inner {
             position: relative; background: rgba(13,19,42,0.96); border-radius: 27px;
              padding: 22px 20px; backdrop-filter: blur(18px); overflow: visible;
@@ -634,7 +635,7 @@ export default function MobileDevisGenerator() {
           }
           .mdev-address-input {
             width: 100%; min-width: 0; height: 22px; padding: 0; border: 0;
-            outline: 0; background: transparent; color: #fff; font-size: 13px;
+            outline: 0; background: transparent; color: #fff; font-size: 16px;
             font-weight: 600; text-overflow: ellipsis;
           }
           .mdev-address-input::placeholder { color: #c3cbe6; font-style: italic; opacity: .82; }
@@ -652,6 +653,8 @@ export default function MobileDevisGenerator() {
           html.theme-light .mdev-address-menu { background: #fff; border-color: rgba(47,95,255,.25); box-shadow: 0 18px 45px rgba(15,21,38,.18); }
           html.theme-light .mdev-address-menu button { color: #1c3fc4 !important; border-color: rgba(47,95,255,.12); }
           html.theme-light .mdev-address-menu button:hover { background: rgba(47,95,255,.08); }
+          html.theme-light .mdev-trip-toggle button.text-white,
+          html.theme-light .mdev-cta { color: #fff !important; }
           .mdev-addr-ic {
             width: 32px; height: 32px; border-radius: 50%;
             background: linear-gradient(135deg, rgba(63,123,255,0.35), rgba(47,95,255,0.1));
