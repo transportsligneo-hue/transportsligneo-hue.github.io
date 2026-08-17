@@ -335,7 +335,7 @@ function AdminNouveauDevisPage() {
     societe: client?.societe ?? null,
     logo_url: client?.logo_url ?? null,
     depart,
-    arrivee,
+    arrivee: isRechargeSeule ? depart : arrivee,
     marque: vehicule || null,
     modele: modele || null,
     immatriculation: immat || null,
@@ -347,7 +347,7 @@ function AdminNouveauDevisPage() {
     destinataire_nom: destNom || null,
     destinataire_tel: destTel || null,
     destinataire_note: destNote || null,
-    prestation: "Convoyage automobile",
+    prestation: prestationLabel,
     prix_estime: prix,
     validite_jours: 15,
     created_at: new Date().toISOString(),
@@ -356,7 +356,8 @@ function AdminNouveauDevisPage() {
 
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
-    if (!depart.trim() || !arrivee.trim()) return toast.error("Départ et arrivée requis");
+    if (!depart.trim()) return toast.error("Adresse requise");
+    if (!isRechargeSeule && !arrivee.trim()) return toast.error("Départ et arrivée requis");
     if (!dateSouhaitee || !heureSouhaitee)
       return toast.error("Date et heure d'enlèvement obligatoires");
     if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
@@ -375,7 +376,7 @@ function AdminNouveauDevisPage() {
           email: client.email ?? "",
           telephone: client.telephone,
           depart: depart.trim(),
-          arrivee: arrivee.trim(),
+          arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
           marque: vehicule || null,
           modele: modele || null,
           immatriculation: immat.trim().toUpperCase() || null,
@@ -397,7 +398,7 @@ function AdminNouveauDevisPage() {
           contact_arrivee_note: destNote || null,
           pv_digitalise: pvDigital,
           message: recapMessage || null,
-          prestation: "Convoyage automobile",
+          prestation: prestationLabel,
           prix_estime: prix,
           prix_manuel: true,
           statut: "brouillon",
