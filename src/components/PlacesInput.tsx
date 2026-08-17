@@ -21,10 +21,10 @@ interface PlacesInputProps {
 }
 
 /**
- * Champ d'adresse avec autocomplete Google Places + fallback :
+ * Champ d'adresse avec autocomplete Google Places :
  * - tape librement (saisie manuelle toujours valide)
  * - propose des suggestions Google si la clé est dispo
- * - sinon, filtre la liste fallbackOptions (villes connues)
+ * - les suggestions n'apparaissent qu'au fil de la saisie
  * - le design est piloté par className / dropdownClassName du parent
  */
 export default function PlacesInput({
