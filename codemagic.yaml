@@ -6,13 +6,14 @@ workflows:
     environment:
       vars:
         PACKAGE_NAME: "com.transportsligneo.driver"
-        NODE_OPTIONS: "--max-old-space-size=6144"
       node: 20
     scripts:
       - name: Installer les dépendances
         script: npm install
       - name: Build de l'app web
-        script: npm run build
+        script: |
+          export NODE_OPTIONS="--max-old-space-size=6144"
+          npm run build
       - name: Synchroniser Capacitor
         script: npx cap sync android
       - name: Générer le bundle Android
