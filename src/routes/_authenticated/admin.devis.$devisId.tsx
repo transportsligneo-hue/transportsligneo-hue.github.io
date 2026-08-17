@@ -7,6 +7,7 @@ import {
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
 } from "@/components/admin/AdminUI";
@@ -493,7 +494,26 @@ function AdminDevisDetailPage() {
                 <Trash2 size={12} /> Supprimer
               </button>
             </div>
+            <div className="mt-4 pt-4 border-t border-pro-border">
+              <SendDocumentByEmail
+                kind="devis"
+                numero={devis.numero}
+                documentId={devis.id}
+                defaultEmail={devis.email}
+                buildPdf={() => generateDevisPdf(buildDevisData(devis))}
+                templateData={{
+                  prenom: devis.prenom,
+                  nom: devis.nom,
+                  depart: devis.depart,
+                  arrivee: devis.arrivee,
+                  distance: devis.distance_km,
+                  prix: devis.prix_estime != null ? Number(devis.prix_estime).toFixed(2) : undefined,
+                  optionTrajet: devis.option_trajet,
+                }}
+              />
+            </div>
           </Card>
+
         </div>
 
         {/* Right: PDF preview */}
