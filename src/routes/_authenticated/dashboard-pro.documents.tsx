@@ -138,7 +138,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
