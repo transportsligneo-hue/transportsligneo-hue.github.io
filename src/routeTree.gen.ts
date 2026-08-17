@@ -28,6 +28,7 @@ import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-c
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
 import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
 import { Route as DeveloppeursRouteImport } from './routes/developpeurs'
+import { Route as DesinscriptionRouteImport } from './routes/desinscription'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
@@ -274,6 +275,11 @@ const DevenirConvoyeurRoute = DevenirConvoyeurRouteImport.update({
 const DeveloppeursRoute = DeveloppeursRouteImport.update({
   id: '/developpeurs',
   path: '/developpeurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesinscriptionRoute = DesinscriptionRouteImport.update({
+  id: '/desinscription',
+  path: '/desinscription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -1153,6 +1159,7 @@ export interface FileRoutesByFullPath {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1325,6 +1332,7 @@ export interface FileRoutesByTo {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1490,6 +1498,7 @@ export interface FileRoutesById {
   '/comment-ca-marche': typeof CommentCaMarcheRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
+  '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
   '/inscription-client': typeof InscriptionClientRoute
@@ -1664,6 +1673,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -1836,6 +1846,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -2000,6 +2011,7 @@ export interface FileRouteTypes {
     | '/comment-ca-marche'
     | '/confidentialite'
     | '/contact'
+    | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
     | '/inscription-client'
@@ -2174,6 +2186,7 @@ export interface RootRouteChildren {
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
+  DesinscriptionRoute: typeof DesinscriptionRoute
   DeveloppeursRoute: typeof DeveloppeursRoute
   DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
@@ -2372,6 +2385,13 @@ declare module '@tanstack/react-router' {
       path: '/developpeurs'
       fullPath: '/developpeurs'
       preLoaderRoute: typeof DeveloppeursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desinscription': {
+      id: '/desinscription'
+      path: '/desinscription'
+      fullPath: '/desinscription'
+      preLoaderRoute: typeof DesinscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -3883,6 +3903,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommentCaMarcheRoute: CommentCaMarcheRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
+  DesinscriptionRoute: DesinscriptionRoute,
   DeveloppeursRoute: DeveloppeursRoute,
   DevenirConvoyeurRoute: DevenirConvoyeurRoute,
   InscriptionClientRoute: InscriptionClientRoute,
