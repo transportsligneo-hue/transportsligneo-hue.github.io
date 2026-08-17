@@ -378,6 +378,52 @@ function AdminFacturesPage() {
             />
           </DrawerSection>
 
+          <DrawerSection title="Envoi au client" icon={<Receipt size={12} />}>
+            <SendDocumentByEmail
+              kind="facture"
+              variant="dark"
+              numero={selected.numero}
+              documentId={selected.id}
+              defaultEmail={selected.client_email}
+              buildPdf={() =>
+                generateFacturePdf({
+                  numero: selected.numero,
+                  type_facture: selected.type_facture,
+                  date_facture: selected.date_facture ?? selected.created_at,
+                  date_mission: selected.date_mission,
+                  date_echeance: selected.date_echeance,
+                  mode_paiement: selected.mode_paiement,
+                  conditions_paiement: selected.conditions_paiement,
+                  client_nom: selected.client_nom,
+                  client_prenom: selected.client_prenom,
+                  client_societe: selected.client_societe,
+                  client_email: selected.client_email,
+                  client_adresse: selected.client_adresse,
+                  client_siret: selected.client_siret,
+                  client_tva: selected.client_tva,
+                  designation: selected.designation,
+                  depart: selected.depart,
+                  arrivee: selected.arrivee,
+                  distance_km: selected.distance_km,
+                  prix_ht: Number(selected.prix_ht),
+                  tva_taux: Number(selected.tva_taux),
+                  prix_tva: Number(selected.prix_tva),
+                  prix_ttc: Number(selected.prix_ttc),
+                  reference_client: selected.reference_client,
+                  reference_label: selected.reference_label,
+                })
+              }
+              templateData={{
+                prenom: selected.client_prenom ?? selected.client_societe ?? undefined,
+                montant: Number(selected.prix_ttc).toFixed(2),
+                echeance: selected.date_echeance
+                  ? new Date(selected.date_echeance).toLocaleDateString("fr-FR")
+                  : undefined,
+              }}
+            />
+          </DrawerSection>
+
+
 
           <DrawerSection title="Trajet" icon={<MapPin size={12} />}>
             <DrawerGrid>
