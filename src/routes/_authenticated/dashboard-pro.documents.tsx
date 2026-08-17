@@ -77,7 +77,9 @@ interface FactureRow {
 }
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
-  envoye: { label: "Envoyé", cls: "bg-blue-50 text-blue-700" },
+  brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
+  genere: { label: "À signer", cls: "bg-blue-50 text-blue-700" },
+  envoye: { label: "À signer", cls: "bg-blue-50 text-blue-700" },
   en_attente: { label: "En attente", cls: "bg-blue-50 text-blue-700" },
   accepte: { label: "À régler", cls: "bg-amber-50 text-amber-700" },
   convertit: { label: "Converti", cls: "bg-emerald-50 text-emerald-700" },
