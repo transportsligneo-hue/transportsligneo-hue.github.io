@@ -457,34 +457,34 @@ export function DevisAcceptationStep({
       </div>
 
       {/* Récapitulatif */}
-      <div className="card-premium-light rounded p-4 space-y-3 text-navy">
+      <div className="bg-[#fafbfd] border border-[#e4e7ec] rounded-xl p-5 space-y-4 text-[#101828]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-navy/70 font-medium">Devis</p>
-            <p className="font-heading text-base text-navy">{numero}</p>
+            <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Devis</p>
+            <p className="font-heading text-sm text-[#0a1638] font-bold">{numero}</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-navy/70 font-medium">Trajet</p>
-            <p className="text-navy font-medium">{depart} → {arrivee}</p>
+            <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Trajet</p>
+            <p className="text-[#101828] font-medium">{depart} → {arrivee}</p>
           </div>
           {dateSouhaitee && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-navy/70 font-medium">Date souhaitée</p>
-              <p className="text-navy font-medium">{new Date(dateSouhaitee).toLocaleDateString("fr-FR")}</p>
+              <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Date souhaitée</p>
+              <p className="text-[#101828] font-medium">{new Date(dateSouhaitee).toLocaleDateString("fr-FR")}</p>
             </div>
           )}
           {vehicule && (
             <div className="sm:col-span-2">
-              <p className="text-[10px] uppercase tracking-wider text-navy/70 font-medium">Véhicule</p>
-              <p className="text-navy font-medium">{vehicule}</p>
+              <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Véhicule</p>
+              <p className="text-[#101828] font-medium">{vehicule}</p>
             </div>
           )}
         </div>
-        <div className="border-t border-navy/15 pt-3 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-navy/70 font-medium">Montant total TTC</span>
-          <span className="font-heading text-2xl text-navy font-semibold">{prixTtc.toFixed(2)} €</span>
+        <div className="border-t border-[#e4e7ec] pt-4 flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.06em] text-[#667085] font-bold">Montant total TTC</span>
+          <span className="font-heading text-[22px] text-[#2f5fff] font-extrabold">{prixTtc.toFixed(2)} €</span>
         </div>
       </div>
 
