@@ -69,6 +69,7 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
+import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/track-click'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
@@ -487,6 +488,11 @@ const ApiPublicYousignWebhookRoute = ApiPublicYousignWebhookRouteImport.update({
 const ApiPublicTrackOpenRoute = ApiPublicTrackOpenRouteImport.update({
   id: '/api/public/track-open',
   path: '/api/public/track-open',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTrackClickRoute = ApiPublicTrackClickRouteImport.update({
+  id: '/api/public/track-click',
+  path: '/api/public/track-click',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAssistantChatRoute = ApiPublicAssistantChatRouteImport.update({
@@ -1247,6 +1253,7 @@ export interface FileRoutesByFullPath {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
@@ -1408,6 +1415,7 @@ export interface FileRoutesByTo {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
@@ -1580,6 +1588,7 @@ export interface FileRoutesById {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
+  '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
@@ -1752,6 +1761,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
@@ -1913,6 +1923,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
@@ -2084,6 +2095,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
+    | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
@@ -2183,6 +2195,7 @@ export interface RootRouteChildren {
   ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
+  ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
   ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -2632,6 +2645,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/track-open'
       fullPath: '/api/public/track-open'
       preLoaderRoute: typeof ApiPublicTrackOpenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/track-click': {
+      id: '/api/public/track-click'
+      path: '/api/public/track-click'
+      fullPath: '/api/public/track-click'
+      preLoaderRoute: typeof ApiPublicTrackClickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/assistant-chat': {
@@ -3877,6 +3897,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
+  ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
   ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
