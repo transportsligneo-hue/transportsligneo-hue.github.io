@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat } from "lucide-react";
+import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat, PenLine } from "lucide-react";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
 import { useServerFn } from "@tanstack/react-start";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { markDevisAsProcessed } from "@/lib/devis-mark-processed.functions";
 
 import { FactureEmbeddedCheckout } from "@/components/facture/FactureEmbeddedCheckout";
