@@ -765,13 +765,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attributions_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_client_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       avis_clients: {
@@ -3887,13 +3880,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "mission_offres_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_client_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       mission_pv_digitaux: {
@@ -5494,13 +5480,6 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "trajets_parent_trajet_id_fkey"
-            columns: ["parent_trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_client_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       trajets_admin_data: {
@@ -5534,13 +5513,6 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: true
             referencedRelation: "trajets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: true
-            referencedRelation: "trajets_client_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -5806,13 +5778,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "vehicle_movements_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_client_safe"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "vehicle_movements_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -5925,7 +5890,6 @@ export type Database = {
           arrivee_contact_telephone2: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
-          commission_convoyeur_pct: number | null
           contact_arrivee_nom: string | null
           contact_arrivee_note: string | null
           contact_arrivee_tel: string | null
@@ -5933,6 +5897,7 @@ export type Database = {
           contact_depart_note: string | null
           contact_depart_tel: string | null
           created_at: string | null
+          date_souhaitee: string | null
           date_trajet: string | null
           demande_id: string | null
           depart: string | null
@@ -5940,19 +5905,20 @@ export type Database = {
           heure_trajet: string | null
           id: string | null
           immatriculation: string | null
+          leg_type: string | null
           marque: string | null
+          mission_group_id: string | null
           modele: string | null
+          numero_mission: string | null
           options_meta: Json | null
-          pricing_mode: string | null
-          prix_convoyeur: number | null
           prix_convoyeur_fixe: number | null
-          prix_convoyeur_max: number | null
-          prix_convoyeur_min: number | null
           prix_suggere: number | null
           published_at: string | null
+          pv_digitalise: string | null
           statut: string | null
           statut_publication: string | null
           tarif_convoyeur: number | null
+          type_mission: string | null
           updated_at: string | null
           vehicule_couleur: string | null
           vehicule_energie: string | null
@@ -6033,177 +5999,7 @@ export type Database = {
           vehicule_vin: string | null
           vin: string | null
         }
-        Insert: {
-          allow_counter_offer?: boolean | null
-          archived_at?: string | null
-          arrivee?: string | null
-          arrivee_contact_email?: string | null
-          arrivee_contact_instructions?: string | null
-          arrivee_contact_nom?: string | null
-          arrivee_contact_prenom?: string | null
-          arrivee_contact_societe?: string | null
-          arrivee_contact_telephone?: string | null
-          arrivee_contact_telephone2?: string | null
-          attribution_mode?: string | null
-          bidding_enabled?: boolean | null
-          carte_grise_recto_url?: string | null
-          carte_grise_verso_url?: string | null
-          client_email?: string | null
-          client_nom?: string | null
-          client_telephone?: string | null
-          commande_ref?: string | null
-          contact_arrivee_nom?: string | null
-          contact_arrivee_note?: string | null
-          contact_arrivee_tel?: string | null
-          contact_depart_nom?: string | null
-          contact_depart_note?: string | null
-          contact_depart_tel?: string | null
-          created_at?: string | null
-          date_souhaitee?: string | null
-          date_trajet?: string | null
-          demande_id?: string | null
-          depart?: string | null
-          devis_id?: string | null
-          group_reference?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          immatriculation?: string | null
-          is_round_trip?: boolean | null
-          is_test_data?: boolean | null
-          leg_index?: number | null
-          leg_type?: string | null
-          marque?: string | null
-          mission_group_id?: string | null
-          mission_id?: string | null
-          modele?: string | null
-          niveau_requis?: string | null
-          numero_mission?: string | null
-          options_meta?: Json | null
-          parent_trajet_id?: string | null
-          pricing_mode?: string | null
-          prix?: number | null
-          prix_client?: number | null
-          prix_total?: number | null
-          proposal_expires_at?: string | null
-          published_at?: string | null
-          pv_digitalise?: string | null
-          statut?: string | null
-          statut_publication?: string | null
-          type_mission?: string | null
-          updated_at?: string | null
-          vehicule_couleur?: string | null
-          vehicule_energie?: string | null
-          vehicule_immatriculation?: string | null
-          vehicule_km?: number | null
-          vehicule_notes?: string | null
-          vehicule_type?: string | null
-          vehicule_vin?: string | null
-          vin?: string | null
-        }
-        Update: {
-          allow_counter_offer?: boolean | null
-          archived_at?: string | null
-          arrivee?: string | null
-          arrivee_contact_email?: string | null
-          arrivee_contact_instructions?: string | null
-          arrivee_contact_nom?: string | null
-          arrivee_contact_prenom?: string | null
-          arrivee_contact_societe?: string | null
-          arrivee_contact_telephone?: string | null
-          arrivee_contact_telephone2?: string | null
-          attribution_mode?: string | null
-          bidding_enabled?: boolean | null
-          carte_grise_recto_url?: string | null
-          carte_grise_verso_url?: string | null
-          client_email?: string | null
-          client_nom?: string | null
-          client_telephone?: string | null
-          commande_ref?: string | null
-          contact_arrivee_nom?: string | null
-          contact_arrivee_note?: string | null
-          contact_arrivee_tel?: string | null
-          contact_depart_nom?: string | null
-          contact_depart_note?: string | null
-          contact_depart_tel?: string | null
-          created_at?: string | null
-          date_souhaitee?: string | null
-          date_trajet?: string | null
-          demande_id?: string | null
-          depart?: string | null
-          devis_id?: string | null
-          group_reference?: string | null
-          heure_trajet?: string | null
-          id?: string | null
-          immatriculation?: string | null
-          is_round_trip?: boolean | null
-          is_test_data?: boolean | null
-          leg_index?: number | null
-          leg_type?: string | null
-          marque?: string | null
-          mission_group_id?: string | null
-          mission_id?: string | null
-          modele?: string | null
-          niveau_requis?: string | null
-          numero_mission?: string | null
-          options_meta?: Json | null
-          parent_trajet_id?: string | null
-          pricing_mode?: string | null
-          prix?: number | null
-          prix_client?: number | null
-          prix_total?: number | null
-          proposal_expires_at?: string | null
-          published_at?: string | null
-          pv_digitalise?: string | null
-          statut?: string | null
-          statut_publication?: string | null
-          type_mission?: string | null
-          updated_at?: string | null
-          vehicule_couleur?: string | null
-          vehicule_energie?: string | null
-          vehicule_immatriculation?: string | null
-          vehicule_km?: number | null
-          vehicule_notes?: string | null
-          vehicule_type?: string | null
-          vehicule_vin?: string | null
-          vin?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trajets_demande_id_fkey"
-            columns: ["demande_id"]
-            isOneToOne: false
-            referencedRelation: "demandes_convoyage"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_devis_id_fkey"
-            columns: ["devis_id"]
-            isOneToOne: false
-            referencedRelation: "devis"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_mission_id_fkey"
-            columns: ["mission_id"]
-            isOneToOne: false
-            referencedRelation: "missions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_parent_trajet_id_fkey"
-            columns: ["parent_trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trajets_parent_trajet_id_fkey"
-            columns: ["parent_trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets_client_safe"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       trajets_publies_safe: {
         Row: {
@@ -6250,7 +6046,6 @@ export type Database = {
           arrivee_contact_telephone2: string
           carte_grise_recto_url: string
           carte_grise_verso_url: string
-          commission_convoyeur_pct: number
           contact_arrivee_nom: string
           contact_arrivee_note: string
           contact_arrivee_tel: string
@@ -6258,6 +6053,7 @@ export type Database = {
           contact_depart_note: string
           contact_depart_tel: string
           created_at: string
+          date_souhaitee: string
           date_trajet: string
           demande_id: string
           depart: string
@@ -6265,19 +6061,90 @@ export type Database = {
           heure_trajet: string
           id: string
           immatriculation: string
+          leg_type: string
           marque: string
+          mission_group_id: string
           modele: string
+          numero_mission: string
           options_meta: Json
-          pricing_mode: string
-          prix_convoyeur: number
           prix_convoyeur_fixe: number
-          prix_convoyeur_max: number
-          prix_convoyeur_min: number
           prix_suggere: number
           published_at: string
+          pv_digitalise: string
           statut: string
           statut_publication: string
           tarif_convoyeur: number
+          type_mission: string
+          updated_at: string
+          vehicule_couleur: string
+          vehicule_energie: string
+          vehicule_immatriculation: string
+          vehicule_km: number
+          vehicule_notes: string
+          vehicule_type: string
+          vehicule_vin: string
+          vin: string
+        }[]
+      }
+      _trajets_client_safe_rows: {
+        Args: never
+        Returns: {
+          allow_counter_offer: boolean
+          archived_at: string
+          arrivee: string
+          arrivee_contact_email: string
+          arrivee_contact_instructions: string
+          arrivee_contact_nom: string
+          arrivee_contact_prenom: string
+          arrivee_contact_societe: string
+          arrivee_contact_telephone: string
+          arrivee_contact_telephone2: string
+          attribution_mode: string
+          bidding_enabled: boolean
+          carte_grise_recto_url: string
+          carte_grise_verso_url: string
+          client_email: string
+          client_nom: string
+          client_telephone: string
+          commande_ref: string
+          contact_arrivee_nom: string
+          contact_arrivee_note: string
+          contact_arrivee_tel: string
+          contact_depart_nom: string
+          contact_depart_note: string
+          contact_depart_tel: string
+          created_at: string
+          date_souhaitee: string
+          date_trajet: string
+          demande_id: string
+          depart: string
+          devis_id: string
+          group_reference: string
+          heure_trajet: string
+          id: string
+          immatriculation: string
+          is_round_trip: boolean
+          is_test_data: boolean
+          leg_index: number
+          leg_type: string
+          marque: string
+          mission_group_id: string
+          mission_id: string
+          modele: string
+          niveau_requis: string
+          numero_mission: string
+          options_meta: Json
+          parent_trajet_id: string
+          pricing_mode: string
+          prix: number
+          prix_client: number
+          prix_total: number
+          proposal_expires_at: string
+          published_at: string
+          pv_digitalise: string
+          statut: string
+          statut_publication: string
+          type_mission: string
           updated_at: string
           vehicule_couleur: string
           vehicule_energie: string
