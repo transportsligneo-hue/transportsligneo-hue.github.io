@@ -92,6 +92,18 @@ function InscriptionConvoyeur() {
     })();
   }, [inviteToken]);
 
+  if (gateLoading) {
+    return (
+      <div className="auth-shell flex items-center justify-center px-4 py-10">
+        <Loader2 className="animate-spin text-white/60" size={32} />
+      </div>
+    );
+  }
+
+  if (!inviteToken && !isOpen("convoyeur")) {
+    return <RegistrationClosed kind="convoyeur" />;
+  }
+
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
