@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Mail, CheckCircle, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { subscribeNewsletter } from "@/lib/public-content.functions";
+import { useRegistrationGate } from "@/hooks/useRegistrationGate";
 
 export const Route = createFileRoute("/devenir-convoyeur")({
   component: DevenirConvoyeurPage,
