@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 import { AvisGoogleHistoryCard } from "@/components/admin/AvisGoogleHistoryCard";
+import { RegistrationGateCard } from "@/components/admin/RegistrationGateCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
