@@ -69,6 +69,7 @@ function InscriptionConvoyeur() {
   const [showPwd, setShowPwd] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
+  const { loading: gateLoading, isOpen } = useRegistrationGate();
 
   // Pré-remplissage depuis une invitation flotte
   useEffect(() => {
