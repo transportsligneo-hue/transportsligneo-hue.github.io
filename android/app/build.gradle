@@ -63,11 +63,15 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
+def servicesJSON = file('google-services.json')
+if (servicesJSON.exists() && servicesJSON.length() > 0) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    def isReleaseBuild = gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }
+    if (isReleaseBuild) {
+        throw new GradleException(
+            "android/app/google-services.json is required for release builds because native push notifications are enabled."
+        )
     }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+    logger.warn("google-services.json not found: native push notifications are unavailable in this local build")
 }

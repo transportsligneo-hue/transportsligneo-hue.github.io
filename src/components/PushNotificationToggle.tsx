@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { pushSupported, getSubscription, subscribeToPush, unsubscribeFromPush } from "@/lib/push/client";
@@ -9,6 +10,7 @@ import { saveNativePushToken, deleteNativePushToken } from "@/lib/push.functions
 const NATIVE_TOKEN_KEY = "ligneo:native-push";
 
 export function PushNotificationToggle({ className }: { className?: string }) {
+  const navigate = useNavigate();
   const isMobileApp = useIsMobileAppShell();
   const [supported, setSupported] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -63,7 +65,15 @@ export function PushNotificationToggle({ className }: { className?: string }) {
                 });
               } catch { /* noop */ }
             },
-            { onError: (m) => console.warn("[push natif]", m) },
+            {
+              onReceived: (event) => {
+                if (event.title) toast(event.title, { description: event.body });
+              },
+              onAction: (event) => {
+                if (event.url?.startsWith("/")) void navigate({ to: event.url });
+              },
+              onError: (m) => console.warn("[push natif]", m),
+            },
           );
           if (!ok) { toast.error("Notifications refusées par le système"); return; }
           setEnabled(true);
