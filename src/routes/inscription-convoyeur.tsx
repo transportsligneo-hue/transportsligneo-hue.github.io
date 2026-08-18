@@ -11,6 +11,8 @@ import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { getFleetInvitation, acceptFleetInvitation } from "@/lib/fleet-drivers.functions";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
+import { useRegistrationGate } from "@/hooks/useRegistrationGate";
+import { RegistrationClosed } from "@/components/RegistrationClosed";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -67,6 +69,7 @@ function InscriptionConvoyeur() {
   const [showPwd, setShowPwd] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
+  const { loading: gateLoading, isOpen } = useRegistrationGate();
 
   // Pré-remplissage depuis une invitation flotte
   useEffect(() => {
@@ -88,6 +91,18 @@ function InscriptionConvoyeur() {
       }
     })();
   }, [inviteToken]);
+
+  if (gateLoading) {
+    return (
+      <div className="auth-shell flex items-center justify-center px-4 py-10">
+        <Loader2 className="animate-spin text-white/60" size={32} />
+      </div>
+    );
+  }
+
+  if (!inviteToken && !isOpen("convoyeur")) {
+    return <RegistrationClosed kind="convoyeur" />;
+  }
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });

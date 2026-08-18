@@ -59,3 +59,29 @@ export const getStoreLinks = createServerFn({ method: "GET" }).handler(
     return { ios: clean(v["ios"]), android: clean(v["android"]) };
   },
 );
+
+export type RegistrationGate = {
+  client: boolean;
+  pro: boolean;
+  flotte: boolean;
+  convoyeur: boolean;
+};
+
+export const getRegistrationGate = createServerFn({ method: "GET" }).handler(
+  async (): Promise<RegistrationGate> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "registration_gate")
+      .maybeSingle();
+    const v = (data?.value ?? {}) as Record<string, unknown>;
+    const bool = (x: unknown) => x === true;
+    return {
+      client: bool(v["client"]),
+      pro: bool(v["pro"]),
+      flotte: bool(v["flotte"]),
+      convoyeur: bool(v["convoyeur"]),
+    };
+  },
+);
