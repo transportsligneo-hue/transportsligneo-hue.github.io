@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+// Base de version (dernier code déjà utilisé sur Play = 3, donc on repart à 4).
+def versionCodeBase = 4
+// Codemagic expose BUILD_NUMBER (alias CM_BUILD_NUMBER) : incrémenté à chaque build.
+def ciBuildNumber = (System.getenv("BUILD_NUMBER") ?: System.getenv("CM_BUILD_NUMBER") ?: "0").toInteger()
+def computedVersionCode = versionCodeBase + ciBuildNumber
+def computedVersionName = "1.3." + ciBuildNumber
+
 android {
     namespace = "com.transportsligneo.driver"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +14,9 @@ android {
         applicationId "com.transportsligneo.driver"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.2"
+        versionCode computedVersionCode
+        versionName computedVersionName
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
