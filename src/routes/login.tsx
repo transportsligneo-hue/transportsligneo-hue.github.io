@@ -6,6 +6,8 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
+
 
 type Tab = "client" | "pro";
 
@@ -32,9 +34,17 @@ function LoginPage() {
     homeRoute,
   } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("client");
+  const isMobileApp = useIsMobileAppShell();
+  const [tab, setTab] = useState<Tab>(isMobileApp ? "pro" : "client");
+
+  // Dans l'app mobile Capacitor, on force directement l'espace driver.
+  useEffect(() => {
+    if (isMobileApp) setTab("pro");
+  }, [isMobileApp]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -164,22 +174,25 @@ function LoginPage() {
           <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace en un clic</p>
         </div>
 
-        <div className="auth-tabs mb-4">
-          <button
-            type="button"
-            onClick={() => { setTab("client"); setError(""); }}
-            className={`auth-tab ${tab === "client" ? "auth-tab-active" : ""}`}
-          >
-            <User size={13} /> Espace Client
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTab("pro"); setError(""); }}
-            className={`auth-tab ${tab === "pro" ? "auth-tab-active" : ""}`}
-          >
-            <Truck size={13} /> Espace Driver
-          </button>
-        </div>
+        {!isMobileApp && (
+          <div className="auth-tabs mb-4">
+            <button
+              type="button"
+              onClick={() => { setTab("client"); setError(""); }}
+              className={`auth-tab ${tab === "client" ? "auth-tab-active" : ""}`}
+            >
+              <User size={13} /> Espace Client
+            </button>
+            <button
+              type="button"
+              onClick={() => { setTab("pro"); setError(""); }}
+              className={`auth-tab ${tab === "pro" ? "auth-tab-active" : ""}`}
+            >
+              <Truck size={13} /> Espace Driver
+            </button>
+          </div>
+        )}
+
 
         <form onSubmit={handleSubmit} className="auth-card p-6 sm:p-7 space-y-5">
           {error === "EMAIL_NOT_CONFIRMED" ? (
