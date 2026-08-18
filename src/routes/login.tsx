@@ -34,7 +34,9 @@ function LoginPage() {
     homeRoute,
   } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("client");
+  const isMobileApp = useIsMobileAppShell();
+  const [tab, setTab] = useState<Tab>(isMobileApp ? "pro" : "client");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
