@@ -12,6 +12,10 @@ workflows:
       android_signing:
         - Ligneo-keystore
     scripts:
+      - name: Version Android (auto-incrément)
+        script: |
+          echo "BUILD_NUMBER=$BUILD_NUMBER"
+          echo "versionCode calculé = $((4 + ${BUILD_NUMBER:-0}))"
       - name: Installer les dépendances
         script: npm install
       - name: Build de l'app web
