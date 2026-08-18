@@ -295,6 +295,11 @@ function AdminParametres() {
         </TabsContent>
 
         {/* === RÔLES & PERMISSIONS === */}
+        {/* === INSCRIPTIONS === */}
+        <TabsContent value="inscriptions" className="mt-0 space-y-4">
+          <RegistrationGateCard />
+        </TabsContent>
+
         <TabsContent value="roles" className="mt-0 space-y-6">
           <Card padded={false}>
             <div className="px-6 py-4 border-b border-pro-border">
