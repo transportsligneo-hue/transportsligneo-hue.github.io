@@ -287,10 +287,12 @@ function LoginPage() {
         </form>
 
         <div className="flex flex-col items-center gap-3 mt-6">
-          <Link to="/" className="auth-link-lg">
-            <ArrowRight size={14} className="arrow-back rotate-180" />
-            Retour au site
-          </Link>
+          {!isMobileApp && (
+            <Link to="/" className="auth-link-lg">
+              <ArrowRight size={14} className="arrow-back rotate-180" />
+              Retour au site
+            </Link>
+          )}
           <p className="inline-flex items-center gap-1.5 text-[10px] leading-relaxed text-white/45 px-2 text-center">
             <ShieldCheck size={11} className="text-blue-300" />
             Protégé par reCAPTCHA ·{" "}
