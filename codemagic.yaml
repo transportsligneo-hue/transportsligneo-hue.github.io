@@ -10,11 +10,21 @@ workflows:
       node: 22
     scripts:
       - name: Installer les dépendances
-        script: npm install
+        script: |
+          source $HOME/.nvm/nvm.sh
+          nvm install 22
+          nvm use 22
+          npm install
       - name: Build de l'app web
-        script: npm run build
+        script: |
+          source $HOME/.nvm/nvm.sh
+          nvm use 22
+          npm run build
       - name: Synchroniser Capacitor
-        script: npx cap sync android
+        script: |
+          source $HOME/.nvm/nvm.sh
+          nvm use 22
+          npx cap sync android
       - name: Générer le bundle Android
         script: |
           cd android
