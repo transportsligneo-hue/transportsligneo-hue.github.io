@@ -55,15 +55,31 @@ function DevenirConvoyeurPage() {
       <Navbar />
       <main className="dc-page">
         <div className="dc-wrap">
-          <div className="dc-eyebrow"><span className="dot" />Réseau Ligneo</div>
-          <h1>Notre réseau de convoyeurs est <span className="accent">complet</span>.</h1>
+          <div className="dc-eyebrow"><span className="dot" />{gate?.convoyeur ? "Recrutement ouvert" : "Réseau Ligneo"}</div>
+          <h1>
+            {gate?.convoyeur
+              ? <>Rejoignez le réseau de convoyeurs <span className="accent">Ligneo</span>.</>
+              : <>Notre réseau de convoyeurs est <span className="accent">complet</span>.</>}
+          </h1>
           <p className="dc-lead">
-            Nous restons volontairement sélectifs pour garantir la qualité de service sur chaque mission.
-            Laissez-nous votre email : nous vous recontactons en priorité dès qu'une place se libère ou que nos besoins évoluent.
+            {gate?.convoyeur
+              ? "Nous recherchons des convoyeurs professionnels et rigoureux pour accompagner la croissance de nos services de transport de véhicules."
+              : "Nous restons volontairement sélectifs pour garantir la qualité de service sur chaque mission. Laissez-nous votre email : nous vous recontactons en priorité dès qu'une place se libère ou que nos besoins évoluent."}
           </p>
 
           <div className="dc-card">
-            {status === "success" ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 size={32} strokeWidth={2} className="animate-spin text-[#2f5fff]" />
+              </div>
+            ) : gate?.convoyeur ? (
+              <Link
+                to="/inscription-convoyeur"
+                className="dc-btn-primary inline-flex items-center justify-center gap-2 w-full"
+              >
+                Créer mon compte convoyeur <ArrowIcon size={14} />
+              </Link>
+            ) : status === "success" ? (
               <div className="dc-waitlist-success">
                 <div className="dc-waitlist-success-icon">
                   <CheckCircle size={32} strokeWidth={2} />
