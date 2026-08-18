@@ -88,7 +88,7 @@ export function RegistrationGateCard() {
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-semibold text-pro-text">{k.label}</span>
-                <Badge variant={open ? "success" : "neutral"}>
+                <Badge tone={open ? "success" : "neutral"}>
                   {open ? (
                     <span className="inline-flex items-center gap-1">
                       <Unlock size={11} /> Ouvertes
