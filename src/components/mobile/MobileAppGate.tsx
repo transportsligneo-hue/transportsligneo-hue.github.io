@@ -19,22 +19,26 @@ export default function MobileAppGate() {
     setIsApp(isMobileAppShell());
   }, []);
 
+  const path = location.pathname;
+  const offLimits = isApp && (path === "/" || !isMobileAppRoute(path));
+
   useEffect(() => {
     if (!isApp || isLoading) return;
-    const path = location.pathname;
-
-    // Racine : on ouvre directement sur l'outil de travail ou la connexion
-    if (path === "/") {
-      navigate({ to: isAuthenticated ? homeRoute : "/login", replace: true });
-      return;
-    }
-
-    if (!isMobileAppRoute(path)) {
+    if (offLimits) {
       navigate({ to: isAuthenticated ? homeRoute : "/login", replace: true });
     }
-  }, [isApp, isLoading, isAuthenticated, homeRoute, location.pathname, navigate]);
+  }, [isApp, isLoading, isAuthenticated, homeRoute, offLimits, navigate]);
 
-  return null;
+  // Voile plein écran : empêche tout affichage du site vitrine dans l'app
+  if (!offLimits) return null;
+  return (
+    <div
+      aria-hidden
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0b1026]"
+    >
+      <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e7c76a]/30 border-t-[#e7c76a]" />
+    </div>
+  );
 }
 
 /** Hook utilitaire : masquer le chrome public (navbar vitrine, cookies…) dans l'app. */
