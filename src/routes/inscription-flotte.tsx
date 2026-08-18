@@ -51,6 +51,19 @@ function InscriptionFlotte() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const { loading: gateLoading, isOpen } = useRegistrationGate();
+
+  if (gateLoading) {
+    return (
+      <div className="auth-shell flex items-center justify-center px-4 py-10">
+        <Loader2 className="animate-spin text-white/60" size={32} />
+      </div>
+    );
+  }
+
+  if (!isOpen("flotte")) {
+    return <RegistrationClosed kind="flotte" />;
+  }
 
   type Field = keyof typeof form;
   const update = (field: Field) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
