@@ -34,6 +34,7 @@ function DevenirConvoyeurPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const submit = useServerFn(subscribeNewsletter);
+  const { gate, loading } = useRegistrationGate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
