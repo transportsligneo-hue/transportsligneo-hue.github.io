@@ -6,6 +6,8 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
+
 
 type Tab = "client" | "pro";
 
