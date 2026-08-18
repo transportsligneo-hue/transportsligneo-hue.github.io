@@ -42,31 +42,37 @@ export default function NativeAppInit() {
 
       if (cancelled) return;
 
-      // Token push natif : conservé localement en attendant l'envoi serveur.
-      void registerNativePush(
-        async (token, platform) => {
-          try {
-            window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
-          } catch { /* noop */ }
-          // Le jeton est rattaché au compte connecté : les alertes missions
-          // existantes (Supabase) peuvent alors cibler cet appareil.
-          try {
-            const { saveNativePushToken } = await import("@/lib/push.functions");
-            await saveNativePushToken({
-              data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
-            });
-          } catch { /* noop : utilisateur non connecté */ }
-        },
-        {
-          onReceived: (e) => {
-            if (e.title) toast(e.title, { description: e.body });
+      // Ne réenregistre automatiquement que les appareils déjà activés.
+      // La première demande de permission reste déclenchée explicitement par
+      // PushNotificationToggle, jamais au démarrage de l'application.
+      let pushAlreadyEnabled = false;
+      try {
+        pushAlreadyEnabled = Boolean(window.localStorage.getItem("ligneo:native-push"));
+      } catch { /* noop */ }
+      if (pushAlreadyEnabled) {
+        void registerNativePush(
+          async (token, platform) => {
+            try {
+              window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
+            } catch { /* noop */ }
+            try {
+              const { saveNativePushToken } = await import("@/lib/push.functions");
+              await saveNativePushToken({
+                data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
+              });
+            } catch { /* noop : utilisateur non connecté */ }
           },
-          onAction: (e) => {
-            if (e.url && e.url.startsWith("/")) void navigate({ to: e.url });
+          {
+            onReceived: (e) => {
+              if (e.title) toast(e.title, { description: e.body });
+            },
+            onAction: (e) => {
+              if (e.url && e.url.startsWith("/")) void navigate({ to: e.url });
+            },
+            onError: (m) => console.warn("[push natif]", m),
           },
-          onError: (m) => console.warn("[push natif]", m),
-        },
-      );
+        );
+      }
     })();
 
     let removeBack: (() => void) | undefined;
