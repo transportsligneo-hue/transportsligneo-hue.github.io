@@ -9,6 +9,8 @@ workflows:
         PACKAGE_NAME: "com.transportsligneo.driver"
       node: 22
       java: 21
+      android_signing:
+        - Ligneo-keystore
     scripts:
       - name: Installer les dépendances
         script: npm install
