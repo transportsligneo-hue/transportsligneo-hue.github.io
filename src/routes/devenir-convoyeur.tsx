@@ -75,6 +75,7 @@ function DevenirConvoyeurPage() {
             ) : gate?.convoyeur ? (
               <Link
                 to="/inscription-convoyeur"
+                search={{ invite: undefined }}
                 className="dc-btn-primary inline-flex items-center justify-center gap-2 w-full"
               >
                 Créer mon compte convoyeur <ArrowIcon size={14} />
