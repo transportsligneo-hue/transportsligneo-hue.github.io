@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Save,
   AlertTriangle,
+  UserPlus,
 } from "lucide-react";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
