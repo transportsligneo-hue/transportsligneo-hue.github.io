@@ -11,6 +11,8 @@ import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { getFleetInvitation, acceptFleetInvitation } from "@/lib/fleet-drivers.functions";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
+import { useRegistrationGate } from "@/hooks/useRegistrationGate";
+import { RegistrationClosed } from "@/components/RegistrationClosed";
 
 export const Route = createFileRoute("/inscription-convoyeur")({
   validateSearch: (search: Record<string, unknown>) => ({
