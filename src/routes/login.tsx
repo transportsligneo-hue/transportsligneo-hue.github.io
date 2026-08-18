@@ -37,8 +37,14 @@ function LoginPage() {
   const isMobileApp = useIsMobileAppShell();
   const [tab, setTab] = useState<Tab>(isMobileApp ? "pro" : "client");
 
+  // Dans l'app mobile Capacitor, on force directement l'espace driver.
+  useEffect(() => {
+    if (isMobileApp) setTab("pro");
+  }, [isMobileApp]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
