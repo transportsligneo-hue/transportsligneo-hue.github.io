@@ -10,6 +10,17 @@ import { isNativeApp, nativePlatform, registerNativePush } from "@/lib/native/br
 export default function NativeAppInit() {
   const navigate = useNavigate();
 
+  // Filet de sécurité : masque le splash natif dès que le JS tourne, même si
+  // la détection native échoue — sinon l'utilisateur reste bloqué sur le logo.
+  useEffect(() => {
+    (async () => {
+      try {
+        const { SplashScreen } = await import("@capacitor/splash-screen");
+        await SplashScreen.hide();
+      } catch { /* noop */ }
+    })();
+  }, []);
+
   useEffect(() => {
     if (!isNativeApp()) return;
     let cancelled = false;
