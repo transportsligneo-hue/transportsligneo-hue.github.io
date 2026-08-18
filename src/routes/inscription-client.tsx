@@ -5,6 +5,8 @@ import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { finalizeSignup } from "@/lib/signup-finalize";
+import { useRegistrationGate } from "@/hooks/useRegistrationGate";
+import { RegistrationClosed } from "@/components/RegistrationClosed";
 
 export const Route = createFileRoute("/inscription-client")({
   component: InscriptionClient,
@@ -26,6 +28,19 @@ function InscriptionClient() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const { loading: gateLoading, isOpen } = useRegistrationGate();
+
+  if (gateLoading) {
+    return (
+      <div className="auth-shell flex items-center justify-center px-4 py-10">
+        <Loader2 className="animate-spin text-white/60" size={32} />
+      </div>
+    );
+  }
+
+  if (!isOpen("client")) {
+    return <RegistrationClosed kind="client" />;
+  }
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [field]: e.target.value });
