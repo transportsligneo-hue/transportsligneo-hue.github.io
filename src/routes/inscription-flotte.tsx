@@ -5,6 +5,8 @@ import { Loader2, User, Mail, Phone, Lock, CheckCircle, Building2, Hash, Car, Ma
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { verifyRecaptcha } from "@/lib/recaptcha.functions";
 import { finalizeSignup } from "@/lib/signup-finalize";
+import { useRegistrationGate } from "@/hooks/useRegistrationGate";
+import { RegistrationClosed } from "@/components/RegistrationClosed";
 
 export const Route = createFileRoute("/inscription-flotte")({
   component: InscriptionFlotte,
