@@ -133,6 +133,9 @@ function AdminParametres() {
           <TabsTrigger value="stripe" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
             <CreditCard size={14} className="mr-1.5" /> Stripe
           </TabsTrigger>
+          <TabsTrigger value="inscriptions" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
+            <UserPlus size={14} className="mr-1.5" /> Inscriptions
+          </TabsTrigger>
           <TabsTrigger value="roles" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
             <ShieldCheck size={14} className="mr-1.5" /> Rôles &amp; permissions
           </TabsTrigger>
