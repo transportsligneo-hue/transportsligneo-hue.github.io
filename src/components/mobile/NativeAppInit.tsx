@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { isNativeApp, nativePlatform, registerNativePush } from "@/lib/native/bridge";
 
 /**
@@ -42,11 +43,30 @@ export default function NativeAppInit() {
       if (cancelled) return;
 
       // Token push natif : conservé localement en attendant l'envoi serveur.
-      void registerNativePush((token, platform) => {
-        try {
-          window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
-        } catch { /* noop */ }
-      });
+      void registerNativePush(
+        async (token, platform) => {
+          try {
+            window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
+          } catch { /* noop */ }
+          // Le jeton est rattaché au compte connecté : les alertes missions
+          // existantes (Supabase) peuvent alors cibler cet appareil.
+          try {
+            const { saveNativePushToken } = await import("@/lib/push.functions");
+            await saveNativePushToken({
+              data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
+            });
+          } catch { /* noop : utilisateur non connecté */ }
+        },
+        {
+          onReceived: (e) => {
+            if (e.title) toast(e.title, { description: e.body });
+          },
+          onAction: (e) => {
+            if (e.url && e.url.startsWith("/")) void navigate({ to: e.url });
+          },
+          onError: (m) => console.warn("[push natif]", m),
+        },
+      );
     })();
 
     let removeBack: (() => void) | undefined;

@@ -114,25 +114,72 @@ export async function shareNativeFile(blob: Blob, filename: string, title = "Doc
  * Enregistre l'appareil auprès d'APNs / FCM et transmet le token.
  * Le Web Push existant reste utilisé côté navigateur.
  */
+export type NativePushEvent = { title?: string; body?: string; url?: string; data?: Record<string, unknown> };
+
 export async function registerNativePush(
   onToken: (token: string, platform: "ios" | "android") => void | Promise<void>,
-): Promise<void> {
-  if (!isNativeApp()) return;
+  handlers?: {
+    onReceived?: (e: NativePushEvent) => void;
+    onAction?: (e: NativePushEvent) => void;
+    onError?: (message: string) => void;
+  },
+): Promise<boolean> {
+  if (!isNativeApp()) return false;
   try {
     const { PushNotifications } = await import("@capacitor/push-notifications");
+
+    // Canal Android dédié aux alertes missions (requis Android 8+).
+    if (nativePlatform() === "android") {
+      try {
+        await PushNotifications.createChannel({
+          id: "missions",
+          name: "Alertes missions",
+          description: "Nouvelles missions, attributions et rappels",
+          importance: 5,
+          visibility: 1,
+        });
+      } catch { /* noop */ }
+    }
+
     const perm = await PushNotifications.checkPermissions();
     let granted = perm.receive === "granted";
     if (!granted) {
       const asked = await PushNotifications.requestPermissions();
       granted = asked.receive === "granted";
     }
-    if (!granted) return;
+    if (!granted) return false;
 
+    // Les listeners doivent être posés AVANT register() pour ne pas rater
+    // l'évènement "registration" (sinon aucun token n'est jamais reçu).
+    await PushNotifications.removeAllListeners().catch(() => {});
     await PushNotifications.addListener("registration", (t) => {
       void onToken(t.value, nativePlatform() === "ios" ? "ios" : "android");
     });
+    await PushNotifications.addListener("registrationError", (e: unknown) => {
+      handlers?.onError?.(String((e as { error?: string })?.error ?? "registration error"));
+    });
+    await PushNotifications.addListener("pushNotificationReceived", (n) => {
+      handlers?.onReceived?.({
+        title: n.title,
+        body: n.body,
+        url: (n.data as Record<string, string> | undefined)?.url,
+        data: n.data as Record<string, unknown>,
+      });
+    });
+    await PushNotifications.addListener("pushNotificationActionPerformed", (a) => {
+      const d = (a.notification?.data ?? {}) as Record<string, unknown>;
+      handlers?.onAction?.({
+        title: a.notification?.title,
+        body: a.notification?.body,
+        url: typeof d.url === "string" ? d.url : undefined,
+        data: d,
+      });
+    });
+
     await PushNotifications.register();
-  } catch {
-    /* silencieux : l'app doit fonctionner sans push */
+    return true;
+  } catch (e) {
+    handlers?.onError?.(e instanceof Error ? e.message : "push natif indisponible");
+    return false;
   }
 }

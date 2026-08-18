@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { pushSupported, getSubscription, subscribeToPush, unsubscribeFromPush } from "@/lib/push/client";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 import { isNativeApp, registerNativePush } from "@/lib/native/bridge";
+import { saveNativePushToken, deleteNativePushToken } from "@/lib/push.functions";
 
 const NATIVE_TOKEN_KEY = "ligneo:native-push";
 
@@ -38,19 +39,33 @@ export function PushNotificationToggle({ className }: { className?: string }) {
     setLoading(true);
     try {
       if (isMobileApp) {
-        // Chemin natif Capacitor uniquement
+        // Chemin natif Capacitor uniquement (@capacitor/push-notifications)
         if (enabled) {
+          let stored: { token?: string } = {};
+          try { stored = JSON.parse(window.localStorage.getItem(NATIVE_TOKEN_KEY) || "{}"); } catch { /* noop */ }
+          if (stored.token) {
+            try { await deleteNativePushToken({ data: { token: stored.token } }); } catch { /* noop */ }
+          }
           try { window.localStorage.removeItem(NATIVE_TOKEN_KEY); } catch { /* noop */ }
           setEnabled(false);
           toast.success("Notifications désactivées");
         } else {
           let got = false;
-          await registerNativePush((token, platform) => {
-            got = true;
-            try {
-              window.localStorage.setItem(NATIVE_TOKEN_KEY, JSON.stringify({ token, platform }));
-            } catch { /* noop */ }
-          });
+          const ok = await registerNativePush(
+            async (token, platform) => {
+              got = true;
+              try {
+                window.localStorage.setItem(NATIVE_TOKEN_KEY, JSON.stringify({ token, platform }));
+              } catch { /* noop */ }
+              try {
+                await saveNativePushToken({
+                  data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
+                });
+              } catch { /* noop */ }
+            },
+            { onError: (m) => console.warn("[push natif]", m) },
+          );
+          if (!ok) { toast.error("Notifications refusées par le système"); return; }
           setEnabled(true);
           toast.success(got ? "Notifications activées" : "Notifications demandées");
         }
