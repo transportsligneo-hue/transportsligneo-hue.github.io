@@ -30,9 +30,14 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1200,
+      // Le splash reste affiché jusqu'à ce que le JS appelle SplashScreen.hide()
+      // (NativeAppInit) : évite l'écran noir pendant le chargement distant.
+      launchShowDuration: 15000,
+      launchAutoHide: false,
       backgroundColor: "#0b1026",
-      showSpinner: false,
+      showSpinner: true,
+      spinnerColor: "#e7c76a",
+      androidSpinnerStyle: "large",
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
       splashImmersive: true,
@@ -49,6 +54,8 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0b1026",
+    // Permet d'inspecter la WebView via chrome://inspect en cas de blocage
+    webContentsDebuggingEnabled: true,
   },
   appendUserAgent: "LigneoDriverApp",
 };
