@@ -21,9 +21,19 @@ function bufToB64Url(buf: ArrayBuffer | null) {
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+function isCapacitorWebView() {
+  if (typeof window === "undefined") return false;
+  const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
+  return w.Capacitor?.isNativePlatform?.() === true;
+}
+
 export function pushSupported() {
+  // Dans la WebView Capacitor, le Web Push (SW + PushManager) n'est pas fiable :
+  // on le considère non supporté, le natif prend le relais.
+  if (isCapacitorWebView()) return false;
   return typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
 }
+
 
 export async function getSubscription() {
   if (!pushSupported()) return null;

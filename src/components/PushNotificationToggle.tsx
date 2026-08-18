@@ -2,22 +2,61 @@ import { useEffect, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { pushSupported, getSubscription, subscribeToPush, unsubscribeFromPush } from "@/lib/push/client";
+import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
+import { isNativeApp, registerNativePush } from "@/lib/native/bridge";
+
+const NATIVE_TOKEN_KEY = "ligneo:native-push";
 
 export function PushNotificationToggle({ className }: { className?: string }) {
+  const isMobileApp = useIsMobileAppShell();
   const [supported, setSupported] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setSupported(pushSupported());
-    if (pushSupported()) getSubscription().then((s) => setEnabled(!!s)).catch(() => {});
-  }, []);
+    // Coquille mobile : on n'utilise JAMAIS l'API Push web (Service Worker +
+    // PushManager) — non fiable dans la WebView Capacitor et source de crash.
+    if (isMobileApp) {
+      const native = isNativeApp();
+      setSupported(native);
+      if (native) {
+        try {
+          setEnabled(!!window.localStorage.getItem(NATIVE_TOKEN_KEY));
+        } catch { /* noop */ }
+      }
+      return;
+    }
+    try {
+      setSupported(pushSupported());
+      if (pushSupported()) getSubscription().then((s) => setEnabled(!!s)).catch(() => {});
+    } catch { /* noop */ }
+  }, [isMobileApp]);
 
   if (!supported) return null;
 
   const toggle = async () => {
     setLoading(true);
     try {
+      if (isMobileApp) {
+        // Chemin natif Capacitor uniquement
+        if (enabled) {
+          try { window.localStorage.removeItem(NATIVE_TOKEN_KEY); } catch { /* noop */ }
+          setEnabled(false);
+          toast.success("Notifications désactivées");
+        } else {
+          let got = false;
+          await registerNativePush((token, platform) => {
+            got = true;
+            try {
+              window.localStorage.setItem(NATIVE_TOKEN_KEY, JSON.stringify({ token, platform }));
+            } catch { /* noop */ }
+          });
+          setEnabled(true);
+          toast.success(got ? "Notifications activées" : "Notifications demandées");
+        }
+        return;
+      }
+
       if (enabled) {
         await unsubscribeFromPush();
         setEnabled(false);
@@ -37,7 +76,7 @@ export function PushNotificationToggle({ className }: { className?: string }) {
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={() => { void toggle(); }}
       disabled={loading}
       aria-pressed={enabled}
       className={[
