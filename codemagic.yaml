@@ -9,22 +9,22 @@ workflows:
         PACKAGE_NAME: "com.transportsligneo.driver"
       node: 22
     scripts:
+      - name: Diagnostic Node
+        script: |
+          echo "--- node par défaut ---"
+          which node || echo "node introuvable"
+          node -v || echo "pas de version"
+          echo "--- nvm ---"
+          which nvm || echo "nvm introuvable dans PATH"
+          ls -la $HOME/.nvm 2>/dev/null || echo "dossier .nvm introuvable"
+          echo "--- versions node installées ---"
+          ls $HOME/.nvm/versions/node 2>/dev/null || echo "aucune version listée"
       - name: Installer les dépendances
-        script: |
-          source $HOME/.nvm/nvm.sh
-          nvm install 22
-          nvm use 22
-          npm install
+        script: npm install
       - name: Build de l'app web
-        script: |
-          source $HOME/.nvm/nvm.sh
-          nvm use 22
-          npm run build
+        script: npm run build
       - name: Synchroniser Capacitor
-        script: |
-          source $HOME/.nvm/nvm.sh
-          nvm use 22
-          npx cap sync android
+        script: npx cap sync android
       - name: Générer le bundle Android
         script: |
           cd android
