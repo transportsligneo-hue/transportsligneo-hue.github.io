@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Save,
   AlertTriangle,
+  UserPlus,
 } from "lucide-react";
 import { PageHeader, Card, Button, FormField, TextInput, Badge } from "@/components/admin/AdminUI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +23,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 import { AvisGoogleHistoryCard } from "@/components/admin/AvisGoogleHistoryCard";
+import { RegistrationGateCard } from "@/components/admin/RegistrationGateCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -132,6 +134,9 @@ function AdminParametres() {
           </TabsTrigger>
           <TabsTrigger value="stripe" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
             <CreditCard size={14} className="mr-1.5" /> Stripe
+          </TabsTrigger>
+          <TabsTrigger value="inscriptions" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
+            <UserPlus size={14} className="mr-1.5" /> Inscriptions
           </TabsTrigger>
           <TabsTrigger value="roles" className="data-[state=active]:bg-pro-bg-soft data-[state=active]:text-pro-accent rounded-lg">
             <ShieldCheck size={14} className="mr-1.5" /> Rôles &amp; permissions
@@ -291,6 +296,11 @@ function AdminParametres() {
         </TabsContent>
 
         {/* === RÔLES & PERMISSIONS === */}
+        {/* === INSCRIPTIONS === */}
+        <TabsContent value="inscriptions" className="mt-0 space-y-4">
+          <RegistrationGateCard />
+        </TabsContent>
+
         <TabsContent value="roles" className="mt-0 space-y-6">
           <Card padded={false}>
             <div className="px-6 py-4 border-b border-pro-border">
