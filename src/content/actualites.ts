@@ -6,8 +6,8 @@ import routeBarcelone from "@/assets/blog/route-barcelone.jpg";
 import appDriver from "@/assets/blog/app-driver.jpg";
 import delaisFrance from "@/assets/blog/delais-france.jpg";
 import concessionDigitale from "@/assets/blog/concession-digitale.jpg";
-import chauffeurLigneo from "@/assets/hero-chauffeur-ligneo.jpg";
-import driverSupercar from "@/assets/driver-hero-supercar.jpg";
+import chauffeurLigneo from "@/assets/blog/metier-convoyeur.jpg";
+import driverSupercar from "@/assets/blog/vehicule-premium.jpg";
 
 export type ArticleCategorie =
   | "Conseils clients"
@@ -56,7 +56,7 @@ export const ARTICLES: Article[] = [
     extrait:
       "Un convoyage se joue souvent avant même le départ. Voici comment préparer la remise de votre véhicule pour que la mission se déroule sans accroc, du premier appel à la signature finale.",
     cover: remiseVehicule,
-    coverAlt: "Remise des clés d'un véhicule à un convoyeur professionnel",
+    coverAlt: "Clés de véhicule et document de remise posés sur un tableau de bord",
     contenu: [
       {
         type: "p",
@@ -88,7 +88,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: etatDesLieuxDigital,
-        alt: "Convoyeur photographiant la carrosserie d'un véhicule avec son smartphone",
+        alt: "Smartphone photographiant la carrosserie d'un véhicule lors de l'état des lieux",
         legende:
           "Chaque angle du véhicule est photographié au départ, puis à l'arrivée, dans l'application driver.",
       },
@@ -161,7 +161,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: concessionDigitale,
-        alt: "Responsable de concession consultant le suivi de ses convoyages sur un ordinateur portable",
+        alt: "Ordinateur portable affichant le suivi des convoyages d'une concession",
       },
       { type: "h2", texte: "Un exemple d'intégration" },
       {
@@ -199,7 +199,7 @@ export const ARTICLES: Article[] = [
     extrait:
       "Statut, assurances, revenus réels, rythme de vie : le point honnête sur un métier qui attire beaucoup, et qui demande plus de rigueur qu'on ne l'imagine.",
     cover: chauffeurLigneo,
-    coverAlt: "Convoyeur indépendant devant un véhicule à livrer",
+    coverAlt: "Habitacle d'un véhicule prêt au départ, clés sur le siège",
     contenu: [
       {
         type: "p",
@@ -226,7 +226,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: driverSupercar,
-        alt: "Convoyeur professionnel préparant la prise en charge d'un véhicule",
+        alt: "Véhicule premium prêt à être pris en charge",
       },
       { type: "h2", texte: "Les revenus, sans promesse creuse" },
       {
@@ -263,7 +263,7 @@ export const ARTICLES: Article[] = [
     extrait:
       "Photos horodatées, schéma de carrosserie, signatures sur écran et procès-verbal envoyé dans la minute. Visite guidée de l'étape la plus importante d'une mission.",
     cover: etatDesLieuxDigital,
-    coverAlt: "État des lieux d'un véhicule réalisé sur smartphone",
+    coverAlt: "Smartphone affichant un état des lieux numérique devant une carrosserie",
     contenu: [
       {
         type: "p",
@@ -295,7 +295,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: remiseVehicule,
-        alt: "Signature de l'état des lieux au moment de la remise du véhicule",
+        alt: "Clés et document de remise posés sur le tableau de bord",
         legende:
           "La signature du client et celle du convoyeur sont recueillies sur l'écran, puis intégrées au procès-verbal.",
       },
@@ -456,7 +456,7 @@ export const ARTICLES: Article[] = [
     extrait:
       "Avant, il fallait imprimer, classer, rappeler le bureau. Aujourd'hui tout tient dans une poche. Retour sur ce que la numérisation a réellement changé pour nos convoyeurs.",
     cover: appDriver,
-    coverAlt: "Application driver affichée sur un smartphone dans un véhicule",
+    coverAlt: "Smartphone affichant l'application mission dans un habitacle",
     contenu: [
       {
         type: "p",
@@ -482,7 +482,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: appDriver,
-        alt: "Convoyeur consultant sa mission sur son smartphone avant le départ",
+        alt: "Smartphone affichant la mission en cours dans l'habitacle",
       },
       { type: "h2", texte: "Ce qui a été plus difficile à accepter" },
       {
@@ -520,7 +520,7 @@ export const ARTICLES: Article[] = [
     extrait:
       "Le convoyage est souvent le dernier maillon non suivi de la chaîne de livraison. C'est aussi celui que le client final juge en premier.",
     cover: concessionDigitale,
-    coverAlt: "Responsable de concession suivant ses livraisons de véhicules",
+    coverAlt: "Poste de travail concession avec tableau de bord des livraisons",
     contenu: [
       {
         type: "p",
@@ -612,7 +612,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: remiseVehicule,
-        alt: "Remise d'un véhicule au client à l'arrivée de la mission",
+        alt: "Clés et document de livraison à l'arrivée de la mission",
       },
       { type: "h2", texte: "Ce qui allonge réellement les délais" },
       {
