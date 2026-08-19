@@ -21,16 +21,16 @@ const SIZES = {
  */
 export default function LigneoLockup({ size = "md", tag = null, className = "" }: Props) {
   const s = SIZES[size];
-  const neonGreen = "#39ff14";
+  const neonGreen = "#6effcd";
   return (
     <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>
       <span
-        className="shrink-0 flex items-center justify-center rounded-full border border-[#39ff14] overflow-hidden"
+        className="shrink-0 flex items-center justify-center rounded-full border border-[#6effcd] overflow-hidden"
         style={{
           width: s.badge,
           height: s.badge,
           background: "#0b1026",
-          boxShadow: "0 0 14px rgba(57,255,20,0.55), 0 0 28px rgba(57,255,20,0.25), inset 0 0 10px rgba(57,255,20,0.12)",
+          boxShadow: "0 0 14px rgba(110,255,205,0.55), 0 0 28px rgba(110,255,205,0.25), inset 0 0 10px rgba(110,255,205,0.12)",
         }}
       >
         <img
@@ -39,7 +39,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
           width={s.badge}
           height={s.badge}
           className="h-full w-full object-contain p-[2px]"
-          style={{ filter: "drop-shadow(0 0 4px rgba(57,255,20,0.7))" }}
+          style={{ filter: "drop-shadow(0 0 4px rgba(110,255,205,0.7))" }}
         />
       </span>
       <span className="min-w-0 flex flex-col leading-none">
@@ -48,12 +48,12 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
           style={{ fontFamily: "'Poppins','SF Pro Rounded','Segoe UI Rounded','Nunito',system-ui,sans-serif", fontSize: s.word }}
         >
           <span className="text-white">TRANSPORTS</span>{" "}
-          <span className="text-[#39ff14]" style={{ textShadow: "0 0 10px rgba(57,255,20,0.65), 0 0 20px rgba(57,255,20,0.35)" }}>LIGNEO</span>
+          <span className="text-[#6effcd]" style={{ textShadow: "0 0 10px rgba(110,255,205,0.65), 0 0 20px rgba(110,255,205,0.35)" }}>LIGNEO</span>
         </span>
         {tag && (
           <span
-            className="font-bold uppercase tracking-[0.12em] text-[#39ff14] mt-[2px]"
-            style={{ fontSize: s.tag, textShadow: "0 0 8px rgba(57,255,20,0.6)" }}
+            className="font-bold uppercase tracking-[0.12em] text-[#6effcd] mt-[2px]"
+            style={{ fontSize: s.tag, textShadow: "0 0 8px rgba(110,255,205,0.6)" }}
           >
             {tag}
           </span>

@@ -169,8 +169,8 @@ function ConvoyeurDashboard() {
           <span className="flex items-baseline gap-2.5 min-w-0">
             <span className="text-[10.5px] uppercase tracking-[0.06em] font-semibold text-[#8fa3d9]">Revenus du mois</span>
             <span
-              className="font-driver text-[22px] font-bold text-[#39ff14] tabular-nums leading-none"
-              style={{ textShadow: "0 0 12px rgba(57,255,20,0.55), 0 0 24px rgba(57,255,20,0.30)" }}
+              className="font-driver text-[22px] font-bold text-[#6effcd] tabular-nums leading-none"
+              style={{ textShadow: "0 0 12px rgba(110,255,205,0.55), 0 0 24px rgba(110,255,205,0.30)" }}
             >
               {revenueMonth.toFixed(0)} €
             </span>
