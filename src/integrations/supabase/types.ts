@@ -1905,10 +1905,12 @@ export type Database = {
         Row: {
           account_status: string
           annees_experience: number | null
+          bic: string | null
           created_at: string
           disponibilite: string | null
           email: string
           has_completed_training: boolean
+          iban: string | null
           id: string
           message: string | null
           missions_terminees: number
@@ -1923,6 +1925,7 @@ export type Database = {
           site_id: string | null
           statut: string
           telephone: string
+          titulaire_compte: string | null
           training_completed_at: string | null
           training_status: string
           type_convoyeur: string
@@ -1933,10 +1936,12 @@ export type Database = {
         Insert: {
           account_status?: string
           annees_experience?: number | null
+          bic?: string | null
           created_at?: string
           disponibilite?: string | null
           email: string
           has_completed_training?: boolean
+          iban?: string | null
           id?: string
           message?: string | null
           missions_terminees?: number
@@ -1951,6 +1956,7 @@ export type Database = {
           site_id?: string | null
           statut?: string
           telephone: string
+          titulaire_compte?: string | null
           training_completed_at?: string | null
           training_status?: string
           type_convoyeur?: string
@@ -1961,10 +1967,12 @@ export type Database = {
         Update: {
           account_status?: string
           annees_experience?: number | null
+          bic?: string | null
           created_at?: string
           disponibilite?: string | null
           email?: string
           has_completed_training?: boolean
+          iban?: string | null
           id?: string
           message?: string | null
           missions_terminees?: number
@@ -1979,6 +1987,7 @@ export type Database = {
           site_id?: string | null
           statut?: string
           telephone?: string
+          titulaire_compte?: string | null
           training_completed_at?: string | null
           training_status?: string
           type_convoyeur?: string
