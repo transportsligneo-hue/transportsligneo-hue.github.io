@@ -6298,3 +6298,42 @@ html.theme-light .driver-selfie-status { color: #47506e; }
 @media (prefers-reduced-motion: reduce) {
   .recharge-neon-badge, .recharge-neon-badge::after, .recharge-neon-spark { animation: none; }
 }
+
+/* === Badge DRIVER néon vert — app Capacitor (page de connexion) === */
+.driver-neon-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.9rem;
+  border-radius: 9999px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  color: #7dffc9;
+  background: radial-gradient(120% 160% at 50% 0%, rgba(110, 255, 205, 0.16), rgba(110, 255, 205, 0.03) 70%);
+  border: 2px solid #6effcd;
+  text-shadow: 0 0 10px rgba(110, 255, 205, 0.9), 0 0 26px rgba(110, 255, 205, 0.45);
+  animation: driverPillGlow 2.6s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+.driver-neon-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: driverPillSheen 3.4s ease-in-out infinite;
+}
+@keyframes driverPillGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(110,255,205,0.45), 0 0 30px rgba(110,255,205,0.18), inset 0 0 12px rgba(110,255,205,0.10); }
+  50%      { box-shadow: 0 0 22px rgba(110,255,205,0.85), 0 0 54px rgba(110,255,205,0.35), inset 0 0 20px rgba(110,255,205,0.20); }
+}
+@keyframes driverPillSheen {
+  0%, 60% { transform: translateX(-120%); }
+  100%    { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .driver-neon-pill, .driver-neon-pill::after { animation: none; }
+}
