@@ -382,14 +382,10 @@ body.is-driver-app .animate-pulse-gold {
 }
 
 /* Common utility class fixes for driver app gold -> green */
-body.is-driver-app .gold-accent-dot,
-body.is-driver-app .gold-bullet,
 body.is-driver-app .amber-dot {
   background-color: #6effcd !important;
   box-shadow: 0 0 8px rgba(110, 255, 205, 0.6) !important;
 }
-
-body.is-driver-app [class*="gold"] { border-color: #6effcd; }
 
 /* Formations / training gate overrides */
 body.is-driver-app .formation-gold-card,
