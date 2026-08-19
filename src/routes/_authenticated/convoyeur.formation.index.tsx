@@ -167,8 +167,14 @@ function FormationHome() {
       </section>
 
       {tourStep !== null && TOUR[tourStep] && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 overscroll-contain"
+          style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)",
+          }}
+        >
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
             <div className="flex items-start justify-between">
               <h3 className="text-sm font-semibold text-pro-text">{TOUR[tourStep].title}</h3>
               <button type="button" onClick={closeTour}><X size={16} className="text-pro-muted" /></button>
