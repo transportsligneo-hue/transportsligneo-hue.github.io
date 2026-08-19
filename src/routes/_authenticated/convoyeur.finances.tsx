@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { MesRemunerations } from "@/components/convoyeur/MesRemunerations";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ArrowLeft, TrendingUp, Wallet, CreditCard, FileDown, Clock3, CheckCircle2,
+  ArrowLeft, TrendingUp, Wallet, CreditCard, FileDown,
   ArrowUpRight, ArrowDownRight, Loader2, Pencil, Check, X,
 } from "lucide-react";
 
@@ -114,8 +115,6 @@ function FinancesPage() {
     return { thisMonth, lastMonth, delta, monthly, currentLabel: MONTHS_FULL[m] };
   }, [missions]);
 
-  const upcomingPayouts = missions.filter((x) => !x.paid);
-  const pastPayouts = missions.filter((x) => x.paid);
 
   const maxMonthly = Math.max(1, ...monthly.map((x) => x.total));
 
