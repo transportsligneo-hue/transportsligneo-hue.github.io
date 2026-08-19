@@ -6344,3 +6344,21 @@ body.is-driver-app .driver-cta-catalogue {
   color: #04231a !important;
   box-shadow: 0 0 14px rgba(110, 255, 205, 0.55), 0 0 28px rgba(35, 196, 138, 0.35) !important;
 }
+
+/* App Capacitor Driver : cloche, eyebrows et dock actif en vert néon */
+body.is-driver-app .notif-bell-btn svg {
+  color: #6effcd !important;
+  filter: drop-shadow(0 0 6px rgba(110, 255, 205, 0.7));
+}
+body.is-driver-app .driver-eyebrow {
+  color: #6effcd !important;
+  text-shadow: 0 0 10px rgba(110, 255, 205, 0.45);
+}
+body.is-driver-app .ldock-fab {
+  background: linear-gradient(150deg, #6effcd, #16a97f) !important;
+  box-shadow: 0 12px 26px rgba(110, 255, 205, 0.45), 0 0 0 6px #040b28 !important;
+}
+body.is-driver-app .ldock-fab svg { color: #04231a !important; }
+body.is-driver-app .ldock-item.is-active svg {
+  filter: drop-shadow(0 0 6px rgba(110, 255, 205, 0.75)) !important;
+}
