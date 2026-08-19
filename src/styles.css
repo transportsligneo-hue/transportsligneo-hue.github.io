@@ -5831,3 +5831,57 @@ html.theme-light .driver-selfie-status { color: #47506e; }
   width: 70px; height: 70px; border-radius: 50%;
   background: var(--glow, transparent); filter: blur(20px); opacity: .3; pointer-events: none;
 }
+
+/* ============ Badge néon « Recharge uniquement (sans livraison) » ============ */
+.recharge-neon-badge {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #061a3a, #0b2b63 55%, #061a3a);
+  border: 1px solid rgba(72, 226, 255, .55);
+  color: #d8fbff;
+  font-family: 'Space Grotesk','Inter',sans-serif;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(47, 95, 255, .25), 0 0 14px -4px rgba(72, 226, 255, .85);
+  animation: recharge-neon-pulse 2.2s ease-in-out infinite;
+  overflow: hidden;
+}
+.recharge-neon-badge::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 34%;
+  left: -60%; transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(160, 245, 255, .45), transparent);
+  animation: recharge-neon-sweep 3.4s ease-in-out infinite;
+}
+.recharge-neon-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 999px;
+  background: radial-gradient(circle at 30% 25%, rgba(72, 226, 255, .95), rgba(47, 95, 255, .55));
+  color: #041329;
+  box-shadow: 0 0 10px -1px rgba(72, 226, 255, .9);
+}
+.recharge-neon-label { text-shadow: 0 0 8px rgba(72, 226, 255, .8); }
+.recharge-neon-sub {
+  font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  color: rgba(216, 251, 255, .7); text-transform: none;
+}
+.recharge-neon-spark { color: #7ef0ff; animation: recharge-neon-blink 1.5s steps(1, end) infinite; }
+
+@keyframes recharge-neon-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(47, 95, 255, .25), 0 0 12px -5px rgba(72, 226, 255, .8); }
+  50%      { box-shadow: 0 0 0 1px rgba(72, 226, 255, .45), 0 0 20px -2px rgba(72, 226, 255, 1); }
+}
+@keyframes recharge-neon-sweep {
+  0%, 65% { left: -60%; }
+  100%    { left: 130%; }
+}
+@keyframes recharge-neon-blink {
+  0%, 60% { opacity: 1; }
+  70%     { opacity: .25; }
+  80%     { opacity: 1; }
+  90%     { opacity: .35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recharge-neon-badge, .recharge-neon-badge::after, .recharge-neon-spark { animation: none; }
+}
