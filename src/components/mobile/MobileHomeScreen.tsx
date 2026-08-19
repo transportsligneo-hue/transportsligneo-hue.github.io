@@ -140,10 +140,10 @@ export default function MobileHomeScreen() {
 
         <div className="relative z-[2] h-full flex flex-col justify-end px-[22px] pb-16">
           <div
-            className="flex items-center gap-2 uppercase mb-3 text-[10.5px] font-semibold tracking-[0.2em] text-[#39ff14]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", textShadow: "0 0 12px rgba(57,255,20,0.6)" }}
+            className="flex items-center gap-2 uppercase mb-3 text-[10.5px] font-semibold tracking-[0.2em] text-[#6effcd]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", textShadow: "0 0 12px rgba(110,255,205,0.6)" }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#39ff14]" style={{ boxShadow: "0 0 8px #39ff14, 0 0 14px rgba(57,255,20,0.6)" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6effcd]" style={{ boxShadow: "0 0 8px #6effcd, 0 0 14px rgba(110,255,205,0.6)" }} />
             Convoyage et logistique automobile
           </div>
           <h1
@@ -173,13 +173,13 @@ export default function MobileHomeScreen() {
           onClick={goEspace}
           className="w-full flex items-center gap-3 rounded-[20px] px-4 py-3.5 border border-white/[0.08] active:scale-[0.98] transition-transform text-left"
           style={{
-            background: "linear-gradient(135deg, rgba(57,255,20,0.22) 0%, rgba(11,85,32,0.5) 100%)",
-            boxShadow: "0 14px 34px -16px rgba(57,255,20,0.5)",
+            background: "linear-gradient(135deg, rgba(110,255,205,0.22) 0%, rgba(15,90,70,0.5) 100%)",
+            boxShadow: "0 14px 34px -16px rgba(110,255,205,0.5)",
           }}
         >
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0"
-            style={{ background: "linear-gradient(135deg, #00c853, #39ff14)", boxShadow: "0 8px 20px -6px rgba(57,255,20,0.55)" }}
+            style={{ background: "linear-gradient(135deg, #4ad0a0, #6effcd)", boxShadow: "0 8px 20px -6px rgba(110,255,205,0.55)" }}
           >
             {isAuthenticated && user?.email ? (
               <span className="text-sm font-bold">{user.email[0]?.toUpperCase()}</span>
@@ -195,7 +195,7 @@ export default function MobileHomeScreen() {
               {isAuthenticated ? (user?.email ?? "Tableau de bord") : "Accéder à mon compte"}
             </span>
           </span>
-          <ChevronRight size={16} className="text-[#39ff14] shrink-0" />
+          <ChevronRight size={16} className="text-[#6effcd] shrink-0" />
         </button>
 
         <MobileDevisGenerator />
@@ -211,8 +211,8 @@ export default function MobileHomeScreen() {
         ].map((s) => (
           <div key={s.l} className="text-center">
             <div
-              className="text-[20px] font-extrabold text-[#39ff14]"
-              style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 14px rgba(57,255,20,0.5)" }}
+              className="text-[20px] font-extrabold text-[#6effcd]"
+              style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 14px rgba(110,255,205,0.5)" }}
             >
               {s.v}
             </div>
@@ -226,21 +226,21 @@ export default function MobileHomeScreen() {
 
       {/* Bande fonctionnalités */}
       <div className="relative z-[1] flex justify-between gap-3 px-[26px] pt-5 pb-1">
-        <FeatureItem icon={<Zap size={17} className="text-[#39ff14]" strokeWidth={2} />} title="Rapide" sub="Estimation 30s" />
-        <FeatureItem icon={<ShieldCheck size={17} className="text-[#39ff14]" strokeWidth={2} />} title="Sécurisé" sub="Convoyeurs vérifiés" />
-        <FeatureItem icon={<MapPin size={17} className="text-[#39ff14]" strokeWidth={2} />} title="France" sub="24/48h" />
+        <FeatureItem icon={<Zap size={17} className="text-[#6effcd]" strokeWidth={2} />} title="Rapide" sub="Estimation 30s" />
+        <FeatureItem icon={<ShieldCheck size={17} className="text-[#6effcd]" strokeWidth={2} />} title="Sécurisé" sub="Convoyeurs vérifiés" />
+        <FeatureItem icon={<MapPin size={17} className="text-[#6effcd]" strokeWidth={2} />} title="France" sub="24/48h" />
       </div>
 
       {/* Accès rapide (scroll horizontal snap) */}
       <section className="relative z-[1] pt-6 pb-1">
         <div className="flex justify-between items-center px-[22px] mb-3.5">
           <h2 className="section-title text-[16px] font-bold tracking-[-0.01em] text-white flex items-center gap-2.5" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <span className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#39ff14,#d9b54a)" }} />
+            <span className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#6effcd,#d9b54a)" }} />
             Accès rapide
           </h2>
           <button
             onClick={goEspace}
-            className="text-[11px] font-bold tracking-[0.02em] text-[#39ff14] flex items-center gap-1"
+            className="text-[11px] font-bold tracking-[0.02em] text-[#6effcd] flex items-center gap-1"
           >
             Tout voir <ArrowRight size={12} strokeWidth={2.6} />
           </button>
@@ -281,45 +281,45 @@ export default function MobileHomeScreen() {
       {/* Bento stats */}
       <div className="relative z-[1] mx-[18px] mt-5 grid grid-cols-[1.1fr_1fr] gap-3 items-stretch">
         <div
-          className="relative overflow-hidden rounded-[22px] p-[18px] flex flex-col justify-end border border-[rgba(57,255,20,0.24)]"
-          style={{ background: "linear-gradient(160deg, rgba(57,255,20,0.18), rgba(10,16,42,0.6))" }}
+          className="relative overflow-hidden rounded-[22px] p-[18px] flex flex-col justify-end border border-[rgba(110,255,205,0.24)]"
+          style={{ background: "linear-gradient(160deg, rgba(110,255,205,0.18), rgba(10,16,42,0.6))" }}
         >
           <span
             aria-hidden
             className="absolute top-4 left-4 w-[130px] h-[130px] rounded-full blur-[10px]"
-            style={{ background: "radial-gradient(circle, rgba(57,255,20,0.3), transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(110,255,205,0.3), transparent 70%)" }}
           />
-          <span className="relative z-[1] w-[48px] h-[48px] rounded-[16px] border border-[rgba(57,255,20,0.4)] bg-white/[0.08] flex items-center justify-center mb-auto">
-            <Truck size={22} className="text-[#39ff14]" strokeWidth={2} />
+          <span className="relative z-[1] w-[48px] h-[48px] rounded-[16px] border border-[rgba(110,255,205,0.4)] bg-white/[0.08] flex items-center justify-center mb-auto">
+            <Truck size={22} className="text-[#6effcd]" strokeWidth={2} />
           </span>
           <div
-            className="relative z-[1] text-[34px] font-extrabold leading-none tracking-[-0.01em] text-[#39ff14] mt-5 mb-1.5"
-            style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 20px rgba(57,255,20,0.5)" }}
+            className="relative z-[1] text-[34px] font-extrabold leading-none tracking-[-0.01em] text-[#6effcd] mt-5 mb-1.5"
+            style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 20px rgba(110,255,205,0.5)" }}
           >
             5000+
           </div>
           <div className="relative z-[1] text-[11.5px] text-[#9aa6c9]">Véhicules convoyés</div>
         </div>
         <div className="grid grid-rows-3 gap-3">
-          <MiniStat icon={<Clock size={15} className="text-[#39ff14]" strokeWidth={2} />} label="Expérience" value="6+ ans" />
-          <MiniStat icon={<ShieldCheck size={15} className="text-[#39ff14]" strokeWidth={2} />} label="Inclus" value="Carburant, péage, assurance" />
-          <MiniStat icon={<Zap size={15} className="text-[#39ff14]" strokeWidth={2} />} label="Dispo" value="24/7" />
+          <MiniStat icon={<Clock size={15} className="text-[#6effcd]" strokeWidth={2} />} label="Expérience" value="6+ ans" />
+          <MiniStat icon={<ShieldCheck size={15} className="text-[#6effcd]" strokeWidth={2} />} label="Inclus" value="Carburant, péage, assurance" />
+          <MiniStat icon={<Zap size={15} className="text-[#6effcd]" strokeWidth={2} />} label="Dispo" value="24/7" />
         </div>
       </div>
 
       {/* Contact banner */}
       <div
-        className="relative z-[1] mx-[18px] mt-[22px] overflow-hidden flex items-center gap-3.5 rounded-[20px] px-[18px] py-4 border border-[rgba(57,255,20,0.22)]"
+        className="relative z-[1] mx-[18px] mt-[22px] overflow-hidden flex items-center gap-3.5 rounded-[20px] px-[18px] py-4 border border-[rgba(110,255,205,0.22)]"
         style={{ background: "rgba(255,255,255,0.04)" }}
       >
         <span
           aria-hidden
           className="absolute -top-10 -right-5 w-[120px] h-[120px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(57,255,20,0.18), transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(110,255,205,0.18), transparent 70%)" }}
         />
         <Link to="/contact" className="relative z-[1] flex items-center gap-3.5 flex-1 min-w-0 active:scale-[0.98] transition-transform">
-          <span className="w-11 h-11 rounded-full bg-[rgba(57,255,20,0.14)] border border-[rgba(57,255,20,0.35)] flex items-center justify-center shrink-0">
-            <Phone size={18} className="text-[#39ff14]" strokeWidth={2} />
+          <span className="w-11 h-11 rounded-full bg-[rgba(110,255,205,0.14)] border border-[rgba(110,255,205,0.35)] flex items-center justify-center shrink-0">
+            <Phone size={18} className="text-[#6effcd]" strokeWidth={2} />
           </span>
           <span className="flex-1 min-w-0 block">
             <span className="block text-[13.5px] font-bold text-white">Une question ?</span>
@@ -359,8 +359,8 @@ export default function MobileHomeScreen() {
       {/* Footer minimal */}
       <footer className="relative z-[1] px-5 pt-10 pb-8 mt-6">
         <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-4 flex items-center gap-3 backdrop-blur-xl">
-          <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-[#39ff14]/35 bg-[#39ff14]/10">
-            <MapPin className="text-[#39ff14]" size={17} />
+          <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-[#6effcd]/35 bg-[#6effcd]/10">
+            <MapPin className="text-[#6effcd]" size={17} />
           </span>
           <div className="flex-1 min-w-0">
             <p className="text-white text-[13px] font-bold tracking-wide">Basé à Tours (37)</p>
@@ -389,13 +389,13 @@ export default function MobileHomeScreen() {
       {/* Styles locaux (animations spécifiques à la maquette) */}
       <style>{`
         .neon-accent {
-          color: #39ff14;
-          text-shadow: 0 0 18px rgba(57,255,20,0.9), 0 0 38px rgba(57,255,20,0.6), 0 0 64px rgba(57,255,20,0.35);
+          color: #6effcd;
+          text-shadow: 0 0 18px rgba(110,255,205,0.9), 0 0 38px rgba(110,255,205,0.6), 0 0 64px rgba(110,255,205,0.35);
           animation: neonPulse 2.6s ease-in-out infinite;
         }
         @keyframes neonPulse {
-          0%,100% { text-shadow: 0 0 18px rgba(57,255,20,0.9), 0 0 38px rgba(57,255,20,0.6), 0 0 64px rgba(57,255,20,0.35); }
-          50%     { text-shadow: 0 0 26px rgba(57,255,20,1), 0 0 50px rgba(57,255,20,0.75), 0 0 84px rgba(57,255,20,0.45); }
+          0%,100% { text-shadow: 0 0 18px rgba(110,255,205,0.9), 0 0 38px rgba(110,255,205,0.6), 0 0 64px rgba(110,255,205,0.35); }
+          50%     { text-shadow: 0 0 26px rgba(110,255,205,1), 0 0 50px rgba(110,255,205,0.75), 0 0 84px rgba(110,255,205,0.45); }
         }
         .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
         @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
@@ -532,10 +532,10 @@ function FeatureItem({ icon, title, sub }: { icon: React.ReactNode; title: strin
   return (
     <div className="flex flex-col items-center gap-1.5 flex-1">
       <span
-        className="mh-ring w-[52px] h-[52px] rounded-full border border-[rgba(57,255,20,0.35)] flex items-center justify-center"
+        className="mh-ring w-[52px] h-[52px] rounded-full border border-[rgba(110,255,205,0.35)] flex items-center justify-center"
         style={{
-          background: "rgba(57,255,20,0.12)",
-          boxShadow: "0 0 12px rgba(57,255,20,0.2)",
+          background: "rgba(110,255,205,0.12)",
+          boxShadow: "0 0 12px rgba(110,255,205,0.2)",
         }}
       >
         {icon}
@@ -558,9 +558,9 @@ const QUICK_TONES: Record<string, { badge: string; shadow: string; halo: string 
     halo: "radial-gradient(circle, #d9b54a, transparent 70%)",
   },
   green: {
-    badge: "linear-gradient(135deg,#00c853,#39ff14)",
-    shadow: "0 8px 18px rgba(57,255,20,0.45)",
-    halo: "radial-gradient(circle, #39ff14, transparent 70%)",
+    badge: "linear-gradient(135deg,#4ad0a0,#6effcd)",
+    shadow: "0 8px 18px rgba(110,255,205,0.45)",
+    halo: "radial-gradient(circle, #6effcd, transparent 70%)",
   },
 };
 
@@ -682,13 +682,13 @@ function MobileMenuDrawer({
           onClick={onEspace}
           className="rounded-[22px] p-4 flex items-center gap-3 border border-white/[0.08] active:scale-[0.98] transition-transform text-left mb-5"
           style={{
-            background: "linear-gradient(135deg, rgba(57,255,20,0.28) 0%, rgba(11,85,32,0.6) 100%)",
-            boxShadow: "0 18px 40px -18px rgba(57,255,20,0.6)",
+            background: "linear-gradient(135deg, rgba(110,255,205,0.28) 0%, rgba(15,90,70,0.6) 100%)",
+            boxShadow: "0 18px 40px -18px rgba(110,255,205,0.6)",
           }}
         >
           <span
             className="w-11 h-11 rounded-full flex items-center justify-center text-white"
-            style={{ background: "linear-gradient(135deg, #00c853, #39ff14)", boxShadow: "0 8px 20px -6px rgba(57,255,20,0.6)" }}
+            style={{ background: "linear-gradient(135deg, #4ad0a0, #6effcd)", boxShadow: "0 8px 20px -6px rgba(110,255,205,0.6)" }}
           >
             {isAuthenticated && userEmail ? userEmail[0]?.toUpperCase() : <LogIn size={18} />}
           </span>
@@ -700,7 +700,7 @@ function MobileMenuDrawer({
               {isAuthenticated ? (userEmail ?? "Tableau de bord") : "Accéder à mon compte"}
             </span>
           </span>
-          <ChevronRight size={16} className="text-[#39ff14]" />
+          <ChevronRight size={16} className="text-[#6effcd]" />
         </button>
 
         <nav className="flex-1 overflow-y-auto -mx-1 px-1">
