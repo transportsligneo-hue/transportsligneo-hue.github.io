@@ -384,10 +384,27 @@ function AdminNouveauDevisPage() {
     (isAllerRetour && (!dateRetourInput || !heureRetourInput));
 
 
+  const groupPayload = groupLines.map((v) => ({
+    immatriculation: v.immat.trim().toUpperCase() || null,
+    marque: v.marque.trim() || null,
+    modele: v.modele.trim() || null,
+    vin: v.vin.trim().toUpperCase() || null,
+    arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
+    prix: Math.round(parseEur(v.prix) * 100) / 100,
+  }));
+
   const recapMessage = [
-    `Type de trajet : ${typeTrajet}`,
-    immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
-    vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
+    isGroupe ? `Devis groupé : ${groupLines.length} véhicules` : `Type de trajet : ${typeTrajet}`,
+    ...(isGroupe
+      ? groupPayload.map(
+          (v, i) =>
+            `Véhicule ${i + 1} : ${[v.marque, v.modele].filter(Boolean).join(" ") || "—"}${
+              v.immatriculation ? ` (${v.immatriculation})` : ""
+            }${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
+        )
+      : []),
+    !isGroupe && immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    !isGroupe && vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
     isAllerRetour && (vehiculeRetour || modeleRetour)
       ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
       : null,
@@ -414,10 +431,11 @@ function AdminNouveauDevisPage() {
     logo_url: client?.logo_url ?? null,
     depart,
     arrivee: isRechargeSeule ? depart : arrivee,
-    marque: vehicule || null,
-    modele: modele || null,
-    immatriculation: immat || null,
-    option_trajet: typeTrajet,
+    marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
+    modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
+    immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
+    vehicules: isGroupe ? groupPayload : null,
+    option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
     date_souhaitee: dateSouhaitee || null,
 
     options,
@@ -431,6 +449,7 @@ function AdminNouveauDevisPage() {
     created_at: new Date().toISOString(),
     version: 1,
   });
+
 
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
