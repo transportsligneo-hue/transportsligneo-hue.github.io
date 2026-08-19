@@ -3449,9 +3449,6 @@ body.is-driver-app .closed-link svg {
     z-index: -1; opacity: 0.55; pointer-events: none;
   }
 
-  /* Ensure the homepage hero clears the double-row header */
-  .r4-page .v5-hero-grid { padding-top: 150px; }
-
 
   /* Glass card générique */
   .r4-glass {
