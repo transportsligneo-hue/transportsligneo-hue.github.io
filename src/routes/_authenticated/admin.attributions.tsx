@@ -599,32 +599,61 @@ function AdminAttributions() {
                   <p className="text-pro-text-soft text-sm mt-1">
                     {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                    {(() => {
-                      const plate = a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation;
-                      return plate ? <span className="plate-tag text-[11px]">{plate}</span> : (
-                        <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                          Plaque à renseigner
-                        </span>
-                      );
-                    })()}
-                    {(a.trajet?.marque || a.trajet?.modele) && (
-                      <span className="text-xs font-semibold text-pro-text">
-                        {[a.trajet?.marque, a.trajet?.modele].filter(Boolean).join(" ")}
-                      </span>
-                    )}
-                    {(() => {
-                      const e = (a.trajet?.vehicule_energie ?? "").toLowerCase();
-                      return e.includes("lec") || e === "ev" ? (
-                        <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                          Électrique
-                        </span>
-                      ) : null;
-                    })()}
-                    {a.trajet?.vin && (
-                      <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {a.trajet.vin.slice(-8)}</span>
-                    )}
-                  </div>
+                  {(() => {
+                    const extra = a.trajet?.devis_id ? devisVehicules.get(a.trajet.devis_id) : undefined;
+                    const list: { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null }[] =
+                      extra && extra.length > 1
+                        ? extra
+                        : [{
+                            immatriculation: a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation,
+                            marque: a.trajet?.marque,
+                            modele: a.trajet?.modele,
+                            vin: a.trajet?.vin,
+                            energie: a.trajet?.vehicule_energie,
+                          }];
+                    return (
+                      <div className="mt-2 space-y-1">
+                        {list.map((v, i) => {
+                          const e = (v.energie ?? "").toLowerCase();
+                          return (
+                            <div key={`${v.immatriculation ?? i}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              {v.immatriculation ? (
+                                <span className="plate-tag text-[11px]">{v.immatriculation}</span>
+                              ) : (
+                                <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                                  Plaque à renseigner
+                                </span>
+                              )}
+                              {(v.marque || v.modele) && (
+                                <span className="text-xs font-semibold text-pro-text">
+                                  {[v.marque, v.modele].filter(Boolean).join(" ")}
+                                </span>
+                              )}
+                              {v.type && (
+                                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                                  {v.type}
+                                </span>
+                              )}
+                              {(e.includes("lec") || e === "ev") && (
+                                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                                  Électrique
+                                </span>
+                              )}
+                              {v.vin && (
+                                <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {v.vin.slice(-8)}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {list.length > 1 && (
+                          <p className="text-[10px] uppercase tracking-wider text-pro-muted">
+                            {list.length} véhicules sur ce dossier
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
 
                     <span className="font-semibold text-pro-text-soft">
