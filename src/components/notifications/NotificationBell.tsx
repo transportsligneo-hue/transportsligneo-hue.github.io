@@ -115,7 +115,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition"
+        className="notif-bell-btn relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition"
         aria-label="Notifications"
         aria-expanded={open}
       >
