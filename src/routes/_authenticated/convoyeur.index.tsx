@@ -128,19 +128,16 @@ function ConvoyeurDashboard() {
   };
 
   const statCards = [
-    { to: "/convoyeur/missions", search: { f: "proposed" as const }, label: "Proposées", value: stats.proposed, icon: Clock, pill: "En attente",
-      iconBg: "from-[#3d2a10] to-[#2a1d0b]", iconBorder: "border-[rgba(234,179,8,0.35)]", iconColor: "text-[#f59e0b]",
-      dotColor: "bg-[#f59e0b]", pillColor: "text-[#fbbf24]" },
-    { to: "/convoyeur/missions", search: { f: "accepted" as const }, label: "Acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
-      iconBg: "from-[#0d1f4d] to-[#0a1638]", iconBorder: "border-[rgba(96,165,250,0.35)]", iconColor: "text-[#60a5fa]",
-      dotColor: "bg-[#60a5fa]", pillColor: "text-[#93c5fd]" },
-    { to: "/convoyeur/missions", search: { f: "in_progress" as const }, label: "En cours", value: stats.inProgress, icon: Truck, pill: "Actives",
-      iconBg: "from-[#0f2e28] to-[#0a1f1a]", iconBorder: "border-[rgba(52,211,153,0.35)]", iconColor: "text-[#34d399]",
-      dotColor: "bg-[#34d399]", pillColor: "text-[#6ee7b7]" },
-    { to: "/convoyeur/historique", search: undefined, label: "Terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
-      iconBg: "from-[#26183d] to-[#1a1128]", iconBorder: "border-[rgba(167,139,250,0.35)]", iconColor: "text-[#a78bfa]",
-      dotColor: "bg-[#a78bfa]", pillColor: "text-[#c4b5fd]" },
+    { to: "/convoyeur/missions", search: { f: "proposed" as const }, label: "Missions proposées", value: stats.proposed, icon: Clock, pill: "En attente",
+      accent: "#f0a94e" },
+    { to: "/convoyeur/missions", search: { f: "accepted" as const }, label: "Missions acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
+      accent: "#4f8cff" },
+    { to: "/convoyeur/missions", search: { f: "in_progress" as const }, label: "Missions en cours", value: stats.inProgress, icon: Truck, pill: "Actives",
+      accent: "#3ddc97" },
+    { to: "/convoyeur/historique", search: undefined, label: "Missions terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
+      accent: "#b98af0" },
   ] as const;
+
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
