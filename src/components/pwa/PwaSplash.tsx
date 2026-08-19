@@ -54,7 +54,7 @@ export default function PwaSplash() {
           draggable={false}
         />
         <div className="pwa-splash__wordmark">
-          <span className="pwa-splash__brand">TRANSPORTS&nbsp;LIGNEO</span>
+          <span className="pwa-splash__brand">TRANSPORTS&nbsp;<span style={{ color: "#4f8cff" }}>LIGNEO</span></span>
           <span className="pwa-splash__tagline">Convoyage automobile</span>
         </div>
       </div>

@@ -186,7 +186,7 @@
 
   /* Driver main : compense le header mobile (safe-area + 64px) */
   @media (max-width: 767px) {
-    .driver-main { padding-top: calc(env(safe-area-inset-top) + 64px); }
+    .driver-main { padding-top: calc(env(safe-area-inset-top) + 44px); }
   }
 
   .mobile-card {
