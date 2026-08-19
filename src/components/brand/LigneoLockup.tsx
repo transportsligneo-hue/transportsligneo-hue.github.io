@@ -1,3 +1,5 @@
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+
 interface Props {
   /** Taille du lockup */
   size?: "sm" | "md" | "lg";
@@ -22,19 +24,16 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
   return (
     <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>
       <span
-        className="shrink-0 flex items-center justify-center rounded-full border border-[#d9b54a] shadow-[0_0_12px_rgba(217,181,74,0.35)]"
-        style={{
-          width: s.badge,
-          height: s.badge,
-          background: "radial-gradient(circle at 30% 20%, #4f8cff, #132a6b 70%)",
-        }}
-        aria-hidden="true"
+        className="shrink-0 flex items-center justify-center rounded-full border border-[#d9b54a] overflow-hidden shadow-[0_0_12px_rgba(217,181,74,0.35)]"
+        style={{ width: s.badge, height: s.badge, background: "#0b1026" }}
       >
-        <svg width={s.icon} height={s.icon} viewBox="0 0 24 24" fill="none" stroke="#d9b54a" strokeWidth="1.6">
-          <path d="M3 13l2-5a2 2 0 012-1.4h10A2 2 0 0119 8l2 5v5a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H6v1a1 1 0 01-1 1H4a1 1 0 01-1-1z" />
-          <circle cx="7.5" cy="16.5" r="1.3" fill="#d9b54a" />
-          <circle cx="16.5" cy="16.5" r="1.3" fill="#d9b54a" />
-        </svg>
+        <img
+          src={logoLigneo}
+          alt="Transports Ligneo"
+          width={s.badge}
+          height={s.badge}
+          className="h-full w-full object-contain p-[2px]"
+        />
       </span>
       <span className="min-w-0 flex flex-col leading-none">
         <span

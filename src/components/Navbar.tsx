@@ -15,6 +15,7 @@ const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }>
   { to: "/suivi", label: "Suivi" },
   { to: "/pro", label: "B2B", accent: "purple" },
   { to: "/devenir-convoyeur", label: "Espace Driver", accent: "green" },
+  { to: "/actualites", label: "Actualités" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
