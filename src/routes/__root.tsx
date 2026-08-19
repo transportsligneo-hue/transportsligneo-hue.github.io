@@ -17,6 +17,7 @@ import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { isMobileAppShell } from "@/lib/app-mode";
 
 import appCss from "../styles.css?url";
 
@@ -124,6 +125,37 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Routes visibles dans la coquille Capacitor "Driver" : login/inscription + espace convoyeur. */
+const DRIVER_APP_ROUTES = [
+  "/login",
+  "/mot-de-passe-oublie",
+  "/reset-password",
+  "/auth",
+  "/inscription-convoyeur",
+  "/invitation-convoyeur",
+  "/attente-validation",
+  "/convoyeur",
+];
+
+/** Applique la classe body `is-driver-app` uniquement dans l'app Capacitor (partie driver). */
+function DriverAppBodyClass() {
+  const { pathname } = useRouterState({ select: (s) => s.location });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isMobileAppShell()) return;
+    const isDriverApp = DRIVER_APP_ROUTES.some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`),
+    );
+    if (isDriverApp) {
+      document.body.classList.add("is-driver-app");
+    } else {
+      document.body.classList.remove("is-driver-app");
+    }
+  }, [pathname]);
+
+  return null;
+}
+
 /** Tunnel de paiement : pas de chrome public, focus total sur le règlement. */
 function useIsCheckoutRoute() {
   const { pathname } = useRouterState({ select: (s) => s.location });
@@ -202,6 +234,7 @@ function RootComponent() {
               <CursorSpotlight />
               <RecoveryLinkRedirect />
               <MobileAppGate />
+              <DriverAppBodyClass />
               <NativeAppInit />
 
 
