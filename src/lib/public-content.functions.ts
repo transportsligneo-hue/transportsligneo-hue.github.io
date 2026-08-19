@@ -40,6 +40,51 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
         { onConflict: "email" },
       );
     if (error) throw new Error("Inscription impossible pour le moment.");
+
+    // Liste d'attente convoyeur : accusé de réception candidat + alerte admin
+    if ((data.source ?? "") === "convoyeur-waitlist") {
+      const dateFr = new Intl.DateTimeFormat("fr-FR", {
+        dateStyle: "short",
+        timeStyle: "short",
+        timeZone: "Europe/Paris",
+      }).format(new Date());
+      const sourceLabel = "Page Devenir convoyeur";
+
+      try {
+        const { sendTransactionalEmailServer, getAdminNotificationEmail } = await import(
+          "@/server/email-send"
+        );
+        await sendTransactionalEmailServer({
+          templateName: "waitlist-convoyeur",
+          recipientEmail: email,
+          idempotencyKey: `waitlist-convoyeur-${email}`,
+          templateData: { email, date: dateFr, source: sourceLabel },
+        });
+        const adminEmail = await getAdminNotificationEmail();
+        await sendTransactionalEmailServer({
+          templateName: "waitlist-convoyeur-admin",
+          recipientEmail: adminEmail,
+          idempotencyKey: `waitlist-convoyeur-admin-${email}-${Date.now()}`,
+          templateData: { email, date: dateFr, source: sourceLabel },
+        });
+      } catch (e) {
+        console.error("[waitlist] email failed", e);
+      }
+
+      try {
+        await supabaseAdmin.rpc("create_admin_notification", {
+          _type: "convoyeur",
+          _titre: "Nouvelle inscription liste d'attente convoyeur",
+          _message: `${email} souhaite rejoindre le réseau de convoyeurs (${sourceLabel}).`,
+          _link: "/admin/marketing",
+          _entity_type: "newsletter_abonne",
+          _entity_id: null,
+        } as never);
+      } catch (e) {
+        console.error("[waitlist] admin notification failed", e);
+      }
+    }
+
     return { ok: true };
   });
 
