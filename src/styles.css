@@ -6362,3 +6362,24 @@ body.is-driver-app .ldock-fab svg { color: #04231a !important; }
 body.is-driver-app .ldock-item.is-active svg {
   filter: drop-shadow(0 0 6px rgba(110, 255, 205, 0.75)) !important;
 }
+
+/* App Capacitor Driver : chips actifs du catalogue en vert néon */
+body.is-driver-app .cat2-chip.is-active {
+  background: linear-gradient(120deg, #16a97f, #6effcd) !important;
+  border-color: rgba(110, 255, 205, 0.55) !important;
+  color: #04231a !important;
+  box-shadow: 0 0 0 1px rgba(110, 255, 205, 0.4), 0 6px 16px rgba(110, 255, 205, 0.35),
+    0 0 20px rgba(110, 255, 205, 0.25) !important;
+}
+body.is-driver-app .cat2-chip.is-active svg {
+  color: #04231a !important;
+  filter: none !important;
+}
+body.is-driver-app .cat2-chip.is-near {
+  background: linear-gradient(120deg, rgba(110, 255, 205, 0.14), rgba(22, 169, 127, 0.14));
+  border-color: rgba(110, 255, 205, 0.35);
+  color: #a8ffe4;
+}
+body.is-driver-app .cat2-chip.is-near svg {
+  filter: drop-shadow(0 0 4px rgba(110, 255, 205, 0.6));
+}
