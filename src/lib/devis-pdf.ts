@@ -318,8 +318,15 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCE MISSION", rx, blockY + 6);
 
-  const vehicule = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
-    || d.type_vehicule || "—";
+  const multiVehicules = (d.vehicules ?? []).filter(
+    (v) => v && (v.immatriculation || v.marque || v.modele),
+  );
+  const isGroupe = multiVehicules.length > 1;
+  const vehicule = isGroupe
+    ? `${multiVehicules.length} véhicules (devis groupé)`
+    : [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
+      || d.type_vehicule || "—";
+
   let ry = blockY + 13;
   // Trajet sur 2 lignes max (adresses longues)
   doc.setFont("helvetica", "normal");
