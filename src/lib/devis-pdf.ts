@@ -383,22 +383,41 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
   const pvDigital = d.pv_digital ?? parsedFromMessage.pv;
 
-  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [
-    {
+  const v1Label = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ");
+  const vehiculesList = parsedFromMessage.vehicules.length
+    ? [v1Label, ...parsedFromMessage.vehicules].filter(Boolean)
+    : [];
+  const nbVeh = vehiculesList.length;
+
+  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [];
+
+  if (nbVeh > 1) {
+    // Prix réparti par véhicule
+    const unitPrice = +(ht / nbVeh).toFixed(2);
+    vehiculesList.forEach((v, i) => {
+      // dernier véhicule : ajuste pour tomber juste sur le total
+      const part = i === nbVeh - 1 ? +(ht - unitPrice * (nbVeh - 1)).toFixed(2) : unitPrice;
+      lignes.push({
+        desc: `Véhicule ${i + 1} : ${v} — ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
+        qty: "1",
+        unit: eur(part),
+        total: eur(part),
+      });
+    });
+  } else {
+    lignes.push({
       desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
       qty: "1",
       unit: eur(ht),
       total: eur(ht),
-    },
-    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
-    { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
-  ];
-  if (parsedFromMessage.vehicules.length) {
-    const v1 = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ");
-    [v1, ...parsedFromMessage.vehicules].filter(Boolean).forEach((v, i) => {
-      lignes.push({ desc: `Véhicule ${i + 1} : ${v}`, qty: "1", unit: "Inclus", total: eur(0) });
     });
   }
+
+  lignes.push(
+    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
+    { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
+  );
+
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
