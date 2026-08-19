@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.profiles_protect_org_on_insert() FROM PUBLIC, anon, authenticated;
