@@ -96,6 +96,25 @@ export function DocScanButton({
         {busy ? "Ouverture du scanner…" : label}
       </button>
 
+      {busy && pages.length === 0 && (
+        <div className="fixed inset-0 z-[96] flex flex-col items-center justify-center bg-gradient-to-b from-[#0a1638] via-[#0d1f4e] to-[#132a6b] text-white">
+          <div className="relative w-24 h-24">
+            <span className="absolute inset-0 rounded-3xl border border-[#4f8cff]/40" />
+            <span className="absolute inset-0 rounded-3xl border-2 border-transparent border-t-[#4f8cff] animate-spin" />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <ScanLine size={30} className="text-[#4f8cff]" />
+            </span>
+            <span className="absolute left-3 right-3 top-1/2 h-px bg-gradient-to-r from-transparent via-[#2f5fff] to-transparent shadow-[0_0_14px_#2f5fff] animate-pulse" />
+          </div>
+          <p className="mt-6 text-[10px] uppercase tracking-[0.28em] text-[#8fb2ff]">Transports Ligneo</p>
+          <p className="mt-1.5 text-base font-semibold">Préparation du scanner</p>
+          <p className="mt-1 text-xs text-white/60 px-10 text-center">
+            Cadrez le document dans la zone lumineuse, la détection des bords est automatique.
+          </p>
+        </div>
+      )}
+
+
       {pages.length > 0 && (
         <div className="fixed inset-0 z-[95] bg-[#0b1026]/95 backdrop-blur-sm flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 text-white">
