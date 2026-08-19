@@ -25,6 +25,7 @@ import {
   Crown,
   ClipboardList,
   AlertTriangle,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
@@ -153,7 +154,8 @@ function AdminLayout() {
 
     // Finance
     { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
-    { to: "/admin/paiements", label: "Paiements", icon: CreditCard, group: "Finance" },
+    { to: "/admin/paiements", label: "Paiements clients", icon: CreditCard, group: "Finance" },
+    { to: "/admin/paiements-convoyeurs", label: "Paiements convoyeurs", icon: Wallet, group: "Finance" },
     { to: "/admin/informations-legales", label: "Informations légales", icon: Building2, group: "Finance" },
 
     // Système

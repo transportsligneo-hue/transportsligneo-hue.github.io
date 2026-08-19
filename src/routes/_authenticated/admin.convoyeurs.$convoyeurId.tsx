@@ -20,10 +20,12 @@ import {
   CalendarDays,
   User,
   Megaphone,
+  Wallet,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ConvoyeurFinancesPanel } from "@/components/admin/finances/ConvoyeurFinancesPanel";
 import { humanizeAction } from "@/lib/activity-humanizer";
 import {
   AdminPageHeader,
@@ -538,6 +540,7 @@ function AdminConvoyeurDetail() {
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/{requiredDocs.length})</TabsTrigger>
           <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
+          <TabsTrigger value="finances" className="gap-1.5"><Wallet size={14} /> Finances</TabsTrigger>
           <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
         </TabsList>
@@ -708,6 +711,10 @@ function AdminConvoyeurDetail() {
               }}
             />
           </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="finances" className="mt-6">
+          <ConvoyeurFinancesPanel convoyeurId={conv.id} nom={fullName} />
         </TabsContent>
 
         <TabsContent value="dispos" className="mt-6">

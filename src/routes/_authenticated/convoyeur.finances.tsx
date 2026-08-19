@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { MesRemunerations } from "@/components/convoyeur/MesRemunerations";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ArrowLeft, TrendingUp, Wallet, CreditCard, FileDown, Clock3, CheckCircle2,
+  ArrowLeft, TrendingUp, Wallet, CreditCard, FileDown,
   ArrowUpRight, ArrowDownRight, Loader2, Pencil, Check, X,
 } from "lucide-react";
 
@@ -114,8 +115,6 @@ function FinancesPage() {
     return { thisMonth, lastMonth, delta, monthly, currentLabel: MONTHS_FULL[m] };
   }, [missions]);
 
-  const upcomingPayouts = missions.filter((x) => !x.paid);
-  const pastPayouts = missions.filter((x) => x.paid);
 
   const maxMonthly = Math.max(1, ...monthly.map((x) => x.total));
 
@@ -212,113 +211,15 @@ function FinancesPage() {
       </div>
 
       {/* Paiements à venir */}
-      <section>
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <Clock3 size={14} className="text-[#f59e0b]" />
-          <h2 className="text-[13px] font-bold text-white">Paiements à venir</h2>
-          <span className="text-[11px] text-[#8fa3cc]">({upcomingPayouts.length})</span>
-        </div>
-        {upcomingPayouts.length === 0 ? (
-          <div className="rounded-[18px] border border-dashed border-[rgba(96,165,250,0.22)] bg-white/[0.02] px-4 py-6 text-center text-[12px] text-[#8fa3cc]">
-            Aucun paiement en attente
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {upcomingPayouts.map((m) => {
-              const eta = new Date(m.updated_at);
-              eta.setDate(eta.getDate() + 7);
-              return (
-                <div key={m.id} className="rounded-[18px] border border-[rgba(234,179,8,0.28)] bg-gradient-to-br from-[#1c1508] to-[#0a1636] p-3.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl border border-[rgba(234,179,8,0.35)] bg-[rgba(224,168,62,0.14)] flex items-center justify-center shrink-0">
-                    <Clock3 size={16} className="text-[#f59e0b]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-semibold text-white truncate">
-                      {m.depart} → {m.arrivee}
-                    </p>
-                    <p className="text-[10.5px] text-[#8fa3cc] mt-0.5 tabular-nums">
-                      Réf. {m.ref} • versement prévu le {eta.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                    </p>
-                  </div>
-                  <p className="text-[15px] font-bold text-[#f5b940] tabular-nums shrink-0">{m.montant.toFixed(0)} €</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Détail missions payées du mois */}
+      {/* Rémunérations officielles (mêmes chiffres que l'admin) */}
       <section>
         <div className="flex items-center gap-2 mb-2 px-1">
           <Wallet size={14} className="text-[#34d399]" />
-          <h2 className="text-[13px] font-bold text-white">Missions rémunérées — {currentLabel}</h2>
+          <h2 className="text-[13px] font-bold text-white">Détail de mes rémunérations</h2>
         </div>
-        {(() => {
-          const now = new Date();
-          const rows = missions.filter((x) => {
-            const d = new Date(x.updated_at);
-            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-          });
-          if (rows.length === 0) {
-            return (
-              <div className="rounded-[18px] border border-dashed border-[rgba(96,165,250,0.22)] bg-white/[0.02] px-4 py-6 text-center text-[12px] text-[#8fa3cc]">
-                Aucune mission terminée ce mois-ci
-              </div>
-            );
-          }
-          return (
-            <div className="space-y-2">
-              {rows.map((m) => (
-                <div key={m.id} className="rounded-[18px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] to-[#081230] p-3.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-[#4EA8FF]">Réf. {m.ref}</p>
-                      <p className="text-[13.5px] font-semibold text-white truncate mt-1">
-                        {m.depart} → {m.arrivee}
-                      </p>
-                      <p className="text-[10.5px] text-[#8fa3cc] mt-1 tabular-nums">
-                        {new Date(m.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                      </p>
-                    </div>
-                    <p className="text-[16px] font-bold text-[#f5b940] tabular-nums shrink-0">{m.montant.toFixed(0)} €</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })()}
+        <MesRemunerations userId={user?.id} />
       </section>
 
-      {/* Historique versements */}
-      <section>
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <CheckCircle2 size={14} className="text-[#34d399]" />
-          <h2 className="text-[13px] font-bold text-white">Historique des versements</h2>
-        </div>
-        {pastPayouts.length === 0 ? (
-          <div className="rounded-[18px] border border-dashed border-[rgba(96,165,250,0.22)] bg-white/[0.02] px-4 py-6 text-center text-[12px] text-[#8fa3cc]">
-            Aucun versement à ce jour
-          </div>
-        ) : (
-          <div className="rounded-[18px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] to-[#081230] divide-y divide-[rgba(96,165,250,0.12)] overflow-hidden">
-            {pastPayouts.slice(0, 10).map((m) => (
-              <div key={m.id} className="flex items-center gap-3 p-3">
-                <div className="w-9 h-9 rounded-xl border border-[rgba(52,211,153,0.35)] bg-[rgba(74,208,160,0.10)] flex items-center justify-center shrink-0">
-                  <CheckCircle2 size={15} className="text-[#34d399]" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[12.5px] font-semibold text-white truncate">Virement — Réf. {m.ref}</p>
-                  <p className="text-[10.5px] text-[#8fa3cc] mt-0.5 tabular-nums">
-                    {new Date(m.updated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })} • Reçu
-                  </p>
-                </div>
-                <p className="text-[13.5px] font-bold text-[#34d399] tabular-nums shrink-0">+{m.montant.toFixed(0)} €</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* Moyen de paiement */}
       <section>
