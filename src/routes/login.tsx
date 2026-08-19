@@ -164,7 +164,7 @@ function LoginPage() {
 
 
   return (
-    <div className={`auth-shell flex items-center justify-center px-4 py-10 ${tab === "pro" ? "auth-driver-theme" : ""}`}>
+    <div className={`auth-shell flex items-center justify-center px-4 py-10 ${isMobileApp ? "auth-driver-theme" : ""}`}>
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
           {tab === "pro" && (
@@ -173,7 +173,7 @@ function LoginPage() {
             </div>
           )}
           <Link to="/" className="inline-block mb-4 relative auth-logo-pulse">
-            <LigneoLockup size="lg" variant={isMobileApp || tab === "pro" ? "green" : "blue"} className="justify-center relative z-10" />
+            <LigneoLockup size="lg" variant={isMobileApp ? "green" : "blue"} className="justify-center relative z-10" />
           </Link>
           <h1 className="auth-title text-2xl md:text-3xl">Connexion <span className="auth-accent">sécurisée</span></h1>
           <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace en un clic</p>
@@ -284,10 +284,10 @@ function LoginPage() {
           </button>
 
           <div className="text-center pt-4 border-t border-white/10">
-            <Link to={isMobileApp ? "/inscription-convoyeur" : "/choisir-compte"} className="auth-link-lg is-gold">
-              Créer un compte
-              <ArrowRight size={14} className="arrow" />
-            </Link>
+          <Link to={isMobileApp ? "/inscription-convoyeur" : "/choisir-compte"} className={`auth-link-lg ${isMobileApp || tab === "client" ? "is-gold" : ""}`}>
+            Créer un compte
+            <ArrowRight size={14} className="arrow" />
+          </Link>
           </div>
         </form>
 
