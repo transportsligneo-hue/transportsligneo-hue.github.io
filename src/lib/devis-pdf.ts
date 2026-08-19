@@ -77,8 +77,8 @@ export interface DevisData {
  * Relit les options cochées (plein carburant, recharge élec, mise en main, lavage…)
  * et le PV digitalisé depuis le récapitulatif enregistré dans `message`.
  */
-export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null } {
-  const out: { options: string[]; pv: string | null } = { options: [], pv: null };
+export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null; vehicules: string[] } {
+  const out: { options: string[]; pv: string | null; vehicules: string[] } = { options: [], pv: null, vehicules: [] };
   if (!message) return out;
   for (const raw of message.split("\n")) {
     const line = raw.trim();
@@ -87,11 +87,17 @@ export function parseDevisOptions(message?: string | null): { options: string[];
       out.options = optMatch[1].split(",").map((s) => s.trim()).filter(Boolean);
       continue;
     }
+    const vehMatch = line.match(/^V[ée]hicule\s*(\d+)\s*:\s*(.+)$/i);
+    if (vehMatch) {
+      out.vehicules.push(vehMatch[2].trim());
+      continue;
+    }
     const pvMatch = line.match(/^PV de livraison digitalis[ée]\s*:\s*(.+)$/i);
     if (pvMatch) out.pv = pvMatch[1].trim();
   }
   return out;
 }
+
 
 const NAVY: [number, number, number] = [12, 22, 56];
 const GOLD: [number, number, number] = [176, 137, 44];
@@ -308,6 +314,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCE MISSION", rx, blockY + 6);
 
+  const vehiculesExtra = parseDevisOptions(d.message).vehicules;
   const vehicule = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
     || d.type_vehicule || "—";
   let ry = blockY + 13;
@@ -321,8 +328,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...NAVY);
   doc.text(trajetLines, rx + 13, ry);
   ry += 5.2 * trajetLines.length;
-  labelValue(doc, rx, ry, "Véhicule : ", vehicule);
+  labelValue(doc, rx, ry, vehiculesExtra.length ? "Véhicule 1 : " : "Véhicule : ", vehicule);
   ry += 5.2;
+  vehiculesExtra.forEach((v, i) => {
+    labelValue(doc, rx, ry, `Véhicule ${i + 2} : `, v);
+    ry += 5.2;
+  });
+
   labelValue(doc, rx, ry, "Enlèvement souhaité : ", d.date_souhaitee ? fmtDate(d.date_souhaitee) : "—");
   ry += 5.2;
   labelValue(doc, rx, ry, "Contact commercial : ", "Olivier G.");
@@ -379,9 +391,16 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
     { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
   ];
+  if (parsedFromMessage.vehicules.length) {
+    const v1 = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ");
+    [v1, ...parsedFromMessage.vehicules].filter(Boolean).forEach((v, i) => {
+      lignes.push({ desc: `Véhicule ${i + 1} : ${v}`, qty: "1", unit: "Inclus", total: eur(0) });
+    });
+  }
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
+
   if (pvDigital) {
     lignes.push({ desc: `PV de livraison digitalisé : ${pvDigital}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
