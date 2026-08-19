@@ -88,7 +88,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: etatDesLieuxDigital,
-        alt: "Convoyeur photographiant la carrosserie d'un véhicule avec son smartphone",
+        alt: "Smartphone photographiant la carrosserie d'un véhicule lors de l'état des lieux",
         legende:
           "Chaque angle du véhicule est photographié au départ, puis à l'arrivée, dans l'application driver.",
       },
@@ -161,7 +161,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: concessionDigitale,
-        alt: "Responsable de concession consultant le suivi de ses convoyages sur un ordinateur portable",
+        alt: "Ordinateur portable affichant le suivi des convoyages d'une concession",
       },
       { type: "h2", texte: "Un exemple d'intégration" },
       {
@@ -226,7 +226,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: driverSupercar,
-        alt: "Convoyeur professionnel préparant la prise en charge d'un véhicule",
+        alt: "Véhicule premium prêt à être pris en charge",
       },
       { type: "h2", texte: "Les revenus, sans promesse creuse" },
       {
@@ -295,7 +295,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: remiseVehicule,
-        alt: "Signature de l'état des lieux au moment de la remise du véhicule",
+        alt: "Clés et document de remise posés sur le tableau de bord",
         legende:
           "La signature du client et celle du convoyeur sont recueillies sur l'écran, puis intégrées au procès-verbal.",
       },
@@ -482,7 +482,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: appDriver,
-        alt: "Convoyeur consultant sa mission sur son smartphone avant le départ",
+        alt: "Smartphone affichant la mission en cours dans l'habitacle",
       },
       { type: "h2", texte: "Ce qui a été plus difficile à accepter" },
       {
@@ -612,7 +612,7 @@ export const ARTICLES: Article[] = [
       {
         type: "image",
         src: remiseVehicule,
-        alt: "Remise d'un véhicule au client à l'arrivée de la mission",
+        alt: "Clés et document de livraison à l'arrivée de la mission",
       },
       { type: "h2", texte: "Ce qui allonge réellement les délais" },
       {
