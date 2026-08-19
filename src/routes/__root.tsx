@@ -139,19 +139,20 @@ const DRIVER_APP_ROUTES = [
 
 /** Applique la classe body `is-driver-app` uniquement dans l'app Capacitor (partie driver). */
 function DriverAppBodyClass() {
+  const { pathname } = useRouterState({ select: (s) => s.location });
+
   useEffect(() => {
     if (typeof window === "undefined" || !isMobileAppShell()) return;
-    const pathname = window.location.pathname;
     const isDriverApp = DRIVER_APP_ROUTES.some(
       (p) => pathname === p || pathname.startsWith(`${p}/`),
     );
     if (isDriverApp) {
       document.body.classList.add("is-driver-app");
-    }
-    return () => {
+    } else {
       document.body.classList.remove("is-driver-app");
-    };
-  }, []);
+    }
+  }, [pathname]);
+
   return null;
 }
 
