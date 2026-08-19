@@ -111,6 +111,8 @@ function AdminLayout() {
         : undefined,
     },
     { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
+    { to: "/admin/test-notifications", label: "Test notifications", icon: Bell, group: "Pilotage" },
+
 
     // Marketing
     { to: "/admin/campagnes", label: "Campagnes", icon: Megaphone, group: "Marketing" },
