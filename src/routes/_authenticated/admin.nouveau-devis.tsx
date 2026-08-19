@@ -750,42 +750,61 @@ function AdminNouveauDevisPage() {
               placeholder="Ex : 6 rue du pont libert, 37520 La Riche"
             />
             {!isRechargeSeule && (
-              <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+              <AddressField
+                label={isGroupe ? "Adresse d'arrivée commune" : "Adresse d'arrivée"}
+                value={arrivee}
+                onChange={setArrivee}
+                placeholder="Ex : 5 avenue de la République, Le Mans"
+              />
             )}
-            <div>
-              <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                Type de trajet
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {TRAJET_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => {
-                      setTypeTrajet(t);
-                      if (t === RECHARGE_SEULE) {
-                        const elecLabel = OPTIONS_LIST[0].label;
-                        setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
-                      }
-                    }}
-                    className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                      typeTrajet === t
-                        ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
-                        : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
+            {!isGroupe && (
+              <div>
+                <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                  Type de trajet
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {TRAJET_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setTypeTrajet(t);
+                        if (t === RECHARGE_SEULE) {
+                          const elecLabel = OPTIONS_LIST[0].label;
+                          setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
+                        }
+                      }}
+                      className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
+                        typeTrajet === t
+                          ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                          : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                {isRechargeSeule && (
+                  <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+                    Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
+                  </p>
+                )}
               </div>
-              {isRechargeSeule && (
-                <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
-                  Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
-                </p>
-              )}
-            </div>
+            )}
 
-            <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+            {isGroupe ? (
+              <div className="flex items-center justify-between rounded-xl border border-pro-border bg-pro-bg-soft px-4 py-3">
+                <span className="text-[12.5px] font-semibold text-pro-muted">
+                  Total TTC du devis ({groupLines.length} véhicule{groupLines.length > 1 ? "s" : ""})
+                </span>
+                <span className="text-[16px] font-extrabold text-pro-text">
+                  {totalGroupe.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+                </span>
+              </div>
+            ) : (
+              <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+            )}
+
 
             <div className="border-t border-pro-border pt-4">
               <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
