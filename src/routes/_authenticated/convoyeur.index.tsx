@@ -249,7 +249,7 @@ function ConvoyeurDashboard() {
             <span className="block text-[9px] font-bold uppercase tracking-[0.1em] text-[#4f8cff]">Catalogue</span>
             <span className="block font-driver text-[13.5px] font-bold text-white mt-[3px] mb-2">Aucune mission disponible</span>
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white"
+              className="driver-cta-catalogue inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white"
               style={{ boxShadow: "0 0 14px rgba(79,140,255,0.6), 0 0 28px rgba(47,95,255,0.35)" }}
             >
               Parcourir <ArrowRight size={11} />
