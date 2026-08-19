@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, CheckCircle2, Building2, User, Send, Star } from "lucide-react";
 import { Modal, Button, FormField, SearchInput, Badge } from "./AdminUI";
@@ -366,6 +367,7 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
+                          <DriverAvatar convoyeurId={c.id} name={`${c.prenom} ${c.nom}`} size="sm" />
                           <p className="font-medium text-pro-text">
                             {c.prenom} {c.nom}
                           </p>

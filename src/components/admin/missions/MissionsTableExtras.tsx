@@ -152,7 +152,7 @@ export function ConvoyeurCell({
 }) {
   return (
     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-      <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} />
+      <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} convoyeurId={meta?.convoyeurId ?? null} />
       <select
         value={meta?.convoyeurId ?? ""}
         disabled={disabled}
