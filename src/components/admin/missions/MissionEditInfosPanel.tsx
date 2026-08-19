@@ -428,24 +428,78 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
             })}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {active.fields.map(renderField)}
-          </div>
+          {active.id === "vehicule" && isGrouped ? (
+            <div>
+              <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-pro-text-soft">
+                  {vehForm.length} véhicules
+                </span>
+                {vehForm.map((v, i) => {
+                  const isActiveVeh = i === vehIndex;
+                  const changed = JSON.stringify(v) !== JSON.stringify(vehInitial[i] ?? {});
+                  const plate = (v.immatriculation as string) || `Véhicule ${i + 1}`;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setVehIndex(i)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold tracking-wide transition ${
+                        isActiveVeh
+                          ? "border-pro-accent bg-pro-accent text-white"
+                          : "border-pro-border bg-white text-pro-text-soft hover:text-pro-text"
+                      }`}
+                    >
+                      <Car size={12} /> {plate}
+                      {changed && (
+                        <span className={`h-1.5 w-1.5 rounded-full ${isActiveVeh ? "bg-white" : "bg-pro-accent"}`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {VEH_FIELDS.map((f) => renderVehField(f, vehIndex))}
+              </div>
+              <p className="mt-2 text-[10px] text-pro-muted">
+                Mission groupée : chaque véhicule du devis est modifiable individuellement. Les champs
+                de la fiche mission (ci-dessous) concernent le véhicule principal.
+              </p>
+              <div className="mt-4 border-t border-pro-border pt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-pro-text-soft">
+                  Véhicule principal (fiche mission)
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {active.fields.map(renderField)}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {active.fields.map(renderField)}
+            </div>
+          )}
 
           <div className="sticky bottom-0 -mx-1 mt-5 flex flex-wrap items-center gap-2 border-t border-pro-border bg-white/95 px-1 py-3 backdrop-blur">
             <p className="text-xs text-pro-text-soft">
-              {dirtyKeys.length === 0 ? "Aucune modification" : `${dirtyKeys.length} champ(s) modifié(s)`}
+              {dirtyKeys.length === 0 && !vehDirty
+                ? "Aucune modification"
+                : `${dirtyKeys.length} champ(s)${vehDirty ? ` · ${vehDirtyCount} véhicule(s)` : ""} modifié(s)`}
             </p>
             <div className="ml-auto flex items-center gap-2">
-              <Button variant="secondary" onClick={() => setForm(initial)} disabled={dirtyKeys.length === 0 || saving}>
+              <Button
+                variant="secondary"
+                onClick={() => { setForm(initial); setVehForm(vehInitial.map((v) => ({ ...v }))); }}
+                disabled={(dirtyKeys.length === 0 && !vehDirty) || saving}
+              >
                 <RotateCcw size={14} /> Annuler
               </Button>
-              <Button onClick={save} disabled={dirtyKeys.length === 0 || saving}>
+              <Button onClick={save} disabled={(dirtyKeys.length === 0 && !vehDirty) || saving}>
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 Enregistrer
               </Button>
             </div>
           </div>
+
         </div>
       )}
     </Card>
