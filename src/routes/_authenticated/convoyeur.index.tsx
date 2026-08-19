@@ -168,9 +168,13 @@ function ConvoyeurDashboard() {
         >
           <span className="flex items-baseline gap-2.5 min-w-0">
             <span className="text-[10.5px] uppercase tracking-[0.06em] font-semibold text-[#8fa3d9]">Revenus du mois</span>
-            <span className="font-driver text-[22px] font-bold text-[#f0d78a] tabular-nums leading-none">
+            <span
+              className="font-driver text-[22px] font-bold text-[#4f8cff] tabular-nums leading-none"
+              style={{ textShadow: "0 0 12px rgba(79,140,255,0.65), 0 0 26px rgba(47,95,255,0.4)" }}
+            >
               {revenueMonth.toFixed(0)} €
             </span>
+
             {revenueDelta !== null && (
               <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[#3ddc97]">
                 <ArrowUpRight size={11} className={revenueDelta >= 0 ? "" : "rotate-90"} />
@@ -244,9 +248,13 @@ function ConvoyeurDashboard() {
           <span className="flex-1 min-w-0">
             <span className="block text-[9px] font-bold uppercase tracking-[0.1em] text-[#4f8cff]">Catalogue</span>
             <span className="block font-driver text-[13.5px] font-bold text-white mt-[3px] mb-2">Aucune mission disponible</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white"
+              style={{ boxShadow: "0 0 14px rgba(79,140,255,0.6), 0 0 28px rgba(47,95,255,0.35)" }}
+            >
               Parcourir <ArrowRight size={11} />
             </span>
+
           </span>
         </Link>
       )}
