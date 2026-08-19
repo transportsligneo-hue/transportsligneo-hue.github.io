@@ -6337,3 +6337,10 @@ html.theme-light .driver-selfie-status { color: #47506e; }
 @media (prefers-reduced-motion: reduce) {
   .driver-neon-pill, .driver-neon-pill::after { animation: none; }
 }
+
+/* CTA "Parcourir" du dashboard driver : vert néon dans l'app Capacitor */
+body.is-driver-app .driver-cta-catalogue {
+  background-image: linear-gradient(to right, #23c48a, #6effcd) !important;
+  color: #04231a !important;
+  box-shadow: 0 0 14px rgba(110, 255, 205, 0.55), 0 0 28px rgba(35, 196, 138, 0.35) !important;
+}
