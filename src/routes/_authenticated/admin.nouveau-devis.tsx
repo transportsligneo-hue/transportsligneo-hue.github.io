@@ -322,17 +322,62 @@ function AdminNouveauDevisPage() {
     }
   };
 
+  const isGroupe = mode === "groupe";
+
+  const patchVeh = (key: string, patch: Partial<VehLine>) =>
+    setVlines((prev) => prev.map((v) => (v.key === key ? { ...v, ...patch } : v)));
+
+  const lookupVehPlate = async (line: VehLine) => {
+    const plate = line.immat.trim().toUpperCase();
+    if (plate.length < 4) {
+      patchVeh(line.key, { msg: "Saisis une plaque valide" });
+      return;
+    }
+    patchVeh(line.key, { busy: true, msg: null });
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        patchVeh(line.key, { msg: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        patchVeh(line.key, {
+          marque: d.marque || line.marque,
+          modele: d.modele || line.modele,
+          vin: d.vin ? d.vin.toUpperCase() : line.vin,
+          msg: `Trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+        });
+      }
+    } catch {
+      patchVeh(line.key, { msg: "Erreur réseau" });
+    } finally {
+      patchVeh(line.key, { busy: false });
+    }
+  };
+
+  const groupLines = useMemo(
+    () => vlines.filter((v) => v.immat.trim().length >= 4 || v.marque.trim() || v.modele.trim()),
+    [vlines],
+  );
+  const totalGroupe = useMemo(
+    () => groupLines.reduce((s, v) => s + parseEur(v.prix), 0),
+    [groupLines],
+  );
+
   const prix = useMemo(() => {
+    if (isGroupe) return totalGroupe > 0 ? Math.round(totalGroupe * 100) / 100 : NaN;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
-  }, [montant]);
+  }, [montant, isGroupe, totalGroupe]);
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
-  const isAllerRetour = typeTrajet === "Livraison + restitution";
-  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
+  const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
+  const isRechargeSeule = !isGroupe && typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
     ? "Recharge véhicule uniquement (sans livraison)"
-    : "Convoyage automobile";
+    : isGroupe
+      ? "Convoyage automobile (devis groupé multi-véhicules)"
+      : "Convoyage automobile";
+
   const planningIncomplet =
     !dateSouhaitee ||
     !heureSouhaitee ||
