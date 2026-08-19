@@ -1121,7 +1121,7 @@ export function EdlPremiumFlow({
         status: "error",
         error: err instanceof Error ? err.message : "Erreur",
       });
-      toast.error("Signature échouée");
+      toastSignatureError(err);
     }
   };
 
