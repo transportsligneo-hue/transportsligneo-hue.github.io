@@ -65,36 +65,16 @@ export default function Navbar() {
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="w-full px-5 py-2.5 flex items-center justify-between gap-3">
+        <div className="r4-topbar-inner w-full px-6 pt-2.5 pb-1.5 flex items-center justify-between gap-6">
           <Link to="/" className="shrink-0" aria-label="Accueil · Transports Ligneo">
             <LigneoLockup size="md" />
           </Link>
-
-          {/* Liens centraux · pilule englobante */}
-          <ul className="r4-nav-pill whitespace-nowrap mx-auto">
-            {navLinks.map((l) => {
-              const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
-              return (
-                <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    activeOptions={{ exact: true }}
-                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
-                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
-                  >
-                    {l.accent === "green" && <LockIcon />}
-                    {l.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
 
           {/* Actions droite : téléphone + Connexion */}
           <div className="flex items-center gap-2.5 shrink-0">
             <a
               href="tel:+33782456181"
-              className="nav-phone-block hidden xl:inline-flex"
+              className="nav-phone-block"
               aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
             >
               <span className="nav-phone-icon">
@@ -116,6 +96,29 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+
+        {/* Rangée 2 · liens centraux dans une pilule englobante */}
+        <div className="w-full px-6 pb-2.5 flex justify-center">
+          <ul className="r4-nav-pill whitespace-nowrap">
+            {navLinks.map((l) => {
+              const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
+              return (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    activeOptions={{ exact: true }}
+                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
+                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
+                  >
+                    {l.accent === "green" && <LockIcon />}
+                    {l.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
 
         {/* Menu compact */}
         {mobileOpen && (
