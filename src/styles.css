@@ -406,6 +406,50 @@ body.is-driver-app .training-gold-card:hover {
     animation: none !important;
   }
 }
+/* Registration closed card — Driver app Capacitor only */
+body.is-driver-app .driver-closed .auth-card {
+  border-color: rgba(110, 255, 205, 0.25) !important;
+  box-shadow: 0 0 30px rgba(110, 255, 205, 0.12), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+
+body.is-driver-app .closed-lock-ring {
+  background: rgba(255, 77, 77, 0.12) !important;
+  border-color: rgba(255, 77, 77, 0.55) !important;
+  box-shadow: 0 0 18px rgba(255, 77, 77, 0.35) !important;
+}
+
+body.is-driver-app .closed-lock-icon {
+  color: #ff4d4d !important;
+  text-shadow: 0 0 8px rgba(255, 77, 77, 0.85), 0 0 16px rgba(255, 77, 77, 0.55) !important;
+}
+
+body.is-driver-app .closed-title {
+  color: #6effcd !important;
+  text-shadow: 0 0 10px rgba(110, 255, 205, 0.55), 0 0 20px rgba(110, 255, 205, 0.3) !important;
+}
+
+body.is-driver-app .closed-message,
+body.is-driver-app .closed-contact {
+  color: rgba(245, 241, 232, 0.75) !important;
+}
+
+body.is-driver-app .closed-contact {
+  border-color: rgba(110, 255, 205, 0.2) !important;
+}
+
+body.is-driver-app .closed-link {
+  color: #6effcd !important;
+  text-shadow: 0 0 6px rgba(110, 255, 205, 0.4) !important;
+}
+
+body.is-driver-app .closed-link:hover {
+  color: #a8ffdf !important;
+  text-shadow: 0 0 10px rgba(168, 255, 223, 0.6) !important;
+}
+
+body.is-driver-app .closed-link svg {
+  color: #6effcd !important;
+}
 
 
 @theme inline {
