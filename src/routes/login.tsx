@@ -167,7 +167,7 @@ function LoginPage() {
     <div className={`auth-shell flex items-center justify-center px-4 py-10 ${tab === "pro" ? "auth-driver-theme" : ""}`}>
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
-          {isMobileApp && (
+          {tab === "pro" && (
             <div className="mb-4 flex justify-center">
               <span className="driver-neon-pill">DRIVER</span>
             </div>
