@@ -18,6 +18,15 @@ import {
   type Remuneration,
 } from "@/lib/finances-convoyeurs";
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <h3 className="text-sm font-semibold text-pro-text mb-3">{title}</h3>
+      {children}
+    </Card>
+  );
+}
+
 /** Onglet « Finances » d'un convoyeur : solde, missions, pénalités, paiements. */
 export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: string; nom?: string }) {
   const [loading, setLoading] = useState(true);
@@ -127,7 +136,7 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
         </Button>
       </div>
 
-      <Card title={`Rémunérations ${annee}`}>
+      <Section title={`Rémunérations ${annee}`}>
         {filtered.length === 0 ? (
           <EmptyState title="Aucune rémunération sur cette période" />
         ) : (
@@ -162,9 +171,9 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
             </tbody>
           </Table>
         )}
-      </Card>
+      </Section>
 
-      <Card title={`Pénalités appliquées (${penalitesList.length})`}>
+      <Section title={`Pénalités appliquées (${penalitesList.length})`}>
         {penalitesList.length === 0 ? (
           <EmptyState title="Aucune pénalité sur cette période" />
         ) : (
@@ -191,9 +200,9 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
             </tbody>
           </Table>
         )}
-      </Card>
+      </Section>
 
-      <Card title="Autres ajustements">
+      <Section title="Autres ajustements">
         {filteredAjust.filter((a) => a.categorie !== "penalite").length === 0 ? (
           <EmptyState title="Aucun ajustement libre sur cette période" />
         ) : (
@@ -210,9 +219,9 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
               ))}
           </ul>
         )}
-      </Card>
+      </Section>
 
-      <Card title="Paiements reçus">
+      <Section title="Paiements reçus">
         {paiements.length === 0 ? (
           <EmptyState title="Aucun paiement enregistré" />
         ) : (
@@ -239,7 +248,7 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
             </tbody>
           </Table>
         )}
-      </Card>
+      </Section>
 
       <RemunerationDetailModal
         remunerationId={detailId}
