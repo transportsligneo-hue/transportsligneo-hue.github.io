@@ -124,7 +124,7 @@ export function DoubleSignatureModal({
                   className="w-full px-3 py-2.5 border border-pro-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
                 />
               </div>
-              <SignatureCanvas key="client" onValidate={handleClient} disabled={saving || !clientName.trim()}/>
+              <SignatureCanvas key="client" onValidate={handleClient} disabled={saving}/>
             </>
           )}
 
