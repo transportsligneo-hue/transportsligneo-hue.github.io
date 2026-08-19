@@ -89,9 +89,11 @@ export function parseDevisOptions(message?: string | null): { options: string[];
     }
     const vehMatch = line.match(/^V[ée]hicule\s*(\d+)\s*:\s*(.+)$/i);
     if (vehMatch) {
-      out.vehicules.push(vehMatch[2].trim());
+      // Le véhicule 1 provient des champs du devis : on ne garde que les suivants
+      if (Number(vehMatch[1]) >= 2) out.vehicules.push(vehMatch[2].trim());
       continue;
     }
+
     const pvMatch = line.match(/^PV de livraison digitalis[ée]\s*:\s*(.+)$/i);
     if (pvMatch) out.pv = pvMatch[1].trim();
   }
