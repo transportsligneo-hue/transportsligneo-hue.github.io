@@ -62,7 +62,9 @@ interface Attribution {
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
     vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null;
     options_meta?: unknown;
+    devis_id?: string | null;
     prix?: number | null;
+
   };
   convoyeur?: { nom: string; prenom: string };
 }
