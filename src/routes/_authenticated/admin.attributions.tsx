@@ -60,7 +60,7 @@ interface Attribution {
     client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
-    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null;
+    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
     options_meta?: unknown;
     devis_id?: string | null;
     prix?: number | null;
