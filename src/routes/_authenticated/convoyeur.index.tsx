@@ -248,7 +248,7 @@ function ConvoyeurDashboard() {
             <span className="block text-[9px] font-bold uppercase tracking-[0.1em] text-[#4f8cff]">Catalogue</span>
             <span className="block font-driver text-[13.5px] font-bold text-white mt-[3px] mb-2">Aucune mission disponible</span>
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#00c853] to-[#39ff14] px-3 py-[7px] text-[11.5px] font-bold text-[#0b1026] shadow-[0_0_16px_rgba(57,255,20,0.55),0_0_28px_rgba(57,255,20,0.25)]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white shadow-[0_10px_25px_-5px_rgba(47,95,255,0.55)]"
             >
               Parcourir <ArrowRight size={11} />
             </span>

@@ -17,7 +17,8 @@ import logoTransak from "@/assets/transakauto-new.png.asset.json";
  */
 export default function HomeDesktopV5() {
   return (
-    <div className="r4-page">
+    <div className="r4-page home-green">
+
       {/* ============ HERO PHOTO + QUOTE ============ */}
       <section className="v5-hero">
         <div className="v5-hero-photo" style={{ backgroundImage: `url(${heroBg})` }} />
@@ -113,7 +114,7 @@ export default function HomeDesktopV5() {
           ].map((c) => (
             <div key={c.t} className="v5-feat-card">
               <div className="v5-feat-ic">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2"><path d={c.p} /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d={c.p} /></svg>
               </div>
               <h4>{c.t}</h4>
               <p>{c.d}</p>
