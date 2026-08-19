@@ -50,7 +50,7 @@ function ConvoyeurDashboard() {
         .maybeSingle();
 
       if (!conv) { setLoading(false); return; }
-      setConvoyeurName(`${conv.prenom} ${conv.nom}`);
+      setConvoyeurName(conv.prenom ?? "");
 
       // Catalogue disponible (via vue sécurisée)
       const { count: catCount } = await supabase
@@ -153,7 +153,7 @@ function ConvoyeurDashboard() {
       {/* Greeting */}
       <div className="min-w-0">
         <h1 className="text-[26px] leading-[1.1] font-bold tracking-tight text-white font-driver">
-          Bonjour, {convoyeurName || "Convoyeur"}
+          Bonjour, <span className="text-[#6effcd]" style={{ textShadow: "0 0 10px rgba(110,255,205,0.7), 0 0 20px rgba(78,255,178,0.5)" }}>{convoyeurName || "Convoyeur"}</span>
         </h1>
         <p className="text-[12.5px] text-[#8fa3d9] mt-1">Vos missions, en un coup d'œil.</p>
       </div>
