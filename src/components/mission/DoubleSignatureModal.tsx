@@ -11,8 +11,12 @@
 import { useState } from "react";
 import { X, User, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import {
+  saveMissionSignature,
+  toastSignatureError,
+  toastSignatureSuccess,
+} from "@/lib/signature-upload";
 
 type Phase = "driver" | "client" | "done";
 
@@ -26,15 +30,6 @@ interface Props {
   alreadyClient: boolean;
   onComplete: () => void;
   onClose: () => void;
-}
-
-async function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = () => reject(r.error);
-    r.readAsDataURL(file);
-  });
 }
 
 export function DoubleSignatureModal({
@@ -52,19 +47,16 @@ export function DoubleSignatureModal({
   const saveSignature = async (kind: string, signerName: string, file: File) => {
     setSaving(true);
     try {
-      const dataUrl = await fileToDataUrl(file);
-      const { error } = await supabase.from("mission_signatures" as never).upsert({
-        attribution_id: attributionId,
+      await saveMissionSignature({
+        attributionId,
         kind,
-        signer_name: signerName,
-        signature_data: dataUrl,
-        signed_by_user_id: userId,
-      } as never, { onConflict: "attribution_id,kind" });
-      if (error) throw error;
-      toast.success(`Signature ${signerName} enregistrée`);
+        signerName,
+        file,
+        signedByUserId: userId,
+      });
+      toastSignatureSuccess(`Signature ${signerName} enregistrée`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Échec";
-      toast.error("Échec signature", { description: msg });
+      toastSignatureError(err);
       throw err;
     } finally {
       setSaving(false);
@@ -80,7 +72,7 @@ export function DoubleSignatureModal({
 
   const handleClient = async (file: File) => {
     if (!clientName.trim()) {
-      toast.error("Nom du client requis");
+      toast.error("Nom du client requis", { id: "signature-save" });
       return;
     }
     try {
@@ -107,7 +99,7 @@ export function DoubleSignatureModal({
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg"><X size={18}/></button>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {phase === "driver" && (
             <>
               <div className="flex items-center gap-2 p-3 bg-pro-bg-soft rounded-xl">
@@ -117,7 +109,7 @@ export function DoubleSignatureModal({
                   <p className="font-semibold text-pro-text">{driverName}</p>
                 </div>
               </div>
-              <SignatureCanvas onValidate={handleDriver} disabled={saving}/>
+              <SignatureCanvas key="driver" onValidate={handleDriver} disabled={saving}/>
             </>
           )}
 
@@ -132,7 +124,7 @@ export function DoubleSignatureModal({
                   className="w-full px-3 py-2.5 border border-pro-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
                 />
               </div>
-              <SignatureCanvas onValidate={handleClient} disabled={saving || !clientName.trim()}/>
+              <SignatureCanvas key="client" onValidate={handleClient} disabled={saving || !clientName.trim()}/>
             </>
           )}
 
