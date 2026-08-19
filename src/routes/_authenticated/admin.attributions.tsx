@@ -60,6 +60,7 @@ interface Attribution {
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
     vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null;
+    options_meta?: unknown;
     prix?: number | null;
   };
   convoyeur?: { nom: string; prenom: string };
