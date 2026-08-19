@@ -643,7 +643,32 @@ function AdminNouveauDevisPage() {
       />
 
       <div className="mx-auto max-w-3xl space-y-5">
+        {/* Type de devis */}
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {([
+            { key: "simple", label: "Devis simple", desc: "1 véhicule (aller ou aller/retour)" },
+            { key: "groupe", label: "Devis groupé", desc: "Plusieurs véhicules dans un seul devis" },
+          ] as const).map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMode(m.key)}
+              className={`rounded-xl border px-4 py-3 text-left transition ${
+                mode === m.key
+                  ? "border-pro-accent bg-pro-accent/10"
+                  : "border-pro-border bg-white hover:border-pro-accent/50"
+              }`}
+            >
+              <span className={`block text-[13.5px] font-bold ${mode === m.key ? "text-pro-accent" : "text-pro-text"}`}>
+                {m.label}
+              </span>
+              <span className="block text-[11.5px] text-pro-muted">{m.desc}</span>
+            </button>
+          ))}
+        </div>
+
         {/* 1. Client */}
+
         <Card>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
