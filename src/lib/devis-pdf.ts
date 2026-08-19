@@ -77,8 +77,8 @@ export interface DevisData {
  * Relit les options cochées (plein carburant, recharge élec, mise en main, lavage…)
  * et le PV digitalisé depuis le récapitulatif enregistré dans `message`.
  */
-export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null; vehicules: string[] } {
-  const out: { options: string[]; pv: string | null; vehicules: string[] } = { options: [], pv: null, vehicules: [] };
+export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null } {
+  const out: { options: string[]; pv: string | null } = { options: [], pv: null };
   if (!message) return out;
   for (const raw of message.split("\n")) {
     const line = raw.trim();
@@ -87,19 +87,11 @@ export function parseDevisOptions(message?: string | null): { options: string[];
       out.options = optMatch[1].split(",").map((s) => s.trim()).filter(Boolean);
       continue;
     }
-    const vehMatch = line.match(/^V[ée]hicule\s*(\d+)\s*:\s*(.+)$/i);
-    if (vehMatch) {
-      // Le véhicule 1 provient des champs du devis : on ne garde que les suivants
-      if (Number(vehMatch[1]) >= 2) out.vehicules.push(vehMatch[2].trim());
-      continue;
-    }
-
     const pvMatch = line.match(/^PV de livraison digitalis[ée]\s*:\s*(.+)$/i);
     if (pvMatch) out.pv = pvMatch[1].trim();
   }
   return out;
 }
-
 
 const NAVY: [number, number, number] = [12, 22, 56];
 const GOLD: [number, number, number] = [176, 137, 44];
@@ -316,7 +308,6 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCE MISSION", rx, blockY + 6);
 
-  const vehiculesExtra = parseDevisOptions(d.message).vehicules;
   const vehicule = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
     || d.type_vehicule || "—";
   let ry = blockY + 13;
@@ -330,13 +321,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...NAVY);
   doc.text(trajetLines, rx + 13, ry);
   ry += 5.2 * trajetLines.length;
-  labelValue(doc, rx, ry, vehiculesExtra.length ? "Véhicule 1 : " : "Véhicule : ", vehicule);
+  labelValue(doc, rx, ry, "Véhicule : ", vehicule);
   ry += 5.2;
-  vehiculesExtra.forEach((v, i) => {
-    labelValue(doc, rx, ry, `Véhicule ${i + 2} : `, v);
-    ry += 5.2;
-  });
-
   labelValue(doc, rx, ry, "Enlèvement souhaité : ", d.date_souhaitee ? fmtDate(d.date_souhaitee) : "—");
   ry += 5.2;
   labelValue(doc, rx, ry, "Contact commercial : ", "Olivier G.");
@@ -383,45 +369,19 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
   const pvDigital = d.pv_digital ?? parsedFromMessage.pv;
 
-  const v1Label = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ");
-  const vehiculesList = parsedFromMessage.vehicules.length
-    ? [v1Label, ...parsedFromMessage.vehicules].filter(Boolean)
-    : [];
-  const nbVeh = vehiculesList.length;
-
-  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [];
-
-  if (nbVeh > 1) {
-    // Prix réparti par véhicule
-    const unitPrice = +(ht / nbVeh).toFixed(2);
-    vehiculesList.forEach((v, i) => {
-      // dernier véhicule : ajuste pour tomber juste sur le total
-      const part = i === nbVeh - 1 ? +(ht - unitPrice * (nbVeh - 1)).toFixed(2) : unitPrice;
-      lignes.push({
-        desc: `Véhicule ${i + 1} : ${v} — ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
-        qty: "1",
-        unit: eur(part),
-        total: eur(part),
-      });
-    });
-  } else {
-    lignes.push({
+  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [
+    {
       desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
       qty: "1",
       unit: eur(ht),
       total: eur(ht),
-    });
-  }
-
-  lignes.push(
+    },
     { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
     { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
-  );
-
+  ];
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
-
   if (pvDigital) {
     lignes.push({ desc: `PV de livraison digitalisé : ${pvDigital}`, qty: "1", unit: "Inclus", total: eur(0) });
   }

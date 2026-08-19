@@ -678,52 +678,6 @@ function DevisDrawer({
         </div>
       }
     >
-      <DrawerSection title="Envoyer par email" icon={<Mail size={12} />}>
-        <SendDocumentByEmail
-          kind="devis"
-          variant="dark"
-          numero={devis.numero}
-          documentId={devis.id}
-          defaultEmail={devis.email}
-          buildPdf={() =>
-            generateDevisPdf({
-              numero: devis.numero,
-              nom: devis.nom,
-              prenom: devis.prenom,
-              email: devis.email,
-              telephone: devis.telephone,
-              depart: devis.depart,
-              arrivee: devis.arrivee,
-              distance_km: devis.distance_km,
-              duree_estimee: devis.duree_estimee,
-              type_vehicule: devis.type_vehicule,
-              marque: devis.marque,
-              modele: devis.modele,
-              carburant: devis.carburant,
-              prestation: devis.prestation,
-              option_trajet: devis.option_trajet,
-              date_souhaitee: devis.date_souhaitee,
-              heure_souhaitee: devis.heure_souhaitee,
-              prix_estime: devis.prix_estime,
-              tarif_label: devis.tarif_label,
-              multiplier_label: devis.multiplier_label,
-              message: devis.message,
-              created_at: devis.created_at,
-              version: devis.version ?? 1,
-            })
-          }
-          templateData={{
-            prenom: devis.prenom,
-            nom: devis.nom,
-            depart: devis.depart,
-            arrivee: devis.arrivee,
-            distance: devis.distance_km,
-            prix: Number(devis.prix_estime).toFixed(2),
-            optionTrajet: devis.option_trajet,
-          }}
-        />
-      </DrawerSection>
-
       <DrawerSection title="Client" icon={<User size={12} />}>
         <DrawerGrid>
           <DrawerField label="Nom" value={`${devis.prenom} ${devis.nom}`} />
@@ -873,8 +827,51 @@ function DevisDrawer({
         fallbackVin={devis.vin}
       />
 
-
-
+      <DrawerSection title="Envoi au client" icon={<User size={12} />}>
+        <SendDocumentByEmail
+          kind="devis"
+          variant="dark"
+          numero={devis.numero}
+          documentId={devis.id}
+          defaultEmail={devis.email}
+          buildPdf={() =>
+            generateDevisPdf({
+              numero: devis.numero,
+              nom: devis.nom,
+              prenom: devis.prenom,
+              email: devis.email,
+              telephone: devis.telephone,
+              depart: devis.depart,
+              arrivee: devis.arrivee,
+              distance_km: devis.distance_km,
+              duree_estimee: devis.duree_estimee,
+              type_vehicule: devis.type_vehicule,
+              marque: devis.marque,
+              modele: devis.modele,
+              carburant: devis.carburant,
+              prestation: devis.prestation,
+              option_trajet: devis.option_trajet,
+              date_souhaitee: devis.date_souhaitee,
+              heure_souhaitee: devis.heure_souhaitee,
+              prix_estime: devis.prix_estime,
+              tarif_label: devis.tarif_label,
+              multiplier_label: devis.multiplier_label,
+              message: devis.message,
+              created_at: devis.created_at,
+              version: devis.version ?? 1,
+            })
+          }
+          templateData={{
+            prenom: devis.prenom,
+            nom: devis.nom,
+            depart: devis.depart,
+            arrivee: devis.arrivee,
+            distance: devis.distance_km,
+            prix: Number(devis.prix_estime).toFixed(2),
+            optionTrajet: devis.option_trajet,
+          }}
+        />
+      </DrawerSection>
 
       {devis.message && (
         <DrawerSection title="Message client">
