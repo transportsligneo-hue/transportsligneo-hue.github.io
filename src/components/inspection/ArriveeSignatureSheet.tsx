@@ -213,6 +213,7 @@ export function ArriveeSignatureSheet({
                 </div>
               ) : (
                 <SignatureCanvas
+                  key={currentStep.kind}
                   onValidate={handleValidate}
                   disabled={states[currentStep.kind].status === "uploading"}
                 />

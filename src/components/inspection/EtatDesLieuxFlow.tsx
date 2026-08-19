@@ -662,7 +662,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           {/* Photo / signature zone */}
           {isSignatureStep ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <SignatureCanvas onValidate={uploadSignature} disabled={currentPhoto?.status === "uploading" || completing} />
+              <SignatureCanvas key={currentStep.id} onValidate={uploadSignature} disabled={currentPhoto?.status === "uploading" || completing} />
               {currentPhoto?.status === "success" && (
                 <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
                   <Check size={16} /> Signature validée

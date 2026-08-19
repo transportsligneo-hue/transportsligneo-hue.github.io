@@ -2043,7 +2043,7 @@ function SignatureArea({
         </div>
       ) : (
         <div className="edl-glass p-3">
-          <SignatureCanvas onValidate={onSign} disabled={state?.status === "uploading"} />
+          <SignatureCanvas key={step.id} onValidate={onSign} disabled={state?.status === "uploading"} />
         </div>
       )}
     </div>
