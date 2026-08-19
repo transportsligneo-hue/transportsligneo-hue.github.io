@@ -128,6 +128,35 @@ const PV_OPTIONS: { key: PvChoice; label: string }[] = [
   ...PV_PLATEFORMES.map((p) => ({ key: p.key as PvChoice, label: p.label })),
 ];
 
+type VehLine = {
+  key: string;
+  immat: string;
+  marque: string;
+  modele: string;
+  vin: string;
+  arrivee: string;
+  prix: string;
+  busy: boolean;
+  msg: string | null;
+};
+
+const newVeh = (): VehLine => ({
+  key: crypto.randomUUID(),
+  immat: "",
+  marque: "",
+  modele: "",
+  vin: "",
+  arrivee: "",
+  prix: "",
+  busy: false,
+  msg: null,
+});
+
+const parseEur = (v: string) => {
+  const n = parseFloat(v.replace(/\s/g, "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+};
+
 function AdminNouveauDevisPage() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRow[]>([]);
@@ -135,11 +164,15 @@ function AdminNouveauDevisPage() {
   const [client, setClient] = useState<ClientRow | null>(null);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
 
+  const [mode, setMode] = useState<"simple" | "groupe">("simple");
+  const [vlines, setVlines] = useState<VehLine[]>([newVeh(), newVeh()]);
+
   const [depart, setDepart] = useState("");
   const [arrivee, setArrivee] = useState("");
   const [vehicule, setVehicule] = useState("");
   const [montant, setMontant] = useState("");
   const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
+
   const [immat, setImmat] = useState("");
   const [modele, setModele] = useState("");
   const [vin, setVin] = useState("");
