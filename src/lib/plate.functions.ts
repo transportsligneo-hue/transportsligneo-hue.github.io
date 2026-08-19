@@ -266,6 +266,18 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puissance_din",
         ]),
         finition: pick(flat, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
+        carrosserie: pick(flat, [
+          "AWN_carrosserie_CG",
+          "AWN_carrosserie",
+          "carrosserie",
+          "AWN_genre_CG",
+          "AWN_genre",
+          "genre",
+          "type_vehicule",
+          "categorie",
+        ]),
+        energie: undefined as string | undefined,
+        categorie: undefined as string | undefined,
       };
 
       // Année : si on a une date complète, extraire l'année
@@ -273,6 +285,10 @@ export const lookupPlate = createServerFn({ method: "POST" })
         const m = result.annee.match(/(\d{4})/);
         if (m) result.annee = m[1];
       }
+
+      result.energie = normalizeEnergie(result.carburant);
+      result.categorie = detectCategorie(result.carrosserie, result.modele, result.finition);
+
 
       console.log("[SIV] mapped", result);
 
