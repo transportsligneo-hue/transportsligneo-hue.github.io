@@ -3502,6 +3502,32 @@
   color:#38e0e0; font-size:12.5px; letter-spacing:2.5px;
   font-weight:700; text-transform:uppercase;
 }
+
+/* Homepage "vert driver" overrides — placed after all .r4-page rules */
+.home-green .v4-accent { color:#39ff14; text-shadow:0 0 18px rgba(57,255,20,0.8),0 0 40px rgba(57,255,20,0.5); animation:v4PulseGlowGreen 2.6s ease-in-out infinite; }
+@keyframes v4PulseGlowGreen {
+  0%,100% { text-shadow:0 0 18px rgba(57,255,20,0.8),0 0 40px rgba(57,255,20,0.5); }
+  50%     { text-shadow:0 0 26px rgba(57,255,20,1),0 0 54px rgba(57,255,20,0.7); }
+}
+.home-green .v4-hero-eyebrow { color:#39ff14; }
+.home-green .v4-hero-eyebrow .dot { background:#39ff14; box-shadow:0 0 8px #39ff14,0 0 14px rgba(57,255,20,0.6); }
+.home-green .v4-btn-primary { background:linear-gradient(120deg,#00c853,#39ff14 60%,#39ff14); box-shadow:0 14px 32px rgba(57,255,20,0.4); }
+.home-green .v4-btn-outline { border-color:rgba(57,255,20,0.45); color:#fff; }
+.home-green .v4-btn-outline:hover { background:rgba(57,255,20,0.12); border-color:rgba(57,255,20,0.65); }
+.home-green .v4-cta-box::before { background:radial-gradient(circle, rgba(57,255,20,0.35), transparent 70%); }
+.home-green .v4-stat .v { color:#39ff14; text-shadow:0 0 20px rgba(57,255,20,0.4); }
+.home-green .v5-hero-glow { background:radial-gradient(circle, rgba(57,255,20,0.28), transparent 70%); }
+.home-green .v5-hero-tint {
+  background:
+    linear-gradient(100deg, rgba(6,12,40,0.88) 0%, rgba(8,16,50,0.72) 45%, rgba(6,12,40,0.55) 100%),
+    linear-gradient(15deg, rgba(57,255,20,0.22), transparent 55%); }
+.home-green .v5-hstat .v { color:#39ff14; text-shadow:0 0 18px rgba(57,255,20,0.5); }
+.home-green .v5-feat-ic { color:#39ff14;
+  background:linear-gradient(135deg, rgba(57,255,20,0.32), rgba(57,255,20,0.08));
+  border:1px solid rgba(57,255,20,0.35); box-shadow:0 0 12px rgba(57,255,20,0.25); }
+.home-green .v5-feat-card:hover { border-color:rgba(57,255,20,0.4); }
+.home-green .v5-teaser-num { color:#39ff14; text-shadow:0 0 20px rgba(57,255,20,0.4); }
+.home-green .v4-quote-card::before { background:linear-gradient(135deg, rgba(57,255,20,0.7), rgba(217,181,74,0.35), rgba(57,255,20,0.15), rgba(0,200,83,0.6)); }
 .sg-h1{
   text-align:center; color:#f3f6ff;
   font-size:clamp(26px,4vw,38px); font-weight:800;
