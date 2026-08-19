@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
   Truck, Clock, CheckCircle2, CheckSquare, ChevronRight, ArrowRight, ArrowUpRight,
-  Calendar, TrendingUp, FileText, Loader2,
+  Calendar, FileText, Loader2, ChevronDown,
 } from "lucide-react";
 import heroCar from "@/assets/driver-hero-supercar.jpg";
 
@@ -37,6 +37,8 @@ function ConvoyeurDashboard() {
   const [todayMission, setTodayMission] = useState<TodayMission | null>(null);
   const [nextMission, setNextMission] = useState<TodayMission | null>(null);
   const [loading, setLoading] = useState(true);
+  // Replié par défaut, déplié dès qu'une mission est active/du jour.
+  const [kpiOpen, setKpiOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -114,6 +116,7 @@ function ConvoyeurDashboard() {
           .sort((a, b) => (a.trajet!.date_trajet! > b.trajet!.date_trajet! ? 1 : -1))[0];
 
         setTodayMission(inProg ?? todayM ?? null);
+        setKpiOpen(Boolean(inProg ?? todayM));
         setNextMission(upcoming ?? null);
       }
       setLoading(false);
