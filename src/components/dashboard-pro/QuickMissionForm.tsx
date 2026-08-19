@@ -51,6 +51,10 @@ const VEHICLE_TYPES = [
   { value: "berline", label: "Berline" },
   { value: "suv", label: "SUV" },
   { value: "break", label: "Break" },
+  { value: "monospace", label: "Monospace" },
+  { value: "coupe", label: "Coupé" },
+  { value: "cabriolet", label: "Cabriolet" },
+  { value: "luxe", label: "Luxe / Supercar" },
   { value: "utilitaire", label: "Utilitaire" },
   { value: "autre", label: "Autre" },
 ];
