@@ -168,7 +168,7 @@ function LoginPage() {
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
           <Link to="/" className="inline-block mb-4 relative auth-logo-pulse">
-            <LigneoLockup size="lg" className="justify-center relative z-10" />
+            <LigneoLockup size="lg" variant={isMobileApp ? "green" : "blue"} className="justify-center relative z-10" />
           </Link>
           <h1 className="auth-title text-2xl md:text-3xl">Connexion <span className="auth-accent">sécurisée</span></h1>
           <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace en un clic</p>
