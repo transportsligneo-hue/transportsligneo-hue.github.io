@@ -12,9 +12,13 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Check, AlertCircle, PenLine, ChevronRight } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import {
+  saveMissionSignature,
+  toastSignatureError,
+  toastSignatureSuccess,
+} from "@/lib/signature-upload";
 
 type SigKind = "driver_end" | "client_end";
 
