@@ -265,31 +265,108 @@ body.is-driver-app .glow-amber {
 
 /* Progress bars / rings with gold colors */
 body.is-driver-app .bg-amber-500\/10,
+body.is-driver-app .bg-amber-500\/15,
 body.is-driver-app .bg-amber-500\/20,
+body.is-driver-app .bg-amber-500\/25,
+body.is-driver-app .bg-amber-500\/30,
+body.is-driver-app .bg-amber-500\/35,
+body.is-driver-app .bg-amber-400\/10,
+body.is-driver-app .bg-amber-400\/15,
+body.is-driver-app .bg-amber-400\/20,
+body.is-driver-app .bg-amber-400\/25,
+body.is-driver-app .bg-amber-400\/30,
+body.is-driver-app .bg-amber-300\/10,
+body.is-driver-app .bg-amber-300\/15,
+body.is-driver-app .bg-amber-300\/20,
+body.is-driver-app .bg-amber-300\/25,
+body.is-driver-app .bg-amber-300\/30,
 body.is-driver-app .bg-yellow-500\/10,
 body.is-driver-app .bg-yellow-500\/20,
+body.is-driver-app .bg-yellow-500\/30,
+body.is-driver-app .bg-yellow-400\/10,
+body.is-driver-app .bg-yellow-400\/20,
+body.is-driver-app .bg-yellow-400\/30,
 body.is-driver-app .bg-primary\/10,
-body.is-driver-app .bg-primary\/20 {
+body.is-driver-app .bg-primary\/15,
+body.is-driver-app .bg-primary\/20,
+body.is-driver-app .bg-primary\/25,
+body.is-driver-app .bg-primary\/30,
+body.is-driver-app .bg-accent\/10,
+body.is-driver-app .bg-accent\/15,
+body.is-driver-app .bg-accent\/20,
+body.is-driver-app .bg-accent\/25,
+body.is-driver-app .bg-accent\/30 {
   background-color: rgba(110, 255, 205, 0.15) !important;
 }
 
-body.is-driver-app .bg-amber-500\/30,
-body.is-driver-app .bg-yellow-500\/30,
-body.is-driver-app .bg-primary\/30 {
+body.is-driver-app .bg-amber-500\/40,
+body.is-driver-app .bg-amber-500\/50,
+body.is-driver-app .bg-amber-500\/60,
+body.is-driver-app .bg-amber-400\/40,
+body.is-driver-app .bg-amber-400\/50,
+body.is-driver-app .bg-amber-400\/60,
+body.is-driver-app .bg-amber-300\/40,
+body.is-driver-app .bg-amber-300\/50,
+body.is-driver-app .bg-amber-300\/60,
+body.is-driver-app .bg-yellow-500\/40,
+body.is-driver-app .bg-yellow-500\/50,
+body.is-driver-app .bg-yellow-500\/60,
+body.is-driver-app .bg-yellow-400\/40,
+body.is-driver-app .bg-yellow-400\/50,
+body.is-driver-app .bg-yellow-400\/60,
+body.is-driver-app .bg-primary\/40,
+body.is-driver-app .bg-primary\/50,
+body.is-driver-app .bg-primary\/60,
+body.is-driver-app .bg-accent\/40,
+body.is-driver-app .bg-accent\/50,
+body.is-driver-app .bg-accent\/60 {
   background-color: rgba(110, 255, 205, 0.3) !important;
 }
 
+body.is-driver-app .border-amber-300\/20,
+body.is-driver-app .border-amber-300\/25,
+body.is-driver-app .border-amber-300\/30,
 body.is-driver-app .border-amber-300\/40,
+body.is-driver-app .border-amber-300\/50,
+body.is-driver-app .border-amber-300\/60,
+body.is-driver-app .border-amber-500\/20,
+body.is-driver-app .border-amber-500\/25,
+body.is-driver-app .border-amber-500\/30,
 body.is-driver-app .border-amber-500\/40,
+body.is-driver-app .border-amber-500\/50,
+body.is-driver-app .border-amber-500\/60,
+body.is-driver-app .border-yellow-400\/20,
+body.is-driver-app .border-yellow-400\/30,
 body.is-driver-app .border-yellow-400\/40,
-body.is-driver-app .border-primary\/40 {
+body.is-driver-app .border-yellow-400\/50,
+body.is-driver-app .border-yellow-500\/20,
+body.is-driver-app .border-yellow-500\/30,
+body.is-driver-app .border-yellow-500\/40,
+body.is-driver-app .border-yellow-500\/50,
+body.is-driver-app .border-primary\/20,
+body.is-driver-app .border-primary\/25,
+body.is-driver-app .border-primary\/30,
+body.is-driver-app .border-primary\/40,
+body.is-driver-app .border-primary\/50,
+body.is-driver-app .border-primary\/60,
+body.is-driver-app .border-accent\/20,
+body.is-driver-app .border-accent\/30,
+body.is-driver-app .border-accent\/40,
+body.is-driver-app .border-accent\/50,
+body.is-driver-app .border-accent\/60 {
   border-color: rgba(110, 255, 205, 0.4) !important;
 }
 
-body.is-driver-app .text-amber-500\/80,
-body.is-driver-app .text-yellow-500\/80,
-body.is-driver-app .text-primary\/80 {
-  color: rgba(110, 255, 205, 0.8) !important;
+body.is-driver-app .text-amber-100,
+body.is-driver-app .text-amber-50,
+body.is-driver-app .text-yellow-100,
+body.is-driver-app .text-yellow-50 {
+  color: #a8ffdf !important;
+}
+
+body.is-driver-app .text-amber-950,
+body.is-driver-app .text-yellow-950 {
+  color: #1a9e7a !important;
 }
 
 /* Neon green pulse for "new" / training badges */
