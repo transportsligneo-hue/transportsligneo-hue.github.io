@@ -386,11 +386,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.6);
   doc.setTextColor(...TEXT);
-  doc.text("Trajet :", rx, ry);
-  const trajetLines = (doc.splitTextToSize(`${d.depart} -> ${d.arrivee}`, 72) as string[]).slice(0, 2);
+  doc.text(rechargeSeule ? "Lieu :" : "Trajet :", rx, ry);
+  const trajetLines = (doc.splitTextToSize(
+    rechargeSeule ? `${d.depart} (recharge sur place)` : `${d.depart} -> ${d.arrivee}`,
+    72,
+  ) as string[]).slice(0, 2);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...NAVY);
-  doc.text(trajetLines, rx + 13, ry);
+  doc.text(trajetLines, rx + (rechargeSeule ? 10 : 13), ry);
   ry += 5.2 * trajetLines.length;
   labelValue(doc, rx, ry, "Véhicule : ", vehicule);
   ry += 5.2;
