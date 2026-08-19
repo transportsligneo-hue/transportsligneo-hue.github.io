@@ -391,9 +391,16 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
     { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
   ];
+  if (parsedFromMessage.vehicules.length) {
+    const v1 = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ");
+    [v1, ...parsedFromMessage.vehicules].filter(Boolean).forEach((v, i) => {
+      lignes.push({ desc: `Véhicule ${i + 1} : ${v}`, qty: "1", unit: "Inclus", total: eur(0) });
+    });
+  }
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
+
   if (pvDigital) {
     lignes.push({ desc: `PV de livraison digitalisé : ${pvDigital}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
