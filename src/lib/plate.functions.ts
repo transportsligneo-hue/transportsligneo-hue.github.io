@@ -75,7 +75,14 @@ export type PlateLookupResult = {
     carburant?: string;
     puissance?: string;
     finition?: string;
+    /** Énergie normalisée : electrique | hybride | essence | diesel | gpl | hydrogene */
+    energie?: string;
+    /** Catégorie normalisée : citadine | berline | break | suv | monospace | coupe | cabriolet | utilitaire | luxe */
+    categorie?: string;
+    /** Carrosserie brute renvoyée par le SIV (ex: BREAK, CI, VU) */
+    carrosserie?: string;
   };
+
 };
 
 const RAPIDAPI_HOST = "api-de-plaque-d-immatriculation-france.p.rapidapi.com";
