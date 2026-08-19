@@ -459,6 +459,13 @@ function AdminNouveauDevisPage() {
       return toast.error("Date et heure d'enlèvement obligatoires");
     if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
       return toast.error("Date et heure de restitution obligatoires");
+    if (isGroupe) {
+      if (groupLines.length < 2) return toast.error("Ajoutez au moins 2 véhicules");
+      if (groupPayload.some((v) => !v.immatriculation))
+        return toast.error("Immatriculation manquante sur un véhicule");
+      if (groupPayload.some((v) => v.prix <= 0))
+        return toast.error("Montant TTC manquant sur un véhicule");
+    }
     if (!Number.isFinite(prix) || prix <= 0) return toast.error("Montant TTC invalide");
 
 
@@ -474,17 +481,19 @@ function AdminNouveauDevisPage() {
           telephone: client.telephone,
           depart: depart.trim(),
           arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
-          marque: vehicule || null,
-          modele: modele || null,
-          immatriculation: immat.trim().toUpperCase() || null,
-          vin: vin.trim().toUpperCase() || null,
+          marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
+          modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
+          immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,
+          vin: (isGroupe ? groupPayload[0]?.vin : vin.trim().toUpperCase()) || null,
+          vehicules: isGroupe ? groupPayload : null,
           marque_retour: isAllerRetour ? vehiculeRetour || null : null,
           modele_retour: isAllerRetour ? modeleRetour || null : null,
           immatriculation_retour: isAllerRetour ? immatRetour.trim().toUpperCase() || null : null,
           vin_retour: isAllerRetour ? vinRetour.trim().toUpperCase() || null : null,
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
-          option_trajet: typeTrajet,
+          option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
+
           date_souhaitee: dateSouhaitee || null,
           heure_souhaitee: heureSouhaitee || null,
           date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
