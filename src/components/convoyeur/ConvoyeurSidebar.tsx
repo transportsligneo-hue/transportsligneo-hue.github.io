@@ -5,7 +5,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import ThemeToggle from "@/components/ThemeToggle";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import LigneoLockup from "@/components/brand/LigneoLockup";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface ConvoyeurSidebarItem {
@@ -102,16 +102,16 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {/* === Mobile Header premium glass === */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 driver-nav-surface border-b border-[rgba(103,193,255,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
         <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[rgba(4,27,82,0.95)]" />
-        <div className="h-16 px-4 flex items-center justify-between gap-3">
-          <DriverBrand />
+        <div className="h-11 px-3.5 flex items-center justify-between gap-3">
+          <DriverBrand size="sm" />
           <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="w-11 h-11 rounded-2xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
+              className="w-9 h-9 rounded-xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
               aria-label="Menu"
             >
-              <Menu size={18} />
+              <Menu size={16} />
             </button>
           </div>
         </div>
@@ -178,21 +178,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   );
 }
 
-/* Brand premium driver : logo officiel + wordmark + badge DRIVER bleu néon */
-function DriverBrand() {
-  return (
-    <div className="flex items-center gap-3 min-w-0">
-      <div className="relative w-11 h-11 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-[#0D2E7A] to-[#041B52] flex items-center justify-center p-1.5 ring-1 ring-[rgba(103,193,255,0.45)] shadow-[0_0_18px_rgba(78,168,255,0.35)]">
-        <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" />
-      </div>
-      <div className="min-w-0 flex flex-col leading-tight">
-        <span className="font-semibold text-[14px] tracking-[0.02em] text-white truncate">
-          Transports Ligneo
-        </span>
-        <span className="inline-flex items-center self-start mt-1 px-2 py-[2px] rounded-md text-[9px] font-extrabold uppercase tracking-[0.18em] bg-gradient-to-r from-[#2F7DFF] via-[#4EA8FF] to-[#67C1FF] text-white shadow-[0_0_14px_rgba(78,168,255,0.55)]">
-          Driver
-        </span>
-      </div>
-    </div>
-  );
+/* Brand premium driver : lockup officiel TRANSPORTS LIGNEO + tag DRIVER */
+function DriverBrand({ size = "md" }: { size?: "sm" | "md" }) {
+  return <LigneoLockup size={size} tag="Driver" />;
 }

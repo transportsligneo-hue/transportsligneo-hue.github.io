@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, X, ArrowRight, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, X, ArrowRight, ChevronRight, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -119,7 +119,7 @@ export default function DriverDock({
           aria-expanded={!collapsed}
           className="ldock-toggle"
         >
-          {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          <ChevronDown size={16} />
         </button>
 
         <div className="ldock">

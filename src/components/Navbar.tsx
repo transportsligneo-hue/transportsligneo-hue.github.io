@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Sparkles, Phone } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -65,19 +65,8 @@ export default function Navbar() {
         }`}
       >
         <div className="w-full px-5 py-2.5 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Accueil · Transports Ligneo">
-            <div
-              className="h-11 w-11 overflow-hidden rounded-xl shrink-0"
-              style={{ boxShadow: "0 0 0 1px rgba(122,163,255,0.4), 0 0 16px rgba(63,123,255,0.35)" }}
-            >
-              <img src={logoLigneo} alt="Transports Ligneo" className="h-full w-full object-cover" loading="eager" />
-            </div>
-            <span
-              className="font-heading text-[15px] font-extrabold tracking-[0.03em] text-white whitespace-nowrap"
-              style={{ fontFamily: "'Poppins', sans-serif" }}
-            >
-              TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">LIGNEO</span>
-            </span>
+          <Link to="/" className="shrink-0" aria-label="Accueil · Transports Ligneo">
+            <LigneoLockup size="md" />
           </Link>
 
           {/* Liens centraux · pilule englobante */}

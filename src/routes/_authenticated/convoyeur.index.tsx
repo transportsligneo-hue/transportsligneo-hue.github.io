@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
   Truck, Clock, CheckCircle2, CheckSquare, ChevronRight, ArrowRight, ArrowUpRight,
-  Calendar, TrendingUp, FileText, Loader2,
+  Calendar, FileText, Loader2, ChevronDown,
 } from "lucide-react";
 import heroCar from "@/assets/driver-hero-supercar.jpg";
 
@@ -37,6 +37,8 @@ function ConvoyeurDashboard() {
   const [todayMission, setTodayMission] = useState<TodayMission | null>(null);
   const [nextMission, setNextMission] = useState<TodayMission | null>(null);
   const [loading, setLoading] = useState(true);
+  // Replié par défaut, déplié dès qu'une mission est active/du jour.
+  const [kpiOpen, setKpiOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -114,6 +116,7 @@ function ConvoyeurDashboard() {
           .sort((a, b) => (a.trajet!.date_trajet! > b.trajet!.date_trajet! ? 1 : -1))[0];
 
         setTodayMission(inProg ?? todayM ?? null);
+        setKpiOpen(Boolean(inProg ?? todayM));
         setNextMission(upcoming ?? null);
       }
       setLoading(false);
@@ -128,19 +131,16 @@ function ConvoyeurDashboard() {
   };
 
   const statCards = [
-    { to: "/convoyeur/missions", search: { f: "proposed" as const }, label: "Proposées", value: stats.proposed, icon: Clock, pill: "En attente",
-      iconBg: "from-[#3d2a10] to-[#2a1d0b]", iconBorder: "border-[rgba(234,179,8,0.35)]", iconColor: "text-[#f59e0b]",
-      dotColor: "bg-[#f59e0b]", pillColor: "text-[#fbbf24]" },
-    { to: "/convoyeur/missions", search: { f: "accepted" as const }, label: "Acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
-      iconBg: "from-[#0d1f4d] to-[#0a1638]", iconBorder: "border-[rgba(96,165,250,0.35)]", iconColor: "text-[#60a5fa]",
-      dotColor: "bg-[#60a5fa]", pillColor: "text-[#93c5fd]" },
-    { to: "/convoyeur/missions", search: { f: "in_progress" as const }, label: "En cours", value: stats.inProgress, icon: Truck, pill: "Actives",
-      iconBg: "from-[#0f2e28] to-[#0a1f1a]", iconBorder: "border-[rgba(52,211,153,0.35)]", iconColor: "text-[#34d399]",
-      dotColor: "bg-[#34d399]", pillColor: "text-[#6ee7b7]" },
-    { to: "/convoyeur/historique", search: undefined, label: "Terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
-      iconBg: "from-[#26183d] to-[#1a1128]", iconBorder: "border-[rgba(167,139,250,0.35)]", iconColor: "text-[#a78bfa]",
-      dotColor: "bg-[#a78bfa]", pillColor: "text-[#c4b5fd]" },
+    { to: "/convoyeur/missions", search: { f: "proposed" as const }, label: "Missions proposées", value: stats.proposed, icon: Clock, pill: "En attente",
+      accent: "#f0a94e" },
+    { to: "/convoyeur/missions", search: { f: "accepted" as const }, label: "Missions acceptées", value: stats.accepted, icon: CheckSquare, pill: "Planifiées",
+      accent: "#4f8cff" },
+    { to: "/convoyeur/missions", search: { f: "in_progress" as const }, label: "Missions en cours", value: stats.inProgress, icon: Truck, pill: "Actives",
+      accent: "#3ddc97" },
+    { to: "/convoyeur/historique", search: undefined, label: "Missions terminées", value: stats.completed, icon: CheckCircle2, pill: "Archivées",
+      accent: "#b98af0" },
   ] as const;
+
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
@@ -150,120 +150,107 @@ function ConvoyeurDashboard() {
     <div className="space-y-5 pb-4">
       <PendingProposalsBanner />
 
-      {/* Greeting + Revenue */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-start">
-        <div className="min-w-0">
-          <h1 className="text-[34px] leading-[1.05] font-bold tracking-tight text-white">
-            Bonjour,
-          </h1>
-          <h1 className="text-[28px] leading-[1.1] font-bold tracking-tight text-white mt-0.5 truncate">
-            {convoyeurName || "Convoyeur"}
-          </h1>
-          <p className="text-[13.5px] text-[#8fa3cc] mt-2">Vos missions, en un coup d'œil.</p>
-        </div>
+      {/* Greeting */}
+      <div className="min-w-0">
+        <h1 className="text-[26px] leading-[1.1] font-bold tracking-tight text-white font-driver">
+          Bonjour, {convoyeurName || "Convoyeur"}
+        </h1>
+        <p className="text-[12.5px] text-[#8fa3d9] mt-1">Vos missions, en un coup d'œil.</p>
+      </div>
 
-        {/* Revenue card — clickable → Finances */}
-        <Link
-          to="/convoyeur/finances"
-          className="group relative overflow-hidden rounded-[22px] border border-[rgba(217,181,74,0.35)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] px-4 py-3.5 min-w-[170px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] transition-all active:scale-[0.97] hover:border-[rgba(217,181,74,0.55)]"
-          aria-label="Ouvrir l'espace Finances"
+      {/* Revenus + KPI fusionnés (repliable) */}
+      <div className={`drv-stats-card${kpiOpen ? " is-open" : ""}`}>
+        <button
+          type="button"
+          onClick={() => setKpiOpen((v) => !v)}
+          aria-expanded={kpiOpen}
+          className="drv-stats-head"
         >
-          <span className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[radial-gradient(circle,rgba(217,181,74,0.28),transparent_70%)]" />
-          {/* mini chart bg */}
-          <svg className="absolute right-0 bottom-0 opacity-40 pointer-events-none" width="120" height="55" viewBox="0 0 120 55" fill="none">
-            <path d="M0 40 Q20 35 35 30 T70 20 T105 8 L120 5 L120 55 L0 55 Z" fill="url(#g1)" />
-            <path d="M0 40 Q20 35 35 30 T70 20 T105 8 L120 5" stroke="#4EA8FF" strokeWidth="1.5" fill="none" />
-            <defs>
-              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#4EA8FF" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#4EA8FF" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="relative flex items-start justify-between gap-2">
-            <p className="text-[12px] text-[#c9d6f2]">Revenus du mois</p>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2F7DFF] to-[#1a5ad6] flex items-center justify-center shadow-[0_0_12px_rgba(78,168,255,0.5)]">
-              <TrendingUp size={14} className="text-white" />
-            </div>
-          </div>
-          <p className="relative text-[30px] font-bold text-[#f5b940] mt-1 tabular-nums leading-none tracking-tight drop-shadow-[0_0_14px_rgba(217,181,74,0.35)]">
-            {revenueMonth.toFixed(0)} €
-          </p>
-          {revenueDelta !== null ? (
-            <p className="relative flex items-center gap-1 text-[11px] mt-3 text-[#8fa3cc]">
-              <ArrowUpRight size={12} className={revenueDelta >= 0 ? "text-[#34d399]" : "text-[#34d399] rotate-90"} />
-              <span className="text-[#34d399] font-semibold">
+          <span className="flex items-baseline gap-2.5 min-w-0">
+            <span className="text-[10.5px] uppercase tracking-[0.06em] font-semibold text-[#8fa3d9]">Revenus du mois</span>
+            <span className="font-driver text-[22px] font-bold text-[#f0d78a] tabular-nums leading-none">
+              {revenueMonth.toFixed(0)} €
+            </span>
+            {revenueDelta !== null && (
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[#3ddc97]">
+                <ArrowUpRight size={11} className={revenueDelta >= 0 ? "" : "rotate-90"} />
                 {revenueDelta > 0 ? "+" : ""}{revenueDelta}%
               </span>
-              <span>vs mois dernier</span>
-            </p>
-          ) : (
-            <p className="relative text-[10.5px] mt-3 text-[#8fa3cc] font-medium tracking-wide">
-              Voir mes finances →
-            </p>
-          )}
-        </Link>
-      </div>
-
-      {/* 4 stat cards — cliquables */}
-      <div className="grid grid-cols-4 gap-2.5">
-        {statCards.map((c) => (
-          <Link
-            key={c.label}
-            to={c.to}
-            search={c.search as never}
-            onClick={clearStoredOpenMission}
-            className="group relative min-w-0 rounded-[18px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-3 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)] transition-all active:scale-[0.96] hover:border-[rgba(96,165,250,0.4)] hover:shadow-[0_10px_28px_-14px_rgba(47,125,255,0.4)]"
-          >
-            <div className={`w-9 h-9 rounded-xl border ${c.iconBorder} bg-gradient-to-br ${c.iconBg} flex items-center justify-center shadow-inner`}>
-              <c.icon size={16} className={c.iconColor} strokeWidth={2.4} />
-            </div>
-            <p className="text-[9px] uppercase tracking-[0.1em] text-[#8fa3cc] font-bold mt-2 leading-tight truncate">{c.label}</p>
-            <p className="text-[22px] font-bold text-white mt-0.5 tabular-nums leading-none">{c.value}</p>
-            <div className="mt-1.5 flex items-center gap-1 min-w-0">
-              <span className={`w-1.5 h-1.5 rounded-full ${c.dotColor} shrink-0`} />
-              <span className={`text-[9.5px] font-semibold ${c.pillColor} leading-tight truncate`}>{c.pill}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Hero catalogue */}
-      <Link
-        to="/convoyeur/catalogue"
-        className="relative block overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
-      >
-        <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
-        <div className="relative max-w-[62%]">
-          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Catalogue missions</p>
-          {todayMission && todayMission.trajet ? (
-            <>
-              <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
-                {todayMission.trajet.depart}
-              </h2>
-              <p className="text-[13px] text-[#c9d6f2] mt-2">→ {todayMission.trajet.arrivee}</p>
-              <p className="text-[11.5px] text-[#8fa3cc] mt-3">
-                {catalogueCount} mission{catalogueCount > 1 ? "s" : ""} disponible{catalogueCount > 1 ? "s" : ""} au catalogue
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-[22px] font-bold text-white mt-2 leading-tight">
-                {catalogueCount > 0
-                  ? `${catalogueCount} mission${catalogueCount > 1 ? "s" : ""} disponible${catalogueCount > 1 ? "s" : ""}`
-                  : "Aucune mission au catalogue"}
-              </h2>
-              <p className="text-[12.5px] text-[#c9d6f2] mt-2 leading-relaxed">
-                Parcourez les trajets ouverts et positionnez-vous en un clic.
-              </p>
-            </>
-          )}
-          <span className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,125,255,0.6)]">
-            Ouvrir le catalogue <ArrowRight size={16} />
+            )}
           </span>
+          <span className="drv-chevron">
+            <ChevronDown size={12} />
+          </span>
+        </button>
+
+        <div className="drv-kpi-grid">
+          {statCards.map((c) => (
+            <Link
+              key={c.label}
+              to={c.to}
+              search={c.search as never}
+              onClick={clearStoredOpenMission}
+              className="drv-kpi-cell"
+              style={{ ["--glow" as string]: c.accent }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span
+                  className="w-8 h-8 rounded-[11px] flex items-center justify-center shrink-0"
+                  style={{ background: `${c.accent}26`, border: `1px solid ${c.accent}59` }}
+                >
+                  <c.icon size={16} strokeWidth={2.2} style={{ color: c.accent }} />
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] pl-1.5 pr-2 py-[3px]">
+                  <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: c.accent }} />
+                  <span className="text-[8.5px] font-bold uppercase tracking-[0.04em] text-[#8fa3d9]">{c.pill}</span>
+                </span>
+              </div>
+              <p className="font-driver text-[26px] font-bold text-white leading-none tabular-nums mb-1.5">{c.value}</p>
+              <p className="text-[11px] font-semibold text-[#8fa3d9] leading-snug">{c.label}</p>
+            </Link>
+          ))}
         </div>
-      </Link>
+      </div>
+
+      {/* Catalogue */}
+      {catalogueCount > 0 ? (
+        <Link
+          to="/convoyeur/catalogue"
+          className="relative block overflow-hidden rounded-[24px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
+        >
+          <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
+          <div className="relative max-w-[62%]">
+            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4f8cff]">Catalogue missions</p>
+            <h2 className="font-driver text-[22px] font-bold text-white mt-2 leading-tight">
+              {catalogueCount} mission{catalogueCount > 1 ? "s" : ""} disponible{catalogueCount > 1 ? "s" : ""}
+            </h2>
+            <p className="text-[12.5px] text-[#c9d6f2] mt-2 leading-relaxed">
+              Parcourez les trajets ouverts et positionnez-vous en un clic.
+            </p>
+            <span className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white text-[13px] font-semibold shadow-[0_10px_25px_-5px_rgba(47,95,255,0.6)]">
+              Ouvrir le catalogue <ArrowRight size={16} />
+            </span>
+          </div>
+        </Link>
+      ) : (
+        <Link
+          to="/convoyeur/catalogue"
+          className="flex items-center gap-3.5 rounded-[24px] border border-[rgba(143,163,217,0.14)] bg-[#101d47] p-4"
+        >
+          <span className="w-11 h-11 rounded-[18px] shrink-0 flex items-center justify-center bg-gradient-to-br from-[#1c3684] to-[#2f5fff]">
+            <Truck size={22} className="text-white" strokeWidth={2} />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-[9px] font-bold uppercase tracking-[0.1em] text-[#4f8cff]">Catalogue</span>
+            <span className="block font-driver text-[13.5px] font-bold text-white mt-[3px] mb-2">Aucune mission disponible</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] px-3 py-[7px] text-[11.5px] font-bold text-white">
+              Parcourir <ArrowRight size={11} />
+            </span>
+          </span>
+        </Link>
+      )}
+
 
       {/* Prochaine mission */}
       {nextMission && nextMission.trajet && (
