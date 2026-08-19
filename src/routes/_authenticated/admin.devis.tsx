@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
-import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
@@ -235,31 +235,7 @@ function AdminDevisPage() {
           return;
         }
       }
-      const data: DevisData = {
-        numero: row.numero,
-        nom: row.nom,
-        prenom: row.prenom,
-        email: row.email,
-        telephone: row.telephone,
-        depart: row.depart,
-        arrivee: row.arrivee,
-        distance_km: row.distance_km,
-        duree_estimee: row.duree_estimee,
-        type_vehicule: row.type_vehicule,
-        marque: row.marque,
-        modele: row.modele,
-        carburant: row.carburant,
-        prestation: row.prestation,
-        option_trajet: row.option_trajet,
-        date_souhaitee: row.date_souhaitee,
-        heure_souhaitee: row.heure_souhaitee,
-        prix_estime: row.prix_estime,
-        tarif_label: row.tarif_label,
-        multiplier_label: row.multiplier_label,
-        message: row.message,
-        created_at: row.created_at,
-        version: row.version ?? 1,
-      };
+      const data: DevisData = devisRowToPdfData(row as unknown as Record<string, unknown>);
       const blob = await generateDevisPdf(data);
       downloadDevisPdf(blob, row.numero);
     } finally {
@@ -835,31 +811,7 @@ function DevisDrawer({
           documentId={devis.id}
           defaultEmail={devis.email}
           buildPdf={() =>
-            generateDevisPdf({
-              numero: devis.numero,
-              nom: devis.nom,
-              prenom: devis.prenom,
-              email: devis.email,
-              telephone: devis.telephone,
-              depart: devis.depart,
-              arrivee: devis.arrivee,
-              distance_km: devis.distance_km,
-              duree_estimee: devis.duree_estimee,
-              type_vehicule: devis.type_vehicule,
-              marque: devis.marque,
-              modele: devis.modele,
-              carburant: devis.carburant,
-              prestation: devis.prestation,
-              option_trajet: devis.option_trajet,
-              date_souhaitee: devis.date_souhaitee,
-              heure_souhaitee: devis.heure_souhaitee,
-              prix_estime: devis.prix_estime,
-              tarif_label: devis.tarif_label,
-              multiplier_label: devis.multiplier_label,
-              message: devis.message,
-              created_at: devis.created_at,
-              version: devis.version ?? 1,
-            })
+            generateDevisPdf(devisRowToPdfData(devis as unknown as Record<string, unknown>))
           }
           templateData={{
             prenom: devis.prenom,

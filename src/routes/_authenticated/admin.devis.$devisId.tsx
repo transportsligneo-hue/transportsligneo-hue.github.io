@@ -6,7 +6,7 @@ import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
-import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
@@ -45,23 +45,14 @@ function AdminDevisDetailPage() {
   const [savingPrice, setSavingPrice] = useState(false);
 
 
-  const buildDevisData = (row: any): DevisData => ({
-    numero: row.numero,
-    nom: row.nom, prenom: row.prenom, email: row.email,
-    telephone: row.telephone, depart: row.depart, arrivee: row.arrivee,
-    distance_km: row.distance_km, duree_estimee: row.duree_estimee,
-    type_vehicule: row.type_vehicule, marque: row.marque, modele: row.modele,
-    carburant: row.carburant, prestation: row.prestation,
-    option_trajet: row.option_trajet, date_souhaitee: row.date_souhaitee,
-    heure_souhaitee: row.heure_souhaitee, prix_estime: row.prix_estime,
-    tarif_label: row.tarif_label, multiplier_label: row.multiplier_label,
-    message: row.message, created_at: row.created_at,
-    societe: row._profile?.societe ?? null,
-    siret: row._profile?.siret ?? null,
-    tva_intra: row._profile?.tva_intra ?? null,
-    logo_url: row._profile?.logo_url ?? null,
-    adresse: row._profile?.adresse_facturation ?? row._profile?.adresse ?? null,
-  });
+  const buildDevisData = (row: any): DevisData =>
+    devisRowToPdfData(row as Record<string, unknown>, {
+      societe: row._profile?.societe ?? null,
+      siret: row._profile?.siret ?? null,
+      tva_intra: row._profile?.tva_intra ?? null,
+      logo_url: row._profile?.logo_url ?? null,
+      adresse: row._profile?.adresse_facturation ?? row._profile?.adresse ?? null,
+    });
 
   const load = async () => {
     setLoading(true);
