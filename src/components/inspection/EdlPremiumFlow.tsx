@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { writeWithOutbox } from "@/lib/offline-outbox";
 import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import { toastSignatureError } from "@/lib/signature-upload";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 import { EdlStartChecklistGate } from "@/components/inspection/EdlStartChecklistGate";
 
