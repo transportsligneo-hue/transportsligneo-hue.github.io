@@ -75,7 +75,14 @@ export type PlateLookupResult = {
     carburant?: string;
     puissance?: string;
     finition?: string;
+    /** Énergie normalisée : electrique | hybride | essence | diesel | gpl | hydrogene */
+    energie?: string;
+    /** Catégorie normalisée : citadine | berline | break | suv | monospace | coupe | cabriolet | utilitaire | luxe */
+    categorie?: string;
+    /** Carrosserie brute renvoyée par le SIV (ex: BREAK, CI, VU) */
+    carrosserie?: string;
   };
+
 };
 
 const RAPIDAPI_HOST = "api-de-plaque-d-immatriculation-france.p.rapidapi.com";
@@ -94,6 +101,38 @@ function flatten(obj: any, out: Record<string, any> = {}, depth = 0): Record<str
   }
   return out;
 }
+/** Normalise l'énergie SIV (EL, ES, GO, HY…) vers nos valeurs métier. */
+function normalizeEnergie(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  const s = raw.toUpperCase().replace(/[^A-Z]/g, "");
+  if (/ELEC|^EL$|^EE$|EV|BATT/.test(s)) return "electrique";
+  if (/HYBRID|^HY$|^EH$|^GH$|^HE$|RECHARGEABLE|PHEV/.test(s)) return "hybride";
+  if (/DIESEL|GAZOLE|GASOIL|^GO$|^GA$/.test(s)) return "diesel";
+  if (/HYDROG|^H2$/.test(s)) return "hydrogene";
+  if (/GPL|LPG|^GL$/.test(s)) return "gpl";
+  if (/GNV|^NG$/.test(s)) return "gnv";
+  if (/ESSENCE|PETROL|^ES$|^EG$|SANSPLOMB/.test(s)) return "essence";
+  return undefined;
+}
+
+const LUXE_MARQUES = /FERRARI|LAMBORGHINI|PORSCHE|BENTLEY|MASERATI|ASTONMARTIN|MCLAREN|ROLLSROYCE|LOTUS|CORVETTE|AMG|GT3|GTR/;
+
+/** Déduit une catégorie commerciale (citadine, berline, SUV…) depuis la carrosserie et le modèle. */
+function detectCategorie(carrosserie?: string, modele?: string, finition?: string): string | undefined {
+  const hay = [carrosserie, modele, finition].filter(Boolean).join(" ").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!hay) return undefined;
+  if (LUXE_MARQUES.test(hay)) return "luxe";
+  if (/CAMIONNETTE|FOURGON|^VU|VASP|UTILITAIRE|CTTE|KANGOO|BERLINGO|PARTNER|TRAFIC|JUMPY|EXPERT|MASTER|DUCATO|TRANSIT|COMBO|VITO|SPRINTER/.test(hay)) return "utilitaire";
+  if (/CABRIOLET|ROADSTER|DECAPOTABLE|SPIDER/.test(hay)) return "cabriolet";
+  if (/COUPE/.test(hay)) return "coupe";
+  if (/MONOSPACE|MINIBUS|SCENIC|ESPACE|TOURAN|ZAFIRA|PICASSO|CMAX|SMAX/.test(hay)) return "monospace";
+  if (/SUV|4X4|TOUTTERRAIN|CROSSOVER|CAPTUR|KADJAR|ARKANA|AUSTRAL|3008|5008|2008|TIGUAN|QASHQAI|JUKE|DUSTER|TUCSON|SPORTAGE|XTRAIL|RAV4|EVOQUE|QSUV/.test(hay)) return "suv";
+  if (/BREAK|SW|ESTATE|TOURING|AVANT/.test(hay)) return "break";
+  if (/CITADINE|CLIO|TWINGO|ZOE|208|108|C3|POLO|CORSA|FIESTA|MICRA|UP|AYGO|YARIS|IBIZA|FABIA|500|PANDA|MII|SWIFT|R5|RENAULT5/.test(hay)) return "citadine";
+  if (/BERLINE|MEGANE|LAGUNA|TALISMAN|308|508|C4|C5|GOLF|PASSAT|SERIE3|SERIE5|CLASSEC|CLASSEE|A3|A4|A6|OCTAVIA|LEON|INSIGNIA|MONDEO/.test(hay)) return "berline";
+  return undefined;
+}
+
 
 function isMeaningful(v: any): boolean {
   if (v == null) return false;
@@ -259,6 +298,18 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puissance_din",
         ]),
         finition: pick(flat, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
+        carrosserie: pick(flat, [
+          "AWN_carrosserie_CG",
+          "AWN_carrosserie",
+          "carrosserie",
+          "AWN_genre_CG",
+          "AWN_genre",
+          "genre",
+          "type_vehicule",
+          "categorie",
+        ]),
+        energie: undefined as string | undefined,
+        categorie: undefined as string | undefined,
       };
 
       // Année : si on a une date complète, extraire l'année
@@ -266,6 +317,10 @@ export const lookupPlate = createServerFn({ method: "POST" })
         const m = result.annee.match(/(\d{4})/);
         if (m) result.annee = m[1];
       }
+
+      result.energie = normalizeEnergie(result.carburant);
+      result.categorie = detectCategorie(result.carrosserie, result.modele, result.finition);
+
 
       console.log("[SIV] mapped", result);
 

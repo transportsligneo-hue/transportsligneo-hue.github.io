@@ -60,9 +60,11 @@ interface Attribution {
     client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
-    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null;
+    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
     options_meta?: unknown;
+    devis_id?: string | null;
     prix?: number | null;
+
   };
   convoyeur?: { nom: string; prenom: string };
 }
@@ -365,10 +367,25 @@ function AdminAttributions() {
     return out;
   }, [attributions, arBaseByGroup]);
 
+  type DevisVehicule = { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null };
+  const [devisVehicules, setDevisVehicules] = useState<Map<string, DevisVehicule[]>>(new Map());
+
+  const fetchDevisVehicules = useCallback(async (rows: Attribution[]) => {
+    const ids = Array.from(new Set(rows.map((r) => r.trajet?.devis_id).filter(Boolean))) as string[];
+    if (ids.length === 0) { setDevisVehicules(new Map()); return; }
+    const { data } = await supabase.from("devis").select("id, vehicules").in("id", ids);
+    const map = new Map<string, DevisVehicule[]>();
+    for (const d of data ?? []) {
+      const v = (d as { vehicules?: unknown }).vehicules;
+      if (Array.isArray(v) && v.length > 0) map.set(d.id as string, v as DevisVehicule[]);
+    }
+    setDevisVehicules(map);
+  }, []);
+
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, options_meta, prix), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -384,8 +401,11 @@ function AdminAttributions() {
       setAttributions((bare ?? []) as unknown as Attribution[]);
       return;
     }
-    setAttributions((data ?? []) as unknown as Attribution[]);
-  }, []);
+    const rows = (data ?? []) as unknown as Attribution[];
+    setAttributions(rows);
+    void fetchDevisVehicules(rows);
+  }, [fetchDevisVehicules]);
+
 
   const fetchOptions = useCallback(async () => {
     // Charge tous les trajets publiables/en attente qui n'ont PAS encore d'attribution active.
@@ -599,32 +619,63 @@ function AdminAttributions() {
                   <p className="text-pro-text-soft text-sm mt-1">
                     {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                    {(() => {
-                      const plate = a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation;
-                      return plate ? <span className="plate-tag text-[11px]">{plate}</span> : (
-                        <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                          Plaque à renseigner
-                        </span>
-                      );
-                    })()}
-                    {(a.trajet?.marque || a.trajet?.modele) && (
-                      <span className="text-xs font-semibold text-pro-text">
-                        {[a.trajet?.marque, a.trajet?.modele].filter(Boolean).join(" ")}
-                      </span>
-                    )}
-                    {(() => {
-                      const e = (a.trajet?.vehicule_energie ?? "").toLowerCase();
-                      return e.includes("lec") || e === "ev" ? (
-                        <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                          Électrique
-                        </span>
-                      ) : null;
-                    })()}
-                    {a.trajet?.vin && (
-                      <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {a.trajet.vin.slice(-8)}</span>
-                    )}
-                  </div>
+                  {(() => {
+                    const extra = a.trajet?.devis_id ? devisVehicules.get(a.trajet.devis_id) : undefined;
+                    const list: { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null }[] =
+                      extra && extra.length > 1
+                        ? extra
+                        : [{
+                            immatriculation: a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation,
+                            marque: a.trajet?.marque,
+                            modele: a.trajet?.modele,
+                            vin: a.trajet?.vin,
+                            energie: a.trajet?.vehicule_energie,
+                            type: a.trajet?.vehicule_type,
+                          }];
+
+                    return (
+                      <div className="mt-2 space-y-1">
+                        {list.map((v, i) => {
+                          const e = (v.energie ?? "").toLowerCase();
+                          return (
+                            <div key={`${v.immatriculation ?? i}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              {v.immatriculation ? (
+                                <span className="plate-tag text-[11px]">{v.immatriculation}</span>
+                              ) : (
+                                <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                                  Plaque à renseigner
+                                </span>
+                              )}
+                              {(v.marque || v.modele) && (
+                                <span className="text-xs font-semibold text-pro-text">
+                                  {[v.marque, v.modele].filter(Boolean).join(" ")}
+                                </span>
+                              )}
+                              {v.type && (
+                                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                                  {v.type}
+                                </span>
+                              )}
+                              {(e.includes("lec") || e === "ev") && (
+                                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                                  Électrique
+                                </span>
+                              )}
+                              {v.vin && (
+                                <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {v.vin.slice(-8)}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {list.length > 1 && (
+                          <p className="text-[10px] uppercase tracking-wider text-pro-muted">
+                            {list.length} véhicules sur ce dossier
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
 
                     <span className="font-semibold text-pro-text-soft">

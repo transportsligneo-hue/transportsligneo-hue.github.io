@@ -51,6 +51,10 @@ const VEHICLE_TYPES = [
   { value: "berline", label: "Berline" },
   { value: "suv", label: "SUV" },
   { value: "break", label: "Break" },
+  { value: "monospace", label: "Monospace" },
+  { value: "coupe", label: "Coupé" },
+  { value: "cabriolet", label: "Cabriolet" },
+  { value: "luxe", label: "Luxe / Supercar" },
   { value: "utilitaire", label: "Utilitaire" },
   { value: "autre", label: "Autre" },
 ];
@@ -289,16 +293,23 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
       if (d.marque && !marque) setMarque(d.marque);
       if (d.modele && !modele) setModele(d.modele);
       if (d.vin && !vin) setVin(d.vin);
-      if (d.carburant && !energie) {
-        const c = d.carburant.toLowerCase();
-        if (c.includes("élec") || c.includes("elec") || c.includes("ev")) setEnergie("electrique");
-        else if (c.includes("hyb") && c.includes("rech")) setEnergie("hybride_rechargeable");
-        else if (c.includes("hyb")) setEnergie("hybride");
-        else if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergie("diesel");
-        else if (c.includes("gpl")) setEnergie("gpl");
-        else if (c.includes("ess")) setEnergie("essence");
+      if (!energie) {
+        if (d.energie) setEnergie(d.energie === "hydrogene" || d.energie === "gnv" ? "autre" : d.energie);
+        else if (d.carburant) {
+          const c = d.carburant.toLowerCase();
+          if (c.includes("élec") || c.includes("elec") || c.includes("ev")) setEnergie("electrique");
+          else if (c.includes("hyb") && c.includes("rech")) setEnergie("hybride_rechargeable");
+          else if (c.includes("hyb")) setEnergie("hybride");
+          else if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergie("diesel");
+          else if (c.includes("gpl")) setEnergie("gpl");
+          else if (c.includes("ess")) setEnergie("essence");
+        }
+      }
+      if (d.categorie) {
+        setVehicleType(VEHICLE_TYPES.some((v) => v.value === d.categorie) ? d.categorie : "autre");
       }
       toast.success("Informations véhicule récupérées");
+
     } catch {
       toast.error("Service indisponible · vous pouvez remplir manuellement");
     } finally {

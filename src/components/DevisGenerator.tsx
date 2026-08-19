@@ -32,7 +32,7 @@ const CITY_DEPARTMENTS: Record<string, string> = { "Tours": "37-intra", "Châtea
 const FIXED_TARIFFS: Record<string, [number, number]> = { "37-intra": [79, 129], "37-hors": [99, 129] };
 const DEPARTMENT_LABELS: Record<string, string> = { "37-intra": "Forfait Tours intra", "37-hors": "Forfait hors agglomération (37)" };
 const CITIES = ["Tours","Paris","Lyon","Marseille","Bordeaux","Nantes","Lille","Strasbourg","Toulouse","Nice","Montpellier","Rennes","Orléans","Poitiers","Limoges","Clermont-Ferrand","Angers","Le Mans","Blois","Chartres","Rouen","Caen","Dijon","Reims","Metz","Nancy","Brest","La Rochelle","Perpignan","Grenoble","Saint-Étienne","Amiens","Bourges","Châteauroux"].sort();
-const VEHICLE_TYPES = [{value:"citadine",label:"Citadine"},{value:"berline",label:"Berline"},{value:"suv",label:"SUV"},{value:"utilitaire",label:"Utilitaire"},{value:"autre",label:"Autre"}];
+const VEHICLE_TYPES = [{value:"citadine",label:"Citadine"},{value:"berline",label:"Berline"},{value:"break",label:"Break"},{value:"suv",label:"SUV"},{value:"monospace",label:"Monospace"},{value:"coupe",label:"Coupé"},{value:"cabriolet",label:"Cabriolet"},{value:"luxe",label:"Luxe / Supercar"},{value:"utilitaire",label:"Utilitaire"},{value:"autre",label:"Autre"}];
 const ENERGY_TYPES = [{value:"diesel",label:"Diesel"},{value:"essence",label:"Essence"},{value:"electrique",label:"Électrique"},{value:"hybride",label:"Hybride"}];
 
 function extractCity(addr: string): string {
@@ -204,12 +204,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         if (d.annee) setAnnee(d.annee);
         if (d.puissance) setPuissance(d.puissance);
         if (d.finition) setFinition(d.finition);
-        if (d.carburant) {
+        if (d.energie) {
+          setEnergy(ENERGY_TYPES.some(e => e.value === d.energie) ? d.energie : "essence");
+        } else if (d.carburant) {
           const c = d.carburant.toLowerCase();
           if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergy("diesel");
           else if (c.includes("essence") || c.includes("sp") || c.includes("petrol")) setEnergy("essence");
           else if (c.includes("élec") || c.includes("elec") || c.includes("ev")) setEnergy("electrique");
           else if (c.includes("hybr")) setEnergy("hybride");
+        }
+        if (d.categorie) {
+          setVehicleType(VEHICLE_TYPES.some(v => v.value === d.categorie) ? d.categorie : "autre");
         }
         setSivMsg({ type: "ok", text: "Véhicule trouvé ✓" });
       }
