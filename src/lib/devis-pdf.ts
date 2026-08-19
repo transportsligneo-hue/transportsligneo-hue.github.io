@@ -77,8 +77,8 @@ export interface DevisData {
  * Relit les options cochées (plein carburant, recharge élec, mise en main, lavage…)
  * et le PV digitalisé depuis le récapitulatif enregistré dans `message`.
  */
-export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null } {
-  const out: { options: string[]; pv: string | null } = { options: [], pv: null };
+export function parseDevisOptions(message?: string | null): { options: string[]; pv: string | null; vehicules: string[] } {
+  const out: { options: string[]; pv: string | null; vehicules: string[] } = { options: [], pv: null, vehicules: [] };
   if (!message) return out;
   for (const raw of message.split("\n")) {
     const line = raw.trim();
@@ -87,11 +87,17 @@ export function parseDevisOptions(message?: string | null): { options: string[];
       out.options = optMatch[1].split(",").map((s) => s.trim()).filter(Boolean);
       continue;
     }
+    const vehMatch = line.match(/^V[ée]hicule\s*(\d+)\s*:\s*(.+)$/i);
+    if (vehMatch) {
+      out.vehicules.push(vehMatch[2].trim());
+      continue;
+    }
     const pvMatch = line.match(/^PV de livraison digitalis[ée]\s*:\s*(.+)$/i);
     if (pvMatch) out.pv = pvMatch[1].trim();
   }
   return out;
 }
+
 
 const NAVY: [number, number, number] = [12, 22, 56];
 const GOLD: [number, number, number] = [176, 137, 44];
