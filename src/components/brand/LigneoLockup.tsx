@@ -52,8 +52,9 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
 
         {tag && (
           <span
-            className="font-bold uppercase tracking-[0.12em] text-[#d9b54a] mt-[2px]"
-            style={{ fontSize: s.tag }}
+            className="font-bold uppercase tracking-[0.12em] text-[#6effcd] mt-[2px]"
+            style={{ fontSize: s.tag, textShadow: "0 0 8px rgba(110,255,205,0.65)" }}
+
           >
             {tag}
           </span>

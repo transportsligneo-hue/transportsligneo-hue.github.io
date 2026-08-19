@@ -112,6 +112,7 @@ import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './rout
 import { Route as AuthenticatedConvoyeurCatalogueRouteImport } from './routes/_authenticated/convoyeur.catalogue'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
+import { Route as AuthenticatedAdminTestNotificationsRouteImport } from './routes/_authenticated/admin.test-notifications'
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
@@ -744,6 +745,12 @@ const AuthenticatedAdminTrajetsRoute =
     path: '/trajets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTestNotificationsRoute =
+  AuthenticatedAdminTestNotificationsRouteImport.update({
+    id: '/test-notifications',
+    path: '/test-notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSuperAdminRoute =
   AuthenticatedAdminSuperAdminRouteImport.update({
     id: '/super-admin',
@@ -1235,6 +1242,7 @@ export interface FileRoutesByFullPath {
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
+  '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1403,6 +1411,7 @@ export interface FileRoutesByTo {
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
+  '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1576,6 +1585,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
+  '/_authenticated/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
@@ -1752,6 +1762,7 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/super-admin'
+    | '/admin/test-notifications'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -1920,6 +1931,7 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/super-admin'
+    | '/admin/test-notifications'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
@@ -2092,6 +2104,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
     | '/_authenticated/admin/super-admin'
+    | '/_authenticated/admin/test-notifications'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/catalogue'
@@ -2988,6 +3001,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrajetsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/test-notifications': {
+      id: '/_authenticated/admin/test-notifications'
+      path: '/test-notifications'
+      fullPath: '/admin/test-notifications'
+      preLoaderRoute: typeof AuthenticatedAdminTestNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/super-admin': {
       id: '/_authenticated/admin/super-admin'
       path: '/super-admin'
@@ -3571,6 +3591,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
+  AuthenticatedAdminTestNotificationsRoute: typeof AuthenticatedAdminTestNotificationsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -3612,6 +3633,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
+  AuthenticatedAdminTestNotificationsRoute:
+    AuthenticatedAdminTestNotificationsRoute,
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

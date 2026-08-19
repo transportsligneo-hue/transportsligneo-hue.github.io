@@ -194,3 +194,104 @@ export const notifyClientMissionCompleted = createServerFn({ method: "POST" })
     const { sendPushToUser } = await import("@/lib/push/send.server");
     return sendPushToUser(clientUserId, payload);
   });
+
+/* ------------------------------------------------------------------ */
+/* Tests de notifications (admin) — app driver Capacitor + web push     */
+/* ------------------------------------------------------------------ */
+
+async function assertAdminCtx(context: any) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+  const { data: isSuper } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "super_admin" });
+  if (!isAdmin && !isSuper) throw new Error("Forbidden");
+}
+
+/** Liste les convoyeurs avec leur nombre d'appareils enregistrés (natif / web). */
+export const listDriverPushDevices = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdminCtx(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fcmConfigured } = await import("@/lib/push/fcm.server");
+
+    const { data: convoyeurs } = await supabaseAdmin
+      .from("convoyeurs")
+      .select("id, user_id, prenom, nom, email, statut")
+      .not("user_id", "is", null)
+      .order("nom", { ascending: true });
+
+    const ids = (convoyeurs ?? []).map((c: any) => c.user_id).filter(Boolean);
+    const { data: natives } = ids.length
+      ? await supabaseAdmin.from("native_push_tokens").select("user_id, platform").in("user_id", ids)
+      : { data: [] as any[] };
+    const { data: webs } = ids.length
+      ? await supabaseAdmin.from("push_subscriptions").select("user_id").in("user_id", ids)
+      : { data: [] as any[] };
+
+    return {
+      fcmConfigured: fcmConfigured(),
+      drivers: (convoyeurs ?? []).map((c: any) => ({
+        id: c.id,
+        userId: c.user_id as string,
+        nom: `${c.prenom ?? ""} ${c.nom ?? ""}`.trim() || c.email || "Convoyeur",
+        email: c.email ?? null,
+        statut: c.statut ?? null,
+        native: (natives ?? []).filter((n: any) => n.user_id === c.user_id).length,
+        platforms: Array.from(
+          new Set((natives ?? []).filter((n: any) => n.user_id === c.user_id).map((n: any) => n.platform)),
+        ),
+        web: (webs ?? []).filter((w: any) => w.user_id === c.user_id).length,
+      })),
+    };
+  });
+
+/**
+ * Envoie une notification de test aux convoyeurs sélectionnés (ou à tous).
+ * Réservé admin / super_admin. Le lien est forcé sur un chemin interne.
+ */
+export const sendTestPushToDrivers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userIds?: string[]; all?: boolean; payload: z.infer<typeof payloadSchema>; saveHistory?: boolean }) => ({
+    userIds: (input.userIds ?? []).map((id) => uuid.parse(id)),
+    all: !!input.all,
+    saveHistory: input.saveHistory !== false,
+    payload: payloadSchema.parse(input.payload),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertAdminCtx(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendPushToUser } = await import("@/lib/push/send.server");
+
+    let targets = data.userIds;
+    if (data.all) {
+      const { data: rows } = await supabaseAdmin
+        .from("convoyeurs")
+        .select("user_id")
+        .not("user_id", "is", null);
+      targets = Array.from(new Set((rows ?? []).map((r: any) => r.user_id).filter(Boolean)));
+    }
+    if (!targets.length) throw new Error("Aucun convoyeur sélectionné");
+
+    const rawUrl = data.payload.url ?? "/convoyeur";
+    const url = rawUrl.startsWith("/") ? rawUrl : "/convoyeur";
+    const payload = { ...data.payload, url, tag: data.payload.tag ?? `test-${Date.now()}` };
+
+    const results: { userId: string; sent: number; native: number; web: number }[] = [];
+    for (const userId of targets) {
+      if (data.saveHistory) await insertUserNotification(supabaseAdmin, userId, "test_notification", payload);
+      const res: any = await sendPushToUser(userId, payload);
+      results.push({
+        userId,
+        sent: res.sent ?? 0,
+        native: res.native?.sent ?? 0,
+        web: res.web?.sent ?? 0,
+      });
+    }
+
+    return {
+      targets: targets.length,
+      totalSent: results.reduce((a, r) => a + r.sent, 0),
+      nativeSent: results.reduce((a, r) => a + r.native, 0),
+      webSent: results.reduce((a, r) => a + r.web, 0),
+      results,
+    };
+  });

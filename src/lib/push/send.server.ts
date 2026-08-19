@@ -29,41 +29,68 @@ export type PushPayload = {
  * Returns { sent, removed }.
  */
 export async function sendPushToUser(userId: string, payload: PushPayload) {
-  configure();
-  const { data: subs, error } = await supabaseAdmin
-    .from("push_subscriptions")
-    .select("endpoint, p256dh, auth_key")
-    .eq("user_id", userId);
-  if (error || !subs?.length) return { sent: 0, removed: 0 };
+  // 1) Push natif (app Capacitor driver) — indépendant du web push
+  let native = { configured: false, devices: 0, sent: 0, removed: 0 };
+  try {
+    const { sendNativePushToUser } = await import("@/lib/push/fcm.server");
+    native = await sendNativePushToUser(userId, {
+      title: payload.title,
+      body: payload.body,
+      url: payload.url,
+      tag: payload.tag,
+    });
+  } catch (e) {
+    console.warn("[push] natif indisponible", e);
+  }
 
-  const body = JSON.stringify(payload);
+  // 2) Web push (navigateur)
   let sent = 0;
   const dead: string[] = [];
-  await Promise.all(
-    subs.map(async (s) => {
-      try {
-        await webpush.sendNotification(
-          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } },
-          body,
-          { TTL: 3600 }
-        );
-        sent++;
-      } catch (e: any) {
-        const code = e?.statusCode;
-        if (code === 404 || code === 410) dead.push(s.endpoint);
-        else console.warn("[push] send failed", code, e?.body || e?.message);
-      }
-    })
-  );
-  if (dead.length) {
-    await supabaseAdmin
+  try {
+    configure();
+    const { data: subs } = await supabaseAdmin
       .from("push_subscriptions")
-      .delete()
-      .eq("user_id", userId)
-      .in("endpoint", dead);
+      .select("endpoint, p256dh, auth_key")
+      .eq("user_id", userId);
+
+    if (subs?.length) {
+      const body = JSON.stringify(payload);
+      await Promise.all(
+        subs.map(async (s) => {
+          try {
+            await webpush.sendNotification(
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } },
+              body,
+              { TTL: 3600 }
+            );
+            sent++;
+          } catch (e: any) {
+            const code = e?.statusCode;
+            if (code === 404 || code === 410) dead.push(s.endpoint);
+            else console.warn("[push] send failed", code, e?.body || e?.message);
+          }
+        })
+      );
+      if (dead.length) {
+        await supabaseAdmin
+          .from("push_subscriptions")
+          .delete()
+          .eq("user_id", userId)
+          .in("endpoint", dead);
+      }
+    }
+  } catch (e) {
+    console.warn("[push] web push indisponible", e);
   }
-  return { sent, removed: dead.length };
+
+  return {
+    sent: sent + native.sent,
+    removed: dead.length + native.removed,
+    web: { sent, removed: dead.length },
+    native,
+  };
 }
+
 
 /**
  * Sends to all users with a given role (admin, super_admin, etc.).
