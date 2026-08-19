@@ -135,6 +135,34 @@ interface Props {
   onChanged?: () => void;
 }
 
+type DevisVehicule = Record<string, unknown>;
+
+/** Champs éditables pour les véhicules additionnels d'un devis groupé. */
+const VEH_FIELDS: FieldDef[] = [
+  { key: "marque", label: "Marque", placeholder: "RENAULT" },
+  { key: "modele", label: "Modèle", placeholder: "KANGOO" },
+  { key: "immatriculation", label: "Immatriculation", placeholder: "AA-123-BB" },
+  { key: "vin", label: "VIN / N° de série", placeholder: "VF1..." },
+  {
+    key: "energie",
+    label: "Énergie",
+    type: "select",
+    options: [
+      { value: "", label: "—" },
+      { value: "essence", label: "Essence" },
+      { value: "diesel", label: "Diesel" },
+      { value: "hybride", label: "Hybride" },
+      { value: "electrique", label: "Électrique" },
+      { value: "gpl", label: "GPL" },
+    ],
+  },
+  { key: "categorie", label: "Type / gabarit" },
+  { key: "couleur", label: "Couleur" },
+  { key: "prix", label: "Prix (€)", type: "number" },
+  { key: "arrivee", label: "Adresse d'arrivée", span: true },
+  { key: "notes", label: "Notes véhicule", type: "textarea", span: true },
+];
+
 export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -142,6 +170,11 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const [initial, setInitial] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({});
   const [tab, setTab] = useState<string>(SECTIONS[0].id);
+  // Devis groupé : plusieurs véhicules dans une seule mission
+  const [devisId, setDevisId] = useState<string | null>(null);
+  const [vehInitial, setVehInitial] = useState<DevisVehicule[]>([]);
+  const [vehForm, setVehForm] = useState<DevisVehicule[]>([]);
+  const [vehIndex, setVehIndex] = useState(0);
 
   useEffect(() => {
     if (openKey > 0) setOpen(true);
@@ -150,8 +183,8 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from("trajets").select("*").eq("id", trajetId).maybeSingle();
-    setLoading(false);
     if (error || !data) {
+      setLoading(false);
       toast.error("Impossible de charger la fiche mission");
       return;
     }
@@ -168,11 +201,28 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     }
     setInitial(next);
     setForm(next);
+
+    // Véhicules additionnels (devis groupé)
+    const dId = (row["devis_id"] as string | null) ?? null;
+    setDevisId(dId);
+    if (dId) {
+      const { data: devis } = await supabase.from("devis").select("vehicules").eq("id", dId).maybeSingle();
+      const list = (devis as { vehicules?: unknown } | null)?.vehicules;
+      const arr = Array.isArray(list) ? (list as DevisVehicule[]) : [];
+      setVehInitial(arr);
+      setVehForm(arr.map((v) => ({ ...v })));
+    } else {
+      setVehInitial([]);
+      setVehForm([]);
+    }
+    setVehIndex(0);
+    setLoading(false);
   }, [trajetId]);
 
   useEffect(() => {
     if (open && Object.keys(initial).length === 0) void load();
   }, [open, initial, load]);
+
 
   const dirtyKeys = useMemo(
     () => ALL_KEYS.filter((k) => (form[k] ?? "") !== (initial[k] ?? "")),
