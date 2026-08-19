@@ -1255,6 +1255,45 @@ export type Database = {
         }
         Relationships: []
       }
+      catalogue_penalites: {
+        Row: {
+          actif: boolean
+          article_reference: string | null
+          code: string | null
+          created_at: string
+          description: string | null
+          id: string
+          libelle: string
+          type_montant: string
+          updated_at: string
+          valeur: number
+        }
+        Insert: {
+          actif?: boolean
+          article_reference?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          libelle: string
+          type_montant: string
+          updated_at?: string
+          valeur?: number
+        }
+        Update: {
+          actif?: boolean
+          article_reference?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          libelle?: string
+          type_montant?: string
+          updated_at?: string
+          valeur?: number
+        }
+        Relationships: []
+      }
       chat_tool_calls: {
         Row: {
           arguments: Json
@@ -1866,10 +1905,12 @@ export type Database = {
         Row: {
           account_status: string
           annees_experience: number | null
+          bic: string | null
           created_at: string
           disponibilite: string | null
           email: string
           has_completed_training: boolean
+          iban: string | null
           id: string
           message: string | null
           missions_terminees: number
@@ -1884,6 +1925,7 @@ export type Database = {
           site_id: string | null
           statut: string
           telephone: string
+          titulaire_compte: string | null
           training_completed_at: string | null
           training_status: string
           type_convoyeur: string
@@ -1894,10 +1936,12 @@ export type Database = {
         Insert: {
           account_status?: string
           annees_experience?: number | null
+          bic?: string | null
           created_at?: string
           disponibilite?: string | null
           email: string
           has_completed_training?: boolean
+          iban?: string | null
           id?: string
           message?: string | null
           missions_terminees?: number
@@ -1912,6 +1956,7 @@ export type Database = {
           site_id?: string | null
           statut?: string
           telephone: string
+          titulaire_compte?: string | null
           training_completed_at?: string | null
           training_status?: string
           type_convoyeur?: string
@@ -1922,10 +1967,12 @@ export type Database = {
         Update: {
           account_status?: string
           annees_experience?: number | null
+          bic?: string | null
           created_at?: string
           disponibilite?: string | null
           email?: string
           has_completed_training?: boolean
+          iban?: string | null
           id?: string
           message?: string | null
           missions_terminees?: number
@@ -1940,6 +1987,7 @@ export type Database = {
           site_id?: string | null
           statut?: string
           telephone?: string
+          titulaire_compte?: string | null
           training_completed_at?: string | null
           training_status?: string
           type_convoyeur?: string
@@ -4796,6 +4844,74 @@ export type Database = {
           },
         ]
       }
+      paiements_convoyeurs: {
+        Row: {
+          convoyeur_id: string
+          created_at: string
+          created_by: string | null
+          date_execution: string | null
+          facture_numero: string | null
+          facture_url: string | null
+          id: string
+          methode: string
+          montant_total: number
+          nb_missions: number
+          notes: string | null
+          numero: string | null
+          periode_debut: string | null
+          periode_fin: string | null
+          reference_bancaire: string | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          convoyeur_id: string
+          created_at?: string
+          created_by?: string | null
+          date_execution?: string | null
+          facture_numero?: string | null
+          facture_url?: string | null
+          id?: string
+          methode?: string
+          montant_total?: number
+          nb_missions?: number
+          notes?: string | null
+          numero?: string | null
+          periode_debut?: string | null
+          periode_fin?: string | null
+          reference_bancaire?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          convoyeur_id?: string
+          created_at?: string
+          created_by?: string | null
+          date_execution?: string | null
+          facture_numero?: string | null
+          facture_url?: string | null
+          id?: string
+          methode?: string
+          montant_total?: number
+          nb_missions?: number
+          notes?: string | null
+          numero?: string | null
+          periode_debut?: string | null
+          periode_fin?: string | null
+          reference_bancaire?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paiements_convoyeurs_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       po_pdf_history: {
         Row: {
           action: string
@@ -5025,6 +5141,277 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      regles_remuneration: {
+        Row: {
+          actif: boolean
+          cond_distance_max: number | null
+          cond_distance_min: number | null
+          cond_type_mission: string | null
+          cond_vehicule_type: string | null
+          cond_zone: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string | null
+          id: string
+          libelle: string
+          montant_forfait: number
+          montant_min: number | null
+          notes: string | null
+          priorite: number
+          seuil_km: number
+          taux_km: number
+          type_regle: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          cond_distance_max?: number | null
+          cond_distance_min?: number | null
+          cond_type_mission?: string | null
+          cond_vehicule_type?: string | null
+          cond_zone?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string | null
+          id?: string
+          libelle: string
+          montant_forfait?: number
+          montant_min?: number | null
+          notes?: string | null
+          priorite?: number
+          seuil_km?: number
+          taux_km?: number
+          type_regle: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          cond_distance_max?: number | null
+          cond_distance_min?: number | null
+          cond_type_mission?: string | null
+          cond_vehicule_type?: string | null
+          cond_zone?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string | null
+          id?: string
+          libelle?: string
+          montant_forfait?: number
+          montant_min?: number | null
+          notes?: string | null
+          priorite?: number
+          seuil_km?: number
+          taux_km?: number
+          type_regle?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      remuneration_ajustements: {
+        Row: {
+          annulation_motif: string | null
+          annule: boolean
+          annule_at: string | null
+          annule_par: string | null
+          article_reference: string | null
+          categorie: string
+          created_at: string
+          created_by: string | null
+          id: string
+          incident_id: string | null
+          justificatif_url: string | null
+          libelle: string
+          montant: number
+          motif: string
+          penalite_id: string | null
+          remuneration_id: string
+          updated_at: string
+        }
+        Insert: {
+          annulation_motif?: string | null
+          annule?: boolean
+          annule_at?: string | null
+          annule_par?: string | null
+          article_reference?: string | null
+          categorie: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          incident_id?: string | null
+          justificatif_url?: string | null
+          libelle: string
+          montant: number
+          motif: string
+          penalite_id?: string | null
+          remuneration_id: string
+          updated_at?: string
+        }
+        Update: {
+          annulation_motif?: string | null
+          annule?: boolean
+          annule_at?: string | null
+          annule_par?: string | null
+          article_reference?: string | null
+          categorie?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          incident_id?: string | null
+          justificatif_url?: string | null
+          libelle?: string
+          montant?: number
+          motif?: string
+          penalite_id?: string | null
+          remuneration_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remuneration_ajustements_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "mission_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remuneration_ajustements_penalite_id_fkey"
+            columns: ["penalite_id"]
+            isOneToOne: false
+            referencedRelation: "catalogue_penalites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remuneration_ajustements_remuneration_id_fkey"
+            columns: ["remuneration_id"]
+            isOneToOne: false
+            referencedRelation: "remunerations_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remunerations_missions: {
+        Row: {
+          attribution_id: string | null
+          base_forfait: number
+          base_km_montant: number
+          calcul_detail: Json
+          calcule_at: string
+          convoyeur_id: string | null
+          created_at: string
+          date_mission: string | null
+          distance_km: number | null
+          frais_annexes: number
+          id: string
+          montant_base: number
+          montant_total: number
+          notes: string | null
+          numero_mission: string | null
+          paiement_id: string | null
+          primes: number
+          regle_id: string | null
+          source_calcul: string
+          statut: string
+          total_ajustements: number
+          trajet_id: string
+          updated_at: string
+          valide_at: string | null
+          valide_par: string | null
+        }
+        Insert: {
+          attribution_id?: string | null
+          base_forfait?: number
+          base_km_montant?: number
+          calcul_detail?: Json
+          calcule_at?: string
+          convoyeur_id?: string | null
+          created_at?: string
+          date_mission?: string | null
+          distance_km?: number | null
+          frais_annexes?: number
+          id?: string
+          montant_base?: number
+          montant_total?: number
+          notes?: string | null
+          numero_mission?: string | null
+          paiement_id?: string | null
+          primes?: number
+          regle_id?: string | null
+          source_calcul?: string
+          statut?: string
+          total_ajustements?: number
+          trajet_id: string
+          updated_at?: string
+          valide_at?: string | null
+          valide_par?: string | null
+        }
+        Update: {
+          attribution_id?: string | null
+          base_forfait?: number
+          base_km_montant?: number
+          calcul_detail?: Json
+          calcule_at?: string
+          convoyeur_id?: string | null
+          created_at?: string
+          date_mission?: string | null
+          distance_km?: number | null
+          frais_annexes?: number
+          id?: string
+          montant_base?: number
+          montant_total?: number
+          notes?: string | null
+          numero_mission?: string | null
+          paiement_id?: string | null
+          primes?: number
+          regle_id?: string | null
+          source_calcul?: string
+          statut?: string
+          total_ajustements?: number
+          trajet_id?: string
+          updated_at?: string
+          valide_at?: string | null
+          valide_par?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remunerations_missions_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remunerations_missions_convoyeur_id_fkey"
+            columns: ["convoyeur_id"]
+            isOneToOne: false
+            referencedRelation: "convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remunerations_missions_paiement_id_fkey"
+            columns: ["paiement_id"]
+            isOneToOne: false
+            referencedRelation: "paiements_convoyeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remunerations_missions_regle_id_fkey"
+            columns: ["regle_id"]
+            isOneToOne: false
+            referencedRelation: "regles_remuneration"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remunerations_missions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -6378,6 +6765,10 @@ export type Database = {
       }
       auto_archive_old_records: { Args: never; Returns: undefined }
       backfill_missions_from_trajets: { Args: never; Returns: number }
+      calculer_remuneration_mission: {
+        Args: { _force?: boolean; _trajet_id: string }
+        Returns: string
+      }
       can_convoyeur_bid_on_trajet: {
         Args: { _convoyeur_id: string; _trajet_id: string }
         Returns: boolean
@@ -6695,6 +7086,7 @@ export type Database = {
         Args: { _convoyeur_id: string }
         Returns: undefined
       }
+      remu_refresh_totals: { Args: { _remu_id: string }; Returns: undefined }
       resolve_client_pricing_rule: {
         Args: {
           _arrivee: string

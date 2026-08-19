@@ -116,6 +116,7 @@ import { Route as AuthenticatedAdminTestNotificationsRouteImport } from './route
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
+import { Route as AuthenticatedAdminPaiementsConvoyeursRouteImport } from './routes/_authenticated/admin.paiements-convoyeurs'
 import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authenticated/admin.paiements'
 import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
 import { Route as AuthenticatedAdminNouveauDevisRouteImport } from './routes/_authenticated/admin.nouveau-devis'
@@ -769,6 +770,12 @@ const AuthenticatedAdminParametresRoute =
     path: '/parametres',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPaiementsConvoyeursRoute =
+  AuthenticatedAdminPaiementsConvoyeursRouteImport.update({
+    id: '/paiements-convoyeurs',
+    path: '/paiements-convoyeurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPaiementsRoute =
   AuthenticatedAdminPaiementsRouteImport.update({
     id: '/paiements',
@@ -1239,6 +1246,7 @@ export interface FileRoutesByFullPath {
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -1408,6 +1416,7 @@ export interface FileRoutesByTo {
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -1582,6 +1591,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
   '/_authenticated/admin/paiements': typeof AuthenticatedAdminPaiementsRoute
+  '/_authenticated/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -1759,6 +1769,7 @@ export interface FileRouteTypes {
     | '/admin/nouveau-devis'
     | '/admin/organisations'
     | '/admin/paiements'
+    | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/super-admin'
@@ -1928,6 +1939,7 @@ export interface FileRouteTypes {
     | '/admin/nouveau-devis'
     | '/admin/organisations'
     | '/admin/paiements'
+    | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/super-admin'
@@ -2101,6 +2113,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/nouveau-devis'
     | '/_authenticated/admin/organisations'
     | '/_authenticated/admin/paiements'
+    | '/_authenticated/admin/paiements-convoyeurs'
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
     | '/_authenticated/admin/super-admin'
@@ -3029,6 +3042,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminParametresRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/paiements-convoyeurs': {
+      id: '/_authenticated/admin/paiements-convoyeurs'
+      path: '/paiements-convoyeurs'
+      fullPath: '/admin/paiements-convoyeurs'
+      preLoaderRoute: typeof AuthenticatedAdminPaiementsConvoyeursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/paiements': {
       id: '/_authenticated/admin/paiements'
       path: '/paiements'
@@ -3588,6 +3608,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNouveauDevisRoute: typeof AuthenticatedAdminNouveauDevisRoute
   AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
   AuthenticatedAdminPaiementsRoute: typeof AuthenticatedAdminPaiementsRoute
+  AuthenticatedAdminPaiementsConvoyeursRoute: typeof AuthenticatedAdminPaiementsConvoyeursRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
@@ -3630,6 +3651,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrganisationsRoute:
     AuthenticatedAdminOrganisationsRouteWithChildren,
   AuthenticatedAdminPaiementsRoute: AuthenticatedAdminPaiementsRoute,
+  AuthenticatedAdminPaiementsConvoyeursRoute:
+    AuthenticatedAdminPaiementsConvoyeursRoute,
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
