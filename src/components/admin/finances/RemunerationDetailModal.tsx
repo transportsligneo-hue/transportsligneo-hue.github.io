@@ -153,7 +153,7 @@ export function RemunerationDetailModal({
       patch.valide_par = userData.user?.id ?? null;
       patch.valide_at = new Date().toISOString();
     }
-    const { error } = await supabase.from("remunerations_missions").update(patch).eq("id", remu.id);
+    const { error } = await supabase.from("remunerations_missions").update(patch as never).eq("id", remu.id);
     if (error) return toast.error(error.message);
     toast.success(`Statut : ${REMU_STATUT_LABEL[statut]}`);
     await load();
