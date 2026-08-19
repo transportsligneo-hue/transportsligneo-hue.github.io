@@ -3,6 +3,338 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+/* =========================================
+   DRIVER APP CAPACITOR — green neon theme
+   (All gold/amber accents become electric mint green)
+   ========================================= */
+
+/* Root design tokens switch */
+body.is-driver-app {
+  --gold: #6effcd;
+  --gold-light: #a8ffdf;
+  --gold-dark: #2dd4a8;
+  --gold-soft: rgba(110, 255, 205, 0.12);
+  --gold-glow: rgba(110, 255, 205, 0.45);
+  --hairline-gold: rgba(110, 255, 205, 0.55);
+  --driver-gold: #6effcd;
+  --v3-gold: #6effcd;
+  --v3-gold-line: rgba(110, 255, 205, 0.5);
+  --ring: #6effcd;
+}
+
+body.is-driver-app,
+body.is-driver-app .driver-shell {
+  --primary: #6effcd;
+  --accent: #a8ffdf;
+}
+
+/* Gold gradient text */
+body.is-driver-app .gold-gradient-text,
+body.is-driver-app .text-gold-luxe,
+body.is-driver-app .gold-text {
+  background: linear-gradient(135deg, #6effcd 0%, #a8ffdf 50%, #6effcd 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Solid gold colors */
+body.is-driver-app .text-gold,
+body.is-driver-app .text-pro-gold,
+body.is-driver-app .text-amber-200,
+body.is-driver-app .text-amber-300,
+body.is-driver-app .text-amber-400,
+body.is-driver-app .text-amber-500,
+body.is-driver-app .text-amber-600,
+body.is-driver-app .text-amber-700,
+body.is-driver-app .text-amber-800,
+body.is-driver-app .text-amber-900,
+body.is-driver-app .text-yellow-400,
+body.is-driver-app .text-yellow-500,
+body.is-driver-app .text-yellow-600,
+body.is-driver-app .text-primary {
+  color: #6effcd !important;
+}
+
+body.is-driver-app .text-amber-100,
+body.is-driver-app .text-amber-50,
+body.is-driver-app .text-gold-light,
+body.is-driver-app .text-accent {
+  color: #a8ffdf !important;
+}
+
+body.is-driver-app .text-amber-950,
+body.is-driver-app .text-yellow-900,
+body.is-driver-app .text-gold-dark {
+  color: #2dd4a8 !important;
+}
+
+/* Gold backgrounds */
+body.is-driver-app .bg-gold,
+body.is-driver-app .bg-pro-gold,
+body.is-driver-app .bg-amber-500,
+body.is-driver-app .bg-yellow-500,
+body.is-driver-app .bg-primary {
+  background-color: #6effcd !important;
+}
+
+body.is-driver-app .bg-amber-50,
+body.is-driver-app .bg-amber-100,
+body.is-driver-app .bg-gold-soft,
+body.is-driver-app .bg-pro-gold-soft,
+body.is-driver-app .bg-yellow-50,
+body.is-driver-app .bg-yellow-100,
+body.is-driver-app .bg-accent,
+body.is-driver-app .bg-accent-soft {
+  background-color: rgba(110, 255, 205, 0.15) !important;
+}
+
+body.is-driver-app .bg-amber-200,
+body.is-driver-app .bg-amber-300,
+body.is-driver-app .bg-amber-400,
+body.is-driver-app .bg-yellow-200,
+body.is-driver-app .bg-yellow-300,
+body.is-driver-app .bg-yellow-400,
+body.is-driver-app .bg-gold-light {
+  background-color: #a8ffdf !important;
+}
+
+body.is-driver-app .bg-amber-900,
+body.is-driver-app .bg-yellow-900,
+body.is-driver-app .bg-gold-dark,
+body.is-driver-app .bg-amber-950 {
+  background-color: rgba(45, 212, 168, 0.25) !important;
+}
+
+/* Gold gradients */
+body.is-driver-app .bg-gold-gradient,
+body.is-driver-app .bg-pro-gold-gradient,
+body.is-driver-app .bg-gradient-to-r.from-amber-300.to-amber-500,
+body.is-driver-app .bg-gradient-to-br.from-amber-300.to-amber-500,
+body.is-driver-app .bg-gradient-to-r.from-yellow-300.to-yellow-500,
+body.is-driver-app .bg-gradient-to-br.from-yellow-300.to-yellow-500 {
+  background-image: linear-gradient(135deg, #6effcd 0%, #a8ffdf 100%) !important;
+}
+
+body.is-driver-app .bg-gradient-to-r.from-amber-500.to-amber-700,
+body.is-driver-app .bg-gradient-to-br.from-amber-500.to-amber-700,
+body.is-driver-app .bg-gradient-to-r.from-yellow-500.to-yellow-700,
+body.is-driver-app .bg-gradient-to-br.from-yellow-500.to-yellow-700 {
+  background-image: linear-gradient(135deg, #6effcd 0%, #2dd4a8 100%) !important;
+}
+
+body.is-driver-app .from-amber-300 { --tw-gradient-from: #6effcd var(--tw-gradient-from-position); --tw-gradient-to: rgba(110, 255, 205, 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+body.is-driver-app .from-amber-500 { --tw-gradient-from: #6effcd var(--tw-gradient-from-position); --tw-gradient-to: rgba(110, 255, 205, 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+body.is-driver-app .to-amber-500 { --tw-gradient-to: #6effcd var(--tw-gradient-to-position); }
+body.is-driver-app .to-amber-700 { --tw-gradient-to: #2dd4a8 var(--tw-gradient-to-position); }
+body.is-driver-app .via-amber-400 { --tw-gradient-stops: var(--tw-gradient-from), #a8ffdf var(--tw-gradient-via-position), var(--tw-gradient-to); }
+
+/* Gold borders */
+body.is-driver-app .border-gold,
+body.is-driver-app .border-pro-gold,
+body.is-driver-app .border-amber-300,
+body.is-driver-app .border-amber-400,
+body.is-driver-app .border-amber-500,
+body.is-driver-app .border-yellow-400,
+body.is-driver-app .border-yellow-500,
+body.is-driver-app .border-primary,
+body.is-driver-app .gold-border,
+body.is-driver-app .gold-border-strong {
+  border-color: #6effcd !important;
+}
+
+body.is-driver-app .border-amber-200,
+body.is-driver-app .border-yellow-200,
+body.is-driver-app .border-gold-light,
+body.is-driver-app .border-accent {
+  border-color: rgba(168, 255, 223, 0.55) !important;
+}
+
+body.is-driver-app .border-amber-100,
+body.is-driver-app .border-yellow-100,
+body.is-driver-app .border-gold-soft {
+  border-color: rgba(110, 255, 205, 0.25) !important;
+}
+
+/* Gold outlines / rings */
+body.is-driver-app .ring-gold,
+body.is-driver-app .ring-amber-400,
+body.is-driver-app .ring-yellow-400,
+body.is-driver-app .ring-primary,
+body.is-driver-app .focus\:ring-amber-400:focus,
+body.is-driver-app .focus\:ring-yellow-400:focus,
+body.is-driver-app .focus\:ring-primary:focus {
+  --tw-ring-color: #6effcd !important;
+}
+
+/* Gold dividers */
+body.is-driver-app .gold-divider,
+body.is-driver-app .gold-divider-short,
+body.is-driver-app .divider-gold,
+body.is-driver-app .bg-gradient-to-r.from-transparent.via-amber-300\/60.to-transparent,
+body.is-driver-app .bg-gradient-to-r.from-transparent.via-yellow-300\/60.to-transparent {
+  background: linear-gradient(90deg, transparent, rgba(110, 255, 205, 0.6), transparent) !important;
+}
+
+/* Gold buttons / CTAs */
+body.is-driver-app .btn-accent-gold,
+body.is-driver-app .btn-gold,
+body.is-driver-app .auth-link-lg.is-gold,
+body.is-driver-app .bg-gradient-to-r.from-yellow-400.to-amber-500,
+body.is-driver-app .bg-gradient-to-r.from-amber-400.to-amber-600,
+body.is-driver-app .hover\:bg-pro-gold-hover:hover,
+body.is-driver-app .hover\:bg-amber-600:hover,
+body.is-driver-app .hover\:bg-yellow-600:hover {
+  background: linear-gradient(135deg, #6effcd 0%, #2dd4a8 100%) !important;
+  color: #041329 !important;
+  border-color: transparent !important;
+}
+
+body.is-driver-app .btn-accent-gold:hover,
+body.is-driver-app .btn-gold:hover,
+body.is-driver-app .auth-link-lg.is-gold:hover,
+body.is-driver-app .hover\:bg-pro-gold-hover:hover {
+  background: linear-gradient(135deg, #a8ffdf 0%, #6effcd 100%) !important;
+}
+
+/* Gold hover states */
+body.is-driver-app .hover\:text-gold:hover,
+body.is-driver-app .hover\:text-amber-400:hover,
+body.is-driver-app .hover\:text-amber-500:hover,
+body.is-driver-app .hover\:text-yellow-400:hover,
+body.is-driver-app .hover\:text-primary:hover {
+  color: #6effcd !important;
+}
+
+body.is-driver-app .hover\:border-gold:hover,
+body.is-driver-app .hover\:border-amber-400:hover,
+body.is-driver-app .hover\:border-amber-500:hover,
+body.is-driver-app .hover\:border-yellow-400:hover,
+body.is-driver-app .hover\:border-primary:hover {
+  border-color: #6effcd !important;
+}
+
+body.is-driver-app .hover\:bg-gold:hover,
+body.is-driver-app .hover\:bg-amber-500:hover,
+body.is-driver-app .hover\:bg-yellow-500:hover,
+body.is-driver-app .hover\:bg-primary:hover {
+  background-color: #6effcd !important;
+}
+
+body.is-driver-app .hover\:bg-gold-soft:hover,
+body.is-driver-app .hover\:bg-amber-100:hover,
+body.is-driver-app .hover\:bg-yellow-100:hover,
+body.is-driver-app .hover\:bg-accent:hover {
+  background-color: rgba(110, 255, 205, 0.15) !important;
+}
+
+/* Fill / stroke for SVGs */
+body.is-driver-app .fill-amber-400,
+body.is-driver-app .fill-amber-500,
+body.is-driver-app .fill-yellow-400,
+body.is-driver-app .fill-yellow-500,
+body.is-driver-app .fill-gold,
+body.is-driver-app .fill-primary {
+  fill: #6effcd !important;
+}
+
+body.is-driver-app .stroke-amber-400,
+body.is-driver-app .stroke-amber-500,
+body.is-driver-app .stroke-yellow-400,
+body.is-driver-app .stroke-yellow-500,
+body.is-driver-app .stroke-gold,
+body.is-driver-app .stroke-primary {
+  stroke: #6effcd !important;
+}
+
+/* Box shadows / glows */
+body.is-driver-app .shadow-gold,
+body.is-driver-app .shadow-amber-500,
+body.is-driver-app .shadow-yellow-500,
+body.is-driver-app .shadow-primary {
+  --tw-shadow-color: #6effcd !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+  box-shadow: 0 0 20px rgba(110, 255, 205, 0.4) !important;
+}
+
+body.is-driver-app .glow-gold,
+body.is-driver-app .glow-amber {
+  box-shadow: 0 0 18px rgba(110, 255, 205, 0.45) !important;
+}
+
+/* Progress bars / rings with gold colors */
+body.is-driver-app .bg-amber-500\/10,
+body.is-driver-app .bg-amber-500\/20,
+body.is-driver-app .bg-yellow-500\/10,
+body.is-driver-app .bg-yellow-500\/20,
+body.is-driver-app .bg-primary\/10,
+body.is-driver-app .bg-primary\/20 {
+  background-color: rgba(110, 255, 205, 0.15) !important;
+}
+
+body.is-driver-app .bg-amber-500\/30,
+body.is-driver-app .bg-yellow-500\/30,
+body.is-driver-app .bg-primary\/30 {
+  background-color: rgba(110, 255, 205, 0.3) !important;
+}
+
+body.is-driver-app .border-amber-300\/40,
+body.is-driver-app .border-amber-500\/40,
+body.is-driver-app .border-yellow-400\/40,
+body.is-driver-app .border-primary\/40 {
+  border-color: rgba(110, 255, 205, 0.4) !important;
+}
+
+body.is-driver-app .text-amber-500\/80,
+body.is-driver-app .text-yellow-500\/80,
+body.is-driver-app .text-primary\/80 {
+  color: rgba(110, 255, 205, 0.8) !important;
+}
+
+/* Neon green pulse for "new" / training badges */
+body.is-driver-app .pulse-gold,
+body.is-driver-app .pulse-amber,
+body.is-driver-app .animate-pulse-gold {
+  animation: green-neon-pulse 2s ease-in-out infinite !important;
+}
+
+@keyframes green-neon-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(110, 255, 205, 0.3); }
+  50%      { box-shadow: 0 0 22px rgba(110, 255, 205, 0.6); }
+}
+
+/* Common utility class fixes for driver app gold -> green */
+body.is-driver-app .gold-accent-dot,
+body.is-driver-app .gold-bullet,
+body.is-driver-app .amber-dot {
+  background-color: #6effcd !important;
+  box-shadow: 0 0 8px rgba(110, 255, 205, 0.6) !important;
+}
+
+body.is-driver-app [class*="gold"] { border-color: #6effcd; }
+
+/* Formations / training gate overrides */
+body.is-driver-app .formation-gold-card,
+body.is-driver-app .training-gold-card {
+  border-color: rgba(110, 255, 205, 0.35) !important;
+  box-shadow: 0 0 18px rgba(110, 255, 205, 0.12) !important;
+}
+body.is-driver-app .formation-gold-card:hover,
+body.is-driver-app .training-gold-card:hover {
+  border-color: rgba(110, 255, 205, 0.7) !important;
+  box-shadow: 0 0 24px rgba(110, 255, 205, 0.25) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-driver-app .pulse-gold,
+  body.is-driver-app .pulse-amber,
+  body.is-driver-app .animate-pulse-gold {
+    animation: none !important;
+  }
+}
+
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
