@@ -21,9 +21,11 @@ const SIZES = {
  * badge véhicule doré + wordmark (TRANSPORTS blanc · LIGNEO bleu électrique)
  * + tag optionnel doré. Remplace l'icône seule partout (app driver, site, splash, login).
  */
-export default function LigneoLockup({ size = "md", tag = null, className = "", variant = "blue" }: Props) {
+export default function LigneoLockup({ size = "md", tag = null, className = "", variant }: Props) {
   const s = SIZES[size];
-  const isGreen = variant === "green";
+  const isApp = useIsMobileAppShell();
+  // Dans la coquille Capacitor (driver), le lockup passe en vert néon par défaut.
+  const isGreen = (variant ?? (isApp ? "green" : "blue")) === "green";
   const accent = isGreen ? "#6effcd" : "#4f8cff";
   const accentSoft = isGreen ? "rgba(78,255,178,0.3)" : "rgba(79,140,255,0.3)";
   const accentGlow = isGreen ? "rgba(110,255,205,0.15)" : "rgba(79,140,255,0.15)";
