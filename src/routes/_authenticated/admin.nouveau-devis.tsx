@@ -872,7 +872,87 @@ function AdminNouveauDevisPage() {
         </Card>
 
 
+        {/* 3. Véhicules du devis groupé */}
+        {isGroupe && (
+          <Card>
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
+                3
+              </span>
+              <h3 className="text-[15px] font-bold text-pro-text">Véhicules du devis</h3>
+              <span className="ml-auto rounded-full border border-pro-border px-2.5 py-0.5 text-[11px] font-semibold text-pro-muted">
+                {vlines.length} ligne{vlines.length > 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {vlines.map((v, i) => (
+                <div key={v.key} className="rounded-xl border border-pro-border bg-pro-bg-soft p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                      Véhicule {i + 1}
+                    </span>
+                    {vlines.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setVlines((prev) => prev.filter((x) => x.key !== v.key))}
+                        className="ml-auto text-[11.5px] font-semibold text-red-600"
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        value={v.immat}
+                        onChange={(e) => patchVeh(v.key, { immat: e.target.value.toUpperCase() })}
+                        placeholder="AB-123-CD"
+                        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => lookupVehPlate(v)}
+                        disabled={v.busy}
+                        className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                      >
+                        {v.busy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                        Rechercher
+                      </button>
+                    </div>
+                    {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
+                      <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="VIN" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: x.toUpperCase() })} placeholder="VF3XXXXXXXXXXXXXX" />
+                      <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
+                    </div>
+                    <AddressField
+                      label="Adresse de livraison (si différente)"
+                      value={v.arrivee}
+                      onChange={(x) => patchVeh(v.key, { arrivee: x })}
+                      placeholder={arrivee || "Par défaut : adresse d'arrivée commune"}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVlines((prev) => [...prev, newVeh()])}
+              className="mt-3 w-full rounded-xl border border-dashed border-pro-accent/50 py-3 text-[12.5px] font-semibold text-pro-accent hover:bg-pro-accent/5"
+            >
+              + Ajouter un véhicule
+            </button>
+            <p className="mt-3 text-[11.5px] text-pro-muted">
+              Un seul devis et un seul PDF listant tous les véhicules. À la conversion, une mission est créée par véhicule.
+            </p>
+          </Card>
+        )}
+
         {/* 3. Véhicule */}
+        {!isGroupe && (
         <Card>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
@@ -880,6 +960,7 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
+
           {isAllerRetour && (
             <p className="mb-4 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
               Trajet Livraison + restitution : deux véhicules distincts (deux états des lieux).
