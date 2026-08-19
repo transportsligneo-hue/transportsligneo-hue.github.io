@@ -167,6 +167,11 @@ function LoginPage() {
     <div className="auth-shell flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
+          {isMobileApp && (
+            <div className="mb-4 flex justify-center">
+              <span className="driver-neon-pill">DRIVER</span>
+            </div>
+          )}
           <Link to="/" className="inline-block mb-4 relative auth-logo-pulse">
             <LigneoLockup size="lg" variant={isMobileApp ? "green" : "blue"} className="justify-center relative z-10" />
           </Link>
