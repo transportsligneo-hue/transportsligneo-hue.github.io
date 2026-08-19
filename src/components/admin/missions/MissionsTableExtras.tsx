@@ -102,13 +102,31 @@ export function FactureQuickLink({ facture }: { facture: FactureLite | null }) {
 /* Avatar convoyeur                                                    */
 /* ------------------------------------------------------------------ */
 
-export function ConvoyeurAvatar({ nom }: { nom: string | null }) {
+export function ConvoyeurAvatar({
+  nom,
+  convoyeurId,
+}: {
+  nom: string | null;
+  convoyeurId?: string | null;
+}) {
+  const photo = useDriverAvatar(convoyeurId);
   const initials = (nom ?? "")
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((s) => s[0]?.toUpperCase())
     .join("");
+  if (photo) {
+    return (
+      <img
+        src={photo}
+        alt={nom ?? "Convoyeur"}
+        title={nom ?? undefined}
+        loading="lazy"
+        className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-[#2f5fff]/30"
+      />
+    );
+  }
   return (
     <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e5e9ff] text-[10px] font-bold text-[#2f5fff]">
       {initials || <UserRound size={12} />}
