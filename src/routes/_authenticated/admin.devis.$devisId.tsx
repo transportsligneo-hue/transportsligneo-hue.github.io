@@ -7,6 +7,7 @@ import {
   MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
+import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader, Card, Badge, Button, IconButton, Select, devisStatutTone,
@@ -469,6 +470,13 @@ function AdminDevisDetailPage() {
           <Card>
             <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3">Actions</p>
             <div className="space-y-2">
+              <ValidateDevisButton
+                devisId={devis.id}
+                numero={devis.numero}
+                locked={!!devis.locked_at}
+                className="w-full"
+                onValidated={load}
+              />
               <Select value={devis.statut} onChange={(e) => updateStatut(e.target.value)} className="w-full text-xs">
                 {STATUTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </Select>

@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
+import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
@@ -543,6 +544,11 @@ function AdminDevisPage() {
           setDevis((rows) => rows.map((row) => row.id === updated.id ? updated : row));
           setSelected(updated);
         }}
+        onValidated={(id) => {
+          const now = new Date().toISOString();
+          setDevis((rows) => rows.map((row) => row.id === id ? { ...row, statut: "accepte", locked_at: now } : row));
+          setSelected((cur) => cur && cur.id === id ? { ...cur, statut: "accepte", locked_at: now } : cur);
+        }}
       />
     </div>
   );
@@ -556,6 +562,7 @@ function DevisDrawer({
   onConvert,
   onArchive,
   onPriceSaved,
+  onValidated,
 }: {
   devis: DevisRow | null;
   acceptation: AcceptationInfo | null;
@@ -564,6 +571,7 @@ function DevisDrawer({
   onConvert: (d: DevisRow) => void;
   onArchive: (d: DevisRow) => void;
   onPriceSaved: (d: DevisRow) => void;
+  onValidated: (id: string) => void;
 }) {
   const [history, setHistory] = useState<HistoryRow[] | null>(null);
   const [proofUrls, setProofUrls] = useState<{ signature: string | null; pdf: string | null }>({ signature: null, pdf: null });
@@ -644,6 +652,12 @@ function DevisDrawer({
       }
       footer={
         <div className="flex flex-wrap gap-2">
+          <ValidateDevisButton
+            devisId={devis.id}
+            numero={devis.numero}
+            locked={!!devis.locked_at}
+            onValidated={() => onValidated(devis.id)}
+          />
           <Button size="sm" onClick={() => onDownload(devis)} icon={<Download size={12} />}>PDF</Button>
           <Button size="sm" onClick={() => onConvert(devis)} disabled={!!devis.mission_id} icon={<ArrowRightCircle size={12} />}>
             {devis.mission_id ? "Converti" : "→ Mission"}
