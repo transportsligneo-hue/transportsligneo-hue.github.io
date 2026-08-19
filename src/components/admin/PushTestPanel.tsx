@@ -43,7 +43,7 @@ export function PushTestPanel() {
   const refresh = async () => {
     setLoading(true);
     try {
-      const res: any = await load({ data: {} });
+      const res: any = await load(undefined as never);
       setDrivers(res.drivers ?? []);
       setFcmOk(!!res.fcmConfigured);
     } catch (e: any) {
