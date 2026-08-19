@@ -126,7 +126,7 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pb-[env(safe-area-inset-bottom)]">
       <div className="bg-white border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden shadow-sm">
         <div className="relative h-56 sm:h-64 touch-none">
           <canvas
@@ -164,7 +164,7 @@ export function SignatureCanvas({ onValidate, disabled }: Props) {
         type="button"
         onClick={validate}
         disabled={!hasInk || disabled}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-40 transition shadow-sm"
+        className="w-full mb-3 flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-40 transition shadow-sm"
       >
         <Check size={16} /> Valider la signature
       </button>

@@ -12,9 +12,13 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Check, AlertCircle, PenLine, ChevronRight } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
+import {
+  saveMissionSignature,
+  toastSignatureError,
+  toastSignatureSuccess,
+} from "@/lib/signature-upload";
 
 type SigKind = "driver_end" | "client_end";
 
@@ -32,22 +36,6 @@ interface SigState {
   error?: string;
 }
 
-async function uploadWithRetry(path: string, file: File, attempts = 3) {
-  let lastErr: unknown = null;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const { error } = await supabase.storage
-        .from("mission-documents")
-        .upload(path, file, { upsert: true, contentType: "image/png" });
-      if (!error) return;
-      lastErr = error;
-    } catch (e) {
-      lastErr = e;
-    }
-    await new Promise((r) => setTimeout(r, 500 * (i + 1)));
-  }
-  throw lastErr ?? new Error("Upload échoué");
-}
 
 export function ArriveeSignatureSheet({
   attributionId, driverName, defaultClientName, onClose, onComplete,
@@ -113,35 +101,23 @@ export function ArriveeSignatureSheet({
     const { kind, signerLabel } = currentStep;
     setStates((prev) => ({ ...prev, [kind]: { status: "uploading" } }));
     try {
-      const path = `${attributionId}/signature_${kind}_${Date.now()}.png`;
-      await uploadWithRetry(path, file);
-      const dataUrl: string = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onloadend = () => res(typeof r.result === "string" ? r.result : "");
-        r.onerror = () => rej(new Error("Lecture signature impossible"));
-        r.readAsDataURL(file);
-      });
       const signerName = kind === "client_end" ? (clientName || signerLabel) : signerLabel;
-      const { error } = await supabase.from("mission_signatures").upsert(
-        {
-          attribution_id: attributionId,
-          kind,
-          signer_name: signerName,
-          signature_data: dataUrl,
-        },
-        { onConflict: "attribution_id,kind" },
-      );
-      if (error) throw error;
+      await saveMissionSignature({
+        attributionId,
+        kind,
+        signerName,
+        file,
+        uploadToStorage: true,
+      });
 
       setStates((prev) => ({ ...prev, [kind]: { status: "done" } }));
-      toast.success("Signature enregistrée");
-      // Avance vers la suivante
-      const next = stepIdx + 1;
-      setStepIdx(next);
+      toastSignatureSuccess();
+      // Avance vers la suivante (canvas remonté via key → aucun "Effacer" requis)
+      setStepIdx(stepIdx + 1);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur";
       setStates((prev) => ({ ...prev, [kind]: { status: "error", error: msg } }));
-      toast.error("Signature échouée", { description: msg });
+      toastSignatureError(err);
     } finally {
       busyRef.current = false;
     }
@@ -237,6 +213,7 @@ export function ArriveeSignatureSheet({
                 </div>
               ) : (
                 <SignatureCanvas
+                  key={currentStep.kind}
                   onValidate={handleValidate}
                   disabled={states[currentStep.kind].status === "uploading"}
                 />
