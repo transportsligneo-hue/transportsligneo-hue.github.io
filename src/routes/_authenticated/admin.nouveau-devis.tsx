@@ -128,6 +128,35 @@ const PV_OPTIONS: { key: PvChoice; label: string }[] = [
   ...PV_PLATEFORMES.map((p) => ({ key: p.key as PvChoice, label: p.label })),
 ];
 
+type VehLine = {
+  key: string;
+  immat: string;
+  marque: string;
+  modele: string;
+  vin: string;
+  arrivee: string;
+  prix: string;
+  busy: boolean;
+  msg: string | null;
+};
+
+const newVeh = (): VehLine => ({
+  key: crypto.randomUUID(),
+  immat: "",
+  marque: "",
+  modele: "",
+  vin: "",
+  arrivee: "",
+  prix: "",
+  busy: false,
+  msg: null,
+});
+
+const parseEur = (v: string) => {
+  const n = parseFloat(v.replace(/\s/g, "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+};
+
 function AdminNouveauDevisPage() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRow[]>([]);
@@ -135,11 +164,15 @@ function AdminNouveauDevisPage() {
   const [client, setClient] = useState<ClientRow | null>(null);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
 
+  const [mode, setMode] = useState<"simple" | "groupe">("simple");
+  const [vlines, setVlines] = useState<VehLine[]>([newVeh(), newVeh()]);
+
   const [depart, setDepart] = useState("");
   const [arrivee, setArrivee] = useState("");
   const [vehicule, setVehicule] = useState("");
   const [montant, setMontant] = useState("");
   const [typeTrajet, setTypeTrajet] = useState<string>(TRAJET_TYPES[0]);
+
   const [immat, setImmat] = useState("");
   const [modele, setModele] = useState("");
   const [vin, setVin] = useState("");
@@ -289,27 +322,89 @@ function AdminNouveauDevisPage() {
     }
   };
 
+  const isGroupe = mode === "groupe";
+
+  const patchVeh = (key: string, patch: Partial<VehLine>) =>
+    setVlines((prev) => prev.map((v) => (v.key === key ? { ...v, ...patch } : v)));
+
+  const lookupVehPlate = async (line: VehLine) => {
+    const plate = line.immat.trim().toUpperCase();
+    if (plate.length < 4) {
+      patchVeh(line.key, { msg: "Saisis une plaque valide" });
+      return;
+    }
+    patchVeh(line.key, { busy: true, msg: null });
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        patchVeh(line.key, { msg: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        patchVeh(line.key, {
+          marque: d.marque || line.marque,
+          modele: d.modele || line.modele,
+          vin: d.vin ? d.vin.toUpperCase() : line.vin,
+          msg: `Trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+        });
+      }
+    } catch {
+      patchVeh(line.key, { msg: "Erreur réseau" });
+    } finally {
+      patchVeh(line.key, { busy: false });
+    }
+  };
+
+  const groupLines = useMemo(
+    () => vlines.filter((v) => v.immat.trim().length >= 4 || v.marque.trim() || v.modele.trim()),
+    [vlines],
+  );
+  const totalGroupe = useMemo(
+    () => groupLines.reduce((s, v) => s + parseEur(v.prix), 0),
+    [groupLines],
+  );
+
   const prix = useMemo(() => {
+    if (isGroupe) return totalGroupe > 0 ? Math.round(totalGroupe * 100) / 100 : NaN;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
-  }, [montant]);
+  }, [montant, isGroupe, totalGroupe]);
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
-  const isAllerRetour = typeTrajet === "Livraison + restitution";
-  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
+  const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
+  const isRechargeSeule = !isGroupe && typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
     ? "Recharge véhicule uniquement (sans livraison)"
-    : "Convoyage automobile";
+    : isGroupe
+      ? "Convoyage automobile (devis groupé multi-véhicules)"
+      : "Convoyage automobile";
+
   const planningIncomplet =
     !dateSouhaitee ||
     !heureSouhaitee ||
     (isAllerRetour && (!dateRetourInput || !heureRetourInput));
 
 
+  const groupPayload = groupLines.map((v) => ({
+    immatriculation: v.immat.trim().toUpperCase() || null,
+    marque: v.marque.trim() || null,
+    modele: v.modele.trim() || null,
+    vin: v.vin.trim().toUpperCase() || null,
+    arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
+    prix: Math.round(parseEur(v.prix) * 100) / 100,
+  }));
+
   const recapMessage = [
-    `Type de trajet : ${typeTrajet}`,
-    immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
-    vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
+    isGroupe ? `Devis groupé : ${groupLines.length} véhicules` : `Type de trajet : ${typeTrajet}`,
+    ...(isGroupe
+      ? groupPayload.map(
+          (v, i) =>
+            `Véhicule ${i + 1} : ${[v.marque, v.modele].filter(Boolean).join(" ") || "—"}${
+              v.immatriculation ? ` (${v.immatriculation})` : ""
+            }${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
+        )
+      : []),
+    !isGroupe && immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
+    !isGroupe && vin ? `VIN${isAllerRetour ? " aller" : ""} : ${vin}` : null,
     isAllerRetour && (vehiculeRetour || modeleRetour)
       ? `Véhicule retour : ${[vehiculeRetour, modeleRetour].filter(Boolean).join(" ")}`
       : null,
@@ -336,10 +431,11 @@ function AdminNouveauDevisPage() {
     logo_url: client?.logo_url ?? null,
     depart,
     arrivee: isRechargeSeule ? depart : arrivee,
-    marque: vehicule || null,
-    modele: modele || null,
-    immatriculation: immat || null,
-    option_trajet: typeTrajet,
+    marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
+    modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
+    immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
+    vehicules: isGroupe ? groupPayload : null,
+    option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
     date_souhaitee: dateSouhaitee || null,
 
     options,
@@ -354,6 +450,7 @@ function AdminNouveauDevisPage() {
     version: 1,
   });
 
+
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim()) return toast.error("Adresse requise");
@@ -362,6 +459,13 @@ function AdminNouveauDevisPage() {
       return toast.error("Date et heure d'enlèvement obligatoires");
     if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
       return toast.error("Date et heure de restitution obligatoires");
+    if (isGroupe) {
+      if (groupLines.length < 2) return toast.error("Ajoutez au moins 2 véhicules");
+      if (groupPayload.some((v) => !v.immatriculation))
+        return toast.error("Immatriculation manquante sur un véhicule");
+      if (groupPayload.some((v) => v.prix <= 0))
+        return toast.error("Montant TTC manquant sur un véhicule");
+    }
     if (!Number.isFinite(prix) || prix <= 0) return toast.error("Montant TTC invalide");
 
 
@@ -377,17 +481,19 @@ function AdminNouveauDevisPage() {
           telephone: client.telephone,
           depart: depart.trim(),
           arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
-          marque: vehicule || null,
-          modele: modele || null,
-          immatriculation: immat.trim().toUpperCase() || null,
-          vin: vin.trim().toUpperCase() || null,
+          marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
+          modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
+          immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,
+          vin: (isGroupe ? groupPayload[0]?.vin : vin.trim().toUpperCase()) || null,
+          vehicules: isGroupe ? groupPayload : null,
           marque_retour: isAllerRetour ? vehiculeRetour || null : null,
           modele_retour: isAllerRetour ? modeleRetour || null : null,
           immatriculation_retour: isAllerRetour ? immatRetour.trim().toUpperCase() || null : null,
           vin_retour: isAllerRetour ? vinRetour.trim().toUpperCase() || null : null,
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
-          option_trajet: typeTrajet,
+          option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
+
           date_souhaitee: dateSouhaitee || null,
           heure_souhaitee: heureSouhaitee || null,
           date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
@@ -537,7 +643,32 @@ function AdminNouveauDevisPage() {
       />
 
       <div className="mx-auto max-w-3xl space-y-5">
+        {/* Type de devis */}
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {([
+            { key: "simple", label: "Devis simple", desc: "1 véhicule (aller ou aller/retour)" },
+            { key: "groupe", label: "Devis groupé", desc: "Plusieurs véhicules dans un seul devis" },
+          ] as const).map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMode(m.key)}
+              className={`rounded-xl border px-4 py-3 text-left transition ${
+                mode === m.key
+                  ? "border-pro-accent bg-pro-accent/10"
+                  : "border-pro-border bg-white hover:border-pro-accent/50"
+              }`}
+            >
+              <span className={`block text-[13.5px] font-bold ${mode === m.key ? "text-pro-accent" : "text-pro-text"}`}>
+                {m.label}
+              </span>
+              <span className="block text-[11.5px] text-pro-muted">{m.desc}</span>
+            </button>
+          ))}
+        </div>
+
         {/* 1. Client */}
+
         <Card>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
@@ -644,42 +775,61 @@ function AdminNouveauDevisPage() {
               placeholder="Ex : 6 rue du pont libert, 37520 La Riche"
             />
             {!isRechargeSeule && (
-              <AddressField label="Adresse d'arrivée" value={arrivee} onChange={setArrivee} placeholder="Ex : 5 avenue de la République, Le Mans" />
+              <AddressField
+                label={isGroupe ? "Adresse d'arrivée commune" : "Adresse d'arrivée"}
+                value={arrivee}
+                onChange={setArrivee}
+                placeholder="Ex : 5 avenue de la République, Le Mans"
+              />
             )}
-            <div>
-              <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                Type de trajet
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {TRAJET_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => {
-                      setTypeTrajet(t);
-                      if (t === RECHARGE_SEULE) {
-                        const elecLabel = OPTIONS_LIST[0].label;
-                        setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
-                      }
-                    }}
-                    className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                      typeTrajet === t
-                        ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
-                        : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
+            {!isGroupe && (
+              <div>
+                <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                  Type de trajet
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {TRAJET_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setTypeTrajet(t);
+                        if (t === RECHARGE_SEULE) {
+                          const elecLabel = OPTIONS_LIST[0].label;
+                          setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
+                        }
+                      }}
+                      className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
+                        typeTrajet === t
+                          ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                          : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                {isRechargeSeule && (
+                  <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
+                    Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
+                  </p>
+                )}
               </div>
-              {isRechargeSeule && (
-                <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
-                  Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
-                </p>
-              )}
-            </div>
+            )}
 
-            <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+            {isGroupe ? (
+              <div className="flex items-center justify-between rounded-xl border border-pro-border bg-pro-bg-soft px-4 py-3">
+                <span className="text-[12.5px] font-semibold text-pro-muted">
+                  Total TTC du devis ({groupLines.length} véhicule{groupLines.length > 1 ? "s" : ""})
+                </span>
+                <span className="text-[16px] font-extrabold text-pro-text">
+                  {totalGroupe.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+                </span>
+              </div>
+            ) : (
+              <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+            )}
+
 
             <div className="border-t border-pro-border pt-4">
               <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
@@ -747,7 +897,87 @@ function AdminNouveauDevisPage() {
         </Card>
 
 
+        {/* 3. Véhicules du devis groupé */}
+        {isGroupe && (
+          <Card>
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
+                3
+              </span>
+              <h3 className="text-[15px] font-bold text-pro-text">Véhicules du devis</h3>
+              <span className="ml-auto rounded-full border border-pro-border px-2.5 py-0.5 text-[11px] font-semibold text-pro-muted">
+                {vlines.length} ligne{vlines.length > 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {vlines.map((v, i) => (
+                <div key={v.key} className="rounded-xl border border-pro-border bg-pro-bg-soft p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                      Véhicule {i + 1}
+                    </span>
+                    {vlines.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setVlines((prev) => prev.filter((x) => x.key !== v.key))}
+                        className="ml-auto text-[11.5px] font-semibold text-red-600"
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        value={v.immat}
+                        onChange={(e) => patchVeh(v.key, { immat: e.target.value.toUpperCase() })}
+                        placeholder="AB-123-CD"
+                        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => lookupVehPlate(v)}
+                        disabled={v.busy}
+                        className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                      >
+                        {v.busy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                        Rechercher
+                      </button>
+                    </div>
+                    {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
+                      <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="VIN" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: x.toUpperCase() })} placeholder="VF3XXXXXXXXXXXXXX" />
+                      <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
+                    </div>
+                    <AddressField
+                      label="Adresse de livraison (si différente)"
+                      value={v.arrivee}
+                      onChange={(x) => patchVeh(v.key, { arrivee: x })}
+                      placeholder={arrivee || "Par défaut : adresse d'arrivée commune"}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVlines((prev) => [...prev, newVeh()])}
+              className="mt-3 w-full rounded-xl border border-dashed border-pro-accent/50 py-3 text-[12.5px] font-semibold text-pro-accent hover:bg-pro-accent/5"
+            >
+              + Ajouter un véhicule
+            </button>
+            <p className="mt-3 text-[11.5px] text-pro-muted">
+              Un seul devis et un seul PDF listant tous les véhicules. À la conversion, une mission est créée par véhicule.
+            </p>
+          </Card>
+        )}
+
         {/* 3. Véhicule */}
+        {!isGroupe && (
         <Card>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pro-accent/10 text-[11px] font-bold text-pro-accent">
@@ -755,6 +985,7 @@ function AdminNouveauDevisPage() {
             </span>
             <h3 className="text-[15px] font-bold text-pro-text">Véhicule</h3>
           </div>
+
           {isAllerRetour && (
             <p className="mb-4 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
               Trajet Livraison + restitution : deux véhicules distincts (deux états des lieux).
@@ -858,6 +1089,8 @@ function AdminNouveauDevisPage() {
 
 
         </Card>
+        )}
+
 
         {/* 4. Destinataire */}
         <Card>
