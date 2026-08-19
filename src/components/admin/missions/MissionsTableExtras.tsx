@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Columns3, Check, ChevronDown, FileText, UserRound } from "lucide-react";
+import { useDriverAvatar } from "@/components/admin/DriverAvatar";
 
 /* ------------------------------------------------------------------ */
 /* Types partagés du tableau missions                                  */
