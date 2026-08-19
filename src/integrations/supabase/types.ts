@@ -2238,6 +2238,7 @@ export type Database = {
           user_id: string | null
           vat_breakdown: Json | null
           vehicule_docs_completed: boolean
+          vehicules: Json | null
           version: number
           vin: string | null
           vin_retour: string | null
@@ -2318,6 +2319,7 @@ export type Database = {
           user_id?: string | null
           vat_breakdown?: Json | null
           vehicule_docs_completed?: boolean
+          vehicules?: Json | null
           version?: number
           vin?: string | null
           vin_retour?: string | null
@@ -2398,6 +2400,7 @@ export type Database = {
           user_id?: string | null
           vat_breakdown?: Json | null
           vehicule_docs_completed?: boolean
+          vehicules?: Json | null
           version?: number
           vin?: string | null
           vin_retour?: string | null
