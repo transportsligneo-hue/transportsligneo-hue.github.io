@@ -24,12 +24,12 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
   return (
     <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>
       <span
-        className="shrink-0 flex items-center justify-center rounded-full border border-[#4f8cff] overflow-hidden"
+        className="shrink-0 flex items-center justify-center rounded-full border border-[#6effcd] overflow-hidden"
         style={{
           width: s.badge,
           height: s.badge,
           background: "#0b1026",
-          boxShadow: "0 0 14px rgba(79,140,255,0.6), 0 0 28px rgba(47,95,255,0.3), inset 0 0 10px rgba(79,140,255,0.15)",
+          boxShadow: "0 0 14px rgba(110,255,205,0.6), 0 0 28px rgba(78,255,178,0.3), inset 0 0 10px rgba(110,255,205,0.15)",
         }}
       >
         <img
@@ -38,7 +38,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
           width={s.badge}
           height={s.badge}
           className="h-full w-full object-contain p-[2px]"
-          style={{ filter: "drop-shadow(0 0 4px rgba(79,140,255,0.7))" }}
+          style={{ filter: "drop-shadow(0 0 4px rgba(110,255,205,0.7))" }}
         />
       </span>
       <span className="min-w-0 flex flex-col leading-none">
@@ -47,7 +47,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "" }
           style={{ fontFamily: "'Poppins','SF Pro Rounded','Segoe UI Rounded','Nunito',system-ui,sans-serif", fontSize: s.word }}
         >
           <span className="text-white">TRANSPORTS</span>{" "}
-          <span className="text-[#4f8cff]" style={{ textShadow: "0 0 10px rgba(79,140,255,0.7), 0 0 22px rgba(47,95,255,0.4)" }}>LIGNEO</span>
+          <span className="text-[#6effcd]" style={{ textShadow: "0 0 10px rgba(110,255,205,0.7), 0 0 22px rgba(78,255,178,0.4)" }}>LIGNEO</span>
         </span>
 
         {tag && (
