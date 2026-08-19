@@ -960,12 +960,14 @@ function AdminNouveauDevisPage() {
                       <Field label="VIN" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: x.toUpperCase() })} placeholder="VF3XXXXXXXXXXXXXX" />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
-                    <AddressField
-                      label="Adresse de livraison (si différente)"
-                      value={v.arrivee}
-                      onChange={(x) => patchVeh(v.key, { arrivee: x })}
-                      placeholder={arrivee || "Par défaut : adresse d'arrivée commune"}
-                    />
+                    {!isRechargeSeule && (
+                      <AddressField
+                        label="Adresse de livraison (si différente)"
+                        value={v.arrivee}
+                        onChange={(x) => patchVeh(v.key, { arrivee: x })}
+                        placeholder={arrivee || "Par défaut : adresse d'arrivée commune"}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
