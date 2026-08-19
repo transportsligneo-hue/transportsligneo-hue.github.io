@@ -3828,7 +3828,7 @@ body.is-driver-app .closed-link svg {
 .r4-page .v5-hero-glow { position:absolute; top:-60px; right:-60px; width:340px; height:340px; border-radius:50%; z-index:1;
   background:radial-gradient(circle, rgba(63,123,255,0.4), transparent 70%); filter:blur(10px); mix-blend-mode:screen; }
 .r4-page .v5-hero-grid { position:relative; z-index:2; max-width:1220px; margin:0 auto;
-  padding:100px 32px 40px; display:grid; grid-template-columns:1fr 0.95fr; gap:50px; align-items:center; }
+  padding:150px 32px 40px; display:grid; grid-template-columns:1fr 0.95fr; gap:50px; align-items:center; }
 .r4-page .v5-hero-h1 { font-family:'Poppins',sans-serif; font-weight:800; font-size:44px;
   line-height:1.08; letter-spacing:-0.02em; margin-bottom:20px; color:#fff; }
 .r4-page .v5-hero-lead { color:var(--v4-text-muted); font-size:15.5px; line-height:1.65; max-width:480px; margin-bottom:26px; }
