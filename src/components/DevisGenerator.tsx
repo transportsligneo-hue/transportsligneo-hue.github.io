@@ -692,8 +692,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Choix de prestation · discret en bas */}
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
               {[
-                { v: "aller-simple", l: "Aller simple" },
-                { v: "aller-retour", l: "Aller-retour" },
+                { v: "aller-simple", l: "Livraison simple" },
+                { v: "aller-retour", l: "Livraison + restitution" },
               ].map((o) => (
                 <button
                   key={o.v}
