@@ -630,7 +630,9 @@ function AdminAttributions() {
                             modele: a.trajet?.modele,
                             vin: a.trajet?.vin,
                             energie: a.trajet?.vehicule_energie,
+                            type: a.trajet?.vehicule_type,
                           }];
+
                     return (
                       <div className="mt-2 space-y-1">
                         {list.map((v, i) => {
