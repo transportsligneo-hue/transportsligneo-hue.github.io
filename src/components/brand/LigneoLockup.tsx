@@ -1,4 +1,5 @@
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 
 interface Props {
   /** Taille du lockup */
