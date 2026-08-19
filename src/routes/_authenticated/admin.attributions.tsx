@@ -31,6 +31,7 @@ import { missionNumberOf, displayTrajetRef, displayNumero, stripLegSuffix, hasLe
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { ArrowLeftRight } from "lucide-react";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
+import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -367,7 +368,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, prix), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, options_meta, prix), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -587,6 +588,7 @@ function AdminAttributions() {
                     <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
                       {statutLabels[a.statut] ?? a.statut}
                     </Badge>
+                    {isRechargeSeule(a.trajet) && <RechargeBadge />}
                     {a.trajet?.is_test_data && <TestBadge />}
                     {a.trajet?.type_transport && (
                       <span className="text-[10px] uppercase tracking-wider text-pro-muted">
