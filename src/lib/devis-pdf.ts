@@ -386,16 +386,32 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
   const pvDigital = d.pv_digital ?? parsedFromMessage.pv;
 
-  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = [
-    {
-      desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
-      qty: "1",
-      unit: eur(ht),
-      total: eur(ht),
-    },
-    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: "1", unit: "Inclus", total: eur(0) },
+  const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = isGroupe
+    ? multiVehicules.map((v, i) => {
+        const ttcLigne = Number(v.prix ?? 0);
+        const htLigne = micro ? ttcLigne : +(ttcLigne / (1 + vatRate / 100)).toFixed(2);
+        const ident = [v.marque, v.modele].filter(Boolean).join(" ") || `Véhicule ${i + 1}`;
+        const dest = v.arrivee || d.arrivee;
+        return {
+          desc: `Convoyage ${ident}${v.immatriculation ? ` (${v.immatriculation})` : ""} — ${d.depart} -> ${dest}. Inclus : carburant, péages, assurance tous risques`,
+          qty: "1",
+          unit: eur(htLigne),
+          total: eur(htLigne),
+        };
+      })
+    : [
+        {
+          desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
+          qty: "1",
+          unit: eur(ht),
+          total: eur(ht),
+        },
+      ];
+  lignes.push(
+    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: isGroupe ? String(multiVehicules.length) : "1", unit: "Inclus", total: eur(0) },
     { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
-  ];
+  );
+
   if (d.option_trajet) {
     lignes.push({ desc: `Type de trajet : ${d.option_trajet}`, qty: "1", unit: "Inclus", total: eur(0) });
   }
