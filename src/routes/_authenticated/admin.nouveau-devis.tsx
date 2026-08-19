@@ -659,7 +659,12 @@ function AdminNouveauDevisPage() {
             <button
               key={m.key}
               type="button"
-              onClick={() => setMode(m.key)}
+              onClick={() => {
+                setMode(m.key);
+                if (m.key === "groupe" && typeTrajet === "Livraison + restitution") {
+                  setTypeTrajet("Livraison simple");
+                }
+              }}
               className={`rounded-xl border px-4 py-3 text-left transition ${
                 mode === m.key
                   ? "border-pro-accent bg-pro-accent/10"
