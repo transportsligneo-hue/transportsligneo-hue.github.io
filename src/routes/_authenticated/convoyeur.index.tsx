@@ -225,7 +225,7 @@ function ConvoyeurDashboard() {
           <img src={heroCar} alt="" className="absolute inset-0 w-full h-full object-cover object-right opacity-55 pointer-events-none" width={1536} height={1024} />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a1738] via-[rgba(10,23,56,0.75)] to-transparent pointer-events-none" />
           <div className="relative max-w-[62%]">
-            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4f8cff]">Catalogue missions</p>
+            <p className="driver-eyebrow text-[10px] uppercase tracking-[0.18em] font-bold text-[#4f8cff]">Catalogue missions</p>
             <h2 className="font-driver text-[22px] font-bold text-white mt-2 leading-tight">
               {catalogueCount} mission{catalogueCount > 1 ? "s" : ""} disponible{catalogueCount > 1 ? "s" : ""}
             </h2>
