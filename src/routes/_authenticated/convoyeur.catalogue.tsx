@@ -385,14 +385,25 @@ function ConvoyeurCatalogue() {
             <button
               type="button"
               className={`cat2-chip is-near${geo.position ? " is-active" : ""}`}
-              onClick={() => {
+              onClick={async () => {
                 if (geo.position) {
                   geo.clear();
                   setFilters((f) => ({ ...f, sort: "date" }));
-                } else {
-                  geo.request();
-                  toast.info("Autorisez la géolocalisation pour trier autour de vous.");
+                  return;
                 }
+                const { ensureLocationPermission, isNativeApp } = await import(
+                  "@/lib/native/bridge"
+                );
+                const ok = await ensureLocationPermission();
+                if (!ok) {
+                  toast.error(
+                    isNativeApp()
+                      ? "Localisation refusée. Activez-la dans Réglages > Applications > Ligneo Driver > Autorisations > Position."
+                      : "Autorisez la géolocalisation dans votre navigateur.",
+                  );
+                  return;
+                }
+                geo.request();
               }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
