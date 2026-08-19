@@ -55,4 +55,5 @@ export interface UnifiedMission {
   prixConvoyeurMin?: number | null;
   prixConvoyeurMax?: number | null;
   margeIndicativePct?: number | null;
+  rechargeSeule?: boolean;
 }

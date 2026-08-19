@@ -31,6 +31,7 @@ import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
+import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
@@ -682,12 +683,13 @@ function AdminMissionsUnified() {
                           {r.m.ref}
                         </p>
                         <div className="flex gap-1.5 mt-1 flex-wrap">
+                          {r.m.rechargeSeule && <RechargeBadge compact />}
                           {r.m.isRoundTrip ? (
                             <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
                               {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
                             </span>
                           ) : (
-                            <span className="a6-badge">Livraison simple</span>
+                            !r.m.rechargeSeule && <span className="a6-badge">Livraison simple</span>
                           )}
                           {r.m.isTest && <span className="a6-badge annulee">Test</span>}
                         </div>
