@@ -314,6 +314,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCE MISSION", rx, blockY + 6);
 
+  const vehiculesExtra = parseDevisOptions(d.message).vehicules;
   const vehicule = [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
     || d.type_vehicule || "—";
   let ry = blockY + 13;
@@ -327,8 +328,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...NAVY);
   doc.text(trajetLines, rx + 13, ry);
   ry += 5.2 * trajetLines.length;
-  labelValue(doc, rx, ry, "Véhicule : ", vehicule);
+  labelValue(doc, rx, ry, vehiculesExtra.length ? "Véhicule 1 : " : "Véhicule : ", vehicule);
   ry += 5.2;
+  vehiculesExtra.forEach((v, i) => {
+    labelValue(doc, rx, ry, `Véhicule ${i + 2} : `, v);
+    ry += 5.2;
+  });
+
   labelValue(doc, rx, ry, "Enlèvement souhaité : ", d.date_souhaitee ? fmtDate(d.date_souhaitee) : "—");
   ry += 5.2;
   labelValue(doc, rx, ry, "Contact commercial : ", "Olivier G.");
