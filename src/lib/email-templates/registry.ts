@@ -29,6 +29,8 @@ import { template as factureDisponible } from './facture-disponible'
 import { template as devisAccepte } from './devis-accepte'
 import { template as welcomeClient } from './welcome-client'
 import { template as nouvelleDemandeAdmin } from './nouvelle-demande-admin'
+import { template as waitlistConvoyeur } from './waitlist-convoyeur'
+import { template as waitlistConvoyeurAdmin } from './waitlist-convoyeur-admin'
 import { template as devisCreeAdmin } from './devis-cree-admin'
 import { template as devisAccepteAdmin } from './devis-accepte-admin'
 import { template as devisPaye } from './devis-paye'
@@ -84,4 +86,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'invite': invite,
   'avis-google': avisGoogle,
   'suppression-compte-admin': suppressionCompteAdmin,
+  'waitlist-convoyeur': waitlistConvoyeur,
+  'waitlist-convoyeur-admin': waitlistConvoyeurAdmin,
 }
