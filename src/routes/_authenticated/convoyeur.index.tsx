@@ -266,7 +266,7 @@ function ConvoyeurDashboard() {
           to="/convoyeur/missions"
           className="block rounded-[22px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-4 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.7)]"
         >
-          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF] mb-3">Prochaine mission</p>
+          <p className="driver-eyebrow text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF] mb-3">Prochaine mission</p>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl border border-[rgba(96,165,250,0.30)] bg-gradient-to-br from-[#0d1f4d] to-[#0a1638] flex items-center justify-center shrink-0">
               <Calendar size={18} className="text-[#60a5fa]" strokeWidth={2.2} />
