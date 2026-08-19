@@ -240,7 +240,7 @@ function AdminPaiementsConvoyeurs() {
     <div className="space-y-6">
       <PageHeader
         title="Paiements convoyeurs"
-        description="Rémunérations calculées, ajustements tracés, lots de virement et export comptable."
+        subtitle="Rémunérations calculées, ajustements tracés, lots de virement et export comptable."
         actions={
           <Button variant="secondary" onClick={exportComptable}>
             <FileDown size={14} /> Export comptable
@@ -360,7 +360,7 @@ function AdminPaiementsConvoyeurs() {
                 <TH>Plus ancienne</TH>
                 <TH>Montant dû</TH>
                 <TH>IBAN</TH>
-                <TH></TH>
+                <TH> </TH>
               </THead>
               <tbody>
                 {duesByConvoyeur
@@ -380,7 +380,7 @@ function AdminPaiementsConvoyeurs() {
                       </TD>
                       <TD>
                         <span className="inline-flex items-center gap-2">
-                          <DriverAvatar convoyeurId={d.convoyeurId} name={convName(d.convoyeurId)} size={26} />
+                          <DriverAvatar convoyeurId={d.convoyeurId} name={convName(d.convoyeurId)} size="sm" />
                           {convName(d.convoyeurId)}
                         </span>
                       </TD>
