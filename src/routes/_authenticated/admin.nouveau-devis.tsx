@@ -269,7 +269,7 @@ function AdminNouveauDevisPage() {
           type: "ok",
           text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
             d.carburant ? ` · ${d.carburant}` : ""
-          }`,
+          }${d.categorie ? ` · ${d.categorie}` : ""}`,
         });
         // Aligne l'option énergie (recharge élec / plein carburant) sur le carburant détecté
         if (carb && leg === 1) {
