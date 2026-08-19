@@ -103,6 +103,59 @@ export function parseDevisOptions(message?: string | null): { options: string[];
   return out;
 }
 
+/** Détecte un devis « recharge uniquement, sans livraison ». */
+export function isDevisRechargeSeule(d: { option_trajet?: string | null; prestation?: string | null }): boolean {
+  const t = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
+  return t.includes("recharge") && (t.includes("sans livraison") || t.includes("uniquement"));
+}
+
+/**
+ * Mappe une ligne brute de la table `devis` (select *) vers les données du PDF.
+ * Point d'entrée unique : garantit que les devis groupés (colonne `vehicules`)
+ * sont toujours détaillés véhicule par véhicule, quel que soit l'écran appelant.
+ */
+export function devisRowToPdfData(
+  row: Record<string, unknown>,
+  extra: Partial<DevisData> = {},
+): DevisData {
+  const g = <T,>(k: string) => row[k] as T;
+  const rawVeh = row["vehicules"];
+  const vehicules = Array.isArray(rawVeh)
+    ? (rawVeh as DevisData["vehicules"])
+    : null;
+  return {
+    numero: g<string>("numero"),
+    nom: g<string>("nom"),
+    prenom: g<string>("prenom"),
+    email: g<string>("email"),
+    telephone: g<string | null>("telephone"),
+    depart: g<string>("depart"),
+    arrivee: g<string>("arrivee"),
+    distance_km: g<number | null>("distance_km"),
+    duree_estimee: g<string | null>("duree_estimee"),
+    type_vehicule: g<string | null>("type_vehicule"),
+    marque: g<string | null>("marque"),
+    modele: g<string | null>("modele"),
+    immatriculation: g<string | null>("immatriculation"),
+    vehicules,
+    carburant: g<string | null>("carburant"),
+    prestation: g<string | null>("prestation"),
+    option_trajet: g<string | null>("option_trajet"),
+    date_souhaitee: g<string | null>("date_souhaitee"),
+    heure_souhaitee: g<string | null>("heure_souhaitee"),
+    destinataire_nom: g<string | null>("contact_arrivee_nom"),
+    destinataire_tel: g<string | null>("contact_arrivee_tel"),
+    destinataire_note: g<string | null>("contact_arrivee_note"),
+    prix_estime: Number(g<number>("prix_estime")),
+    tarif_label: g<string | null>("tarif_label"),
+    multiplier_label: g<string | null>("multiplier_label"),
+    message: g<string | null>("message"),
+    created_at: g<string | undefined>("created_at"),
+    version: (g<number | null>("version")) ?? 1,
+    ...extra,
+  };
+}
+
 const NAVY: [number, number, number] = [12, 22, 56];
 const GOLD: [number, number, number] = [176, 137, 44];
 const GOLD_SOFT: [number, number, number] = [214, 183, 106];
@@ -322,6 +375,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     (v) => v && (v.immatriculation || v.marque || v.modele),
   );
   const isGroupe = multiVehicules.length > 1;
+  const rechargeSeule = isDevisRechargeSeule(d);
   const vehicule = isGroupe
     ? `${multiVehicules.length} véhicules (devis groupé)`
     : [d.marque, d.modele, d.immatriculation].filter(Boolean).join(" ")
@@ -332,11 +386,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.6);
   doc.setTextColor(...TEXT);
-  doc.text("Trajet :", rx, ry);
-  const trajetLines = (doc.splitTextToSize(`${d.depart} -> ${d.arrivee}`, 72) as string[]).slice(0, 2);
+  doc.text(rechargeSeule ? "Lieu :" : "Trajet :", rx, ry);
+  const trajetLines = (doc.splitTextToSize(
+    rechargeSeule ? `${d.depart} (recharge sur place)` : `${d.depart} -> ${d.arrivee}`,
+    72,
+  ) as string[]).slice(0, 2);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...NAVY);
-  doc.text(trajetLines, rx + 13, ry);
+  doc.text(trajetLines, rx + (rechargeSeule ? 10 : 13), ry);
   ry += 5.2 * trajetLines.length;
   labelValue(doc, rx, ry, "Véhicule : ", vehicule);
   ry += 5.2;
@@ -390,10 +447,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ? multiVehicules.map((v, i) => {
         const ttcLigne = Number(v.prix ?? 0);
         const htLigne = micro ? ttcLigne : +(ttcLigne / (1 + vatRate / 100)).toFixed(2);
-        const ident = [v.marque, v.modele].filter(Boolean).join(" ") || `Véhicule ${i + 1}`;
+        const ident = [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
         const dest = v.arrivee || d.arrivee;
+        const plaque = v.immatriculation ? ` — ${v.immatriculation}` : "";
+        const desc = rechargeSeule
+          ? `Véhicule ${i + 1} : ${ident}${plaque} — Recharge électrique sur place (sans livraison), ${d.depart}. Inclus : branchement, surveillance, contrôle photo`
+          : `Véhicule ${i + 1} : ${ident}${plaque} — Convoyage ${d.depart} -> ${dest}. Inclus : carburant, péages, assurance tous risques`;
         return {
-          desc: `Convoyage ${ident}${v.immatriculation ? ` (${v.immatriculation})` : ""} — ${d.depart} -> ${dest}. Inclus : carburant, péages, assurance tous risques`,
+          desc,
           qty: "1",
           unit: eur(htLigne),
           total: eur(htLigne),
@@ -401,15 +462,22 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       })
     : [
         {
-          desc: `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
+          desc: rechargeSeule
+            ? `Recharge électrique sur place (sans livraison) — ${d.depart}. Inclus : branchement, surveillance, contrôle photo`
+            : `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
           qty: "1",
           unit: eur(ht),
           total: eur(ht),
         },
       ];
+  const qtyVeh = isGroupe ? String(multiVehicules.length) : "1";
   lignes.push(
-    { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: isGroupe ? String(multiVehicules.length) : "1", unit: "Inclus", total: eur(0) },
-    { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
+    rechargeSeule
+      ? { desc: "Contrôle photo avant / après recharge (niveau de charge horodaté)", qty: qtyVeh, unit: "Inclus", total: eur(0) }
+      : { desc: "État des lieux contradictoire départ / arrivée avec constat photo", qty: qtyVeh, unit: "Inclus", total: eur(0) },
+    rechargeSeule
+      ? { desc: "Compte rendu d'intervention + notifications client", qty: "1", unit: "Inclus", total: eur(0) }
+      : { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0) },
   );
 
   if (d.option_trajet) {
