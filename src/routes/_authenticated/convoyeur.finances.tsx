@@ -155,7 +155,7 @@ function FinancesPage() {
             <p className="text-[11px] uppercase tracking-[0.15em] font-bold text-[#c9d6f2]">
               {currentLabel.charAt(0).toUpperCase() + currentLabel.slice(1)} {new Date().getFullYear()}
             </p>
-            <p className="text-[44px] font-bold text-[#f5b940] tabular-nums leading-none mt-2 drop-shadow-[0_0_18px_rgba(217,181,74,0.4)]">
+            <p className="fin-amount-hero text-[44px] font-bold text-[#f5b940] tabular-nums leading-none mt-2 drop-shadow-[0_0_18px_rgba(217,181,74,0.4)]">
               {thisMonth.toFixed(0)} <span className="text-[26px]">€</span>
             </p>
             {delta !== null ? (
@@ -190,7 +190,7 @@ function FinancesPage() {
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-2 min-w-0">
                 <div className="w-full flex flex-col items-center justify-end h-full">
-                  <span className="text-[9px] text-[#8fa3cc] tabular-nums mb-1">
+                  <span className={`text-[9px] tabular-nums mb-1 ${active ? "fin-month-active" : "text-[#8fa3cc]"}`}>
                     {mo.total > 0 ? `${mo.total.toFixed(0)}` : ""}
                   </span>
                   <div
@@ -202,7 +202,7 @@ function FinancesPage() {
                     style={{ height: `${h}%` }}
                   />
                 </div>
-                <span className={`text-[10px] font-semibold ${active ? "text-[#f5b940]" : "text-[#8fa3cc]"}`}>
+                <span className={`text-[10px] font-semibold ${active ? "fin-month-active text-[#f5b940]" : "text-[#8fa3cc]"}`}>
                   {mo.label}
                 </span>
               </div>
