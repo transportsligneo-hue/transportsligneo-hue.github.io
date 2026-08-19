@@ -38,6 +38,16 @@ export interface DevisData {
   option_trajet?: string | null;
   /** Immatriculation du vehicule convoye */
   immatriculation?: string | null;
+  /** Devis groupé : plusieurs véhicules sur un même devis */
+  vehicules?: Array<{
+    immatriculation?: string | null;
+    marque?: string | null;
+    modele?: string | null;
+    vin?: string | null;
+    arrivee?: string | null;
+    prix?: number | null;
+  }> | null;
+
   /** Options additionnelles cochees (recharge, lavage, mise en main...) */
   options?: string[] | null;
   /** PV de livraison digitalise (WelcomeAuto / Model) */
