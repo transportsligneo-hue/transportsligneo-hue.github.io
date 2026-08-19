@@ -135,6 +135,34 @@ interface Props {
   onChanged?: () => void;
 }
 
+type DevisVehicule = Record<string, unknown>;
+
+/** Champs éditables pour les véhicules additionnels d'un devis groupé. */
+const VEH_FIELDS: FieldDef[] = [
+  { key: "marque", label: "Marque", placeholder: "RENAULT" },
+  { key: "modele", label: "Modèle", placeholder: "KANGOO" },
+  { key: "immatriculation", label: "Immatriculation", placeholder: "AA-123-BB" },
+  { key: "vin", label: "VIN / N° de série", placeholder: "VF1..." },
+  {
+    key: "energie",
+    label: "Énergie",
+    type: "select",
+    options: [
+      { value: "", label: "—" },
+      { value: "essence", label: "Essence" },
+      { value: "diesel", label: "Diesel" },
+      { value: "hybride", label: "Hybride" },
+      { value: "electrique", label: "Électrique" },
+      { value: "gpl", label: "GPL" },
+    ],
+  },
+  { key: "categorie", label: "Type / gabarit" },
+  { key: "couleur", label: "Couleur" },
+  { key: "prix", label: "Prix (€)", type: "number" },
+  { key: "arrivee", label: "Adresse d'arrivée", span: true },
+  { key: "notes", label: "Notes véhicule", type: "textarea", span: true },
+];
+
 export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -142,6 +170,11 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const [initial, setInitial] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({});
   const [tab, setTab] = useState<string>(SECTIONS[0].id);
+  // Devis groupé : plusieurs véhicules dans une seule mission
+  const [devisId, setDevisId] = useState<string | null>(null);
+  const [vehInitial, setVehInitial] = useState<DevisVehicule[]>([]);
+  const [vehForm, setVehForm] = useState<DevisVehicule[]>([]);
+  const [vehIndex, setVehIndex] = useState(0);
 
   useEffect(() => {
     if (openKey > 0) setOpen(true);
@@ -150,8 +183,8 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from("trajets").select("*").eq("id", trajetId).maybeSingle();
-    setLoading(false);
     if (error || !data) {
+      setLoading(false);
       toast.error("Impossible de charger la fiche mission");
       return;
     }
@@ -168,11 +201,28 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     }
     setInitial(next);
     setForm(next);
+
+    // Véhicules additionnels (devis groupé)
+    const dId = (row["devis_id"] as string | null) ?? null;
+    setDevisId(dId);
+    if (dId) {
+      const { data: devis } = await supabase.from("devis").select("vehicules").eq("id", dId).maybeSingle();
+      const list = (devis as { vehicules?: unknown } | null)?.vehicules;
+      const arr = Array.isArray(list) ? (list as DevisVehicule[]) : [];
+      setVehInitial(arr);
+      setVehForm(arr.map((v) => ({ ...v })));
+    } else {
+      setVehInitial([]);
+      setVehForm([]);
+    }
+    setVehIndex(0);
+    setLoading(false);
   }, [trajetId]);
 
   useEffect(() => {
     if (open && Object.keys(initial).length === 0) void load();
   }, [open, initial, load]);
+
 
   const dirtyKeys = useMemo(
     () => ALL_KEYS.filter((k) => (form[k] ?? "") !== (initial[k] ?? "")),
@@ -187,24 +237,51 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     return m;
   }, [form, initial]);
 
+  const isGrouped = vehForm.length > 1;
+  const vehDirty = useMemo(
+    () => JSON.stringify(vehForm) !== JSON.stringify(vehInitial),
+    [vehForm, vehInitial],
+  );
+  const vehDirtyCount = useMemo(
+    () => vehForm.reduce((n, v, i) => (JSON.stringify(v) !== JSON.stringify(vehInitial[i] ?? {}) ? n + 1 : n), 0),
+    [vehForm, vehInitial],
+  );
+
   const save = async () => {
-    if (dirtyKeys.length === 0) return;
+    if (dirtyKeys.length === 0 && !vehDirty) return;
     setSaving(true);
     try {
-      const patch: Record<string, string | null> = {};
-      for (const k of dirtyKeys) {
-        const value = form[k]?.trim() ? form[k].trim() : null;
-        patch[k] = value;
-        FIELD_BY_KEY[k]?.mirrors?.forEach((m) => { patch[m] = value; });
+      if (dirtyKeys.length > 0) {
+        const patch: Record<string, string | null> = {};
+        for (const k of dirtyKeys) {
+          const value = form[k]?.trim() ? form[k].trim() : null;
+          patch[k] = value;
+          FIELD_BY_KEY[k]?.mirrors?.forEach((m) => { patch[m] = value; });
+        }
+        const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
+          _trajet_id: trajetId,
+          _patch: patch as never,
+        } as never);
+        if (error) throw error;
       }
-      const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
-        _trajet_id: trajetId,
-        _patch: patch as never,
-      } as never);
-      if (error) throw error;
-      toast.success(`${dirtyKeys.length} champ(s) mis à jour`, {
-        description: "Client, convoyeur et admin notifiés selon les réglages.",
-      });
+
+      if (vehDirty && devisId) {
+        const cleaned = vehForm.map((v) => {
+          const out: DevisVehicule = { ...v };
+          if (typeof out.prix === "string") out.prix = out.prix === "" ? null : Number(out.prix);
+          return out;
+        });
+        const { error: vErr } = await supabase
+          .from("devis")
+          .update({ vehicules: cleaned as never })
+          .eq("id", devisId);
+        if (vErr) throw vErr;
+      }
+
+      toast.success(
+        `${dirtyKeys.length + (vehDirty ? vehDirtyCount : 0)} modification(s) enregistrée(s)`,
+        { description: "Client, convoyeur et admin notifiés selon les réglages." },
+      );
       setInitial({});
       await load();
       onChanged?.();
@@ -216,6 +293,48 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
       setSaving(false);
     }
   };
+
+  const setVehField = (idx: number, key: string, value: string) => {
+    setVehForm((prev) => prev.map((v, i) => (i === idx ? { ...v, [key]: value } : v)));
+  };
+
+  const renderVehField = (f: FieldDef, idx: number) => {
+    const raw = vehForm[idx]?.[f.key];
+    const value = raw === null || raw === undefined ? "" : String(raw);
+    const rawInit = vehInitial[idx]?.[f.key];
+    const initValue = rawInit === null || rawInit === undefined ? "" : String(rawInit);
+    const changed = value !== initValue;
+    return (
+      <div key={f.key} className={f.span ? "sm:col-span-2" : undefined}>
+        <label className="mb-1 flex items-center gap-1 text-[11px] font-medium text-pro-text-soft">
+          {f.label}
+          {changed && <span className="h-1.5 w-1.5 rounded-full bg-pro-accent" aria-label="modifié" />}
+        </label>
+        {f.type === "textarea" ? (
+          <textarea
+            value={value}
+            rows={2}
+            onChange={(e) => setVehField(idx, f.key, e.target.value)}
+            className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text outline-none focus:border-pro-accent"
+          />
+        ) : f.type === "select" ? (
+          <Select value={value} onChange={(e) => setVehField(idx, f.key, e.target.value)}>
+            {f.options?.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </Select>
+        ) : (
+          <TextInput
+            type={f.type === "number" ? "number" : "text"}
+            value={value}
+            placeholder={f.placeholder}
+            onChange={(e) => setVehField(idx, f.key, e.target.value)}
+          />
+        )}
+      </div>
+    );
+  };
+
 
   const active = SECTIONS.find((s) => s.id === tab) ?? SECTIONS[0];
 
@@ -309,24 +428,78 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
             })}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {active.fields.map(renderField)}
-          </div>
+          {active.id === "vehicule" && isGrouped ? (
+            <div>
+              <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-pro-text-soft">
+                  {vehForm.length} véhicules
+                </span>
+                {vehForm.map((v, i) => {
+                  const isActiveVeh = i === vehIndex;
+                  const changed = JSON.stringify(v) !== JSON.stringify(vehInitial[i] ?? {});
+                  const plate = (v.immatriculation as string) || `Véhicule ${i + 1}`;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setVehIndex(i)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold tracking-wide transition ${
+                        isActiveVeh
+                          ? "border-pro-accent bg-pro-accent text-white"
+                          : "border-pro-border bg-white text-pro-text-soft hover:text-pro-text"
+                      }`}
+                    >
+                      <Car size={12} /> {plate}
+                      {changed && (
+                        <span className={`h-1.5 w-1.5 rounded-full ${isActiveVeh ? "bg-white" : "bg-pro-accent"}`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {VEH_FIELDS.map((f) => renderVehField(f, vehIndex))}
+              </div>
+              <p className="mt-2 text-[10px] text-pro-muted">
+                Mission groupée : chaque véhicule du devis est modifiable individuellement. Les champs
+                de la fiche mission (ci-dessous) concernent le véhicule principal.
+              </p>
+              <div className="mt-4 border-t border-pro-border pt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-pro-text-soft">
+                  Véhicule principal (fiche mission)
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {active.fields.map(renderField)}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {active.fields.map(renderField)}
+            </div>
+          )}
 
           <div className="sticky bottom-0 -mx-1 mt-5 flex flex-wrap items-center gap-2 border-t border-pro-border bg-white/95 px-1 py-3 backdrop-blur">
             <p className="text-xs text-pro-text-soft">
-              {dirtyKeys.length === 0 ? "Aucune modification" : `${dirtyKeys.length} champ(s) modifié(s)`}
+              {dirtyKeys.length === 0 && !vehDirty
+                ? "Aucune modification"
+                : `${dirtyKeys.length} champ(s)${vehDirty ? ` · ${vehDirtyCount} véhicule(s)` : ""} modifié(s)`}
             </p>
             <div className="ml-auto flex items-center gap-2">
-              <Button variant="secondary" onClick={() => setForm(initial)} disabled={dirtyKeys.length === 0 || saving}>
+              <Button
+                variant="secondary"
+                onClick={() => { setForm(initial); setVehForm(vehInitial.map((v) => ({ ...v }))); }}
+                disabled={(dirtyKeys.length === 0 && !vehDirty) || saving}
+              >
                 <RotateCcw size={14} /> Annuler
               </Button>
-              <Button onClick={save} disabled={dirtyKeys.length === 0 || saving}>
+              <Button onClick={save} disabled={(dirtyKeys.length === 0 && !vehDirty) || saving}>
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 Enregistrer
               </Button>
             </div>
           </div>
+
         </div>
       )}
     </Card>
