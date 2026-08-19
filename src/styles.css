@@ -5561,13 +5561,16 @@ html.theme-light .driver-selfie-status { color: #47506e; }
 .ldock-zone .ldock { transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
 .ldock-zone.is-collapsed .ldock { transform: translateY(140%); opacity: 0; pointer-events: none; }
 .ldock-toggle {
-  position: absolute; right: 18px; bottom: calc(100% - 6px);
-  width: 34px; height: 26px; display: flex; align-items: center; justify-content: center;
-  border-radius: 12px 12px 4px 4px; color: #9fb8ff;
-  background: rgba(10,20,58,0.82); border: 1px solid rgba(140,170,255,0.28); border-bottom: none;
-  backdrop-filter: blur(14px); box-shadow: 0 -6px 18px rgba(0,0,6,0.4);
+  position: absolute; right: 16px; bottom: calc(100% + 8px);
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: #ffffff;
+  background: rgba(16,29,71,0.95); border: 1px solid rgba(143,163,217,0.22);
+  backdrop-filter: blur(14px); box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  transition: bottom .3s ease;
 }
-.ldock-zone.is-collapsed .ldock-toggle { bottom: 0; color: #4f8cff; }
+.ldock-toggle svg { transition: transform .3s ease; }
+.ldock-zone.is-collapsed .ldock-toggle { bottom: 4px; color: #4f8cff; }
+.ldock-zone.is-collapsed .ldock-toggle svg { transform: rotate(180deg); }
 
 .ldock {
   position: relative; display: flex; align-items: center; justify-content: space-around;

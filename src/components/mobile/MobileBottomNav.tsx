@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Home, Truck, Sparkles, User } from "lucide-react";
+import { Home, Truck, Sparkles, User, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
@@ -11,6 +12,7 @@ export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, role } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
 
   const inDashboard =
     location.pathname.startsWith("/dashboard-client") ||
@@ -39,7 +41,16 @@ export default function MobileBottomNav() {
 
 
   return (
-    <nav aria-label="Navigation principale" className="md:hidden ldock-zone">
+    <nav aria-label="Navigation principale" className={`md:hidden ldock-zone${collapsed ? " is-collapsed" : ""}`}>
+      <button
+        type="button"
+        onClick={() => setCollapsed((v) => !v)}
+        aria-label={collapsed ? "Afficher la barre de navigation" : "Masquer la barre de navigation"}
+        aria-expanded={!collapsed}
+        className="ldock-toggle"
+      >
+        <ChevronDown size={16} />
+      </button>
       <div className="ldock">
         <Link to="/" className={`ldock-item${isHome ? " is-active" : ""}`}>
           <span className="ldock-ic">
