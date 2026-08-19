@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Columns3, Check, ChevronDown, FileText, UserRound } from "lucide-react";
+import { useDriverAvatar } from "@/components/admin/DriverAvatar";
 
 /* ------------------------------------------------------------------ */
 /* Types partagés du tableau missions                                  */
@@ -102,13 +103,31 @@ export function FactureQuickLink({ facture }: { facture: FactureLite | null }) {
 /* Avatar convoyeur                                                    */
 /* ------------------------------------------------------------------ */
 
-export function ConvoyeurAvatar({ nom }: { nom: string | null }) {
+export function ConvoyeurAvatar({
+  nom,
+  convoyeurId,
+}: {
+  nom: string | null;
+  convoyeurId?: string | null;
+}) {
+  const photo = useDriverAvatar(convoyeurId);
   const initials = (nom ?? "")
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((s) => s[0]?.toUpperCase())
     .join("");
+  if (photo) {
+    return (
+      <img
+        src={photo}
+        alt={nom ?? "Convoyeur"}
+        title={nom ?? undefined}
+        loading="lazy"
+        className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-[#2f5fff]/30"
+      />
+    );
+  }
   return (
     <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e5e9ff] text-[10px] font-bold text-[#2f5fff]">
       {initials || <UserRound size={12} />}
@@ -133,7 +152,7 @@ export function ConvoyeurCell({
 }) {
   return (
     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-      <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} />
+      <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} convoyeurId={meta?.convoyeurId ?? null} />
       <select
         value={meta?.convoyeurId ?? ""}
         disabled={disabled}

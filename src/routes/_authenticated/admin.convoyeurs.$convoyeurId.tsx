@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -447,6 +448,7 @@ function AdminConvoyeurDetail() {
         status={
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
+              <DriverAvatar convoyeurId={conv.id} name={fullName} size="md" />
               <StatutConvoyeurBadge statut={statutUnifie} size="md" />
               <AdminBadge label={accountState.label} tone={accountState.tone} />
               {conv.ville && <AdminBadge label={conv.ville} tone="info" />}

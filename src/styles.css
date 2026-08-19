@@ -6383,3 +6383,28 @@ body.is-driver-app .cat2-chip.is-near {
 body.is-driver-app .cat2-chip.is-near svg {
   filter: drop-shadow(0 0 4px rgba(110, 255, 205, 0.6));
 }
+
+/* App Capacitor Driver : formation — doré → vert néon électrique */
+body.is-driver-app .text-\[\#E7C76A\],
+body.is-driver-app .text-\[\#B8862A\] {
+  color: #6effcd !important;
+  text-shadow: 0 0 10px rgba(110, 255, 205, 0.35);
+}
+body.is-driver-app .bg-\[\#E7C76A\] {
+  background-color: #6effcd !important;
+  color: #04231a !important;
+  box-shadow: 0 0 16px rgba(110, 255, 205, 0.45);
+}
+body.is-driver-app .from-\[\#B8862A\].to-\[\#E7C76A\] {
+  background-image: linear-gradient(to right, #16a97f, #6effcd) !important;
+  color: #04231a !important;
+  box-shadow: 0 0 16px rgba(110, 255, 205, 0.45);
+}
+body.is-driver-app .border-\[\#B8862A\]\/40 {
+  border-color: rgba(110, 255, 205, 0.4) !important;
+}
+body.is-driver-app .bg-emerald-100.text-emerald-700,
+body.is-driver-app .bg-amber-100.text-amber-700 {
+  background-color: rgba(110, 255, 205, 0.16) !important;
+  color: #6effcd !important;
+}

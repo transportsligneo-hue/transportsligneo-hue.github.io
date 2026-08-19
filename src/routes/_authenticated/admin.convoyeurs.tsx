@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import {
   RefreshCw, Eye, CheckCircle, XCircle, UserPlus, IdCard, User, FileText, Mail, MapPin,
@@ -642,9 +643,7 @@ function AdminConvoyeurs() {
               <TR key={c.id} onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: c.id } })} className="cursor-pointer">
                 <TD>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-pro-accent/10 text-pro-accent flex items-center justify-center text-xs font-semibold shrink-0">
-                      {(c.prenom?.[0] ?? "?").toUpperCase()}
-                    </div>
+                    <DriverAvatar convoyeurId={c.id} name={`${c.prenom ?? ""} ${c.nom ?? ""}`.trim()} size="sm" />
                     <div className="min-w-0">
                       <p className="font-medium text-pro-text truncate">
                         {c.prenom} {c.nom}
