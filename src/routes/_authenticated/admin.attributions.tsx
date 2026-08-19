@@ -367,10 +367,25 @@ function AdminAttributions() {
     return out;
   }, [attributions, arBaseByGroup]);
 
+  type DevisVehicule = { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null };
+  const [devisVehicules, setDevisVehicules] = useState<Map<string, DevisVehicule[]>>(new Map());
+
+  const fetchDevisVehicules = useCallback(async (rows: Attribution[]) => {
+    const ids = Array.from(new Set(rows.map((r) => r.trajet?.devis_id).filter(Boolean))) as string[];
+    if (ids.length === 0) { setDevisVehicules(new Map()); return; }
+    const { data } = await supabase.from("devis").select("id, vehicules").in("id", ids);
+    const map = new Map<string, DevisVehicule[]>();
+    for (const d of data ?? []) {
+      const v = (d as { vehicules?: unknown }).vehicules;
+      if (Array.isArray(v) && v.length > 0) map.set(d.id as string, v as DevisVehicule[]);
+    }
+    setDevisVehicules(map);
+  }, []);
+
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, options_meta, prix), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -386,8 +401,11 @@ function AdminAttributions() {
       setAttributions((bare ?? []) as unknown as Attribution[]);
       return;
     }
-    setAttributions((data ?? []) as unknown as Attribution[]);
-  }, []);
+    const rows = (data ?? []) as unknown as Attribution[];
+    setAttributions(rows);
+    void fetchDevisVehicules(rows);
+  }, [fetchDevisVehicules]);
+
 
   const fetchOptions = useCallback(async () => {
     // Charge tous les trajets publiables/en attente qui n'ont PAS encore d'attribution active.
