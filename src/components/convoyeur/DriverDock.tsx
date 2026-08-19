@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, X, ArrowRight, ChevronRight } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, X, ArrowRight, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -38,6 +38,8 @@ export default function DriverDock({
   const [moreOpen, setMoreOpen] = useState(false);
   const [catalogueCount, setCatalogueCount] = useState(0);
   const [active, setActive] = useState<ActiveMission | null>(null);
+  // Masquage temporaire du dock (étapes critiques : signature, EDL).
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,7 +111,16 @@ export default function DriverDock({
 
   return (
     <>
-      <nav aria-label="Navigation convoyeur" className="md:hidden ldock-zone">
+      <nav aria-label="Navigation convoyeur" className={`md:hidden ldock-zone${collapsed ? " is-collapsed" : ""}`}>
+        <button
+          type="button"
+          onClick={() => setCollapsed((v) => !v)}
+          aria-label={collapsed ? "Afficher la barre de navigation" : "Masquer la barre de navigation"}
+          aria-expanded={!collapsed}
+          className="ldock-toggle"
+        >
+          {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
 
         <div className="ldock">
           <Link to="/convoyeur" className={`ldock-item${activeDash ? " is-active" : ""}`}>
