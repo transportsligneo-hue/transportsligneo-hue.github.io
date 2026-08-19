@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
+import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
@@ -644,6 +645,12 @@ function DevisDrawer({
       }
       footer={
         <div className="flex flex-wrap gap-2">
+          <ValidateDevisButton
+            devisId={devis.id}
+            numero={devis.numero}
+            locked={!!devis.locked_at}
+            onValidated={() => onStatut(devis.id, "accepte")}
+          />
           <Button size="sm" onClick={() => onDownload(devis)} icon={<Download size={12} />}>PDF</Button>
           <Button size="sm" onClick={() => onConvert(devis)} disabled={!!devis.mission_id} icon={<ArrowRightCircle size={12} />}>
             {devis.mission_id ? "Converti" : "→ Mission"}
