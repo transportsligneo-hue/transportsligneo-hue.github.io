@@ -31,6 +31,7 @@ import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
+import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
@@ -42,7 +43,7 @@ interface TrajetRow {
   date_souhaitee: string | null;
   marque: string | null; modele: string | null; immatriculation: string | null;
   vehicule_immatriculation: string | null; vin: string | null; vehicule_vin: string | null;
-  vehicule_energie: string | null; mission_id: string | null;
+  vehicule_energie: string | null; mission_id: string | null; options_meta?: unknown;
   client_nom: string | null; client_email: string | null; client_telephone: string | null;
   prix: number | null; prix_convoyeur: number | null; tarif_convoyeur: number | null;
   prix_suggere: number | null; statut: string; statut_publication: string | null;
@@ -348,6 +349,7 @@ function AdminMissionsUnified() {
         prixConvoyeurMin: t.prix_convoyeur_min,
         prixConvoyeurMax: t.prix_convoyeur_max,
         margeIndicativePct: t.marge_indicative_pct,
+        rechargeSeule: isRechargeSeule(t),
       };
     });
 
@@ -682,12 +684,13 @@ function AdminMissionsUnified() {
                           {r.m.ref}
                         </p>
                         <div className="flex gap-1.5 mt-1 flex-wrap">
+                          {r.m.rechargeSeule && <RechargeBadge compact />}
                           {r.m.isRoundTrip ? (
                             <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
                               {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
                             </span>
                           ) : (
-                            <span className="a6-badge">Livraison simple</span>
+                            !r.m.rechargeSeule && <span className="a6-badge">Livraison simple</span>
                           )}
                           {r.m.isTest && <span className="a6-badge annulee">Test</span>}
                         </div>
