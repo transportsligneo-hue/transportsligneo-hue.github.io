@@ -237,24 +237,51 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
     return m;
   }, [form, initial]);
 
+  const isGrouped = vehForm.length > 1;
+  const vehDirty = useMemo(
+    () => JSON.stringify(vehForm) !== JSON.stringify(vehInitial),
+    [vehForm, vehInitial],
+  );
+  const vehDirtyCount = useMemo(
+    () => vehForm.reduce((n, v, i) => (JSON.stringify(v) !== JSON.stringify(vehInitial[i] ?? {}) ? n + 1 : n), 0),
+    [vehForm, vehInitial],
+  );
+
   const save = async () => {
-    if (dirtyKeys.length === 0) return;
+    if (dirtyKeys.length === 0 && !vehDirty) return;
     setSaving(true);
     try {
-      const patch: Record<string, string | null> = {};
-      for (const k of dirtyKeys) {
-        const value = form[k]?.trim() ? form[k].trim() : null;
-        patch[k] = value;
-        FIELD_BY_KEY[k]?.mirrors?.forEach((m) => { patch[m] = value; });
+      if (dirtyKeys.length > 0) {
+        const patch: Record<string, string | null> = {};
+        for (const k of dirtyKeys) {
+          const value = form[k]?.trim() ? form[k].trim() : null;
+          patch[k] = value;
+          FIELD_BY_KEY[k]?.mirrors?.forEach((m) => { patch[m] = value; });
+        }
+        const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
+          _trajet_id: trajetId,
+          _patch: patch as never,
+        } as never);
+        if (error) throw error;
       }
-      const { error } = await supabase.rpc("admin_update_mission_infos" as never, {
-        _trajet_id: trajetId,
-        _patch: patch as never,
-      } as never);
-      if (error) throw error;
-      toast.success(`${dirtyKeys.length} champ(s) mis à jour`, {
-        description: "Client, convoyeur et admin notifiés selon les réglages.",
-      });
+
+      if (vehDirty && devisId) {
+        const cleaned = vehForm.map((v) => {
+          const out: DevisVehicule = { ...v };
+          if (typeof out.prix === "string") out.prix = out.prix === "" ? null : Number(out.prix);
+          return out;
+        });
+        const { error: vErr } = await supabase
+          .from("devis")
+          .update({ vehicules: cleaned as never })
+          .eq("id", devisId);
+        if (vErr) throw vErr;
+      }
+
+      toast.success(
+        `${dirtyKeys.length + (vehDirty ? vehDirtyCount : 0)} modification(s) enregistrée(s)`,
+        { description: "Client, convoyeur et admin notifiés selon les réglages." },
+      );
       setInitial({});
       await load();
       onChanged?.();
@@ -266,6 +293,48 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
       setSaving(false);
     }
   };
+
+  const setVehField = (idx: number, key: string, value: string) => {
+    setVehForm((prev) => prev.map((v, i) => (i === idx ? { ...v, [key]: value } : v)));
+  };
+
+  const renderVehField = (f: FieldDef, idx: number) => {
+    const raw = vehForm[idx]?.[f.key];
+    const value = raw === null || raw === undefined ? "" : String(raw);
+    const rawInit = vehInitial[idx]?.[f.key];
+    const initValue = rawInit === null || rawInit === undefined ? "" : String(rawInit);
+    const changed = value !== initValue;
+    return (
+      <div key={f.key} className={f.span ? "sm:col-span-2" : undefined}>
+        <label className="mb-1 flex items-center gap-1 text-[11px] font-medium text-pro-text-soft">
+          {f.label}
+          {changed && <span className="h-1.5 w-1.5 rounded-full bg-pro-accent" aria-label="modifié" />}
+        </label>
+        {f.type === "textarea" ? (
+          <textarea
+            value={value}
+            rows={2}
+            onChange={(e) => setVehField(idx, f.key, e.target.value)}
+            className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text outline-none focus:border-pro-accent"
+          />
+        ) : f.type === "select" ? (
+          <Select value={value} onChange={(e) => setVehField(idx, f.key, e.target.value)}>
+            {f.options?.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </Select>
+        ) : (
+          <TextInput
+            type={f.type === "number" ? "number" : "text"}
+            value={value}
+            placeholder={f.placeholder}
+            onChange={(e) => setVehField(idx, f.key, e.target.value)}
+          />
+        )}
+      </div>
+    );
+  };
+
 
   const active = SECTIONS.find((s) => s.id === tab) ?? SECTIONS[0];
 
