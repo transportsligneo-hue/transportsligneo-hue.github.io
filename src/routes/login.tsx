@@ -284,10 +284,10 @@ function LoginPage() {
           </button>
 
           <div className="text-center pt-4 border-t border-white/10">
-            <Link to={isMobileApp ? "/inscription-convoyeur" : "/choisir-compte"} className="auth-link-lg is-gold">
-              Créer un compte
-              <ArrowRight size={14} className="arrow" />
-            </Link>
+          <Link to={isMobileApp ? "/inscription-convoyeur" : "/choisir-compte"} className={`auth-link-lg ${isMobileApp || tab === "client" ? "is-gold" : ""}`}>
+            Créer un compte
+            <ArrowRight size={14} className="arrow" />
+          </Link>
           </div>
         </form>
 
