@@ -36,22 +36,6 @@ interface SigState {
   error?: string;
 }
 
-async function uploadWithRetry(path: string, file: File, attempts = 3) {
-  let lastErr: unknown = null;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const { error } = await supabase.storage
-        .from("mission-documents")
-        .upload(path, file, { upsert: true, contentType: "image/png" });
-      if (!error) return;
-      lastErr = error;
-    } catch (e) {
-      lastErr = e;
-    }
-    await new Promise((r) => setTimeout(r, 500 * (i + 1)));
-  }
-  throw lastErr ?? new Error("Upload échoué");
-}
 
 export function ArriveeSignatureSheet({
   attributionId, driverName, defaultClientName, onClose, onComplete,
