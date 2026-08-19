@@ -5786,3 +5786,45 @@ html.theme-light .driver-selfie-status { color: #47506e; }
 @media (prefers-reduced-motion: reduce) {
   .plate-tag, .plate-tag::after { transition: none; }
 }
+
+/* =========================================================
+   DRIVER DASHBOARD — carte revenus + KPI repliables
+   ========================================================= */
+.font-driver { font-family: 'Poppins','SF Pro Rounded','Segoe UI Rounded','Nunito',system-ui,sans-serif; }
+
+.drv-stats-card {
+  background: #101d47;
+  border: 1px solid rgba(143,163,217,0.14);
+  border-radius: 26px;
+  overflow: hidden;
+}
+.drv-stats-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 16px; text-align: left;
+}
+.drv-chevron {
+  width: 22px; height: 22px; border-radius: 11px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06); color: #8fa3d9;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .25s ease;
+}
+.drv-stats-card.is-open .drv-chevron { transform: rotate(180deg); }
+.drv-kpi-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 0 14px; max-height: 0; overflow: hidden;
+  transition: max-height .3s ease, padding-bottom .3s ease;
+}
+.drv-stats-card.is-open .drv-kpi-grid { max-height: 420px; padding-bottom: 16px; }
+.drv-kpi-cell {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+  border: 1px solid rgba(143,163,217,0.14);
+  border-radius: 20px; padding: 14px 14px 15px;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.drv-kpi-cell:active { transform: scale(.97); }
+.drv-kpi-cell::after {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 70px; height: 70px; border-radius: 50%;
+  background: var(--glow, transparent); filter: blur(20px); opacity: .3; pointer-events: none;
+}
