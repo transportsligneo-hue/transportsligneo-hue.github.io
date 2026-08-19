@@ -61,11 +61,11 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 r4-topbar-centered transition-all duration-500 ${
           scrolled ? "r4-topbar" : "bg-transparent"
         }`}
       >
-        <div className="r4-topbar-inner w-full px-6 pt-2.5 pb-1.5 flex items-center justify-between gap-6">
+        <div className="r4-topbar-inner w-full">
           <Link to="/" className="shrink-0" aria-label="Accueil · Transports Ligneo">
             <LigneoLockup size="md" />
           </Link>
@@ -98,7 +98,7 @@ export default function Navbar() {
         </div>
 
         {/* Rangée 2 · liens centraux dans une pilule englobante */}
-        <div className="w-full px-6 pb-2.5 flex justify-center">
+        <div className="r4-topbar-row">
           <ul className="r4-nav-pill whitespace-nowrap">
             {navLinks.map((l) => {
               const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
