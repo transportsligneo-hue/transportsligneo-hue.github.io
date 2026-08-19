@@ -371,12 +371,17 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
-  const isRechargeSeule = !isGroupe && typeTrajet === RECHARGE_SEULE;
+  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
-    ? "Recharge véhicule uniquement (sans livraison)"
+    ? isGroupe
+      ? "Recharge véhicule uniquement (sans livraison) — devis groupé multi-véhicules"
+      : "Recharge véhicule uniquement (sans livraison)"
     : isGroupe
       ? "Convoyage automobile (devis groupé multi-véhicules)"
       : "Convoyage automobile";
+  const optionTrajetLabel = isGroupe
+    ? `${typeTrajet} — devis groupé (${groupLines.length} véhicule${groupLines.length > 1 ? "s" : ""})`
+    : typeTrajet;
 
   const planningIncomplet =
     !dateSouhaitee ||
@@ -389,12 +394,14 @@ function AdminNouveauDevisPage() {
     marque: v.marque.trim() || null,
     modele: v.modele.trim() || null,
     vin: v.vin.trim().toUpperCase() || null,
-    arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
+    arrivee: (isRechargeSeule ? depart.trim() : (v.arrivee.trim() || arrivee.trim())) || null,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
   const recapMessage = [
-    isGroupe ? `Devis groupé : ${groupLines.length} véhicules` : `Type de trajet : ${typeTrajet}`,
+    isGroupe
+      ? `Devis groupé : ${groupLines.length} véhicules — Type de prestation : ${typeTrajet}`
+      : `Type de trajet : ${typeTrajet}`,
     ...(isGroupe
       ? groupPayload.map(
           (v, i) =>
@@ -435,7 +442,7 @@ function AdminNouveauDevisPage() {
     modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
     immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
     vehicules: isGroupe ? groupPayload : null,
-    option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
+    option_trajet: optionTrajetLabel,
     date_souhaitee: dateSouhaitee || null,
 
     options,
@@ -492,7 +499,7 @@ function AdminNouveauDevisPage() {
           vin_retour: isAllerRetour ? vinRetour.trim().toUpperCase() || null : null,
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
-          option_trajet: isGroupe ? "Livraison simple (devis groupé)" : typeTrajet,
+          option_trajet: optionTrajetLabel,
 
           date_souhaitee: dateSouhaitee || null,
           heure_souhaitee: heureSouhaitee || null,
@@ -782,13 +789,13 @@ function AdminNouveauDevisPage() {
                 placeholder="Ex : 5 avenue de la République, Le Mans"
               />
             )}
-            {!isGroupe && (
+            {(
               <div>
                 <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                  Type de trajet
+                  {isGroupe ? "Type de prestation (appliqué à tous les véhicules)" : "Type de trajet"}
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {TRAJET_TYPES.map((t) => (
+                  {TRAJET_TYPES.filter((t) => !isGroupe || t !== "Livraison + restitution").map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -811,7 +818,7 @@ function AdminNouveauDevisPage() {
                 </div>
                 {isRechargeSeule && (
                   <p className="mt-2 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
-                    Intervention de recharge sur place : le véhicule n'est pas livré, il reste à la même adresse.
+                    Intervention de recharge sur place : {isGroupe ? "aucun véhicule n'est livré, chacun reste à la même adresse." : "le véhicule n'est pas livré, il reste à la même adresse."}
                   </p>
                 )}
               </div>
