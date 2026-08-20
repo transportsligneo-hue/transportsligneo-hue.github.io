@@ -64,11 +64,9 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Transports Ligneo" },
       { property: "og:locale", content: "fr_FR" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Transports Ligneo — Convoyage et logistique automobile B2B | Particuliers & Professionnels" },
       { name: "twitter:description", content: "Transports Ligneo, spécialiste du convoyage et logistique automobile B2B et particuliers. Concessionnaires, loueurs, gestionnaires de flotte : missions à la carte, état des lieux digital, suivi GPS temps réel et API partenaires. Basés à Tours, disponibles 7j/7 en France et en Europe." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/53a08c7a-21e8-42e2-803d-1f0891146ce4" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/53a08c7a-21e8-42e2-803d-1f0891146ce4" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
