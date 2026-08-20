@@ -119,10 +119,17 @@ function splitAddress(addr: string): { street: string; city: string } {
 
 function isTruthy(v: unknown): boolean {
   if (v === true) return true;
-  if (typeof v === "string") return ["true", "oui", "yes", "ok", "présent", "present"].includes(v.toLowerCase());
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    // Valeurs négatives explicites
+    if (["", "false", "non", "no", "aucun", "absent", "absente", "0", "ko", "null"].includes(s)) return false;
+    // Valeurs positives connues + variantes métier (roue : "secours" / "kit")
+    return true;
+  }
   if (typeof v === "number") return v > 0;
   return false;
 }
+
 
 async function toDataUrl(url: string): Promise<string | null> {
   try {
@@ -208,18 +215,26 @@ function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhoto
   };
 
   const presence = new Map<string, boolean>();
+  const details = new Map<string, string>();
   for (const key of DEFAULT_EQUIP_KEYS) presence.set(key, false);
   for (const [k, v] of Object.entries(eq)) {
     const nk = normalizeKey(k);
     if (!nk) continue;
-    presence.set(nk, (presence.get(nk) ?? false) || isTruthy(v));
+    const ok = isTruthy(v);
+    presence.set(nk, (presence.get(nk) ?? false) || ok);
+    if (ok && nk === "roue_secours" && typeof v === "string") {
+      const s = v.trim().toLowerCase();
+      if (s === "secours") details.set(nk, "Roue de secours");
+      else if (s === "kit") details.set(nk, "Kit anti-crevaison");
+    }
   }
 
   const equipItems = Array.from(presence.entries()).map(([k, ok]) => ({
     label: EQUIP_LABELS[k] ?? k.replace(/_/g, " "),
-    sub: ok ? "Présent" : "Absent",
+    sub: ok ? (details.get(k) ?? "Présent") : "Absent",
     ok,
   }));
+
 
 
   return `
