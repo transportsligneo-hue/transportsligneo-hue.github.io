@@ -32,6 +32,7 @@ import {
   Copy,
   Fingerprint,
   Pencil,
+  Eye,
 } from "lucide-react";
 import {
   Card,
@@ -247,6 +248,7 @@ function AdminMissionDetail() {
   const [clotureKey, setClotureKey] = useState(0);
   const [generatingFacture, setGeneratingFacture] = useState(false);
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
+  const [edlPreviewUrl, setEdlPreviewUrl] = useState<string | null>(null);
   const [savingContact, setSavingContact] = useState(false);
   const [contactNom, setContactNom] = useState("");
   const [contactPrenom, setContactPrenom] = useState("");
@@ -571,7 +573,7 @@ function AdminMissionDetail() {
     }
   };
 
-  const downloadEdlPdf = async () => {
+  const downloadEdlPdf = async (mode: "download" | "preview" = "download") => {
     if (!attribution || !trajet || generatingEdlPdf) return;
     setGeneratingEdlPdf(true);
     try {
@@ -645,6 +647,13 @@ function AdminMissionDetail() {
       });
 
       const url = URL.createObjectURL(blob);
+      if (mode === "preview") {
+        setEdlPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
+        });
+        return;
+      }
       const a = document.createElement("a");
       a.href = url;
       a.download = `EDL-${missionNumberOf(attribution)}.pdf`;
@@ -1072,8 +1081,16 @@ function AdminMissionDetail() {
             </Button>
             <Button
               variant="secondary"
+              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+              onClick={() => downloadEdlPdf("preview")}
+              disabled={generatingEdlPdf}
+            >
+              Aperçu état des lieux
+            </Button>
+            <Button
+              variant="secondary"
               icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-              onClick={downloadEdlPdf}
+              onClick={() => downloadEdlPdf("download")}
               disabled={generatingEdlPdf}
             >
               PDF état des lieux
@@ -1887,6 +1904,41 @@ function AdminMissionDetail() {
       {/* Rapport */}
       {reportOpen && (
         <MissionReport attributionId={attribution.id} onClose={() => setReportOpen(false)} />
+      )}
+
+      {/* Aperçu PDF état des lieux */}
+      {edlPreviewUrl && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-3 sm:p-6"
+          onClick={() => { URL.revokeObjectURL(edlPreviewUrl); setEdlPreviewUrl(null); }}
+        >
+          <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between gap-3 border-b border-black/10 px-4 py-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[#0b1026]">Aperçu état des lieux</p>
+                <p className="truncate text-xs text-black/50">{missionNumberOf(attribution)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={edlPreviewUrl}
+                  download={`EDL-${missionNumberOf(attribution)}.pdf`}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#2F5FFF] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2450e0]"
+                >
+                  <Download size={14} /> Télécharger
+                </a>
+                <button
+                  type="button"
+                  onClick={() => { URL.revokeObjectURL(edlPreviewUrl); setEdlPreviewUrl(null); }}
+                  className="rounded-lg border border-black/10 p-2 text-black/60 hover:bg-black/5"
+                  aria-label="Fermer l'aperçu"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <iframe src={edlPreviewUrl} title="Aperçu état des lieux" className="min-h-0 flex-1 w-full bg-[#f5f7fc]" />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { BellRing, Loader2, Mail, Send } from 'lucide-react'
+import { BellRing, Eye, Loader2, Mail, Send, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { sendTransactionalEmail } from '@/lib/email/send'
+import { renderEmailPreview } from '@/lib/email-preview.functions'
 import {
   getCommunicationRecipients,
   getEmailTemplateCatalog,
@@ -38,6 +39,7 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
   const listTemplates = useServerFn(getEmailTemplateCatalog)
   const listRecipients = useServerFn(getCommunicationRecipients)
   const sendPush = useServerFn(sendAdminPushNotification)
+  const renderPreview = useServerFn(renderEmailPreview)
   const [templates, setTemplates] = useState<TemplateInfo[]>([])
   const [recipients, setRecipients] = useState<Recipient[]>([])
   const [recipientScope, setRecipientScope] = useState<'convoyeurs' | 'clients'>(recipient?.role === 'client' ? 'clients' : 'convoyeurs')
@@ -45,6 +47,8 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
   const [emailTo, setEmailTo] = useState(recipient?.email ?? '')
   const [templateData, setTemplateData] = useState<Record<string, string>>({})
   const [sendingEmail, setSendingEmail] = useState(false)
+  const [preview, setPreview] = useState<{ html: string; subject: string } | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   const [pushTarget, setPushTarget] = useState<'single' | 'convoyeurs' | 'clients' | 'all'>(recipient ? 'single' : 'convoyeurs')
   const [selectedUserId, setSelectedUserId] = useState(recipient?.userId ?? '')
@@ -88,6 +92,19 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
     setSelectedUserId(userId)
     const found = recipients.find((r) => r.userId === userId)
     if (found?.email) setEmailTo(found.email)
+  }
+
+  const openPreview = async () => {
+    if (!selectedTemplate) return
+    setPreviewLoading(true)
+    try {
+      const result = await renderPreview({ data: { templateName: selectedTemplate, templateData } })
+      setPreview(result as { html: string; subject: string })
+    } catch (error: any) {
+      toast.error(error?.message || 'Aperçu indisponible')
+    } finally {
+      setPreviewLoading(false)
+    }
   }
 
   const submitEmail = async () => {
@@ -198,11 +215,38 @@ export function AdminManualCommunication({ recipient }: { recipient?: SingleReci
               </div>
             ))}
           </div>
-          <button onClick={submitEmail} disabled={sendingEmail} className="admin-btn-primary inline-flex items-center gap-2">
-            {sendingEmail ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-            Envoyer l'email
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={submitEmail} disabled={sendingEmail} className="admin-btn-primary inline-flex items-center gap-2">
+              {sendingEmail ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              Envoyer l'email
+            </button>
+            <button
+              onClick={openPreview}
+              disabled={previewLoading}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+              Prévisualiser
+            </button>
+          </div>
         </div>
+
+        {preview && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-3 sm:p-6" onClick={() => setPreview(null)}>
+            <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-900">Aperçu email — {template?.displayName}</p>
+                  <p className="truncate text-xs text-slate-500">Objet : {preview.subject}</p>
+                </div>
+                <button type="button" onClick={() => setPreview(null)} className="rounded-md border border-slate-200 p-2 text-slate-500 hover:bg-slate-50" aria-label="Fermer l'aperçu">
+                  <X size={16} />
+                </button>
+              </div>
+              <iframe srcDoc={preview.html} title="Aperçu email" className="min-h-0 flex-1 w-full bg-slate-100" />
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
