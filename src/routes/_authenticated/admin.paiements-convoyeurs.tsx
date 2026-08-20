@@ -772,7 +772,7 @@ function ReglagesTab({
         </div>
       </Modal>
 
-      <Modal open={openPen} onClose={() => setOpenPen(false)} title="Nouvelle pénalité" size="md">
+      <Modal open={openPen} onClose={() => setOpenPen(false)} title={pf.id ? "Modifier la pénalité" : "Nouvelle pénalité"} size="md">
         <div className="space-y-3">
           <FormField label="Libellé" required>
             <TextInput value={pf.libelle} onChange={(e) => setPf({ ...pf, libelle: e.target.value })} />
