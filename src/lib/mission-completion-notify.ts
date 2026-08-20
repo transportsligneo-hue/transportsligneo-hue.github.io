@@ -12,7 +12,10 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 
 const ADMIN_EMAIL = "contact@transportsligneo.fr";
 
-export async function notifyAdminMissionTerminee(attributionId: string): Promise<void> {
+export async function notifyAdminMissionTerminee(
+  attributionId: string,
+  opts?: { manual?: boolean },
+): Promise<void> {
   try {
     const { data: attr } = await supabase
       .from("attributions")
