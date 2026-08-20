@@ -65,6 +65,7 @@ import { EditableNumero } from "@/components/admin/EditableNumero";
 import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
 import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
+import { MissionNotifAdminPanel } from "@/components/admin/missions/MissionNotifAdminPanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
 import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
@@ -1610,6 +1611,11 @@ function AdminMissionDetail() {
             contactEmail={trajet.arrivee_contact_email}
             contactTelephone={trajet.arrivee_contact_telephone}
           />
+
+          {/* Notification fin de mission (renvoi manuel) */}
+          <MissionNotifAdminPanel attributionId={attribution.id} />
+
+
 
 
           {/* Documents */}

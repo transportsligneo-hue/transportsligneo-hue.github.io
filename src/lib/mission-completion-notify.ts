@@ -12,7 +12,10 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 
 const ADMIN_EMAIL = "contact@transportsligneo.fr";
 
-export async function notifyAdminMissionTerminee(attributionId: string): Promise<void> {
+export async function notifyAdminMissionTerminee(
+  attributionId: string,
+  opts?: { manual?: boolean },
+): Promise<void> {
   try {
     const { data: attr } = await supabase
       .from("attributions")
@@ -71,7 +74,9 @@ export async function notifyAdminMissionTerminee(attributionId: string): Promise
     await sendTransactionalEmail({
       templateName: "mission-terminee-admin",
       recipientEmail: ADMIN_EMAIL,
-      idempotencyKey: `mission-terminee-admin-${attributionId}`,
+      idempotencyKey: opts?.manual
+        ? `mission-terminee-admin-${attributionId}-${Date.now()}`
+        : `mission-terminee-admin-${attributionId}`,
       skipProfileLookup: true,
       templateData: {
         numero,
