@@ -54,6 +54,11 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
   const submittedTabRef = useRef<Tab>("client");
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
+  const userTypedRef = useRef(false);
+  const autoSubmittedRef = useRef(false);
+
 
   useEffect(() => {
     if (isInitializing || isLoading || !isAuthenticated) return;
@@ -81,8 +86,11 @@ function LoginPage() {
     else navigate({ to: "/dashboard-client" });
   }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent, override?: { email: string; password: string }) => {
+    e?.preventDefault();
+    const emailValue = (override?.email ?? email).trim();
+    const passwordValue = override?.password ?? password;
+
     setError("");
     setSubmitting(true);
     submittedTabRef.current = tab;
@@ -116,7 +124,7 @@ function LoginPage() {
         setError("Vérification de sécurité refusée. Si le problème persiste, contactez-nous.");
         return;
       }
-      await login(email.trim(), password);
+      await login(emailValue, passwordValue);
     } catch (err: unknown) {
       justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
@@ -129,6 +137,30 @@ function LoginPage() {
       setSubmitting(false);
     }
   };
+
+  // App mobile : quand Samsung Pass / le gestionnaire de mots de passe remplit
+  // les champs après validation biométrique, on connecte automatiquement.
+  const submitRef = useRef(handleSubmit);
+  submitRef.current = handleSubmit;
+  useEffect(() => {
+    if (!isMobileApp) return;
+    const timer = window.setInterval(() => {
+      if (autoSubmittedRef.current || userTypedRef.current) return;
+      const em = emailInputRef.current?.value?.trim() ?? "";
+      const pw = passwordInputRef.current?.value ?? "";
+      if (!em || !pw) return;
+      autoSubmittedRef.current = true;
+      window.clearInterval(timer);
+      setEmail(em);
+      setPassword(pw);
+      void submitRef.current(undefined, { email: em, password: pw });
+    }, 350);
+    // On n'écoute l'auto-remplissage que pendant les premières secondes.
+    const stop = window.setTimeout(() => window.clearInterval(timer), 25000);
+    return () => { window.clearInterval(timer); window.clearTimeout(stop); };
+  }, [isMobileApp]);
+
+
 
   const handleResendConfirmation = async () => {
     if (!email.trim()) { setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer »."); return; }
@@ -227,7 +259,10 @@ function LoginPage() {
               <input
                 type="email"
                 value={email}
+                ref={emailInputRef}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={() => { userTypedRef.current = true; }}
+
                 required
                 autoComplete="email"
                 disabled={loading}
@@ -249,7 +284,10 @@ function LoginPage() {
               <input
                 type={showPwd ? "text" : "password"}
                 value={password}
+                ref={passwordInputRef}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={() => { userTypedRef.current = true; }}
+
                 required
                 autoComplete="current-password"
                 disabled={loading}
