@@ -61,45 +61,20 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 r4-topbar-centered transition-all duration-500 ${
-          scrolled ? "r4-topbar" : "bg-transparent"
+        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 tln-shell ${
+          scrolled ? "is-scrolled" : ""
         }`}
       >
-        <div className="r4-topbar-inner w-full">
-          <Link to="/" className="shrink-0" aria-label="Accueil · Transports Ligneo">
+        <div className="tln-bar">
+          <span className="tln-sheen" aria-hidden="true" />
+
+          <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
             <LigneoLockup size="md" />
           </Link>
 
-          {/* Actions droite : téléphone + Connexion */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <a
-              href="tel:+33782456181"
-              className="nav-phone-block"
-              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
-            >
-              <span className="nav-phone-icon">
-                <Phone size={15} strokeWidth={2.25} />
-                <span className="nav-phone-pulse" aria-hidden="true" />
-              </span>
-              <span className="flex flex-col items-start">
-                <span className="nav-phone-number">Besoin d'un conseil ?</span>
-                <span className="nav-phone-sub">
-                  <span className="nav-phone-live" aria-hidden="true" />
-                  07 82 45 61 81 · 7j/7
-                </span>
-              </span>
-            </a>
-            <ThemeToggle />
-            <button onClick={goToEspace} className="r4-btn-connect" type="button">
-              <User size={13} />
-              {isAuthenticated ? "Mon espace" : "Connexion"}
-            </button>
-          </div>
-        </div>
+          <span className="tln-sep" aria-hidden="true" />
 
-        {/* Rangée 2 · liens centraux dans une pilule englobante */}
-        <div className="r4-topbar-row">
-          <ul className="r4-nav-pill whitespace-nowrap">
+          <ul className="tln-links">
             {navLinks.map((l) => {
               const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
               return (
@@ -117,7 +92,35 @@ export default function Navbar() {
               );
             })}
           </ul>
+
+          <span className="tln-sep" aria-hidden="true" />
+
+          <div className="tln-actions">
+            <a
+              href="tel:+33782456181"
+              className="nav-phone-block tln-phone"
+              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+            >
+              <span className="nav-phone-icon">
+                <Phone size={15} strokeWidth={2.25} />
+                <span className="nav-phone-pulse" aria-hidden="true" />
+              </span>
+              <span className="flex flex-col items-start">
+                <span className="nav-phone-number">Besoin d'un conseil ?</span>
+                <span className="nav-phone-sub">
+                  <span className="nav-phone-live" aria-hidden="true" />
+                  07 82 45 61 81 · 7j/7
+                </span>
+              </span>
+            </a>
+            <ThemeToggle />
+            <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
+              <User size={13} />
+              {isAuthenticated ? "Mon espace" : "Connexion"}
+            </button>
+          </div>
         </div>
+
 
 
         {/* Menu compact */}
