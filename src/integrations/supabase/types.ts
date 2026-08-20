@@ -6679,6 +6679,22 @@ export type Database = {
           numero: string
         }[]
       }
+      admin_convert_mission_to_duo: {
+        Args: {
+          _arrivee?: string
+          _date?: string
+          _depart?: string
+          _heure?: string
+          _immatriculation?: string
+          _marque?: string
+          _modele?: string
+          _prix_retour?: number
+          _split_prix?: boolean
+          _trajet_id: string
+          _vin?: string
+        }
+        Returns: string
+      }
       admin_counter_offer: {
         Args: { _counter_price: number; _message?: string; _offre_id: string }
         Returns: undefined
