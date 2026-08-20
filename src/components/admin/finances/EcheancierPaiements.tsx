@@ -321,7 +321,7 @@ export function EcheancierPaiements() {
                 className="w-full flex flex-wrap items-center gap-3 px-4 py-4 text-left hover:bg-pro-bg-soft/60 transition-colors"
               >
                 {isOpen ? <ChevronDown size={16} className="text-pro-muted" /> : <ChevronRight size={16} className="text-pro-muted" />}
-                <DriverAvatar convoyeurId={g.id === "none" ? null : g.id} nom={conv?.nom} prenom={conv?.prenom} size={32} />
+                <DriverAvatar convoyeurId={g.id === "none" ? null : g.id} name={convName(g.id === "none" ? null : g.id)} size="md" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-pro-text truncate">{convName(g.id === "none" ? null : g.id)}</p>
                   <p className="text-[11px] text-pro-muted">{g.rows.length} mission(s)</p>
