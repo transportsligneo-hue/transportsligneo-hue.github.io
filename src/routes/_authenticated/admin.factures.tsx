@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, FileText, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
+import { Loader2, Download, FileText, FileSearch, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
+import { PdfPreviewDialog } from "@/components/admin/PdfPreviewDialog";
 import { toast } from "sonner";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
@@ -79,6 +80,7 @@ function AdminFacturesPage() {
   const [statutFilter, setStatutFilter] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [previewRow, setPreviewRow] = useState<FactureRow | null>(null);
 
   const fetchFactures = async () => {
     setLoading(true);
@@ -314,6 +316,9 @@ function AdminFacturesPage() {
                   <IconButton title="Voir détail" tone="neutral" onClick={() => setSelected(f)}>
                     <Eye size={15} />
                   </IconButton>
+                  <IconButton title="Prévisualiser le PDF" tone="neutral" onClick={() => setPreviewRow(f)}>
+                    <FileSearch size={15} />
+                  </IconButton>
                   <IconButton
                     onClick={() => handleDownload(f)}
                     title="Télécharger PDF"
@@ -333,6 +338,42 @@ function AdminFacturesPage() {
           ))}
         </div>
       )}
+
+      <PdfPreviewDialog
+        open={!!previewRow}
+        title={`Facture ${previewRow?.numero ?? ""}`}
+        filename={`Facture-${previewRow?.numero ?? "apercu"}.pdf`}
+        generate={async () => {
+          const row = previewRow!;
+          return generateFacturePdf({
+            numero: row.numero,
+            type_facture: row.type_facture,
+            date_facture: row.date_facture ?? new Date().toISOString(),
+            date_mission: row.date_mission,
+            date_echeance: row.date_echeance,
+            mode_paiement: row.mode_paiement,
+            conditions_paiement: row.conditions_paiement,
+            client_nom: row.client_nom,
+            client_prenom: row.client_prenom,
+            client_societe: row.client_societe,
+            client_email: row.client_email,
+            client_adresse: row.client_adresse,
+            client_siret: row.client_siret,
+            client_tva: row.client_tva,
+            designation: row.designation,
+            depart: row.depart,
+            arrivee: row.arrivee,
+            distance_km: row.distance_km,
+            prix_ht: Number(row.prix_ht),
+            tva_taux: Number(row.tva_taux),
+            prix_tva: Number(row.prix_tva),
+            prix_ttc: Number(row.prix_ttc),
+            reference_client: row.reference_client ?? null,
+            reference_label: row.reference_label ?? null,
+          });
+        }}
+        onClose={() => setPreviewRow(null)}
+      />
 
       {selected && (
         <AdminDetailDrawer
