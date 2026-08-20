@@ -140,17 +140,23 @@ async function sendReviewSms(params: {
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
   if (!isValidPhone(params.recipient.phone)) {
-    return { success: false, reason: 'Téléphone invalide.' }
+    return { success: false, reason: 'Numéro de téléphone invalide ou manquant.' }
   }
-  const shortUrl = await ensureShortReviewUrl(params.settings.url)
-  const body = buildSmsBody(params.convoyeurLabel, shortUrl)
-  const res = await sendSms({
-    to: params.recipient.phone!,
-    body,
-    from: params.settings.sms_from || 'Ligneo',
-  })
-  return res.ok ? { success: true } : { success: false, reason: res.error }
+  if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
+  try {
+    const shortUrl = await ensureShortReviewUrl(params.settings.url)
+    const body = buildSmsBody(params.convoyeurLabel, shortUrl)
+    const res = await sendSms({
+      to: params.recipient.phone!,
+      body,
+      from: params.settings.sms_from || 'Ligneo',
+    })
+    return res.ok ? { success: true } : { success: false, reason: res.error || 'Échec SMS (opérateur).' }
+  } catch (err) {
+    return { success: false, reason: err instanceof Error ? err.message : 'Erreur SMS inconnue.' }
+  }
 }
+
 
 
 async function recordReviewRequest(params: {
