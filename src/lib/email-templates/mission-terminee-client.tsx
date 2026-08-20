@@ -4,7 +4,7 @@ import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props {
   /** Lien avis Google (optionnel, sinon lien par défaut). */
-  avisUrl?: string prenom?: string; numero?: string; depart?: string; arrivee?: string; dateLivraison?: string; facture?: string }
+  avisUrl?: string; prenom?: string; numero?: string; depart?: string; arrivee?: string; dateLivraison?: string; facture?: string }
 
 const Email = ({ avisUrl, prenom, numero, depart, arrivee, dateLivraison, facture }: Props) => (
   <LigneoEmailShell
