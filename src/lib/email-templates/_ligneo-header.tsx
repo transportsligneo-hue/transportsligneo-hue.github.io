@@ -239,21 +239,73 @@ export function LigneoEmailShell({
   )
 }
 
+// ---------- En-tête de marque (HTML pur, sans dépendance image) ----------
+
+export function BrandHeaderBlock() {
+  return (
+    <Section style={headerSection}>
+      <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' }}>
+        <tbody>
+          <tr>
+            <td style={{ padding: '26px 32px 22px', textAlign: 'center' }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: FONT_STACK_HEAD,
+                  fontSize: '21px',
+                  fontWeight: 800,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: '#ffffff',
+                  lineHeight: '1.2',
+                }}
+              >
+                Transports&nbsp;Ligneo
+              </p>
+              <p
+                style={{
+                  margin: '10px auto 0',
+                  width: '54px',
+                  height: '2px',
+                  lineHeight: '2px',
+                  fontSize: '1px',
+                  backgroundColor: GOLD_LIGHT,
+                }}
+              >
+                &nbsp;
+              </p>
+              <p
+                style={{
+                  margin: '12px 0 0',
+                  fontFamily: FONT_STACK_BODY,
+                  fontSize: '10.5px',
+                  fontWeight: 600,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: '#9fb2e6',
+                }}
+              >
+                Convoyage automobile · Tours (37)
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Section>
+  )
+}
+
 // ---------- Ancien header (backward compat) ----------
 
 export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
-    <Section style={headerSection}>
-      <img
-        src={LIGNEO_BRAND_BANNER_URL}
-        width="600"
-        alt="Transports Ligneo"
-        style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }}
-      />
+    <>
+      <BrandHeaderBlock />
       {tagline ? <Text style={{ ...eyebrowStyle, padding: '10px 32px 0' }}>{tagline}</Text> : null}
-    </Section>
+    </>
   )
 }
+
 
 // ---------- Sub-composants réutilisables ----------
 
