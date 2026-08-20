@@ -103,23 +103,35 @@ async function sendReviewEmail(params: {
 }): Promise<{ success: boolean; reason?: string }> {
   const { attribution, trajet, recipient, convoyeurLabel, settings, auto } = params
   if (!isValidEmail(recipient.email)) {
-    return { success: false, reason: 'Email invalide.' }
+    return { success: false, reason: 'Adresse email invalide ou manquante.' }
   }
-  return sendTransactionalEmailServer({
-    templateName: 'avis-google',
-    recipientEmail: recipient.email.trim(),
-    idempotencyKey: `avis-google-${attribution.id}-email`,
-    templateData: {
-      prenom: recipient.prenom,
-      numero: attribution.numero_mission ?? '',
-      depart: trajet.depart,
-      arrivee: trajet.arrivee,
-      convoyeur: convoyeurLabel ?? '',
-      reviewUrl: settings.url,
-      isContactLivraison: false,
-    },
-  })
+  // Envoi automatique : idempotent (une seule fois par mission).
+  // Renvoi manuel : clé unique pour contourner la déduplication et forcer un vrai nouvel envoi.
+  const idempotencyKey = auto
+    ? `avis-google-${attribution.id}-email`
+    : `avis-google-${attribution.id}-email-${Date.now()}`
+  try {
+    const res = await sendTransactionalEmailServer({
+      templateName: 'avis-google',
+      recipientEmail: recipient.email.trim(),
+      idempotencyKey,
+      templateData: {
+        prenom: recipient.prenom,
+        numero: attribution.numero_mission ?? '',
+        depart: trajet.depart,
+        arrivee: trajet.arrivee,
+        convoyeur: convoyeurLabel ?? '',
+        reviewUrl: settings.url,
+        isContactLivraison: false,
+      },
+    })
+    if (res?.success) return { success: true }
+    return { success: false, reason: res?.reason || "L'email n'a pas pu être mis en file d'envoi." }
+  } catch (err) {
+    return { success: false, reason: err instanceof Error ? err.message : 'Erreur email inconnue.' }
+  }
 }
+
 
 async function sendReviewSms(params: {
   attribution: any
