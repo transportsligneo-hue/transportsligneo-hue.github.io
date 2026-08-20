@@ -91,7 +91,7 @@ export const Route = createRootRoute({
           url: "https://transportsligneo.fr",
           logo: "https://transportsligneo.fr/logo-ligneo.png",
           description:
-            "Convoyage automobile pour particuliers et professionnels. Livraison de véhicules 7j/7 partout en France, au départ de Tours.",
+            "Transports Ligneo, spécialiste du convoyage et logistique automobile B2B et particuliers. Concessionnaires, loueurs, gestionnaires de flotte : missions à la carte, état des lieux digital, suivi GPS temps réel et API partenaires. Basés à Tours, disponibles 7j/7 en France et en Europe.",
           telephone: "+33 6 12 34 56 78",
           areaServed: "FR",
           address: {
