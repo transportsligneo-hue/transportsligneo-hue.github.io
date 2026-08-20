@@ -89,6 +89,29 @@ function ville(v: string | null) {
   return parts[parts.length - 1] || v;
 }
 
+/** Séquence formatée : 142 → "#142", 1042 → "#1042" (le dièse remplace le zéro de tête). */
+export function formatVirSeq(n: number): string {
+  const s = String(n).padStart(4, "0");
+  return s.startsWith("0") ? `#${s.slice(1)}` : `#${s}`;
+}
+
+/** Référence virement : VIR-2026-#142 */
+export function buildVirementRef(year: number, seq: number): string {
+  return `VIR-${year}-${formatVirSeq(seq)}`;
+}
+
+/** Dernière séquence utilisée sur l'année en cours. */
+export function lastVirementSeq(refs: (string | null | undefined)[], year: number): number {
+  let max = 0;
+  const re = new RegExp(`^VIR-${year}-#?0*(\\d+)$`, "i");
+  for (const r of refs) {
+    const m = (r ?? "").trim().match(re);
+    if (m) max = Math.max(max, parseInt(m[1]!, 10));
+  }
+  return max;
+}
+
+
 /* ---------- Composant principal ---------- */
 
 export function EcheancierPaiements() {
