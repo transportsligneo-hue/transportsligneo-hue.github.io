@@ -2,10 +2,13 @@ import * as React from 'react'
 import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
-interface Props { prenom?: string; numero?: string; depart?: string; arrivee?: string; dateLivraison?: string; facture?: string }
+interface Props {
+  /** Lien avis Google (optionnel, sinon lien par défaut). */
+  avisUrl?: string prenom?: string; numero?: string; depart?: string; arrivee?: string; dateLivraison?: string; facture?: string }
 
-const Email = ({ prenom, numero, depart, arrivee, dateLivraison, facture }: Props) => (
+const Email = ({ avisUrl, prenom, numero, depart, arrivee, dateLivraison, facture }: Props) => (
   <LigneoEmailShell
+    googleReview={avisUrl || true}
     preview={`Votre véhicule a été livré.${facture ? ` Facture ${facture} disponible.` : ''}`}
     tagline="Mission terminée"
     title="Votre véhicule a été livré ✓"

@@ -3,6 +3,8 @@ import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, SimpleCard } from './_ligneo-header'
 
 interface Props {
+  /** Lien avis Google (optionnel, sinon lien par défaut). */
+  avisUrl?: string
   prenom?: string
   numero?: string
   montant?: number | string
@@ -13,8 +15,9 @@ interface Props {
   pdfUrl?: string
 }
 
-const Email = ({ prenom, numero, montant, echeance, clientLogoUrl, clientName, pdfUrl }: Props) => (
+const Email = ({ avisUrl, prenom, numero, montant, echeance, clientLogoUrl, clientName, pdfUrl }: Props) => (
   <LigneoEmailShell
+    googleReview={avisUrl || true}
     preview={`Facture ${numero ?? ''} prête au téléchargement.`}
     tagline="Facturation"
     title="Votre facture est prête"
