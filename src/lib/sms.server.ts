@@ -1,6 +1,7 @@
 /**
- * Envoi de SMS via Twilio (connector gateway).
+ * Envoi de SMS via Brevo (ex-Sendinblue), à travers le connector gateway Lovable.
  *
+ * Doc : https://developers.brevo.com/reference/sendtransacsms
  * On ne logue JAMAIS les secrets ; seuls les numéros et les statuts finaux
  * sont remontés.
  */
@@ -17,21 +18,22 @@ function isValidPhone(phone?: string | null): boolean {
   return digits.length >= 10 && digits.length <= 15
 }
 
-function normalizePhone(phone: string): string {
+/** Brevo attend le numéro au format international SANS le "+" (ex : 33612345678). */
+export function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, '')
-  if (digits.startsWith('0') && !digits.startsWith('00')) {
-    return `+33${digits.slice(1)}`
-  }
-  if (digits.startsWith('33') && digits.length === 11) {
-    return `+${digits}`
-  }
-  if (digits.startsWith('00')) {
-    return `+${digits.slice(2)}`
-  }
-  return `+${digits}`
+  if (digits.startsWith('00')) return digits.slice(2)
+  if (digits.startsWith('0')) return `33${digits.slice(1)}`
+  return digits
 }
 
-const GATEWAY_URL = 'https://connector-gateway.lovable.dev/twilio'
+/** Nom d'expéditeur alphanumérique : max 11 caractères en France. */
+function normalizeSender(from?: string): string {
+  const raw = (from || 'Ligneo').replace(/[^A-Za-z0-9 ]/g, '').trim()
+  const value = raw.length > 0 ? raw.slice(0, 11) : 'Ligneo'
+  return value
+}
+
+const GATEWAY_URL = 'https://connector-gateway.lovable.dev/brevo'
 
 export async function sendSms(params: {
   to: string
@@ -43,43 +45,47 @@ export async function sendSms(params: {
   }
 
   const LOVABLE_API_KEY = process.env['LOVABLE_API_KEY']
-  const TWILIO_API_KEY = process.env['TWILIO_API_KEY']
-  if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
-    return { ok: false, error: 'Configuration SMS incomplète.' }
+  const BREVO_API_KEY = process.env['BREVO_API_KEY']
+  if (!LOVABLE_API_KEY || !BREVO_API_KEY) {
+    return { ok: false, error: 'Configuration SMS incomplète (clé Brevo manquante).' }
   }
 
-  const to = normalizePhone(params.to)
-  const body = params.body.slice(0, 160)
+  const recipient = normalizePhone(params.to)
+  const content = params.body.slice(0, 160)
 
   try {
-    const response = await fetch(`${GATEWAY_URL}/Messages.json`, {
+    const response = await fetch(`${GATEWAY_URL}/transactionalSMS/sms`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'X-Connection-Api-Key': TWILIO_API_KEY,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Connection-Api-Key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        To: to,
-        From: params.from || 'Ligneo',
-        Body: body,
+      body: JSON.stringify({
+        sender: normalizeSender(params.from),
+        recipient,
+        content,
+        type: 'transactional',
       }),
     })
 
+    const raw = await response.text()
     if (!response.ok) {
-      const text = await response.text()
-      console.error(`Twilio gateway error [${response.status}]: ${text}`)
-      return { ok: false, error: `Twilio ${response.status}: ${text.slice(0, 120)}` }
+      console.error(`Brevo SMS error [${response.status}]: ${raw}`)
+      return { ok: false, error: `Brevo ${response.status}: ${raw.slice(0, 160)}` }
     }
 
-    const data = (await response.json()) as { sid?: string; error_message?: string }
-    if (data.error_message) {
-      return { ok: false, error: data.error_message }
+    let messageId: string | undefined
+    try {
+      const parsed = JSON.parse(raw) as { messageId?: string | number; reference?: string }
+      messageId = parsed.messageId != null ? String(parsed.messageId) : parsed.reference
+    } catch {
+      /* réponse non JSON : on garde le succès HTTP */
     }
-    return { ok: true, sid: data.sid }
+    return { ok: true, sid: messageId }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    console.error('Twilio send exception:', msg)
+    console.error('Brevo SMS exception:', msg)
     return { ok: false, error: msg }
   }
 }
