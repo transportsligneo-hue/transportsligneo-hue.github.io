@@ -144,21 +144,53 @@ function LoginPage() {
   submitRef.current = handleSubmit;
   useEffect(() => {
     if (!isMobileApp) return;
-    const timer = window.setInterval(() => {
-      if (autoSubmittedRef.current || userTypedRef.current) return;
-      const em = emailInputRef.current?.value?.trim() ?? "";
-      const pw = passwordInputRef.current?.value ?? "";
+    let lastPw = "";
+    let lastEm = "";
+
+    const maybeAuto = () => {
+      if (autoSubmittedRef.current) return;
+      const emEl = emailInputRef.current;
+      const pwEl = passwordInputRef.current;
+      if (!emEl || !pwEl) return;
+      const em = emEl.value.trim();
+      const pw = pwEl.value;
+      // Un gestionnaire de mots de passe insère la valeur d'un coup :
+      // on détecte un saut de plusieurs caractères sans frappe clavier.
+      const pwJump = pw.length - lastPw.length >= 3;
+      const emJump = em.length - lastEm.length >= 3;
+      const filledByManager = pwJump || emJump || !userTypedRef.current;
+      lastPw = pw;
+      lastEm = em;
       if (!em || !pw) return;
+      if (!filledByManager) return;
       autoSubmittedRef.current = true;
-      window.clearInterval(timer);
+      cleanup();
       setEmail(em);
       setPassword(pw);
-      void submitRef.current(undefined, { email: em, password: pw });
-    }, 350);
-    // On n'écoute l'auto-remplissage que pendant les premières secondes.
-    const stop = window.setTimeout(() => window.clearInterval(timer), 25000);
-    return () => { window.clearInterval(timer); window.clearTimeout(stop); };
+      // Laisse le gestionnaire finir d'écrire les deux champs.
+      window.setTimeout(() => {
+        const e2 = emailInputRef.current?.value?.trim() || em;
+        const p2 = passwordInputRef.current?.value || pw;
+        setEmail(e2);
+        setPassword(p2);
+        void submitRef.current(undefined, { email: e2, password: p2 });
+      }, 250);
+    };
+
+    const timer = window.setInterval(maybeAuto, 300);
+    const onEvt = () => maybeAuto();
+    const cleanup = () => {
+      window.clearInterval(timer);
+      document.removeEventListener("input", onEvt, true);
+      document.removeEventListener("change", onEvt, true);
+      document.removeEventListener("animationstart", onEvt, true);
+    };
+    document.addEventListener("input", onEvt, true);
+    document.addEventListener("change", onEvt, true);
+    document.addEventListener("animationstart", onEvt, true);
+    return cleanup;
   }, [isMobileApp]);
+
 
 
 
