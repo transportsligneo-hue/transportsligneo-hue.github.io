@@ -6,9 +6,10 @@ export const Route = createFileRoute("/mentions-legales")({
   head: () => ({
     meta: [
       { title: "Mentions légales · Transports Ligneo" },
-      { name: "description", content: "Mentions légales du site Transports Ligneo." },
+      { name: "description", content: "Éditeur, hébergement, propriété intellectuelle et responsabilité du site Transports Ligneo, convoyage automobile à Tours." },
       { property: "og:title", content: "Mentions légales · Transports Ligneo" },
-      { property: "og:description", content: "Mentions légales du site Transports Ligneo." },
+      { property: "og:description", content: "Éditeur, propriété intellectuelle et responsabilité du site Transports Ligneo, convoyage automobile à Tours." },
+      { property: "og:url", content: "https://transportsligneo.fr/mentions-legales" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/mentions-legales" }],
   }),

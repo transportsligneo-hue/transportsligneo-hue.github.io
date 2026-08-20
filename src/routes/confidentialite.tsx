@@ -10,6 +10,7 @@ export const Route = createFileRoute("/confidentialite")({
       { property: "og:title", content: "Politique de confidentialité · Transports Ligneo" },
       { property: "og:description", content: "Politique de confidentialité de l'application Transports Ligneo Driver et du site Transports Ligneo." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://transportsligneo.fr/confidentialite" },
       { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/confidentialite" }],

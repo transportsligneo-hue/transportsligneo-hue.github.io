@@ -6,9 +6,10 @@ export const Route = createFileRoute("/cgv")({
   head: () => ({
     meta: [
       { title: "CGV · Transports Ligneo" },
-      { name: "description", content: "Conditions générales de vente de Transports Ligneo." },
+      { name: "description", content: "Conditions générales de vente Transports Ligneo : prestations de convoyage, tarifs, zone d'intervention, assurance et annulation." },
       { property: "og:title", content: "CGV · Transports Ligneo" },
-      { property: "og:description", content: "Conditions générales de vente de Transports Ligneo." },
+      { property: "og:description", content: "Prestations de convoyage, tarifs, zone d'intervention, assurance et conditions d'annulation." },
+      { property: "og:url", content: "https://transportsligneo.fr/cgv" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/cgv" }],
   }),
