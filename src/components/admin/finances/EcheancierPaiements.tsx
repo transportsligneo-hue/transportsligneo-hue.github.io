@@ -155,7 +155,11 @@ export function EcheancierPaiements() {
       await load();
       return;
     }
-    if (data) setRemus((prev) => prev.map((r) => (r.id === row.id ? { ...r, ...(data as never) } : r)));
+    if (data) {
+      const fresh = data as unknown as Partial<RemuRow>;
+      setRemus((prev) => prev.map((r) => (r.id === row.id ? { ...r, ...fresh } : r)));
+    }
+
   }
 
   /* ---------- Filtres ---------- */
