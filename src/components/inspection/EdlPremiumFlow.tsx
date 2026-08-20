@@ -230,7 +230,11 @@ export function EdlPremiumFlow({
 
   // Électrique OU hybride rechargeable (PHEV). Un simple "hybride" (non
   // rechargeable) n'a pas de câble et ne déclenche donc pas l'étape.
-  const isElectric = isElectricEnergie(vehicleCarburant);
+  // Fallback marque/modèle depuis les infos véhicule déjà affichées (Tesla, Zoé…)
+  // pour ne jamais rater le câble de recharge si le champ carburant est vide.
+  const isElectric =
+    isElectricEnergie(vehicleCarburant) ||
+    guessElectricFromModel(vehicule?.marque, vehicule?.modele);
 
   const STEPS = useMemo(() => {
     // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).
@@ -249,7 +253,15 @@ export function EdlPremiumFlow({
       if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
     });
-    return base;
+    if (type !== "arrivee") return base;
+    // ARRIVÉE : on commence par le compteur (kilométrage saisi + photo compteur),
+    // puis le câble électrique s'il y a lieu, avant le tour du véhicule.
+    const priority = ["kilometrage_arrivee", "compteur", "cable_electrique"];
+    const head = priority
+      .map((id) => base.find((s) => s.id === id))
+      .filter((s): s is EdlStepDef => Boolean(s));
+    const rest = base.filter((s) => !head.includes(s));
+    return [...head, ...rest];
   }, [type, isElectric]);
   const TOTAL = STEPS.length;
 
