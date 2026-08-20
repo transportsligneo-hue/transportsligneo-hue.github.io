@@ -628,6 +628,7 @@ function AvisGoogleCard() {
   const [sendToContact, setSendToContact] = useState(true);
   const [channel, setChannel] = useState<"email" | "sms" | "email+sms">("email");
   const [smsFrom, setSmsFrom] = useState("Ligneo");
+  const [cooldownMonths, setCooldownMonths] = useState(4);
   const [smsCount, setSmsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -639,7 +640,7 @@ function AvisGoogleCard() {
         .select("value")
         .eq("key", "google_review")
         .maybeSingle();
-      const v = (data as { value?: { url?: string; auto_enabled?: boolean; delay_hours?: number; send_to_contact?: boolean; channel?: "email" | "sms" | "email+sms"; sms_from?: string } } | null)?.value;
+      const v = (data as { value?: { url?: string; auto_enabled?: boolean; delay_hours?: number; send_to_contact?: boolean; channel?: "email" | "sms" | "email+sms"; sms_from?: string; cooldown_months?: number } } | null)?.value;
       if (v) {
         setUrl(v.url ?? "");
         setAutoEnabled(!!v.auto_enabled);
@@ -647,6 +648,7 @@ function AvisGoogleCard() {
         setSendToContact(v.send_to_contact !== false);
         setChannel(v.channel ?? "email");
         setSmsFrom(v.sms_from ?? "Ligneo");
+        setCooldownMonths(typeof v.cooldown_months === "number" ? v.cooldown_months : 4);
       }
       const month = new Date().toISOString().slice(0, 7);
       const { data: counter } = await supabase.from("app_settings").select("value").eq("key", `sms_sent_${month}`).maybeSingle();
@@ -667,6 +669,7 @@ function AvisGoogleCard() {
           send_to_contact: sendToContact,
           channel,
           sms_from: smsFrom.trim() || "Ligneo",
+          cooldown_months: Math.max(0, Number(cooldownMonths) || 0),
         } as unknown as never,
       },
       { onConflict: "key" },
@@ -740,6 +743,26 @@ function AvisGoogleCard() {
             />
           </FormField>
         )}
+
+        <FormField label="Ne pas resolliciter un même client avant (mois)">
+          <select
+            value={String(cooldownMonths)}
+            disabled={loading}
+            onChange={(e) => setCooldownMonths(Number(e.target.value))}
+            className="w-full rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+          >
+            <option value="0">Aucune limite (à chaque mission)</option>
+            <option value="3">Tous les 3 mois</option>
+            <option value="4">Tous les 4 mois (recommandé)</option>
+            <option value="6">Tous les 6 mois</option>
+            <option value="12">Tous les 12 mois</option>
+          </select>
+          <p className="mt-1 text-[11px] text-pro-muted">
+            Évite de spammer les clients récurrents (ex : CAT France) qui ont plusieurs missions par
+            semaine. S'applique aux envois automatiques ; un admin peut toujours forcer l'envoi
+            depuis la fiche mission.
+          </p>
+        </FormField>
 
         <label className="flex items-center gap-2 text-xs text-pro-text">
           <input

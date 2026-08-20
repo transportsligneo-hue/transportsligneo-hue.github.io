@@ -42,6 +42,7 @@ export const Route = createFileRoute('/api/public/hooks/google-review-dispatch')
         if (settings.send_to_contact) targets.push('contact_livraison')
 
         let sent = 0
+        let skipped = 0
         for (const a of attributions ?? []) {
           const { data: existing } = await supabaseAdmin
             .from('mission_review_requests')
@@ -63,12 +64,16 @@ export const Route = createFileRoute('/api/public/hooks/google-review-dispatch')
               if (res.ok) {
                 sent++
                 done.add(`${recipientType}:${channel}`)
+              } else if (res.skipped === 'cooldown') {
+                // Client récurrent déjà sollicité récemment : on n'insiste pas.
+                skipped++
+                done.add(`${recipientType}:${channel}`)
               }
             }
           }
         }
 
-        return Response.json({ ok: true, processed: attributions?.length ?? 0, sent })
+        return Response.json({ ok: true, processed: attributions?.length ?? 0, sent, skipped })
       },
     },
   },
