@@ -200,6 +200,44 @@ export function EcheancierPaiements() {
 
   }
 
+  /* ---------- Paiement groupé (plusieurs virements d'un coup) ---------- */
+  async function payBatch(rows: RemuRow[], note: string | null, startSeq: number) {
+    const now = new Date().toISOString();
+    let seq = startSeq;
+    const updates = rows.map((r) => ({ row: r, ref: buildVirementRef(year, seq++) }));
+    for (const u of updates) {
+      const { error } = await supabase
+        .from("remunerations_missions")
+        .update({
+          paye_manuellement: true,
+          paye_at: now,
+          paiement_reference: u.ref,
+          paiement_note: note,
+        } as never)
+        .eq("id", u.row.id);
+      if (error) {
+        toast.error(error.message);
+        await load();
+        return;
+      }
+    }
+    setRemus((prev) =>
+      prev.map((r) => {
+        const u = updates.find((x) => x.row.id === r.id);
+        return u
+          ? { ...r, paye_manuellement: true, paye_at: now, paiement_reference: u.ref, paiement_note: note }
+          : r;
+      }),
+    );
+    setSelected(new Set());
+    setBatchOpen(false);
+    toast.success(`${updates.length} paiement(s) enregistré(s)`, {
+      description: `${updates[0]?.ref} → ${updates[updates.length - 1]?.ref}`,
+    });
+  }
+
+
+
   /* ---------- Filtres ---------- */
   const q = search.trim().toLowerCase();
   const filtered = useMemo(() => {
