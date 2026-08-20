@@ -293,7 +293,7 @@ function LoginPage() {
                 value={email}
                 ref={emailInputRef}
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={() => { userTypedRef.current = true; }}
+                onKeyDown={(ev) => { if (ev.key.length === 1 || ev.key === "Backspace") userTypedRef.current = true; }}
 
                 required
                 autoComplete="email"
@@ -318,7 +318,7 @@ function LoginPage() {
                 value={password}
                 ref={passwordInputRef}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={() => { userTypedRef.current = true; }}
+                onKeyDown={(ev) => { if (ev.key.length === 1 || ev.key === "Backspace") userTypedRef.current = true; }}
 
                 required
                 autoComplete="current-password"
