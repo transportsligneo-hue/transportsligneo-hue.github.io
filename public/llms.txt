@@ -1,0 +1,29 @@
+# Transports Ligneo
+
+> Convoyage et logistique automobile pour particuliers et professionnels, au départ de Tours (37) et partout en France et en Europe, 7j/7.
+
+Transports Ligneo déplace des véhicules par la route avec des convoyeurs professionnels : livraison simple, livraison + restitution, transferts inter-sites, missions groupées. Chaque mission inclut un état des lieux digital, un suivi GPS temps réel et des documents (devis, factures, PV) centralisés. Une API partenaires et un espace B2B sont disponibles pour les concessions, loueurs et gestionnaires de flotte.
+
+## Pages
+
+- [Accueil](/): Présentation du service et estimation de convoyage en ligne.
+- [Nos services](/services): Livraison, transferts inter-agences, rapatriement, partenariats.
+- [Tarifs & estimation](/tarifs): Grille tarifaire transparente, péages et carburant inclus.
+- [Comment ça marche](/comment-ca-marche): Déroulé d'une mission de convoyage, étape par étape.
+- [Solutions B2B](/pro): Offre pour concessions, loueurs et gestionnaires de flotte.
+- [Espace entreprises](/b2b): Partenariats flotte et transports ponctuels.
+- [Partenariat flotte](/b2b/partenariat-flotte): Contrats récurrents pour parcs de véhicules.
+- [Transport ponctuel](/b2b/transport-ponctuel): Missions à la demande pour professionnels.
+- [Développeurs](/developpeurs): API partenaires et webhooks.
+- [Actualités](/actualites): Articles sur le convoyage et la logistique automobile.
+- [Blog](/blog): Guides et conseils sur le transport de véhicules.
+- [À propos](/a-propos): L'entreprise, son implantation à Tours et ses engagements.
+- [Contact](/contact): Demande de devis et coordonnées.
+- [Suivi de mission](/suivi): Suivi public d'une mission via code confidentiel.
+- [Devenir convoyeur](/devenir-convoyeur): Rejoindre le réseau de convoyeurs.
+
+## Optional
+
+- [CGV](/cgv): Conditions générales de vente.
+- [Mentions légales](/mentions-legales): Informations légales de l'éditeur.
+- [Politique de confidentialité](/confidentialite): Traitement des données personnelles.
