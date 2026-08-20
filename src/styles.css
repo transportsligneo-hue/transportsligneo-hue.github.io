@@ -6684,13 +6684,21 @@ body.is-driver-app .ldock-dot {
     border-color: rgba(110, 255, 205, 0.35);
     color: #c8fff0;
   }
-  .auth-driver-theme .auth-link-lg:not(.is-gold) {
+  /* « Retour au site » reste bleu même en espace Driver. */
+  .auth-driver-theme .auth-link-lg.is-site-blue,
+  .auth-driver-theme .auth-link-lg.is-site-blue:hover {
+    color: #dbeafe;
+    background: linear-gradient(135deg, rgba(79,140,255,0.16), rgba(79,140,255,0.06));
+    border-color: rgba(79,140,255,0.35);
+    box-shadow: 0 8px 24px -12px rgba(79,140,255,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .auth-driver-theme .auth-link-lg:not(.is-gold):not(.is-site-blue) {
     color: #c8fff0;
     background: linear-gradient(135deg, rgba(110,255,205,0.14), rgba(110,255,205,0.05));
     border-color: rgba(110,255,205,0.28);
     box-shadow: 0 8px 24px -12px rgba(110,255,205,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
   }
-  .auth-driver-theme .auth-link-lg:not(.is-gold):hover {
+  .auth-driver-theme .auth-link-lg:not(.is-gold):not(.is-site-blue):hover {
     color: #ffffff;
     border-color: rgba(110,255,205,0.6);
     background: linear-gradient(135deg, rgba(110,255,205,0.26), rgba(110,255,205,0.12));

@@ -1,4 +1,5 @@
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import logoDriver from "@/assets/ligneo-driver-badge.png.asset.json";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   className?: string;
   /** Variante de couleur. Par défaut bleu néon électrique (site). */
   variant?: "blue" | "green";
+  /** Utilise le logo avec le bandeau DRIVER (espace convoyeur uniquement). */
+  driverBadge?: boolean;
 }
 
 const SIZES = {
@@ -22,7 +25,7 @@ const SIZES = {
  * badge véhicule doré + wordmark (TRANSPORTS blanc · LIGNEO bleu électrique)
  * + tag optionnel doré. Remplace l'icône seule partout (app driver, site, splash, login).
  */
-export default function LigneoLockup({ size = "md", tag = null, className = "", variant }: Props) {
+export default function LigneoLockup({ size = "md", tag = null, className = "", variant, driverBadge = false }: Props) {
   const s = SIZES[size];
   const isApp = useIsMobileAppShell();
   // Dans la coquille Capacitor (driver), le lockup passe en vert néon par défaut.
@@ -43,7 +46,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "", 
         }}
       >
         <img
-          src={logoLigneo}
+          src={driverBadge ? logoDriver.url : logoLigneo}
           alt="Transports Ligneo"
           width={s.badge}
           height={s.badge}

@@ -164,7 +164,7 @@ function LoginPage() {
 
 
   return (
-    <div className={`auth-shell flex items-center justify-center px-4 py-10 ${isMobileApp ? "auth-driver-theme" : ""}`}>
+    <div className={`auth-shell flex items-center justify-center px-4 py-10 ${isMobileApp || tab === "pro" ? "auth-driver-theme" : ""}`}>
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
           {tab === "pro" && (
@@ -173,7 +173,12 @@ function LoginPage() {
             </div>
           )}
           <Link to="/" className="inline-block mb-4 relative auth-logo-pulse">
-            <LigneoLockup size="lg" variant={isMobileApp ? "green" : "blue"} className="justify-center relative z-10" />
+            <LigneoLockup
+              size="lg"
+              variant={isMobileApp || tab === "pro" ? "green" : "blue"}
+              driverBadge={isMobileApp || tab === "pro"}
+              className="justify-center relative z-10"
+            />
           </Link>
           <h1 className="auth-title text-2xl md:text-3xl">Connexion <span className="auth-accent">sécurisée</span></h1>
           <p className="auth-subtle text-sm mt-1.5">Accédez à votre espace en un clic</p>
@@ -293,7 +298,7 @@ function LoginPage() {
 
         <div className="flex flex-col items-center gap-3 mt-6">
           {!isMobileApp && (
-            <Link to="/" className="auth-link-lg">
+            <Link to="/" className="auth-link-lg is-site-blue">
               <ArrowRight size={14} className="arrow-back rotate-180" />
               Retour au site
             </Link>
