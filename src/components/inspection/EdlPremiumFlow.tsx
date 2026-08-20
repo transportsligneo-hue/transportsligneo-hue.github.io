@@ -230,7 +230,11 @@ export function EdlPremiumFlow({
 
   // Électrique OU hybride rechargeable (PHEV). Un simple "hybride" (non
   // rechargeable) n'a pas de câble et ne déclenche donc pas l'étape.
-  const isElectric = isElectricEnergie(vehicleCarburant);
+  // Fallback marque/modèle depuis les infos véhicule déjà affichées (Tesla, Zoé…)
+  // pour ne jamais rater le câble de recharge si le champ carburant est vide.
+  const isElectric =
+    isElectricEnergie(vehicleCarburant) ||
+    guessElectricFromModel(vehicule?.marque, vehicule?.modele);
 
   const STEPS = useMemo(() => {
     // DÉPART : toutes les étapes EDL sauf le selfie initial (géré par cockpit).
