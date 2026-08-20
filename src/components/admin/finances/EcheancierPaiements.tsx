@@ -115,7 +115,9 @@ export function EcheancierPaiements() {
         )
         .order("date_mission", { ascending: false })
         .limit(2000),
-      supabase.from("convoyeurs").select("id, nom, prenom, photo_url, delai_paiement_defaut"),
+      supabase
+        .from("convoyeurs")
+        .select("id, nom, prenom, email, telephone, ville, statut, niveau, delai_paiement_defaut"),
     ]);
     const list = (rRes.data ?? []) as unknown as RemuRow[];
     setRemus(list);
