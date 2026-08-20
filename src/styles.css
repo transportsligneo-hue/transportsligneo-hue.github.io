@@ -3450,6 +3450,112 @@ body.is-driver-app .closed-link svg {
     z-index: -1; opacity: 0.55; pointer-events: none;
   }
 
+  /* ============================================================
+     TLN · Barre de navigation flottante (desktop ≥1536px)
+     Capsule verre + filet dégradé animé + sheen dynamique
+     ============================================================ */
+  .tln-shell {
+    padding: 16px 26px 0;
+    transition: padding .45s cubic-bezier(.22,1,.36,1);
+    pointer-events: none;
+  }
+  .tln-shell.is-scrolled { padding-top: 8px; }
+
+  .tln-bar {
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+    max-width: 1840px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 14px 9px 18px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(90deg, rgba(9,17,46,0.92), rgba(14,32,96,0.86) 50%, rgba(9,17,46,0.92)) padding-box,
+      linear-gradient(120deg, rgba(217,181,74,0.45), rgba(79,140,255,0.55) 35%, rgba(122,163,255,0.15) 60%, rgba(217,181,74,0.4)) border-box;
+    background-size: 100% 100%, 240% 240%;
+    -webkit-backdrop-filter: blur(20px) saturate(165%);
+    backdrop-filter: blur(20px) saturate(165%);
+    box-shadow:
+      0 18px 50px -22px rgba(0,0,0,0.85),
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 0 34px -14px rgba(47,95,255,0.6);
+    animation: tlnBorderDrift 9s ease-in-out infinite;
+    transition: padding .45s cubic-bezier(.22,1,.36,1), box-shadow .4s ease, transform .45s cubic-bezier(.22,1,.36,1);
+  }
+  .tln-shell.is-scrolled .tln-bar {
+    padding: 5px 12px 5px 15px;
+    box-shadow:
+      0 22px 60px -26px rgba(0,0,0,0.95),
+      0 0 0 1px rgba(255,255,255,0.05) inset,
+      0 0 44px -14px rgba(47,95,255,0.75);
+  }
+  @keyframes tlnBorderDrift {
+    0%,100% { background-position: 0 0, 0% 50%; }
+    50%     { background-position: 0 0, 100% 50%; }
+  }
+
+  /* Reflet qui balaye la barre */
+  .tln-sheen {
+    position: absolute; top: 0; bottom: 0; left: -35%; width: 26%;
+    background: linear-gradient(115deg, transparent, rgba(160,200,255,0.14), transparent);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    animation: tlnSheen 7.5s ease-in-out infinite;
+  }
+  @keyframes tlnSheen { 0% { left: -35%; } 55%,100% { left: 125%; } }
+
+  .tln-brand {
+    flex-shrink: 0; display: flex; align-items: center;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), filter .35s ease;
+  }
+  .tln-brand:hover { transform: translateY(-1px) scale(1.02); filter: drop-shadow(0 0 14px rgba(79,140,255,0.55)); }
+  .tln-shell.is-scrolled .tln-brand { transform: scale(0.92); }
+
+  .tln-sep {
+    flex-shrink: 0; width: 1px; height: 26px;
+    background: linear-gradient(180deg, transparent, rgba(122,163,255,0.42), transparent);
+  }
+
+  .tln-links {
+    flex: 1 1 auto; min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 2px; margin: 0; padding: 0; list-style: none;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tln-links::-webkit-scrollbar { display: none; }
+  .tln-links > li { list-style: none; display: flex; }
+  .tln-links > li::marker { content: none; }
+
+  .tln-bar .r4-nav-link {
+    min-height: 36px; padding: 0 11px;
+    font-size: 12.4px; font-weight: 600; letter-spacing: 0.012em;
+  }
+  .tln-bar .r4-nav-link.is-active {
+    box-shadow: 0 4px 14px rgba(47,95,255,0.45), 0 0 18px rgba(79,140,255,0.4);
+  }
+  .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 32px; font-size: 12px; }
+
+  .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
+  .tln-bar .tln-phone { padding: 5px 12px 5px 6px; }
+  .tln-bar .tln-connect { min-height: 38px; padding: 0 15px; font-size: 12px; }
+  .tln-shell.is-scrolled .tln-bar .tln-connect { min-height: 34px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tln-bar, .tln-sheen { animation: none; }
+  }
+
+  html.theme-light .tln-bar {
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.94), rgba(244,247,255,0.9) 50%, rgba(255,255,255,0.94)) padding-box,
+      linear-gradient(120deg, rgba(217,181,74,0.5), rgba(47,95,255,0.45), rgba(217,181,74,0.5)) border-box;
+    box-shadow: 0 18px 44px -26px rgba(20,40,90,0.45), 0 0 0 1px rgba(255,255,255,0.7) inset;
+  }
+
+
 
   /* Glass card générique */
   .r4-glass {
