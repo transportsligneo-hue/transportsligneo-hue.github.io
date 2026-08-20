@@ -625,16 +625,20 @@ function ReglagesTab({
 
   async function savePenalite() {
     if (!pf.libelle.trim()) return toast.error("Libellé requis");
-    const { error } = await supabase.from("catalogue_penalites").insert({
+    const payload = {
       libelle: pf.libelle.trim(),
       type_montant: pf.type_montant,
-      valeur: Number(pf.valeur.replace(",", ".") || 0),
+      valeur: Number(String(pf.valeur).replace(",", ".") || 0),
       article_reference: pf.article_reference.trim() || null,
       description: pf.description.trim() || null,
-    });
+    };
+    const { error } = pf.id
+      ? await supabase.from("catalogue_penalites").update(payload).eq("id", pf.id)
+      : await supabase.from("catalogue_penalites").insert(payload);
     if (error) return toast.error(error.message);
-    toast.success("Pénalité ajoutée au catalogue");
+    toast.success(pf.id ? "Pénalité mise à jour" : "Pénalité ajoutée au catalogue");
     setOpenPen(false);
+    setPf(emptyPf);
     onChanged();
   }
 
