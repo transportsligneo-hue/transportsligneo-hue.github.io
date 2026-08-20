@@ -119,10 +119,17 @@ function splitAddress(addr: string): { street: string; city: string } {
 
 function isTruthy(v: unknown): boolean {
   if (v === true) return true;
-  if (typeof v === "string") return ["true", "oui", "yes", "ok", "présent", "present"].includes(v.toLowerCase());
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    // Valeurs négatives explicites
+    if (["", "false", "non", "no", "aucun", "absent", "absente", "0", "ko", "null"].includes(s)) return false;
+    // Valeurs positives connues + variantes métier (roue : "secours" / "kit")
+    return true;
+  }
   if (typeof v === "number") return v > 0;
   return false;
 }
+
 
 async function toDataUrl(url: string): Promise<string | null> {
   try {
