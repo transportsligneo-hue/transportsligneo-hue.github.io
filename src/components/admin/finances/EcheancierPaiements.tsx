@@ -89,6 +89,29 @@ function ville(v: string | null) {
   return parts[parts.length - 1] || v;
 }
 
+/** Séquence formatée : 142 → "#142", 1042 → "#1042" (le dièse remplace le zéro de tête). */
+export function formatVirSeq(n: number): string {
+  const s = String(n).padStart(4, "0");
+  return s.startsWith("0") ? `#${s.slice(1)}` : `#${s}`;
+}
+
+/** Référence virement : VIR-2026-#142 */
+export function buildVirementRef(year: number, seq: number): string {
+  return `VIR-${year}-${formatVirSeq(seq)}`;
+}
+
+/** Dernière séquence utilisée sur l'année en cours. */
+export function lastVirementSeq(refs: (string | null | undefined)[], year: number): number {
+  let max = 0;
+  const re = new RegExp(`^VIR-${year}-#?0*(\\d+)$`, "i");
+  for (const r of refs) {
+    const m = (r ?? "").trim().match(re);
+    if (m) max = Math.max(max, parseInt(m[1]!, 10));
+  }
+  return max;
+}
+
+
 /* ---------- Composant principal ---------- */
 
 export function EcheancierPaiements() {
@@ -104,6 +127,15 @@ export function EcheancierPaiements() {
   const [to, setTo] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [payModal, setPayModal] = useState<RemuRow | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchOpen, setBatchOpen] = useState(false);
+
+  const year = new Date().getFullYear();
+  const nextSeq = useMemo(
+    () => lastVirementSeq(remus.map((r) => r.paiement_reference), year) + 1,
+    [remus, year],
+  );
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -167,6 +199,44 @@ export function EcheancierPaiements() {
     }
 
   }
+
+  /* ---------- Paiement groupé (plusieurs virements d'un coup) ---------- */
+  async function payBatch(rows: RemuRow[], note: string | null, startSeq: number) {
+    const now = new Date().toISOString();
+    let seq = startSeq;
+    const updates = rows.map((r) => ({ row: r, ref: buildVirementRef(year, seq++) }));
+    for (const u of updates) {
+      const { error } = await supabase
+        .from("remunerations_missions")
+        .update({
+          paye_manuellement: true,
+          paye_at: now,
+          paiement_reference: u.ref,
+          paiement_note: note,
+        } as never)
+        .eq("id", u.row.id);
+      if (error) {
+        toast.error(error.message);
+        await load();
+        return;
+      }
+    }
+    setRemus((prev) =>
+      prev.map((r) => {
+        const u = updates.find((x) => x.row.id === r.id);
+        return u
+          ? { ...r, paye_manuellement: true, paye_at: now, paiement_reference: u.ref, paiement_note: note }
+          : r;
+      }),
+    );
+    setSelected(new Set());
+    setBatchOpen(false);
+    toast.success(`${updates.length} paiement(s) enregistré(s)`, {
+      description: `${updates[0]?.ref} → ${updates[updates.length - 1]?.ref}`,
+    });
+  }
+
+
 
   /* ---------- Filtres ---------- */
   const q = search.trim().toLowerCase();
@@ -356,9 +426,31 @@ export function EcheancierPaiements() {
                 <div className="border-t border-pro-border">
                   <Table>
                     <THead>
+                      <TH>
+                        <input
+                          type="checkbox"
+                          className="accent-pro-accent"
+                          title="Tout sélectionner"
+                          checked={
+                            g.rows.filter((r) => echeanceStatut(r) !== "paye").length > 0 &&
+                            g.rows.filter((r) => echeanceStatut(r) !== "paye").every((r) => selected.has(r.id))
+                          }
+                          onChange={(e) =>
+                            setSelected((prev) => {
+                              const n = new Set(prev);
+                              for (const r of g.rows) {
+                                if (echeanceStatut(r) === "paye") continue;
+                                e.target.checked ? n.add(r.id) : n.delete(r.id);
+                              }
+                              return n;
+                            })
+                          }
+                        />
+                      </TH>
                       <TH>Mission</TH><TH>Trajet</TH><TH>Dates</TH><TH>Montant</TH>
                       <TH>Délai</TH><TH>Échéance</TH><TH>Statut</TH><TH>Payé le</TH><TH>Actions</TH>
                     </THead>
+
                     <tbody>
                       {g.rows.map((r) => {
                         const st = echeanceStatut(r);
@@ -374,6 +466,21 @@ export function EcheancierPaiements() {
                                   : ""
                             }
                           >
+                            <TD>
+                              <input
+                                type="checkbox"
+                                className="accent-pro-accent"
+                                disabled={st === "paye"}
+                                checked={selected.has(r.id)}
+                                onChange={(e) =>
+                                  setSelected((prev) => {
+                                    const n = new Set(prev);
+                                    e.target.checked ? n.add(r.id) : n.delete(r.id);
+                                    return n;
+                                  })
+                                }
+                              />
+                            </TD>
                             <TD>
                               <div className="flex items-center gap-2">
                                 {r.urgent && st !== "paye" && (
@@ -464,9 +571,28 @@ export function EcheancierPaiements() {
         })
       )}
 
+      {/* Barre de sélection multiple */}
+      {selected.size > 0 && (
+        <div className="sticky bottom-4 z-30 flex flex-wrap items-center gap-3 rounded-2xl border border-pro-border bg-white/95 backdrop-blur px-4 py-3 shadow-lg">
+          <span className="text-sm font-semibold text-pro-text">
+            {selected.size} mission(s) sélectionnée(s) — {eur(remus.filter((r) => selected.has(r.id)).reduce((s, r) => s + Number(r.montant_total), 0))}
+          </span>
+          <span className="text-xs text-pro-muted">
+            Références : {buildVirementRef(year, nextSeq)} → {buildVirementRef(year, nextSeq + selected.size - 1)}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => setSelected(new Set())}>Annuler</Button>
+            <Button size="sm" onClick={() => setBatchOpen(true)}>
+              <CheckCircle2 size={14} /> Marquer payé
+            </Button>
+          </div>
+        </div>
+      )}
+
       {payModal && (
         <PaiementManuelModal
           row={payModal}
+          defaultRef={payModal.paiement_reference ?? buildVirementRef(year, nextSeq)}
           onClose={() => setPayModal(null)}
           onConfirm={async (values) => {
             await patch(payModal, { paye_manuellement: true, paye_at: new Date().toISOString(), ...values });
@@ -475,22 +601,90 @@ export function EcheancierPaiements() {
           }}
         />
       )}
+
+      {batchOpen && (
+        <PaiementGroupeModal
+          rows={sortRows(remus.filter((r) => selected.has(r.id)))}
+          firstRef={buildVirementRef(year, nextSeq)}
+          lastRef={buildVirementRef(year, nextSeq + selected.size - 1)}
+          convName={convName}
+          onClose={() => setBatchOpen(false)}
+          onConfirm={(note) => payBatch(sortRows(remus.filter((r) => selected.has(r.id))), note, nextSeq)}
+        />
+      )}
     </div>
   );
 }
+
+/* ---------- Modal de paiement groupé ---------- */
+
+function PaiementGroupeModal({
+  rows, firstRef, lastRef, convName, onClose, onConfirm,
+}: {
+  rows: RemuRow[];
+  firstRef: string;
+  lastRef: string;
+  convName: (id: string | null) => string;
+  onClose: () => void;
+  onConfirm: (note: string | null) => Promise<void>;
+}) {
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const total = rows.reduce((s, r) => s + Number(r.montant_total), 0);
+
+  return (
+    <Modal open onClose={onClose} title={`Paiement groupé — ${rows.length} mission(s)`}>
+      <div className="space-y-4">
+        <p className="text-sm text-pro-text-soft">
+          Total réglé : <b className="text-pro-text">{eur(total)}</b> — références générées automatiquement
+          {" "}<b className="text-pro-text">{firstRef}</b> → <b className="text-pro-text">{lastRef}</b>.
+        </p>
+        <div className="max-h-52 overflow-y-auto rounded-xl border border-pro-border divide-y divide-pro-border">
+          {rows.map((r) => (
+            <div key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
+              <span className="font-medium text-pro-text">{r.numero_mission ?? "—"}</span>
+              <span className="text-pro-muted truncate">{convName(r.convoyeur_id)}</span>
+              <span className="font-semibold whitespace-nowrap">{eur(Number(r.montant_total))}</span>
+            </div>
+          ))}
+        </div>
+        <FormField label="Note commune (moyen de paiement, commentaire)">
+          <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder="Virement SEPA groupé — banque X" />
+        </FormField>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>Annuler</Button>
+          <Button
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              await onConfirm(note.trim() || null);
+              setBusy(false);
+            }}
+          >
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Confirmer {rows.length} paiement(s)
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 
 /* ---------- Modal de validation manuelle ---------- */
 
 function PaiementManuelModal({
   row,
+  defaultRef,
   onClose,
   onConfirm,
 }: {
   row: RemuRow;
+  defaultRef: string;
   onClose: () => void;
   onConfirm: (values: { paiement_reference: string | null; paiement_note: string | null }) => Promise<void>;
 }) {
-  const [ref, setRef] = useState(row.paiement_reference ?? "");
+  const [ref, setRef] = useState(row.paiement_reference ?? defaultRef);
+
   const [note, setNote] = useState(row.paiement_note ?? "");
   const [busy, setBusy] = useState(false);
 
