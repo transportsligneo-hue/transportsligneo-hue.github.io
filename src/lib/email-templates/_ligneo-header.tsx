@@ -1,5 +1,10 @@
 import * as React from 'react'
-import { LIGNEO_BRAND_BANNER_URL } from '@/lib/brand-assets'
+import {
+  LIGNEO_BRAND_BANNER_URL,
+  LIGNEO_GOOGLE_REVIEW_URL,
+  LIGNEO_LOGO_SQUARE_URL,
+  LIGNEO_QR_AVIS_GOOGLE_URL,
+} from '@/lib/brand-assets'
 import {
   Body,
   Button,
@@ -676,3 +681,68 @@ export function AmountRow({ label = 'Montant TTC', amount }: { label?: string; a
 }
 
 void brandCell
+
+// ---------- Bloc "Avis Google" (pied de page emails clients) ----------
+
+export function GoogleReviewBlock({ url }: { url?: string }) {
+  const href = url || LIGNEO_GOOGLE_REVIEW_URL
+  return (
+    <Section style={{ padding: '0 28px' }}>
+      <Hr style={{ borderColor: BORDER, borderWidth: '1px 0 0', margin: '4px 0 14px' }} />
+      <table
+        role="presentation"
+        cellPadding={0}
+        cellSpacing={0}
+        width="100%"
+        style={{ backgroundColor: '#ffffff', borderCollapse: 'collapse' }}
+      >
+        <tbody>
+          <tr>
+            <td width="46" style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <img
+                src={LIGNEO_LOGO_SQUARE_URL}
+                width="46"
+                height="46"
+                alt="Transports Ligneo"
+                style={{ display: 'block', width: '46px', height: '46px', borderRadius: '10px', border: 0 }}
+              />
+            </td>
+            <td style={{ verticalAlign: 'middle' }}>
+              <p
+                style={{
+                  margin: '0 0 4px',
+                  fontFamily: FONT_STACK_HEAD,
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#2f5fff',
+                  textShadow: '0 0 10px rgba(79,140,255,0.45)',
+                }}
+              >
+                Votre avis compte pour nous
+              </p>
+              <p style={{ margin: 0, fontFamily: FONT_STACK_BODY, fontSize: '12px', lineHeight: '18px', color: TEXT_MUTED }}>
+                Scannez ce code ou{' '}
+                <a href={href} style={{ color: '#4f8cff', textDecoration: 'underline' }}>
+                  cliquez ici
+                </a>{' '}
+                pour laisser un avis Google. Ça prend 30 secondes.
+              </p>
+            </td>
+            <td width="110" style={{ verticalAlign: 'middle', paddingLeft: '12px', textAlign: 'right' }}>
+              {/* Emplacement QR code — remplacer LIGNEO_QR_AVIS_GOOGLE_URL pour changer l'image */}
+              <a href={href}>
+                <img
+                  src={LIGNEO_QR_AVIS_GOOGLE_URL}
+                  width="110"
+                  height="110"
+                  alt="QR code avis Google Transports Ligneo"
+                  style={{ display: 'block', width: '110px', height: '110px', maxWidth: '110px', border: 0, borderRadius: '8px' }}
+                />
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Section>
+  )
+}
