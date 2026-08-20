@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  // bannière image conservée pour compat (non utilisée : images souvent bloquées)
+  LIGNEO_BRAND_BANNER_URL,
   LIGNEO_GOOGLE_REVIEW_URL,
   LIGNEO_LOGO_SQUARE_URL,
   LIGNEO_QR_AVIS_GOOGLE_URL,
@@ -126,10 +126,15 @@ export function LigneoEmailShell({
       <Body style={bodyStyle}>
         <Container style={outerContainer}>
           <Section style={card}>
-            {/* En-tête de marque — HTML pur : s'affiche même si les images
-                sont bloquées (IONOS, Outlook, Gmail mode "images masquées"). */}
-            <BrandHeaderBlock />
-
+            {/* En-tête de marque officiel — bannière unique, jamais recréée en CSS */}
+            <Section style={headerSection}>
+              <img
+                src={LIGNEO_BRAND_BANNER_URL}
+                width="600"
+                alt="Transports Ligneo"
+                style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }}
+              />
+            </Section>
 
 
             {clientLogoUrl || clientName || themeChip ? (
@@ -299,10 +304,15 @@ export function BrandHeaderBlock() {
 
 export function LigneoEmailHeader({ tagline }: { tagline?: string }) {
   return (
-    <>
-      <BrandHeaderBlock />
+    <Section style={headerSection}>
+      <img
+        src={LIGNEO_BRAND_BANNER_URL}
+        width="600"
+        alt="Transports Ligneo"
+        style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }}
+      />
       {tagline ? <Text style={{ ...eyebrowStyle, padding: '10px 32px 0' }}>{tagline}</Text> : null}
-    </>
+    </Section>
   )
 }
 
