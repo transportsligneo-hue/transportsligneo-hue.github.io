@@ -575,7 +575,33 @@ function ReglagesTab({
   const [openRegle, setOpenRegle] = useState(false);
   const [openPen, setOpenPen] = useState(false);
   const [rf, setRf] = useState({ libelle: "", type_regle: "forfait_km", montant_forfait: "", taux_km: "", seuil_km: "", montant_min: "", cond_type_mission: "", priorite: "0", date_debut: new Date().toISOString().slice(0, 10) });
-  const [pf, setPf] = useState({ libelle: "", type_montant: "forfait", valeur: "", article_reference: "", description: "" });
+  const emptyPf = { id: "", libelle: "", type_montant: "forfait", valeur: "", article_reference: "", description: "" };
+  const [pf, setPf] = useState(emptyPf);
+
+  function openNewPenalite() {
+    setPf(emptyPf);
+    setOpenPen(true);
+  }
+
+  function openEditPenalite(p: CatalogPenalite) {
+    setPf({
+      id: p.id,
+      libelle: p.libelle,
+      type_montant: p.type_montant,
+      valeur: String(p.valeur ?? ""),
+      article_reference: p.article_reference ?? "",
+      description: p.description ?? "",
+    });
+    setOpenPen(true);
+  }
+
+  async function deletePenalite(p: CatalogPenalite) {
+    if (!window.confirm(`Supprimer définitivement la pénalité « ${p.libelle} » ?`)) return;
+    const { error } = await supabase.from("catalogue_penalites").delete().eq("id", p.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pénalité supprimée");
+    onChanged();
+  }
 
   async function saveRegle() {
     if (!rf.libelle.trim()) return toast.error("Libellé requis");
