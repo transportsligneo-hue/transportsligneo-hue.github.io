@@ -100,6 +100,8 @@ export function LigneoEmailShell({
   accountTheme,
   taglineTone,
   footnote,
+  googleReview,
+
 }: LigneoEmailShellProps) {
   const themeChip =
     accountTheme === 'flotte'
