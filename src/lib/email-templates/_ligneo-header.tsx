@@ -79,6 +79,9 @@ export interface LigneoEmailShellProps {
   taglineTone?: 'blue' | 'warn'
   /** Petit texte discret affiché sous les CTA (mentions, sécurité). */
   footnote?: React.ReactNode
+  /** Affiche le bloc "Avis Google" au-dessus du pied de page. `true` = lien par défaut, ou URL personnalisée. */
+  googleReview?: boolean | string | null
+
 }
 
 export function LigneoEmailShell({
