@@ -571,9 +571,28 @@ export function EcheancierPaiements() {
         })
       )}
 
+      {/* Barre de sélection multiple */}
+      {selected.size > 0 && (
+        <div className="sticky bottom-4 z-30 flex flex-wrap items-center gap-3 rounded-2xl border border-pro-border bg-white/95 backdrop-blur px-4 py-3 shadow-lg">
+          <span className="text-sm font-semibold text-pro-text">
+            {selected.size} mission(s) sélectionnée(s) — {eur(remus.filter((r) => selected.has(r.id)).reduce((s, r) => s + Number(r.montant_total), 0))}
+          </span>
+          <span className="text-xs text-pro-muted">
+            Références : {buildVirementRef(year, nextSeq)} → {buildVirementRef(year, nextSeq + selected.size - 1)}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => setSelected(new Set())}>Annuler</Button>
+            <Button size="sm" onClick={() => setBatchOpen(true)}>
+              <CheckCircle2 size={14} /> Marquer payé
+            </Button>
+          </div>
+        </div>
+      )}
+
       {payModal && (
         <PaiementManuelModal
           row={payModal}
+          defaultRef={payModal.paiement_reference ?? buildVirementRef(year, nextSeq)}
           onClose={() => setPayModal(null)}
           onConfirm={async (values) => {
             await patch(payModal, { paye_manuellement: true, paye_at: new Date().toISOString(), ...values });
@@ -582,9 +601,74 @@ export function EcheancierPaiements() {
           }}
         />
       )}
+
+      {batchOpen && (
+        <PaiementGroupeModal
+          rows={sortRows(remus.filter((r) => selected.has(r.id)))}
+          firstRef={buildVirementRef(year, nextSeq)}
+          lastRef={buildVirementRef(year, nextSeq + selected.size - 1)}
+          convName={convName}
+          onClose={() => setBatchOpen(false)}
+          onConfirm={(note) => payBatch(sortRows(remus.filter((r) => selected.has(r.id))), note, nextSeq)}
+        />
+      )}
     </div>
   );
 }
+
+/* ---------- Modal de paiement groupé ---------- */
+
+function PaiementGroupeModal({
+  rows, firstRef, lastRef, convName, onClose, onConfirm,
+}: {
+  rows: RemuRow[];
+  firstRef: string;
+  lastRef: string;
+  convName: (id: string | null) => string;
+  onClose: () => void;
+  onConfirm: (note: string | null) => Promise<void>;
+}) {
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const total = rows.reduce((s, r) => s + Number(r.montant_total), 0);
+
+  return (
+    <Modal open onClose={onClose} title={`Paiement groupé — ${rows.length} mission(s)`}>
+      <div className="space-y-4">
+        <p className="text-sm text-pro-text-soft">
+          Total réglé : <b className="text-pro-text">{eur(total)}</b> — références générées automatiquement
+          {" "}<b className="text-pro-text">{firstRef}</b> → <b className="text-pro-text">{lastRef}</b>.
+        </p>
+        <div className="max-h-52 overflow-y-auto rounded-xl border border-pro-border divide-y divide-pro-border">
+          {rows.map((r) => (
+            <div key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
+              <span className="font-medium text-pro-text">{r.numero_mission ?? "—"}</span>
+              <span className="text-pro-muted truncate">{convName(r.convoyeur_id)}</span>
+              <span className="font-semibold whitespace-nowrap">{eur(Number(r.montant_total))}</span>
+            </div>
+          ))}
+        </div>
+        <FormField label="Note commune (moyen de paiement, commentaire)">
+          <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder="Virement SEPA groupé — banque X" />
+        </FormField>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>Annuler</Button>
+          <Button
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              await onConfirm(note.trim() || null);
+              setBusy(false);
+            }}
+          >
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Confirmer {rows.length} paiement(s)
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 
 /* ---------- Modal de validation manuelle ---------- */
 
