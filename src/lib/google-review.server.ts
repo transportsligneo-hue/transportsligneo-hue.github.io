@@ -282,7 +282,8 @@ export async function sendGoogleReviewRequestServer(params: {
 
   const channel = params.channel ?? settings.channel ?? 'email'
 
-  const result: SendReviewResult = { ok: false, channel }
+  const result: SendReviewResult = { ok: false, channel, results: [] }
+  const errors: string[] = []
 
   if (channel === 'email' || channel === 'email+sms') {
     const emailRes = await sendReviewEmail({
@@ -293,34 +294,28 @@ export async function sendGoogleReviewRequestServer(params: {
       settings,
       auto: params.auto,
     })
+    await recordReviewRequest({
+      attribution,
+      trajet,
+      recipientType: params.recipientType,
+      recipient,
+      channel: 'email',
+      status: emailRes.success ? 'sent' : 'failed',
+      errorMessage: emailRes.reason ?? null,
+      auto: params.auto,
+      actorUserId: params.actorUserId,
+      actorLabel: params.actorLabel,
+    })
+    result.results!.push({
+      channel: 'email',
+      ok: emailRes.success,
+      error: emailRes.success ? undefined : (emailRes.reason ?? "Échec de l'envoi email."),
+    })
     if (emailRes.success) {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'email',
-        status: 'sent',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
       result.ok = true
       result.recipientEmail = recipient.email ?? undefined
-    } else if (channel === 'email') {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'email',
-        status: 'failed',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
-      result.error = emailRes.reason ?? "Échec de l'envoi email."
-      return result
+    } else {
+      errors.push(`Email : ${emailRes.reason ?? 'échec.'}`)
     }
   }
 
@@ -331,40 +326,36 @@ export async function sendGoogleReviewRequestServer(params: {
       convoyeurLabel,
       settings,
     })
+    await recordReviewRequest({
+      attribution,
+      trajet,
+      recipientType: params.recipientType,
+      recipient,
+      channel: 'sms',
+      status: smsRes.success ? 'sent' : 'failed',
+      errorMessage: smsRes.reason ?? null,
+      auto: params.auto,
+      actorUserId: params.actorUserId,
+      actorLabel: params.actorLabel,
+    })
+    result.results!.push({
+      channel: 'sms',
+      ok: smsRes.success,
+      error: smsRes.success ? undefined : (smsRes.reason ?? "Échec de l'envoi SMS."),
+    })
     if (smsRes.success) {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'sms',
-        status: 'sent',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
       result.ok = true
       result.recipientPhone = recipient.phone ?? undefined
-      await bumpSmsCounter()
-    } else if (channel === 'sms') {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'sms',
-        status: 'failed',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
-      result.error = smsRes.reason ?? "Échec de l'envoi SMS."
-      return result
+      await bumpSmsCounter().catch(() => undefined)
+    } else {
+      errors.push(`SMS : ${smsRes.reason ?? 'échec.'}`)
     }
   }
 
+  if (errors.length) result.error = errors.join(' · ')
   return result
 }
+
 
 async function bumpSmsCounter() {
   const month = new Date().toISOString().slice(0, 7)
