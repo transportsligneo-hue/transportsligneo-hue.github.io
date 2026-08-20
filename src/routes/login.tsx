@@ -119,7 +119,7 @@ function LoginPage() {
         setError("Vérification de sécurité refusée. Si le problème persiste, contactez-nous.");
         return;
       }
-      await login(email.trim(), password);
+      await login(emailValue, passwordValue);
     } catch (err: unknown) {
       justLoggedInRef.current = false;
       const msg = err instanceof Error ? err.message : "Erreur de connexion";
