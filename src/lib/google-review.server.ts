@@ -59,7 +59,10 @@ export interface SendReviewResult {
   recipientEmail?: string
   recipientPhone?: string
   channel?: ReviewChannel
+  /** Détail par canal (email / sms) pour l'affichage admin. */
+  results?: Array<{ channel: 'email' | 'sms'; ok: boolean; error?: string }>
 }
+
 
 interface RecipientInfo {
   email: string | null
