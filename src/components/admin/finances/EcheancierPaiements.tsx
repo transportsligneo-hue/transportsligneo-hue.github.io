@@ -127,6 +127,15 @@ export function EcheancierPaiements() {
   const [to, setTo] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [payModal, setPayModal] = useState<RemuRow | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchOpen, setBatchOpen] = useState(false);
+
+  const year = new Date().getFullYear();
+  const nextSeq = useMemo(
+    () => lastVirementSeq(remus.map((r) => r.paiement_reference), year) + 1,
+    [remus, year],
+  );
+
 
   const load = useCallback(async () => {
     setLoading(true);
