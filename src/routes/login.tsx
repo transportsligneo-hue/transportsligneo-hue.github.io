@@ -259,7 +259,10 @@ function LoginPage() {
               <input
                 type="email"
                 value={email}
+                ref={emailInputRef}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={() => { userTypedRef.current = true; }}
+
                 required
                 autoComplete="email"
                 disabled={loading}
