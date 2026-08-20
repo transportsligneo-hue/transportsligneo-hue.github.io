@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, Wallet, Users, AlertTriangle, CalendarClock, FileDown, Banknote,
-  Gavel, Settings2, Plus, Check, X, Search,
+  Gavel, Settings2, Plus, Check, X, Search, Pencil, Trash2,
 } from "lucide-react";
 import {
   PageHeader, Card, KpiCard, Badge, Button, EmptyState, Select, SearchInput,
@@ -575,7 +575,33 @@ function ReglagesTab({
   const [openRegle, setOpenRegle] = useState(false);
   const [openPen, setOpenPen] = useState(false);
   const [rf, setRf] = useState({ libelle: "", type_regle: "forfait_km", montant_forfait: "", taux_km: "", seuil_km: "", montant_min: "", cond_type_mission: "", priorite: "0", date_debut: new Date().toISOString().slice(0, 10) });
-  const [pf, setPf] = useState({ libelle: "", type_montant: "forfait", valeur: "", article_reference: "", description: "" });
+  const emptyPf = { id: "", libelle: "", type_montant: "forfait", valeur: "", article_reference: "", description: "" };
+  const [pf, setPf] = useState(emptyPf);
+
+  function openNewPenalite() {
+    setPf(emptyPf);
+    setOpenPen(true);
+  }
+
+  function openEditPenalite(p: CatalogPenalite) {
+    setPf({
+      id: p.id,
+      libelle: p.libelle,
+      type_montant: p.type_montant,
+      valeur: String(p.valeur ?? ""),
+      article_reference: p.article_reference ?? "",
+      description: p.description ?? "",
+    });
+    setOpenPen(true);
+  }
+
+  async function deletePenalite(p: CatalogPenalite) {
+    if (!window.confirm(`Supprimer définitivement la pénalité « ${p.libelle} » ?`)) return;
+    const { error } = await supabase.from("catalogue_penalites").delete().eq("id", p.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pénalité supprimée");
+    onChanged();
+  }
 
   async function saveRegle() {
     if (!rf.libelle.trim()) return toast.error("Libellé requis");
@@ -599,16 +625,20 @@ function ReglagesTab({
 
   async function savePenalite() {
     if (!pf.libelle.trim()) return toast.error("Libellé requis");
-    const { error } = await supabase.from("catalogue_penalites").insert({
+    const payload = {
       libelle: pf.libelle.trim(),
       type_montant: pf.type_montant,
-      valeur: Number(pf.valeur.replace(",", ".") || 0),
+      valeur: Number(String(pf.valeur).replace(",", ".") || 0),
       article_reference: pf.article_reference.trim() || null,
       description: pf.description.trim() || null,
-    });
+    };
+    const { error } = pf.id
+      ? await supabase.from("catalogue_penalites").update(payload).eq("id", pf.id)
+      : await supabase.from("catalogue_penalites").insert(payload);
     if (error) return toast.error(error.message);
-    toast.success("Pénalité ajoutée au catalogue");
+    toast.success(pf.id ? "Pénalité mise à jour" : "Pénalité ajoutée au catalogue");
     setOpenPen(false);
+    setPf(emptyPf);
     onChanged();
   }
 
@@ -667,25 +697,40 @@ function ReglagesTab({
           <h3 className="text-sm font-semibold text-pro-text flex items-center gap-2">
             <Gavel size={15} /> Catalogue de pénalités
           </h3>
-          <Button size="sm" onClick={() => setOpenPen(true)}><Plus size={13} /> Nouvelle pénalité</Button>
+          <Button size="sm" onClick={openNewPenalite}><Plus size={13} /> Nouvelle pénalité</Button>
         </div>
+        {penalites.length === 0 ? (
+          <EmptyState title="Catalogue vide" description="Ajoutez vos pénalités contractuelles pour les appliquer aux rémunérations." />
+        ) : (
         <Table>
-          <THead><TH>Libellé</TH><TH>Montant</TH><TH>Article de référence</TH><TH>État</TH></THead>
+          <THead><TH>Libellé</TH><TH>Montant</TH><TH>Article de référence</TH><TH>Description</TH><TH>État</TH><TH>Actions</TH></THead>
           <tbody>
             {penalites.map((p) => (
               <TR key={p.id}>
                 <TD>{p.libelle}</TD>
                 <TD>{p.type_montant === "pourcentage" ? `${p.valeur} %` : eur(p.valeur)}</TD>
                 <TD className="text-xs">{p.article_reference ?? "—"}</TD>
+                <TD className="text-xs max-w-[280px] truncate">{p.description ?? "—"}</TD>
                 <TD>
-                  <button onClick={() => void toggle("catalogue_penalites", p.id, p.actif)}>
+                  <button onClick={() => void toggle("catalogue_penalites", p.id, p.actif)} title="Activer / désactiver">
                     <Badge tone={p.actif ? "success" : "neutral"}>{p.actif ? "Active" : "Inactive"}</Badge>
                   </button>
+                </TD>
+                <TD>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="secondary" onClick={() => openEditPenalite(p)} title="Modifier">
+                      <Pencil size={13} />
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => void deletePenalite(p)} title="Supprimer">
+                      <Trash2 size={13} />
+                    </Button>
+                  </div>
                 </TD>
               </TR>
             ))}
           </tbody>
         </Table>
+        )}
       </Card>
 
       <Modal open={openRegle} onClose={() => setOpenRegle(false)} title="Nouvelle règle de rémunération" size="lg">
@@ -727,7 +772,7 @@ function ReglagesTab({
         </div>
       </Modal>
 
-      <Modal open={openPen} onClose={() => setOpenPen(false)} title="Nouvelle pénalité" size="md">
+      <Modal open={openPen} onClose={() => setOpenPen(false)} title={pf.id ? "Modifier la pénalité" : "Nouvelle pénalité"} size="md">
         <div className="space-y-3">
           <FormField label="Libellé" required>
             <TextInput value={pf.libelle} onChange={(e) => setPf({ ...pf, libelle: e.target.value })} />
@@ -747,7 +792,7 @@ function ReglagesTab({
           <FormField label="Description">
             <TextInput value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} />
           </FormField>
-          <Button onClick={() => void savePenalite()}>Ajouter au catalogue</Button>
+          <Button onClick={() => void savePenalite()}>{pf.id ? "Enregistrer les modifications" : "Ajouter au catalogue"}</Button>
         </div>
       </Modal>
     </div>
