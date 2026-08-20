@@ -792,7 +792,7 @@ function ReglagesTab({
           <FormField label="Description">
             <TextInput value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} />
           </FormField>
-          <Button onClick={() => void savePenalite()}>Ajouter au catalogue</Button>
+          <Button onClick={() => void savePenalite()}>{pf.id ? "Enregistrer les modifications" : "Ajouter au catalogue"}</Button>
         </div>
       </Modal>
     </div>
