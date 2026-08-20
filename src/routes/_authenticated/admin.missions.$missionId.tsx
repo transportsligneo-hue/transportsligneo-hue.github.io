@@ -70,6 +70,8 @@ import { MissionNotifAdminPanel } from "@/components/admin/missions/MissionNotif
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
 import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
+import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
+
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
