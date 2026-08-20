@@ -21,7 +21,8 @@ export const Route = createFileRoute("/blog/$slug")({
   ),
   head: ({ loaderData }) => {
     const a = loaderData?.article;
-    if (!a) return { meta: [{ title: "Article introuvable" }] };
+    if (!a) return { meta: [{ title: "Article introuvable · Blog Transports Ligneo" }] };
+    const url = `https://transportsligneo.fr/blog/${a.slug}`;
     return {
       meta: [
         { title: `${a.title} · Blog Transports Ligneo` },
@@ -29,6 +30,22 @@ export const Route = createFileRoute("/blog/$slug")({
         { property: "og:title", content: a.title },
         { property: "og:description", content: a.metaDescription },
         { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: a.title,
+            description: a.metaDescription,
+            mainEntityOfPage: url,
+            author: { "@type": "Organization", name: "Transports Ligneo" },
+            publisher: { "@type": "Organization", name: "Transports Ligneo" },
+          }),
+        },
       ],
     };
   },

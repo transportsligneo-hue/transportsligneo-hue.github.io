@@ -12,7 +12,9 @@ export const Route = createFileRoute("/tarifs")({
       { name: "description", content: "Tarifs convoyage automobile transparents au départ de Tours (37). Péages, carburant et assurance inclus. Estimation immédiate en ligne." },
       { property: "og:title", content: "Tarifs & estimation · Transports Ligneo" },
       { property: "og:description", content: "Un tarif clair et juste. Devis instantané, aucun frais caché." },
+      { property: "og:url", content: "https://transportsligneo.fr/tarifs" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/tarifs" }],
   }),
 });
 

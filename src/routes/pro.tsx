@@ -14,6 +14,23 @@ export const Route = createFileRoute("/pro")({
       { name: "description", content: "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace." },
       { property: "og:title", content: "Solutions B2B · Transports Ligneo" },
       { property: "og:description", content: "Concessions, loueurs, gestionnaires de flotte : le convoyage à l'échelle de votre parc." },
+      { property: "og:url", content: "https://transportsligneo.fr/pro" },
+    ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/pro" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfessionalService",
+          name: "Transports Ligneo · Solutions B2B de convoyage",
+          url: "https://transportsligneo.fr/pro",
+          description:
+            "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace.",
+          areaServed: { "@type": "Country", name: "France" },
+          address: { "@type": "PostalAddress", addressLocality: "Tours", addressCountry: "FR" },
+        }),
+      },
     ],
   }),
 });
