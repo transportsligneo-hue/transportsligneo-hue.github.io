@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
@@ -187,13 +187,25 @@ export function AdminSidebar({ items, children }: Props) {
         </>
       )}
 
+      {/* Poignée flottante toujours visible pour rétracter / déployer */}
+      <button
+        onClick={toggleCollapsed}
+        className="admin-rail-toggle"
+        style={{ left: collapsed ? 63 : 243 }}
+        title={collapsed ? "Déployer le menu" : "Rétracter le menu"}
+        aria-label={collapsed ? "Déployer le menu latéral" : "Rétracter le menu latéral"}
+      >
+        {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+      </button>
+
       {/* === Main === */}
       <main
         className={`flex-1 min-w-0 max-w-full ${collapsed ? "lg:ml-[76px]" : "lg:ml-64"} pt-14 lg:pt-0 min-h-screen flex flex-col transition-[margin] duration-200 ease-out`}
       >
         <DashboardHeader variant="light" enableGlobalSearch />
-        <div className="p-4 sm:p-6 lg:p-8 max-w-[1800px] mx-auto w-full min-w-0 flex-1">{children}</div>
+        <div className="p-4 sm:p-5 lg:px-6 lg:py-7 max-w-[2000px] mx-auto w-full min-w-0 flex-1">{children}</div>
       </main>
+
 
     </div>
   );

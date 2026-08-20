@@ -6720,3 +6720,45 @@ body.is-driver-app .ldock-dot {
     border-color: rgba(110, 255, 205, 0.4);
   }
 }
+
+/* ========================================================
+   Admin — zones scrollables horizontalement (tableaux larges)
+   Scrollbar toujours visible pour signaler les colonnes hors écran.
+   ======================================================== */
+.admin-shell .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37, 99, 235, .55) rgba(15, 21, 38, .06);
+  overscroll-behavior-x: contain;
+}
+.admin-shell .overflow-x-auto::-webkit-scrollbar { height: 10px; }
+.admin-shell .overflow-x-auto::-webkit-scrollbar-track {
+  background: rgba(15, 21, 38, .05);
+  border-radius: 999px;
+}
+.admin-shell .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, .5);
+  border-radius: 999px;
+}
+.admin-shell .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, .75);
+}
+
+/* Bouton flottant de rétraction du menu admin (desktop) */
+.admin-rail-toggle {
+  position: fixed;
+  top: 74px;
+  z-index: 45;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border-strong, #cdd6e6);
+  background: #fff;
+  color: #1d4ed8;
+  box-shadow: 0 6px 16px rgba(15, 21, 38, .14);
+  transition: transform .18s ease, left .2s ease, background .18s ease;
+}
+.admin-rail-toggle:hover { transform: scale(1.08); background: #eff4ff; }
+@media (min-width: 1024px) { .admin-rail-toggle { display: inline-flex; } }
