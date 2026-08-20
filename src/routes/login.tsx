@@ -138,6 +138,30 @@ function LoginPage() {
     }
   };
 
+  // App mobile : quand Samsung Pass / le gestionnaire de mots de passe remplit
+  // les champs après validation biométrique, on connecte automatiquement.
+  const submitRef = useRef(handleSubmit);
+  submitRef.current = handleSubmit;
+  useEffect(() => {
+    if (!isMobileApp) return;
+    const timer = window.setInterval(() => {
+      if (autoSubmittedRef.current || userTypedRef.current) return;
+      const em = emailInputRef.current?.value?.trim() ?? "";
+      const pw = passwordInputRef.current?.value ?? "";
+      if (!em || !pw) return;
+      autoSubmittedRef.current = true;
+      window.clearInterval(timer);
+      setEmail(em);
+      setPassword(pw);
+      void submitRef.current(undefined, { email: em, password: pw });
+    }, 350);
+    // On n'écoute l'auto-remplissage que pendant les premières secondes.
+    const stop = window.setTimeout(() => window.clearInterval(timer), 25000);
+    return () => { window.clearInterval(timer); window.clearTimeout(stop); };
+  }, [isMobileApp]);
+
+
+
   const handleResendConfirmation = async () => {
     if (!email.trim()) { setError("Saisissez votre email puis cliquez à nouveau sur « Renvoyer »."); return; }
     try {
