@@ -253,7 +253,15 @@ export function EdlPremiumFlow({
       if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
     });
-    return base;
+    if (type !== "arrivee") return base;
+    // ARRIVÉE : on commence par le compteur (kilométrage saisi + photo compteur),
+    // puis le câble électrique s'il y a lieu, avant le tour du véhicule.
+    const priority = ["kilometrage_arrivee", "compteur", "cable_electrique"];
+    const head = priority
+      .map((id) => base.find((s) => s.id === id))
+      .filter((s): s is EdlStepDef => Boolean(s));
+    const rest = base.filter((s) => !head.includes(s));
+    return [...head, ...rest];
   }, [type, isElectric]);
   const TOTAL = STEPS.length;
 
