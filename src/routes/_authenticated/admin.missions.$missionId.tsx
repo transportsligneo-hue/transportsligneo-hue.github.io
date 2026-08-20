@@ -1611,6 +1611,11 @@ function AdminMissionDetail() {
             contactTelephone={trajet.arrivee_contact_telephone}
           />
 
+          {/* Notification fin de mission (renvoi manuel) */}
+          <MissionNotifAdminPanel attributionId={attribution.id} />
+
+
+
 
           {/* Documents */}
           <Card>
