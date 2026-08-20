@@ -674,14 +674,17 @@ function PaiementGroupeModal({
 
 function PaiementManuelModal({
   row,
+  defaultRef,
   onClose,
   onConfirm,
 }: {
   row: RemuRow;
+  defaultRef: string;
   onClose: () => void;
   onConfirm: (values: { paiement_reference: string | null; paiement_note: string | null }) => Promise<void>;
 }) {
-  const [ref, setRef] = useState(row.paiement_reference ?? "");
+  const [ref, setRef] = useState(row.paiement_reference ?? defaultRef);
+
   const [note, setNote] = useState(row.paiement_note ?? "");
   const [busy, setBusy] = useState(false);
 
