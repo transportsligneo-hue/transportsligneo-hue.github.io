@@ -126,15 +126,10 @@ export function LigneoEmailShell({
       <Body style={bodyStyle}>
         <Container style={outerContainer}>
           <Section style={card}>
-            {/* En-tête de marque officiel — bannière unique, jamais recréée en CSS */}
-            <Section style={headerSection}>
-              <img
-                src={LIGNEO_BRAND_BANNER_URL}
-                width="600"
-                alt="Transports Ligneo"
-                style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }}
-              />
-            </Section>
+            {/* En-tête de marque — HTML pur : s'affiche même si les images
+                sont bloquées (IONOS, Outlook, Gmail mode "images masquées"). */}
+            <BrandHeaderBlock />
+
 
 
             {clientLogoUrl || clientName || themeChip ? (
