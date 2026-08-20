@@ -1907,6 +1907,7 @@ export type Database = {
           annees_experience: number | null
           bic: string | null
           created_at: string
+          delai_paiement_defaut: string
           disponibilite: string | null
           email: string
           has_completed_training: boolean
@@ -1938,6 +1939,7 @@ export type Database = {
           annees_experience?: number | null
           bic?: string | null
           created_at?: string
+          delai_paiement_defaut?: string
           disponibilite?: string | null
           email: string
           has_completed_training?: boolean
@@ -1969,6 +1971,7 @@ export type Database = {
           annees_experience?: number | null
           bic?: string | null
           created_at?: string
+          delai_paiement_defaut?: string
           disponibilite?: string | null
           email?: string
           has_completed_training?: boolean
@@ -5312,7 +5315,9 @@ export type Database = {
           convoyeur_id: string | null
           created_at: string
           date_mission: string | null
+          delai_paiement: string
           distance_km: number | null
+          echeance_paiement: string | null
           frais_annexes: number
           id: string
           montant_base: number
@@ -5320,6 +5325,10 @@ export type Database = {
           notes: string | null
           numero_mission: string | null
           paiement_id: string | null
+          paiement_note: string | null
+          paiement_reference: string | null
+          paye_at: string | null
+          paye_manuellement: boolean
           primes: number
           regle_id: string | null
           source_calcul: string
@@ -5327,6 +5336,7 @@ export type Database = {
           total_ajustements: number
           trajet_id: string
           updated_at: string
+          urgent: boolean
           valide_at: string | null
           valide_par: string | null
         }
@@ -5339,7 +5349,9 @@ export type Database = {
           convoyeur_id?: string | null
           created_at?: string
           date_mission?: string | null
+          delai_paiement?: string
           distance_km?: number | null
+          echeance_paiement?: string | null
           frais_annexes?: number
           id?: string
           montant_base?: number
@@ -5347,6 +5359,10 @@ export type Database = {
           notes?: string | null
           numero_mission?: string | null
           paiement_id?: string | null
+          paiement_note?: string | null
+          paiement_reference?: string | null
+          paye_at?: string | null
+          paye_manuellement?: boolean
           primes?: number
           regle_id?: string | null
           source_calcul?: string
@@ -5354,6 +5370,7 @@ export type Database = {
           total_ajustements?: number
           trajet_id: string
           updated_at?: string
+          urgent?: boolean
           valide_at?: string | null
           valide_par?: string | null
         }
@@ -5366,7 +5383,9 @@ export type Database = {
           convoyeur_id?: string | null
           created_at?: string
           date_mission?: string | null
+          delai_paiement?: string
           distance_km?: number | null
+          echeance_paiement?: string | null
           frais_annexes?: number
           id?: string
           montant_base?: number
@@ -5374,6 +5393,10 @@ export type Database = {
           notes?: string | null
           numero_mission?: string | null
           paiement_id?: string | null
+          paiement_note?: string | null
+          paiement_reference?: string | null
+          paye_at?: string | null
+          paye_manuellement?: boolean
           primes?: number
           regle_id?: string | null
           source_calcul?: string
@@ -5381,6 +5404,7 @@ export type Database = {
           total_ajustements?: number
           trajet_id?: string
           updated_at?: string
+          urgent?: boolean
           valide_at?: string | null
           valide_par?: string | null
         }
