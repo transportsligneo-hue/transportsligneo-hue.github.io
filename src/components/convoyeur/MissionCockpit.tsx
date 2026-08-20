@@ -397,6 +397,10 @@ export function MissionCockpit({
           }
           // Demande d'avis Google automatique (silencieux, anti-doublon serveur).
           void notifyDeliveryDoneFn({ data: { attributionId } }).catch(() => {});
+          // Notification + email admin "mission terminée" (best-effort).
+          void import("@/lib/mission-completion-notify")
+            .then(({ notifyAdminMissionTerminee }) => notifyAdminMissionTerminee(attributionId))
+            .catch(() => {});
           await Promise.resolve(onUpdated());
           break;
         case "done":
