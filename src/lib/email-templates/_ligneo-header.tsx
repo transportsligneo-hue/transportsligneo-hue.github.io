@@ -203,7 +203,11 @@ export function LigneoEmailShell({
               </Text>
             </Section>
 
+            {/* Bloc "Avis Google" (devis, facture, rapport EDL) */}
+            {googleReview ? <GoogleReviewBlock url={typeof googleReview === 'string' ? googleReview : undefined} /> : null}
+
             {/* Pied de page */}
+
             <Section style={footerBar}>
               <Hr style={divider} />
               <Text style={footerLine}>
