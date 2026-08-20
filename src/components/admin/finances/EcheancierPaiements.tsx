@@ -467,6 +467,21 @@ export function EcheancierPaiements() {
                             }
                           >
                             <TD>
+                              <input
+                                type="checkbox"
+                                className="accent-pro-accent"
+                                disabled={st === "paye"}
+                                checked={selected.has(r.id)}
+                                onChange={(e) =>
+                                  setSelected((prev) => {
+                                    const n = new Set(prev);
+                                    e.target.checked ? n.add(r.id) : n.delete(r.id);
+                                    return n;
+                                  })
+                                }
+                              />
+                            </TD>
+                            <TD>
                               <div className="flex items-center gap-2">
                                 {r.urgent && st !== "paye" && (
                                   <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
