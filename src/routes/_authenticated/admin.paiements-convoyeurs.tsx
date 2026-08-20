@@ -697,25 +697,40 @@ function ReglagesTab({
           <h3 className="text-sm font-semibold text-pro-text flex items-center gap-2">
             <Gavel size={15} /> Catalogue de pénalités
           </h3>
-          <Button size="sm" onClick={() => setOpenPen(true)}><Plus size={13} /> Nouvelle pénalité</Button>
+          <Button size="sm" onClick={openNewPenalite}><Plus size={13} /> Nouvelle pénalité</Button>
         </div>
+        {penalites.length === 0 ? (
+          <EmptyState title="Catalogue vide" description="Ajoutez vos pénalités contractuelles pour les appliquer aux rémunérations." />
+        ) : (
         <Table>
-          <THead><TH>Libellé</TH><TH>Montant</TH><TH>Article de référence</TH><TH>État</TH></THead>
+          <THead><TH>Libellé</TH><TH>Montant</TH><TH>Article de référence</TH><TH>Description</TH><TH>État</TH><TH>Actions</TH></THead>
           <tbody>
             {penalites.map((p) => (
               <TR key={p.id}>
                 <TD>{p.libelle}</TD>
                 <TD>{p.type_montant === "pourcentage" ? `${p.valeur} %` : eur(p.valeur)}</TD>
                 <TD className="text-xs">{p.article_reference ?? "—"}</TD>
+                <TD className="text-xs max-w-[280px] truncate">{p.description ?? "—"}</TD>
                 <TD>
-                  <button onClick={() => void toggle("catalogue_penalites", p.id, p.actif)}>
+                  <button onClick={() => void toggle("catalogue_penalites", p.id, p.actif)} title="Activer / désactiver">
                     <Badge tone={p.actif ? "success" : "neutral"}>{p.actif ? "Active" : "Inactive"}</Badge>
                   </button>
+                </TD>
+                <TD>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="secondary" onClick={() => openEditPenalite(p)} title="Modifier">
+                      <Pencil size={13} />
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => void deletePenalite(p)} title="Supprimer">
+                      <Trash2 size={13} />
+                    </Button>
+                  </div>
                 </TD>
               </TR>
             ))}
           </tbody>
         </Table>
+        )}
       </Card>
 
       <Modal open={openRegle} onClose={() => setOpenRegle(false)} title="Nouvelle règle de rémunération" size="lg">
