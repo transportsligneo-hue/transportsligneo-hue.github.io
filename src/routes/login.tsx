@@ -284,7 +284,10 @@ function LoginPage() {
               <input
                 type={showPwd ? "text" : "password"}
                 value={password}
+                ref={passwordInputRef}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={() => { userTypedRef.current = true; }}
+
                 required
                 autoComplete="current-password"
                 disabled={loading}
