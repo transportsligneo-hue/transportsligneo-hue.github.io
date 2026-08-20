@@ -81,8 +81,11 @@ function LoginPage() {
     else navigate({ to: "/dashboard-client" });
   }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent, override?: { email: string; password: string }) => {
+    e?.preventDefault();
+    const emailValue = (override?.email ?? email).trim();
+    const passwordValue = override?.password ?? password;
+
     setError("");
     setSubmitting(true);
     submittedTabRef.current = tab;
