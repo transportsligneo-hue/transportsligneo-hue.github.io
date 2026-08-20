@@ -1601,6 +1601,22 @@ function AdminMissionDetail() {
             />
           </div>
 
+          {/* Transformer un aller simple en Livraison + Restitution */}
+          <MissionConvertDuoPanel
+            trajetId={trajet.id}
+            isDuo={isDuo}
+            depart={trajet.depart}
+            arrivee={trajet.arrivee}
+            date={trajet.date_trajet}
+            immatriculation={trajet.immatriculation ?? trajet.vehicule_immatriculation ?? null}
+            vin={trajet.vin ?? trajet.vehicule_vin ?? null}
+            marque={trajet.marque}
+            modele={trajet.modele}
+            prix={trajet.prix}
+            onConverted={() => { void fetchAll(); }}
+          />
+
+
 
 
 
