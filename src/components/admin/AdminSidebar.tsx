@@ -193,7 +193,7 @@ export function AdminSidebar({ items, children }: Props) {
         className="admin-rail-toggle"
         style={{ left: collapsed ? 63 : 243 }}
         title={collapsed ? "Déployer le menu" : "Rétracter le menu"}
-        aria-label={collapsed ? "Déployer le menu" : "Rétracter le menu"}
+        aria-label={collapsed ? "Déployer le menu latéral" : "Rétracter le menu latéral"}
       >
         {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
       </button>
