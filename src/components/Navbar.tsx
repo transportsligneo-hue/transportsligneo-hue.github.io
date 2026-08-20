@@ -68,56 +68,58 @@ export default function Navbar() {
         <div className="tln-bar">
           <span className="tln-sheen" aria-hidden="true" />
 
-          <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
-            <LigneoLockup size="md" />
-          </Link>
+          <div className="tln-bar-inner">
+            <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
+              <LigneoLockup size="md" />
+            </Link>
 
-          <span className="tln-sep" aria-hidden="true" />
+            <span className="tln-sep" aria-hidden="true" />
 
-          <ul className="tln-links">
-            {navLinks.map((l) => {
-              const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
-              return (
-                <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    activeOptions={{ exact: true }}
-                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
-                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
-                  >
-                    {l.accent === "green" && <LockIcon />}
-                    {l.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+            <ul className="tln-links">
+              {navLinks.map((l) => {
+                const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
+                return (
+                  <li key={l.to}>
+                    <Link
+                      to={l.to}
+                      activeOptions={{ exact: true }}
+                      activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
+                      inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
+                    >
+                      {l.accent === "green" && <LockIcon />}
+                      {l.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
 
-          <span className="tln-sep" aria-hidden="true" />
+            <span className="tln-sep" aria-hidden="true" />
 
-          <div className="tln-actions">
-            <a
-              href="tel:+33782456181"
-              className="nav-phone-block tln-phone"
-              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
-            >
-              <span className="nav-phone-icon">
-                <Phone size={15} strokeWidth={2.25} />
-                <span className="nav-phone-pulse" aria-hidden="true" />
-              </span>
-              <span className="flex flex-col items-start">
-                <span className="nav-phone-number">Besoin d'un conseil ?</span>
-                <span className="nav-phone-sub">
-                  <span className="nav-phone-live" aria-hidden="true" />
-                  07 82 45 61 81 · 7j/7
+            <div className="tln-actions">
+              <a
+                href="tel:+33782456181"
+                className="nav-phone-block tln-phone"
+                aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+              >
+                <span className="nav-phone-icon">
+                  <Phone size={15} strokeWidth={2.25} />
+                  <span className="nav-phone-pulse" aria-hidden="true" />
                 </span>
-              </span>
-            </a>
-            <ThemeToggle />
-            <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
-              <User size={13} />
-              {isAuthenticated ? "Mon espace" : "Connexion"}
-            </button>
+                <span className="flex flex-col items-start">
+                  <span className="nav-phone-number">Besoin d'un conseil ?</span>
+                  <span className="nav-phone-sub">
+                    <span className="nav-phone-live" aria-hidden="true" />
+                    07 82 45 61 81 · 7j/7
+                  </span>
+                </span>
+              </a>
+              <ThemeToggle />
+              <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
+                <User size={13} />
+                {isAuthenticated ? "Mon espace" : "Connexion"}
+              </button>
+            </div>
           </div>
         </div>
 
