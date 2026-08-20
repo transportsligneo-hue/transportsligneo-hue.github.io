@@ -6812,6 +6812,7 @@ export type Database = {
         Args: { _api_key_id: string; _window: string }
         Returns: number
       }
+      auth_verified_email: { Args: never; Returns: string }
       auto_archive_old_records: { Args: never; Returns: undefined }
       backfill_missions_from_trajets: { Args: never; Returns: number }
       calculer_remuneration_mission: {
