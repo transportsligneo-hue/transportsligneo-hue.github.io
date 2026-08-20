@@ -54,7 +54,11 @@ interface ConvRow {
   id: string;
   nom: string | null;
   prenom: string | null;
-  photo_url?: string | null;
+  email?: string | null;
+  telephone?: string | null;
+  ville?: string | null;
+  statut?: string | null;
+  niveau?: string | null;
   delai_paiement_defaut?: string | null;
 }
 
