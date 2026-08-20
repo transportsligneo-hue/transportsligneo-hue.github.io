@@ -426,9 +426,31 @@ export function EcheancierPaiements() {
                 <div className="border-t border-pro-border">
                   <Table>
                     <THead>
+                      <TH>
+                        <input
+                          type="checkbox"
+                          className="accent-pro-accent"
+                          title="Tout sélectionner"
+                          checked={
+                            g.rows.filter((r) => echeanceStatut(r) !== "paye").length > 0 &&
+                            g.rows.filter((r) => echeanceStatut(r) !== "paye").every((r) => selected.has(r.id))
+                          }
+                          onChange={(e) =>
+                            setSelected((prev) => {
+                              const n = new Set(prev);
+                              for (const r of g.rows) {
+                                if (echeanceStatut(r) === "paye") continue;
+                                e.target.checked ? n.add(r.id) : n.delete(r.id);
+                              }
+                              return n;
+                            })
+                          }
+                        />
+                      </TH>
                       <TH>Mission</TH><TH>Trajet</TH><TH>Dates</TH><TH>Montant</TH>
                       <TH>Délai</TH><TH>Échéance</TH><TH>Statut</TH><TH>Payé le</TH><TH>Actions</TH>
                     </THead>
+
                     <tbody>
                       {g.rows.map((r) => {
                         const st = echeanceStatut(r);
