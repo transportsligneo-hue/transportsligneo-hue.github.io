@@ -43,7 +43,10 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
         toast.error("Impossible de renommer", { description: rpcError.message });
         return;
       }
-      toast.success("Numéro mis à jour partout");
+      toast.success("Numéro mis à jour partout", {
+        description: "Volets Livraison/Restitution, fiche mission, facture et devis liés.",
+      });
+
       onSaved(next);
       setEditing(false);
       return;
