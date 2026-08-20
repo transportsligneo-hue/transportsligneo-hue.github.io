@@ -6634,14 +6634,14 @@ body.is-driver-app .ldock-dot {
 @layer components {
   .auth-shell.auth-driver-theme {
     background:
-      radial-gradient(ellipse 90% 60% at 15% 10%, rgba(110, 255, 205, 0.20), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 85% 90%, rgba(110, 255, 205, 0.14), transparent 65%),
-      linear-gradient(160deg, #04140f 0%, #062b23 45%, #073b30 100%);
+      radial-gradient(ellipse 90% 60% at 15% 10%, rgba(59, 130, 246, 0.45), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 90%, rgba(96, 165, 250, 0.35), transparent 65%),
+      linear-gradient(160deg, #061238 0%, #0a1f5c 45%, #0f2d80 100%);
   }
   .auth-shell.auth-driver-theme::before {
     background:
-      radial-gradient(circle at 20% 20%, rgba(110, 255, 205, 0.22), transparent 30%),
-      radial-gradient(circle at 80% 70%, rgba(110, 255, 205, 0.14), transparent 35%);
+      radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.25), transparent 30%),
+      radial-gradient(circle at 80% 70%, rgba(147, 197, 253, 0.18), transparent 35%);
   }
   .auth-driver-theme .auth-accent {
     color: #6effcd;
