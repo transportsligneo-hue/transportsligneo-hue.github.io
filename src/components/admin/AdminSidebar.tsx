@@ -28,6 +28,22 @@ export function AdminSidebar({ items, children }: Props) {
   const location = useLocation();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Restaure la préférence (rétracté / déployé) après hydratation
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem("admin-sidebar-collapsed") === "1");
+    } catch { /* storage indisponible */ }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((c) => {
+      const next = !c;
+      try { localStorage.setItem("admin-sidebar-collapsed", next ? "1" : "0"); } catch { /* noop */ }
+      return next;
+    });
+  };
 
   const isActive = (item: AdminSidebarItem) =>
     item.exact
@@ -42,14 +58,18 @@ export function AdminSidebar({ items, children }: Props) {
   }, {});
   const groupOrder = Object.keys(groups);
 
-  const renderNav = (onClick?: () => void) => (
-    <nav className="lig-nav flex-1 p-3 space-y-5 overflow-y-auto">
+  const renderNav = (onClick?: () => void, mini = false) => (
+    <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
       {groupOrder.map((g) => (
         <div key={g} className="space-y-1">
           {g !== "_main" && (
-            <p className="px-3 pt-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-pro-muted">
-              {g}
-            </p>
+            mini ? (
+              <div className="mx-3 my-2 border-t border-pro-border" />
+            ) : (
+              <p className="px-3 pt-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-pro-muted">
+                {g}
+              </p>
+            )
           )}
           {groups[g].map((item) => {
             const active = isActive(item);
@@ -58,11 +78,13 @@ export function AdminSidebar({ items, children }: Props) {
                 key={item.to}
                 to={item.to}
                 onClick={onClick}
-                className={`lig-nav-item${active ? " is-active" : ""}`}
+                title={mini ? item.label : undefined}
+                aria-label={mini ? item.label : undefined}
+                className={`lig-nav-item${active ? " is-active" : ""}${mini ? " justify-center px-0" : ""}`}
               >
                 <span className="lig-nav-ic"><item.icon size={15} /></span>
-                <span className="flex-1">{item.label}</span>
-                {item.badge}
+                {!mini && <span className="flex-1">{item.label}</span>}
+                {!mini && item.badge}
               </Link>
             );
           })}
@@ -70,6 +92,7 @@ export function AdminSidebar({ items, children }: Props) {
       ))}
     </nav>
   );
+
 
 
   return (
