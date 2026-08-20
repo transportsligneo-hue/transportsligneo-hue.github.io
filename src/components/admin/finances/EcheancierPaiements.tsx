@@ -334,7 +334,14 @@ export function EcheancierPaiements() {
                 <DriverAvatar convoyeurId={g.id === "none" ? null : g.id} name={convName(g.id === "none" ? null : g.id)} size="md" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-pro-text truncate">{convName(g.id === "none" ? null : g.id)}</p>
-                  <p className="text-[11px] text-pro-muted">{g.rows.length} mission(s)</p>
+                  <p className="text-[11px] text-pro-muted truncate">
+                    {[conv?.email, conv?.telephone, conv?.ville].filter(Boolean).join(" · ") || "Coordonnées non renseignées"}
+                  </p>
+                  <p className="text-[11px] text-pro-muted">
+                    {g.rows.length} mission(s)
+                    {conv?.delai_paiement_defaut ? ` · délai par défaut ${conv.delai_paiement_defaut === "j15" ? "J+15" : conv.delai_paiement_defaut === "j30" ? "J+30" : "manuel"}` : ""}
+                    {conv?.statut ? ` · ${conv.statut}` : ""}
+                  </p>
                 </div>
                 {/* 5. Totaux par convoyeur */}
                 <div className="ml-auto flex flex-wrap items-center gap-2">
