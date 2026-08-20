@@ -22,6 +22,8 @@ interface ReviewRow {
   channel: ReviewChannel;
   status: string;
   sent_at: string;
+  error_message: string | null;
+  attempts: number | null;
 }
 
 const CHANNEL_LABELS: Record<ReviewChannel, string> = {
@@ -59,12 +61,14 @@ export function MissionAvisGooglePanel({
   const [phone, setPhone] = useState(contactTelephone ?? "");
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPhone, setSavingPhone] = useState(false);
+  const [savedContactEmail, setSavedContactEmail] = useState(contactEmail ?? "");
+  const [savedContactPhone, setSavedContactPhone] = useState(contactTelephone ?? "");
 
   const load = useCallback(async () => {
     const [{ data: reqs }, { data: setting }] = await Promise.all([
       supabase
         .from("mission_review_requests")
-        .select("recipient_type, recipient_email, recipient_phone, channel, status, sent_at")
+        .select("recipient_type, recipient_email, recipient_phone, channel, status, sent_at, error_message, attempts")
         .eq("attribution_id", attributionId),
       supabase.from("app_settings").select("value").eq("key", "google_review").maybeSingle(),
     ]);
@@ -83,6 +87,8 @@ export function MissionAvisGooglePanel({
   useEffect(() => {
     setEmail(contactEmail ?? "");
     setPhone(contactTelephone ?? "");
+    setSavedContactEmail(contactEmail ?? "");
+    setSavedContactPhone(contactTelephone ?? "");
   }, [contactEmail, contactTelephone]);
 
   const rowFor = (t: RecipientType, ch: ReviewChannel) =>
@@ -92,18 +98,25 @@ export function MissionAvisGooglePanel({
     setLoading(recipientType);
     try {
       const res = await send({ data: { attributionId, recipientType, channel } });
-      if (res.ok) {
+      const detail = (res.results ?? [])
+        .map((r) => `${r.channel === "email" ? "Email" : "SMS"} : ${r.ok ? "OK" : (r.error ?? "échec")}`)
+        .join(" · ");
+      if (res.ok && !res.error) {
         toast.success("Demande d'avis envoyée", {
-          description: [res.recipientEmail, res.recipientPhone].filter(Boolean).join(" · ") || undefined,
+          description: [res.recipientEmail, res.recipientPhone].filter(Boolean).join(" · ") || detail || undefined,
         });
-        await load();
+      } else if (res.ok) {
+        toast.warning("Envoi partiel", { description: detail || res.error });
       } else {
-        toast.error("Envoi impossible", { description: res.error });
+        toast.error("Envoi impossible", { description: detail || res.error });
       }
     } catch (err) {
-      toast.error("Erreur", { description: err instanceof Error ? err.message : "" });
+      toast.error("Erreur d'envoi", {
+        description: err instanceof Error ? err.message : "Réessaie dans quelques instants.",
+      });
     } finally {
       setLoading(null);
+      await load();
     }
   };
 
@@ -115,7 +128,10 @@ export function MissionAvisGooglePanel({
       .eq("id", trajetId);
     setSavingEmail(false);
     if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else toast.success("Email du contact livraison enregistré");
+    else {
+      setSavedContactEmail(email.trim());
+      toast.success("Email du contact livraison enregistré");
+    }
   };
 
   const saveContactPhone = async () => {
@@ -126,34 +142,53 @@ export function MissionAvisGooglePanel({
       .eq("id", trajetId);
     setSavingPhone(false);
     if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else toast.success("Téléphone du contact livraison enregistré");
+    else {
+      setSavedContactPhone(phone.trim());
+      toast.success("Téléphone du contact livraison enregistré");
+    }
   };
 
   const renderStatus = (t: RecipientType, ch: ReviewChannel) => {
     const r = rowFor(t, ch);
-    if (!r) return <span className="text-[11px] text-pro-muted">Non envoyé</span>;
+    const label = ch === "email" ? "Email" : "SMS";
+    if (!r)
+      return (
+        <span className="text-[11px] text-pro-muted">
+          {label} : non envoyé
+        </span>
+      );
     if (r.status === "review_left")
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-          <CheckCircle2 size={12} /> Avis laissé
+          <CheckCircle2 size={12} /> {label} · avis laissé
         </span>
       );
     if (r.status === "failed")
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600">
-          <AlertTriangle size={12} /> Échec d'envoi
+        <span
+          className="inline-flex items-start gap-1 text-[11px] font-medium text-red-600"
+          title={r.error_message ?? undefined}
+        >
+          <AlertTriangle size={12} className="mt-[2px] shrink-0" />
+          <span>
+            {label} · échec
+            {r.error_message ? <span className="font-normal"> — {r.error_message}</span> : null}
+            {r.attempts && r.attempts > 1 ? (
+              <span className="font-normal text-pro-muted"> ({r.attempts} tentatives)</span>
+            ) : null}
+          </span>
         </span>
       );
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-        <CheckCircle2 size={12} /> Envoyé le {new Date(r.sent_at).toLocaleDateString("fr-FR")} à{" "}
+        <CheckCircle2 size={12} /> {label} · envoyé le {new Date(r.sent_at).toLocaleDateString("fr-FR")} à{" "}
         {new Date(r.sent_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
       </span>
     );
   };
 
-  const contactHasEmail = !!(contactEmail && contactEmail.includes("@"));
-  const contactHasPhone = !!(contactTelephone && contactTelephone.replace(/\D/g, "").length >= 10);
+  const contactHasEmail = !!(savedContactEmail && savedContactEmail.includes("@"));
+  const contactHasPhone = !!(savedContactPhone && savedContactPhone.replace(/\D/g, "").length >= 10);
 
   const canSend = (t: RecipientType) => {
     if (channel === "email") return t === "client" ? !!clientEmail : contactHasEmail;
@@ -200,7 +235,7 @@ export function MissionAvisGooglePanel({
               {clientNom || "—"} {clientEmail ? `· ${clientEmail}` : "· email manquant"}{" "}
               {clientTelephone ? `· ${clientTelephone}` : "· téléphone manquant"}
             </p>
-            <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
+            <div className="mt-1 flex flex-col gap-0.5">
               {renderStatus("client", "email")}
               {renderStatus("client", "sms")}
             </div>
@@ -220,10 +255,10 @@ export function MissionAvisGooglePanel({
             <div className="min-w-0">
               <p className="text-xs font-semibold text-pro-text">Contact livraison</p>
               <p className="truncate text-[11px] text-pro-muted">
-                {contactNom || "—"} {contactHasEmail ? `· ${contactEmail}` : "· email manquant"}{" "}
-                {contactHasPhone ? `· ${contactTelephone}` : "· téléphone manquant"}
+                {contactNom || "—"} {contactHasEmail ? `· ${savedContactEmail}` : "· email manquant"}{" "}
+                {contactHasPhone ? `· ${savedContactPhone}` : "· téléphone manquant"}
               </p>
-              <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
+              <div className="mt-1 flex flex-col gap-0.5">
                 {renderStatus("contact_livraison", "email")}
                 {renderStatus("contact_livraison", "sms")}
               </div>

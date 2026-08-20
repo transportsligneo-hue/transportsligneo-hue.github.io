@@ -3974,12 +3974,15 @@ export type Database = {
       }
       mission_review_requests: {
         Row: {
+          attempts: number
           attribution_id: string
           auto: boolean
           channel: string
           created_at: string
           created_by: string | null
+          error_message: string | null
           id: string
+          last_attempt_at: string | null
           recipient_email: string | null
           recipient_name: string | null
           recipient_phone: string | null
@@ -3991,12 +3994,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attempts?: number
           attribution_id: string
           auto?: boolean
           channel?: string
           created_at?: string
           created_by?: string | null
+          error_message?: string | null
           id?: string
+          last_attempt_at?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
           recipient_phone?: string | null
@@ -4008,12 +4014,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attempts?: number
           attribution_id?: string
           auto?: boolean
           channel?: string
           created_at?: string
           created_by?: string | null
+          error_message?: string | null
           id?: string
+          last_attempt_at?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
           recipient_phone?: string | null

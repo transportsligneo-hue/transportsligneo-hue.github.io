@@ -59,7 +59,10 @@ export interface SendReviewResult {
   recipientEmail?: string
   recipientPhone?: string
   channel?: ReviewChannel
+  /** Détail par canal (email / sms) pour l'affichage admin. */
+  results?: Array<{ channel: 'email' | 'sms'; ok: boolean; error?: string }>
 }
+
 
 interface RecipientInfo {
   email: string | null
@@ -103,23 +106,35 @@ async function sendReviewEmail(params: {
 }): Promise<{ success: boolean; reason?: string }> {
   const { attribution, trajet, recipient, convoyeurLabel, settings, auto } = params
   if (!isValidEmail(recipient.email)) {
-    return { success: false, reason: 'Email invalide.' }
+    return { success: false, reason: 'Adresse email invalide ou manquante.' }
   }
-  return sendTransactionalEmailServer({
-    templateName: 'avis-google',
-    recipientEmail: recipient.email.trim(),
-    idempotencyKey: `avis-google-${attribution.id}-email`,
-    templateData: {
-      prenom: recipient.prenom,
-      numero: attribution.numero_mission ?? '',
-      depart: trajet.depart,
-      arrivee: trajet.arrivee,
-      convoyeur: convoyeurLabel ?? '',
-      reviewUrl: settings.url,
-      isContactLivraison: false,
-    },
-  })
+  // Envoi automatique : idempotent (une seule fois par mission).
+  // Renvoi manuel : clé unique pour contourner la déduplication et forcer un vrai nouvel envoi.
+  const idempotencyKey = auto
+    ? `avis-google-${attribution.id}-email`
+    : `avis-google-${attribution.id}-email-${Date.now()}`
+  try {
+    const res = await sendTransactionalEmailServer({
+      templateName: 'avis-google',
+      recipientEmail: recipient.email.trim(),
+      idempotencyKey,
+      templateData: {
+        prenom: recipient.prenom,
+        numero: attribution.numero_mission ?? '',
+        depart: trajet.depart,
+        arrivee: trajet.arrivee,
+        convoyeur: convoyeurLabel ?? '',
+        reviewUrl: settings.url,
+        isContactLivraison: false,
+      },
+    })
+    if (res?.success) return { success: true }
+    return { success: false, reason: res?.reason || "L'email n'a pas pu être mis en file d'envoi." }
+  } catch (err) {
+    return { success: false, reason: err instanceof Error ? err.message : 'Erreur email inconnue.' }
+  }
 }
+
 
 async function sendReviewSms(params: {
   attribution: any
@@ -128,17 +143,23 @@ async function sendReviewSms(params: {
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
   if (!isValidPhone(params.recipient.phone)) {
-    return { success: false, reason: 'Téléphone invalide.' }
+    return { success: false, reason: 'Numéro de téléphone invalide ou manquant.' }
   }
-  const shortUrl = await ensureShortReviewUrl(params.settings.url)
-  const body = buildSmsBody(params.convoyeurLabel, shortUrl)
-  const res = await sendSms({
-    to: params.recipient.phone!,
-    body,
-    from: params.settings.sms_from || 'Ligneo',
-  })
-  return res.ok ? { success: true } : { success: false, reason: res.error }
+  if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
+  try {
+    const shortUrl = await ensureShortReviewUrl(params.settings.url)
+    const body = buildSmsBody(params.convoyeurLabel, shortUrl)
+    const res = await sendSms({
+      to: params.recipient.phone!,
+      body,
+      from: params.settings.sms_from || 'Ligneo',
+    })
+    return res.ok ? { success: true } : { success: false, reason: res.error || 'Échec SMS (opérateur).' }
+  } catch (err) {
+    return { success: false, reason: err instanceof Error ? err.message : 'Erreur SMS inconnue.' }
+  }
 }
+
 
 
 async function recordReviewRequest(params: {
@@ -148,44 +169,75 @@ async function recordReviewRequest(params: {
   recipient: RecipientInfo
   channel: ReviewChannel
   status: 'sent' | 'failed'
+  errorMessage?: string | null
   auto?: boolean
   actorUserId?: string | null
   actorLabel?: string | null
 }) {
-  const { attribution, trajet, recipientType, recipient, channel, status, auto, actorUserId, actorLabel } = params
-  await supabaseAdmin.from('mission_review_requests').upsert(
-    {
-      attribution_id: attribution.id,
-      trajet_id: trajet.id,
-      recipient_type: recipientType,
-      recipient_email: recipient.email,
-      recipient_phone: recipient.phone,
-      recipient_name: recipient.name,
-      channel,
-      status,
-      sent_at: new Date().toISOString(),
-      auto: !!auto,
-      created_by: actorUserId ?? null,
-    } as never,
-    { onConflict: 'attribution_id,recipient_type,channel' } as never,
-  )
+  const { attribution, trajet, recipientType, recipient, channel, status, errorMessage, auto, actorUserId, actorLabel } =
+    params
+  const now = new Date().toISOString()
 
-  if (status === 'sent') {
-    await supabaseAdmin.rpc('log_activity', {
-      _action: 'mission.avis_google_envoye',
-      _entity_type: 'attribution',
-      _entity_id: attribution.id,
-      _metadata: {
+  // Compte les tentatives précédentes (best-effort).
+  let attempts = 1
+  try {
+    const { data: prev } = await supabaseAdmin
+      .from('mission_review_requests')
+      .select('attempts')
+      .eq('attribution_id', attribution.id)
+      .eq('recipient_type', recipientType)
+      .eq('channel', channel)
+      .maybeSingle()
+    attempts = ((prev as { attempts?: number } | null)?.attempts ?? 0) + 1
+  } catch {
+    /* ignore */
+  }
+
+  try {
+    await supabaseAdmin.from('mission_review_requests').upsert(
+      {
+        attribution_id: attribution.id,
+        trajet_id: trajet.id,
         recipient_type: recipientType,
-        channel,
         recipient_email: recipient.email,
         recipient_phone: recipient.phone,
+        recipient_name: recipient.name,
+        channel,
+        status,
+        error_message: status === 'failed' ? (errorMessage ?? 'Erreur inconnue.') : null,
+        attempts,
+        last_attempt_at: now,
+        sent_at: now,
         auto: !!auto,
-        actor: actorLabel ?? (auto ? 'Automatique' : 'Admin'),
-      },
-    } as never)
+        created_by: actorUserId ?? null,
+      } as never,
+      { onConflict: 'attribution_id,recipient_type,channel' } as never,
+    )
+  } catch {
+    /* l'historique ne doit jamais faire échouer l'envoi */
+  }
+
+  if (status === 'sent') {
+    try {
+      await supabaseAdmin.rpc('log_activity', {
+        _action: 'mission.avis_google_envoye',
+        _entity_type: 'attribution',
+        _entity_id: attribution.id,
+        _metadata: {
+          recipient_type: recipientType,
+          channel,
+          recipient_email: recipient.email,
+          recipient_phone: recipient.phone,
+          auto: !!auto,
+          actor: actorLabel ?? (auto ? 'Automatique' : 'Admin'),
+        },
+      } as never)
+    } catch {
+      /* ignore */
+    }
   }
 }
+
 
 /** Envoie (ou ré-envoie) une demande d'avis Google pour une mission. */
 export async function sendGoogleReviewRequestServer(params: {
@@ -233,7 +285,8 @@ export async function sendGoogleReviewRequestServer(params: {
 
   const channel = params.channel ?? settings.channel ?? 'email'
 
-  const result: SendReviewResult = { ok: false, channel }
+  const result: SendReviewResult = { ok: false, channel, results: [] }
+  const errors: string[] = []
 
   if (channel === 'email' || channel === 'email+sms') {
     const emailRes = await sendReviewEmail({
@@ -244,34 +297,28 @@ export async function sendGoogleReviewRequestServer(params: {
       settings,
       auto: params.auto,
     })
+    await recordReviewRequest({
+      attribution,
+      trajet,
+      recipientType: params.recipientType,
+      recipient,
+      channel: 'email',
+      status: emailRes.success ? 'sent' : 'failed',
+      errorMessage: emailRes.reason ?? null,
+      auto: params.auto,
+      actorUserId: params.actorUserId,
+      actorLabel: params.actorLabel,
+    })
+    result.results!.push({
+      channel: 'email',
+      ok: emailRes.success,
+      error: emailRes.success ? undefined : (emailRes.reason ?? "Échec de l'envoi email."),
+    })
     if (emailRes.success) {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'email',
-        status: 'sent',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
       result.ok = true
       result.recipientEmail = recipient.email ?? undefined
-    } else if (channel === 'email') {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'email',
-        status: 'failed',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
-      result.error = emailRes.reason ?? "Échec de l'envoi email."
-      return result
+    } else {
+      errors.push(`Email : ${emailRes.reason ?? 'échec.'}`)
     }
   }
 
@@ -282,40 +329,36 @@ export async function sendGoogleReviewRequestServer(params: {
       convoyeurLabel,
       settings,
     })
+    await recordReviewRequest({
+      attribution,
+      trajet,
+      recipientType: params.recipientType,
+      recipient,
+      channel: 'sms',
+      status: smsRes.success ? 'sent' : 'failed',
+      errorMessage: smsRes.reason ?? null,
+      auto: params.auto,
+      actorUserId: params.actorUserId,
+      actorLabel: params.actorLabel,
+    })
+    result.results!.push({
+      channel: 'sms',
+      ok: smsRes.success,
+      error: smsRes.success ? undefined : (smsRes.reason ?? "Échec de l'envoi SMS."),
+    })
     if (smsRes.success) {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'sms',
-        status: 'sent',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
       result.ok = true
       result.recipientPhone = recipient.phone ?? undefined
-      await bumpSmsCounter()
-    } else if (channel === 'sms') {
-      await recordReviewRequest({
-        attribution,
-        trajet,
-        recipientType: params.recipientType,
-        recipient,
-        channel: 'sms',
-        status: 'failed',
-        auto: params.auto,
-        actorUserId: params.actorUserId,
-        actorLabel: params.actorLabel,
-      })
-      result.error = smsRes.reason ?? "Échec de l'envoi SMS."
-      return result
+      await bumpSmsCounter().catch(() => undefined)
+    } else {
+      errors.push(`SMS : ${smsRes.reason ?? 'échec.'}`)
     }
   }
 
+  if (errors.length) result.error = errors.join(' · ')
   return result
 }
+
 
 async function bumpSmsCounter() {
   const month = new Date().toISOString().slice(0, 7)
