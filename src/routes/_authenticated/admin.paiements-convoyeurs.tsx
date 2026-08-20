@@ -13,6 +13,7 @@ import {
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { ConvoyeurFinancesPanel } from "@/components/admin/finances/ConvoyeurFinancesPanel";
 import { RemunerationDetailModal } from "@/components/admin/finances/RemunerationDetailModal";
+import { EcheancierPaiements } from "@/components/admin/finances/EcheancierPaiements";
 import {
   REMU_STATUT_LABEL, REMU_STATUT_TONE, PAIEMENT_STATUT_LABEL, PAIEMENT_STATUT_TONE,
   AJUSTEMENT_LABEL, eur, dateFr, toCsv, downloadFile, buildSepaXml,
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/admin/paiements-convoyeurs
   }),
 });
 
-type Tab = "overview" | "apayer" | "lots" | "penalites" | "reglages";
+type Tab = "overview" | "echeancier" | "apayer" | "lots" | "penalites" | "reglages";
 
 interface ConvoyeurRow {
   id: string; nom: string | null; prenom: string | null;
@@ -251,6 +252,7 @@ function AdminPaiementsConvoyeurs() {
       <div className="flex flex-wrap gap-2">
         {([
           ["overview", "Vue d'ensemble"],
+          ["echeancier", "Par convoyeur"],
           ["apayer", `À payer (${duesByConvoyeur.length})`],
           ["lots", `Paiements (${paiements.length})`],
           ["penalites", `Pénalités (${penalitesAppliquees.filter((a) => !a.annule).length})`],
@@ -270,6 +272,8 @@ function AdminPaiementsConvoyeurs() {
           <SearchInput value={search} onChange={setSearch} placeholder="Mission, convoyeur, motif…" />
         </div>
       </div>
+
+      {tab === "echeancier" && <EcheancierPaiements />}
 
       {tab === "overview" && (
         <div className="space-y-5">
