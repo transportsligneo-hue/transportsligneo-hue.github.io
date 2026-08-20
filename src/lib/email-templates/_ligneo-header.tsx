@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  LIGNEO_BRAND_BANNER_URL,
+  // bannière image conservée pour compat (non utilisée : images souvent bloquées)
   LIGNEO_GOOGLE_REVIEW_URL,
   LIGNEO_LOGO_SQUARE_URL,
   LIGNEO_QR_AVIS_GOOGLE_URL,
