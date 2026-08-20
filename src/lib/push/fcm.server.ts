@@ -14,6 +14,9 @@ type ServiceAccount = {
   project_id: string;
 };
 
+/** Logo couleur (avec badge) utilisé comme visuel des notifications Android. */
+const NOTIFICATION_IMAGE_URL = "https://transportsligneo.fr/logo-ligneo.png";
+
 export type NativePushPayload = {
   title: string;
   body?: string;
