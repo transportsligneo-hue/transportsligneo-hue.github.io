@@ -74,7 +74,9 @@ export async function notifyAdminMissionTerminee(
     await sendTransactionalEmail({
       templateName: "mission-terminee-admin",
       recipientEmail: ADMIN_EMAIL,
-      idempotencyKey: `mission-terminee-admin-${attributionId}`,
+      idempotencyKey: opts?.manual
+        ? `mission-terminee-admin-${attributionId}-${Date.now()}`
+        : `mission-terminee-admin-${attributionId}`,
       skipProfileLookup: true,
       templateData: {
         numero,
