@@ -14,6 +14,9 @@ type ServiceAccount = {
   project_id: string;
 };
 
+/** Logo couleur (avec badge) utilisé comme visuel des notifications Android. */
+const NOTIFICATION_IMAGE_URL = "https://transportsligneo.fr/logo-ligneo.png";
+
 export type NativePushPayload = {
   title: string;
   body?: string;
@@ -136,7 +139,17 @@ export async function sendNativePushToUser(userId: string, payload: NativePushPa
               },
               android: {
                 priority: "HIGH",
-                notification: { channel_id: "ligneo", color: "#2F5FFF" },
+                notification: {
+                  channel_id: "ligneo",
+                  // Petite icône : Android impose une silhouette monochrome
+                  icon: "ic_notification",
+                  // Teinte appliquée à la silhouette + accent système
+                  color: "#2F5FFF",
+                  // Visuel couleur (logo complet avec badge) affiché à l'ouverture
+                  // de la notification (grande image) — seule façon d'avoir de la
+                  // couleur et le badge sur Android.
+                  image: NOTIFICATION_IMAGE_URL,
+                },
               },
               apns: {
                 payload: { aps: { sound: "default", badge: 1 } },
