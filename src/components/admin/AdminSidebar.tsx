@@ -188,10 +188,13 @@ export function AdminSidebar({ items, children }: Props) {
       )}
 
       {/* === Main === */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+      <main
+        className={`flex-1 min-w-0 max-w-full ${collapsed ? "lg:ml-[76px]" : "lg:ml-64"} pt-14 lg:pt-0 min-h-screen flex flex-col transition-[margin] duration-200 ease-out`}
+      >
         <DashboardHeader variant="light" enableGlobalSearch />
-        <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto w-full flex-1">{children}</div>
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1800px] mx-auto w-full min-w-0 flex-1">{children}</div>
       </main>
+
     </div>
   );
 }
