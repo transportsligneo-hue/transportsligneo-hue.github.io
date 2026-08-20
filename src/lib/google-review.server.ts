@@ -166,44 +166,75 @@ async function recordReviewRequest(params: {
   recipient: RecipientInfo
   channel: ReviewChannel
   status: 'sent' | 'failed'
+  errorMessage?: string | null
   auto?: boolean
   actorUserId?: string | null
   actorLabel?: string | null
 }) {
-  const { attribution, trajet, recipientType, recipient, channel, status, auto, actorUserId, actorLabel } = params
-  await supabaseAdmin.from('mission_review_requests').upsert(
-    {
-      attribution_id: attribution.id,
-      trajet_id: trajet.id,
-      recipient_type: recipientType,
-      recipient_email: recipient.email,
-      recipient_phone: recipient.phone,
-      recipient_name: recipient.name,
-      channel,
-      status,
-      sent_at: new Date().toISOString(),
-      auto: !!auto,
-      created_by: actorUserId ?? null,
-    } as never,
-    { onConflict: 'attribution_id,recipient_type,channel' } as never,
-  )
+  const { attribution, trajet, recipientType, recipient, channel, status, errorMessage, auto, actorUserId, actorLabel } =
+    params
+  const now = new Date().toISOString()
 
-  if (status === 'sent') {
-    await supabaseAdmin.rpc('log_activity', {
-      _action: 'mission.avis_google_envoye',
-      _entity_type: 'attribution',
-      _entity_id: attribution.id,
-      _metadata: {
+  // Compte les tentatives précédentes (best-effort).
+  let attempts = 1
+  try {
+    const { data: prev } = await supabaseAdmin
+      .from('mission_review_requests')
+      .select('attempts')
+      .eq('attribution_id', attribution.id)
+      .eq('recipient_type', recipientType)
+      .eq('channel', channel)
+      .maybeSingle()
+    attempts = ((prev as { attempts?: number } | null)?.attempts ?? 0) + 1
+  } catch {
+    /* ignore */
+  }
+
+  try {
+    await supabaseAdmin.from('mission_review_requests').upsert(
+      {
+        attribution_id: attribution.id,
+        trajet_id: trajet.id,
         recipient_type: recipientType,
-        channel,
         recipient_email: recipient.email,
         recipient_phone: recipient.phone,
+        recipient_name: recipient.name,
+        channel,
+        status,
+        error_message: status === 'failed' ? (errorMessage ?? 'Erreur inconnue.') : null,
+        attempts,
+        last_attempt_at: now,
+        sent_at: now,
         auto: !!auto,
-        actor: actorLabel ?? (auto ? 'Automatique' : 'Admin'),
-      },
-    } as never)
+        created_by: actorUserId ?? null,
+      } as never,
+      { onConflict: 'attribution_id,recipient_type,channel' } as never,
+    )
+  } catch {
+    /* l'historique ne doit jamais faire échouer l'envoi */
+  }
+
+  if (status === 'sent') {
+    try {
+      await supabaseAdmin.rpc('log_activity', {
+        _action: 'mission.avis_google_envoye',
+        _entity_type: 'attribution',
+        _entity_id: attribution.id,
+        _metadata: {
+          recipient_type: recipientType,
+          channel,
+          recipient_email: recipient.email,
+          recipient_phone: recipient.phone,
+          auto: !!auto,
+          actor: actorLabel ?? (auto ? 'Automatique' : 'Admin'),
+        },
+      } as never)
+    } catch {
+      /* ignore */
+    }
   }
 }
+
 
 /** Envoie (ou ré-envoie) une demande d'avis Google pour une mission. */
 export async function sendGoogleReviewRequestServer(params: {
