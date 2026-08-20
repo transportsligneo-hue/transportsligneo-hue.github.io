@@ -22,6 +22,12 @@ export interface GoogleReviewSettings {
   channel?: ReviewChannel
   /** Numéro Twilio expéditeur (E.164) ou sender ID alphabétique. */
   sms_from?: string
+  /**
+   * Fréquence maximale de sollicitation d'un même destinataire (en mois).
+   * Évite de spammer les clients récurrents (ex : CAT France) qui ont
+   * plusieurs missions par semaine. 0 = pas de limite.
+   */
+  cooldown_months?: number
 }
 
 export const DEFAULT_REVIEW_SETTINGS: GoogleReviewSettings = {
@@ -31,6 +37,7 @@ export const DEFAULT_REVIEW_SETTINGS: GoogleReviewSettings = {
   send_to_contact: true,
   channel: 'email',
   sms_from: 'Ligneo',
+  cooldown_months: 4,
 }
 
 export async function getGoogleReviewSettings(): Promise<GoogleReviewSettings> {
@@ -56,6 +63,8 @@ function isValidPhone(phone?: string | null): boolean {
 export interface SendReviewResult {
   ok: boolean
   error?: string
+  /** Envoi automatique ignoré : destinataire déjà sollicité récemment. */
+  skipped?: 'cooldown'
   recipientEmail?: string
   recipientPhone?: string
   channel?: ReviewChannel
@@ -63,6 +72,54 @@ export interface SendReviewResult {
   results?: Array<{ channel: 'email' | 'sms'; ok: boolean; error?: string }>
 }
 
+
+function normalizePhone(phone?: string | null): string | null {
+  if (!phone) return null
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 9 ? digits.slice(-9) : null
+}
+
+/**
+ * Un même destinataire (email ou téléphone) ne doit être sollicité qu'une fois
+ * par période (par défaut tous les 4 mois), toutes missions confondues.
+ * Ne s'applique qu'aux envois automatiques : un admin peut toujours forcer.
+ */
+async function isInCooldown(params: {
+  email: string | null
+  phone: string | null
+  months: number
+  excludeAttributionId: string
+}): Promise<{ blocked: boolean; lastSentAt?: string }> {
+  const { email, phone, months, excludeAttributionId } = params
+  if (!months || months <= 0) return { blocked: false }
+  const since = new Date(Date.now() - months * 30 * 24 * 3_600_000).toISOString()
+  try {
+    const { data } = await supabaseAdmin
+      .from('mission_review_requests')
+      .select('recipient_email, recipient_phone, sent_at, attribution_id, status')
+      .eq('status', 'sent')
+      .gte('sent_at', since)
+      .order('sent_at', { ascending: false })
+      .limit(500)
+    const rows = (data ?? []) as Array<{
+      recipient_email: string | null
+      recipient_phone: string | null
+      sent_at: string
+      attribution_id: string
+    }>
+    const mail = email?.trim().toLowerCase() || null
+    const tel = normalizePhone(phone)
+    const hit = rows.find(
+      (r) =>
+        r.attribution_id !== excludeAttributionId &&
+        ((mail && r.recipient_email?.trim().toLowerCase() === mail) ||
+          (tel && normalizePhone(r.recipient_phone) === tel)),
+    )
+    return hit ? { blocked: true, lastSentAt: hit.sent_at } : { blocked: false }
+  } catch {
+    return { blocked: false }
+  }
+}
 
 interface RecipientInfo {
   email: string | null
@@ -284,6 +341,26 @@ export async function sendGoogleReviewRequestServer(params: {
   if (params.emailOverride) recipient.email = params.emailOverride
 
   const channel = params.channel ?? settings.channel ?? 'email'
+
+  // Anti-spam clients récurrents : une seule demande d'avis par destinataire
+  // et par période (envois automatiques uniquement).
+  if (params.auto) {
+    const cd = await isInCooldown({
+      email: recipient.email,
+      phone: recipient.phone,
+      months: settings.cooldown_months ?? DEFAULT_REVIEW_SETTINGS.cooldown_months!,
+      excludeAttributionId: attribution.id,
+    })
+    if (cd.blocked) {
+      const last = cd.lastSentAt ? new Date(cd.lastSentAt).toLocaleDateString('fr-FR') : null
+      return {
+        ok: false,
+        skipped: 'cooldown',
+        channel,
+        error: `Destinataire déjà sollicité${last ? ` le ${last}` : ''} — nouvelle demande possible dans ${settings.cooldown_months ?? 4} mois.`,
+      }
+    }
+  }
 
   const result: SendReviewResult = { ok: false, channel, results: [] }
   const errors: string[] = []
