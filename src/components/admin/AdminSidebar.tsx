@@ -98,21 +98,47 @@ export function AdminSidebar({ items, children }: Props) {
   return (
     <div className="admin-shell min-h-screen flex text-pro-text">
       {/* === Sidebar Desktop === */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-pro-border flex-col shadow-pro-card">
+      <aside
+        className={`hidden lg:flex fixed inset-y-0 left-0 z-40 ${collapsed ? "w-[76px]" : "w-64"} bg-white border-r border-pro-border flex-col shadow-pro-card transition-[width] duration-200 ease-out`}
+      >
         {/* Bandeau brand bleu nuit (style Stripe / Qonto) */}
-        <div className="bg-pro-brand-strip px-5 py-5 border-b border-pro-border">
-          <LigneoBrand role="admin" variant="dark" />
-          <p className="text-cream/50 text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
+        <div className={`bg-pro-brand-strip border-b border-pro-border ${collapsed ? "px-2 py-4" : "px-5 py-5"}`}>
+          {collapsed ? (
+            <div className="flex justify-center">
+              <LigneoBrand role="admin" variant="dark" compact />
+            </div>
+          ) : (
+            <>
+              <LigneoBrand role="admin" variant="dark" />
+              <p className="text-cream/50 text-[11px] truncate mt-1.5 pl-12">{user?.email}</p>
+            </>
+          )}
         </div>
 
-        {renderNav()}
+        {/* Bouton rétracter / déployer */}
+        <button
+          onClick={toggleCollapsed}
+          title={collapsed ? "Déployer le menu" : "Rétracter le menu"}
+          aria-label={collapsed ? "Déployer le menu" : "Rétracter le menu"}
+          className={`flex items-center gap-2 border-b border-pro-border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-pro-muted hover:text-pro-text hover:bg-pro-surface-2 transition-colors ${collapsed ? "justify-center" : ""}`}
+        >
+          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          {!collapsed && <span>Rétracter</span>}
+        </button>
 
-        <div className="lig-nav p-3 border-t border-pro-border">
-          <button onClick={() => logout()} className="lig-nav-logout">
+        {renderNav(undefined, collapsed)}
+
+        <div className={`lig-nav border-t border-pro-border ${collapsed ? "p-2" : "p-3"}`}>
+          <button
+            onClick={() => logout()}
+            className={`lig-nav-logout${collapsed ? " justify-center px-0" : ""}`}
+            title={collapsed ? "Déconnexion" : undefined}
+          >
             <span className="lig-nav-ic"><LogOut size={15} /></span>
-            Déconnexion
+            {!collapsed && "Déconnexion"}
           </button>
         </div>
+
 
       </aside>
 
