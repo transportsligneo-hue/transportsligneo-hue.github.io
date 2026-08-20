@@ -54,6 +54,11 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
   const submittedTabRef = useRef<Tab>("client");
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
+  const userTypedRef = useRef(false);
+  const autoSubmittedRef = useRef(false);
+
 
   useEffect(() => {
     if (isInitializing || isLoading || !isAuthenticated) return;
