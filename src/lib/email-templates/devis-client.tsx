@@ -3,6 +3,8 @@ import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, SimpleCard, AmountRow } from './_ligneo-header'
 
 interface Props {
+  /** Lien avis Google (optionnel, sinon lien par défaut). */
+  avisUrl?: string
   prenom?: string
   nom?: string
   numero?: string
@@ -17,8 +19,9 @@ interface Props {
   pdfUrl?: string
 }
 
-const Email = ({ prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, pdfUrl }: Props) => (
+const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, pdfUrl }: Props) => (
   <LigneoEmailShell
+    googleReview={avisUrl || true}
     preview={`Devis ${prix ? `${prix} € ` : ''}— valable 15 jours.`}
     tagline="Devis instantané"
     title="Votre devis est prêt"

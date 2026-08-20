@@ -22,3 +22,14 @@ export const LIGNEO_BRAND_BANNER_URL = `${LIGNEO_SITE_ORIGIN}${brandBanner.url}`
 
 /** Sender ID SMS (si le fournisseur autorise un expéditeur personnalisé). */
 export const LIGNEO_SMS_SENDER_ID = "Ligneo";
+
+/** QR code "Avis Google" (bloc pied de page des emails clients). */
+import qrAvisGoogle from "@/assets/qr-avis-google.png.asset.json";
+export const LIGNEO_QR_AVIS_GOOGLE_URL = `${LIGNEO_SITE_ORIGIN}${qrAvisGoogle.url}`;
+
+/** Logo carré officiel en URL absolue (emails). */
+export const LIGNEO_LOGO_SQUARE_URL = `${LIGNEO_SITE_ORIGIN}/logo-ligneo.png`;
+
+/** Lien public de dépôt d'avis Google (surchargeable via templateData.avisUrl). */
+export const LIGNEO_GOOGLE_REVIEW_URL =
+  "https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours";
