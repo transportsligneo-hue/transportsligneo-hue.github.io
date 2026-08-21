@@ -204,10 +204,14 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
   const [cancelTrajet, setCancelTrajet] = useState(true);
   const [applyGroup, setApplyGroup] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [mode, setMode] = useState<"annulation" | "facturable">("annulation");
+  const [montantFacture, setMontantFacture] = useState("");
+
+  const catalogue = mode === "facturable" ? CLOTURE_FACTURABLE_CATEGORIES : CLOTURE_CATEGORIES;
 
   const selected = useMemo(
-    () => CLOTURE_CATEGORIES.find((c) => c.key === categorie) ?? null,
-    [categorie],
+    () => catalogue.find((c) => c.key === categorie) ?? null,
+    [categorie, catalogue],
   );
 
   const load = async () => {
