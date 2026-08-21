@@ -521,6 +521,7 @@ function AdminMissionsUnified() {
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
     | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null; pv: string[] }
+    | { type: "lotHeader"; lotId: string; lotRef: string; ids: string[]; plaques: string[]; convs: string[]; total: number; clientNom: string | null; clientEmail: string | null }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -530,7 +531,37 @@ function AdminMissionsUnified() {
     const isRetour = (x: (typeof visible)[number]) => x.legType === "retour" || x.legIndex === 2;
     const isAller = (x: (typeof visible)[number]) => x.legType === "aller" || x.legIndex === 1;
 
+    const emitted = new Set<string>();
+
     visible.forEach((m) => {
+      if (emitted.has(m.id)) return;
+
+      // Lot multi-plaques : une mission, plusieurs véhicules
+      const lot = m.lotId ?? null;
+      if (lot) {
+        const members = visible.filter((x) => x.lotId === lot);
+        if (members.length >= 2 && !seen.has(`lot:${lot}`)) {
+          seen.add(`lot:${lot}`);
+          band = !band;
+          out.push({
+            type: "lotHeader",
+            lotId: lot,
+            lotRef: m.lotRef ?? "Lot",
+            ids: members.map((x) => x.id),
+            plaques: members.map((x) => x.immatriculation).filter(Boolean) as string[],
+            convs: Array.from(new Set(members.map((x) => meta.get(x.id)?.convoyeurNom).filter(Boolean))) as string[],
+            total: members.reduce((s2, x) => s2 + (x.prix ?? 0), 0),
+            clientNom: members.find((x) => x.clientNom)?.clientNom ?? null,
+            clientEmail: members.find((x) => x.clientEmail)?.clientEmail ?? null,
+          });
+          members.forEach((x, i) => {
+            emitted.add(x.id);
+            out.push({ type: "row", m: x, band, inGroup: true, last: i === members.length - 1 });
+          });
+          return;
+        }
+      }
+
       const gid = m.groupId ?? null;
       const all = gid ? visible.filter((x) => x.groupId === gid) : [];
       const duo = [all.find(isAller), all.find(isRetour)].filter(Boolean) as typeof all;
@@ -554,12 +585,16 @@ function AdminMissionsUnified() {
             clientNom: duo.find((x) => x.clientNom)?.clientNom ?? null,
             pv: Array.from(new Set(duo.flatMap((x) => pvOf(pvMap, meta.get(x.id)?.attributionId)))),
           });
-          duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
+          duo.forEach((x, i) => {
+            emitted.add(x.id);
+            out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 });
+          });
         }
         if (inDuo.has(m.id)) return;
       }
 
       band = !band;
+      emitted.add(m.id);
       out.push({ type: "row", m, band, inGroup: false, last: true });
     });
     return out;
