@@ -3,14 +3,22 @@ import { BatteryCharging, Zap } from "lucide-react";
 /** Détecte une mission « Recharge uniquement (sans livraison) ». */
 export function isRechargeSeule(trajet?: {
   options_meta?: unknown;
+  type_mission?: string | null;
   depart?: string | null;
   arrivee?: string | null;
 } | null): boolean {
   if (!trajet) return false;
   const meta = trajet.options_meta as Record<string, unknown> | null | undefined;
-  if (meta && typeof meta === "object" && meta.recharge_seule === true) return true;
+  if (meta && typeof meta === "object") {
+    if (meta.recharge_seule === true) return true;
+    const metaType = typeof meta.type_mission === "string" ? meta.type_mission.toLowerCase() : "";
+    if (metaType.startsWith("recharge")) return true;
+  }
+  const type = (trajet.type_mission ?? "").toLowerCase();
+  if (type.startsWith("recharge")) return true;
   return false;
 }
+
 
 /**
  * Badge néon animé signalant une mission de recharge sur place,
