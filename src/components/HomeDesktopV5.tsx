@@ -46,12 +46,14 @@ export default function HomeDesktopV5() {
               ))}
             </div>
             <div className="v5-hero-actions">
-              <Link to="/contact" className="v4-btn-primary">Contact</Link>
-              <Link to="/services" search={{ audience: "pro" }} className="v4-btn-driver">
+              <Link to="/contact" className="hero-pill hero-pill-blue">Contact</Link>
+              <Link to="/services" search={{ audience: "pro" }} className="hero-pill hero-pill-violet">
+                Nos services B2B
+              </Link>
+              <Link to="/devenir-convoyeur" className="hero-pill hero-pill-green">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M8 11V7a4 4 0 0 1 8 0v4" /><rect x="5" y="11" width="14" height="9" rx="2" /></svg>
                 Espace Driver
               </Link>
-              <Link to="/services" search={{ audience: "particuliers" }} className="v4-btn-outline">Nos services</Link>
             </div>
           </div>
 
