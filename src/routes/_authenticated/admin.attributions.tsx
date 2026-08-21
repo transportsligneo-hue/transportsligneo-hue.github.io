@@ -1066,7 +1066,7 @@ function AdminAttributions() {
         <AdminDetailDrawer
           open={!!selectedAttr}
           onClose={() => setSelectedAttr(null)}
-          title={missionNumberOf({ id: selectedAttr.id, created_at: selectedAttr.created_at, numero_mission: attrDetail?.numero_mission })}
+          title={attributionRef(selectedAttr, arBaseByGroup)}
           subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
           badge={
             <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
@@ -1175,9 +1175,6 @@ function attributionRef(
   a: Attribution,
   baseByGroup: Map<string, string>,
 ): string {
-  // Un numéro attribué par l'admin reste la source de vérité : ne jamais le
-  // reconstruire, le resuffixer ou le renuméroter. On normalise juste le format
-  // d'affichage (dièse devant la séquence).
   // Le trajet est la source canonique pour les dossiers multi-véhicules :
   // l'attribution peut encore contenir un ancien numéro avant synchronisation.
   if (a.trajet?.numero_mission) return displayNumero(a.trajet.numero_mission);
