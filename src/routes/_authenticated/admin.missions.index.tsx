@@ -64,7 +64,13 @@ interface DemandeRow {
 }
 
 const PRIORITY: Record<string, number> = { en_cours: 60, attribue: 50, accepte: 40, en_attente: 30, termine: 20, annule: 10 };
-const ACTIVE_ATTR = ["propose", "accepte", "en_cours", "en_attente_validation"];
+// Statuts d'attribution qui ne comptent plus (le convoyeur n'a pas fait la mission)
+const DEAD_ATTR = ["refuse", "refusee", "annule", "annulee", "expire", "expiree"];
+// Priorité d'affichage : une attribution en cours prime sur une attribution terminée
+const ATTR_PRIORITY: Record<string, number> = {
+  en_cours: 60, accepte: 55, en_attente_validation: 50, propose: 45,
+  validee: 40, termine: 35, terminee: 35,
+};
 const TABLE_KEY = "admin_missions";
 
 const QUICK_STATUS: { value: string; label: string }[] = [
