@@ -245,12 +245,64 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
 
   const pickCategorie = (key: string) => {
     setCategorie(key);
-    const cat = CLOTURE_CATEGORIES.find((c) => c.key === key);
+    const cat = catalogue.find((c) => c.key === key);
     setFacturable(Boolean(cat?.facturable));
     setPassageVide(Boolean(cat?.passageVide));
   };
 
+  const switchMode = (next: "annulation" | "facturable") => {
+    setMode(next);
+    setCategorie("");
+    setFacturable(next === "facturable");
+    setPassageVide(false);
+  };
+
+  const submitFacturable = async () => {
+    if (!categorie) {
+      toast.error("Choisissez un motif de clôture");
+      return;
+    }
+    if (categorie === "autre_facturable" && motif.trim().length < 3) {
+      toast.error("Précisez le motif dans le commentaire");
+      return;
+    }
+    const cat = CLOTURE_FACTURABLE_CATEGORIES.find((c) => c.key === categorie);
+    const ok = await confirmToast(`Clôturer et facturer — ${cat?.label} ?`, {
+      description:
+        "La mission reste Terminée et facturable au client (aucune annulation). Action tracée dans l'historique.",
+      confirmLabel: "Clôturer & facturer",
+    });
+    if (!ok) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.rpc("admin_close_mission_facturable" as never, {
+        _attribution_id: attributionId,
+        _categorie: cat?.label ?? categorie,
+        _motif: motif.trim() || null,
+        _montant_facture: montantFacture ? Number(montantFacture) : null,
+        _indemnite: indemnite ? Number(indemnite) : null,
+        _passage_vide: passageVide,
+        _apply_group: isGroup ? applyGroup : false,
+      } as never);
+      if (error) throw error;
+      toast.success("Mission clôturée et facturable", { description: cat?.label });
+      setOpen(false);
+      setMotif("");
+      await load();
+      onChanged?.();
+      if (passageVide) {
+        onPassageAVide?.(`${cat?.label}${motif.trim() ? ` — ${motif.trim()}` : ""}`);
+      }
+    } catch (e) {
+      toast.error("Échec de la clôture", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const submit = async () => {
+    if (mode === "facturable") return submitFacturable();
     if (!categorie) {
       toast.error("Choisissez un motif d'annulation");
       return;
