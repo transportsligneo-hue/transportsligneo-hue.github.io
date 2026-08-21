@@ -77,10 +77,11 @@ export default function Navbar() {
               {navLinks.map((l) => {
                 const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
                 return (
-                  <li key={l.to}>
+                  <li key={`${l.to}-${l.search?.audience ?? ""}`}>
                     <Link
                       to={l.to}
-                      activeOptions={{ exact: true }}
+                      search={l.search}
+                      activeOptions={{ exact: l.search ? false : true }}
                       activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
                       inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
                     >
