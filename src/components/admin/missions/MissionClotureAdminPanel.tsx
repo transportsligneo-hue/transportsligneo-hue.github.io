@@ -550,18 +550,22 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-2 text-sm text-pro-text">
-              <input type="checkbox" checked={facturable} onChange={(e) => setFacturable(e.target.checked)} />
-              Facturable au client
-            </label>
+            {mode === "annulation" && (
+              <label className="flex items-center gap-2 text-sm text-pro-text">
+                <input type="checkbox" checked={facturable} onChange={(e) => setFacturable(e.target.checked)} />
+                Facturable au client
+              </label>
+            )}
             <label className="flex items-center gap-2 text-sm text-pro-text">
               <input type="checkbox" checked={passageVide} onChange={(e) => setPassageVide(e.target.checked)} />
               Générer un passage à vide
             </label>
-            <label className="flex items-center gap-2 text-sm text-pro-text">
-              <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
-              Annuler aussi le trajet (sinon republiable)
-            </label>
+            {mode === "annulation" && (
+              <label className="flex items-center gap-2 text-sm text-pro-text">
+                <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
+                Annuler aussi le trajet (sinon republiable)
+              </label>
+            )}
             {isGroup && (
               <label className="flex items-center gap-2 text-sm font-semibold text-pro-text sm:col-span-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2">
                 <input type="checkbox" checked={applyGroup} onChange={(e) => setApplyGroup(e.target.checked)} />
