@@ -7599,24 +7599,34 @@ html.theme-light .plateforme-pro .feat-toggle {
    (visuel uniquement)
    ============================================================ */
 
-/* 1) La photo du hero se dissout progressivement vers le fond de page :
-      plus aucune bande nette ni ligne de coupure. */
+/* 1) Le voile bas du hero se fond dans la couleur réelle de la page
+      (plus aucune ligne de coupure navy → blanc). */
+:root { --ligneo-page-bg: 8, 18, 48; }
+html.theme-light { --ligneo-page-bg: 245, 247, 252; }
+
 .r4-page .v5-hero { padding-bottom: clamp(140px, 15vw, 260px) !important; }
+.r4-page .v5-hero-fade {
+  background: linear-gradient(180deg,
+    rgba(var(--ligneo-page-bg), 0) 30%,
+    rgba(var(--ligneo-page-bg), 0.18) 52%,
+    rgba(var(--ligneo-page-bg), 0.48) 68%,
+    rgba(var(--ligneo-page-bg), 0.78) 82%,
+    rgba(var(--ligneo-page-bg), 0.95) 92%,
+    rgba(var(--ligneo-page-bg), 1) 100%) !important;
+}
 .r4-page .v5-hero-photo,
 .r4-page .v5-hero-tint {
   -webkit-mask-image: linear-gradient(180deg,
-    #000 0%, #000 46%,
-    rgba(0,0,0,0.92) 60%,
-    rgba(0,0,0,0.66) 72%,
-    rgba(0,0,0,0.34) 84%,
-    rgba(0,0,0,0.12) 93%,
+    #000 0%, #000 44%,
+    rgba(0,0,0,0.86) 60%,
+    rgba(0,0,0,0.5) 76%,
+    rgba(0,0,0,0.18) 90%,
     rgba(0,0,0,0) 100%);
   mask-image: linear-gradient(180deg,
-    #000 0%, #000 46%,
-    rgba(0,0,0,0.92) 60%,
-    rgba(0,0,0,0.66) 72%,
-    rgba(0,0,0,0.34) 84%,
-    rgba(0,0,0,0.12) 93%,
+    #000 0%, #000 44%,
+    rgba(0,0,0,0.86) 60%,
+    rgba(0,0,0,0.5) 76%,
+    rgba(0,0,0,0.18) 90%,
     rgba(0,0,0,0) 100%);
 }
 
