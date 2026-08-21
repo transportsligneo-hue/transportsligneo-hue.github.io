@@ -4322,7 +4322,18 @@ body.is-driver-app .closed-link svg {
 }
 @media (max-width:720px){
   .sg-panel{ grid-template-columns:1fr; }
-  .sg-visual{ border-right:none; border-bottom:1px solid rgba(255,255,255,0.10); padding:40px 24px; }
+  .sg-visual{ border-right:none; border-bottom:none; padding:40px 24px; }
+  .sg-visual::after{
+    top:auto; bottom:0; left:10%; right:auto;
+    width:80%; height:1px;
+    background:linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,0.10) 30%,
+      rgba(255,255,255,0.14) 50%,
+      rgba(255,255,255,0.10) 70%,
+      transparent 100%
+    );
+  }
   .sg-content{ padding:36px 28px; }
 }
 
