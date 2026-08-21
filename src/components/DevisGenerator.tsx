@@ -1200,13 +1200,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 4. Marque / Modèle */}
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque *</label>
                       <input value={marque} onChange={e => setMarque(e.target.value)} placeholder="Ex: Peugeot" className={inputCard} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle *</label>
                       <input value={modele} onChange={e => setModele(e.target.value)} placeholder="Ex: 308" className={inputCard} />
                     </div>
+                    <p className="sm:col-span-2 text-[11px] text-cream/45">
+                      Marque, modèle et type sont obligatoires. Renseignez la plaque ou cochez « Je ne connais pas encore la plaque ».
+                    </p>
+
 
                     {/* 5. Type véhicule */}
                     <div>
@@ -1421,7 +1425,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onClick={() => setStep(s => Math.min(4, s + 1))}
                   disabled={
                     (step === 1 && (!departure || !arrival)) ||
-                    (step === 2 && !vehicleType) ||
+                    (step === 2 && (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim()))) ||
                     (step === 3 && (!nom || !prenom || !email || !telephone || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted)))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
