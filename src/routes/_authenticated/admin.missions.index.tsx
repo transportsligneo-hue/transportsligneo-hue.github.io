@@ -52,6 +52,7 @@ interface TrajetRow {
   pricing_mode: "fixe" | "enchere" | null; prix_client_ttc: number | null;
   prix_convoyeur_fixe: number | null; prix_convoyeur_min: number | null; prix_convoyeur_max: number | null;
   marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
+  lot_id: string | null; lot_reference: string | null;
 }
 
 interface DemandeRow {
@@ -153,12 +154,14 @@ function AdminMissionsUnified() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [lotBusy, setLotBusy] = useState(false);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
   const clientBrands = useClientBrands(rows.map((r) => r.clientEmail));
   const pvMap = useMissionPv(Array.from(meta.values()).map((m) => m.attributionId));
 
   const show = useCallback((key: string) => !hidden.has(key), [hidden]);
-  const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length, [hidden]);
+  const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length + 1, [hidden]);
 
   /* ---------------- Préférences de colonnes (par admin) ---------------- */
   useEffect(() => {
@@ -350,6 +353,8 @@ function AdminMissionsUnified() {
         prixConvoyeurMax: t.prix_convoyeur_max,
         margeIndicativePct: t.marge_indicative_pct,
         rechargeSeule: isRechargeSeule(t),
+        lotId: t.lot_id ?? null,
+        lotRef: t.lot_reference ?? null,
       };
     });
 
@@ -429,6 +434,54 @@ function AdminMissionsUnified() {
     } as never);
     if (error) return toast.error("Planning non enregistré", { description: error.message });
     toast.success(key === "date_trajet" ? "Date de mission enregistrée" : "Heure enregistrée");
+    fetchAll();
+  };
+
+  /* ---------------- Lots multi-plaques ---------------- */
+  const togglePick = (id: string) => {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const groupLot = async () => {
+    const ids = Array.from(picked);
+    if (ids.length < 2) return toast.error("Sélectionnez au moins deux missions");
+    setLotBusy(true);
+    const { data, error } = await supabase.rpc("admin_group_trajets_lot" as never, { _trajet_ids: ids } as never);
+    setLotBusy(false);
+    if (error) return toast.error("Regroupement impossible", { description: error.message });
+    const ref = (data as { lot_reference?: string }[] | null)?.[0]?.lot_reference;
+    toast.success(`Lot créé${ref ? ` · ${ref}` : ""}`, { description: `${ids.length} plaques regroupées` });
+    setPicked(new Set());
+    fetchAll();
+  };
+
+  const ungroupLot = async (ids: string[]) => {
+    if (!ids.length) return;
+    setLotBusy(true);
+    const { error } = await supabase.rpc("admin_ungroup_trajets_lot" as never, { _trajet_ids: ids } as never);
+    setLotBusy(false);
+    if (error) return toast.error("Dégroupage impossible", { description: error.message });
+    toast.success("Missions dégroupées");
+    setPicked(new Set());
+    fetchAll();
+  };
+
+  const assignMany = async (ids: string[], convoyeurId: string) => {
+    if (!convoyeurId || !ids.length) return;
+    setLotBusy(true);
+    let ok = 0;
+    for (const id of ids) {
+      const { error } = await supabase.rpc("admin_assign_convoyeur", { _trajet_id: id, _convoyeur_id: convoyeurId });
+      if (error) toast.error("Attribution partielle", { description: error.message });
+      else ok += 1;
+    }
+    setLotBusy(false);
+    if (ok) toast.success(`${ok} mission${ok > 1 ? "s" : ""} attribuée${ok > 1 ? "s" : ""}`);
+    setPicked(new Set());
     fetchAll();
   };
 
