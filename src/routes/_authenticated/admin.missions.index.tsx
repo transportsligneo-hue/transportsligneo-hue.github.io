@@ -474,6 +474,14 @@ function AdminMissionsUnified() {
 
   const assignMany = async (ids: string[], convoyeurId: string) => {
     if (!convoyeurId || !ids.length) return;
+    const nom = convoyeurs.find((c) => c.id === convoyeurId)?.nom ?? "ce convoyeur";
+    const openIds = ids.filter((id) => {
+      const row = rows.find((x) => x.id === id);
+      return row ? row.status !== "terminee" && row.status !== "annulee" : true;
+    });
+    if (!openIds.length) return toast.error("Missions clôturées : attribution verrouillée");
+    if (!window.confirm(`Attribuer ${openIds.length} mission(s) à ${nom} ?`)) return;
+    ids = openIds;
     setLotBusy(true);
     let ok = 0;
     for (const id of ids) {
