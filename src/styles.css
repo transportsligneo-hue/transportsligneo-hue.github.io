@@ -4135,25 +4135,74 @@ body.is-driver-app .closed-link svg {
   margin:0 0 36px; letter-spacing:-0.3px;
   font-family:'Playfair Display', serif;
 }
-.sg-h1 em{
+.sg-h1-white{
+  color:#ffffff;
+}
+.sg-h1-comma{
+  color:#ffffff;
+}
+.sg-h1-blue{
+  font-style:normal;
+  font-family:'Poppins', sans-serif;
+  font-weight:800;
+  color:#60a5fa;
+  text-shadow:
+    0 0 18px rgba(96,165,250,0.55),
+    0 0 36px rgba(96,165,250,0.35),
+    0 0 54px rgba(96,165,250,0.18);
+}
+.sg-h1 em{ /* legacy fallback */
   font-style:normal;
   background:linear-gradient(90deg,#f4dfa0,#e8c874);
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 .sg-panel{
   position:relative; display:grid; grid-template-columns:1fr 1fr; gap:0;
-  background:rgba(255,255,255,0.035);
-  border:1px solid rgba(255,255,255,0.10);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%) padding-box,
+    linear-gradient(90deg,
+      rgba(5,12,31,0.0) 0%,
+      rgba(255,255,255,0.14) 15%,
+      rgba(255,255,255,0.16) 50%,
+      rgba(255,255,255,0.14) 85%,
+      rgba(5,12,31,0.0) 100%
+    ) border-box;
+  border:1px solid transparent;
   border-radius:28px; backdrop-filter:blur(18px);
   overflow:hidden;
   box-shadow:0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.sg-panel::before,
+.sg-panel::after{
+  content:"";
+  position:absolute; top:0; bottom:0;
+  width:48px; pointer-events:none; z-index:2;
+}
+.sg-panel::before{
+  left:0;
+  background:linear-gradient(90deg, rgba(5,12,31,0.38), transparent);
+}
+.sg-panel::after{
+  right:0;
+  background:linear-gradient(270deg, rgba(5,12,31,0.38), transparent);
 }
 .sg-visual{
   position:relative; padding:56px 40px;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   min-height:340px;
-  border-right:1px solid rgba(255,255,255,0.10);
+  border-right:none;
+}
+.sg-visual::after{
+  content:"";
+  position:absolute; top:10%; right:0; width:1px; height:80%;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    rgba(255,255,255,0.10) 30%,
+    rgba(255,255,255,0.14) 50%,
+    rgba(255,255,255,0.10) 70%,
+    transparent 100%
+  );
 }
 .sg-icon-wrap{
   position:relative; width:112px;height:112px;
