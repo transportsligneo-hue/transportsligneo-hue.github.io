@@ -44,6 +44,14 @@ export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
 });
 
+interface DevisVehicule {
+  immatriculation?: string | null;
+  marque?: string | null;
+  modele?: string | null;
+  vin?: string | null;
+  energie?: string | null;
+  type?: string | null;
+}
 
 interface Attribution {
   id: string;
@@ -368,7 +376,6 @@ function AdminAttributions() {
     return out;
   }, [attributions, arBaseByGroup]);
 
-  type DevisVehicule = { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null };
   const [devisVehicules, setDevisVehicules] = useState<Map<string, DevisVehicule[]>>(new Map());
 
   const fetchDevisVehicules = useCallback(async (rows: Attribution[]) => {
