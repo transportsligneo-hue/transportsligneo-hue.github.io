@@ -7861,13 +7861,13 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
 .section-bg::before, .section-bg-alt::before, .edl-section-bg::before,
 .section-navy-clean::before, .section-light::before, .section-cream::before,
 .section-mist::before, .r4-page .v5-trust::before {
-  top: calc(var(--ligneo-fade-h) * -0.92) !important;
+  top: calc(var(--ligneo-fade-h) * -0.5) !important;
   bottom: auto !important;
 }
 .section-bg::after, .section-bg-alt::after, .edl-section-bg::after,
 .section-navy-clean::after, .section-light::after, .section-cream::after,
 .section-mist::after, .r4-page .v5-trust::after {
-  bottom: calc(var(--ligneo-fade-h) * -0.92) !important;
+  bottom: calc(var(--ligneo-fade-h) * -0.5) !important;
   top: auto !important;
 }
 
