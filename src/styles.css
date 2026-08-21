@@ -7631,15 +7631,20 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     rgba(0,0,0,0) 100%);
 }
 
-/* 3) La bande stats n'a plus d'overlay opaque : juste une diffusion douce */
+/* 3) La lumière du hero se prolonge dans la bande stats : continuité parfaite */
 .r4-page .v5-hero-stats { padding-top: 0 !important; }
-.r4-page .v5-hero-stats::before,
-.r4-page .v5-hero-stats::after {
+.r4-page .v5-hero-stats::before {
+  top: 0 !important;
+  left: 0 !important; right: 0 !important;
+  height: clamp(160px, 22vw, 300px) !important;
   background-image:
-    radial-gradient(65% 130% at 50% 0%, rgba(61,155,255,0.10), transparent 76%) !important;
-  filter: blur(16px) !important;
+    linear-gradient(180deg, rgba(96,150,255,0.10) 0%, rgba(96,150,255,0.05) 38%, rgba(96,150,255,0.02) 68%, rgba(96,150,255,0) 100%) !important;
+  filter: blur(10px) !important;
   box-shadow: none !important;
+  animation: none !important;
+  z-index: 0 !important;
 }
+.r4-page .v5-hero-stats::after { display: none !important; }
 
 /* 4) Adoucissement global : les fondus de section ne créent plus d'arête */
 .section-bg::before, .section-bg::after,
