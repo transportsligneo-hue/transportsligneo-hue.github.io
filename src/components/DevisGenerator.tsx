@@ -108,7 +108,7 @@ export interface DevisGeneratorProps {
    * - "flat"       : full-width fields posés directement sur le fond de page (/tarifs).
    * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
-  variant?: "bar" | "hero-card" | "flat";
+  variant?: "bar" | "hero-card" | "flat" | "flat-mini";
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
