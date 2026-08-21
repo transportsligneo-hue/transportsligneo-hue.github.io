@@ -7493,3 +7493,103 @@ html.theme-light .r4-page .hero-pill.hero-pill-green {
     opacity: .85;
   }
 }
+
+/* ============================================================
+   FIX LISIBILITÉ BOUTONS + BARRE FONCTIONNALITÉS DYNAMIQUE
+   (visuel uniquement)
+   ============================================================ */
+
+/* Onglet actif Particuliers / Professionnels en thème clair */
+html.theme-light .r4-page .v4-tab.is-active {
+  background: linear-gradient(120deg, #2f5fff, #4f8bff) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px -14px rgba(47,95,255,0.85) !important;
+}
+html.theme-light .r4-page .v4-tab.pro.is-active {
+  background: linear-gradient(120deg, #7c5cff, #9a86ff) !important;
+  box-shadow: 0 14px 30px -14px rgba(124,92,255,0.85) !important;
+}
+
+/* Bouton fantôme « Contacter / Parler à un conseiller » */
+.r4-page .v4-btn-outline {
+  transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease, background .2s ease, color .2s ease;
+}
+.r4-page .v4-btn-outline:hover { transform: translateY(-2px); background: rgba(61,155,255,0.12); }
+html.theme-light .r4-page .v4-btn-outline {
+  color: #1c3fc4 !important;
+  border: 1.5px solid #2f5fff !important;
+  background: rgba(47,95,255,0.06) !important;
+  box-shadow: 0 10px 26px -18px rgba(47,95,255,0.9);
+}
+html.theme-light .r4-page .v4-btn-outline:hover {
+  background: #2f5fff !important; color: #ffffff !important;
+  box-shadow: 0 18px 36px -16px rgba(47,95,255,0.9);
+}
+html.theme-light .r4-page .v4-btn-outline.v {
+  color: #5b32c9 !important; border-color: #7c5cff !important; background: rgba(124,92,255,0.07) !important;
+}
+html.theme-light .r4-page .v4-btn-outline.v:hover { background: #7c5cff !important; color: #ffffff !important; }
+
+/* Barre « Déplier toutes les fonctionnalités » — plus visible et dynamique */
+.r4-page .feat-toggle {
+  position: relative; overflow: hidden;
+  border: 1.5px solid rgba(96,165,250,0.45);
+  background: linear-gradient(120deg, rgba(47,95,255,0.16), rgba(96,165,250,0.08));
+  box-shadow: 0 0 0 1px rgba(96,165,250,0.14), 0 18px 40px -22px rgba(47,95,255,0.95);
+  animation: featPulse 3.4s ease-in-out infinite;
+  transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease, border-color .2s ease;
+}
+.r4-page .feat-toggle::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.28), transparent);
+  transform: skewX(-18deg); animation: featShine 4s ease-in-out infinite; pointer-events: none;
+}
+.r4-page .feat-toggle:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(96,165,250,0.85);
+  box-shadow: 0 24px 55px -20px rgba(47,95,255,1);
+}
+.r4-page .feat-toggle-label { letter-spacing: .02em; }
+.r4-page .feat-toggle-chevron { animation: featChevron 2.4s ease-in-out infinite; }
+.r4-page .feat-toggle.is-open { animation: none; }
+.r4-page .feat-toggle.is-open .feat-toggle-chevron { animation: none; transform: rotate(180deg); }
+@keyframes featPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(96,165,250,0.14), 0 18px 40px -22px rgba(47,95,255,0.95); }
+  50%      { box-shadow: 0 0 0 4px rgba(96,165,250,0.12), 0 22px 52px -20px rgba(47,95,255,1); }
+}
+@keyframes featShine { 0%, 70% { left: -60%; } 100% { left: 130%; } }
+@keyframes featChevron { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+html.theme-light .r4-page .feat-toggle {
+  background: linear-gradient(120deg, #ffffff, #eef3ff) !important;
+  border-color: #2f5fff !important;
+}
+html.theme-light .r4-page .feat-toggle-label { color: #0f1526 !important; }
+
+/* Variante violette (Professionnels) */
+.plateforme-pro .feat-toggle {
+  border-color: rgba(169,123,255,0.5);
+  background: linear-gradient(120deg, rgba(139,63,245,0.18), rgba(169,123,255,0.08));
+  box-shadow: 0 0 0 1px rgba(169,123,255,0.16), 0 18px 40px -22px rgba(124,92,255,0.95);
+  animation: featPulseV 3.4s ease-in-out infinite;
+}
+.plateforme-pro .feat-toggle:hover {
+  border-color: rgba(169,123,255,0.9);
+  box-shadow: 0 24px 55px -20px rgba(124,92,255,1);
+}
+.plateforme-pro .feat-toggle.is-open { animation: none; }
+@keyframes featPulseV {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(169,123,255,0.16), 0 18px 40px -22px rgba(124,92,255,0.95); }
+  50%      { box-shadow: 0 0 0 4px rgba(169,123,255,0.14), 0 22px 52px -20px rgba(124,92,255,1); }
+}
+html.theme-light .plateforme-pro .feat-toggle {
+  background: linear-gradient(120deg, #ffffff, #f4eeff) !important;
+  border-color: #7c5cff !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .r4-page .feat-toggle,
+  .r4-page .feat-toggle::after,
+  .r4-page .feat-toggle-chevron { animation: none !important; }
+}
