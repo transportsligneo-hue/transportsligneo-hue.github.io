@@ -76,6 +76,7 @@ export type Database = {
       admin_notifications: {
         Row: {
           created_at: string
+          email_sent_at: string | null
           entity_id: string | null
           entity_type: string | null
           id: string
@@ -89,6 +90,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email_sent_at?: string | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
@@ -102,6 +104,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email_sent_at?: string | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string

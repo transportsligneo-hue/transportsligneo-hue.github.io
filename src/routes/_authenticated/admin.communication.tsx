@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AdminManualCommunication } from '@/components/admin/AdminManualCommunication'
+import { AdminAlertSettings } from '@/components/admin/AdminAlertSettings'
 import { AdminSection } from '@/components/admin/ui'
 import { PageHeader } from '@/components/admin/AdminUI'
 
@@ -15,9 +16,16 @@ function AdminCommunicationPage() {
         title="Emails & notifications"
         subtitle="Envoyer un email manuel avec template ou afficher une notification en haut des espaces convoyeur et client."
       />
+      <AdminSection
+        title="Alertes automatiques"
+        description="Ne plus rater une demande client : chaque nouvelle demande déclenche un email vers votre boîte."
+      >
+        <AdminAlertSettings />
+      </AdminSection>
       <AdminSection title="Nouvel envoi" description="Les emails restent individuels. Les notifications peuvent cibler un utilisateur, tous les convoyeurs ou tous les clients.">
         <AdminManualCommunication />
       </AdminSection>
     </div>
   )
 }
+
