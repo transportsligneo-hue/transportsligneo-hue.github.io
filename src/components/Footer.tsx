@@ -203,6 +203,11 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Préférence de thème — visible haut de footer */}
+      <div className="relative z-10 mx-auto flex max-w-[1180px] justify-center border-t border-[#7aa3ff]/15 px-8 py-5">
+        <ThemePreference />
+      </div>
+
       {/* Newsletter + application */}
       <div className="relative z-10 mx-auto grid max-w-[1180px] gap-8 border-t border-[#7aa3ff]/15 px-8 py-8 md:grid-cols-2">
         <div>
@@ -243,7 +248,6 @@ export default function Footer() {
           </button>
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <ThemePreference />
           <button
             onClick={scrollTop}
             type="button"
