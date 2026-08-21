@@ -122,7 +122,7 @@ ${form.message}`;
         <form onSubmit={handleSubmit} className="v4-glass v4-form-card">
           <div className="v4-form-tabs">
             <button type="button" className={`t ${profil === "particulier" ? "active" : ""}`} onClick={() => setProfil("particulier")}>Particulier</button>
-            <button type="button" className={`t ${profil === "pro" ? "active" : ""}`} onClick={() => setProfil("pro")}>Professionnel</button>
+            <button type="button" className={`t t-pro ${profil === "pro" ? "active" : ""}`} onClick={() => setProfil("pro")}>Professionnel</button>
           </div>
           <p className="intro">
             {profil === "pro"
