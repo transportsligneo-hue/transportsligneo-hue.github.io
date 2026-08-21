@@ -486,6 +486,9 @@ body.is-driver-app .closed-link svg {
 }
 
 :root {
+  /* Empêche le "forced dark mode" d'Edge de repeindre le site en noir :
+     on déclare explicitement le schéma de couleurs géré par l'app. */
+  color-scheme: dark;
   --radius: 0.375rem;
   --background: #061238;
   --foreground: #f5f1e8;
@@ -5660,6 +5663,7 @@ html.theme-light .theme-toggle:hover { color: #0f1526; box-shadow: 0 8px 20px -1
 
 /* --- Tokens globaux --- */
 html.theme-light {
+  color-scheme: light;
   --background: #f5f7fc;
   --foreground: #0f1526;
   --card: #ffffff;
