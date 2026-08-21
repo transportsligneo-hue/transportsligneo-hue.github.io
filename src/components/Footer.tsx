@@ -4,6 +4,8 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { openCookiePreferences } from "@/lib/cookie-consent";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import StoreBadges from "@/components/public/StoreBadges";
+import ThemePreference from "@/components/ThemePreference";
+
 
 const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
