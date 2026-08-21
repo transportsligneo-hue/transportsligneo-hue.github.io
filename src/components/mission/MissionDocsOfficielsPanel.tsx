@@ -99,7 +99,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     const [tRes, cRes, dRes, comp] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
-        ? supabase.from("convoyeurs").select("nom, prenom, telephone, siret").eq("id", attr.convoyeur_id).maybeSingle()
+        ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase
         .from("mission_documents")
@@ -112,7 +112,16 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
 
     const t = tRes.data as unknown as TrajetLite | null;
     setTrajet(t);
-    setConvoyeur((cRes.data as unknown as ConvoyeurLite | null) ?? null);
+    const conv = (cRes.data as unknown as (ConvoyeurLite & { user_id?: string | null }) | null) ?? null;
+    if (conv?.user_id) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("siret")
+        .eq("id", conv.user_id)
+        .maybeSingle();
+      conv.siret = (prof as { siret?: string | null } | null)?.siret ?? null;
+    }
+    setConvoyeur(conv);
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);

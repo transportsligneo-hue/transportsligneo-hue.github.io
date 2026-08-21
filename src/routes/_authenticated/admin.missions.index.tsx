@@ -58,7 +58,7 @@ interface DemandeRow {
   id: string; nom: string; prenom: string; email: string | null; telephone: string | null;
   depart: string; arrivee: string; date_souhaitee: string | null; heure_souhaitee: string | null;
   marque: string | null; modele: string | null; immatriculation: string | null;
-  prix_estime: number | null; statut: string; created_at: string; type_trajet: string | null;
+  prix_estime: number | null; statut: string; created_at: string; date_retour: string | null; depart_retour: string | null;
 }
 
 const PRIORITY: Record<string, number> = { en_cours: 60, attribue: 50, accepte: 40, en_attente: 30, termine: 20, annule: 10 };
@@ -195,7 +195,7 @@ function AdminMissionsUnified() {
       supabase.from("trajets").select("*").order("created_at", { ascending: false }),
       supabase
         .from("demandes_convoyage")
-        .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
+        .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, date_retour, depart_retour")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
       supabase.from("attributions").select("id, trajet_id, convoyeur_id, statut, numero_mission, created_at"),
@@ -374,7 +374,7 @@ function AdminMissionsUnified() {
         prixConvoyeur: null,
         prixSuggere: null,
         statutPublication: null,
-        isRoundTrip: d.type_trajet === "aller_retour",
+        isRoundTrip: Boolean(d.date_retour || d.depart_retour),
         legType: null,
         isTest: false,
         createdAt: d.created_at,
