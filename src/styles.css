@@ -7927,10 +7927,10 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
   bottom: 0;
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--surface-white) 0%, transparent) 0%,
-    color-mix(in srgb, var(--surface-white) 12%, transparent) 22%,
-    color-mix(in srgb, var(--surface-white) 34%, transparent) 44%,
-    color-mix(in srgb, var(--surface-white) 62%, transparent) 66%,
-    color-mix(in srgb, var(--surface-white) 88%, transparent) 86%,
+    color-mix(in srgb, var(--surface-white) 6%, transparent) 24%,
+    color-mix(in srgb, var(--surface-white) 20%, transparent) 48%,
+    color-mix(in srgb, var(--surface-white) 48%, transparent) 70%,
+    color-mix(in srgb, var(--surface-white) 82%, transparent) 88%,
     var(--surface-white) 100%);
 }
 .sg-carousel-section > * { position: relative; z-index: 2; }
