@@ -627,7 +627,7 @@ function AvisGoogleCard() {
   const [delayHours, setDelayHours] = useState(2);
   const [sendToContact, setSendToContact] = useState(true);
   const [channel, setChannel] = useState<"email" | "sms" | "email+sms">("email");
-  const [smsFrom, setSmsFrom] = useState("Ligneo");
+  const [smsFrom, setSmsFrom] = useState("TRSP LIGNEO");
   const [cooldownMonths, setCooldownMonths] = useState(4);
   const [smsCount, setSmsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -668,7 +668,7 @@ function AvisGoogleCard() {
           delay_hours: Math.max(0, Number(delayHours) || 0),
           send_to_contact: sendToContact,
           channel,
-          sms_from: smsFrom.trim() || "Ligneo",
+          sms_from: smsFrom.trim().slice(0, 11) || "TRSP LIGNEO",
           cooldown_months: Math.max(0, Number(cooldownMonths) || 0),
         } as unknown as never,
       },
@@ -739,8 +739,18 @@ function AvisGoogleCard() {
               value={smsFrom}
               disabled={loading}
               onChange={(e) => setSmsFrom(e.target.value)}
-              placeholder="Ligneo"
+              placeholder="TRSP LIGNEO"
             />
+            {smsFrom.trim().length > 11 && !/^\+?\d+$/.test(smsFrom.trim()) ? (
+              <p className="mt-1 text-[11px] font-medium text-red-600">
+                Un expéditeur SMS alphanumérique ne peut pas dépasser 11 caractères, il sera
+                tronqué par les opérateurs sinon. ({smsFrom.trim().length} caractères)
+              </p>
+            ) : (
+              <p className="mt-1 text-[11px] text-pro-muted">
+                11 caractères maximum (norme GSM). Exemple : « TRSP LIGNEO ».
+              </p>
+            )}
           </FormField>
         )}
 
