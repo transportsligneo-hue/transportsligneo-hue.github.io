@@ -394,7 +394,7 @@ function AdminNouveauDevisPage() {
     marque: v.marque.trim() || null,
     modele: v.modele.trim() || null,
     vin: v.vin.trim().toUpperCase() || null,
-    arrivee: (isRechargeSeule ? depart.trim() : (v.arrivee.trim() || arrivee.trim())) || null,
+    arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
@@ -437,7 +437,7 @@ function AdminNouveauDevisPage() {
     societe: client?.societe ?? null,
     logo_url: client?.logo_url ?? null,
     depart,
-    arrivee: isRechargeSeule ? depart : arrivee,
+    arrivee,
     marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
     modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
     immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
@@ -461,7 +461,7 @@ function AdminNouveauDevisPage() {
   const handleGenerate = async () => {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim()) return toast.error("Adresse requise");
-    if (!isRechargeSeule && !arrivee.trim()) return toast.error("Départ et arrivée requis");
+    if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
     if (!dateSouhaitee || !heureSouhaitee)
       return toast.error("Date et heure d'enlèvement obligatoires");
     if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
@@ -487,7 +487,7 @@ function AdminNouveauDevisPage() {
           email: client.email ?? "",
           telephone: client.telephone,
           depart: depart.trim(),
-          arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
+          arrivee: arrivee.trim(),
           marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
           modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
           immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,

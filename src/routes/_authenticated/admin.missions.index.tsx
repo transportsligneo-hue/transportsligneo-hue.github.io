@@ -536,7 +536,7 @@ function AdminMissionsUnified() {
     visible.forEach((m) => {
       if (emitted.has(m.id)) return;
 
-      // Lot multi-plaques : une mission, plusieurs véhicules
+      // Lot multi-plaques : missions séparées, regroupées uniquement pour les actions admin.
       const lot = m.lotId ?? null;
       if (lot) {
         const members = visible.filter((x) => x.lotId === lot);
@@ -704,7 +704,7 @@ function AdminMissionsUnified() {
             onClick={groupLot}
             className="h-8 rounded-lg bg-[#4f46e5] px-3 text-[12px] font-semibold text-white disabled:opacity-50"
           >
-            Regrouper en lot (plusieurs plaques)
+            Regrouper les missions
           </button>
           <button
             type="button"
