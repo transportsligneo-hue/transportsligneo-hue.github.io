@@ -154,7 +154,7 @@ export default function HomeDesktopV5() {
           </div>
         </div>
         <div className="v5-teaser-cta">
-          <Link to="/comment-ca-marche" className="v4-btn-outline">Voir les 4 étapes en détail →</Link>
+          <Link to="/comment-ca-marche" className="v4-btn-outline">Voir les étapes en détail →</Link>
         </div>
       </section>
 
