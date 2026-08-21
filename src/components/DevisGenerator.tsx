@@ -1200,13 +1200,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 4. Marque / Modèle */}
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque *</label>
                       <input value={marque} onChange={e => setMarque(e.target.value)} placeholder="Ex: Peugeot" className={inputCard} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle *</label>
                       <input value={modele} onChange={e => setModele(e.target.value)} placeholder="Ex: 308" className={inputCard} />
                     </div>
+                    <p className="sm:col-span-2 text-[11px] text-cream/45">
+                      Marque, modèle et type sont obligatoires. Renseignez la plaque ou cochez « Je ne connais pas encore la plaque ».
+                    </p>
+
 
                     {/* 5. Type véhicule */}
                     <div>
