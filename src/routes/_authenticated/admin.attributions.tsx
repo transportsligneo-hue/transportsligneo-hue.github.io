@@ -37,6 +37,7 @@ import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -812,6 +813,11 @@ function AdminAttributions() {
           </>
         }
       />
+
+      <div className="mb-4">
+        <AdminBadgeLegend />
+      </div>
+
 
       {/* === Section "À attribuer" : trajets convertis sans convoyeur === */}
       {trajetsDisponibles.length > 0 && (

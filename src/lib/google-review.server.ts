@@ -36,7 +36,7 @@ export const DEFAULT_REVIEW_SETTINGS: GoogleReviewSettings = {
   delay_hours: 2,
   send_to_contact: true,
   channel: 'email',
-  sms_from: 'Ligneo',
+  sms_from: 'TRSP LIGNEO',
   cooldown_months: 4,
 }
 
@@ -209,7 +209,7 @@ async function sendReviewSms(params: {
     const res = await sendSms({
       to: params.recipient.phone!,
       body,
-      from: params.settings.sms_from || 'Ligneo',
+      from: params.settings.sms_from || 'TRSP LIGNEO',
     })
     return res.ok ? { success: true } : { success: false, reason: res.error || 'Échec SMS (opérateur).' }
   } catch (err) {

@@ -16,6 +16,7 @@ import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
@@ -178,6 +179,9 @@ function AdminDemandes() {
           </button>
         }
       />
+
+      <AdminBadgeLegend />
+
 
       <AdminSection>
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
