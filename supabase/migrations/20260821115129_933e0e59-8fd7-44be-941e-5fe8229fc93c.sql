@@ -1,0 +1,10 @@
+REVOKE EXECUTE ON FUNCTION public.get_my_mission_lots(uuid[]) FROM public, anon;
+REVOKE EXECUTE ON FUNCTION public.admin_group_trajets_lot(uuid[]) FROM public, anon;
+REVOKE EXECUTE ON FUNCTION public.admin_ungroup_trajets_lot(uuid[]) FROM public, anon;
+REVOKE EXECUTE ON FUNCTION public.admin_assign_lot(uuid, uuid) FROM public, anon;
+REVOKE EXECUTE ON FUNCTION public.generate_lot_reference() FROM public, anon;
+REVOKE EXECUTE ON FUNCTION public.trajets_autolot_from_devis() FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.get_my_mission_lots(uuid[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_group_trajets_lot(uuid[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_ungroup_trajets_lot(uuid[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_assign_lot(uuid, uuid) TO authenticated;

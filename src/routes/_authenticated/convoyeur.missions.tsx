@@ -229,9 +229,26 @@ function ConvoyeurMissions() {
         };
       }));
 
-      const nextActiveMission = enriched.find((mission) => mission.statut === "en_cours")?.id ?? null;
+      // Lots multi-plaques (une mission, plusieurs véhicules)
+      let withLots = enriched;
+      try {
+        const trajetIds = enriched.map((m) => m.trajet_id).filter(Boolean);
+        if (trajetIds.length) {
+          const { data: lots } = await supabase.rpc("get_my_mission_lots" as never, { _trajet_ids: trajetIds } as never);
+          const lotByTrajet = new Map<string, { ref: string | null; plaques: string[]; total: number }>();
+          ((lots ?? []) as unknown as Array<{ trajet_id: string; lot_reference: string | null; plaques: string[] | null; total: number }>)
+            .forEach((l) => lotByTrajet.set(l.trajet_id, { ref: l.lot_reference, plaques: l.plaques ?? [], total: l.total }));
+          if (lotByTrajet.size) {
+            withLots = enriched.map((m) => ({ ...m, lot: lotByTrajet.get(m.trajet_id) ?? null }));
+          }
+        }
+      } catch {
+        /* lot non bloquant */
+      }
+
+      const nextActiveMission = withLots.find((mission) => mission.statut === "en_cours")?.id ?? null;
       setActiveMissionId(nextActiveMission);
-      setMissions(enriched);
+      setMissions(withLots);
     }
     setLoading(false);
   }, [user]);

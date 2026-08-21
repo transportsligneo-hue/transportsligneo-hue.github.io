@@ -5719,6 +5719,8 @@ export type Database = {
           is_test_data: boolean
           leg_index: number | null
           leg_type: string | null
+          lot_id: string | null
+          lot_reference: string | null
           marque: string | null
           mission_group_id: string | null
           mission_id: string | null
@@ -5794,6 +5796,8 @@ export type Database = {
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
+          lot_id?: string | null
+          lot_reference?: string | null
           marque?: string | null
           mission_group_id?: string | null
           mission_id?: string | null
@@ -5869,6 +5873,8 @@ export type Database = {
           is_test_data?: boolean
           leg_index?: number | null
           leg_type?: string | null
+          lot_id?: string | null
+          lot_reference?: string | null
           marque?: string | null
           mission_group_id?: string | null
           mission_id?: string | null
@@ -6652,6 +6658,10 @@ export type Database = {
         Args: { _convoyeur_id: string; _trajet_id: string }
         Returns: string
       }
+      admin_assign_lot: {
+        Args: { _convoyeur_id: string; _lot_id: string }
+        Returns: number
+      }
       admin_award_offer: { Args: { _offre_id: string }; Returns: string }
       admin_cancel_mission:
         | {
@@ -6756,6 +6766,13 @@ export type Database = {
         Args: { _trajet_id: string }
         Returns: undefined
       }
+      admin_group_trajets_lot: {
+        Args: { _trajet_ids: string[] }
+        Returns: {
+          lot_id: string
+          lot_reference: string
+        }[]
+      }
       admin_propose_mission_to_convoyeur: {
         Args: {
           _convoyeur_id: string
@@ -6792,6 +6809,10 @@ export type Database = {
       }
       admin_set_mission_prix: {
         Args: { _mission_id: string; _prix: number }
+        Returns: undefined
+      }
+      admin_ungroup_trajets_lot: {
+        Args: { _trajet_ids: string[] }
         Returns: undefined
       }
       admin_unlink_mission_from_group: {
@@ -6948,6 +6969,7 @@ export type Database = {
       }
       gen_tracking_code: { Args: never; Returns: string }
       generate_group_reference: { Args: never; Returns: string }
+      generate_lot_reference: { Args: never; Returns: string }
       get_active_vat_rates: {
         Args: never
         Returns: {
@@ -7040,6 +7062,16 @@ export type Database = {
           signed_at: string
           signed_pdf_path: string
           statut: string
+        }[]
+      }
+      get_my_mission_lots: {
+        Args: { _trajet_ids: string[] }
+        Returns: {
+          lot_id: string
+          lot_reference: string
+          plaques: string[]
+          total: number
+          trajet_id: string
         }[]
       }
       get_public_pricing_display: {

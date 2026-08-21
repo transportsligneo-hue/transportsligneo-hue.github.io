@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -52,6 +52,7 @@ interface TrajetRow {
   pricing_mode: "fixe" | "enchere" | null; prix_client_ttc: number | null;
   prix_convoyeur_fixe: number | null; prix_convoyeur_min: number | null; prix_convoyeur_max: number | null;
   marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
+  lot_id: string | null; lot_reference: string | null;
 }
 
 interface DemandeRow {
@@ -153,12 +154,14 @@ function AdminMissionsUnified() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [lotBusy, setLotBusy] = useState(false);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
   const clientBrands = useClientBrands(rows.map((r) => r.clientEmail));
   const pvMap = useMissionPv(Array.from(meta.values()).map((m) => m.attributionId));
 
   const show = useCallback((key: string) => !hidden.has(key), [hidden]);
-  const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length, [hidden]);
+  const colCount = useMemo(() => MISSION_COLUMNS.filter((c) => !hidden.has(c.key)).length + 1, [hidden]);
 
   /* ---------------- Préférences de colonnes (par admin) ---------------- */
   useEffect(() => {
@@ -350,6 +353,8 @@ function AdminMissionsUnified() {
         prixConvoyeurMax: t.prix_convoyeur_max,
         margeIndicativePct: t.marge_indicative_pct,
         rechargeSeule: isRechargeSeule(t),
+        lotId: t.lot_id ?? null,
+        lotRef: t.lot_reference ?? null,
       };
     });
 
@@ -432,6 +437,54 @@ function AdminMissionsUnified() {
     fetchAll();
   };
 
+  /* ---------------- Lots multi-plaques ---------------- */
+  const togglePick = (id: string) => {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const groupLot = async () => {
+    const ids = Array.from(picked);
+    if (ids.length < 2) return toast.error("Sélectionnez au moins deux missions");
+    setLotBusy(true);
+    const { data, error } = await supabase.rpc("admin_group_trajets_lot" as never, { _trajet_ids: ids } as never);
+    setLotBusy(false);
+    if (error) return toast.error("Regroupement impossible", { description: error.message });
+    const ref = (data as { lot_reference?: string }[] | null)?.[0]?.lot_reference;
+    toast.success(`Lot créé${ref ? ` · ${ref}` : ""}`, { description: `${ids.length} plaques regroupées` });
+    setPicked(new Set());
+    fetchAll();
+  };
+
+  const ungroupLot = async (ids: string[]) => {
+    if (!ids.length) return;
+    setLotBusy(true);
+    const { error } = await supabase.rpc("admin_ungroup_trajets_lot" as never, { _trajet_ids: ids } as never);
+    setLotBusy(false);
+    if (error) return toast.error("Dégroupage impossible", { description: error.message });
+    toast.success("Missions dégroupées");
+    setPicked(new Set());
+    fetchAll();
+  };
+
+  const assignMany = async (ids: string[], convoyeurId: string) => {
+    if (!convoyeurId || !ids.length) return;
+    setLotBusy(true);
+    let ok = 0;
+    for (const id of ids) {
+      const { error } = await supabase.rpc("admin_assign_convoyeur", { _trajet_id: id, _convoyeur_id: convoyeurId });
+      if (error) toast.error("Attribution partielle", { description: error.message });
+      else ok += 1;
+    }
+    setLotBusy(false);
+    if (ok) toast.success(`${ok} mission${ok > 1 ? "s" : ""} attribuée${ok > 1 ? "s" : ""}`);
+    setPicked(new Set());
+    fetchAll();
+  };
+
   /* ---------------- Filtres / tri ---------------- */
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: rows.length };
@@ -468,6 +521,7 @@ function AdminMissionsUnified() {
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
     | { type: "groupHeader"; gid: string; refs: string[]; convs: string[]; total: number; statut: string; clientEmail: string | null; clientNom: string | null; pv: string[] }
+    | { type: "lotHeader"; lotId: string; lotRef: string; ids: string[]; plaques: string[]; convs: string[]; total: number; clientNom: string | null; clientEmail: string | null }
     | { type: "row"; m: (typeof visible)[number]; band: boolean; inGroup: boolean; last: boolean };
 
   const listRows = useMemo<ListRow[]>(() => {
@@ -477,7 +531,37 @@ function AdminMissionsUnified() {
     const isRetour = (x: (typeof visible)[number]) => x.legType === "retour" || x.legIndex === 2;
     const isAller = (x: (typeof visible)[number]) => x.legType === "aller" || x.legIndex === 1;
 
+    const emitted = new Set<string>();
+
     visible.forEach((m) => {
+      if (emitted.has(m.id)) return;
+
+      // Lot multi-plaques : une mission, plusieurs véhicules
+      const lot = m.lotId ?? null;
+      if (lot) {
+        const members = visible.filter((x) => x.lotId === lot);
+        if (members.length >= 2 && !seen.has(`lot:${lot}`)) {
+          seen.add(`lot:${lot}`);
+          band = !band;
+          out.push({
+            type: "lotHeader",
+            lotId: lot,
+            lotRef: m.lotRef ?? "Lot",
+            ids: members.map((x) => x.id),
+            plaques: members.map((x) => x.immatriculation).filter(Boolean) as string[],
+            convs: Array.from(new Set(members.map((x) => meta.get(x.id)?.convoyeurNom).filter(Boolean))) as string[],
+            total: members.reduce((s2, x) => s2 + (x.prix ?? 0), 0),
+            clientNom: members.find((x) => x.clientNom)?.clientNom ?? null,
+            clientEmail: members.find((x) => x.clientEmail)?.clientEmail ?? null,
+          });
+          members.forEach((x, i) => {
+            emitted.add(x.id);
+            out.push({ type: "row", m: x, band, inGroup: true, last: i === members.length - 1 });
+          });
+          return;
+        }
+      }
+
       const gid = m.groupId ?? null;
       const all = gid ? visible.filter((x) => x.groupId === gid) : [];
       const duo = [all.find(isAller), all.find(isRetour)].filter(Boolean) as typeof all;
@@ -501,12 +585,16 @@ function AdminMissionsUnified() {
             clientNom: duo.find((x) => x.clientNom)?.clientNom ?? null,
             pv: Array.from(new Set(duo.flatMap((x) => pvOf(pvMap, meta.get(x.id)?.attributionId)))),
           });
-          duo.forEach((x, i) => out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 }));
+          duo.forEach((x, i) => {
+            emitted.add(x.id);
+            out.push({ type: "row", m: x, band, inGroup: true, last: i === duo.length - 1 });
+          });
         }
         if (inDuo.has(m.id)) return;
       }
 
       band = !band;
+      emitted.add(m.id);
       out.push({ type: "row", m, band, inGroup: false, last: true });
     });
     return out;
@@ -605,6 +693,48 @@ function AdminMissionsUnified() {
         ))}
       </div>
 
+      {picked.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#4f46e5]/30 bg-[#eef0ff] px-3 py-2">
+          <span className="text-[12px] font-semibold text-[#3730a3]">
+            {picked.size} mission{picked.size > 1 ? "s" : ""} sélectionnée{picked.size > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            disabled={lotBusy || picked.size < 2}
+            onClick={groupLot}
+            className="h-8 rounded-lg bg-[#4f46e5] px-3 text-[12px] font-semibold text-white disabled:opacity-50"
+          >
+            Regrouper en lot (plusieurs plaques)
+          </button>
+          <button
+            type="button"
+            disabled={lotBusy}
+            onClick={() => ungroupLot(Array.from(picked))}
+            className="h-8 rounded-lg border border-[#4f46e5]/40 bg-white px-3 text-[12px] font-semibold text-[#3730a3] disabled:opacity-50"
+          >
+            Dégrouper
+          </button>
+          <select
+            value=""
+            disabled={lotBusy}
+            onChange={(e) => e.target.value && assignMany(Array.from(picked), e.target.value)}
+            className="h-8 rounded-lg border border-[#4f46e5]/40 bg-white px-2 text-[12px] font-semibold text-[#3730a3]"
+          >
+            <option value="">Attribuer la sélection à…</option>
+            {convoyeurs.map((c) => (
+              <option key={c.id} value={c.id}>{c.nom}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setPicked(new Set())}
+            className="ml-auto text-[11.5px] font-medium text-[#3730a3] underline"
+          >
+            Tout désélectionner
+          </button>
+        </div>
+      )}
+
       <LegSuffixLegend className="mb-3" />
 
       {/* Tableau unique */}
@@ -619,6 +749,7 @@ function AdminMissionsUnified() {
             <table className="a6-table">
               <thead>
                 <tr>
+                  <th className="w-8"></th>
                   <th>Référence</th>
                   {show("trajet") && <th>Trajet</th>}
                   {show("plaque") && <th>Plaque / VIN</th>}
@@ -633,7 +764,57 @@ function AdminMissionsUnified() {
               </thead>
               <tbody>
                 {listRows.map((r) =>
-                  r.type === "groupHeader" ? (
+                  r.type === "lotHeader" ? (
+                    <tr key={`lot-${r.lotId}`} className="bg-[#eafaf2]">
+                      <td
+                        colSpan={colCount}
+                        className="!py-2.5 border-t-[3px] border-t-[#0f9d63] shadow-[inset_4px_0_0_0_#0f9d63]"
+                        style={{ paddingLeft: 14 }}
+                      >
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f9d63] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
+                            <Layers size={11} /> Lot {r.lotRef} · {r.ids.length} véhicules
+                          </span>
+                          {r.plaques.map((pl) => (
+                            <span key={pl} className="plate-tag plate-tag--sm">{pl}</span>
+                          ))}
+                          <span className="rounded-full bg-white/80 px-2 py-0.5">
+                            <ClientBrand
+                              brand={clientBrandOf(clientBrands, r.clientEmail)}
+                              fallbackName={r.clientNom}
+                              size={20}
+                            />
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#065f41]">
+                            Convoyeur{r.convs.length > 1 ? "s" : ""} : {r.convs.length ? r.convs.join(", ") : "non attribué"}
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#065f41]">
+                            Total : {r.total.toFixed(2)} €
+                          </span>
+                          <select
+                            value=""
+                            disabled={lotBusy}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => e.target.value && assignMany(r.ids, e.target.value)}
+                            className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
+                          >
+                            <option value="">Attribuer tout le lot à…</option>
+                            {convoyeurs.map((c) => (
+                              <option key={c.id} value={c.id}>{c.nom}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            disabled={lotBusy}
+                            onClick={(e) => { e.stopPropagation(); ungroupLot(r.ids); }}
+                            className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
+                          >
+                            Dégrouper
+                          </button>
+                        </span>
+                      </td>
+                    </tr>
+                  ) : r.type === "groupHeader" ? (
                     <tr key={`g-${r.gid}`} className="bg-[#e5e9ff]">
                       <td
                         colSpan={colCount}
@@ -673,6 +854,17 @@ function AdminMissionsUnified() {
                       className={`row ${r.inGroup ? "bg-[#f6f7ff]" : r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_4px_0_0_0_#4f46e5]" : ""} ${r.inGroup && r.last ? "border-b-[3px] border-b-[#4f46e5]" : ""}`}
                       onClick={() => setSelected(r.m)}
                     >
+                      <td className="w-8" onClick={(e) => e.stopPropagation()}>
+                        {r.m.kind === "trajet" && (
+                          <input
+                            type="checkbox"
+                            aria-label={`Sélectionner ${r.m.ref}`}
+                            checked={picked.has(r.m.id)}
+                            onChange={() => togglePick(r.m.id)}
+                            className="h-3.5 w-3.5 accent-[#4f46e5]"
+                          />
+                        )}
+                      </td>
                       <td className={r.inGroup ? "pl-5" : ""}>
                         <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
                           {alertsByTrajet.get(r.m.id) && (

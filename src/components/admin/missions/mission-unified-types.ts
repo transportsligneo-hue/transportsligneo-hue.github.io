@@ -56,4 +56,7 @@ export interface UnifiedMission {
   prixConvoyeurMax?: number | null;
   margeIndicativePct?: number | null;
   rechargeSeule?: boolean;
+  /** Lot multi-plaques (une mission, plusieurs véhicules) */
+  lotId?: string | null;
+  lotRef?: string | null;
 }
