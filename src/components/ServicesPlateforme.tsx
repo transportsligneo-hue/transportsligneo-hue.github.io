@@ -78,6 +78,9 @@ const CATS: { title: string; items: Feat[] }[] = [
 ];
 
 export default function ServicesPlateforme() {
+  const [open, setOpen] = useState(false);
+  const total = CATS.reduce((n, c) => n + c.items.length, 0);
+
   return (
     <div className="r4-page" style={{ minHeight: 0 }}>
       <section className="plateforme-section">
@@ -89,19 +92,41 @@ export default function ServicesPlateforme() {
           <p>Réservation, suivi, documents, comptabilité : tout est centralisé dans votre espace Transports Ligneo.</p>
         </div>
 
-        {CATS.map((cat) => (
-          <div key={cat.title} className="feat-category">
-            <div className="feat-cat-title">{cat.title}</div>
-            <div className="feat-grid2">
-              {cat.items.map(({ Icon, label }) => (
-                <div key={label} className="feat-item">
-                  <div className="feat-item-ic"><Icon size={17} strokeWidth={2} /></div>
-                  <span>{label}</span>
-                </div>
-              ))}
+        <button
+          type="button"
+          className={`feat-toggle${open ? " is-open" : ""}`}
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls="plateforme-features"
+        >
+          <span className="feat-toggle-label">
+            {open ? "Réduire les fonctionnalités" : "Déplier toutes les fonctionnalités"}
+            <span className="feat-toggle-count">{total}</span>
+          </span>
+          <span className="feat-toggle-chevron" aria-hidden="true">
+            <ChevronDown size={18} strokeWidth={2.4} />
+          </span>
+        </button>
+
+        <div
+          id="plateforme-features"
+          className={`feat-collapse${open ? " is-open" : ""}`}
+          hidden={!open}
+        >
+          {CATS.map((cat) => (
+            <div key={cat.title} className="feat-category">
+              <div className="feat-cat-title">{cat.title}</div>
+              <div className="feat-grid2">
+                {cat.items.map(({ Icon, label }) => (
+                  <div key={label} className="feat-item">
+                    <div className="feat-item-ic"><Icon size={17} strokeWidth={2} /></div>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
     </div>
   );
