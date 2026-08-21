@@ -479,7 +479,29 @@ function ConvoyeurMissions() {
     });
   }, [missions, filter, search]);
 
-  const closeInspection = useCallback(() => setInspection(null), []);
+  const closeInspection = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem(EDL_SESSION_KEY);
+        localStorage.removeItem(EDL_SESSION_KEY);
+      } catch {
+        // ignore
+      }
+    }
+    setInspection(null);
+  }, []);
+
+  // Une mission « recharge uniquement » n'a pas d'état des lieux de livraison :
+  // on purge toute session EDL restaurée par erreur pour ce type de mission.
+  useEffect(() => {
+    if (!inspection) return;
+    const m = missions.find((mm) => mm.id === inspection.attributionId);
+    if (!m) return;
+    if (isRechargeSeule(m.trajet as { options_meta?: unknown; type_mission?: string | null } | null)) {
+      closeInspection();
+    }
+  }, [inspection, missions, closeInspection]);
+
 
   const openMission = openMissionId ? missions.find(m => m.id === openMissionId) : null;
 
