@@ -291,8 +291,19 @@ function AdminDemandes() {
                         </span>
                       </td>
                       <td>
-                        <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
+                        <div className="flex flex-wrap items-center gap-1">
+                          <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
+                          {(() => {
+                            const marque = d.vehicule_marque ?? d.marque;
+                            const modele = d.vehicule_modele ?? d.modele;
+                            const plaque = d.vehicule_immatriculation ?? d.immatriculation;
+                            if (!marque || !modele) return <AdminBadge label="Infos véhicule incomplètes" tone="danger" />;
+                            if (!plaque) return <AdminBadge label="Plaque à confirmer" tone="warning" />;
+                            return null;
+                          })()}
+                        </div>
                       </td>
+
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button
