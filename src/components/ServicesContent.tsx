@@ -1,6 +1,7 @@
-import { User, Building2, Truck, Star, Camera, ShieldCheck } from "lucide-react";
+import { User, Building2, Truck, Star, Camera, ShieldCheck, Users2 } from "lucide-react";
 import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
+import ProSegment from "@/components/services/ProSegment";
 
 const services = [
   {
@@ -41,36 +42,71 @@ const services = [
   },
 ];
 
-export default function ServicesContent() {
+export type Audience = "particuliers" | "pro";
+
+export default function ServicesContent({
+  audience = "particuliers",
+  onAudienceChange,
+}: {
+  audience?: Audience;
+  onAudienceChange?: (a: Audience) => void;
+}) {
   return (
     <div className="r4-page">
-      <div className="v4-hero">
-        <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
-        <h1 className="v4-h1">Le convoyage, <span className="v4-accent">réinventé</span>.</h1>
-        <p className="v4-hero-p">De la citadine au véhicule de collection, pour les particuliers comme pour les professionnels : un service de convoyage complet, transparent et assuré.</p>
+      {/* Toggle Particuliers / Professionnels */}
+      <div className="v4-tabs" role="tablist" aria-label="Audience">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={audience === "particuliers"}
+          className={`v4-tab${audience === "particuliers" ? " is-active" : ""}`}
+          onClick={() => onAudienceChange?.("particuliers")}
+        >
+          <User size={15} />
+          Particuliers
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={audience === "pro"}
+          className={`v4-tab pro${audience === "pro" ? " is-active" : ""}`}
+          onClick={() => onAudienceChange?.("pro")}
+        >
+          <Users2 size={15} />
+          Professionnels
+        </button>
       </div>
 
-      <div className="v4-section">
-        <div className="v4-services-grid">
-          {services.map(({ Icon, title, desc, tags }) => (
-            <div key={title} className="v4-svc-card">
-              <div className="v4-svc-ic"><Icon size={22} strokeWidth={2} /></div>
-              <h3>{title}</h3>
-              <p>{desc}</p>
-              <div className="v4-svc-tags">
-                {tags.map((t) => <span key={t} className="v4-svc-tag">{t}</span>)}
-              </div>
+      {audience === "particuliers" ? (
+        <>
+          <div className="v4-hero">
+            <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
+            <h1 className="v4-h1">Le convoyage, <span className="v4-accent">réinventé</span>.</h1>
+            <p className="v4-hero-p">De la citadine au véhicule de collection, pour les particuliers comme pour les professionnels : un service de convoyage complet, transparent et assuré.</p>
+          </div>
+
+          <div className="v4-section">
+            <div className="v4-services-grid">
+              {services.map(({ Icon, title, desc, tags }) => (
+                <div key={title} className="v4-svc-card">
+                  <div className="v4-svc-ic"><Icon size={22} strokeWidth={2} /></div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                  <div className="v4-svc-tags">
+                    {tags.map((t) => <span key={t} className="v4-svc-tag">{t}</span>)}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <ServicesGarantiesCarousel />
+          <ServicesGarantiesCarousel />
 
-      <ServicesPlateforme />
-
-
-
+          <ServicesPlateforme />
+        </>
+      ) : (
+        <ProSegment />
+      )}
     </div>
   );
 }
