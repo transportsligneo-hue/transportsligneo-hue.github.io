@@ -1424,9 +1424,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   type="button"
                   onClick={() => setStep(s => Math.min(4, s + 1))}
                   disabled={
-                    (step === 1 && (!departure || !arrival)) ||
+                    (step === 1 && (!departure || !arrival || !date || !heure)) ||
                     (step === 2 && (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim()))) ||
-                    (step === 3 && (!nom || !prenom || !email || !telephone || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted)))
+                    (step === 3 && (!nom.trim() || !prenom.trim() || !email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) || telephone.replace(/\D/g, "").length < 9 || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted)))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
