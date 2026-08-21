@@ -7934,3 +7934,6 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     var(--surface-white) 100%);
 }
 .sg-carousel-section > * { position: relative; z-index: 2; }
+
+.sg-carousel-section { border: 0 !important; box-shadow: none !important; }
+.r4-page .v4-section { border-bottom: 0 !important; box-shadow: none !important; }
