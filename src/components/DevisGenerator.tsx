@@ -703,27 +703,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Départ / Arrivée · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <MapPin size={11} className="text-[#60a5fa]" /> Départ
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <MapPin size={11} className="text-[#e7c76a]" /> Départ
                 </label>
                 <PlacesInput
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Adresse de départ"
-                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <MapPinned size={11} className="text-[#60a5fa]" /> Arrivée
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
                 </label>
                 <PlacesInput
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée"
-                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -738,13 +738,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Véhicule · pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                <Car size={11} className="text-[#60a5fa]" /> Véhicule
+              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <Car size={11} className="text-[#e7c76a]" /> Véhicule
               </label>
               <select
                 value={vehicleType}
                 onChange={e => setVehicleType(e.target.value)}
-                className="w-full bg-transparent text-white text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
+                className="w-full bg-transparent text-white text-[15px] font-semibold appearance-none pr-6 cursor-pointer focus:outline-none"
               >
                 <option value="">Sélectionnez votre véhicule</option>
                 {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
@@ -755,25 +755,25 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Date / Heure · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Calendar size={11} className="text-[#60a5fa]" /> Date *
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <Calendar size={11} className="text-[#e7c76a]" /> Date *
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Clock size={11} className="text-[#60a5fa]" /> Heure *
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <Clock size={11} className="text-[#e7c76a]" /> Heure *
                 </label>
                 <input
                   type="time"
                   value={heure}
                   onChange={e => setHeure(e.target.value)}
-                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
               </div>
             </div>
