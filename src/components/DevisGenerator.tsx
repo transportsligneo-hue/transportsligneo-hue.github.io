@@ -103,11 +103,12 @@ export interface DevisGeneratorProps {
   successRedirect?: string;
   /**
    * Visual layout of step 0.
-   * - "bar"        : current full-width horizontal bar (used on /tarifs and everywhere else).
+   * - "bar"        : current full-width horizontal bar.
    * - "hero-card"  : compact vertical card meant to live in the right column of the hero.
+   * - "flat"       : full-width fields posés directement sur le fond de page (/tarifs).
    * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
-  variant?: "bar" | "hero-card";
+  variant?: "bar" | "hero-card" | "flat";
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
