@@ -195,7 +195,7 @@ function AdminMissionsUnified() {
       supabase.from("trajets").select("*").order("created_at", { ascending: false }),
       supabase
         .from("demandes_convoyage")
-        .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, type_trajet")
+        .select("id, nom, prenom, email, telephone, depart, arrivee, date_souhaitee, heure_souhaitee, marque, modele, immatriculation, prix_estime, statut, created_at, date_retour, depart_retour")
         .in("statut", ["nouvelle", "a_traiter"])
         .order("created_at", { ascending: false }),
       supabase.from("attributions").select("id, trajet_id, convoyeur_id, statut, numero_mission, created_at"),
