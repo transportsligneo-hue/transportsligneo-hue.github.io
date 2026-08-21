@@ -374,7 +374,7 @@ function AdminMissionsUnified() {
         prixConvoyeur: null,
         prixSuggere: null,
         statutPublication: null,
-        isRoundTrip: d.type_trajet === "aller_retour",
+        isRoundTrip: Boolean(d.date_retour || d.depart_retour),
         legType: null,
         isTest: false,
         createdAt: d.created_at,
