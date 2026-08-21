@@ -7520,8 +7520,9 @@ html.theme-light .r4-page .hero-pill.hero-pill-green {
   background-repeat: no-repeat;
   background-size: 160% 100%, 140% 100%, 100% 100%;
   filter: blur(0.5px);
-  animation: ligneo-blend-drift 14s ease-in-out infinite;
-  will-change: opacity, background-position;
+  /* Fondu statique : aucune animation, rendu identique partout */
+  background-position: 50% 0%, 50% 100%, 50% 50%;
+  opacity: 1;
 }
 .section-bg::before,
 .section-bg-alt::before,
@@ -7813,7 +7814,6 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
       rgba(var(--ligneo-page-bg), 0.24) 76%,
       rgba(var(--ligneo-page-bg), 0.08) 88%,
       rgba(var(--ligneo-page-bg), 0) 100%);
-  animation: ligneo-blend-drift 16s ease-in-out infinite;
 }
 
 /* Halo diffus qui adoucit encore la limite et apporte de la profondeur */
@@ -7830,5 +7830,4 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     rgba(var(--ligneo-page-bg), 0) 100%);
   filter: blur(48px);
   opacity: 0.95;
-  animation: ligneo-blend-drift 16s ease-in-out infinite reverse;
 }
