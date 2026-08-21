@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -693,6 +693,48 @@ function AdminMissionsUnified() {
         ))}
       </div>
 
+      {picked.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#4f46e5]/30 bg-[#eef0ff] px-3 py-2">
+          <span className="text-[12px] font-semibold text-[#3730a3]">
+            {picked.size} mission{picked.size > 1 ? "s" : ""} sélectionnée{picked.size > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            disabled={lotBusy || picked.size < 2}
+            onClick={groupLot}
+            className="h-8 rounded-lg bg-[#4f46e5] px-3 text-[12px] font-semibold text-white disabled:opacity-50"
+          >
+            Regrouper en lot (plusieurs plaques)
+          </button>
+          <button
+            type="button"
+            disabled={lotBusy}
+            onClick={() => ungroupLot(Array.from(picked))}
+            className="h-8 rounded-lg border border-[#4f46e5]/40 bg-white px-3 text-[12px] font-semibold text-[#3730a3] disabled:opacity-50"
+          >
+            Dégrouper
+          </button>
+          <select
+            value=""
+            disabled={lotBusy}
+            onChange={(e) => e.target.value && assignMany(Array.from(picked), e.target.value)}
+            className="h-8 rounded-lg border border-[#4f46e5]/40 bg-white px-2 text-[12px] font-semibold text-[#3730a3]"
+          >
+            <option value="">Attribuer la sélection à…</option>
+            {convoyeurs.map((c) => (
+              <option key={c.id} value={c.id}>{c.nom}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setPicked(new Set())}
+            className="ml-auto text-[11.5px] font-medium text-[#3730a3] underline"
+          >
+            Tout désélectionner
+          </button>
+        </div>
+      )}
+
       <LegSuffixLegend className="mb-3" />
 
       {/* Tableau unique */}
@@ -707,6 +749,7 @@ function AdminMissionsUnified() {
             <table className="a6-table">
               <thead>
                 <tr>
+                  <th className="w-8"></th>
                   <th>Référence</th>
                   {show("trajet") && <th>Trajet</th>}
                   {show("plaque") && <th>Plaque / VIN</th>}
@@ -721,7 +764,57 @@ function AdminMissionsUnified() {
               </thead>
               <tbody>
                 {listRows.map((r) =>
-                  r.type === "groupHeader" ? (
+                  r.type === "lotHeader" ? (
+                    <tr key={`lot-${r.lotId}`} className="bg-[#eafaf2]">
+                      <td
+                        colSpan={colCount}
+                        className="!py-2.5 border-t-[3px] border-t-[#0f9d63] shadow-[inset_4px_0_0_0_#0f9d63]"
+                        style={{ paddingLeft: 14 }}
+                      >
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f9d63] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
+                            <Layers size={11} /> Lot {r.lotRef} · {r.ids.length} véhicules
+                          </span>
+                          {r.plaques.map((pl) => (
+                            <span key={pl} className="plate-tag plate-tag--sm">{pl}</span>
+                          ))}
+                          <span className="rounded-full bg-white/80 px-2 py-0.5">
+                            <ClientBrand
+                              brand={clientBrandOf(clientBrands, r.clientEmail)}
+                              fallbackName={r.clientNom}
+                              size={20}
+                            />
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#065f41]">
+                            Convoyeur{r.convs.length > 1 ? "s" : ""} : {r.convs.length ? r.convs.join(", ") : "non attribué"}
+                          </span>
+                          <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10.5px] font-semibold text-[#065f41]">
+                            Total : {r.total.toFixed(2)} €
+                          </span>
+                          <select
+                            value=""
+                            disabled={lotBusy}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => e.target.value && assignMany(r.ids, e.target.value)}
+                            className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
+                          >
+                            <option value="">Attribuer tout le lot à…</option>
+                            {convoyeurs.map((c) => (
+                              <option key={c.id} value={c.id}>{c.nom}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            disabled={lotBusy}
+                            onClick={(e) => { e.stopPropagation(); ungroupLot(r.ids); }}
+                            className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
+                          >
+                            Dégrouper
+                          </button>
+                        </span>
+                      </td>
+                    </tr>
+                  ) : r.type === "groupHeader" ? (
                     <tr key={`g-${r.gid}`} className="bg-[#e5e9ff]">
                       <td
                         colSpan={colCount}
@@ -761,6 +854,17 @@ function AdminMissionsUnified() {
                       className={`row ${r.inGroup ? "bg-[#f6f7ff]" : r.band ? "bg-[var(--a6-blue)]/[0.05]" : "bg-white"} ${r.inGroup ? "shadow-[inset_4px_0_0_0_#4f46e5]" : ""} ${r.inGroup && r.last ? "border-b-[3px] border-b-[#4f46e5]" : ""}`}
                       onClick={() => setSelected(r.m)}
                     >
+                      <td className="w-8" onClick={(e) => e.stopPropagation()}>
+                        {r.m.kind === "trajet" && (
+                          <input
+                            type="checkbox"
+                            aria-label={`Sélectionner ${r.m.ref}`}
+                            checked={picked.has(r.m.id)}
+                            onChange={() => togglePick(r.m.id)}
+                            className="h-3.5 w-3.5 accent-[#4f46e5]"
+                          />
+                        )}
+                      </td>
                       <td className={r.inGroup ? "pl-5" : ""}>
                         <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
                           {alertsByTrajet.get(r.m.id) && (
