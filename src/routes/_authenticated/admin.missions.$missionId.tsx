@@ -324,9 +324,10 @@ function AdminMissionDetail() {
 
   // Numéro de base partagé pour un aller-retour (les 2 volets affichent 075A / 075R)
   const [groupBaseNumero, setGroupBaseNumero] = useState<string | null>(null);
+  const [legTabs, setLegTabs] = useState<{ attributionId: string; isAller: boolean; numero: string | null }[]>([]);
   const groupId = trajet?.mission_group_id ?? null;
   useEffect(() => {
-    if (!groupId) { setGroupBaseNumero(null); return; }
+    if (!groupId) { setGroupBaseNumero(null); setLegTabs([]); return; }
     let cancelled = false;
     (async () => {
       const { data: legs } = await supabase
@@ -337,21 +338,26 @@ function AdminMissionDetail() {
       if (!ids.length) return;
       const { data: attrs } = await supabase
         .from("attributions")
-        .select("trajet_id, numero_mission")
+        .select("id, trajet_id, numero_mission")
         .in("trajet_id", ids);
       const legById = new Map((legs ?? []).map((l) => [l.id, l]));
       let base: string | null = null;
+      const tabs: { attributionId: string; isAller: boolean; numero: string | null }[] = [];
       (attrs ?? []).forEach((a) => {
-        if (!a.trajet_id || !a.numero_mission) return;
-        const num = stripLegSuffix(a.numero_mission);
+        if (!a.trajet_id) return;
         const leg = legById.get(a.trajet_id);
         const isAller = (leg?.leg_index ?? 1) === 1 || leg?.leg_type === "aller";
+        tabs.push({ attributionId: a.id, isAller, numero: a.numero_mission ?? null });
+        if (!a.numero_mission) return;
+        const num = stripLegSuffix(a.numero_mission);
         if (!base || isAller || num < base) base = isAller ? num : base ?? num;
       });
-      if (!cancelled) setGroupBaseNumero(base);
+      tabs.sort((a, b) => Number(b.isAller) - Number(a.isAller));
+      if (!cancelled) { setGroupBaseNumero(base); setLegTabs(tabs); }
     })();
     return () => { cancelled = true; };
   }, [groupId]);
+
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -955,6 +961,34 @@ function AdminMissionDetail() {
           <RefreshCw size={15} />
         </IconButton>
       </div>
+
+      {/* === Switch Livraison / Restitution (aller-retour) === */}
+      {legTabs.length > 1 && (
+        <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-xl border border-pro-border bg-pro-surface p-1">
+          {legTabs.map((leg) => {
+            const active = leg.attributionId === attribution.id;
+            return (
+              <button
+                key={leg.attributionId}
+                type="button"
+                disabled={active}
+                onClick={() =>
+                  navigate({ to: "/admin/missions/$missionId", params: { missionId: leg.attributionId } })
+                }
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                  active
+                    ? "bg-pro-accent text-white shadow-sm"
+                    : "text-pro-text-soft hover:text-pro-text hover:bg-pro-surface-2"
+                }`}
+              >
+                {leg.isAller ? "Livraison" : "Restitution"}
+                {leg.numero ? <span className="ml-2 opacity-70">{leg.numero}</span> : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
 
       {(trajet.client_nom || trajet.client_email || clientSociete) && (
         <AdminOrgContextBanner
