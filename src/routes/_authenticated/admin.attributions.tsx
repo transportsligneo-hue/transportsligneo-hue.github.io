@@ -639,23 +639,28 @@ function AdminAttributions() {
                     {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
                   {(() => {
+                    const ownPlate = a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation;
                     const embedded = a.trajet?.devis?.vehicules ?? undefined;
                     const extra = embedded && embedded.length > 0
                       ? embedded
                       : a.trajet?.devis_id
                         ? devisVehicules.get(a.trajet.devis_id)
                         : undefined;
+                    // Un trajet qui porte sa propre plaque = 1 véhicule = 1 mission.
+                    // On n'affiche la liste complète du devis que si la mission
+                    // n'a pas encore de véhicule propre (sinon faux doublons).
                     const list: { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null }[] =
-                      extra && extra.length > 1
+                      !ownPlate && extra && extra.length > 1
                         ? extra
                         : [{
-                            immatriculation: a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation,
+                            immatriculation: ownPlate,
                             marque: a.trajet?.marque,
                             modele: a.trajet?.modele,
                             vin: a.trajet?.vin,
                             energie: a.trajet?.vehicule_energie,
                             type: a.trajet?.vehicule_type,
                           }];
+
 
                     return (
                       <div className="mt-2 space-y-1">

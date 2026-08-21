@@ -4,10 +4,14 @@
  * Un éventuel suffixe de volet est affiché séparé par un tiret → MIS-TLG-2026-#075-L.
  */
 export function displayNumero(numero: string): string {
+  // Sous-numéro de dossier groupé : MIS-TLG-2026-108.2 → MIS-TLG-2026-#108.2
+  const sub = numero.match(/-#?(\d+)\.(\d+)$/);
+  if (sub) return numero.replace(/-#?\d+\.\d+$/, `-#${sub[1]}.${sub[2]}`);
   return numero.replace(/-#?(\d+)-?([ARL])?$/i, (_m, digits: string, suffix?: string) =>
     `-#${digits}${suffix ? `-${suffix.toUpperCase()}` : ""}`,
   );
 }
+
 
 
 /** Numéro mission MIS-TLG-YYYY-#XXX dérivé déterministe depuis created_at + id */
