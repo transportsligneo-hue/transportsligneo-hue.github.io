@@ -15,6 +15,7 @@ import {
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
+import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -44,6 +45,7 @@ function AdminDevisDetailPage() {
   const [converting, setConverting] = useState(false);
   const [priceInput, setPriceInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
+  const [prixVehiculesOpen, setPrixVehiculesOpen] = useState(false);
 
 
   const buildDevisData = (row: any): DevisData =>
@@ -337,6 +339,21 @@ function AdminDevisDetailPage() {
             <p className="text-[10px] text-pro-muted uppercase tracking-wider">TTC</p>
             {devis.tarif_label && <p className="text-xs text-pro-text-soft mt-2">{devis.tarif_label}</p>}
 
+            {Array.isArray(devis.vehicules) && devis.vehicules.length > 1 && (
+              <div className="mt-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPrixVehiculesOpen(true)}
+                  icon={<Car size={12} />}
+                >
+                  Prix par véhicule ({devis.vehicules.length})
+                </Button>
+              </div>
+            )}
+
+
+
             {devis.locked_at ? (
               <p className="mt-3 text-[11px] text-pro-muted">Devis signé/verrouillé : le montant n'est plus modifiable.</p>
             ) : (
@@ -530,6 +547,15 @@ function AdminDevisDetailPage() {
           </Card>
         </div>
       </div>
+
+      <VehiculesPrixDialog
+        open={prixVehiculesOpen}
+        onClose={() => setPrixVehiculesOpen(false)}
+        devisId={devisId}
+        title={`Prix par véhicule — devis ${devis.numero ?? ""}`}
+        onSaved={() => void load()}
+      />
     </div>
+
   );
 }
