@@ -29,6 +29,7 @@ import {
 } from "@/components/admin/ui";
 import { LogoUploader } from "@/components/LogoUploader";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { AdminAvatarUploader } from "@/components/admin/AdminAvatarUploader";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
@@ -54,6 +55,7 @@ interface Profile {
   type_client: string | null;
   statut: string | null;
   logo_url: string | null;
+  avatar_url: string | null;
   created_at: string;
   pricing_display_mode: string | null;
   tva_exemption_note: string | null;
@@ -455,6 +457,13 @@ function AdminClientDetail() {
           description="Modifiez les champs puis enregistrez."
         >
           <div className="space-y-4">
+            <AdminField label="Photo de profil">
+              <AdminAvatarUploader
+                ownerUserId={profile.user_id}
+                value={profile.avatar_url}
+                onChange={(url) => setProfile({ ...profile, avatar_url: url })}
+              />
+            </AdminField>
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />

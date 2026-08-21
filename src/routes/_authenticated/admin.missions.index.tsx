@@ -64,7 +64,13 @@ interface DemandeRow {
 }
 
 const PRIORITY: Record<string, number> = { en_cours: 60, attribue: 50, accepte: 40, en_attente: 30, termine: 20, annule: 10 };
-const ACTIVE_ATTR = ["propose", "accepte", "en_cours", "en_attente_validation"];
+// Statuts d'attribution qui ne comptent plus (le convoyeur n'a pas fait la mission)
+const DEAD_ATTR = ["refuse", "refusee", "annule", "annulee", "expire", "expiree"];
+// Priorité d'affichage : une attribution en cours prime sur une attribution terminée
+const ATTR_PRIORITY: Record<string, number> = {
+  en_cours: 60, accepte: 55, en_attente_validation: 50, propose: 45,
+  validee: 40, termine: 35, terminee: 35,
+};
 const TABLE_KEY = "admin_missions";
 
 const QUICK_STATUS: { value: string; label: string }[] = [
@@ -240,7 +246,12 @@ function AdminMissionsUnified() {
     attrRows.forEach((a) => {
       if (!a.trajet_id) return;
       if (a.numero_mission && !numeroByTrajet.has(a.trajet_id)) numeroByTrajet.set(a.trajet_id, a.numero_mission);
-      if (ACTIVE_ATTR.includes(a.statut ?? "") && !activeAttrByTrajet.has(a.trajet_id)) {
+      const st = (a.statut ?? "").toLowerCase();
+      if (DEAD_ATTR.includes(st) || !a.convoyeur_id) return;
+      const cur = activeAttrByTrajet.get(a.trajet_id);
+      const score = ATTR_PRIORITY[st] ?? 10;
+      const curScore = cur ? ATTR_PRIORITY[(cur.statut ?? "").toLowerCase()] ?? 10 : -1;
+      if (score > curScore) {
         activeAttrByTrajet.set(a.trajet_id, { id: a.id, convoyeur_id: a.convoyeur_id, statut: a.statut });
       }
     });
