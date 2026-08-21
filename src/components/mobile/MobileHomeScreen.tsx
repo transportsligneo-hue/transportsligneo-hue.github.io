@@ -30,7 +30,7 @@ import {
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
-import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
+import DevisGenerator from "@/components/DevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -197,7 +197,7 @@ export default function MobileHomeScreen() {
           <ChevronRight size={16} className="text-[#93c5fd] shrink-0" />
         </button>
 
-        <MobileDevisGenerator />
+        <DevisGenerator variant="flat-mini" />
       </div>
 
       {/* Bande de statistiques (alignée sur le PC) */}

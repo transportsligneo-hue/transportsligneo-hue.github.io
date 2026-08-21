@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
-import MobileDevisGenerator from "@/components/mobile/MobileDevisGenerator";
+import DevisGenerator from "@/components/DevisGenerator";
 
 /**
  * MobileTarifsScreen · page Tarifs dédiée mobile, ambiance navy/or
@@ -37,7 +37,7 @@ export default function MobileTarifsScreen() {
 
       {/* Simulateur réel */}
       <div className="relative z-[3] mx-[18px] mt-5">
-        <MobileDevisGenerator />
+        <DevisGenerator variant="flat" />
       </div>
 
       {/* Grille tarifaire */}
