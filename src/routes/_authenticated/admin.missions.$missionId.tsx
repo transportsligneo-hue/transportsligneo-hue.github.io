@@ -71,6 +71,8 @@ import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncide
 import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
+import { MissionLotPlaquesPanel } from "@/components/admin/missions/MissionLotPlaquesPanel";
+
 
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
@@ -1248,6 +1250,15 @@ function AdminMissionDetail() {
         onGroupChanged={fetchAll}
       />
 
+      <MissionLotPlaquesPanel
+        trajetId={trajet.id}
+        lotId={(trajet as unknown as { lot_id?: string | null }).lot_id ?? null}
+        devisId={(trajet as unknown as { devis_id?: string | null }).devis_id ?? null}
+        lotReference={(trajet as unknown as { lot_reference?: string | null }).lot_reference ?? null}
+        baseNumero={missionNumber}
+        onPricesSaved={fetchAll}
+      />
+
       <MissionPriceCard
         trajetId={trajet.id}
         groupId={trajet.mission_group_id}
@@ -1258,6 +1269,7 @@ function AdminMissionDetail() {
           setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
         }
       />
+
 
 
 
