@@ -26,10 +26,11 @@ export interface MissionCardData {
     vin?: string | null;
     carte_grise_recto_url?: string | null;
     carte_grise_verso_url?: string | null;
+    options_meta?: unknown;
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
-  /** Lot multi-véhicules : une mission, plusieurs plaques */
+  /** Lot administratif : plusieurs missions distinctes, attribuables ensemble. */
   lot?: { ref: string | null; plaques: string[]; total: number } | null;
 }
 
@@ -108,12 +109,12 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
         </div>
       </button>
 
-      {/* Lot multi-plaques */}
+      {/* Lot de missions distinctes */}
       {mission.lot && mission.lot.total > 1 && (
         <div className="brex-divider px-5 py-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(110,255,205,0.35)] bg-[rgba(110,255,205,0.12)] px-2.5 py-0.5 text-[10.5px] font-bold text-[#6effcd]">
-              <Layers size={11} /> Lot · {mission.lot.total} véhicules
+              <Layers size={11} /> Lot · {mission.lot.total} missions
               {mission.lot.ref ? ` · ${mission.lot.ref}` : ""}
             </span>
             {mission.lot.plaques.map((pl) => (

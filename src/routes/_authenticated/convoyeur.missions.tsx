@@ -17,6 +17,8 @@ import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBl
 import { GpsMapView } from "@/components/GpsMapView";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
+import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCockpit";
+import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
@@ -229,7 +231,7 @@ function ConvoyeurMissions() {
         };
       }));
 
-      // Lots multi-plaques (une mission, plusieurs véhicules)
+      // Lots multi-plaques : missions distinctes reliées pour l'attribution groupée.
       let withLots = enriched;
       try {
         const trajetIds = enriched.map((m) => m.trajet_id).filter(Boolean);
@@ -520,6 +522,7 @@ function ConvoyeurMissions() {
   // === FICHE MISSION DÉTAILLÉE ===
   if (openMission) {
     const t = openMission.trajet;
+    const rechargeOnly = isRechargeSeule(t as { options_meta?: unknown; depart?: string | null; arrivee?: string | null } | null);
     const isActive = openMission.id === activeMissionId;
     const lastPoint = gpsPoints.length > 0 ? gpsPoints[gpsPoints.length - 1] : null;
 
@@ -793,7 +796,23 @@ function ConvoyeurMissions() {
         )}
 
         {/* === COCKPIT MISSION plein écran === */}
-        {openMission.statut !== "propose" && user && (
+        {openMission.statut !== "propose" && user && rechargeOnly && (
+          <RechargeMissionCockpit
+            attributionId={openMission.id}
+            userId={user.id}
+            driverName={driverDisplayName}
+            currentEtape={openMission.etape_courante ?? null}
+            statut={openMission.statut}
+            completions={openMission.options_completion ?? {}}
+            missionNumber={openMission.numero_mission ?? null}
+            plaque={t?.immatriculation || (t as { vehicule_immatriculation?: string | null } | null)?.vehicule_immatriculation || null}
+            depart={t?.depart ?? null}
+            rechargePoint={t?.arrivee ?? null}
+            onMacroStatusChange={(s: string) => updateStatus(openMission.id, s)}
+            onUpdated={fetchMissions}
+          />
+        )}
+        {openMission.statut !== "propose" && user && !rechargeOnly && (
           <MissionCockpit
             attributionId={openMission.id}
             userId={user.id}

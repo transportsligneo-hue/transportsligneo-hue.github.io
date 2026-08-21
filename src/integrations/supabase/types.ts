@@ -7261,6 +7261,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      sync_grouped_devis_trajets: {
+        Args: { _devis_id: string }
+        Returns: number
+      }
       sync_trajet_dates_from_devis: {
         Args: { _devis_id: string }
         Returns: undefined
