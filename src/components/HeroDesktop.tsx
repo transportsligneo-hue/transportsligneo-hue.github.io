@@ -129,7 +129,7 @@ export default function HeroDesktop() {
               }}
             />
             <div className="relative">
-              <DevisGenerator variant="hero-card" />
+              <DevisGenerator variant="flat-mini" />
             </div>
           </div>
 
