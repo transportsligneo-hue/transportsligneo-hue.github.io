@@ -4,6 +4,7 @@ import {
   Building2, Warehouse, Clock, LayoutDashboard, Calendar, MapPin,
 } from "lucide-react";
 import ProTimeline from "@/components/services/ProTimeline";
+import ServicesPlateforme from "@/components/ServicesPlateforme";
 
 const audiences = [
   { Icon: Building2, title: "Concessions", desc: "Transferts inter-sites, livraisons clients, restitutions : gagnez du temps sur vos flux quotidiens." },
@@ -159,6 +160,9 @@ export default function ProSegment() {
           </article>
         </div>
       </div>
+
+      {/* Notre plateforme — fonctionnalités */}
+      <ServicesPlateforme variant="pro" />
 
       {/* CTA */}
       <div className="v4-cta-box v">
