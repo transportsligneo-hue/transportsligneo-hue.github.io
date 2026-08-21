@@ -446,28 +446,70 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
       ) : !open ? (
         <div className="space-y-2">
           <p className="text-sm text-pro-text-soft">
-            Annulez la mission avec un motif normalisé (client, véhicule, convoyeur, force majeure…), en précisant
-            la facturation et l'indemnité éventuelle du convoyeur.
+            Deux issues possibles : <strong>annulation</strong> (mission sans suite) ou <strong>clôture facturable</strong>
+            {" "}quand le déplacement a bien eu lieu (client absent, véhicule non remis, report…) et reste dû.
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
-          >
-            <Ban size={13} /> Annuler / clôturer la mission
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => {
+                switchMode("annulation");
+                setOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+            >
+              <Ban size={13} /> Annuler la mission
+            </button>
+            <button
+              onClick={() => {
+                switchMode("facturable");
+                setOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+            >
+              <FileWarning size={13} /> Clôturer & facturer (non réalisée)
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
+          <div className="inline-flex rounded-lg border border-pro-border bg-pro-surface p-1">
+            <button
+              onClick={() => switchMode("annulation")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mode === "annulation" ? "bg-red-600 text-white" : "text-pro-text hover:bg-white"
+              }`}
+            >
+              Annulation
+            </button>
+            <button
+              onClick={() => switchMode("facturable")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mode === "facturable" ? "bg-emerald-600 text-white" : "text-pro-text hover:bg-white"
+              }`}
+            >
+              Clôture facturable
+            </button>
+          </div>
+
+          {mode === "facturable" && (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              La mission restera <strong>Terminée</strong> et facturable au client : elle n'apparaîtra pas comme annulée
+              dans le suivi ni dans la facturation.
+            </p>
+          )}
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-pro-muted mb-2">Motif</p>
             <div className="grid gap-2 sm:grid-cols-2">
-              {CLOTURE_CATEGORIES.map((c) => (
+              {catalogue.map((c) => (
                 <button
                   key={c.key}
                   onClick={() => pickCategorie(c.key)}
                   className={`text-left rounded-lg border px-3 py-2 transition ${
                     categorie === c.key
-                      ? "border-red-400 bg-red-50 ring-1 ring-red-300"
+                      ? mode === "facturable"
+                        ? "border-emerald-400 bg-emerald-50 ring-1 ring-emerald-300"
+                        : "border-red-400 bg-red-50 ring-1 ring-red-300"
                       : "border-pro-border bg-white hover:bg-pro-surface"
                   }`}
                 >
@@ -478,9 +520,25 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
             </div>
           </div>
 
+          {mode === "facturable" && (
+            <label className="flex items-center gap-2 text-sm text-pro-text">
+              <span className="shrink-0">Montant facturé au client (optionnel)</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={montantFacture}
+                onChange={(e) => setMontantFacture(e.target.value)}
+                placeholder="inchangé"
+                className="w-28 rounded border border-pro-border bg-white px-2 py-1 text-sm"
+              />
+              <span>€</span>
+            </label>
+          )}
+
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wide text-pro-muted mb-1">
-              Commentaire {selected?.key === "autre" ? "(obligatoire)" : "(optionnel)"}
+              Commentaire {selected?.key === "autre" || selected?.key === "autre_facturable" ? "(obligatoire)" : "(optionnel)"}
             </label>
             <textarea
               value={motif}
