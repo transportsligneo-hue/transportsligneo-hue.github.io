@@ -422,14 +422,14 @@ function AdminAttributions() {
     // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client, is_test_data")
+      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client, is_test_data, lot_id")
       .in("statut", ["en_attente", "attribue"])
       .order("date_trajet", { ascending: true, nullsFirst: false });
     if (!trajets) return;
 
     // Fix : les trajets publiés au catalogue restent visibles (badge "Au catalogue"),
     // l'admin peut reprendre la main pour attribuer manuellement (mode mixte).
-    const assignableTrajets = trajets as Trajet[];
+    const assignableTrajets = trajets as (Trajet & { lot_id?: string | null })[];
 
     // Filtre côté client : retire les trajets ayant déjà une attribution non annulée
     const ids = assignableTrajets.map((t) => t.id);
@@ -441,7 +441,15 @@ function AdminAttributions() {
     const busy = new Set((existing ?? [])
       .filter((a) => !["annule", "refusee", "refuse"].includes(a.statut))
       .map((a) => a.trajet_id));
-    setTrajetsDisponibles(assignableTrajets.filter((t) => !busy.has(t.id)) as Trajet[]);
+    // Anti-doublon : si un véhicule du même lot est déjà attribué, le lot entier
+    // est affiché dans la carte d'attribution → on ne le remet pas dans "À attribuer".
+    const busyLots = new Set(
+      assignableTrajets.filter((t) => busy.has(t.id) && t.lot_id).map((t) => t.lot_id as string),
+    );
+    setTrajetsDisponibles(
+      assignableTrajets.filter((t) => !busy.has(t.id) && !(t.lot_id && busyLots.has(t.lot_id))) as Trajet[],
+    );
+
   }, []);
 
   useEffect(() => {
