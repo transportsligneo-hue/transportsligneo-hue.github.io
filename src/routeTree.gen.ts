@@ -74,6 +74,7 @@ import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/tra
 import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
+import { Route as ApiPublicAdminAlertsDispatchRouteImport } from './routes/api/public/admin-alerts-dispatch'
 import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
@@ -520,6 +521,12 @@ const ApiPublicAlertesDocumentsVehiculesRoute =
   ApiPublicAlertesDocumentsVehiculesRouteImport.update({
     id: '/api/public/alertes-documents-vehicules',
     path: '/api/public/alertes-documents-vehicules',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicAdminAlertsDispatchRoute =
+  ApiPublicAdminAlertsDispatchRouteImport.update({
+    id: '/api/public/admin-alerts-dispatch',
+    path: '/api/public/admin-alerts-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiFacturePaymentIntentRoute = ApiFacturePaymentIntentRouteImport.update({
@@ -1289,6 +1296,7 @@ export interface FileRoutesByFullPath {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
@@ -1456,6 +1464,7 @@ export interface FileRoutesByTo {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
@@ -1634,6 +1643,7 @@ export interface FileRoutesById {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
@@ -1812,6 +1822,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
@@ -1979,6 +1990,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
@@ -2156,6 +2168,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
@@ -2258,6 +2271,7 @@ export interface RootRouteChildren {
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
   ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
+  ApiPublicAdminAlertsDispatchRoute: typeof ApiPublicAdminAlertsDispatchRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
@@ -2746,6 +2760,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/alertes-documents-vehicules'
       fullPath: '/api/public/alertes-documents-vehicules'
       preLoaderRoute: typeof ApiPublicAlertesDocumentsVehiculesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/admin-alerts-dispatch': {
+      id: '/api/public/admin-alerts-dispatch'
+      path: '/api/public/admin-alerts-dispatch'
+      fullPath: '/api/public/admin-alerts-dispatch'
+      preLoaderRoute: typeof ApiPublicAdminAlertsDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/facture/payment-intent': {
@@ -4004,6 +4025,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
   ApiFacturePaymentIntentRoute: ApiFacturePaymentIntentRoute,
+  ApiPublicAdminAlertsDispatchRoute: ApiPublicAdminAlertsDispatchRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
