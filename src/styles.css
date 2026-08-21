@@ -4188,27 +4188,34 @@ body.is-driver-app .closed-link svg {
   font-weight:700; text-transform:uppercase;
 }
 .sg-h1{
-  text-align:center; color:#f3f6ff;
+  text-align:center;
   font-size:clamp(26px,4vw,38px); font-weight:800;
   margin:0 0 36px; letter-spacing:-0.3px;
-  font-family:'Playfair Display', serif;
+  font-family:'Poppins', sans-serif !important;
+  color:#ffffff !important;
 }
-.sg-h1-white{
-  color:#ffffff;
-}
+.sg-h1-white,
 .sg-h1-comma{
-  color:#ffffff;
+  color:#ffffff !important;
+  font-family:'Poppins', sans-serif !important;
+  font-weight:800;
+  font-style:normal;
+  background:none !important;
+  -webkit-text-fill-color:#ffffff !important;
 }
 .sg-h1-blue{
   font-style:normal;
-  font-family:'Poppins', sans-serif;
+  font-family:'Poppins', sans-serif !important;
   font-weight:800;
-  color:#60a5fa;
+  color:#3d7bff !important;
+  background:none !important;
+  -webkit-text-fill-color:#3d7bff !important;
   text-shadow:
-    0 0 18px rgba(96,165,250,0.55),
-    0 0 36px rgba(96,165,250,0.35),
-    0 0 54px rgba(96,165,250,0.18);
+    0 0 18px rgba(61,123,255,0.6),
+    0 0 36px rgba(61,123,255,0.38),
+    0 0 54px rgba(61,123,255,0.2);
 }
+
 .sg-panel{
   position:relative; display:grid; grid-template-columns:1fr 1fr; gap:0;
   background:
