@@ -7631,22 +7631,6 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     rgba(0,0,0,0) 100%);
 }
 
-/* 2) Halo lumineux respirant à la jonction (aucune arête) */
-.r4-page .v5-hero::after {
-  content: "";
-  position: absolute;
-  left: -10%; right: -10%;
-  bottom: -6%;
-  height: 46%;
-  pointer-events: none;
-  z-index: 1;
-  background:
-    radial-gradient(70% 100% at 50% 100%, rgba(61,155,255,0.07), transparent 74%),
-    radial-gradient(50% 90% at 22% 90%, rgba(110,231,255,0.05), transparent 76%);
-  filter: blur(28px);
-  animation: ligneo-blend-drift 16s ease-in-out infinite;
-}
-
 /* 3) La bande stats n'a plus d'overlay opaque : juste une diffusion douce */
 .r4-page .v5-hero-stats { padding-top: 0 !important; }
 .r4-page .v5-hero-stats::before,
@@ -7670,9 +7654,7 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
   filter: blur(14px);
   box-shadow: none;
 }
-@media (prefers-reduced-motion: reduce) {
-  .r4-page .v5-hero::after { animation: none; }
-}
+
 
 /* ============================================================
    CONTACT — onglet « Professionnel » en violet néon électrique
