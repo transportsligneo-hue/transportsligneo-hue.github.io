@@ -579,7 +579,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const isHero = variant === "hero-card";
 
   return (
-    <div className="w-full">
+    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}`}>
       <div className={isHero ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
         {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
         {!isHero && (

@@ -4,6 +4,8 @@ import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { openCookiePreferences } from "@/lib/cookie-consent";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import StoreBadges from "@/components/public/StoreBadges";
+import ThemePreference from "@/components/ThemePreference";
+
 
 const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
@@ -246,14 +248,18 @@ export default function Footer() {
             Gérer mes cookies
           </button>
         </p>
-        <button
-          onClick={scrollTop}
-          type="button"
-          className="flex items-center gap-1.5 rounded-full border border-[#7aa3ff]/30 bg-[#3f7bff]/10 px-4 py-2 text-xs font-bold text-[#4f8cff] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3f7bff]/20"
-        >
-          <ArrowUp size={13} className="animate-[ligneoFloatUp_2s_ease-in-out_infinite]" />
-          Haut de page
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <ThemePreference />
+          <button
+            onClick={scrollTop}
+            type="button"
+            className="flex items-center gap-1.5 rounded-full border border-[#7aa3ff]/30 bg-[#3f7bff]/10 px-4 py-2 text-xs font-bold text-[#4f8cff] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3f7bff]/20"
+          >
+            <ArrowUp size={13} className="animate-[ligneoFloatUp_2s_ease-in-out_infinite]" />
+            Haut de page
+          </button>
+        </div>
+
       </div>
     </footer>
   );
