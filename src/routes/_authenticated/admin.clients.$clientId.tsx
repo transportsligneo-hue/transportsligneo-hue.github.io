@@ -54,6 +54,7 @@ interface Profile {
   type_client: string | null;
   statut: string | null;
   logo_url: string | null;
+  avatar_url: string | null;
   created_at: string;
   pricing_display_mode: string | null;
   tva_exemption_note: string | null;
