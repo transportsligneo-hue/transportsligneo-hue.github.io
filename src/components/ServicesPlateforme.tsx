@@ -78,20 +78,22 @@ const CATS: { title: string; items: Feat[] }[] = [
 
 ];
 
-export default function ServicesPlateforme() {
+export default function ServicesPlateforme({ variant = "particuliers" }: { variant?: "particuliers" | "pro" }) {
   const [open, setOpen] = useState(false);
   const total = CATS.reduce((n, c) => n + c.items.length, 0);
+  const isPro = variant === "pro";
 
   return (
-    <div className="r4-page" style={{ minHeight: 0 }}>
+    <div className={`r4-page${isPro ? " plateforme-pro" : ""}`} style={{ minHeight: 0 }}>
       <section className="plateforme-section">
         <div className="plateforme-head">
-          <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
+          <div className={`v4-hero-eyebrow${isPro ? " v" : ""}`} style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Notre plateforme
           </div>
-          <h2>Des dizaines de fonctionnalités pour un convoyage <span className="v4-accent">sans effort</span></h2>
+          <h2>Des dizaines de fonctionnalités pour un convoyage <span className={`v4-accent${isPro ? " v" : ""}`}>sans effort</span></h2>
           <p>Réservation, suivi, documents, comptabilité : tout est centralisé dans votre espace Transports Ligneo.</p>
         </div>
+
 
         <button
           type="button"
