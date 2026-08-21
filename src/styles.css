@@ -6995,6 +6995,61 @@ html.theme-light .theme-pref-group { border-color: rgba(47,95,255,0.25); backgro
 html.theme-light .theme-pref-btn { color: #47506e; }
 html.theme-light .theme-pref-btn.is-active { background: #2f5fff; color: #ffffff; }
 
+/* ---- Sélecteur de thème compact (navbar) ---- */
+.theme-pref--compact { gap: 6px; }
+.theme-pref--compact .theme-pref-group {
+  padding: 3px;
+  gap: 3px;
+  border-radius: 999px;
+  border-color: rgba(122,163,255,0.35);
+  background: rgba(9,17,46,0.55);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 6px 18px -8px rgba(0,0,0,0.45);
+}
+.theme-pref--compact .theme-pref-btn {
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(219,227,255,0.75);
+  background: transparent;
+  transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.theme-pref--compact .theme-pref-btn:hover {
+  color: #ffffff;
+  background: rgba(79,140,255,0.12);
+}
+.theme-pref--compact .theme-pref-btn.is-active {
+  background: linear-gradient(135deg, #2f5fff, #2450e0 60%, #4f8cff);
+  color: #ffffff;
+  box-shadow:
+    0 3px 12px rgba(47,95,255,0.45),
+    0 0 14px rgba(79,140,255,0.35);
+}
+.theme-pref--compact .theme-pref-btn-text { display: inline; }
+
+/* Mobile navbar : réduction du sélecteur de thème */
+.mnav-bar .theme-pref--compact .theme-pref-group { padding: 2px; gap: 2px; }
+.mnav-bar .theme-pref--compact .theme-pref-btn { padding: 5px 6px; font-size: 0; }
+.mnav-bar .theme-pref--compact .theme-pref-btn svg { margin: 0; }
+
+html.theme-light .theme-pref--compact .theme-pref-group {
+  border-color: rgba(47,95,255,0.35);
+  background: rgba(238,243,255,0.72);
+}
+html.theme-light .theme-pref--compact .theme-pref-btn { color: #5b6485; }
+html.theme-light .theme-pref--compact .theme-pref-btn:hover { color: #2f5fff; background: rgba(47,95,255,0.08); }
+html.theme-light .theme-pref--compact .theme-pref-btn.is-active { color: #ffffff; }
+
+@media (max-width: 374px) {
+  .theme-pref--compact .theme-pref-btn-text { display: none; }
+  .theme-pref--compact .theme-pref-btn { padding: 5px 7px; }
+}
+
+
 /* ============ SERVICES : onglets Particuliers / Professionnels ============ */
 .r4-page .v4-tabs { display:flex; justify-content:center; gap:8px; padding:96px 16px 0; }
 .r4-page .v4-tab { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:999px;
