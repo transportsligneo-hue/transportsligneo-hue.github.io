@@ -592,9 +592,12 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
             <button
               onClick={submit}
               disabled={saving || !categorie}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 ${
+                mode === "facturable" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
+              }`}
             >
-              {saving ? <Loader2 size={13} className="animate-spin" /> : <Ban size={13} />} Confirmer l'annulation
+              {saving ? <Loader2 size={13} className="animate-spin" /> : mode === "facturable" ? <FileWarning size={13} /> : <Ban size={13} />}
+              {mode === "facturable" ? " Clôturer & facturer" : " Confirmer l'annulation"}
             </button>
             <button
               onClick={() => setOpen(false)}
