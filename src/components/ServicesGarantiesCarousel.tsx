@@ -139,7 +139,9 @@ export default function ServicesGarantiesCarousel() {
           <span>Nos garanties</span>
         </div>
         <h2 className="sg-h1">
-          Un convoyage suivi, <em>de bout en bout</em>
+          <span className="sg-h1-white">Un convoyage suivi</span>
+          <span className="sg-h1-comma">, </span>
+          <em className="sg-h1-blue">de bout en bout</em>
         </h2>
 
         <div className="sg-panel">
