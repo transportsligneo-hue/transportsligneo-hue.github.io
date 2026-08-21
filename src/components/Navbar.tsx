@@ -129,11 +129,12 @@ export default function Navbar() {
           <div className="2xl:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
             <ul className="flex flex-col items-center gap-6 pt-6">
               {navLinks.map((l) => (
-                <li key={l.to}>
+                <li key={`${l.to}-${l.search?.audience ?? ""}`}>
                   <Link
                     to={l.to}
+                    search={l.search}
                     onClick={() => setMobileOpen(false)}
-                    activeOptions={{ exact: true }}
+                    activeOptions={{ exact: l.search ? false : true }}
                     activeProps={{ className: "text-primary" }}
                     className="text-sm tracking-[0.15em] uppercase text-cream/80 hover:text-primary transition-colors"
                   >
