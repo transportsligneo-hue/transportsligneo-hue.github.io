@@ -108,7 +108,7 @@ export interface DevisGeneratorProps {
    * - "flat"       : full-width fields posés directement sur le fond de page (/tarifs).
    * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
-  variant?: "bar" | "hero-card" | "flat";
+  variant?: "bar" | "hero-card" | "flat" | "flat-mini";
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
@@ -577,11 +577,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }
 
   // --- ESTIMATEUR : carte premium "chauffeur" ---
-  const isFlat = variant === "flat";
+  const isMini = variant === "flat-mini";
+  const isFlat = variant === "flat" || isMini;
   const isHero = variant === "hero-card";
 
   return (
-    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}${isFlat ? " dg-estimator--flat" : ""}`}>
+    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}${isFlat ? " dg-estimator--flat" : ""}${isMini ? " dg-estimator--mini" : ""}`}>
       <div className={isHero || isFlat ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
         {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
         {!isHero && !isFlat && (
@@ -633,7 +634,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <option value="">Sélectionnez votre véhicule</option>
                   {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#e7c76a]/80 pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#60a5fa] pointer-events-none" />
               </div>
               <div className="dg-flat-field">
                 <label className="dg-flat-label"><Calendar size={12} /> Date *</label>
@@ -667,9 +668,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               type="button"
               onClick={() => setStep(1)}
               disabled={!isComplete}
-              className="mt-4 w-full inline-flex items-center justify-center gap-2.5 px-6 py-[18px] rounded-2xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[13px] tracking-[0.24em] uppercase shadow-[0_18px_45px_-12px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="dg-flat-cta mt-4"
             >
-              <Send size={15} /> Obtenir mon prix
+              <Send size={15} /> <span>Obtenir mon prix</span>
             </button>
 
             {/* Bandeau de réassurance */}
