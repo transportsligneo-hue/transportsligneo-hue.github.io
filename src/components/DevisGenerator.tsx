@@ -634,7 +634,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <option value="">Sélectionnez votre véhicule</option>
                   {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#e7c76a]/80 pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#60a5fa] pointer-events-none" />
               </div>
               <div className="dg-flat-field">
                 <label className="dg-flat-label"><Calendar size={12} /> Date *</label>
