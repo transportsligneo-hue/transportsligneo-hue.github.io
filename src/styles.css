@@ -7762,33 +7762,15 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
 .ligneo-footer-blend::before {
   content: "";
   position: absolute;
-  inset: -30px -10% 0;
+  inset: -40px -12% 0;
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(180deg,
-    rgba(var(--ligneo-page-bg), 0.95) 0%,
-    rgba(var(--ligneo-page-bg), 0.75) 25%,
-    rgba(var(--ligneo-page-bg), 0.35) 55%,
+    rgba(var(--ligneo-page-bg), 0.96) 0%,
+    rgba(var(--ligneo-page-bg), 0.80) 22%,
+    rgba(var(--ligneo-page-bg), 0.42) 52%,
     rgba(var(--ligneo-page-bg), 0) 100%);
-  filter: blur(36px);
-  opacity: 0.9;
+  filter: blur(48px);
+  opacity: 0.95;
   animation: ligneo-blend-drift 16s ease-in-out infinite reverse;
-}
-
-/* Ligne lumineuse très subtile qui crée une sensation de profondeur sans démarcation dure */
-.ligneo-footer-blend::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.55) 20%,
-    rgba(110, 231, 255, 0.45) 50%,
-    rgba(255, 255, 255, 0.55) 80%,
-    transparent 100%);
-  filter: blur(2px);
-  opacity: 0.55;
 }
