@@ -1248,6 +1248,15 @@ function AdminMissionDetail() {
         onGroupChanged={fetchAll}
       />
 
+      <MissionLotPlaquesPanel
+        trajetId={trajet.id}
+        lotId={(trajet as unknown as { lot_id?: string | null }).lot_id ?? null}
+        devisId={(trajet as unknown as { devis_id?: string | null }).devis_id ?? null}
+        lotReference={(trajet as unknown as { lot_reference?: string | null }).lot_reference ?? null}
+        baseNumero={missionNumber}
+        onPricesSaved={fetchAll}
+      />
+
       <MissionPriceCard
         trajetId={trajet.id}
         groupId={trajet.mission_group_id}
@@ -1258,6 +1267,7 @@ function AdminMissionDetail() {
           setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
         }
       />
+
 
 
 
