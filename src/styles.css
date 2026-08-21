@@ -7924,32 +7924,13 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
 /* Section « Nos garanties » : fondu haut/bas avec les sections claires */
 .sg-carousel-section::before,
 .sg-carousel-section::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0;
-  height: clamp(140px, 18vw, 260px);
-  pointer-events: none;
-  z-index: 1;
-  filter: blur(6px);
-}
-.sg-carousel-section::before {
-  top: 0;
-  background: linear-gradient(180deg,
-    rgba(var(--ligneo-page-bg), 1) 0%,
-    rgba(var(--ligneo-page-bg), 0.88) 14%,
-    rgba(var(--ligneo-page-bg), 0.62) 34%,
-    rgba(var(--ligneo-page-bg), 0.34) 56%,
-    rgba(var(--ligneo-page-bg), 0.12) 78%,
-    rgba(var(--ligneo-page-bg), 0) 100%);
-}
-.sg-carousel-section::after {
   bottom: 0;
   background: linear-gradient(180deg,
-    rgba(var(--ligneo-page-bg), 0) 0%,
-    rgba(var(--ligneo-page-bg), 0.12) 22%,
-    rgba(var(--ligneo-page-bg), 0.34) 44%,
-    rgba(var(--ligneo-page-bg), 0.62) 66%,
-    rgba(var(--ligneo-page-bg), 0.88) 86%,
-    rgba(var(--ligneo-page-bg), 1) 100%);
+    color-mix(in srgb, var(--surface-white) 0%, transparent) 0%,
+    color-mix(in srgb, var(--surface-white) 12%, transparent) 22%,
+    color-mix(in srgb, var(--surface-white) 34%, transparent) 44%,
+    color-mix(in srgb, var(--surface-white) 62%, transparent) 66%,
+    color-mix(in srgb, var(--surface-white) 88%, transparent) 86%,
+    var(--surface-white) 100%);
 }
 .sg-carousel-section > * { position: relative; z-index: 2; }
