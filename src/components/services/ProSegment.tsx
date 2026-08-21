@@ -160,6 +160,9 @@ export default function ProSegment() {
         </div>
       </div>
 
+      {/* Notre plateforme — fonctionnalités */}
+      <ServicesPlateforme variant="pro" />
+
       {/* CTA */}
       <div className="v4-cta-box v">
         <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
