@@ -7924,7 +7924,7 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
 /* Section « Nos garanties » : fondu haut/bas avec les sections claires */
 .sg-carousel-section::before,
 .sg-carousel-section::after {
-  bottom: 0;
+  bottom: -10px;
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--surface-white) 0%, transparent) 0%,
     color-mix(in srgb, var(--surface-white) 6%, transparent) 24%,
