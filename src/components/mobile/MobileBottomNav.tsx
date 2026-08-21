@@ -60,7 +60,7 @@ export default function MobileBottomNav() {
           <i className="ldock-dot" />
         </Link>
 
-        <Link to="/services" className={`ldock-item${isServices ? " is-active" : ""}`} aria-label="Services">
+        <Link to="/services" search={{ audience: "particuliers" }} className={`ldock-item${isServices ? " is-active" : ""}`} aria-label="Services">
           <span className="ldock-ic">
             <Truck strokeWidth={2} />
           </span>
