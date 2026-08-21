@@ -577,11 +577,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }
 
   // --- ESTIMATEUR : carte premium "chauffeur" ---
-  const isFlat = variant === "flat";
+  const isMini = variant === "flat-mini";
+  const isFlat = variant === "flat" || isMini;
   const isHero = variant === "hero-card";
 
   return (
-    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}${isFlat ? " dg-estimator--flat" : ""}`}>
+    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}${isFlat ? " dg-estimator--flat" : ""}${isMini ? " dg-estimator--mini" : ""}`}>
       <div className={isHero || isFlat ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
         {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
         {!isHero && !isFlat && (
