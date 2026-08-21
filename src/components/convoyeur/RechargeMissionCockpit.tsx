@@ -188,7 +188,7 @@ export function RechargeMissionCockpit({
   const ActiveIcon = active.icon;
 
   return (
-    <section className="mx-3 mb-5 overflow-hidden rounded-lg border border-cyan-300/15 bg-[#07102b] text-slate-50 shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
+    <section className="mx-3 mb-5 overflow-hidden rounded-[1.75rem] border border-cyan-300/15 bg-[#07102b] text-slate-50 shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
       <input
         ref={fileRef}
         type="file"
@@ -223,11 +223,11 @@ export function RechargeMissionCockpit({
           return (
             <span
               key={step.key}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold transition-all duration-300 ${
                 completed
                   ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
                   : selected
-                    ? "border-cyan-300/40 bg-cyan-300/10 text-cyan-200"
+                    ? "border-cyan-300/60 bg-cyan-300/20 text-cyan-100 shadow-[0_0_18px_-4px_rgba(103,232,249,0.7)] scale-[1.04]"
                     : "border-slate-600/40 text-slate-500"
               }`}
             >
@@ -238,9 +238,9 @@ export function RechargeMissionCockpit({
       </div>
 
       <div className="px-4 pb-5">
-        <div className="rounded-lg border border-cyan-300/15 bg-slate-50/[0.04] p-4">
+        <div className="rounded-3xl border border-cyan-300/15 bg-slate-50/[0.04] p-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-200">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
               <ActiveIcon size={22} />
             </span>
             <div>
@@ -256,7 +256,7 @@ export function RechargeMissionCockpit({
                 variant="outline"
                 disabled={busy || done(local, "recharge_cles_depart")}
                 onClick={() => void validateTask("recharge_cles_depart")}
-                className="h-12 justify-start border-slate-600 bg-slate-50/5 text-slate-50 hover:bg-slate-50/10 hover:text-slate-50"
+                className="rch-cta-ghost h-14 justify-start gap-3 px-4 text-[15px] hover:text-slate-50"
               >
                 {done(local, "recharge_cles_depart") ? <Check /> : <KeyRound />} Clés récupérées
               </Button>
@@ -264,7 +264,7 @@ export function RechargeMissionCockpit({
                 type="button"
                 disabled={busy || done(local, "recharge_compteur_depart")}
                 onClick={() => requestPhoto("recharge_compteur_depart")}
-                className="h-12 justify-start bg-cyan-300 text-[#07102b] hover:bg-cyan-200"
+                className="rch-cta h-14 justify-start gap-3 px-4 text-[15px]"
               >
                 {busy && photoKey === "recharge_compteur_depart" ? <Loader2 className="animate-spin" /> : done(local, "recharge_compteur_depart") ? <Check /> : <Camera />}
                 Photo du compteur au départ
@@ -273,25 +273,25 @@ export function RechargeMissionCockpit({
           )}
 
           {!sent && currentIndex === 1 && (
-            <Button disabled={busy} onClick={() => void startOutbound()} className="mt-4 h-12 w-full bg-cyan-300 text-[#07102b] hover:bg-cyan-200">
+            <Button disabled={busy} onClick={() => void startOutbound()} className="rch-cta mt-4 h-14 w-full gap-3 text-[15px]">
               {busy ? <Loader2 className="animate-spin" /> : <Navigation />} Démarrer le trajet vers la borne
             </Button>
           )}
 
           {!sent && currentIndex === 2 && (
-            <Button disabled={busy} onClick={() => requestPhoto("recharge_branchee")} className="mt-4 h-12 w-full bg-cyan-300 text-[#07102b] hover:bg-cyan-200">
+            <Button disabled={busy} onClick={() => requestPhoto("recharge_branchee")} className="rch-cta mt-4 h-14 w-full gap-3 text-[15px]">
               {busy ? <Loader2 className="animate-spin" /> : <Camera />} Photo du véhicule branché
             </Button>
           )}
 
           {!sent && currentIndex === 3 && (
-            <Button disabled={busy} onClick={() => void validateTask("recharge_terminee", "recharge_terminee")} className="mt-4 h-12 w-full bg-cyan-300 text-[#07102b] hover:bg-cyan-200">
+            <Button disabled={busy} onClick={() => void validateTask("recharge_terminee", "recharge_terminee")} className="rch-cta mt-4 h-14 w-full gap-3 text-[15px]">
               {busy ? <Loader2 className="animate-spin" /> : <BatteryCharging />} Chargement terminé
             </Button>
           )}
 
           {!sent && currentIndex === 4 && (
-            <Button disabled={busy} onClick={() => void validateTask("recharge_trajet_retour", "recharge_trajet_retour")} className="mt-4 h-12 w-full bg-cyan-300 text-[#07102b] hover:bg-cyan-200">
+            <Button disabled={busy} onClick={() => void validateTask("recharge_trajet_retour", "recharge_trajet_retour")} className="rch-cta mt-4 h-14 w-full gap-3 text-[15px]">
               {busy ? <Loader2 className="animate-spin" /> : <RotateCcw />} Démarrer le retour au site de départ
             </Button>
           )}
@@ -302,14 +302,14 @@ export function RechargeMissionCockpit({
                 variant="outline"
                 disabled={busy || done(local, "recharge_cles_retour")}
                 onClick={() => void validateTask("recharge_cles_retour")}
-                className="h-12 justify-start border-slate-600 bg-slate-50/5 text-slate-50 hover:bg-slate-50/10 hover:text-slate-50"
+                className="rch-cta-ghost h-14 justify-start gap-3 px-4 text-[15px] hover:text-slate-50"
               >
                 {done(local, "recharge_cles_retour") ? <Check /> : <KeyRound />} Clés restituées
               </Button>
               <Button
                 disabled={busy || done(local, "recharge_compteur_retour")}
                 onClick={() => requestPhoto("recharge_compteur_retour")}
-                className="h-12 justify-start bg-cyan-300 text-[#07102b] hover:bg-cyan-200"
+                className="rch-cta h-14 justify-start gap-3 px-4 text-[15px]"
               >
                 {busy ? <Loader2 className="animate-spin" /> : done(local, "recharge_compteur_retour") ? <Check /> : <Camera />}
                 Photo du compteur au retour
@@ -320,11 +320,11 @@ export function RechargeMissionCockpit({
           {!sent && currentIndex === 6 && (
             <div className="mt-4 grid gap-2">
               {!done(local, "recharge_signature") ? (
-                <Button disabled={busy} onClick={() => setSignatureOpen(true)} className="h-12 bg-cyan-300 text-[#07102b] hover:bg-cyan-200">
+                <Button disabled={busy} onClick={() => setSignatureOpen(true)} className="rch-cta h-14 w-full gap-3 text-[15px]">
                   <PenLine /> Faire signer le responsable
                 </Button>
               ) : (
-                <Button disabled={busy} onClick={() => void sendToAdmin()} className="h-12 bg-amber-300 text-[#07102b] hover:bg-amber-200">
+                <Button disabled={busy} onClick={() => void sendToAdmin()} className="rch-cta-gold h-14 w-full gap-3 text-[15px]">
                   {busy ? <Loader2 className="animate-spin" /> : <Send />} Signer et envoyer à l’admin
                 </Button>
               )}
@@ -333,7 +333,7 @@ export function RechargeMissionCockpit({
         </div>
 
         {currentIndex >= 2 && currentIndex <= 3 && !sent && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg border border-cyan-300/15 bg-cyan-300/[0.06] px-3 py-2.5 text-xs text-cyan-100">
+          <div className="mt-3 flex items-center gap-2 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.06] px-3 py-2.5 text-xs text-cyan-100">
             <MapPin size={14} /> Arrivée sur le point de chargement
           </div>
         )}
@@ -341,7 +341,7 @@ export function RechargeMissionCockpit({
 
       {signatureOpen && (
         <div className="fixed inset-0 z-[90] flex items-end justify-center bg-[#020617]/80 p-0 sm:items-center sm:p-4">
-          <div className="w-full max-w-lg rounded-t-lg bg-slate-50 p-4 text-slate-900 sm:rounded-lg">
+          <div className="w-full max-w-lg rounded-t-3xl bg-slate-50 p-4 text-slate-900 sm:rounded-3xl">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold">Signature du responsable</p>
