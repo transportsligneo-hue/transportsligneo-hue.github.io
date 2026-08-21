@@ -39,13 +39,9 @@ function TarifsPage() {
           <p>Péages, carburant et assurance inclus. Aucun frais caché, devis instantané en ligne.</p>
         </section>
 
-        {/* ============ ESTIMATEUR (quote-card style HTML) ============ */}
-        <section className="v4-section" style={{ maxWidth: 720, paddingTop: 0 }}>
-          <div className="v4-quote-card">
-            <div className="v4-quote-inner">
-              <DevisGenerator variant="hero-card" />
-            </div>
-          </div>
+        {/* ============ ESTIMATEUR (fusionné dans le fond de page) ============ */}
+        <section className="v4-section" style={{ maxWidth: 1040, paddingTop: 0 }}>
+          <DevisGenerator variant="flat" />
         </section>
 
         {/* ============ GRILLE TARIFAIRE RÉELLE ============ */}
