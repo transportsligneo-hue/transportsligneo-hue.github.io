@@ -6928,6 +6928,48 @@ html.theme-light .r4-page .feat-toggle-label { color:#0f1526; }
   border:1px solid rgba(110,255,205,0.6); box-shadow:0 14px 32px rgba(55,224,170,0.32); transition:all .2s ease; }
 .v4-btn-driver:hover, .r4-page .v4-btn-driver:hover { transform:translateY(-2px); box-shadow:0 18px 40px rgba(55,224,170,0.42); }
 
+/* Pills du hero — même langage que les accents de la navbar (Contact bleu, B2B violet, Espace Driver vert) */
+.hero-pill, .r4-page .hero-pill {
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  padding:15px 26px; border-radius:999px; font-weight:800; font-size:14.5px; letter-spacing:0.01em;
+  color:#fff; border:1px solid rgba(255,255,255,0.25);
+  transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.hero-pill svg { width:16px; height:16px; filter:drop-shadow(0 0 6px rgba(255,255,255,0.6)); }
+.hero-pill:hover, .r4-page .hero-pill:hover { transform:translateY(-2px); }
+.hero-pill.hero-pill-blue, .r4-page .hero-pill.hero-pill-blue {
+  background:linear-gradient(120deg, rgba(47,95,255,0.9), rgba(79,140,255,0.75));
+  border-color:rgba(122,163,255,0.6);
+  box-shadow:0 0 0 1px rgba(122,163,255,0.35), 0 4px 18px rgba(47,95,255,0.55), 0 0 26px rgba(79,140,255,0.45);
+}
+.hero-pill.hero-pill-blue:hover, .r4-page .hero-pill.hero-pill-blue:hover { box-shadow:0 0 0 1px rgba(122,163,255,0.6), 0 6px 24px rgba(47,95,255,0.8), 0 0 40px rgba(79,140,255,0.7); }
+.hero-pill.hero-pill-violet, .r4-page .hero-pill.hero-pill-violet {
+  color:#f3eeff; text-shadow:0 0 10px rgba(196,177,255,0.85);
+  background:linear-gradient(120deg, rgba(124,92,255,0.7), rgba(167,139,250,0.42));
+  border-color:rgba(167,139,250,0.85);
+  box-shadow:0 0 0 1px rgba(167,139,250,0.35), 0 4px 18px rgba(124,92,255,0.5), 0 0 26px rgba(167,139,250,0.5);
+  animation:r4PurplePulse 2.4s ease-in-out infinite;
+}
+.hero-pill.hero-pill-violet:hover, .r4-page .hero-pill.hero-pill-violet:hover {
+  background:linear-gradient(120deg, rgba(124,92,255,0.9), rgba(167,139,250,0.6));
+  box-shadow:0 0 0 1px rgba(167,139,250,0.6), 0 6px 26px rgba(124,92,255,0.8), 0 0 42px rgba(167,139,250,0.85);
+}
+.hero-pill.hero-pill-green, .r4-page .hero-pill.hero-pill-green {
+  color:#03291f; background:linear-gradient(120deg,#6effcd,#37e0aa);
+  border-color:rgba(110,255,205,0.7); text-shadow:none;
+  box-shadow:0 0 0 1px rgba(110,255,205,0.3), 0 4px 18px rgba(74,208,160,0.55), 0 0 28px rgba(110,255,205,0.55);
+  animation:r4GreenPulse 2.4s ease-in-out infinite;
+}
+.hero-pill.hero-pill-green svg { filter:drop-shadow(0 0 6px rgba(3,41,31,0.5)); }
+.hero-pill.hero-pill-green:hover, .r4-page .hero-pill.hero-pill-green:hover {
+  box-shadow:0 0 0 1px rgba(110,255,205,0.55), 0 6px 26px rgba(74,208,160,0.8), 0 0 44px rgba(110,255,205,0.85);
+}
+
 /* Navbar : plus compacte, liens plus lisibles */
 .tln-bar-inner { padding-top:6px !important; padding-bottom:6px !important; }
 .r4-nav-link { font-size:14.5px !important; letter-spacing:0.02em; padding-top:8px !important; padding-bottom:8px !important; }
+
+/* Navbar desktop : boutons restants plus grands (meilleure lisibilité) */
+.tln-bar .r4-nav-link { min-height: 42px !important; padding-left: 15px !important; padding-right: 15px !important; font-size: 15px !important; font-weight: 700; }
+.tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 38px !important; font-size: 14.2px !important; }
+.mnav-pill .r4-nav-link { font-size: 14px !important; padding-left: 14px !important; padding-right: 14px !important; }
