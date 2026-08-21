@@ -51,7 +51,10 @@ export async function sendSms(params: {
   }
 
   const recipient = normalizePhone(params.to)
-  const content = params.body.slice(0, 160)
+  // Pas de troncature à 160 caractères : un SMS plus long est simplement
+  // découpé en plusieurs segments concaténés par l'opérateur (facturation
+  // multi-crédits). Tronquer couperait le lien d'avis en plein milieu.
+  const content = params.body.trim().slice(0, 1600)
 
   try {
     const response = await fetch(`${GATEWAY_URL}/transactionalSMS/sms`, {
