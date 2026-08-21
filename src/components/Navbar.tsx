@@ -4,7 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemePreference from "@/components/ThemePreference";
 
 type NavAccent = "purple" | "green" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
@@ -112,7 +112,7 @@ export default function Navbar() {
                   </span>
                 </span>
               </a>
-              <ThemeToggle />
+              <ThemePreference variant="compact" />
               <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
                 <User size={13} />
                 {isAuthenticated ? "Mon espace" : "Connexion"}
@@ -161,7 +161,7 @@ export default function Navbar() {
                 </a>
               </li>
               <li>
-                <ThemeToggle variant="full" />
+                <ThemePreference variant="full" />
               </li>
               <li>
                 <button onClick={goToEspace} className="r4-btn-connect" type="button">
