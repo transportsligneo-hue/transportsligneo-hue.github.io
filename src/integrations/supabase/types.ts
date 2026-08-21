@@ -6683,6 +6683,18 @@ export type Database = {
         Args: { _mission_id: string }
         Returns: undefined
       }
+      admin_close_mission_facturable: {
+        Args: {
+          _apply_group?: boolean
+          _attribution_id: string
+          _categorie: string
+          _indemnite?: number
+          _montant_facture?: number
+          _motif?: string
+          _passage_vide?: boolean
+        }
+        Returns: number
+      }
       admin_convert_demande_to_missions: {
         Args: { _demande_id: string }
         Returns: {

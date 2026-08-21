@@ -116,6 +116,59 @@ export const CLOTURE_LABEL: Record<string, string> = Object.fromEntries(
   CLOTURE_CATEGORIES.map((c) => [c.key, c.label]),
 );
 
+/**
+ * Mission non réalisée sur le terrain mais DUE au client :
+ * la mission reste « Terminée » et facturable (pas d'annulation).
+ */
+export const CLOTURE_FACTURABLE_CATEGORIES: ClotureCategorie[] = [
+  {
+    key: "client_absent",
+    label: "Client absent au rendez-vous",
+    description: "Déplacement effectué, personne sur place : prestation due.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "vehicule_non_remis",
+    label: "Véhicule non remis / non conforme",
+    description: "Véhicule absent, non roulant ou documents manquants sur place.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "mission_reportee_facturee",
+    label: "Mission reportée (déplacement facturé)",
+    description: "Nouvelle date à planifier, le déplacement du jour reste facturé.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "double_facturation",
+    label: "Double facturation (aller + retour à vide)",
+    description: "Deux prestations facturées : convoyage prévu + retour à vide.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "attente_immobilisation",
+    label: "Attente / immobilisation sur site",
+    description: "Temps d'attente prolongé facturé au client.",
+    facturable: true,
+  },
+  {
+    key: "annulation_tardive_facturee",
+    label: "Annulation tardive facturée (< 24 h)",
+    description: "Annulée hors délai : frais d'annulation intégralement dus.",
+    facturable: true,
+  },
+  {
+    key: "autre_facturable",
+    label: "Autre motif facturable",
+    description: "Motif libre à préciser dans le commentaire.",
+    facturable: true,
+  },
+];
+
 type Props = {
   attributionId: string;
   statut: string;
@@ -151,10 +204,14 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
   const [cancelTrajet, setCancelTrajet] = useState(true);
   const [applyGroup, setApplyGroup] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [mode, setMode] = useState<"annulation" | "facturable">("annulation");
+  const [montantFacture, setMontantFacture] = useState("");
+
+  const catalogue = mode === "facturable" ? CLOTURE_FACTURABLE_CATEGORIES : CLOTURE_CATEGORIES;
 
   const selected = useMemo(
-    () => CLOTURE_CATEGORIES.find((c) => c.key === categorie) ?? null,
-    [categorie],
+    () => catalogue.find((c) => c.key === categorie) ?? null,
+    [categorie, catalogue],
   );
 
   const load = async () => {
@@ -188,12 +245,64 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
 
   const pickCategorie = (key: string) => {
     setCategorie(key);
-    const cat = CLOTURE_CATEGORIES.find((c) => c.key === key);
+    const cat = catalogue.find((c) => c.key === key);
     setFacturable(Boolean(cat?.facturable));
     setPassageVide(Boolean(cat?.passageVide));
   };
 
+  const switchMode = (next: "annulation" | "facturable") => {
+    setMode(next);
+    setCategorie("");
+    setFacturable(next === "facturable");
+    setPassageVide(false);
+  };
+
+  const submitFacturable = async () => {
+    if (!categorie) {
+      toast.error("Choisissez un motif de clôture");
+      return;
+    }
+    if (categorie === "autre_facturable" && motif.trim().length < 3) {
+      toast.error("Précisez le motif dans le commentaire");
+      return;
+    }
+    const cat = CLOTURE_FACTURABLE_CATEGORIES.find((c) => c.key === categorie);
+    const ok = await confirmToast(`Clôturer et facturer — ${cat?.label} ?`, {
+      description:
+        "La mission reste Terminée et facturable au client (aucune annulation). Action tracée dans l'historique.",
+      confirmLabel: "Clôturer & facturer",
+    });
+    if (!ok) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.rpc("admin_close_mission_facturable" as never, {
+        _attribution_id: attributionId,
+        _categorie: cat?.label ?? categorie,
+        _motif: motif.trim() || null,
+        _montant_facture: montantFacture ? Number(montantFacture) : null,
+        _indemnite: indemnite ? Number(indemnite) : null,
+        _passage_vide: passageVide,
+        _apply_group: isGroup ? applyGroup : false,
+      } as never);
+      if (error) throw error;
+      toast.success("Mission clôturée et facturable", { description: cat?.label });
+      setOpen(false);
+      setMotif("");
+      await load();
+      onChanged?.();
+      if (passageVide) {
+        onPassageAVide?.(`${cat?.label}${motif.trim() ? ` — ${motif.trim()}` : ""}`);
+      }
+    } catch (e) {
+      toast.error("Échec de la clôture", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const submit = async () => {
+    if (mode === "facturable") return submitFacturable();
     if (!categorie) {
       toast.error("Choisissez un motif d'annulation");
       return;
@@ -336,29 +445,78 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
         </div>
       ) : !open ? (
         <div className="space-y-2">
+          {row?.annulation_at && row?.annulation_facturable && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+              <span className="font-semibold">Clôturée facturable</span>
+              {row.annulation_categorie ? ` · ${row.annulation_categorie}` : ""}
+              {row.annulation_motif ? <p className="mt-1 whitespace-pre-wrap">{row.annulation_motif}</p> : null}
+            </div>
+          )}
           <p className="text-sm text-pro-text-soft">
-            Annulez la mission avec un motif normalisé (client, véhicule, convoyeur, force majeure…), en précisant
-            la facturation et l'indemnité éventuelle du convoyeur.
+            Deux issues possibles : <strong>annulation</strong> (mission sans suite) ou <strong>clôture facturable</strong>
+            {" "}quand le déplacement a bien eu lieu (client absent, véhicule non remis, report…) et reste dû.
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
-          >
-            <Ban size={13} /> Annuler / clôturer la mission
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => {
+                switchMode("annulation");
+                setOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+            >
+              <Ban size={13} /> Annuler la mission
+            </button>
+            <button
+              onClick={() => {
+                switchMode("facturable");
+                setOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+            >
+              <FileWarning size={13} /> Clôturer & facturer (non réalisée)
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
+          <div className="inline-flex rounded-lg border border-pro-border bg-pro-surface p-1">
+            <button
+              onClick={() => switchMode("annulation")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mode === "annulation" ? "bg-red-600 text-white" : "text-pro-text hover:bg-white"
+              }`}
+            >
+              Annulation
+            </button>
+            <button
+              onClick={() => switchMode("facturable")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mode === "facturable" ? "bg-emerald-600 text-white" : "text-pro-text hover:bg-white"
+              }`}
+            >
+              Clôture facturable
+            </button>
+          </div>
+
+          {mode === "facturable" && (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              La mission restera <strong>Terminée</strong> et facturable au client : elle n'apparaîtra pas comme annulée
+              dans le suivi ni dans la facturation.
+            </p>
+          )}
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-pro-muted mb-2">Motif</p>
             <div className="grid gap-2 sm:grid-cols-2">
-              {CLOTURE_CATEGORIES.map((c) => (
+              {catalogue.map((c) => (
                 <button
                   key={c.key}
                   onClick={() => pickCategorie(c.key)}
                   className={`text-left rounded-lg border px-3 py-2 transition ${
                     categorie === c.key
-                      ? "border-red-400 bg-red-50 ring-1 ring-red-300"
+                      ? mode === "facturable"
+                        ? "border-emerald-400 bg-emerald-50 ring-1 ring-emerald-300"
+                        : "border-red-400 bg-red-50 ring-1 ring-red-300"
                       : "border-pro-border bg-white hover:bg-pro-surface"
                   }`}
                 >
@@ -369,9 +527,25 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
             </div>
           </div>
 
+          {mode === "facturable" && (
+            <label className="flex items-center gap-2 text-sm text-pro-text">
+              <span className="shrink-0">Montant facturé au client (optionnel)</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={montantFacture}
+                onChange={(e) => setMontantFacture(e.target.value)}
+                placeholder="inchangé"
+                className="w-28 rounded border border-pro-border bg-white px-2 py-1 text-sm"
+              />
+              <span>€</span>
+            </label>
+          )}
+
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wide text-pro-muted mb-1">
-              Commentaire {selected?.key === "autre" ? "(obligatoire)" : "(optionnel)"}
+              Commentaire {selected?.key === "autre" || selected?.key === "autre_facturable" ? "(obligatoire)" : "(optionnel)"}
             </label>
             <textarea
               value={motif}
@@ -383,18 +557,22 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-2 text-sm text-pro-text">
-              <input type="checkbox" checked={facturable} onChange={(e) => setFacturable(e.target.checked)} />
-              Facturable au client
-            </label>
+            {mode === "annulation" && (
+              <label className="flex items-center gap-2 text-sm text-pro-text">
+                <input type="checkbox" checked={facturable} onChange={(e) => setFacturable(e.target.checked)} />
+                Facturable au client
+              </label>
+            )}
             <label className="flex items-center gap-2 text-sm text-pro-text">
               <input type="checkbox" checked={passageVide} onChange={(e) => setPassageVide(e.target.checked)} />
               Générer un passage à vide
             </label>
-            <label className="flex items-center gap-2 text-sm text-pro-text">
-              <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
-              Annuler aussi le trajet (sinon republiable)
-            </label>
+            {mode === "annulation" && (
+              <label className="flex items-center gap-2 text-sm text-pro-text">
+                <input type="checkbox" checked={cancelTrajet} onChange={(e) => setCancelTrajet(e.target.checked)} />
+                Annuler aussi le trajet (sinon republiable)
+              </label>
+            )}
             {isGroup && (
               <label className="flex items-center gap-2 text-sm font-semibold text-pro-text sm:col-span-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2">
                 <input type="checkbox" checked={applyGroup} onChange={(e) => setApplyGroup(e.target.checked)} />
@@ -421,9 +599,12 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
             <button
               onClick={submit}
               disabled={saving || !categorie}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 ${
+                mode === "facturable" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
+              }`}
             >
-              {saving ? <Loader2 size={13} className="animate-spin" /> : <Ban size={13} />} Confirmer l'annulation
+              {saving ? <Loader2 size={13} className="animate-spin" /> : mode === "facturable" ? <FileWarning size={13} /> : <Ban size={13} />}
+              {mode === "facturable" ? " Clôturer & facturer" : " Confirmer l'annulation"}
             </button>
             <button
               onClick={() => setOpen(false)}
