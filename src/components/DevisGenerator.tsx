@@ -668,9 +668,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               type="button"
               onClick={() => setStep(1)}
               disabled={!isComplete}
-              className="mt-4 w-full inline-flex items-center justify-center gap-2.5 px-6 py-[18px] rounded-2xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[13px] tracking-[0.24em] uppercase shadow-[0_18px_45px_-12px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="dg-flat-cta mt-4"
             >
-              <Send size={15} /> Obtenir mon prix
+              <Send size={15} /> <span>Obtenir mon prix</span>
             </button>
 
             {/* Bandeau de réassurance */}
