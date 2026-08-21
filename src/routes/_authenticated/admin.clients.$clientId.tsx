@@ -456,6 +456,13 @@ function AdminClientDetail() {
           description="Modifiez les champs puis enregistrez."
         >
           <div className="space-y-4">
+            <AdminField label="Photo de profil">
+              <AdminAvatarUploader
+                ownerUserId={profile.user_id}
+                value={profile.avatar_url}
+                onChange={(url) => setProfile({ ...profile, avatar_url: url })}
+              />
+            </AdminField>
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
