@@ -7679,3 +7679,23 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
   color: #a855f7 !important;
   box-shadow: 0 0 0 1px rgba(168,85,247,0.45), 0 0 18px rgba(168,85,247,0.25) !important;
 }
+
+/* ============ FONDU FOOTER : dégradé organique depuis la section précédente ============ */
+.ligneo-footer-blend {
+  position: relative;
+  z-index: 6;
+  width: 100%;
+  height: clamp(90px, 12vw, 180px);
+  pointer-events: none;
+  background:
+    radial-gradient(60% 130% at 50% 0%, rgba(110, 231, 255, 0.10), transparent 72%),
+    radial-gradient(45% 120% at 22% 5%, rgba(61, 155, 255, 0.10), transparent 72%),
+    linear-gradient(180deg,
+      rgba(var(--ligneo-page-bg), 1) 0%,
+      rgba(var(--ligneo-page-bg), 0.92) 12%,
+      rgba(var(--ligneo-page-bg), 0.7) 32%,
+      rgba(var(--ligneo-page-bg), 0.4) 55%,
+      rgba(var(--ligneo-page-bg), 0.16) 76%,
+      rgba(var(--ligneo-page-bg), 0) 100%);
+  animation: ligneo-blend-drift 16s ease-in-out infinite;
+}

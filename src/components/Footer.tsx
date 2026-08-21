@@ -55,15 +55,9 @@ export default function Footer() {
         style={{ background: "radial-gradient(circle, rgba(217,181,74,0.14), transparent 70%)" }}
       />
 
-      {/* Ligne lumineuse en haut */}
-      <div
-        className="relative h-[2px] w-full animate-[ligneoLineDrift_6s_linear_infinite]"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(122,163,255,0.6), rgba(217,181,74,0.6), rgba(122,163,255,0.6), transparent)",
-          backgroundSize: "200% 100%",
-        }}
-      />
+      {/* Fondu progressif depuis la section précédente */}
+      <div aria-hidden className="ligneo-footer-blend" />
+
 
       {/* Particules */}
       {[
