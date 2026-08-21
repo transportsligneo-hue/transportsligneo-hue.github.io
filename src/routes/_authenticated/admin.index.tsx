@@ -111,34 +111,35 @@ function AdminDashboard() {
       enCours, terminees,
       devis, devisEnvoyes,
       docsAttente,
-      missionsTerm,
-      missionsMois,
+      caTermine,
+      caMoisRows,
       demandesWeek,
     ] = await Promise.all([
       supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }),
-      supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).eq("statut", "nouvelle"),
+      supabase.from("demandes_convoyage").select("id", { count: "exact", head: true }).gte("created_at", start7j),
       supabase.from("trajets").select("id", { count: "exact", head: true }),
-      supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte"]),
+      supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte", "en_attente_validation"]),
       supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "valide"),
       supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
       supabase.from("profiles").select("id", { count: "exact", head: true }),
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("type_client", "b2b"),
-      supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "en_cours"),
-      supabase.from("attributions").select("id", { count: "exact", head: true }).eq("statut", "termine"),
+      supabase.from("companies").select("id", { count: "exact", head: true }),
+      supabase.from("trajets").select("id", { count: "exact", head: true }).in("statut", ["en_cours", "attribue", "accepte", "en_attente_validation"]),
+      supabase.from("trajets").select("id", { count: "exact", head: true }).eq("statut", "termine"),
       supabase.from("devis").select("id", { count: "exact", head: true }),
       supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye"),
       supabase.from("documents_convoyeurs").select("id", { count: "exact", head: true }).eq("statut_validation", "en_attente"),
-      supabase.from("missions").select("prix_total").in("statut", ["livree", "terminee"]),
-      supabase.from("missions").select("prix_total, created_at").in("statut", ["livree", "terminee"]).gte("created_at", startMonth),
+      supabase.from("trajets").select("prix").eq("statut", "termine"),
+      supabase.from("trajets").select("prix").eq("statut", "termine").gte("created_at", startMonth),
       supabase.from("demandes_convoyage").select("created_at").gte("created_at", start7j),
     ]);
 
-    const ca = (missionsTerm.data ?? []).reduce(
-      (s: number, m: { prix_total: number | null }) => s + Number(m.prix_total ?? 0), 0
+    const ca = (caTermine.data ?? []).reduce(
+      (s: number, m: { prix: number | null }) => s + Number(m.prix ?? 0), 0
     );
-    const caMois = (missionsMois.data ?? []).reduce(
-      (s: number, m: { prix_total: number | null }) => s + Number(m.prix_total ?? 0), 0
+    const caMois = (caMoisRows.data ?? []).reduce(
+      (s: number, m: { prix: number | null }) => s + Number(m.prix ?? 0), 0
     );
+
 
     // 7 day buckets
     const buckets: Record<string, number> = {};
