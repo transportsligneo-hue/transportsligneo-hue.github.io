@@ -112,7 +112,16 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
 
     const t = tRes.data as unknown as TrajetLite | null;
     setTrajet(t);
-    setConvoyeur((cRes.data as unknown as ConvoyeurLite | null) ?? null);
+    const conv = (cRes.data as unknown as (ConvoyeurLite & { user_id?: string | null }) | null) ?? null;
+    if (conv?.user_id) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("siret")
+        .eq("id", conv.user_id)
+        .maybeSingle();
+      conv.siret = (prof as { siret?: string | null } | null)?.siret ?? null;
+    }
+    setConvoyeur(conv);
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);
