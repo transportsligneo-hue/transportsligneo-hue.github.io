@@ -1850,7 +1850,10 @@ body.is-driver-app .closed-link svg {
   .admin-badge--danger  { background: var(--admin-danger-soft);  color: #991b1b; border-color: rgba(220,38,38,0.20); }
   .admin-badge--info    { background: var(--admin-info-soft);    color: #075985; border-color: rgba(2,132,199,0.18); }
   .admin-badge--accent  { background: var(--admin-accent-soft);  color: #1e3a8a; border-color: rgba(37,99,235,0.20); }
+  .admin-badge--violet  { background: #f3e8ff; color: #6b21a8; border-color: rgba(147,51,234,0.22); }
+  .admin-badge--gold    { background: #fdf3d8; color: #8a6a1a; border-color: rgba(184,134,42,0.28); }
   .admin-badge--neutral { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+
 
   .admin-btn-primary {
     background: linear-gradient(180deg, var(--admin-accent), var(--admin-accent-strong));

@@ -97,13 +97,16 @@ export function AdminStatCard({ label, value, delta, icon: Icon, hint, accent = 
 }
 
 /* ============== Status Badge ============== */
-type StatusTone = "success" | "warning" | "danger" | "info" | "accent" | "neutral";
+type StatusTone = "success" | "warning" | "danger" | "info" | "accent" | "violet" | "gold" | "neutral";
 const TONE_BY_KEYWORD: Record<string, StatusTone> = {
-  termine: "success", terminée: "success", validee: "success", validée: "success", valide: "success", paye: "success", paid: "success", actif: "success", active: "success", confirme: "success",
-  attente: "warning", brouillon: "warning", pending: "warning", en_cours: "info", "en cours": "info", encours: "info",
-  refuse: "danger", refusée: "danger", annule: "danger", annulée: "danger", echec: "danger", failed: "danger", incident: "danger", suspendu: "danger",
-  nouveau: "accent", new: "accent", devis: "accent",
+  termine: "success", terminée: "success", terminee: "success", validee: "success", validée: "success", valide: "success", paye: "success", paid: "success", actif: "success", active: "success", confirme: "success",
+  attente: "warning", à_traiter: "warning", a_traiter: "warning", "à traiter": "warning", brouillon: "warning", pending: "warning", en_cours: "info", "en cours": "info", encours: "info",
+  refuse: "danger", refusée: "danger", annule: "danger", annulée: "danger", annulee: "danger", echec: "danger", failed: "danger", incident: "danger", suspendu: "danger",
+  nouveau: "accent", nouvelle: "accent", new: "accent", devis: "accent",
+  convertie: "violet", converti: "violet", convertit: "violet",
+  attribuee: "gold", attribuée: "gold", attribue: "gold", attribué: "gold",
 };
+
 export function AdminBadge({ label, tone }: { label: string; tone?: StatusTone }) {
   const key = label.toLowerCase().replace(/\s+/g, "_");
   const t: StatusTone = tone ?? TONE_BY_KEYWORD[key] ?? TONE_BY_KEYWORD[key.replace(/_/g, " ")] ?? "neutral";
