@@ -7086,3 +7086,206 @@ html.theme-light .dg-estimator--flat .dg-flat-toggle.is-active {
 html.theme-light .dg-estimator--flat .dg-flat-trust { border-top-color: rgba(15,21,38,0.12); }
 html.theme-light .dg-estimator--flat .dg-flat-trust span { color: #4a5474 !important; }
 html.theme-light .dg-estimator--flat .dg-flat-trust svg { color: #2f5fff !important; }
+
+/* ============================================================
+   HARMONISATION PREMIUM LIGNEO — badges, bordures, navbar claire,
+   bouton Espace Driver, cohérence néon. (visuel uniquement)
+   ============================================================ */
+:root {
+  --lg-neon-blue: #3d9bff;
+  --lg-neon-blue-light: #6ee7ff;
+  --lg-neon-green: #00f7a1;
+  --lg-night: #050b1d;
+  --lg-night-2: #07112d;
+}
+
+/* --- 1. Badges / tags sur fond clair --------------------------------- */
+html.theme-light .r4-page .v4-svc-tag,
+html.theme-light .r4-page .v4-tag,
+html.theme-light .r4-page .v5-tag,
+html.theme-light .r4-page .feat-item-tag,
+html.theme-light .plateforme-section .v4-svc-tag {
+  color: #1668d6 !important;
+  background: linear-gradient(120deg, rgba(61,155,255,0.12), rgba(110,231,255,0.08)) !important;
+  border: 1px solid rgba(61,155,255,0.28) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.5) inset, 0 4px 14px -8px rgba(61,155,255,0.55);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  backdrop-filter: saturate(140%) blur(6px);
+  transition: color .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+html.theme-light .r4-page .v4-svc-tag:hover,
+html.theme-light .r4-page .v4-tag:hover,
+html.theme-light .r4-page .v5-tag:hover {
+  color: #0b52b5 !important;
+  border-color: rgba(61,155,255,0.5) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.6) inset, 0 6px 20px -8px rgba(61,155,255,0.8);
+}
+/* Badges néon en thème sombre : même langage, plus lumineux */
+.r4-page .v4-svc-tag {
+  color: var(--lg-neon-blue-light);
+  background: linear-gradient(120deg, rgba(61,155,255,0.16), rgba(110,231,255,0.06));
+  border: 1px solid rgba(61,155,255,0.28);
+  transition: color .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+.r4-page .v4-svc-tag:hover {
+  border-color: rgba(110,231,255,0.5);
+  box-shadow: 0 0 18px -6px rgba(61,155,255,0.7);
+}
+
+/* --- 2. Bordures diffuses des grands blocs --------------------------- */
+.r4-page .v4-svc-card,
+.r4-page .v4-feat-card,
+.r4-page .v4-value-card,
+.r4-page .v4-teaser-card,
+.r4-page .v5-feat-card,
+.r4-page .v5-teaser-card,
+.r4-page .v4-tl-body,
+.r4-page .v4-faq-item,
+.r4-page .v4-aud-card,
+.r4-page .v4-glass,
+.r4-glass,
+.r4-map-card {
+  border-color: color-mix(in oklab, var(--lg-neon-blue) 16%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03) inset,
+    0 24px 60px -40px rgba(5,11,29,0.9),
+    0 0 60px -34px rgba(61,155,255,0.45);
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.r4-page .v4-svc-card:hover,
+.r4-page .v4-feat-card:hover,
+.r4-page .v5-feat-card:hover,
+.r4-page .v4-aud-card:hover {
+  border-color: color-mix(in oklab, var(--lg-neon-blue) 30%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 28px 70px -40px rgba(5,11,29,0.95),
+    0 0 70px -28px rgba(61,155,255,0.6);
+}
+html.theme-light .r4-page .v4-svc-card,
+html.theme-light .r4-page .v4-feat-card,
+html.theme-light .r4-page .v4-value-card,
+html.theme-light .r4-page .v4-teaser-card,
+html.theme-light .r4-page .v5-feat-card,
+html.theme-light .r4-page .v5-teaser-card,
+html.theme-light .r4-page .v4-tl-body,
+html.theme-light .r4-page .v4-faq-item,
+html.theme-light .r4-page .v4-aud-card,
+html.theme-light .card-premium-light {
+  border-color: rgba(61,155,255,0.14) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 18px 44px -34px rgba(15,21,38,0.45),
+    0 0 44px -30px rgba(61,155,255,0.45) !important;
+}
+html.theme-light .r4-page .v4-svc-card:hover,
+html.theme-light .r4-page .v4-feat-card:hover,
+html.theme-light .r4-page .v5-feat-card:hover,
+html.theme-light .r4-page .v4-aud-card:hover {
+  border-color: rgba(61,155,255,0.26) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.95) inset,
+    0 22px 52px -32px rgba(15,21,38,0.5),
+    0 0 56px -26px rgba(61,155,255,0.6) !important;
+}
+
+/* --- 3. Navbar mobile : identité sombre conservée en thème clair ------ */
+html.theme-light .mnav-bar,
+html.theme-light .r4-topbar-mobile {
+  background:
+    linear-gradient(90deg, rgba(5,11,29,0.97), rgba(7,17,45,0.94) 50%, rgba(5,11,29,0.97)) !important;
+  border-bottom: 1px solid rgba(61,155,255,0.22) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 18px 46px -30px rgba(5,11,29,0.9), 0 0 34px -20px rgba(61,155,255,0.55) !important;
+}
+html.theme-light .mnav-bar .font-heading,
+html.theme-light .mnav-bar .text-white { color: #ffffff !important; }
+html.theme-light .mnav-bar .mnav-pill,
+html.theme-light .mnav-bar .r4-nav-pill {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(61,155,255,0.20) !important;
+}
+html.theme-light .mnav-bar .r4-nav-link {
+  color: rgba(226,236,255,0.78) !important;
+  text-shadow: none !important;
+  transition: color .25s ease, background .25s ease, box-shadow .25s ease;
+}
+html.theme-light .mnav-bar .r4-nav-link:hover {
+  color: #ffffff !important;
+  background: linear-gradient(120deg, rgba(61,155,255,0.22), rgba(110,231,255,0.12)) !important;
+}
+html.theme-light .mnav-bar .r4-nav-link.is-active {
+  color: #ffffff !important;
+  background: linear-gradient(120deg, #2f5fff, #3d9bff) !important;
+  box-shadow: 0 4px 14px -6px rgba(61,155,255,0.8), 0 0 20px -6px rgba(110,231,255,0.7) !important;
+}
+html.theme-light .mnav-bar .nav-phone-block {
+  background: linear-gradient(120deg, rgba(61,155,255,0.18), rgba(7,17,45,0.65)) !important;
+  border-color: rgba(61,155,255,0.42) !important;
+  color: #ffffff !important;
+}
+html.theme-light .mnav-bar .nav-phone-number,
+html.theme-light .mnav-bar .mnav-phone-label { color: #ffffff !important; }
+html.theme-light .mnav-bar .nav-phone-sub { color: rgba(200,226,255,0.95) !important; }
+html.theme-light .mnav-bar .theme-toggle {
+  background: rgba(61,155,255,0.14) !important;
+  border-color: rgba(61,155,255,0.38) !important;
+  color: #cfe6ff !important;
+}
+html.theme-light .mnav-bar .theme-toggle:hover { color: #ffffff !important; box-shadow: 0 0 18px rgba(61,155,255,0.55) !important; }
+html.theme-light .mnav-bar .r4-btn-connect { color: #ffffff !important; }
+
+/* --- 4. Bouton « Espace Driver » : outline néon premium --------------- */
+.hero-pill.hero-pill-green,
+.r4-page .hero-pill.hero-pill-green,
+html.theme-light .r4-page .hero-pill.hero-pill-green {
+  position: relative;
+  overflow: hidden;
+  color: var(--lg-neon-green);
+  background: radial-gradient(130% 180% at 50% 0%, rgba(0,247,161,0.16), rgba(0,247,161,0.04) 70%);
+  border: 1px solid rgba(0,247,161,0.7);
+  text-shadow: 0 0 10px rgba(0,247,161,0.55);
+  box-shadow:
+    0 0 0 1px rgba(0,247,161,0.18),
+    0 10px 30px -18px rgba(0,247,161,0.7),
+    0 0 26px -10px rgba(0,247,161,0.5);
+  animation: lgDriverBreath 3.2s ease-in-out infinite;
+  transition: box-shadow .28s ease, transform .25s ease, background .28s ease;
+}
+.hero-pill.hero-pill-green svg,
+.r4-page .hero-pill.hero-pill-green svg {
+  color: var(--lg-neon-green);
+  filter: drop-shadow(0 0 6px rgba(0,247,161,0.7));
+}
+.hero-pill.hero-pill-green::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 38%, rgba(0,247,161,0.22) 50%, transparent 62%);
+  transform: translateX(-130%);
+  animation: lgDriverSheen 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-pill.hero-pill-green:hover,
+.r4-page .hero-pill.hero-pill-green:hover {
+  background: radial-gradient(130% 180% at 50% 0%, rgba(0,247,161,0.26), rgba(0,247,161,0.06) 72%);
+  box-shadow:
+    0 0 0 1px rgba(0,247,161,0.35),
+    0 14px 36px -18px rgba(0,247,161,0.85),
+    0 0 46px -12px rgba(0,247,161,0.75);
+}
+@keyframes lgDriverBreath {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(0,247,161,0.16), 0 10px 30px -20px rgba(0,247,161,0.6), 0 0 22px -12px rgba(0,247,161,0.45); }
+  50%      { box-shadow: 0 0 0 1px rgba(0,247,161,0.3), 0 12px 34px -18px rgba(0,247,161,0.8), 0 0 38px -10px rgba(0,247,161,0.7); }
+}
+@keyframes lgDriverSheen {
+  0%, 62% { transform: translateX(-130%); }
+  100%    { transform: translateX(130%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-pill.hero-pill-green,
+  .hero-pill.hero-pill-green::after { animation: none; }
+}
