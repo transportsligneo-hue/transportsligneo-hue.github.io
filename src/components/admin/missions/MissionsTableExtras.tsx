@@ -143,32 +143,87 @@ export function ConvoyeurCell({
   meta,
   convoyeurs,
   disabled,
+  locked,
   onAssign,
 }: {
   meta: MissionMeta | undefined;
   convoyeurs: ConvoyeurOption[];
   disabled?: boolean;
+  /** Mission terminée ou annulée : convoyeur conservé mais non modifiable */
+  locked?: boolean;
   onAssign: (convoyeurId: string) => void;
 }) {
+  const [pending, setPending] = useState<{ id: string; nom: string } | null>(null);
+  const current = meta?.convoyeurId ?? "";
+
+  if (locked) {
+    return (
+      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} convoyeurId={meta?.convoyeurId ?? null} />
+        <span className="text-[11.5px] font-medium text-[var(--a6-text)]">
+          {meta?.convoyeurNom ?? "Non attribué"}
+        </span>
+        <span
+          title="Mission clôturée : attribution verrouillée"
+          className="rounded-md border border-[#eaeaee] bg-[#f6f7fb] px-1.5 py-0.5 text-[9.5px] uppercase tracking-wide text-[var(--a6-dim)]"
+        >
+          Verrouillé
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-      <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} convoyeurId={meta?.convoyeurId ?? null} />
-      <select
-        value={meta?.convoyeurId ?? ""}
-        disabled={disabled}
-        onChange={(e) => e.target.value && onAssign(e.target.value)}
-        className="max-w-[132px] rounded-md border border-[#eaeaee] bg-white px-1.5 py-1 text-[11px] text-[var(--a6-text)] outline-none focus:border-[var(--a6-blue)] disabled:opacity-50"
-      >
-        <option value="">Non attribué</option>
-        {convoyeurs.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.nom}
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center gap-1.5">
+        <ConvoyeurAvatar nom={meta?.convoyeurNom ?? null} convoyeurId={meta?.convoyeurId ?? null} />
+        <select
+          value={current}
+          disabled={disabled || !!pending}
+          onChange={(e) => {
+            const id = e.target.value;
+            if (!id || id === current) return;
+            const nom = convoyeurs.find((c) => c.id === id)?.nom ?? "ce convoyeur";
+            setPending({ id, nom });
+          }}
+          className="max-w-[132px] rounded-md border border-[#eaeaee] bg-white px-1.5 py-1 text-[11px] text-[var(--a6-text)] outline-none focus:border-[var(--a6-blue)] disabled:opacity-50"
+        >
+          <option value="">Non attribué</option>
+          {convoyeurs.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nom}
+            </option>
+          ))}
+        </select>
+      </div>
+      {pending && (
+        <div className="rounded-md border border-[var(--a6-blue)]/40 bg-[#f2f6ff] px-2 py-1.5 text-[10.5px] leading-snug text-[var(--a6-text)]">
+          <p className="mb-1">
+            {current ? "Remplacer le convoyeur par " : "Attribuer à "}
+            <strong>{pending.nom}</strong> ?
+          </p>
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => { onAssign(pending.id); setPending(null); }}
+              className="rounded-md bg-[var(--a6-blue)] px-2 py-0.5 text-[10.5px] font-semibold text-white hover:brightness-110"
+            >
+              Confirmer
+            </button>
+            <button
+              type="button"
+              onClick={() => setPending(null)}
+              className="rounded-md border border-[#eaeaee] bg-white px-2 py-0.5 text-[10.5px] text-[var(--a6-muted)] hover:border-[var(--a6-blue)]"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Menu colonnes                                                       */
