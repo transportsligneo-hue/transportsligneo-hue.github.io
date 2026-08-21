@@ -1,9 +1,10 @@
+import { useState } from "react";
 import {
   FileText, MousePointerClick, Layers, CalendarClock, Repeat, Users, Star, BadgeEuro,
   MapPin, Bell, History, LineChart, UserCheck, BellRing,
   Camera, PenLine, FolderCheck, ScanLine, ShieldCheck, Search, AlertTriangle,
   LayoutDashboard, Building2, Receipt, Headphones, PhoneCall,
-  Bot, Code2, Wrench, Calculator, IdCard, Hash,
+  Bot, Code2, Wrench, Calculator, IdCard, Hash, ChevronDown,
 } from "lucide-react";
 
 type Feat = { Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; label: string };
