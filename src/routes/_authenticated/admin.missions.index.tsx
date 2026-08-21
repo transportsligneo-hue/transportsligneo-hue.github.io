@@ -58,7 +58,7 @@ interface DemandeRow {
   id: string; nom: string; prenom: string; email: string | null; telephone: string | null;
   depart: string; arrivee: string; date_souhaitee: string | null; heure_souhaitee: string | null;
   marque: string | null; modele: string | null; immatriculation: string | null;
-  prix_estime: number | null; statut: string; created_at: string; type_trajet: string | null;
+  prix_estime: number | null; statut: string; created_at: string; date_retour: string | null; depart_retour: string | null;
 }
 
 const PRIORITY: Record<string, number> = { en_cours: 60, attribue: 50, accepte: 40, en_attente: 30, termine: 20, annule: 10 };
