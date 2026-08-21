@@ -1041,7 +1041,11 @@ function AdminMissionsUnified() {
         open={!!prixLot}
         onClose={() => setPrixLot(null)}
         trajetIds={prixLot?.ids}
-        title={`Prix par véhicule — lot ${prixLot?.ref ?? ""}`}
+        title={
+          prixLot && prixLot.ids.length === 1
+            ? `Prix du véhicule — ${prixLot.ref}`
+            : `Prix par véhicule — lot ${prixLot?.ref ?? ""}`
+        }
         onSaved={fetchAll}
       />
 
