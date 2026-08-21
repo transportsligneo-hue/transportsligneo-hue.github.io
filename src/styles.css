@@ -486,6 +486,9 @@ body.is-driver-app .closed-link svg {
 }
 
 :root {
+  /* Empêche le "forced dark mode" d'Edge de repeindre le site en noir :
+     on déclare explicitement le schéma de couleurs géré par l'app. */
+  color-scheme: dark;
   --radius: 0.375rem;
   --background: #061238;
   --foreground: #f5f1e8;
