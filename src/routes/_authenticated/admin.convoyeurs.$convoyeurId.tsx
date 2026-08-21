@@ -200,6 +200,12 @@ function AdminConvoyeurDetail() {
       });
 
       if (cv.user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("user_id", cv.user_id)
+          .maybeSingle();
+        setAvatarUrl((prof as { avatar_url: string | null } | null)?.avatar_url ?? null);
         try {
           const { data: s } = await supabase.functions.invoke("admin-user-actions", {
             body: { action: "get_account_status", user_id: cv.user_id },
