@@ -962,6 +962,34 @@ function AdminMissionDetail() {
         </IconButton>
       </div>
 
+      {/* === Switch Livraison / Restitution (aller-retour) === */}
+      {legTabs.length > 1 && (
+        <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-xl border border-pro-border bg-pro-surface p-1">
+          {legTabs.map((leg) => {
+            const active = leg.attributionId === attribution.id;
+            return (
+              <button
+                key={leg.attributionId}
+                type="button"
+                disabled={active}
+                onClick={() =>
+                  navigate({ to: "/admin/missions/$missionId", params: { missionId: leg.attributionId } })
+                }
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                  active
+                    ? "bg-pro-accent text-white shadow-sm"
+                    : "text-pro-text-soft hover:text-pro-text hover:bg-pro-surface-2"
+                }`}
+              >
+                {leg.isAller ? "Livraison" : "Restitution"}
+                {leg.numero ? <span className="ml-2 opacity-70">{leg.numero}</span> : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+
       {(trajet.client_nom || trajet.client_email || clientSociete) && (
         <AdminOrgContextBanner
           clientId={clientUserId ?? undefined}
