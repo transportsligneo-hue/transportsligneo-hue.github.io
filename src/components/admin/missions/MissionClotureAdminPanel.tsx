@@ -445,6 +445,13 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
         </div>
       ) : !open ? (
         <div className="space-y-2">
+          {row?.annulation_at && row?.annulation_facturable && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+              <span className="font-semibold">Clôturée facturable</span>
+              {row.annulation_categorie ? ` · ${row.annulation_categorie}` : ""}
+              {row.annulation_motif ? <p className="mt-1 whitespace-pre-wrap">{row.annulation_motif}</p> : null}
+            </div>
+          )}
           <p className="text-sm text-pro-text-soft">
             Deux issues possibles : <strong>annulation</strong> (mission sans suite) ou <strong>clôture facturable</strong>
             {" "}quand le déplacement a bien eu lieu (client absent, véhicule non remis, report…) et reste dû.
