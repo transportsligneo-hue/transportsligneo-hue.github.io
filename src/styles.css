@@ -7831,3 +7831,127 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
   filter: blur(48px);
   opacity: 0.95;
 }
+
+/* ============================================================
+   FONDU DE SECTION V2 — vrai cross-fade couleur (plus aucune arête)
+   Chaque section déborde sa propre couleur dans la section voisine
+   sur une grande hauteur : navy ⇄ clair devient un dégradé continu.
+   ============================================================ */
+:root { --ligneo-fade-h: clamp(160px, 20vw, 300px); }
+@media (max-width: 767px) { :root { --ligneo-fade-h: clamp(110px, 26vw, 190px); } }
+
+.section-bg::before, .section-bg::after,
+.section-bg-alt::before, .section-bg-alt::after,
+.edl-section-bg::before, .edl-section-bg::after,
+.section-navy-clean::before, .section-navy-clean::after,
+.section-light::before, .section-light::after,
+.section-cream::before, .section-cream::after,
+.section-mist::before, .section-mist::after,
+.r4-page .v5-trust::before, .r4-page .v5-trust::after {
+  left: -8% !important;
+  right: -8% !important;
+  height: var(--ligneo-fade-h) !important;
+  filter: blur(18px) !important;
+  box-shadow: none !important;
+  animation: none !important;
+  opacity: 1 !important;
+  z-index: 3 !important;
+}
+
+.section-bg::before, .section-bg-alt::before, .edl-section-bg::before,
+.section-navy-clean::before, .section-light::before, .section-cream::before,
+.section-mist::before, .r4-page .v5-trust::before {
+  top: calc(var(--ligneo-fade-h) * -0.5) !important;
+  bottom: auto !important;
+}
+.section-bg::after, .section-bg-alt::after, .edl-section-bg::after,
+.section-navy-clean::after, .section-light::after, .section-cream::after,
+.section-mist::after, .r4-page .v5-trust::after {
+  bottom: calc(var(--ligneo-fade-h) * -0.5) !important;
+  top: auto !important;
+}
+
+/* --- Sections bleu nuit : le navy remonte / descend dans le clair --- */
+.section-bg::before        { background-image: linear-gradient(180deg, rgba(6,18,56,0) 0%, rgba(6,18,56,0.10) 26%, rgba(6,18,56,0.32) 48%, rgba(6,18,56,0.62) 68%, rgba(6,18,56,0.88) 86%, rgba(6,18,56,1) 100%) !important; }
+.section-bg::after         { background-image: linear-gradient(180deg, rgba(6,18,56,1) 0%, rgba(6,18,56,0.88) 14%, rgba(6,18,56,0.62) 32%, rgba(6,18,56,0.32) 52%, rgba(6,18,56,0.10) 74%, rgba(6,18,56,0) 100%) !important; }
+.section-bg-alt::before    { background-image: linear-gradient(180deg, rgba(10,31,92,0) 0%, rgba(10,31,92,0.10) 26%, rgba(10,31,92,0.32) 48%, rgba(10,31,92,0.62) 68%, rgba(10,31,92,0.88) 86%, rgba(10,31,92,1) 100%) !important; }
+.section-bg-alt::after     { background-image: linear-gradient(180deg, rgba(10,31,92,1) 0%, rgba(10,31,92,0.88) 14%, rgba(10,31,92,0.62) 32%, rgba(10,31,92,0.32) 52%, rgba(10,31,92,0.10) 74%, rgba(10,31,92,0) 100%) !important; }
+.edl-section-bg::before    { background-image: linear-gradient(180deg, rgba(10,19,53,0) 0%, rgba(10,19,53,0.10) 26%, rgba(10,19,53,0.32) 48%, rgba(10,19,53,0.62) 68%, rgba(10,19,53,0.88) 86%, rgba(10,19,53,1) 100%) !important; }
+.edl-section-bg::after     { background-image: linear-gradient(180deg, rgba(10,19,53,1) 0%, rgba(10,19,53,0.88) 14%, rgba(10,19,53,0.62) 32%, rgba(10,19,53,0.32) 52%, rgba(10,19,53,0.10) 74%, rgba(10,19,53,0) 100%) !important; }
+.section-navy-clean::before{ background-image: linear-gradient(180deg, rgba(11,16,38,0) 0%, rgba(11,16,38,0.10) 26%, rgba(11,16,38,0.32) 48%, rgba(11,16,38,0.62) 68%, rgba(11,16,38,0.88) 86%, rgba(11,16,38,1) 100%) !important; }
+.section-navy-clean::after { background-image: linear-gradient(180deg, rgba(17,26,61,1) 0%, rgba(17,26,61,0.88) 14%, rgba(17,26,61,0.62) 32%, rgba(17,26,61,0.32) 52%, rgba(17,26,61,0.10) 74%, rgba(17,26,61,0) 100%) !important; }
+
+/* --- Sections claires : la couleur claire descend / remonte dans le navy --- */
+.section-light::before, .section-cream::before, .section-mist::before,
+.r4-page .v5-trust::before {
+  background-image: linear-gradient(180deg,
+    color-mix(in srgb, var(--ligneo-fade-light) 0%, transparent) 0%,
+    color-mix(in srgb, var(--ligneo-fade-light) 10%, transparent) 26%,
+    color-mix(in srgb, var(--ligneo-fade-light) 32%, transparent) 48%,
+    color-mix(in srgb, var(--ligneo-fade-light) 62%, transparent) 68%,
+    color-mix(in srgb, var(--ligneo-fade-light) 88%, transparent) 86%,
+    var(--ligneo-fade-light) 100%) !important;
+}
+.section-light::after, .section-cream::after, .section-mist::after,
+.r4-page .v5-trust::after {
+  background-image: linear-gradient(180deg,
+    var(--ligneo-fade-light) 0%,
+    color-mix(in srgb, var(--ligneo-fade-light) 88%, transparent) 14%,
+    color-mix(in srgb, var(--ligneo-fade-light) 62%, transparent) 32%,
+    color-mix(in srgb, var(--ligneo-fade-light) 32%, transparent) 52%,
+    color-mix(in srgb, var(--ligneo-fade-light) 10%, transparent) 74%,
+    color-mix(in srgb, var(--ligneo-fade-light) 0%, transparent) 100%) !important;
+}
+.section-light  { --ligneo-fade-light: var(--surface-white); }
+.section-cream  { --ligneo-fade-light: var(--surface-cream); }
+.section-mist   { --ligneo-fade-light: var(--surface-mist); }
+.r4-page .v5-trust { --ligneo-fade-light: var(--surface-white); }
+
+/* Footer : même logique, fondu long et continu, sans ligne */
+.ligneo-footer-blend {
+  height: clamp(200px, 28vw, 360px) !important;
+  background:
+    linear-gradient(180deg,
+      rgba(var(--ligneo-page-bg), 1) 0%,
+      rgba(var(--ligneo-page-bg), 0.92) 16%,
+      rgba(var(--ligneo-page-bg), 0.74) 32%,
+      rgba(var(--ligneo-page-bg), 0.50) 50%,
+      rgba(var(--ligneo-page-bg), 0.26) 68%,
+      rgba(var(--ligneo-page-bg), 0.08) 86%,
+      rgba(var(--ligneo-page-bg), 0) 100%) !important;
+}
+
+/* Section « Nos garanties » : fondu haut/bas avec les sections claires */
+.sg-carousel-section { border: 0 !important; box-shadow: none !important; }
+.r4-page .v4-section { border-bottom: 0 !important; box-shadow: none !important; }
+.sg-carousel-section::before,
+.sg-carousel-section::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  height: clamp(120px, 15vw, 220px);
+  pointer-events: none;
+  z-index: 1;
+}
+.sg-carousel-section::before {
+  top: -8px;
+  background: linear-gradient(180deg,
+    var(--surface-white) 0%,
+    color-mix(in srgb, var(--surface-white) 82%, transparent) 14%,
+    color-mix(in srgb, var(--surface-white) 48%, transparent) 32%,
+    color-mix(in srgb, var(--surface-white) 20%, transparent) 54%,
+    color-mix(in srgb, var(--surface-white) 6%, transparent) 78%,
+    color-mix(in srgb, var(--surface-white) 0%, transparent) 100%);
+}
+.sg-carousel-section::after {
+  bottom: -8px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface-white) 0%, transparent) 0%,
+    color-mix(in srgb, var(--surface-white) 6%, transparent) 22%,
+    color-mix(in srgb, var(--surface-white) 20%, transparent) 46%,
+    color-mix(in srgb, var(--surface-white) 48%, transparent) 68%,
+    color-mix(in srgb, var(--surface-white) 82%, transparent) 86%,
+    var(--surface-white) 100%);
+}
+.sg-carousel-section > * { position: relative; z-index: 2; }
