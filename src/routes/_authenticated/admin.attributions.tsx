@@ -814,6 +814,11 @@ function AdminAttributions() {
         }
       />
 
+      <div className="mb-4">
+        <AdminBadgeLegend />
+      </div>
+
+
       {/* === Section "À attribuer" : trajets convertis sans convoyeur === */}
       {trajetsDisponibles.length > 0 && (
         <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
