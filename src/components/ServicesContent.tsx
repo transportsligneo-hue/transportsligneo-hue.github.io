@@ -1,4 +1,4 @@
-import { User, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
+import { User, Users2, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
 import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
