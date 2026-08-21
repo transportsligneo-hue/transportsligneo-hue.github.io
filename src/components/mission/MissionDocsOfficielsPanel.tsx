@@ -99,7 +99,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     const [tRes, cRes, dRes, comp] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
-        ? supabase.from("convoyeurs").select("nom, prenom, telephone, siret").eq("id", attr.convoyeur_id).maybeSingle()
+        ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase
         .from("mission_documents")
