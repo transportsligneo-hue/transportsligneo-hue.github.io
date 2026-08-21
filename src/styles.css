@@ -5663,6 +5663,7 @@ html.theme-light .theme-toggle:hover { color: #0f1526; box-shadow: 0 8px 20px -1
 
 /* --- Tokens globaux --- */
 html.theme-light {
+  color-scheme: light;
   --background: #f5f7fc;
   --foreground: #0f1526;
   --card: #ffffff;
