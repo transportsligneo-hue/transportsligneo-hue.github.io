@@ -37,7 +37,7 @@ export default function MobileTarifsScreen() {
 
       {/* Simulateur réel */}
       <div className="relative z-[3] mx-[18px] mt-5">
-        <DevisGenerator variant="flat-mini" />
+        <DevisGenerator variant="flat" />
       </div>
 
       {/* Grille tarifaire */}
