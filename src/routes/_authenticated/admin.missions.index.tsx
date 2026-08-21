@@ -246,7 +246,12 @@ function AdminMissionsUnified() {
     attrRows.forEach((a) => {
       if (!a.trajet_id) return;
       if (a.numero_mission && !numeroByTrajet.has(a.trajet_id)) numeroByTrajet.set(a.trajet_id, a.numero_mission);
-      if (ACTIVE_ATTR.includes(a.statut ?? "") && !activeAttrByTrajet.has(a.trajet_id)) {
+      const st = (a.statut ?? "").toLowerCase();
+      if (DEAD_ATTR.includes(st) || !a.convoyeur_id) return;
+      const cur = activeAttrByTrajet.get(a.trajet_id);
+      const score = ATTR_PRIORITY[st] ?? 10;
+      const curScore = cur ? ATTR_PRIORITY[(cur.statut ?? "").toLowerCase()] ?? 10 : -1;
+      if (score > curScore) {
         activeAttrByTrajet.set(a.trajet_id, { id: a.id, convoyeur_id: a.convoyeur_id, statut: a.statut });
       }
     });
