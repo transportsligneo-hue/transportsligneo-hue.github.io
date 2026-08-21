@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
+import { AdminAvatarUploader } from "@/components/admin/AdminAvatarUploader";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -457,7 +458,7 @@ function AdminConvoyeurDetail() {
         status={
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <DriverAvatar convoyeurId={conv.id} name={fullName} size="md" />
+              <DriverAvatar convoyeurId={conv.id} src={avatarUrl} name={fullName} size="md" />
               <StatutConvoyeurBadge statut={statutUnifie} size="md" />
               <AdminBadge label={accountState.label} tone={accountState.tone} />
               {conv.ville && <AdminBadge label={conv.ville} tone="info" />}
@@ -555,6 +556,13 @@ function AdminConvoyeurDetail() {
         <TabsContent value="overview" className="mt-6">
           <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
             <div className="space-y-4">
+            <AdminField label="Photo de profil">
+              <AdminAvatarUploader
+                ownerUserId={conv.user_id ?? null}
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+              />
+            </AdminField>
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
