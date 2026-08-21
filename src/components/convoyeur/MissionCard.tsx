@@ -4,7 +4,7 @@
  */
 import {
   MapPin, Calendar, Car, ClipboardCheck, ChevronRight,
-  Phone, Navigation, AlertCircle, Clock, Truck, Flag,
+  Phone, Navigation, AlertCircle, Clock, Truck, Flag, Layers,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -29,6 +29,8 @@ export interface MissionCardData {
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
+  /** Lot multi-véhicules : une mission, plusieurs plaques */
+  lot?: { ref: string | null; plaques: string[]; total: number } | null;
 }
 
 interface Props {
@@ -105,6 +107,26 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
           <ChevronRight size={16} className="text-[var(--driver-muted)] shrink-0 mt-1" />
         </div>
       </button>
+
+      {/* Lot multi-plaques */}
+      {mission.lot && mission.lot.total > 1 && (
+        <div className="brex-divider px-5 py-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(110,255,205,0.35)] bg-[rgba(110,255,205,0.12)] px-2.5 py-0.5 text-[10.5px] font-bold text-[#6effcd]">
+              <Layers size={11} /> Lot · {mission.lot.total} véhicules
+              {mission.lot.ref ? ` · ${mission.lot.ref}` : ""}
+            </span>
+            {mission.lot.plaques.map((pl) => (
+              <span
+                key={pl}
+                className="rounded-md border border-white/15 bg-white/[0.06] px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-white"
+              >
+                {pl}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Véhicule + tarif */}
       {(t?.marque || t?.immatriculation || (showTarif && t?.tarif_convoyeur != null)) && (
