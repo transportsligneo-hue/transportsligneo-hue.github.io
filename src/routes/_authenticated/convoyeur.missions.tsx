@@ -205,7 +205,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -479,7 +479,29 @@ function ConvoyeurMissions() {
     });
   }, [missions, filter, search]);
 
-  const closeInspection = useCallback(() => setInspection(null), []);
+  const closeInspection = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem(EDL_SESSION_KEY);
+        localStorage.removeItem(EDL_SESSION_KEY);
+      } catch {
+        // ignore
+      }
+    }
+    setInspection(null);
+  }, []);
+
+  // Une mission « recharge uniquement » n'a pas d'état des lieux de livraison :
+  // on purge toute session EDL restaurée par erreur pour ce type de mission.
+  useEffect(() => {
+    if (!inspection) return;
+    const m = missions.find((mm) => mm.id === inspection.attributionId);
+    if (!m) return;
+    if (isRechargeSeule(m.trajet as { options_meta?: unknown; type_mission?: string | null } | null)) {
+      closeInspection();
+    }
+  }, [inspection, missions, closeInspection]);
+
 
   const openMission = openMissionId ? missions.find(m => m.id === openMissionId) : null;
 
