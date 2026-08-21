@@ -81,6 +81,8 @@ export const createQuoteFromDemande = createServerFn({ method: "POST" })
         statut: "envoye",
         origine: "demande_client",
         demande_id: demande.id,
+        mission_group_id: demande.mission_group_id,
+        group_reference: demande.group_reference,
       })
       .select("id, numero, statut, prix_estime")
       .single();
