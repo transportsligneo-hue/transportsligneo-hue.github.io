@@ -83,7 +83,7 @@ export const createQuoteFromDemande = createServerFn({ method: "POST" })
         demande_id: demande.id,
         mission_group_id: demande.mission_group_id,
         group_reference: demande.group_reference,
-      })
+      } as never)
       .select("id, numero, statut, prix_estime")
       .single();
     if (insErr) throw insErr;
