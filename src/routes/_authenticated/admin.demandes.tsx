@@ -180,6 +180,9 @@ function AdminDemandes() {
         }
       />
 
+      <AdminBadgeLegend />
+
+
       <AdminSection>
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
           <div className="relative flex-1">
