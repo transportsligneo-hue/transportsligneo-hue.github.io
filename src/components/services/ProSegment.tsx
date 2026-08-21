@@ -4,6 +4,7 @@ import {
   Building2, Warehouse, Clock, LayoutDashboard, Calendar, MapPin,
 } from "lucide-react";
 import ProTimeline from "@/components/services/ProTimeline";
+import ServicesPlateforme from "@/components/ServicesPlateforme";
 
 const audiences = [
   { Icon: Building2, title: "Concessions", desc: "Transferts inter-sites, livraisons clients, restitutions : gagnez du temps sur vos flux quotidiens." },
