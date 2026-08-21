@@ -44,6 +44,14 @@ export const Route = createFileRoute("/_authenticated/admin/attributions")({
   component: AdminAttributions,
 });
 
+interface DevisVehicule {
+  immatriculation?: string | null;
+  marque?: string | null;
+  modele?: string | null;
+  vin?: string | null;
+  energie?: string | null;
+  type?: string | null;
+}
 
 interface Attribution {
   id: string;
@@ -63,6 +71,7 @@ interface Attribution {
     vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
     options_meta?: unknown;
     devis_id?: string | null;
+    devis?: { vehicules?: DevisVehicule[] | null } | null;
     prix?: number | null;
 
   };
@@ -367,7 +376,6 @@ function AdminAttributions() {
     return out;
   }, [attributions, arBaseByGroup]);
 
-  type DevisVehicule = { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null };
   const [devisVehicules, setDevisVehicules] = useState<Map<string, DevisVehicule[]>>(new Map());
 
   const fetchDevisVehicules = useCallback(async (rows: Attribution[]) => {
@@ -385,7 +393,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -620,7 +628,12 @@ function AdminAttributions() {
                     {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
                   </p>
                   {(() => {
-                    const extra = a.trajet?.devis_id ? devisVehicules.get(a.trajet.devis_id) : undefined;
+                    const embedded = a.trajet?.devis?.vehicules ?? undefined;
+                    const extra = embedded && embedded.length > 0
+                      ? embedded
+                      : a.trajet?.devis_id
+                        ? devisVehicules.get(a.trajet.devis_id)
+                        : undefined;
                     const list: { immatriculation?: string | null; marque?: string | null; modele?: string | null; vin?: string | null; energie?: string | null; type?: string | null }[] =
                       extra && extra.length > 1
                         ? extra
