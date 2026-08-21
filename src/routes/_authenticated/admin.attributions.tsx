@@ -75,6 +75,7 @@ interface Attribution {
     devis_id?: string | null;
     devis?: { vehicules?: DevisVehicule[] | null } | null;
     prix?: number | null;
+    numero_mission?: string | null;
 
   };
   convoyeur?: { nom: string; prenom: string };
@@ -396,7 +397,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -898,8 +899,8 @@ function AdminAttributions() {
                     <ArrowLeftRight size={12} /> Duo Livraison–Restitution
                   </span>
                   <span className="text-[11px] text-pro-text-soft">
-                    Livraison {item.items[0]?.numero_mission ? displayNumero(item.items[0].numero_mission) : "—"} + Restitution{" "}
-                    {item.items[1]?.numero_mission ? displayNumero(item.items[1].numero_mission) : "—"} — liées tant qu'elles ne sont pas dissociées
+                    Livraison {item.items[0] ? attributionRef(item.items[0], arBaseByGroup) : "—"} + Restitution{" "}
+                    {item.items[1] ? attributionRef(item.items[1], arBaseByGroup) : "—"} — liées tant qu'elles ne sont pas dissociées
                   </span>
                 </div>
 
@@ -1065,7 +1066,7 @@ function AdminAttributions() {
         <AdminDetailDrawer
           open={!!selectedAttr}
           onClose={() => setSelectedAttr(null)}
-          title={missionNumberOf({ id: selectedAttr.id, created_at: selectedAttr.created_at, numero_mission: attrDetail?.numero_mission })}
+          title={attributionRef(selectedAttr, arBaseByGroup)}
           subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
           badge={
             <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
@@ -1174,9 +1175,9 @@ function attributionRef(
   a: Attribution,
   baseByGroup: Map<string, string>,
 ): string {
-  // Un numéro attribué par l'admin reste la source de vérité : ne jamais le
-  // reconstruire, le resuffixer ou le renuméroter. On normalise juste le format
-  // d'affichage (dièse devant la séquence).
+  // Le trajet est la source canonique pour les dossiers multi-véhicules :
+  // l'attribution peut encore contenir un ancien numéro avant synchronisation.
+  if (a.trajet?.numero_mission) return displayNumero(a.trajet.numero_mission);
   if (a.numero_mission) return displayNumero(a.numero_mission);
   const gid = a.trajet?.mission_group_id ?? null;
   if (!gid) return missionNumberOf(a);
