@@ -409,6 +409,16 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
   async function handleSubmit() {
     if (!pricing || distance == null) return;
+    // Champs obligatoires : trajet + date/heure + coordonnées
+    if (!departure || !arrival) { setAccountError("Merci d'indiquer le départ et l'arrivée."); setStep(1); return; }
+    if (!date || !heure) { setAccountError("La date et l'heure souhaitées sont obligatoires."); setStep(1); return; }
+    if (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim())) {
+      setAccountError("Merci de compléter les informations du véhicule."); setStep(2); return;
+    }
+    if (!prenom.trim() || !nom.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) || telephone.replace(/\D/g, "").length < 9) {
+      setAccountError("Merci de renseigner vos nom, prénom, email et téléphone valides."); setStep(3); return;
+    }
+    setAccountError("");
     // CGU requise dans tous les cas
     // CGU requise UNIQUEMENT pour les visiteurs non connectés (création de compte possible)
     if (!hideAccountStep && !cguAccepted) { setAccountError("Vous devez accepter les CGU pour continuer."); return; }
