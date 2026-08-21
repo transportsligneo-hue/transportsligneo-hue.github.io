@@ -474,6 +474,14 @@ function AdminMissionsUnified() {
 
   const assignMany = async (ids: string[], convoyeurId: string) => {
     if (!convoyeurId || !ids.length) return;
+    const nom = convoyeurs.find((c) => c.id === convoyeurId)?.nom ?? "ce convoyeur";
+    const openIds = ids.filter((id) => {
+      const row = rows.find((x) => x.id === id);
+      return row ? row.status !== "terminee" && row.status !== "annulee" : true;
+    });
+    if (!openIds.length) return toast.error("Missions clôturées : attribution verrouillée");
+    if (!window.confirm(`Attribuer ${openIds.length} mission(s) à ${nom} ?`)) return;
+    ids = openIds;
     setLotBusy(true);
     let ok = 0;
     for (const id of ids) {
@@ -953,6 +961,7 @@ function AdminMissionsUnified() {
                             <ConvoyeurCell
                               meta={meta.get(r.m.id)}
                               convoyeurs={convoyeurs}
+                              locked={r.m.status === "terminee" || r.m.status === "annulee"}
                               onAssign={(cid) => assignConvoyeur(r.m.id, cid)}
                             />
                           ) : (
@@ -963,7 +972,7 @@ function AdminMissionsUnified() {
 
                       {show("date") && (
                         <td className="min-w-[170px] text-[var(--a6-dim)] text-[11.5px]">
-                          {r.m.kind === "trajet" ? (
+                          {r.m.kind === "trajet" && r.m.status !== "terminee" && r.m.status !== "annulee" ? (
                             <MissionDateCell
                               refLabel={r.m.ref}
                               date={r.m.date ?? null}
@@ -983,7 +992,7 @@ function AdminMissionsUnified() {
                       {show("prix") && (
                         <td className="a6-num font-semibold whitespace-nowrap">
                           {r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}
-                          {r.m.kind === "trajet" && (
+                          {r.m.kind === "trajet" && r.m.status !== "terminee" && r.m.status !== "annulee" && (
                             <button
                               type="button"
                               title={`Modifier le prix de ${r.m.immatriculation ?? r.m.ref}`}
