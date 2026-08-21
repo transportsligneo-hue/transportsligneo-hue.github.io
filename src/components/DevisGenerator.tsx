@@ -103,11 +103,12 @@ export interface DevisGeneratorProps {
   successRedirect?: string;
   /**
    * Visual layout of step 0.
-   * - "bar"        : current full-width horizontal bar (used on /tarifs and everywhere else).
+   * - "bar"        : current full-width horizontal bar.
    * - "hero-card"  : compact vertical card meant to live in the right column of the hero.
+   * - "flat"       : full-width fields posés directement sur le fond de page (/tarifs).
    * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
-  variant?: "bar" | "hero-card";
+  variant?: "bar" | "hero-card" | "flat";
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
@@ -576,17 +577,110 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }
 
   // --- ESTIMATEUR : carte premium "chauffeur" ---
+  const isFlat = variant === "flat";
   const isHero = variant === "hero-card";
 
   return (
-    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}`}>
-      <div className={isHero ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
+    <div className={`w-full dg-estimator${isHero ? " dg-estimator--hero" : ""}${isFlat ? " dg-estimator--flat" : ""}`}>
+      <div className={isHero || isFlat ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
         {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
-        {!isHero && (
+        {!isHero && !isFlat && (
           <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
         )}
 
-        {isHero ? (
+        {isFlat ? (
+          // ============================================================
+          // VARIANTE FLAT · champs posés directement sur le fond de page
+          // ============================================================
+          <div className="dg-flat">
+            {/* Rangée 1 · Départ / Arrivée (grands champs) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="dg-flat-field dg-flat-field--lg relative">
+                <label className="dg-flat-label">
+                  <MapPin size={12} /> Départ
+                </label>
+                <PlacesInput
+                  value={departure}
+                  onChange={setDeparture}
+                  placeholder="Adresse de départ complète"
+                  className="dg-flat-input dg-flat-input--lg"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
+              </div>
+              <div className="dg-flat-field dg-flat-field--lg relative">
+                <label className="dg-flat-label">
+                  <MapPinned size={12} /> Arrivée
+                </label>
+                <PlacesInput
+                  value={arrival}
+                  onChange={setArrival}
+                  placeholder="Adresse d'arrivée complète"
+                  className="dg-flat-input dg-flat-input--lg"
+                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                />
+              </div>
+            </div>
+
+            {/* Rangée 2 · Véhicule / Date / Heure */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="dg-flat-field relative">
+                <label className="dg-flat-label"><Car size={12} /> Véhicule</label>
+                <select
+                  value={vehicleType}
+                  onChange={e => setVehicleType(e.target.value)}
+                  className="dg-flat-input appearance-none pr-6 cursor-pointer"
+                >
+                  <option value="">Sélectionnez votre véhicule</option>
+                  {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#e7c76a]/80 pointer-events-none" />
+              </div>
+              <div className="dg-flat-field">
+                <label className="dg-flat-label"><Calendar size={12} /> Date *</label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="dg-flat-input" />
+              </div>
+              <div className="dg-flat-field">
+                <label className="dg-flat-label"><Clock size={12} /> Heure *</label>
+                <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
+              </div>
+            </div>
+
+            {/* Options de prestation · bascule */}
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { v: "aller-simple", l: "Livraison simple" },
+                { v: "aller-retour", l: "Livraison + restitution" },
+              ].map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setOption(o.v as typeof option)}
+                  className={`dg-flat-toggle${option === o.v ? " is-active" : ""}`}
+                >
+                  {o.l}
+                </button>
+              ))}
+            </div>
+
+            {/* CTA principal */}
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={!isComplete}
+              className="mt-4 w-full inline-flex items-center justify-center gap-2.5 px-6 py-[18px] rounded-2xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[13px] tracking-[0.24em] uppercase shadow-[0_18px_45px_-12px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Send size={15} /> Obtenir mon prix
+            </button>
+
+            {/* Bandeau de réassurance */}
+            <div className="dg-flat-trust">
+              <span><Shield size={13} /> Assurance incluse</span>
+              <span><Clock size={13} /> Disponible 7j/7</span>
+              <span><CheckCircle size={13} /> Aucun frais caché</span>
+              <span><Sparkles size={13} /> Réponse immédiate</span>
+            </div>
+          </div>
+        ) : isHero ? (
           // ============================================================
           // VARIANTE HERO-CARD · layout vertical compact (maquette)
           // Mêmes états, mêmes setters, mêmes calculs. Seul l'agencement change.
@@ -609,27 +703,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Départ / Arrivée · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <MapPin size={11} className="text-[#60a5fa]" /> Départ
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <MapPin size={11} className="text-[#e7c76a]" /> Départ
                 </label>
                 <PlacesInput
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Adresse de départ"
-                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <MapPinned size={11} className="text-[#60a5fa]" /> Arrivée
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
                 </label>
                 <PlacesInput
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée"
-                  className="w-full bg-transparent text-white text-[13.5px] placeholder:text-white/35 focus:outline-none h-7"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
                   dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 />
               </div>
@@ -644,13 +738,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Véhicule · pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                <Car size={11} className="text-[#60a5fa]" /> Véhicule
+              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <Car size={11} className="text-[#e7c76a]" /> Véhicule
               </label>
               <select
                 value={vehicleType}
                 onChange={e => setVehicleType(e.target.value)}
-                className="w-full bg-transparent text-white text-[13.5px] appearance-none pr-6 cursor-pointer focus:outline-none"
+                className="w-full bg-transparent text-white text-[15px] font-semibold appearance-none pr-6 cursor-pointer focus:outline-none"
               >
                 <option value="">Sélectionnez votre véhicule</option>
                 {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
@@ -661,25 +755,25 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Date / Heure · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Calendar size={11} className="text-[#60a5fa]" /> Date *
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <Calendar size={11} className="text-[#e7c76a]" /> Date *
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.22em] text-white/75 font-heading mb-1.5">
-                  <Clock size={11} className="text-[#60a5fa]" /> Heure *
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                  <Clock size={11} className="text-[#e7c76a]" /> Heure *
                 </label>
                 <input
                   type="time"
                   value={heure}
                   onChange={e => setHeure(e.target.value)}
-                  className="w-full bg-transparent text-white text-[13.5px] focus:outline-none [color-scheme:dark]"
+                  className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
               </div>
             </div>

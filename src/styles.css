@@ -7002,3 +7002,87 @@ html.theme-light .r4-page .feat-toggle-label { color:#0f1526; }
 .tln-bar .r4-nav-link { min-height: 42px !important; padding-left: 15px !important; padding-right: 15px !important; font-size: 15px !important; font-weight: 700; }
 .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 38px !important; font-size: 14.2px !important; }
 .mnav-pill .r4-nav-link { font-size: 14px !important; padding-left: 14px !important; padding-right: 14px !important; }
+
+/* ============================================================
+   ESTIMATEUR · VARIANTE FLAT (/tarifs) — champs posés sur le fond
+   ============================================================ */
+.dg-flat { width: 100%; }
+.dg-flat-field {
+  position: relative;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  transition: border-color .2s ease, background .2s ease;
+}
+.dg-flat-field:hover,
+.dg-flat-field:focus-within { border-color: rgba(96,165,250,0.55); background: rgba(255,255,255,0.09); }
+.dg-flat-field--lg { padding: 18px 22px; }
+.dg-flat-label {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'Playfair Display', serif;
+  font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: #e7c76a; margin-bottom: 8px;
+}
+.dg-flat-label svg { color: #e7c76a; }
+.dg-flat-input {
+  width: 100%; background: transparent; border: 0; outline: none;
+  color: #ffffff; font-weight: 600; font-size: 16px;
+  text-overflow: ellipsis;
+}
+.dg-flat-input--lg { font-size: 20px; line-height: 1.35; height: 32px; }
+.dg-flat-input::placeholder { color: rgba(255,255,255,0.45); font-weight: 500; }
+.dg-flat-input option { color: #0f1526; }
+
+.dg-flat-toggle {
+  border-radius: 16px; padding: 14px 18px;
+  font-family: 'Playfair Display', serif;
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  transition: all .2s ease;
+}
+.dg-flat-toggle:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.dg-flat-toggle.is-active {
+  color: #e7c76a; border-color: rgba(231,199,106,0.6);
+  background: rgba(231,199,106,0.1);
+  box-shadow: 0 0 0 1px rgba(231,199,106,0.22);
+}
+
+.dg-flat-trust {
+  margin-top: 20px; padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.dg-flat-trust span {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 12.5px; color: rgba(255,255,255,0.8); text-align: center;
+}
+.dg-flat-trust svg { color: #60a5fa; flex: 0 0 auto; }
+@media (max-width: 720px) {
+  .dg-flat-trust { grid-template-columns: repeat(2, 1fr); }
+  .dg-flat-input--lg { font-size: 18px; }
+}
+
+/* ---- Thème clair ---- */
+html.theme-light .dg-estimator--flat .dg-flat-field {
+  background: #ffffff !important;
+  border-color: rgba(15,21,38,0.12) !important;
+  box-shadow: 0 12px 30px -24px rgba(15,21,38,0.4);
+}
+html.theme-light .dg-estimator--flat .dg-flat-field:hover,
+html.theme-light .dg-estimator--flat .dg-flat-field:focus-within { border-color: #2f5fff !important; }
+html.theme-light .dg-estimator--flat .dg-flat-label,
+html.theme-light .dg-estimator--flat .dg-flat-label svg { color: #a8791f !important; }
+html.theme-light .dg-estimator--flat .dg-flat-input { color: #0f1526 !important; }
+html.theme-light .dg-estimator--flat .dg-flat-input::placeholder { color: #8a92ad !important; }
+html.theme-light .dg-estimator--flat .dg-flat-toggle {
+  background: #ffffff !important; border-color: rgba(15,21,38,0.12) !important; color: #4a5474 !important;
+}
+html.theme-light .dg-estimator--flat .dg-flat-toggle.is-active {
+  color: #1c3fc4 !important; border-color: #2f5fff !important; background: rgba(47,95,255,0.08) !important;
+}
+html.theme-light .dg-estimator--flat .dg-flat-trust { border-top-color: rgba(15,21,38,0.12); }
+html.theme-light .dg-estimator--flat .dg-flat-trust span { color: #4a5474 !important; }
+html.theme-light .dg-estimator--flat .dg-flat-trust svg { color: #2f5fff !important; }
