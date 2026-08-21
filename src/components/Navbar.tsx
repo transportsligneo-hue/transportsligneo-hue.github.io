@@ -7,14 +7,13 @@ import { scrollToDevis } from "@/lib/scroll-to-devis";
 import ThemeToggle from "@/components/ThemeToggle";
 
 type NavAccent = "purple" | "green" | undefined;
-const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
+const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
   { to: "/", label: "Accueil" },
   { to: "/services", label: "Services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/suivi", label: "Suivi" },
-  { to: "/pro", label: "B2B", accent: "purple" },
-  { to: "/devenir-convoyeur", label: "Espace Driver", accent: "green" },
+  { to: "/services", label: "Professionnels", search: { audience: "pro" }, accent: "purple" },
   { to: "/actualites", label: "Actualités" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
