@@ -953,6 +953,7 @@ function AdminMissionsUnified() {
                             <ConvoyeurCell
                               meta={meta.get(r.m.id)}
                               convoyeurs={convoyeurs}
+                              locked={r.m.status === "terminee" || r.m.status === "annulee"}
                               onAssign={(cid) => assignConvoyeur(r.m.id, cid)}
                             />
                           ) : (
