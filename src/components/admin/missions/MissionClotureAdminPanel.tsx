@@ -116,6 +116,59 @@ export const CLOTURE_LABEL: Record<string, string> = Object.fromEntries(
   CLOTURE_CATEGORIES.map((c) => [c.key, c.label]),
 );
 
+/**
+ * Mission non réalisée sur le terrain mais DUE au client :
+ * la mission reste « Terminée » et facturable (pas d'annulation).
+ */
+export const CLOTURE_FACTURABLE_CATEGORIES: ClotureCategorie[] = [
+  {
+    key: "client_absent",
+    label: "Client absent au rendez-vous",
+    description: "Déplacement effectué, personne sur place : prestation due.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "vehicule_non_remis",
+    label: "Véhicule non remis / non conforme",
+    description: "Véhicule absent, non roulant ou documents manquants sur place.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "mission_reportee_facturee",
+    label: "Mission reportée (déplacement facturé)",
+    description: "Nouvelle date à planifier, le déplacement du jour reste facturé.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "double_facturation",
+    label: "Double facturation (aller + retour à vide)",
+    description: "Deux prestations facturées : convoyage prévu + retour à vide.",
+    passageVide: true,
+    facturable: true,
+  },
+  {
+    key: "attente_immobilisation",
+    label: "Attente / immobilisation sur site",
+    description: "Temps d'attente prolongé facturé au client.",
+    facturable: true,
+  },
+  {
+    key: "annulation_tardive_facturee",
+    label: "Annulation tardive facturée (< 24 h)",
+    description: "Annulée hors délai : frais d'annulation intégralement dus.",
+    facturable: true,
+  },
+  {
+    key: "autre_facturable",
+    label: "Autre motif facturable",
+    description: "Motif libre à préciser dans le commentaire.",
+    facturable: true,
+  },
+];
+
 type Props = {
   attributionId: string;
   statut: string;
