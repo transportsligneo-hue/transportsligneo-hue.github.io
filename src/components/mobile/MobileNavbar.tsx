@@ -8,12 +8,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 type NavAccent = "b2b" | "driver" | undefined;
 const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
   { to: "/", label: "Accueil" },
-  { to: "/services", label: "Services" },
+  { to: "/services", label: "Nos services" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/comment-ca-marche", label: "Process" },
   { to: "/suivi", label: "Suivi" },
-  { to: "/pro", label: "B2B", accent: "b2b" },
-  { to: "/devenir-convoyeur", label: "Espace Driver", accent: "driver" },
   { to: "/actualites", label: "Actualités" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
