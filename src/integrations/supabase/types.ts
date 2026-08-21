@@ -7064,6 +7064,16 @@ export type Database = {
           statut: string
         }[]
       }
+      get_my_mission_lots: {
+        Args: { _trajet_ids: string[] }
+        Returns: {
+          lot_id: string
+          lot_reference: string
+          plaques: string[]
+          total: number
+          trajet_id: string
+        }[]
+      }
       get_public_pricing_display: {
         Args: never
         Returns: {
