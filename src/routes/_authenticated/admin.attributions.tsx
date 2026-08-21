@@ -23,6 +23,7 @@ import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPa
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPreuvesBlock";
 import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
+import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
 import { CreateTestMissionButton, TestBadge, DeleteTestMissionButton } from "@/components/admin/TestMissionActions";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
@@ -175,6 +176,7 @@ function AdminAttributions() {
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
+  const [prixDevisId, setPrixDevisId] = useState<string | null>(null);
   const [photosView, setPhotosView] = useState<{ id: string; type: string; photos: InspectionPhoto[] } | null>(null);
   const [reportId, setReportId] = useState<string | null>(null);
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
@@ -681,9 +683,20 @@ function AdminAttributions() {
                           );
                         })}
                         {list.length > 1 && (
-                          <p className="text-[10px] uppercase tracking-wider text-pro-muted">
-                            {list.length} véhicules sur ce dossier
-                          </p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[10px] uppercase tracking-wider text-pro-muted">
+                              {list.length} véhicules sur ce dossier
+                            </p>
+                            {a.trajet?.devis_id && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setPrixDevisId(a.trajet!.devis_id!); }}
+                                className="rounded-md border border-pro-border bg-white px-2 py-0.5 text-[10px] font-semibold text-pro-text hover:bg-pro-bg-soft"
+                              >
+                                Prix par véhicule
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     );
@@ -1125,6 +1138,14 @@ function AdminAttributions() {
           </DrawerSection>
         </AdminDetailDrawer>
       )}
+
+      <VehiculesPrixDialog
+        open={!!prixDevisId}
+        onClose={() => setPrixDevisId(null)}
+        devisId={prixDevisId ?? undefined}
+        title="Prix par véhicule — dossier groupé"
+        onSaved={() => void fetchAttributions()}
+      />
     </div>
   );
 }

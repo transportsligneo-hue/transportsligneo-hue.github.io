@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers } from "lucide-react";
@@ -156,6 +157,7 @@ function AdminMissionsUnified() {
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [lotBusy, setLotBusy] = useState(false);
+  const [prixLot, setPrixLot] = useState<{ ids: string[]; ref: string } | null>(null);
   const { byTrajet: alertsByTrajet } = useMissionAlerts("active");
   const clientBrands = useClientBrands(rows.map((r) => r.clientEmail));
   const pvMap = useMissionPv(Array.from(meta.values()).map((m) => m.attributionId));
@@ -805,6 +807,13 @@ function AdminMissionsUnified() {
                           </select>
                           <button
                             type="button"
+                            onClick={(e) => { e.stopPropagation(); setPrixLot({ ids: r.ids, ref: r.lotRef }); }}
+                            className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
+                          >
+                            Prix par véhicule
+                          </button>
+                          <button
+                            type="button"
                             disabled={lotBusy}
                             onClick={(e) => { e.stopPropagation(); ungroupLot(r.ids); }}
                             className="h-7 rounded-lg border border-[#0f9d63]/40 bg-white px-2 text-[11px] font-semibold text-[#065f41]"
@@ -1012,6 +1021,14 @@ function AdminMissionsUnified() {
       {selected && (
         <MissionUnifiedPanel mission={selected} onClose={() => setSelected(null)} onChanged={fetchAll} />
       )}
+
+      <VehiculesPrixDialog
+        open={!!prixLot}
+        onClose={() => setPrixLot(null)}
+        trajetIds={prixLot?.ids}
+        title={`Prix par véhicule — lot ${prixLot?.ref ?? ""}`}
+        onSaved={fetchAll}
+      />
 
       <p className="mt-4 text-[11px] text-[var(--a6-dim)] inline-flex items-center gap-1.5">
         <RouteIcon size={12} /> Les statuts fusionnent demandes, trajets et attributions : Nouvelle → À attribuer → Attribuée → En cours → Terminée / Annulée.
