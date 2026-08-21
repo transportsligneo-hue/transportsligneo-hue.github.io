@@ -95,7 +95,7 @@ export default function ServicesContent({
           <div className="v4-hero">
             <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
             <h1 className="v4-h1">Le convoyage, <span className="v4-accent">réinventé</span>.</h1>
-            <p className="v4-hero-p">De la citadine au véhicule de collection, pour les particuliers comme pour les professionnels : un service de convoyage complet, transparent et assuré.</p>
+            <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un service de convoyage complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
           <div className="v4-section">
