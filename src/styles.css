@@ -7418,29 +7418,10 @@ html.theme-light .r4-page .hero-pill.hero-pill-green {
 }
 
 /* --- Lumière technologique qui traverse le fondu --- */
-.section-bg > .ligneo-sweep, .section-bg-alt > .ligneo-sweep { display: none; }
 .section-bg::after, .section-bg-alt::after, .edl-section-bg::after,
 .section-navy-clean::after, .section-light::after, .section-cream::after,
 .section-mist::after, .r4-page .v5-trust::after {
   box-shadow: 0 0 90px 30px rgba(61, 155, 255, calc(0.05 * var(--ligneo-blend-glow)));
-}
-
-.ligneo-sweep-layer {
-  position: absolute;
-  left: 0; right: 0;
-  height: var(--ligneo-blend-h);
-  pointer-events: none;
-  z-index: 3;
-  overflow: hidden;
-}
-.ligneo-sweep-layer::after {
-  content: "";
-  position: absolute;
-  inset: -20% -40%;
-  background: linear-gradient(100deg, transparent 35%, rgba(150, 210, 255, 0.18) 48%, rgba(255, 255, 255, 0.22) 52%, transparent 66%);
-  filter: blur(14px);
-  animation: ligneo-blend-sweep 13s ease-in-out infinite;
-  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7452,8 +7433,7 @@ html.theme-light .r4-page .hero-pill.hero-pill-green {
   .section-cream::before, .section-cream::after,
   .section-mist::before, .section-mist::after,
   .r4-page .v5-trust::before, .r4-page .v5-trust::after,
-  .r4-page .v5-hero-stats::before, .r4-page .v5-hero-stats::after,
-  .ligneo-sweep-layer::after {
+  .r4-page .v5-hero-stats::before, .r4-page .v5-hero-stats::after {
     animation: none;
     opacity: .85;
   }
