@@ -119,6 +119,7 @@ function AdminConvoyeurDetail() {
   const { convoyeurId } = Route.useParams();
   const navigate = useNavigate();
   const [conv, setConv] = useState<Convoyeur | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [attribs, setAttribs] = useState<AttribItem[]>([]);
   const [dispos, setDispos] = useState<DispoRow[]>([]);
