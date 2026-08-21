@@ -981,7 +981,22 @@ function AdminMissionsUnified() {
 
 
                       {show("prix") && (
-                        <td className="a6-num font-semibold">{r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}</td>
+                        <td className="a6-num font-semibold whitespace-nowrap">
+                          {r.m.prix != null ? `${Number(r.m.prix).toFixed(2)} €` : "—"}
+                          {r.m.kind === "trajet" && (
+                            <button
+                              type="button"
+                              title={`Modifier le prix de ${r.m.immatriculation ?? r.m.ref}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPrixLot({ ids: [r.m.id], ref: r.m.immatriculation ?? r.m.ref });
+                              }}
+                              className="ml-1.5 rounded-md border border-[var(--a6-border)] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[var(--a6-blue)] hover:border-[var(--a6-blue)]"
+                            >
+                              Modifier
+                            </button>
+                          )}
+                        </td>
                       )}
 
                       {show("paiement") && (
@@ -1026,7 +1041,11 @@ function AdminMissionsUnified() {
         open={!!prixLot}
         onClose={() => setPrixLot(null)}
         trajetIds={prixLot?.ids}
-        title={`Prix par véhicule — lot ${prixLot?.ref ?? ""}`}
+        title={
+          prixLot && prixLot.ids.length === 1
+            ? `Prix du véhicule — ${prixLot.ref}`
+            : `Prix par véhicule — lot ${prixLot?.ref ?? ""}`
+        }
         onSaved={fetchAll}
       />
 
