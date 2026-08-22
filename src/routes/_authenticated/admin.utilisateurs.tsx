@@ -516,13 +516,26 @@ function UserDetailDrawer({
       }
     >
       <Tabs defaultValue="profil" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full bg-slate-100 p-1 rounded-lg">
+        <TabsList className="grid grid-cols-6 w-full bg-slate-100 p-1 rounded-lg">
           <TabsTrigger value="profil" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Profil</TabsTrigger>
           <TabsTrigger value="devis" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Devis ({devis.length})</TabsTrigger>
           <TabsTrigger value="missions" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="factures" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Factures ({factures.length})</TabsTrigger>
+          <TabsTrigger value="messages" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-slate-600 font-medium">
+            <MessageSquare
+              size={14}
+              className={msgCount > 0 ? "text-[#6effcd] drop-shadow-[0_0_6px_rgba(110,255,205,0.9)]" : "text-slate-400"}
+            />
+            <span className={msgCount > 0 ? "text-[#0f8f6c]" : ""}>Messages</span>
+            {msgCount > 0 && (
+              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#6effcd] px-1.5 text-[10px] font-bold text-[#04231a] shadow-[0_0_10px_rgba(110,255,205,0.8)]">
+                {msgCount}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="logs" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Logs</TabsTrigger>
         </TabsList>
+
 
 
         <TabsContent value="profil" className="mt-4 space-y-4">
