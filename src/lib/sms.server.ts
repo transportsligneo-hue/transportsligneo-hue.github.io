@@ -28,8 +28,8 @@ export function normalizePhone(phone: string): string {
 
 /** Nom d'expéditeur alphanumérique : max 11 caractères en France. */
 function normalizeSender(from?: string): string {
-  const raw = (from || 'Ligneo').replace(/[^A-Za-z0-9 ]/g, '').trim()
-  const value = raw.length > 0 ? raw.slice(0, 11) : 'Ligneo'
+  const raw = (from || 'LIGNEO').replace(/[^A-Za-z0-9 ]/g, '').trim()
+  const value = raw.length > 0 ? raw.slice(0, 11) : 'LIGNEO'
   return value
 }
 
