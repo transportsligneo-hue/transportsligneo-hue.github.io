@@ -69,7 +69,8 @@ export const Route = createFileRoute("/api/devis/checkout")({
         try {
           const stripe = createStripeClient(env);
 
-          if (devis.stripe_session_id) {
+          // Un avoir appliqué change le montant : on ne réutilise pas l'ancienne session.
+          if (devis.stripe_session_id && avoir <= 0) {
             try {
               const existing = await stripe.checkout.sessions.retrieve(devis.stripe_session_id);
               if (existing.status === "open" && existing.client_secret) {
