@@ -159,9 +159,9 @@ function toGsm7(text: string): string {
  * Aucune mention du convoyeur (ni prénom, ni initiale, ni nom).
  * Le lien est toujours placé en fin de message et n'est jamais tronqué.
  */
-function buildSmsBody(shortUrl: string): string {
+function buildSmsBody(reviewUrl: string): string {
   return toGsm7(
-    `Transports Ligneo : votre vehicule a bien ete livre. Si vous etes satisfait, un avis nous aiderait beaucoup : ${shortUrl}`,
+    `Transports Ligneo - Bonjour, votre vehicule a bien ete livre. Si vous etes satisfait, un avis nous aiderait beaucoup : ${reviewUrl}`,
   )
 }
 
@@ -183,11 +183,10 @@ async function sendReviewEmail(params: {
   attribution: any
   trajet: any
   recipient: RecipientInfo
-  convoyeurLabel: string | null
   settings: GoogleReviewSettings
   auto?: boolean
 }): Promise<{ success: boolean; reason?: string }> {
-  const { attribution, trajet, recipient, convoyeurLabel, settings, auto } = params
+  const { attribution, trajet, recipient, settings, auto } = params
   if (!isValidEmail(recipient.email)) {
     return { success: false, reason: 'Adresse email invalide ou manquante.' }
   }
@@ -206,9 +205,8 @@ async function sendReviewEmail(params: {
         numero: attribution.numero_mission ?? '',
         depart: trajet.depart,
         arrivee: trajet.arrivee,
-        convoyeur: convoyeurLabel ?? '',
         reviewUrl: settings.url,
-        isContactLivraison: false,
+        isContactLivraison: params.recipient === getRecipientInfo(trajet, 'contact_livraison'),
       },
     })
     if (res?.success) return { success: true }
@@ -220,9 +218,7 @@ async function sendReviewEmail(params: {
 
 
 async function sendReviewSms(params: {
-  attribution: any
   recipient: RecipientInfo
-  convoyeurLabel: string | null
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
   if (!isValidPhone(params.recipient.phone)) {
@@ -353,16 +349,6 @@ export async function sendGoogleReviewRequestServer(params: {
     .maybeSingle()
   if (!trajet) return { ok: false, error: 'Trajet introuvable.' }
 
-  let convoyeurLabel: string | null = null
-  if (attribution.convoyeur_id) {
-    const { data: c } = await supabaseAdmin
-      .from('convoyeurs')
-      .select('nom, prenom')
-      .eq('id', attribution.convoyeur_id)
-      .maybeSingle()
-    if (c) convoyeurLabel = [c.prenom, c.nom ? `${String(c.nom).charAt(0)}.` : null].filter(Boolean).join(' ') || null
-  }
-
   const recipient = getRecipientInfo(trajet, params.recipientType)
   if (params.emailOverride) recipient.email = params.emailOverride
 
@@ -396,7 +382,6 @@ export async function sendGoogleReviewRequestServer(params: {
       attribution,
       trajet,
       recipient,
-      convoyeurLabel,
       settings,
       auto: params.auto,
     })
@@ -427,9 +412,7 @@ export async function sendGoogleReviewRequestServer(params: {
 
   if (channel === 'sms' || channel === 'email+sms') {
     const smsRes = await sendReviewSms({
-      attribution,
       recipient,
-      convoyeurLabel,
       settings,
     })
     await recordReviewRequest({
