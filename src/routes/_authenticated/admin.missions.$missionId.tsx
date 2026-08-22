@@ -72,6 +72,8 @@ import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditIn
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
 import { MissionLotPlaquesPanel } from "@/components/admin/missions/MissionLotPlaquesPanel";
+import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
+
 
 
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
@@ -1543,9 +1545,11 @@ function AdminMissionDetail() {
                 Photos état des lieux
               </h3>
             </div>
+            <RechargePreuvesBlock attributionId={attribution.id} />
             {inspections.length === 0 ? (
-              <p className="text-pro-muted text-sm">Aucun état des lieux pour le moment.</p>
+              <p className="text-pro-muted text-sm mt-3">Aucun état des lieux classique pour le moment.</p>
             ) : (
+
               <div className="space-y-5">
                 {inspections.map((insp) => (
                   <div key={insp.id}>
