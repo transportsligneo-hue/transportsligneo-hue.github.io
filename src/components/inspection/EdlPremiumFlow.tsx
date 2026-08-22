@@ -1411,17 +1411,9 @@ export function EdlPremiumFlow({
     );
   }
 
-  // Checklist obligatoire avant toute prise de photo (départ ET arrivée).
-  if (!startChecklistDone) {
-    return createPortal(
-      <EdlStartChecklistGate
-        phase={type}
-        onConfirm={() => setStartChecklistDone(true)}
-        onClose={onClose}
-      />,
-      document.body,
-    );
-  }
+  // La checklist sécurité (gilet, tenue…) est validée une seule fois,
+  // au moment du départ vers le véhicule (cockpit mission).
+
 
   const overlay = (
 
