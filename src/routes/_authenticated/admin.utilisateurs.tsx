@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, Search, Users, Shield, IdCard, Building2, UserRound,
-  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt,
+  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
 import { getHighestActiveRole } from "@/lib/roles";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
