@@ -113,18 +113,53 @@ function AdminDemandes() {
   const convertDemande = useServerFn(convertDemandeToMissions);
 
   const fetchDemandes = useCallback(async () => {
-    let query = supabase
+    const { data } = await supabase
       .from("demandes_convoyage")
       .select("*")
-      .order("created_at", { ascending: false });
-    if (filterStatut !== "all") query = query.eq("statut", filterStatut);
-    const { data } = await query;
+      .order("created_at", { ascending: false })
+      .limit(500);
     if (data) setDemandes(data as Demande[]);
-  }, [filterStatut]);
+  }, []);
 
   useEffect(() => {
     fetchDemandes();
   }, [fetchDemandes]);
+
+  // Temps réel : toute nouvelle demande remonte immédiatement dans la liste.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-demandes-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          const d = payload.new as Partial<Demande>;
+          toast.info("Nouvelle demande de convoyage", {
+            description: `${d.prenom ?? ""} ${d.nom ?? ""} · ${d.depart ?? "?"} → ${d.arrivee ?? "?"}`,
+          });
+        }
+        fetchDemandes();
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [fetchDemandes]);
+
+  const stats = useMemo(() => {
+    const nouvelles = demandes.filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter").length;
+    const today = new Date().toDateString();
+    const aujourdhui = demandes.filter((d) => new Date(d.created_at).toDateString() === today).length;
+    const converties = demandes.filter((d) => d.statut === "convertie" || d.statut === "attribuee" || d.statut === "terminee").length;
+    const potentiel = demandes
+      .filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter")
+      .reduce((sum, d) => sum + (extractFromOptions(d.options).prix ?? 0), 0);
+    return { nouvelles, aujourdhui, converties, potentiel };
+  }, [demandes]);
+
+  const countByStatut = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const d of demandes) m[d.statut] = (m[d.statut] ?? 0) + 1;
+    return m;
+  }, [demandes]);
+
+
 
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
