@@ -141,17 +141,43 @@ function getRecipientInfo(trajet: any, recipientType: ReviewRecipientType): Reci
   return { email, phone, name, prenom }
 }
 
-function buildSmsBody(prenomConvoyeur: string | null, shortUrl: string): string {
-  const convoyeurPart = prenomConvoyeur
-    ? ` par ${prenomConvoyeur}`
-    : ' par notre convoyeur'
-  return `Transports Ligneo - Bonjour, votre véhicule a bien été livré${convoyeurPart}. Si vous êtes satisfait, un avis nous aiderait beaucoup : ${shortUrl}`
+/**
+ * Retire les accents : un SMS contenant un caractère non GSM-7 bascule en
+ * UCS-2 (70 caractères par segment), ce qui provoquait la coupure du lien.
+ */
+function toGsm7(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’‘]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—]/g, '-')
 }
 
-async function ensureShortReviewUrl(reviewUrl: string): Promise<string> {
-  if (reviewUrl.length <= 60) return reviewUrl
-  return createShortLink(reviewUrl, 'avis-google')
+/**
+ * Message SMS d'avis Google.
+ * Aucune mention du convoyeur (ni prénom, ni initiale, ni nom).
+ * Le lien est toujours placé en fin de message et n'est jamais tronqué.
+ */
+function buildSmsBody(shortUrl: string): string {
+  return toGsm7(
+    `Transports Ligneo : votre vehicule a bien ete livre. Si vous etes satisfait, un avis nous aiderait beaucoup : ${shortUrl}`,
+  )
 }
+
+/**
+ * Raccourcit le lien uniquement si le SMS complet dépasserait un segment
+ * GSM-7 (160 caractères). Sinon, l'URL d'avis est reprise intégralement.
+ */
+async function ensureShortReviewUrl(reviewUrl: string): Promise<string> {
+  if (buildSmsBody(reviewUrl).length <= 160) return reviewUrl
+  try {
+    return await createShortLink(reviewUrl, 'avis-google')
+  } catch {
+    return reviewUrl
+  }
+}
+
 
 async function sendReviewEmail(params: {
   attribution: any
