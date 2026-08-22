@@ -157,6 +157,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
+import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
@@ -1013,6 +1014,12 @@ const ApiPublicScanHandoffExtractRoute =
     path: '/api/public/scan/handoff-extract',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksLoyaltyDailyRoute =
+  ApiPublicHooksLoyaltyDailyRouteImport.update({
+    id: '/api/public/hooks/loyalty-daily',
+    path: '/api/public/hooks/loyalty-daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksGoogleReviewDispatchRoute =
   ApiPublicHooksGoogleReviewDispatchRouteImport.update({
     id: '/api/public/hooks/google-review-dispatch',
@@ -1330,6 +1337,7 @@ export interface FileRoutesByFullPath {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1498,6 +1506,7 @@ export interface FileRoutesByTo {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1677,6 +1686,7 @@ export interface FileRoutesById {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1856,6 +1866,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2024,6 +2035,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2202,6 +2214,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2287,6 +2300,7 @@ export interface RootRouteChildren {
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
+  ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -3343,6 +3357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/loyalty-daily': {
+      id: '/api/public/hooks/loyalty-daily'
+      path: '/api/public/hooks/loyalty-daily'
+      fullPath: '/api/public/hooks/loyalty-daily'
+      preLoaderRoute: typeof ApiPublicHooksLoyaltyDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/google-review-dispatch': {
       id: '/api/public/hooks/google-review-dispatch'
       path: '/api/public/hooks/google-review-dispatch'
@@ -4043,6 +4064,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
+  ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

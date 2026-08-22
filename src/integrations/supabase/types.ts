@@ -2223,6 +2223,7 @@ export type Database = {
           archived_at: string | null
           arrivee: string
           arrivee_retour: string | null
+          avoir_applique: number
           carburant: string | null
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
@@ -2304,6 +2305,7 @@ export type Database = {
           archived_at?: string | null
           arrivee: string
           arrivee_retour?: string | null
+          avoir_applique?: number
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -2385,6 +2387,7 @@ export type Database = {
           archived_at?: string | null
           arrivee?: string
           arrivee_retour?: string | null
+          avoir_applique?: number
           carburant?: string | null
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
@@ -3569,6 +3572,197 @@ export type Database = {
           min_km?: number
           name?: string
           sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      loyalty_accounts: {
+        Row: {
+          client_id: string
+          created_at: string
+          date_debut_periode: string
+          email: string | null
+          id: string
+          km_cumules_periode: number
+          montant_ht_cumule_periode: number
+          solde_avoir: number
+          taux_notifie: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          date_debut_periode?: string
+          email?: string | null
+          id?: string
+          km_cumules_periode?: number
+          montant_ht_cumule_periode?: number
+          solde_avoir?: number
+          taux_notifie?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          date_debut_periode?: string
+          email?: string | null
+          id?: string
+          km_cumules_periode?: number
+          montant_ht_cumule_periode?: number
+          solde_avoir?: number
+          taux_notifie?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      loyalty_redemptions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          devis_id: string | null
+          id: string
+          loyalty_account_id: string
+          mission_id: string | null
+          montant: number
+          note: string | null
+          reward_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          devis_id?: string | null
+          id?: string
+          loyalty_account_id: string
+          mission_id?: string | null
+          montant: number
+          note?: string | null
+          reward_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          devis_id?: string | null
+          id?: string
+          loyalty_account_id?: string
+          mission_id?: string | null
+          montant?: number
+          note?: string | null
+          reward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_redemptions_loyalty_account_id_fkey"
+            columns: ["loyalty_account_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_rewards_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_rewards_history: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_calcul: string
+          date_expiration_avoir: string | null
+          expiry_reminder_sent_at: string | null
+          id: string
+          km_au_calcul: number
+          loyalty_account_id: string
+          montant_avoir_genere: number
+          montant_ht_periode: number
+          montant_utilise: number
+          note: string | null
+          notified_at: string | null
+          source: string
+          statut: string
+          taux_applique: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_calcul?: string
+          date_expiration_avoir?: string | null
+          expiry_reminder_sent_at?: string | null
+          id?: string
+          km_au_calcul?: number
+          loyalty_account_id: string
+          montant_avoir_genere?: number
+          montant_ht_periode?: number
+          montant_utilise?: number
+          note?: string | null
+          notified_at?: string | null
+          source?: string
+          statut?: string
+          taux_applique?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_calcul?: string
+          date_expiration_avoir?: string | null
+          expiry_reminder_sent_at?: string | null
+          id?: string
+          km_au_calcul?: number
+          loyalty_account_id?: string
+          montant_avoir_genere?: number
+          montant_ht_periode?: number
+          montant_utilise?: number
+          note?: string | null
+          notified_at?: string | null
+          source?: string
+          statut?: string
+          taux_applique?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_rewards_history_loyalty_account_id_fkey"
+            columns: ["loyalty_account_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_settings: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          seuil_km_max: number | null
+          seuil_km_min: number
+          sort_order: number
+          taux: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          seuil_km_max?: number | null
+          seuil_km_min?: number
+          sort_order?: number
+          taux: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          seuil_km_max?: number | null
+          seuil_km_min?: number
+          sort_order?: number
+          taux?: number
           updated_at?: string
         }
         Relationships: []
@@ -6776,6 +6970,15 @@ export type Database = {
           lot_reference: string
         }[]
       }
+      admin_loyalty_adjust: {
+        Args: {
+          _account_id: string
+          _montant_avoir: number
+          _note: string
+          _taux: number
+        }
+        Returns: string
+      }
       admin_propose_mission_to_convoyeur: {
         Args: {
           _convoyeur_id: string
@@ -7126,6 +7329,30 @@ export type Database = {
         }
         Returns: string
       }
+      loyalty_apply_avoir: {
+        Args: { _devis_id?: string; _mission_id?: string; _montant: number }
+        Returns: number
+      }
+      loyalty_close_due_periods: {
+        Args: never
+        Returns: {
+          account_id: string
+          avoir: number
+          client_id: string
+          email: string
+          expiration: string
+          km: number
+          montant_ht: number
+          reward_id: string
+          taux: number
+        }[]
+      }
+      loyalty_expire_avoirs: { Args: never; Returns: number }
+      loyalty_get_or_create_account: {
+        Args: { _client_id: string; _email?: string }
+        Returns: string
+      }
+      loyalty_rate_for_km: { Args: { _km: number }; Returns: number }
       map_trajet_statut_to_mission: {
         Args: { _statut: string }
         Returns: string

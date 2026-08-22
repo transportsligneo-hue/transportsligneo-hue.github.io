@@ -1,0 +1,1 @@
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS avoir_applique numeric NOT NULL DEFAULT 0;
