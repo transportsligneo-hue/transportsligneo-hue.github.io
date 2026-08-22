@@ -8028,3 +8028,40 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     var(--surface-white) 100%);
 }
 .sg-carousel-section > * { position: relative; z-index: 2; }
+
+/* ============================================================
+   Thème clair · Carte France/Europe fondue dans la page
+   La carte garde son rendu "nuit" mais se fond en haut et en bas
+   dans le fond clair : aucune délimitation visible.
+   ============================================================ */
+html.theme-light .r4-page .ligneo-map {
+  position: relative;
+  padding: 96px 24px 104px;
+  background: transparent;
+  isolation: isolate;
+}
+html.theme-light .r4-page .ligneo-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(120% 70% at 50% 45%, rgba(47,95,255,0.20), transparent 70%),
+    linear-gradient(180deg,
+      #f5f7fc 0%,
+      rgba(11,16,38,0.55) 16%,
+      #0b1026 34%,
+      #0b1026 66%,
+      rgba(11,16,38,0.55) 84%,
+      #f5f7fc 100%);
+  pointer-events: none;
+}
+html.theme-light .r4-page .ligneo-map .ligneo-map-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+}
+html.theme-light .r4-page .ligneo-map .ligneo-map-legend-item { color: #9aa6c9; }
