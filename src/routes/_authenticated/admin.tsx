@@ -55,6 +55,25 @@ function AdminLayout() {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
+  const [demandesCount, setDemandesCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "super_admin") return;
+    const fetchDemandes = async () => {
+      const { count } = await supabase
+        .from("demandes_convoyage" as never)
+        .select("id", { count: "exact", head: true })
+        .in("statut" as never, ["nouvelle", "a_traiter", "en_attente"] as never);
+      setDemandesCount(count ?? 0);
+    };
+    fetchDemandes();
+    const channel = supabase
+      .channel("admin-demandes-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, fetchDemandes)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [role]);
+
 
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
