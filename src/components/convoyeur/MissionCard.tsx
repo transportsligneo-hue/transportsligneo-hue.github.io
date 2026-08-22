@@ -11,7 +11,9 @@ import type { ComponentType } from "react";
 export interface MissionCardData {
   id: string;
   statut: string;
+  numero_mission?: string | null;
   etape_courante?: string | null;
+
   trajet: {
     depart: string;
     arrivee: string;
