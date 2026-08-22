@@ -8076,23 +8076,32 @@ html.theme-light .r4-page .ligneo-map::before {
       #ffffff 100%);
   pointer-events: none;
 }
-/* la bande "Ils nous font confiance" repart en blanc : fondu continu */
+/* la bande "Ils nous font confiance" repart en blanc : fondu continu, sans filet */
 html.theme-light .r4-page .v5-trust {
-  background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+  background: #ffffff !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
 }
-html.theme-light .r4-page .v5-trust h2,
-html.theme-light .r4-page .v5-trust .v5-trust-title {
-  color: #0b1026;
+/* on supprime les voiles de brume qui effaçaient le titre en thème clair */
+html.theme-light .r4-page .v5-trust::before,
+html.theme-light .r4-page .v5-trust::after {
+  display: none !important;
+}
+html.theme-light .r4-page .v5-trust-label {
+  color: #0b1026 !important;
   -webkit-text-fill-color: #0b1026;
-  background: none;
   opacity: 1;
+  position: relative;
+  z-index: 3;
 }
-html.theme-light .r4-page .v5-trust p,
-html.theme-light .r4-page .v5-trust .v5-trust-sub {
-  color: #5a6486;
+html.theme-light .r4-page .v5-trust-sub {
+  color: #5a6486 !important;
   -webkit-text-fill-color: #5a6486;
   opacity: 1;
+  position: relative;
+  z-index: 3;
 }
+
 
 html.theme-light .r4-page .ligneo-map .ligneo-map-card {
   background: transparent;
