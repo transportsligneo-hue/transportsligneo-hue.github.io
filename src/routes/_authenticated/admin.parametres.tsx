@@ -647,7 +647,7 @@ function AvisGoogleCard() {
         setDelayHours(typeof v.delay_hours === "number" ? v.delay_hours : 2);
         setSendToContact(v.send_to_contact !== false);
         setChannel(v.channel ?? "email");
-        setSmsFrom(v.sms_from ?? "Ligneo");
+        setSmsFrom(v.sms_from ?? "LIGNEO");
         setCooldownMonths(typeof v.cooldown_months === "number" ? v.cooldown_months : 4);
       }
       const month = new Date().toISOString().slice(0, 7);
@@ -668,7 +668,7 @@ function AvisGoogleCard() {
           delay_hours: Math.max(0, Number(delayHours) || 0),
           send_to_contact: sendToContact,
           channel,
-          sms_from: smsFrom.trim().slice(0, 11) || "TRSP LIGNEO",
+          sms_from: smsFrom.trim().slice(0, 11) || "LIGNEO",
           cooldown_months: Math.max(0, Number(cooldownMonths) || 0),
         } as unknown as never,
       },

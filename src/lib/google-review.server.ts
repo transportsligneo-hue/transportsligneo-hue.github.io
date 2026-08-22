@@ -36,7 +36,7 @@ export const DEFAULT_REVIEW_SETTINGS: GoogleReviewSettings = {
   delay_hours: 2,
   send_to_contact: true,
   channel: 'email',
-  sms_from: 'TRSP LIGNEO',
+  sms_from: 'LIGNEO',
   cooldown_months: 4,
 }
 
@@ -231,11 +231,11 @@ async function sendReviewSms(params: {
   if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
   try {
     const shortUrl = await ensureShortReviewUrl(params.settings.url)
-    const body = buildSmsBody(params.convoyeurLabel, shortUrl)
+    const body = buildSmsBody(shortUrl)
     const res = await sendSms({
       to: params.recipient.phone!,
       body,
-      from: params.settings.sms_from || 'TRSP LIGNEO',
+      from: params.settings.sms_from || 'LIGNEO',
     })
     return res.ok ? { success: true } : { success: false, reason: res.error || 'Échec SMS (opérateur).' }
   } catch (err) {
