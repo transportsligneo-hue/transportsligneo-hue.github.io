@@ -8176,7 +8176,7 @@ body .tln-shell.is-scrolled .tln-bar .r4-nav-link {
    ============================================================ */
 .back-to-home {
   position: fixed;
-  right: 20px;
+  left: 20px;
   bottom: 84px;
   z-index: 45;
   display: inline-flex;
