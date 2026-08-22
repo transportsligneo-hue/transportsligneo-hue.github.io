@@ -8,6 +8,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailServer } from '@/server/email-send'
 import { sendSms } from '@/lib/sms.server'
+import { buildGoogleReviewSms } from '@/lib/google-review-message'
 
 export type ReviewRecipientType = 'client' | 'contact_livraison'
 export type ReviewChannel = 'email' | 'sms' | 'email+sms'
@@ -140,30 +141,6 @@ function getRecipientInfo(trajet: any, recipientType: ReviewRecipientType): Reci
   return { email, phone, name, prenom }
 }
 
-/**
- * Retire les accents : un SMS contenant un caractère non GSM-7 bascule en
- * UCS-2 (70 caractères par segment), ce qui provoquait la coupure du lien.
- */
-function toGsm7(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’‘]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[–—]/g, '-')
-}
-
-/**
- * Message SMS d'avis Google.
- * Aucune mention du convoyeur (ni prénom, ni initiale, ni nom).
- * Le lien est toujours placé en fin de message et n'est jamais tronqué.
- */
-function buildSmsBody(reviewUrl: string): string {
-  return toGsm7(
-    `Transports Ligneo - Bonjour, votre vehicule a bien ete livre. Si vous etes satisfait, un avis nous aiderait beaucoup : ${reviewUrl}`,
-  )
-}
-
 async function sendReviewEmail(params: {
   attribution: any
   trajet: any
@@ -213,7 +190,7 @@ async function sendReviewSms(params: {
   }
   if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
   try {
-    const body = buildSmsBody(params.settings.url)
+    const body = buildGoogleReviewSms(params.settings.url)
     const res = await sendSms({
       to: phone,
       body,
