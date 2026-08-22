@@ -123,30 +123,34 @@ export function UserMessagesPanel({
         />
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setByEmail((v) => !v)}
-            disabled={!target.email}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
-              byEmail
-                ? "border-[#2F5FFF] bg-[#2F5FFF]/10 text-[#2F5FFF]"
-                : "border-slate-300 bg-white text-slate-600"
-            }`}
-          >
-            <Mail size={13} /> Email {target.email ? "" : "(indisponible)"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setByApp((v) => !v)}
-            disabled={!target.userId}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
-              byApp
-                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                : "border-slate-300 bg-white text-slate-600"
-            }`}
-          >
-            <Smartphone size={13} /> Compte / app Driver
-          </button>
+          <span className="text-[11px] uppercase tracking-wider text-slate-500 mr-1">Envoyer via</span>
+          {([
+            { key: "email", label: "Email", icon: <Mail size={13} />, disabled: !target.email },
+            { key: "app", label: "App Driver", icon: <Smartphone size={13} />, disabled: !target.userId },
+            { key: "both", label: "Les deux", icon: <Send size={13} />, disabled: !target.email || !target.userId },
+          ] as const).map((opt) => {
+            const active =
+              opt.key === "both" ? byEmail && byApp : opt.key === "email" ? byEmail && !byApp : byApp && !byEmail;
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                disabled={opt.disabled}
+                onClick={() => {
+                  setByEmail(opt.key !== "app");
+                  setByApp(opt.key !== "email");
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
+                  active
+                    ? "border-[#2F5FFF] bg-[#2F5FFF]/10 text-[#2F5FFF]"
+                    : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
+                }`}
+              >
+                {opt.icon} {opt.label}
+              </button>
+            );
+          })}
+
 
           <Button
             size="sm"
