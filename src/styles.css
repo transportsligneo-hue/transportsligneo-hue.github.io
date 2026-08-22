@@ -7140,6 +7140,19 @@ html.theme-light .r4-page .feat-toggle-label { color:#0f1526; }
 .plateforme-pro .feat-item span { text-shadow: 0 0 10px rgba(169,123,255,0.18); }
 .plateforme-pro .feat-item:hover span { text-shadow: 0 0 16px rgba(169,123,255,0.55), 0 0 32px rgba(169,123,255,0.3); }
 
+/* Light theme : fonctionnalités de la plateforme lisibles */
+html.theme-light .r4-page .feat-item span { color: #0f1526; text-shadow: 0 0 10px rgba(47,95,255,0.12); }
+html.theme-light .r4-page .feat-item:hover span { color: #2f5fff; text-shadow: 0 0 14px rgba(47,95,255,0.25); }
+html.theme-light .r4-page .feat-item-ic { background: linear-gradient(135deg, rgba(47,95,255,0.14), rgba(47,95,255,0.04)); border-color: rgba(47,95,255,0.22); color: #2f5fff; filter: drop-shadow(0 0 4px rgba(47,95,255,0.25)); }
+html.theme-light .r4-page .feat-item:hover .feat-item-ic { background: linear-gradient(135deg, rgba(47,95,255,0.28), rgba(47,95,255,0.1)); border-color: rgba(47,95,255,0.45); color: #ffffff; filter: drop-shadow(0 0 8px rgba(47,95,255,0.5)); }
+html.theme-light .r4-page .feat-item:hover { background: rgba(47,95,255,0.08); box-shadow: 0 8px 24px rgba(47,95,255,0.12); }
+
+html.theme-light .plateforme-pro .feat-item span { color: #0f1526; text-shadow: 0 0 10px rgba(107,71,255,0.12); }
+html.theme-light .plateforme-pro .feat-item:hover span { color: #6b47ff; text-shadow: 0 0 16px rgba(107,71,255,0.3); }
+html.theme-light .plateforme-pro .feat-item-ic { background: linear-gradient(135deg, rgba(107,71,255,0.14), rgba(107,71,255,0.04)); border-color: rgba(107,71,255,0.22); color: #6b47ff; filter: drop-shadow(0 0 4px rgba(107,71,255,0.25)); }
+html.theme-light .plateforme-pro .feat-item:hover .feat-item-ic { background: linear-gradient(135deg, rgba(107,71,255,0.3), rgba(107,71,255,0.1)); border-color: rgba(107,71,255,0.45); color: #ffffff; filter: drop-shadow(0 0 8px rgba(107,71,255,0.5)); }
+html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,0.08); box-shadow: 0 8px 24px rgba(107,71,255,0.12); }
+
 
 /* Bouton Espace Driver (vert néon) */
 .v4-btn-driver, .r4-page .v4-btn-driver { display:inline-flex; align-items:center; gap:9px; padding:15px 26px; border-radius:999px;
