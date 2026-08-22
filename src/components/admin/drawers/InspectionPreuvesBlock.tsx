@@ -239,6 +239,8 @@ export function InspectionPreuvesBlock({
             <Group title="Selfie convoyeur" icon={<Camera size={12} />} items={selfies} empty="Aucun selfie pris." />
             <Group title="Photos départ" icon={<FileImage size={12} />} items={photosDepart} empty="Aucune photo de départ." />
             <Group title="Photos arrivée" icon={<FileImage size={12} />} items={photosArrivee} empty="Aucune photo d'arrivée." />
+            <RechargePreuvesBlock attributionId={attributionId} variant="dark" />
+
             <Group title="Signatures" icon={<PenLine size={12} />} items={signatures} empty="Aucune signature enregistrée." />
             <Group title="Carte grise" icon={<ImgIcon size={12} />} items={carteGrise} empty="Carte grise non fournie." />
             <Group title="Documents (PV, autres)" icon={<FileText size={12} />} items={docs} empty="Aucun document mission." />
