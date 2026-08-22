@@ -99,6 +99,7 @@ import { Route as AuthenticatedDashboardProApiRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
+import { Route as AuthenticatedDashboardClientFideliteRouteImport } from './routes/_authenticated/dashboard-client.fidelite'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
 import { Route as AuthenticatedDashboardClientDevisRouteImport } from './routes/_authenticated/dashboard-client.devis'
 import { Route as AuthenticatedDashboardClientAdressesRouteImport } from './routes/_authenticated/dashboard-client.adresses'
@@ -668,6 +669,12 @@ const AuthenticatedDashboardClientNouvelleReservationRoute =
   AuthenticatedDashboardClientNouvelleReservationRouteImport.update({
     id: '/nouvelle-reservation',
     path: '/nouvelle-reservation',
+    getParentRoute: () => AuthenticatedDashboardClientRoute,
+  } as any)
+const AuthenticatedDashboardClientFideliteRoute =
+  AuthenticatedDashboardClientFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
 const AuthenticatedDashboardClientDocumentsRoute =
@@ -1279,6 +1286,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1450,6 +1458,7 @@ export interface FileRoutesByTo {
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1628,6 +1637,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/_authenticated/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/_authenticated/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1808,6 +1818,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
+    | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
@@ -1979,6 +1990,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
+    | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
@@ -2156,6 +2168,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/adresses'
     | '/_authenticated/dashboard-client/devis'
     | '/_authenticated/dashboard-client/documents'
+    | '/_authenticated/dashboard-client/fidelite'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
     | '/_authenticated/dashboard-pro/adresses'
@@ -2949,6 +2962,13 @@ declare module '@tanstack/react-router' {
       path: '/nouvelle-reservation'
       fullPath: '/dashboard-client/nouvelle-reservation'
       preLoaderRoute: typeof AuthenticatedDashboardClientNouvelleReservationRouteImport
+      parentRoute: typeof AuthenticatedDashboardClientRoute
+    }
+    '/_authenticated/dashboard-client/fidelite': {
+      id: '/_authenticated/dashboard-client/fidelite'
+      path: '/fidelite'
+      fullPath: '/dashboard-client/fidelite'
+      preLoaderRoute: typeof AuthenticatedDashboardClientFideliteRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
     '/_authenticated/dashboard-client/documents': {
@@ -3775,6 +3795,7 @@ interface AuthenticatedDashboardClientRouteChildren {
   AuthenticatedDashboardClientAdressesRoute: typeof AuthenticatedDashboardClientAdressesRoute
   AuthenticatedDashboardClientDevisRoute: typeof AuthenticatedDashboardClientDevisRoute
   AuthenticatedDashboardClientDocumentsRoute: typeof AuthenticatedDashboardClientDocumentsRoute
+  AuthenticatedDashboardClientFideliteRoute: typeof AuthenticatedDashboardClientFideliteRoute
   AuthenticatedDashboardClientNouvelleReservationRoute: typeof AuthenticatedDashboardClientNouvelleReservationRoute
   AuthenticatedDashboardClientProfilRoute: typeof AuthenticatedDashboardClientProfilRoute
   AuthenticatedDashboardClientIndexRoute: typeof AuthenticatedDashboardClientIndexRoute
@@ -3790,6 +3811,8 @@ const AuthenticatedDashboardClientRouteChildren: AuthenticatedDashboardClientRou
       AuthenticatedDashboardClientDevisRoute,
     AuthenticatedDashboardClientDocumentsRoute:
       AuthenticatedDashboardClientDocumentsRoute,
+    AuthenticatedDashboardClientFideliteRoute:
+      AuthenticatedDashboardClientFideliteRoute,
     AuthenticatedDashboardClientNouvelleReservationRoute:
       AuthenticatedDashboardClientNouvelleReservationRoute,
     AuthenticatedDashboardClientProfilRoute:
