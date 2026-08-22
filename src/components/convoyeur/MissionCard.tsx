@@ -71,10 +71,18 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
     <article className={`brex-card ${isActive ? "brex-card--active" : ""}`}>
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-2">
-        <span className={`brex-pill brex-pill--${meta.tone} ${meta.live ? "brex-pill--live" : ""}`}>
-          <span className="brex-pill-dot" />
-          {meta.label}
-        </span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`brex-pill brex-pill--${meta.tone} ${meta.live ? "brex-pill--live" : ""}`}>
+            <span className="brex-pill-dot" />
+            {meta.label}
+          </span>
+          {mission.numero_mission && (
+            <span className="rounded-md border border-white/15 bg-white/[0.06] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-white/90 truncate">
+              {displayNumero(mission.numero_mission)}
+            </span>
+          )}
+        </div>
+
         {t?.date_trajet && (
           <span className="flex items-center gap-1.5 text-[11px] text-[var(--driver-muted)] tabular-nums">
             <Calendar size={11} />
