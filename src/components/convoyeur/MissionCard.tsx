@@ -7,6 +7,8 @@ import {
   Phone, Navigation, AlertCircle, Clock, Truck, Flag, Layers,
 } from "lucide-react";
 import type { ComponentType } from "react";
+import { displayNumero } from "@/lib/mission-number";
+
 
 export interface MissionCardData {
   id: string;
