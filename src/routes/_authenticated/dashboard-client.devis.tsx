@@ -519,8 +519,17 @@ function MesFacturesEtDevis() {
                 }}
               />
             ) : (
-              <DevisEmbeddedCheckout devisId={active.id} returnUrl={returnUrl} />
+              <>
+                <AvoirRedemption
+                  devisId={active.id}
+                  prixTtc={Number(active.prix_estime)}
+                  dejaApplique={Number((active as Record<string, unknown>)["avoir_applique"] ?? 0)}
+                  onApplied={() => refresh()}
+                />
+                <DevisEmbeddedCheckout devisId={active.id} returnUrl={returnUrl} />
+              </>
             )}
+
           </div>
         </div>
       )}
