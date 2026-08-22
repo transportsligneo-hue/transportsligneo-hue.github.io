@@ -8069,12 +8069,31 @@ html.theme-light .r4-page .ligneo-map::before {
       #4d5b87 73%,
       #7280a8 76%,
       #9ba6c4 80%,
-      #c3cbe0 84%,
-      #dfe4f1 89%,
-      #eef1f9 94%,
-      #f5f7fc 100%);
+      #c6cee1 84%,
+      #e4e9f4 89%,
+      #f3f6fc 94%,
+      #fbfcfe 97%,
+      #ffffff 100%);
   pointer-events: none;
 }
+/* la bande "Ils nous font confiance" repart en blanc : fondu continu */
+html.theme-light .r4-page .v5-trust {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+}
+html.theme-light .r4-page .v5-trust h2,
+html.theme-light .r4-page .v5-trust .v5-trust-title {
+  color: #0b1026;
+  -webkit-text-fill-color: #0b1026;
+  background: none;
+  opacity: 1;
+}
+html.theme-light .r4-page .v5-trust p,
+html.theme-light .r4-page .v5-trust .v5-trust-sub {
+  color: #5a6486;
+  -webkit-text-fill-color: #5a6486;
+  opacity: 1;
+}
+
 html.theme-light .r4-page .ligneo-map .ligneo-map-card {
   background: transparent;
   border: 0;
