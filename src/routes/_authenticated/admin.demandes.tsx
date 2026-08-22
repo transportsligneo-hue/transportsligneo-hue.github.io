@@ -187,17 +187,20 @@ function AdminDemandes() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return demandes;
-    return demandes.filter(
-      (d) =>
+    return demandes.filter((d) => {
+      if (filterStatut !== "all" && d.statut !== filterStatut) return false;
+      if (!q) return true;
+      return (
         d.nom.toLowerCase().includes(q) ||
         d.prenom.toLowerCase().includes(q) ||
         d.email.toLowerCase().includes(q) ||
         (d.telephone ?? "").toLowerCase().includes(q) ||
         d.depart.toLowerCase().includes(q) ||
         d.arrivee.toLowerCase().includes(q)
-    );
-  }, [demandes, search]);
+      );
+    });
+  }, [demandes, search, filterStatut]);
+
 
   return (
     <div className="space-y-6">
