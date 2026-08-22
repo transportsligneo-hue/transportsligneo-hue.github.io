@@ -3,13 +3,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
-import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User } from "lucide-react";
+import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User, Inbox, Clock, CheckCircle2, Euro } from "lucide-react";
 import {
   AdminPageHeader,
   AdminSection,
   AdminBadge,
   AdminEmpty,
+  AdminStatCard,
 } from "@/components/admin/ui";
+
 import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
@@ -111,18 +113,53 @@ function AdminDemandes() {
   const convertDemande = useServerFn(convertDemandeToMissions);
 
   const fetchDemandes = useCallback(async () => {
-    let query = supabase
+    const { data } = await supabase
       .from("demandes_convoyage")
       .select("*")
-      .order("created_at", { ascending: false });
-    if (filterStatut !== "all") query = query.eq("statut", filterStatut);
-    const { data } = await query;
+      .order("created_at", { ascending: false })
+      .limit(500);
     if (data) setDemandes(data as Demande[]);
-  }, [filterStatut]);
+  }, []);
 
   useEffect(() => {
     fetchDemandes();
   }, [fetchDemandes]);
+
+  // Temps réel : toute nouvelle demande remonte immédiatement dans la liste.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-demandes-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          const d = payload.new as Partial<Demande>;
+          toast.info("Nouvelle demande de convoyage", {
+            description: `${d.prenom ?? ""} ${d.nom ?? ""} · ${d.depart ?? "?"} → ${d.arrivee ?? "?"}`,
+          });
+        }
+        fetchDemandes();
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [fetchDemandes]);
+
+  const stats = useMemo(() => {
+    const nouvelles = demandes.filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter").length;
+    const today = new Date().toDateString();
+    const aujourdhui = demandes.filter((d) => new Date(d.created_at).toDateString() === today).length;
+    const converties = demandes.filter((d) => d.statut === "convertie" || d.statut === "attribuee" || d.statut === "terminee").length;
+    const potentiel = demandes
+      .filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter")
+      .reduce((sum, d) => sum + (extractFromOptions(d.options).prix ?? 0), 0);
+    return { nouvelles, aujourdhui, converties, potentiel };
+  }, [demandes]);
+
+  const countByStatut = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const d of demandes) m[d.statut] = (m[d.statut] ?? 0) + 1;
+    return m;
+  }, [demandes]);
+
+
 
   const convertToTrajet = async (d: Demande) => {
     setConverting(d.id);
@@ -150,17 +187,20 @@ function AdminDemandes() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return demandes;
-    return demandes.filter(
-      (d) =>
+    return demandes.filter((d) => {
+      if (filterStatut !== "all" && d.statut !== filterStatut) return false;
+      if (!q) return true;
+      return (
         d.nom.toLowerCase().includes(q) ||
         d.prenom.toLowerCase().includes(q) ||
         d.email.toLowerCase().includes(q) ||
         (d.telephone ?? "").toLowerCase().includes(q) ||
         d.depart.toLowerCase().includes(q) ||
         d.arrivee.toLowerCase().includes(q)
-    );
-  }, [demandes, search]);
+      );
+    });
+  }, [demandes, search, filterStatut]);
+
 
   return (
     <div className="space-y-6">
@@ -183,6 +223,13 @@ function AdminDemandes() {
       <AdminBadgeLegend />
 
 
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="À traiter" value={stats.nouvelles} icon={Inbox} accent={stats.nouvelles ? "warning" : "default"} hint="Demandes non converties" />
+        <AdminStatCard label="Reçues aujourd'hui" value={stats.aujourdhui} icon={Clock} />
+        <AdminStatCard label="Converties en mission" value={stats.converties} icon={CheckCircle2} accent="success" />
+        <AdminStatCard label="Potentiel en attente" value={`${Math.round(stats.potentiel)} €`} icon={Euro} accent="info" hint="Somme des estimations à traiter" />
+      </div>
+
       <AdminSection>
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
           <div className="relative flex-1">
@@ -198,31 +245,39 @@ function AdminDemandes() {
               className="w-full pl-9 pr-3 py-2 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-sm focus:outline-none focus:border-[color:var(--admin-accent)]"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-1.5">
             <button
               onClick={() => setFilterStatut("all")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                 filterStatut === "all"
-                  ? "bg-[color:var(--admin-accent)] text-white border-[color:var(--admin-accent)]"
-                  : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[color:var(--admin-accent)]"
+                  ? "bg-[#2F5FFF] text-white border-[#2F5FFF]"
+                  : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[#2F5FFF]"
               }`}
             >
               Tous
+              <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${filterStatut === "all" ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{demandes.length}</span>
             </button>
-            {statuts.map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilterStatut(s)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                  filterStatut === s
-                    ? "bg-[color:var(--admin-accent)] text-white border-[color:var(--admin-accent)]"
-                    : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[color:var(--admin-accent)]"
-                }`}
-              >
-                {statutLabels[s]}
-              </button>
-            ))}
+            {statuts.map((s) => {
+              const active = filterStatut === s;
+              const count = countByStatut[s] ?? 0;
+              if (count === 0 && !active) return null;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatut(s)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    active
+                      ? "bg-[#2F5FFF] text-white border-[#2F5FFF]"
+                      : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[#2F5FFF]"
+                  }`}
+                >
+                  {statutLabels[s]}
+                  <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${active ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{count}</span>
+                </button>
+              );
+            })}
           </div>
+
         </div>
 
         {filtered.length === 0 ? (

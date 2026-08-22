@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   Wallet,
   Gauge,
+  Inbox,
 
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -55,6 +56,25 @@ function AdminLayout() {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
+  const [demandesCount, setDemandesCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "super_admin") return;
+    const fetchDemandes = async () => {
+      const { count } = await supabase
+        .from("demandes_convoyage" as never)
+        .select("id", { count: "exact", head: true })
+        .in("statut" as never, ["nouvelle", "a_traiter"] as never);
+      setDemandesCount(count ?? 0);
+    };
+    fetchDemandes();
+    const channel = supabase
+      .channel("admin-demandes-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, fetchDemandes)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [role]);
+
 
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
@@ -130,7 +150,17 @@ function AdminLayout() {
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Comptes" },
 
     // Activité commerciale
+    {
+      to: "/admin/demandes",
+      label: "Demandes de convoyage",
+      icon: Inbox,
+      group: "Activité",
+      badge: demandesCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#2F5FFF] text-white">{demandesCount > 99 ? "99+" : demandesCount}</span>
+        : undefined,
+    },
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
+
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
