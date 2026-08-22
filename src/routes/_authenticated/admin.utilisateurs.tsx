@@ -625,7 +625,21 @@ function UserDetailDrawer({
           ))}
         </TabsContent>
 
+        <TabsContent value="messages" className="mt-4">
+          <UserMessagesPanel
+            target={{
+              userId: user.user_id,
+              email: user.email,
+              prenom: (user as any).prenom ?? null,
+              label: `${(user as any).prenom ?? ""} ${(user as any).nom ?? ""}`.trim() || user.email || undefined,
+              role: (user as any).role === "convoyeur" ? "convoyeur" : "client",
+            }}
+            onSent={refreshMsgCount}
+          />
+        </TabsContent>
+
         <TabsContent value="logs" className="mt-4 space-y-2">
+
           {logs.length === 0 ? (
             <p className="text-sm text-white/50 text-center py-8">Aucune activité enregistrée.</p>
           ) : logs.map((l) => (
