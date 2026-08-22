@@ -8250,3 +8250,37 @@ html.theme-light .back-to-home:hover {
     0 0 38px rgba(79, 140, 255, 0.95);
 }
 
+
+/* ============================================================
+   NAVBAR · anti-rognage (Edge / Chromium)
+   `overflow-x:auto` sur .tln-links force overflow-y:auto : le halo et
+   les bords arrondis des pastilles actives étaient coupés sur Edge.
+   On passe en overflow-x:clip (autorise overflow-y:visible) + place
+   verticale garantie dans la barre.
+   ============================================================ */
+body .tln-links {
+  overflow: visible !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  flex-wrap: nowrap !important;
+  padding-block: 6px !important;
+  align-items: center !important;
+}
+body .tln-links > li { align-items: center !important; }
+body .tln-bar {
+  overflow: visible !important;
+  align-items: center !important;
+}
+/* Le reflet reste confiné à la barre malgré overflow:visible */
+.tln-bar .tln-sheen {
+  border-radius: inherit;
+  clip-path: inset(0 round 0 0 22px 22px);
+}
+body .tln-bar .r4-nav-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.4 !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  white-space: nowrap !important;
+}
