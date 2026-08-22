@@ -2,8 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Wallet, Gauge, Search, Settings2, Pencil } from "lucide-react";
+import { Loader2, Wallet, Gauge, Settings2, Pencil, Users, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  PageHeader, Card, KpiCard, Badge, Button, EmptyState, Select, SearchInput,
+  Table, THead, TH, TR, TD, TextInput, FormField,
+} from "@/components/admin/AdminUI";
 import {
   adminListLoyalty,
   adminAdjustLoyalty,
@@ -14,6 +18,13 @@ import { currentTier, formatEur, formatKm, formatDateFr, DEFAULT_TIERS, type Loy
 
 export const Route = createFileRoute("/_authenticated/admin/fidelite")({
   component: AdminFidelite,
+  head: () => ({
+    meta: [
+      { title: "Compte Kilomètres — Administration Transports Ligneo" },
+      { name: "description", content: "Suivi des comptes fidélité, avoirs et paliers kilométriques." },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
 });
 
 type SortKey = "avoir" | "km" | "client";
@@ -55,9 +66,7 @@ function AdminFidelite() {
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
     const filtered = (data?.rows ?? []).filter((r) =>
-      !q
-        ? true
-        : `${r.clientNom} ${r.clientEmail} ${r.societe ?? ""}`.toLowerCase().includes(q),
+      !q ? true : `${r.clientNom} ${r.clientEmail} ${r.societe ?? ""}`.toLowerCase().includes(q),
     );
     return [...filtered].sort((a, b) => {
       if (sort === "client") return a.clientNom.localeCompare(b.clientNom);
@@ -77,114 +86,88 @@ function AdminFidelite() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-pro-accent" size={30} />
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="animate-spin text-pro-accent" size={28} />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-pro-accent">Fidélité</p>
-          <h1 className="font-heading text-2xl">Compte Kilomètres</h1>
-          <p className="text-sm text-pro-muted">
-            Programme interne — non visible sur le site public.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowBareme((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-xs uppercase tracking-[0.14em] hover:bg-black/5"
-        >
-          <Settings2 size={14} /> Barème
-        </button>
-      </div>
+      <PageHeader
+        title="Compte Kilomètres"
+        eyebrow="Fidélité"
+        subtitle="Programme interne — non visible sur le site public."
+        actions={
+          <Button
+            variant={showBareme ? "primary" : "secondary"}
+            icon={showBareme ? <X size={15} /> : <Settings2 size={15} />}
+            onClick={() => setShowBareme((v) => !v)}
+          >
+            {showBareme ? "Fermer le barème" : "Barème"}
+          </Button>
+        }
+      />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MiniStat label="Comptes actifs" value={String(totals.comptes)} icon={<Wallet size={16} />} />
-        <MiniStat label="Avoirs en circulation" value={formatEur(totals.avoir)} icon={<Wallet size={16} />} />
-        <MiniStat label="Km cumulés (périodes en cours)" value={formatKm(totals.km)} icon={<Gauge size={16} />} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <KpiCard label="Comptes actifs" value={totals.comptes} icon={Users} tone="info" />
+        <KpiCard label="Avoirs en circulation" value={formatEur(totals.avoir)} icon={Wallet} tone="primary" />
+        <KpiCard label="Km cumulés (périodes en cours)" value={formatKm(totals.km)} icon={Gauge} tone="success" />
       </div>
 
       {showBareme && (
-        <div className="card-premium rounded-2xl p-5">
-          <h2 className="font-heading text-sm uppercase tracking-[0.14em] mb-3">Paliers et taux</h2>
+        <Card>
+          <h2 className="text-sm font-semibold text-pro-text mb-4">Paliers et taux</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {tiers.map((t) => (
               <TierEditor key={t.id} tier={t} onSave={(v) => tierMutation.mutate(v)} saving={tierMutation.isPending} />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
-      <div className="card-premium rounded-2xl p-5">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un client, un email, une société…"
-              className="w-full rounded-xl border border-black/10 bg-transparent pl-9 pr-3 py-2 text-sm"
-            />
-          </div>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-xl border border-black/10 bg-transparent px-3 py-2 text-sm"
-          >
-            <option value="avoir">Tri : solde d'avoir</option>
-            <option value="km">Tri : kilomètres cumulés</option>
-            <option value="client">Tri : client</option>
-          </select>
-        </div>
-
-        {rows.length === 0 ? (
-          <p className="text-sm text-pro-muted">Aucun compte fidélité pour le moment.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-[11px] uppercase tracking-wider text-pro-muted">
-                  <th className="py-2 pr-3">Client</th>
-                  <th className="py-2 pr-3">Type</th>
-                  <th className="py-2 pr-3">Km période</th>
-                  <th className="py-2 pr-3">HT période</th>
-                  <th className="py-2 pr-3">Palier</th>
-                  <th className="py-2 pr-3">Avoir</th>
-                  <th className="py-2 pr-3">Début période</th>
-                  <th className="py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <AccountRow
-                    key={r.account.id}
-                    row={r}
-                    tiers={tiers}
-                    open={openAccount === r.account.id}
-                    onToggle={() => setOpenAccount(openAccount === r.account.id ? null : r.account.id)}
-                    onAdjust={(v) => adjustMutation.mutate({ accountId: r.account.id, ...v })}
-                    saving={adjustMutation.isPending}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      <div className="flex flex-wrap items-center gap-3">
+        <SearchInput value={search} onChange={setSearch} placeholder="Client, email, société…" />
+        <Select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+          <option value="avoir">Tri : solde d'avoir</option>
+          <option value="km">Tri : kilomètres cumulés</option>
+          <option value="client">Tri : client</option>
+        </Select>
       </div>
-    </div>
-  );
-}
 
-function MiniStat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-  return (
-    <div className="card-premium rounded-2xl p-5">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-pro-accent">
-        {icon} {label}
-      </div>
-      <div className="mt-2 font-heading text-2xl">{value}</div>
+      {rows.length === 0 ? (
+        <EmptyState
+          icon={Gauge}
+          title="Aucun compte fidélité"
+          description="Les comptes se créent automatiquement dès la première mission terminée."
+        />
+      ) : (
+        <Table>
+          <THead>
+            <TH>Client</TH>
+            <TH>Type</TH>
+            <TH>Km période</TH>
+            <TH>HT période</TH>
+            <TH>Palier</TH>
+            <TH>Avoir</TH>
+            <TH>Début période</TH>
+            <TH className="text-right">Actions</TH>
+          </THead>
+          <tbody>
+            {rows.map((r) => (
+              <AccountRow
+                key={r.account.id}
+                row={r}
+                tiers={tiers}
+                open={openAccount === r.account.id}
+                onToggle={() => setOpenAccount(openAccount === r.account.id ? null : r.account.id)}
+                onAdjust={(v) => adjustMutation.mutate({ accountId: r.account.id, ...v })}
+                saving={adjustMutation.isPending}
+              />
+            ))}
+          </tbody>
+        </Table>
+      )}
     </div>
   );
 }
@@ -202,15 +185,27 @@ function TierEditor({
   const [max, setMax] = useState(tier.seuil_km_max == null ? "" : String(tier.seuil_km_max));
   const [taux, setTaux] = useState(String(tier.taux));
   return (
-    <div className="rounded-xl border border-black/10 p-3 space-y-2">
-      <div className="text-[11px] uppercase tracking-wider text-pro-muted">{tier.label}</div>
-      <div className="flex gap-2">
-        <input value={min} onChange={(e) => setMin(e.target.value)} className="w-full rounded-lg border border-black/10 bg-transparent px-2 py-1 text-sm" placeholder="km min" />
-        <input value={max} onChange={(e) => setMax(e.target.value)} className="w-full rounded-lg border border-black/10 bg-transparent px-2 py-1 text-sm" placeholder="km max (vide = ∞)" />
+    <div className="rounded-xl border border-pro-border bg-pro-bg-soft/40 p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] uppercase tracking-wider font-semibold text-pro-text-soft">{tier.label}</span>
+        <Badge tone="primary">{tier.taux} %</Badge>
       </div>
-      <div className="flex gap-2 items-center">
-        <input value={taux} onChange={(e) => setTaux(e.target.value)} className="w-full rounded-lg border border-black/10 bg-transparent px-2 py-1 text-sm" placeholder="taux %" />
-        <button
+      <div className="grid grid-cols-2 gap-2">
+        <FormField label="Km min">
+          <TextInput value={min} onChange={(e) => setMin(e.target.value)} placeholder="0" />
+        </FormField>
+        <FormField label="Km max">
+          <TextInput value={max} onChange={(e) => setMax(e.target.value)} placeholder="∞" />
+        </FormField>
+      </div>
+      <div className="flex items-end gap-2">
+        <div className="flex-1">
+          <FormField label="Taux %">
+            <TextInput value={taux} onChange={(e) => setTaux(e.target.value)} placeholder="1" />
+          </FormField>
+        </div>
+        <Button
+          size="sm"
           disabled={saving}
           onClick={() =>
             onSave({
@@ -220,10 +215,9 @@ function TierEditor({
               taux: Number(taux) || 0,
             })
           }
-          className="rounded-lg bg-pro-accent px-3 py-1 text-xs text-white"
         >
           OK
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -249,54 +243,65 @@ function AccountRow({
   const [note, setNote] = useState("");
   const km = Number(row.account.km_cumules_periode);
   const tier = currentTier(km, tiers);
+  const avoir = Number(row.account.solde_avoir);
 
   return (
     <>
-      <tr className="border-t border-black/5">
-        <td className="py-2 pr-3">
-          <div className="font-medium">{row.clientNom}</div>
+      <TR>
+        <TD>
+          <div className="font-medium text-pro-text">{row.clientNom}</div>
           <div className="text-xs text-pro-muted">{row.societe || row.clientEmail}</div>
-        </td>
-        <td className="py-2 pr-3 text-xs uppercase tracking-wider text-pro-muted">{row.typeClient ?? "—"}</td>
-        <td className="py-2 pr-3">{formatKm(km)}</td>
-        <td className="py-2 pr-3">{formatEur(Number(row.account.montant_ht_cumule_periode))}</td>
-        <td className="py-2 pr-3">{tier.taux} %</td>
-        <td className="py-2 pr-3 font-semibold">{formatEur(Number(row.account.solde_avoir))}</td>
-        <td className="py-2 pr-3">{formatDateFr(row.account.date_debut_periode)}</td>
-        <td className="py-2 text-right">
-          <button onClick={onToggle} className="inline-flex items-center gap-1 text-xs text-pro-accent hover:underline">
-            <Pencil size={12} /> {open ? "Fermer" : "Ajuster"}
-          </button>
-        </td>
-      </tr>
+        </TD>
+        <TD>
+          <Badge tone={row.typeClient === "professionnel" ? "purple" : "neutral"}>
+            {row.typeClient ?? "—"}
+          </Badge>
+        </TD>
+        <TD>{formatKm(km)}</TD>
+        <TD>{formatEur(Number(row.account.montant_ht_cumule_periode))}</TD>
+        <TD>
+          <Badge tone="info">{tier.taux} %</Badge>
+        </TD>
+        <TD className="font-semibold">
+          {avoir > 0 ? <Badge tone="success">{formatEur(avoir)}</Badge> : formatEur(avoir)}
+        </TD>
+        <TD className="text-pro-text-soft">{formatDateFr(row.account.date_debut_periode)}</TD>
+        <TD className="text-right">
+          <Button size="sm" variant={open ? "secondary" : "ghost"} icon={<Pencil size={13} />} onClick={onToggle}>
+            {open ? "Fermer" : "Ajuster"}
+          </Button>
+        </TD>
+      </TR>
       {open && (
-        <tr className="border-t border-black/5 bg-black/[0.02]">
-          <td colSpan={8} className="p-4">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="space-y-2">
-                <h3 className="text-[11px] uppercase tracking-wider text-pro-muted">Ajustement manuel</h3>
-                <div className="flex flex-wrap gap-2">
-                  <input
-                    value={montant}
-                    onChange={(e) => setMontant(e.target.value)}
-                    placeholder="Montant d'avoir (€, négatif possible)"
-                    className="flex-1 min-w-[180px] rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm"
-                  />
-                  <input
-                    value={taux}
-                    onChange={(e) => setTaux(e.target.value)}
-                    placeholder="Taux appliqué (%)"
-                    className="w-40 rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm"
-                  />
+        <tr className="border-b border-pro-border bg-pro-bg-soft/50">
+          <td colSpan={8} className="p-5">
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-3">
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-pro-text-soft">
+                  Ajustement manuel
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Montant d'avoir (€)" required>
+                    <TextInput
+                      value={montant}
+                      onChange={(e) => setMontant(e.target.value)}
+                      placeholder="ex : 120 ou -50"
+                    />
+                  </FormField>
+                  <FormField label="Taux appliqué (%)">
+                    <TextInput value={taux} onChange={(e) => setTaux(e.target.value)} placeholder="ex : 2" />
+                  </FormField>
                 </div>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Note justificative (obligatoire) — volume exceptionnel, geste commercial…"
-                  rows={2}
-                  className="w-full rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm"
-                />
-                <button
+                <FormField label="Note justificative" required>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Volume exceptionnel, geste commercial…"
+                    rows={2}
+                    className="w-full px-3 py-2 bg-white border border-pro-border rounded-md text-sm text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:ring-2 focus:ring-pro-accent/20 focus:outline-none"
+                  />
+                </FormField>
+                <Button
                   disabled={saving || note.trim().length < 3 || !montant}
                   onClick={() => {
                     onAdjust({ montantAvoir: Number(montant) || 0, taux: Number(taux) || 0, note: note.trim() });
@@ -304,25 +309,29 @@ function AccountRow({
                     setTaux("");
                     setNote("");
                   }}
-                  className="rounded-xl bg-pro-accent px-4 py-2 text-xs uppercase tracking-[0.14em] text-white disabled:opacity-50"
                 >
                   Enregistrer l'ajustement
-                </button>
+                </Button>
               </div>
               <div>
-                <h3 className="text-[11px] uppercase tracking-wider text-pro-muted mb-2">Historique des primes</h3>
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-pro-text-soft mb-2">
+                  Historique des primes
+                </h3>
                 {row.rewards.length === 0 ? (
-                  <p className="text-sm text-pro-muted">Aucune prime.</p>
+                  <p className="text-sm text-pro-muted">Aucune prime pour le moment.</p>
                 ) : (
-                  <ul className="space-y-1 text-sm">
+                  <ul className="space-y-2">
                     {row.rewards.map((r) => (
-                      <li key={r.id} className="flex flex-wrap justify-between gap-2 border-b border-black/5 py-1">
-                        <span>
+                      <li
+                        key={r.id}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-pro-border bg-white px-3 py-2 text-sm"
+                      >
+                        <span className="text-pro-text-soft">
                           {formatDateFr(r.date_calcul)} — {formatKm(Number(r.km_au_calcul))} · {r.taux_applique} %
                         </span>
-                        <span className="font-medium">
-                          {formatEur(Number(r.montant_avoir_genere))} · {r.statut}
-                          {r.note ? ` · ${r.note}` : ""}
+                        <span className="flex items-center gap-2">
+                          <span className="font-semibold text-pro-text">{formatEur(Number(r.montant_avoir_genere))}</span>
+                          <Badge tone={r.statut === "actif" ? "success" : "neutral"}>{r.statut}</Badge>
                         </span>
                       </li>
                     ))}
