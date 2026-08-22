@@ -8150,6 +8150,103 @@ html.theme-dark .r4-page .v5-trust::after {
   display: none !important;
   background: none !important;
 }
-html.theme-dark .r4-page .v5-trust {
-  background: linear-gradient(90deg, rgba(20,45,140,0.22), rgba(47,95,255,0.14) 50%, rgba(20,45,140,0.22)) !important;
+
+/* ============================================================
+   NAVBAR · liens plus aérés pour éviter les lettres/accents coupés
+   ============================================================ */
+body .tln-bar { padding: 12px 24px !important; }
+body .tln-bar-inner { gap: 16px !important; }
+body .tln-links { gap: 4px !important; }
+body .tln-bar .r4-nav-link {
+  min-height: 40px !important;
+  padding: 7px 13px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 999px !important;
 }
+body .tln-shell.is-scrolled .tln-bar .r4-nav-link {
+  min-height: 36px !important;
+  padding: 6px 11px !important;
+  font-size: 12.4px !important;
+}
+
+/* ============================================================
+   BOUTON FLOTTANT · Revenir à l'accueil (bleu néon électrique)
+   ============================================================ */
+.back-to-home {
+  position: fixed;
+  right: 20px;
+  bottom: 84px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2f5fff 0%, #4f8cff 55%, #6ea1ff 100%);
+  border: 1px solid rgba(110, 161, 255, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(47, 95, 255, 0.35),
+    0 6px 22px rgba(47, 95, 255, 0.45),
+    0 0 24px rgba(79, 140, 255, 0.55);
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  animation: backHomeBreathe 2.8s ease-in-out infinite;
+  pointer-events: auto;
+}
+.back-to-home:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 0 0 1px rgba(110, 161, 255, 0.7),
+    0 10px 30px rgba(47, 95, 255, 0.6),
+    0 0 38px rgba(79, 140, 255, 0.85);
+  filter: brightness(1.08);
+}
+.back-to-home svg {
+  width: 18px; height: 18px;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.55));
+}
+.back-to-home-label { display: inline; }
+
+@keyframes backHomeBreathe {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(47, 95, 255, 0.35), 0 6px 22px rgba(47, 95, 255, 0.45), 0 0 24px rgba(79, 140, 255, 0.55); }
+  50% { box-shadow: 0 0 0 1px rgba(110, 161, 255, 0.6), 0 8px 28px rgba(47, 95, 255, 0.65), 0 0 36px rgba(79, 140, 255, 0.9); }
+}
+
+@media (max-width: 640px) {
+  .back-to-home {
+    right: 14px;
+    bottom: 76px;
+    padding: 9px 12px;
+    font-size: 11.5px;
+  }
+  .back-to-home-label { display: none; }
+}
+
+@media (min-width: 1280px) {
+  .back-to-home { bottom: 96px; }
+}
+
+/* Thème clair : conserver le bleu néon électrique */
+html.theme-light .back-to-home {
+  color: #ffffff;
+  background: linear-gradient(135deg, #1a4aff 0%, #2f5fff 55%, #4f8cff 100%);
+  border-color: rgba(79, 140, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(47, 95, 255, 0.3),
+    0 6px 22px rgba(47, 95, 255, 0.5),
+    0 0 24px rgba(79, 140, 255, 0.6);
+}
+html.theme-light .back-to-home:hover {
+  box-shadow:
+    0 0 0 1px rgba(79, 140, 255, 0.7),
+    0 10px 30px rgba(47, 95, 255, 0.65),
+    0 0 38px rgba(79, 140, 255, 0.95);
+}
+
