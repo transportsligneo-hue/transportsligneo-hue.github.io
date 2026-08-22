@@ -192,7 +192,7 @@ ${form.message}`;
             </div>
           </div>
 
-          <button type="submit" disabled={status === "sending"} className="v4-submit-btn">
+          <button type="submit" disabled={status === "sending"} className={`v4-submit-btn${profil === "pro" ? " is-pro" : ""}`}>
             {status === "sending" ? (<><Loader2 size={16} className="animate-spin" /> Envoi en cours…</>)
               : (<><Send size={14} /> {profil === "pro" ? "Envoyer ma demande pro" : "Envoyer mon message"}</>)}
           </button>

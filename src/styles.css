@@ -3953,6 +3953,7 @@ body.is-driver-app .closed-link svg {
 .r4-page .v4-submit-btn { position:relative; overflow:hidden; width:100%; text-align:center; padding:15px; border-radius:999px; color:#fff;
   background:linear-gradient(120deg,var(--v4-blue),#2450e0 60%,var(--v4-blue-bright)); font-weight:700; font-size:14.5px;
   box-shadow:0 16px 34px rgba(47,95,255,0.45); margin-top:6px; border:0; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+.r4-page .v4-submit-btn.is-pro { background:linear-gradient(120deg,#7c4dff,#6c34e8 60%,#a06bff); box-shadow:0 16px 34px rgba(124,77,255,0.45); }
 .r4-page .v4-submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
 .r4-page .v4-submit-btn::after { content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
   background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent); transform:skewX(-20deg); animation:v4Shine 3.4s ease-in-out infinite; }
