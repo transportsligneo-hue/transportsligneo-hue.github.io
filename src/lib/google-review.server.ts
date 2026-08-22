@@ -207,14 +207,15 @@ async function sendReviewSms(params: {
   recipient: RecipientInfo
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
-  if (!isValidPhone(params.recipient.phone)) {
+  const phone = params.recipient.phone
+  if (!phone || !isValidPhone(phone)) {
     return { success: false, reason: 'Numéro de téléphone invalide ou manquant.' }
   }
   if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
   try {
     const body = buildSmsBody(params.settings.url)
     const res = await sendSms({
-      to: params.recipient.phone!,
+      to: phone,
       body,
       from: params.settings.sms_from || 'LIGNEO',
     })
