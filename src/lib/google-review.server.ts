@@ -321,7 +321,7 @@ export async function sendGoogleReviewRequestServer(params: {
 
   const { data: attribution } = await supabaseAdmin
     .from('attributions')
-    .select('id, trajet_id, convoyeur_id, numero_mission, statut')
+    .select('id, trajet_id, numero_mission, statut')
     .eq('id', params.attributionId)
     .maybeSingle()
   if (!attribution) return { ok: false, error: 'Mission introuvable.' }
