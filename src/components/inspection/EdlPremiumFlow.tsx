@@ -283,8 +283,8 @@ export function EdlPremiumFlow({
   const [inspectionId, setInspectionId] = useState<string | null>(
     initialState?.inspectionId ?? null
   );
-  // Checklist sécurité obligatoire à chaque ouverture d'EDL (départ ET arrivée).
-  const [startChecklistDone, setStartChecklistDone] = useState(false);
+
+
 
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
