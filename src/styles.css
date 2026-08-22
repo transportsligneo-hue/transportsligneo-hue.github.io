@@ -4842,9 +4842,10 @@ body.is-driver-app .closed-link svg {
 }
 .vrm-panel.vrm-open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
 @media (max-width: 640px) {
-  .vrm-launcher { bottom: 88px; right: 16px; }
+  .vrm-launcher { bottom: 138px; right: 14px; }
   .vrm-panel { bottom: 84px; right: 12px; left: 12px; width: auto; height: min(600px, calc(100vh - 150px)); }
 }
+
 .vrm-head {
   position: relative; overflow: hidden; padding: 20px 18px 18px;
   background: linear-gradient(135deg, #111c42, #182655);
